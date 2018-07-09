@@ -1,0 +1,66 @@
+allprojects {
+    group 'com.agorapulse'
+    version '1.0-SNAPSHOT'
+
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven {
+            url  "https://dl.bintray.com/agorapulse/libs"
+        }
+    }
+}
+
+subprojects {
+    apply plugin:"io.spring.dependency-management"
+    apply plugin:"groovy"
+
+    apply plugin:"net.ltgt.apt-eclipse"
+    apply plugin:"net.ltgt.apt-idea"
+
+
+    dependencyManagement {
+        imports {
+            mavenBom "io.micronaut:bom:$micronautVersion"
+        }
+    }
+
+    dependencies {
+        annotationProcessor "io.micronaut:inject-java"
+
+        // Groovy
+        compile "org.codehaus.groovy:groovy:$groovyVersion"
+
+        compile "io.micronaut:runtime-groovy"
+        compile "io.micronaut:inject"
+        compile "io.micronaut:runtime"
+
+        compileOnly "io.micronaut:inject-groovy"
+        compileOnly "io.micronaut:inject-java"
+
+        runtime "ch.qos.logback:logback-classic:1.2.3"
+
+        testCompile "io.micronaut:inject-groovy"
+        testCompile "io.micronaut:inject-java"
+
+        testCompile("org.spockframework:spock-core:1.1-groovy-2.4") {
+            exclude group: "org.codehaus.groovy", module: "groovy-all"
+        }
+        testCompile 'cglib:cglib-nodep:3.2.0'
+        testCompile 'org.objenesis:objenesis:1.2'
+    }
+
+    compileJava.options.compilerArgs += '-parameters'
+    compileTestJava.options.compilerArgs += '-parameters'
+
+    test {
+        testLogging {
+            showCauses = true
+            showExceptions = true
+            showStackTraces = true
+            showStandardStreams = false
+        }
+
+        systemProperty 'TEST_RESOURCES_FOLDER', new File(project.projectDir, 'src/test/resources').canonicalPath
+    }
+}

@@ -1,0 +1,5 @@
+rootProject.name = 'micronaut-libraries'
+
+// temporary micronaut module before extraction
+include 'micronaut-function-aws-agp'
+include 'micronaut-http-server-basic'

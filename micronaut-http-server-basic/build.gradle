@@ -1,0 +1,6 @@
+dependencies {
+    compile "io.micronaut:http-server"
+    compile "io.micronaut:router"
+
+    compile group: 'io.netty', name: 'netty-buffer', version: '4.1.25.Final'
+}
