@@ -1,6 +1,5 @@
 package hello.galaxy
 
-import com.agorapulse.micronaut.http.basic.HttpResponder
 import groovy.transform.CompileStatic
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.*
@@ -8,13 +7,6 @@ import io.micronaut.http.annotation.*
 @CompileStatic
 @Controller("/hello")
 class HelloController {
-
-    private final HttpResponder responder
-
-    HelloController(HttpResponder responder) {
-        this.responder = responder
-    }
-
     @Get("/")
     String index() {
         return "Hello Galaxy!"
@@ -22,7 +14,7 @@ class HelloController {
 
     @Post("/greet")
     HttpResponse<Greetings> newGreeting(@Body Greetings body) {
-        return responder.created(body)
+        return HttpResponse.created(body)
     }
 
     @Get("/greet/{message}/{language}")
@@ -33,12 +25,12 @@ class HelloController {
     @Put('/mfa')
     HttpResponse mfa(Optional<Boolean> enable, Optional<Integer> multiFactorCode) {
         if (!multiFactorCode.present) {
-            return responder.badRequest()
+            return HttpResponse.badRequest()
         }
         if (enable.present && enable.get()) {
             int code = multiFactorCode.get()
-            return responder.ok([enable: true, mfa: code])
+            return HttpResponse.ok([enable: true, mfa: code])
         }
-        return responder.ok([enable: false])
+        return HttpResponse.ok([enable: false])
     }
 }

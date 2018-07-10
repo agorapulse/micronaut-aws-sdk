@@ -2,13 +2,11 @@ dependencies {
     compile project(':micronaut-http-server-basic')
 
     // custom compile
-    compile group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '2.1.0'
     compile group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.0'
+    compile group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '2.1.0'
 
     // custom test
-    testCompile "com.agorapulse:gru-http:0.4.2"
+    testCompile project(':micronaut-http-server-tck')
 
-    testCompile "com.agorapulse:gru-api-gateway:${gruVersion}"
-
-    testCompile "io.micronaut:http-server-netty"
+    testCompile "com.agorapulse:gru-api-gateway:$gruVersion"
 }

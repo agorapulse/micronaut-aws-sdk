@@ -2,6 +2,7 @@ package com.agorapulse.micronaut.agp
 
 import com.agorapulse.gru.Gru
 import com.agorapulse.gru.agp.ApiGatewayProxy
+import com.agorapulse.micronaut.http.server.tck.AbstractApiGatewayProxyHttpRequestSpec
 import org.junit.Rule
 
 

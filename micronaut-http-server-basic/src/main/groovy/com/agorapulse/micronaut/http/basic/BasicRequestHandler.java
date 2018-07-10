@@ -70,7 +70,6 @@ public class BasicRequestHandler {
     private final BeanLocator beanLocator;
     private final RequestArgumentSatisfier requestArgumentSatisfier;
     private final MediaTypeCodecRegistry mediaTypeCodecRegistry;
-    private final HttpResponder httpResponder;
 
     /**
      * @param beanLocator            The bean locator
@@ -88,8 +87,7 @@ public class BasicRequestHandler {
         StaticResourceResolver staticResourceResolver,
         RequestBinderRegistry binderRegistry,
         ExecutorSelector executorSelector,
-        ExecutorService ioExecutor,
-        HttpResponder httpResponder
+        ExecutorService ioExecutor
     ) {
 
         this.mediaTypeCodecRegistry = mediaTypeCodecRegistry;
@@ -99,7 +97,6 @@ public class BasicRequestHandler {
         this.executorSelector = executorSelector;
         this.router = router;
         this.requestArgumentSatisfier = new RequestArgumentSatisfier(binderRegistry);
-        this.httpResponder = httpResponder;
     }
 
     @SuppressWarnings("unchecked")
@@ -109,7 +106,7 @@ public class BasicRequestHandler {
             if (LOG.isErrorEnabled()) {
                 LOG.error("Micronaut Server Error - No request state present. Cause: " + cause.getMessage(), cause);
             }
-            return Flowable.just(httpResponder.serverError());
+            return Flowable.just(HttpResponse.serverError());
         }
 
         // find the origination of of the route
@@ -269,7 +266,7 @@ public class BasicRequestHandler {
 
                 return handleStatusError(
                     request,
-                    httpResponder.notAllowed(existingRoutes),
+                    HttpResponse.notAllowed(existingRoutes),
                     "Method [" + httpMethod + "] not allowed. Allowed methods: " + existingRoutes);
             } else {
                 Optional<? extends FileCustomizableResponseType> optionalFile = matchFile(requestPath);
@@ -297,7 +294,7 @@ public class BasicRequestHandler {
 
             return handleStatusError(
                 request,
-                httpResponder.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE),
+                HttpResponse.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE),
                 "Unsupported Media Type: " + contentType);
         }
         if (LOG.isDebugEnabled()) {
@@ -378,7 +375,7 @@ public class BasicRequestHandler {
 
     private MutableHttpResponse<Object> newNotFoundError(HttpRequest<?> request) {
         JsonError error = newError(request, "Page Not Found");
-        return httpResponder.notFound()
+        return HttpResponse.notFound()
             .body(error);
     }
 
@@ -391,11 +388,11 @@ public class BasicRequestHandler {
     private MutableHttpResponse errorResultToResponse(Object result) {
         MutableHttpResponse<?> response;
         if (result == null) {
-            response = httpResponder.serverError();
+            response = HttpResponse.serverError();
         } else if (result instanceof io.micronaut.http.HttpResponse) {
             response = (MutableHttpResponse) result;
         } else {
-            response = httpResponder.serverError()
+            response = HttpResponse.serverError()
                 .body(result);
             MediaType.fromType(result.getClass()).ifPresent(response::contentType);
         }
@@ -574,7 +571,7 @@ public class BasicRequestHandler {
                 }
             } else {
                 // void return type with no response, nothing else to do
-                response = httpResponder.ok();
+                response = HttpResponse.ok();
             }
             try {
                 emitter.onNext(response);
@@ -689,7 +686,7 @@ public class BasicRequestHandler {
                     // then the result can be streamed chunk by chunk
                     resultEmitter = Flowable.create((emitter) -> {
                         Object result = finalRoute.execute();
-                        MutableHttpResponse<Object> chunkedResponse = httpResponder.ok(result);
+                        MutableHttpResponse<Object> chunkedResponse = HttpResponse.ok(result);
                         chunkedResponse.header(HttpHeaders.TRANSFER_ENCODING, "chunked");
                         emitter.onNext(chunkedResponse);
                         emitter.onComplete();
@@ -738,7 +735,7 @@ public class BasicRequestHandler {
                 .orElseThrow(() -> new InternalServerException("Emitted response is not mutable"));
         } else {
             if (message instanceof HttpStatus) {
-                response = httpResponder.status((HttpStatus) message);
+                response = HttpResponse.status((HttpStatus) message);
             } else {
                 HttpStatus status = HttpStatus.OK;
 
@@ -748,7 +745,7 @@ public class BasicRequestHandler {
                         status = rm.getAnnotation(Status.class).value();
                     }
                 }
-                response = httpResponder.status(status).body(message);
+                response = HttpResponse.status(status).body(message);
             }
         }
         return response;
@@ -804,7 +801,7 @@ public class BasicRequestHandler {
             LOG.error("Unexpected error occurred: " + cause.getMessage(), cause);
         }
 
-        MutableHttpResponse<?> error = httpResponder.serverError()
+        MutableHttpResponse<?> error = HttpResponse.serverError()
             .body(new JsonError("Internal Server Error: " + cause.getMessage()));
         return subscribeToResponsePublisher(
             MediaType.APPLICATION_JSON_TYPE,

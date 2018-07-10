@@ -1,4 +1,4 @@
-package com.agorapulse.micronaut.agp
+package com.agorapulse.micronaut.http.server.tck
 
 import com.agorapulse.gru.Gru
 import spock.lang.PendingFeature
