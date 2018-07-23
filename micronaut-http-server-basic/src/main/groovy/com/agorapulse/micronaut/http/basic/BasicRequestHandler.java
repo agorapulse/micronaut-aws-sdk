@@ -1,5 +1,6 @@
 package com.agorapulse.micronaut.http.basic;
 
+import io.micronaut.buffer.netty.NettyByteBufferFactory;
 import io.micronaut.context.BeanLocator;
 import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.core.convert.ConversionService;
@@ -16,7 +17,7 @@ import io.micronaut.http.filter.HttpServerFilter;
 import io.micronaut.http.filter.ServerFilterChain;
 import io.micronaut.http.hateos.JsonError;
 import io.micronaut.http.hateos.Link;
-import io.micronaut.http.server.binding.RequestBinderRegistry;
+import io.micronaut.http.server.binding.RequestArgumentSatisfier;
 import io.micronaut.http.server.exceptions.ExceptionHandler;
 import io.micronaut.http.server.exceptions.InternalServerException;
 import io.micronaut.http.server.types.files.FileCustomizableResponseType;
@@ -72,20 +73,20 @@ public class BasicRequestHandler {
     private final MediaTypeCodecRegistry mediaTypeCodecRegistry;
 
     /**
-     * @param beanLocator            The bean locator
-     * @param router                 The router
-     * @param mediaTypeCodecRegistry The media type codec registry
-     * @param staticResourceResolver The static resource resolver
-     * @param binderRegistry         The Request binder registry
-     * @param executorSelector       The executor selector
-     * @param ioExecutor             The IO executor
+     * @param beanLocator               The bean locator
+     * @param router                    The router
+     * @param mediaTypeCodecRegistry    The media type codec registry
+     * @param staticResourceResolver    The static resource resolver
+     * @param requestArgumentSatisfier  The request argument satisfier
+     * @param executorSelector          The executor selector
+     * @param ioExecutor                The IO executor
      */
     public BasicRequestHandler(
         BeanLocator beanLocator,
         Router router,
         MediaTypeCodecRegistry mediaTypeCodecRegistry,
         StaticResourceResolver staticResourceResolver,
-        RequestBinderRegistry binderRegistry,
+        RequestArgumentSatisfier requestArgumentSatisfier,
         ExecutorSelector executorSelector,
         ExecutorService ioExecutor
     ) {
@@ -96,7 +97,7 @@ public class BasicRequestHandler {
         this.ioExecutor = ioExecutor;
         this.executorSelector = executorSelector;
         this.router = router;
-        this.requestArgumentSatisfier = new RequestArgumentSatisfier(binderRegistry);
+        this.requestArgumentSatisfier = requestArgumentSatisfier;
     }
 
     @SuppressWarnings("unchecked")
@@ -250,18 +251,18 @@ public class BasicRequestHandler {
 
         if (!routeMatch.isPresent()) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("No matching route found for URI {} and method {}", request.getUri(), httpMethod);
+                LOG.debug("No matching route found for URI {} and method {}", request.getPath(), httpMethod);
             }
 
             // if there is no route present try to locate a route that matches a different HTTP method
             Set<io.micronaut.http.HttpMethod> existingRoutes = router
-                .findAny(request.getUri().toString())
+                .findAny(request.getPath())
                 .map(UriRouteMatch::getHttpMethod)
                 .collect(Collectors.toSet());
 
             if (!existingRoutes.isEmpty()) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Method not allowed for URI {} and method {}", request.getUri(), httpMethod);
+                    LOG.debug("Method not allowed for URI {} and method {}", request.getPath(), httpMethod);
                 }
 
                 return handleStatusError(

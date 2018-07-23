@@ -1,23 +1,20 @@
 package com.agorapulse.micronaut.agp;
 
-import com.agorapulse.micronaut.http.basic.BasicHttpHeaders;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.core.convert.ArgumentConversionContext;
 import io.micronaut.core.convert.ConversionService;
-import io.micronaut.core.convert.value.ConvertibleMultiValues;
-import io.micronaut.core.convert.value.ConvertibleMultiValuesMap;
 import io.micronaut.core.convert.value.MutableConvertibleValues;
 import io.micronaut.core.convert.value.MutableConvertibleValuesMap;
 import io.micronaut.http.*;
 import io.micronaut.http.cookie.Cookie;
 import io.micronaut.http.cookie.Cookies;
+import io.micronaut.http.simple.SimpleHttpParameters;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.*;
 
 abstract class ApiGatewayProxyHttpRequest<B> implements HttpRequest<B> {
@@ -119,94 +116,46 @@ abstract class ApiGatewayProxyHttpRequest<B> implements HttpRequest<B> {
         }
     }
 
-    private static class ApiGatewayProxyHttpParameters implements HttpParameters {
-
-        private final ConvertibleMultiValues<String> values;
-
-        /**
-         * @param parameters        The parameters
-         * @param conversionService The conversion service
-         */
-        ApiGatewayProxyHttpParameters(Map<String, String> parameters, ConversionService conversionService) {
-            LinkedHashMap<CharSequence, List<String>> values = new LinkedHashMap<>(parameters.size());
-            this.values = new ConvertibleMultiValuesMap<>(values, conversionService);
-            for (Map.Entry<String, String> entry : parameters.entrySet()) {
-                values.put(entry.getKey(), Collections.singletonList(entry.getValue()));
-            }
-        }
-
-        @Override
-        public Set<String> names() {
-            return values.names();
-        }
-
-        @Override
-        public Collection<List<String>> values() {
-            return values.values();
-        }
-
-        @Override
-        public List<String> getAll(CharSequence name) {
-            return values.getAll(name);
-        }
-
-        @Override
-        public String get(CharSequence name) {
-            return values.get(name);
-        }
-
-        @Override
-        public <T> Optional<T> get(CharSequence name, ArgumentConversionContext<T> conversionContext) {
-            return values.get(name, conversionContext);
-        }
-    }
-
     final APIGatewayProxyRequestEvent input;
 
-    private final HttpParameters parameters;
+    private final SimpleHttpParameters parameters;
     private final HttpMethod method;
     private final URI uri;
     private final MutableConvertibleValues<Object> attributes = new MutableConvertibleValuesMap<>();
-    private final HttpHeaders headers;
-    private final String serverName;
-    private final String path;
-    private final InetSocketAddress serverAddress;
+    private final MutableHttpHeaders headers;
     private final InetSocketAddress remoteAddress;
 
     ApiGatewayProxyHttpRequest(APIGatewayProxyRequestEvent input, ConversionService conversionService) {
         this.input = input;
-        this.path = input.getPath();
 
-        Map<String, String> queryStringParameters = Optional.ofNullable(input.getQueryStringParameters()).orElseGet(Collections::emptyMap);
-        Map<String, String> httpHeaders = Optional.ofNullable(input.getHeaders()).orElseGet(Collections::emptyMap);
         String httpMethod = Optional.ofNullable(input.getHttpMethod()).orElse(DEFAULT_HTTP_METHOD);
-
-        this.parameters = new ApiGatewayProxyHttpParameters(queryStringParameters, conversionService);
-        this.headers = new BasicHttpHeaders(httpHeaders, conversionService);
         this.method = HttpMethod.valueOf(httpMethod.toUpperCase());
-
-        try {
-            // TODO: include query parameters
-            this.uri = new URI(input.getPath());
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("Path is not valid URI:", e);
-        }
-
-        String region = Optional.ofNullable(System.getenv(AWS_REGION_ENV_NAME)).orElseGet(() -> LOCAL_DEVELOPMENT_AWS_REGION);
 
         APIGatewayProxyRequestEvent.ProxyRequestContext context = Optional.ofNullable(input.getRequestContext()).orElseGet(() ->
             new APIGatewayProxyRequestEvent.ProxyRequestContext()
                 .withApiId(LOCAL_DEVELOPMENT_APP_ID)
         );
 
-        serverName = context.getApiId() + ".execute-api." + region + ".amazonaws.com";
-        serverAddress = new InetSocketAddress(serverName, HTTPS_PORT);
+        String region = Optional.ofNullable(System.getenv(AWS_REGION_ENV_NAME)).orElseGet(() -> LOCAL_DEVELOPMENT_AWS_REGION);
+        String serverName = context.getApiId() + ".execute-api." + region + ".amazonaws.com";
 
         APIGatewayProxyRequestEvent.RequestIdentity identity = Optional.ofNullable(context.getIdentity()).orElseGet(() ->
             new APIGatewayProxyRequestEvent.RequestIdentity().withSourceIp(LOCAL_DEVELOPMENT_SOURCE_IP)
         );
 
         remoteAddress = new InetSocketAddress(identity.getSourceIp(), HTTPS_PORT);
+
+        MutableHttpRequest request = HttpRequest.create(this.method, "https://" + serverName + input.getPath());
+
+        this.uri = request.getUri();
+
+        Map<String, String> httpHeaders = Optional.ofNullable(input.getHeaders()).orElseGet(Collections::emptyMap);
+        this.headers = request.getHeaders();
+        httpHeaders.forEach(this.headers::add);
+
+        Map<String, String> queryStringParameters = Optional.ofNullable(input.getQueryStringParameters()).orElseGet(Collections::emptyMap);
+        this.parameters = new SimpleHttpParameters(conversionService);
+        queryStringParameters.forEach(this.parameters::put);
     }
 
     @Override
@@ -230,33 +179,13 @@ abstract class ApiGatewayProxyHttpRequest<B> implements HttpRequest<B> {
     }
 
     @Override
-    public String getPath() {
-        return path;
+    public HttpHeaders getHeaders() {
+        return headers;
     }
 
     @Override
     public InetSocketAddress getRemoteAddress() {
         return remoteAddress;
-    }
-
-    @Override
-    public InetSocketAddress getServerAddress() {
-        return serverAddress;
-    }
-
-    @Override
-    public String getServerName() {
-        return serverName;
-    }
-
-    @Override
-    public boolean isSecure() {
-        return true;
-    }
-
-    @Override
-    public HttpHeaders getHeaders() {
-        return headers;
     }
 
     @Override

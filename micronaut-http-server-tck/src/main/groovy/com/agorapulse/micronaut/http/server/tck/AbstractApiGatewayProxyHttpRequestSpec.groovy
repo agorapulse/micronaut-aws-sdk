@@ -1,7 +1,6 @@
 package com.agorapulse.micronaut.http.server.tck
 
 import com.agorapulse.gru.Gru
-import spock.lang.PendingFeature
 import spock.lang.Specification
 
 abstract class AbstractApiGatewayProxyHttpRequestSpec extends Specification {
@@ -14,6 +13,16 @@ abstract class AbstractApiGatewayProxyHttpRequestSpec extends Specification {
                 get '/hello'
                 expect {
                     text inline("Hello Galaxy!")
+                }
+            }
+    }
+
+    void 'should return method not allowed'() {
+        expect:
+            gru.test {
+                post '/hello'
+                expect {
+                    status METHOD_NOT_ALLOWED
                 }
             }
     }
@@ -42,7 +51,6 @@ abstract class AbstractApiGatewayProxyHttpRequestSpec extends Specification {
             }
     }
 
-    @PendingFeature
     void 'optional int parameter from body'() {
         expect:
             gru.test {
