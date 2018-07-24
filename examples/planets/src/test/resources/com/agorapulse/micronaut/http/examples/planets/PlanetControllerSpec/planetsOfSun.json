@@ -1,0 +1,18 @@
+[
+    {
+        "star": "sun",
+        "name": "mercury"
+    },
+    {
+        "star": "sun",
+        "name": "venus"
+    },
+    {
+        "star": "sun",
+        "name": "earth"
+    },
+    {
+        "star": "sun",
+        "name": "mars"
+    }
+]

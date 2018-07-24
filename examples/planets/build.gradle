@@ -1,0 +1,7 @@
+apply from: '../gradle/lambda.gradle'
+
+dependencies {
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: '1.11.372'
+
+    testCompile group: 'com.agorapulse', name: 'dru-client-dynamodb', version: druVersion
+}

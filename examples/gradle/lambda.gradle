@@ -1,0 +1,24 @@
+configurations {
+    lambda.extendsFrom runtime
+    testCompile.extendsFrom lambda
+}
+
+dependencies {
+    lambda project(':micronaut-function-aws-agp')
+
+    compile "io.micronaut:http-server"
+    compile "io.micronaut:router"
+
+    // gru lambda incubation
+    testCompile "com.agorapulse:gru-api-gateway:$gruVersion"
+}
+
+task buildZip(type: Zip) {
+    from compileGroovy
+    from processResources
+    into('lib') {
+        from configurations.lambda
+    }
+}
+
+build.dependsOn buildZip

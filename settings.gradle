@@ -5,3 +5,8 @@ include 'micronaut-function-aws-agp'
 include 'micronaut-http-server-basic'
 include 'micronaut-http-server-tck'
 include 'micronaut-http-server-tck-netty-tests'
+
+// examples
+include 'examples/planets'
+include 'examples/spacecrafts'
+include 'examples/local-server'
