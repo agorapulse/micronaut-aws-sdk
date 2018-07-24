@@ -3,3 +3,5 @@ dependencies {
     compile "io.micronaut:http-server"
     compile "io.micronaut:router"
 }
+
+apply from: '../gradle/bintray.gradle'

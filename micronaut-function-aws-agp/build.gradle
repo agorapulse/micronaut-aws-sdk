@@ -10,3 +10,5 @@ dependencies {
 
     testCompile "com.agorapulse:gru-api-gateway:$gruVersion"
 }
+
+apply from: '../gradle/bintray.gradle'
