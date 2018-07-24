@@ -1,0 +1,24 @@
+apply plugin: "application"
+apply plugin: "com.github.johnrengelman.shadow"
+
+dependencies {
+    compile project(':examples/planets')
+    compile project(':examples/spacecrafts')
+
+    compile "com.agorapulse:dru-client-dynamodb:${druVersion}"
+    compile "com.agorapulse:gru-api-gateway:$gruVersion"
+
+    compile "io.micronaut:http-server-netty"
+
+}
+
+
+shadowJar {
+    mergeServiceFiles()
+}
+
+runShadow {
+    systemProperties 'micronaut.environments': 'dev'
+}
+
+mainClassName = "com.agorapulse.micronaut.http.examples.Application"

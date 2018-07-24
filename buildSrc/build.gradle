@@ -14,4 +14,5 @@ dependencies {
     compile 'io.spring.gradle:dependency-management-plugin:1.0.5.RELEASE'
     compile 'net.ltgt.gradle:gradle-apt-plugin:0.15'
     compile 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
+    compile 'com.github.jengelman.gradle.plugins:shadow:2.0.4'
 }
