@@ -1,0 +1,25 @@
+### List all planets
+
+GET {{server_url}}/planet/sun
+
+### Get Earth
+
+GET {{server_url}}/planet/sun/earth
+
+### Add Pluto
+
+POST {{server_url}}/planet/sun/pluto
+
+### Delete Pluto
+
+DELETE {{server_url}}/planet/sun/pluto
+
+### Get all American spacecrafts
+
+GET {{server_url}}/spacecraft/usa
+
+### Add Atlantis to spacecrafts
+
+POST {{server_url}}/spacecraft/usa/atlantis
+
+###
