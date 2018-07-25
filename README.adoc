@@ -112,7 +112,7 @@ build.dependsOn buildZip
 Then update your `build.gradle` file with the Lambda configuration:
 
 [source,indent=0,options="nowrap"]
-.lambda.gradle
+.build.gradle
 ----
 import com.amazonaws.services.lambda.model.Runtime
 import jp.classmethod.aws.gradle.lambda.AWSLambdaMigrateFunctionTask

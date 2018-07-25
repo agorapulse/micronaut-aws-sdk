@@ -18,24 +18,30 @@ class PlanetHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGa
     }
 
     @Override
-    APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context context) {
-        if (input.httpMethod == 'GET' && input.path == '/planet/{star}') {
-            return list(input.pathParameters.star)
+    APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent req, Context context) {
+        String star = req.pathParameters.star
+
+        if (req.httpMethod == 'GET' && req.path == '/planet/{star}') {
+            return list(star)
         }
 
-        if (input.path != '/planet/{star}/{name}') {
-            return notFound(input.path)
+        if (req.path != '/planet/{star}/{name}') {
+            return notFound(req.path)
         }
 
-        switch (input.httpMethod) {
-            case 'DELETE': return delete(input.pathParameters.star, input.pathParameters.name)
-            case 'GET': return show(input.pathParameters.star, input.pathParameters.name)
-            case 'POST': return create(input.pathParameters.star, input.pathParameters.name)
+        String name = req.pathParameters.name
+
+        switch (req.httpMethod) {
+            case 'DELETE':
+                return delete(star, name)
+            case 'GET':
+                return show(star, name)
+            case 'POST':
+                return create(star, name)
         }
 
-        return methodNotAllowed(input)
+        return methodNotAllowed(req)
     }
-    // end::badcode[]
 
     APIGatewayProxyResponseEvent methodNotAllowed(APIGatewayProxyRequestEvent input) {
         throw new UnsupportedMediaException()
