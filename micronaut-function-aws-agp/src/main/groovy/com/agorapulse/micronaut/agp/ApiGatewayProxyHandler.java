@@ -24,26 +24,29 @@ public class ApiGatewayProxyHandler implements RequestHandler<APIGatewayProxyReq
      */
     public static final String API_GATEWAY_PROXY_ENVIRONMENT = "api_gateway_proxy";
 
+    // tag::handler[]
     @Override
-    public final APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context context) {
-        ApplicationContext applicationContext = buildApplicationContext(context);
-        startEnvironment(applicationContext);
-        applicationContext.registerSingleton(input);
+    public final APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context lambdaContext) {
+        ApplicationContext context = buildApplicationContext(lambdaContext);
+        startEnvironment(context);
+        context.registerSingleton(input);
 
         APIGatewayProxyRequestEvent.ProxyRequestContext requestContext = Optional.ofNullable(input.getRequestContext()).orElseGet(APIGatewayProxyRequestEvent.ProxyRequestContext::new);
         APIGatewayProxyRequestEvent.RequestIdentity requestIdentity = Optional.ofNullable(requestContext.getIdentity()).orElseGet(APIGatewayProxyRequestEvent.RequestIdentity::new);
 
-        applicationContext.registerSingleton(requestContext);
-        applicationContext.registerSingleton(requestIdentity);
+        context.registerSingleton(requestContext);
+        context.registerSingleton(requestIdentity);
 
-        doWithApplicationContext(applicationContext);
+        doWithApplicationContext(context);
 
-        ObjectMapper objectMapper = applicationContext.getBean(ObjectMapper.class);
-        HttpRequest request = convertToMicronautHttpRequest(input, applicationContext.getConversionService(), objectMapper);
-        BasicRequestHandler inBoundHandler = applicationContext.getBean(BasicRequestHandler.class);
-        HttpResponse response = inBoundHandler.handleRequest(request);
-        return convertToApiGatewayProxyResponse(response);
+        ObjectMapper mapper = context.getBean(ObjectMapper.class);
+        ConversionService<?> conversionService = context.getConversionService();
+        HttpRequest request = convertToMicronautHttpRequest(input, conversionService, mapper);  // <1>
+        BasicRequestHandler inBoundHandler = context.getBean(BasicRequestHandler.class);        // <2>
+        HttpResponse response = inBoundHandler.handleRequest(request);                          // <3>
+        return convertToApiGatewayProxyResponse(response);                                      // <4>
     }
+    // end::handler[]
 
     protected void doWithApplicationContext(ApplicationContext applicationContext) {
         // an entry point to customize application context, useful for tests

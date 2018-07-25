@@ -1,10 +1,24 @@
-= agorapulse Micronaut Libraries
+= Agorapulse Micronaut Libraries
 
-Documentation in progress...
+Set of useful libraries for http://micronaut.io[Micronaut].
 
 == Micronaut HTTP Server Basic
-Implementation agnostic black-box HTTP Server support for Micronaut.  
+
+Implementation agnostic black-box HTTP Server support for Micronaut.
+
+Following example from AWS API Gateway Proxy implementation will show you how to implement you own HTTP server
+with Micronaut's capabilities:
+
+[source,java,indent=0,options="nowrap"]
+.Creating Own HTTP Server Implementation
+----
+include::micronaut-function-aws-agp/src/main/groovy/com/agorapulse/micronaut/agp/ApiGatewayProxyHandler.java[tag=handler]
+----
+<1> Convert the library's request to Micronaut's request
+<2> Obtain the handler from the application context
+<3> Handle the request
+<4> Convert the Micronaut's response to library's response
 
 == micronaut-function-aws-agp
-API Gateway Lambda Proxy support for Micronaut which enables
-using most of the Micronaut HTTP Server features such as controllers, filters and annotation statuses.
+API Gateway Lambda Proxy support for Micronaut which enables using most of the Micronaut HTTP Server features such
+as controllers, filters and annotation statuses.
