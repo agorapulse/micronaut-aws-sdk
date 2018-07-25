@@ -1,7 +1,32 @@
+import com.amazonaws.services.lambda.model.Runtime
+import jp.classmethod.aws.gradle.lambda.AWSLambdaMigrateFunctionTask
+
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "jp.classmethod.aws:gradle-aws-plugin:0.38"
+    }
+}
+
 apply from: '../gradle/lambda.gradle'
+apply plugin: 'jp.classmethod.aws.lambda'
 
 dependencies {
     compile group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: '1.11.372'
 
     testCompile group: 'com.agorapulse', name: 'dru-client-dynamodb', version: druVersion
+}
+
+task deployLambda(type: AWSLambdaMigrateFunctionTask, dependsOn: build, group: 'deploy')  {
+    functionName = 'MicronautExamplePlanets'
+    handler = 'com.agorapulse.micronaut.agp.ApiGatewayProxyHandler::handleRequest'
+    role = "arn:aws:iam::281741939716:role/service-role/MicronautExamples"
+    runtime = Runtime.Java8
+    zipFile = buildZip.archivePath
+    memorySize = 512
+    timeout = 60
 }

@@ -1,16 +1,32 @@
 package com.agorapulse.micronaut.http.examples.planets
 
+import com.amazonaws.AmazonClientException
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
+import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput
 
+import javax.annotation.PostConstruct
 import javax.inject.Singleton
 
 @Singleton
 class PlanetDBService {
 
-    IDynamoDBMapper mapper = new DynamoDBMapper(new AmazonDynamoDBClient())
+    AmazonDynamoDB amazonDynamoDBClient = new AmazonDynamoDBClient()
+    IDynamoDBMapper mapper = new DynamoDBMapper(amazonDynamoDBClient)
+
+    @PostConstruct
+    void init() {
+        try {
+            amazonDynamoDBClient.createTable(mapper.generateCreateTableRequest(Planet).withProvisionedThroughput(
+                new ProvisionedThroughput().withReadCapacityUnits(5).withWriteCapacityUnits(5)
+            ))
+        } catch (AmazonClientException e) {
+            e.printStackTrace()
+        }
+    }
 
     void save(Planet planet) {
         mapper.save(planet)
