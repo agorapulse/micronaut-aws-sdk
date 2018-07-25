@@ -1,0 +1,25 @@
+### List all planets
+
+GET http://localhost:46054/planet/sun
+
+### Get Earth
+
+GET http://localhost:46054/planet/sun/earth
+
+### Add Pluto
+
+POST http://localhost:46054/planet/sun/pluto
+
+### Delete Pluto
+
+DELETE http://localhost:46054/planet/sun/pluto
+
+### Get all American spacecrafts
+
+GET http://localhost:46054/spacecraft/usa
+
+### Add Atlantis to spacecrafts
+
+POST http://localhost:46054/spacecraft/usa/atlantis
+
+###
