@@ -1,6 +1,11 @@
 = Agorapulse Micronaut Libraries
 
-Set of useful libraries for http://micronaut.io[Micronaut].
+image::https://api.bintray.com/packages/agorapulse/libs/micronaut-http-server-basic/images/download.svg[link="https://bintray.com/agorapulse/libs/micronaut-http-server-basic/_latestVersion"]
+
+Set of useful libraries for http://micronaut.io[Micronaut]. All of the libraries are available in JCenter repository.
+
+The installation snippets expects having Gradle property `micronautLibrariesVersion` stored in `gradle.properties` file
+pointing to latest version of the libraries (see the badge above).
 
 == Micronaut HTTP Server Basic
 
@@ -12,13 +17,136 @@ with Micronaut's capabilities:
 [source,java,indent=0,options="nowrap"]
 .Creating Own HTTP Server Implementation
 ----
-include::micronaut-function-aws-agp/src/main/groovy/com/agorapulse/micronaut/agp/ApiGatewayProxyHandler.java[tag=handler]
+@Override
+public final APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context lambdaContext) {
+    ApplicationContext context = buildApplicationContext(lambdaContext);
+    startEnvironment(context);
+    context.registerSingleton(input);
+
+    APIGatewayProxyRequestEvent.ProxyRequestContext requestContext = Optional.ofNullable(input.getRequestContext()).orElseGet(APIGatewayProxyRequestEvent.ProxyRequestContext::new);
+    APIGatewayProxyRequestEvent.RequestIdentity requestIdentity = Optional.ofNullable(requestContext.getIdentity()).orElseGet(APIGatewayProxyRequestEvent.RequestIdentity::new);
+
+    context.registerSingleton(requestContext);
+    context.registerSingleton(requestIdentity);
+
+    doWithApplicationContext(context);
+
+    ObjectMapper mapper = context.getBean(ObjectMapper.class);
+    ConversionService<?> conversionService = context.getConversionService();
+    HttpRequest request = convertToMicronautHttpRequest(input, conversionService, mapper);  // <1>
+    BasicRequestHandler inBoundHandler = context.getBean(BasicRequestHandler.class);        // <2>
+    HttpResponse response = inBoundHandler.handleRequest(request);                          // <3>
+    return convertToApiGatewayProxyResponse(response);                                      // <4>
+}
 ----
 <1> Convert the library's request to Micronaut's request
 <2> Obtain the handler from the application context
 <3> Handle the request
 <4> Convert the Micronaut's response to library's response
 
-== micronaut-function-aws-agp
+=== Instalation
+
+[source,indent=0,options="nowrap"]
+.Gradle Installation
+----
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile "com.agorapulse:micronaut-http-server-basic:$micronautLibrariesVersion"
+}
+----
+
+== Micronaut Function for AWS API Gateway Proxy
 API Gateway Lambda Proxy support for Micronaut which enables using most of the Micronaut HTTP Server features such
-as controllers, filters and annotation statuses.
+as controllers, filters and annotation statuses. Follow http://docs.micronaut.io/latest/guide/index.html[Micronaut website for extensive documentation].
+
+You can use `api_gateway_proxy` https://docs.micronaut.io/latest/guide/index.html#environments[environment]
+to distinguish the application is running using this library.
+
+Following beans can be injected if necessary:
+
+  * `com.amazonaws.services.lambda.runtime.Context`
+  * `com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent`
+  * `com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent.ProxyRequestContext`
+  * `com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent.RequestIdentity`
+
+=== Instalation
+
+It is recommended to only include this library in the final deployment package and tests. This enables an option
+to run the application locally using the Netty-based Micronaut server which is the biggest advantage of using this library.
+
+First create following file to share configuration between your lambda libraries in `gradle/lambda.gradle`:
+
+
+[source,indent=0,options="nowrap"]
+.lambda.gradle
+----
+configurations {
+    lambda.extendsFrom runtime
+    testCompile.extendsFrom lambda
+}
+
+dependencies {
+    lambda "com.agorapulse:micronaut-function-aws-agp:$micronautLibrariesVersion"
+
+    compile "io.micronaut:http-server"
+    compile "io.micronaut:router"
+
+    // gru for aws lambda can help you testing lambda fuctions
+    // https://agorapulse.github.io/gru/
+    testCompile "com.agorapulse:gru-api-gateway:0.6.3"
+}
+
+task buildZip(type: Zip) {
+    from compileGroovy
+    from processResources
+    into('lib') {
+        from configurations.lambda
+    }
+}
+
+build.dependsOn buildZip
+----
+
+Then update your `build.gradle` file with the Lambda configuration:
+
+
+[source,indent=0,options="nowrap"]
+.lambda.gradle
+----
+import com.amazonaws.services.lambda.model.Runtime
+import jp.classmethod.aws.gradle.lambda.AWSLambdaMigrateFunctionTask
+
+buildscript {                                                                               // <1>
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "jp.classmethod.aws:gradle-aws-plugin:0.38"
+    }
+}
+
+apply from: 'gradle/lambda.gradle'                                                          // <2>
+apply plugin: 'jp.classmethod.aws.lambda'                                                   // <3>
+
+task deployLambda(type: AWSLambdaMigrateFunctionTask, dependsOn: build, group: 'deploy')  { // <4>
+    // these values must always be the same
+    handler = 'com.agorapulse.micronaut.agp.ApiGatewayProxyHandler::handleRequest'
+    runtime = Runtime.Java8
+    zipFile = buildZip.archivePath
+
+    // these values are up to you to reflect you configuration
+    functionName = 'MicronautExamplePlanets'
+    role = "arn:aws:iam::281741939716:role/service-role/MicronautExamples"
+    memorySize = 512
+    timeout = 60
+}
+----
+<1> Add AWS Lambda Gradle Plugin to the Gradle's classpath
+<2> Apply the script we've created in the first step
+<3> Apply AWS Lambda Gradle Plugin
+<4> Create the deployment task
