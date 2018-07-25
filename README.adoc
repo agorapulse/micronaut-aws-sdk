@@ -79,7 +79,6 @@ to run the application locally using the Netty-based Micronaut server which is t
 
 First create following file to share configuration between your lambda libraries in `gradle/lambda.gradle`:
 
-
 [source,indent=0,options="nowrap"]
 .lambda.gradle
 ----
@@ -111,7 +110,6 @@ build.dependsOn buildZip
 ----
 
 Then update your `build.gradle` file with the Lambda configuration:
-
 
 [source,indent=0,options="nowrap"]
 .lambda.gradle
@@ -150,3 +148,72 @@ task deployLambda(type: AWSLambdaMigrateFunctionTask, dependsOn: build, group: '
 <2> Apply the script we've created in the first step
 <3> Apply AWS Lambda Gradle Plugin
 <4> Create the deployment task
+
+
+=== Local server
+
+As your lambda is using Micronaut's controllers and other capabilities you can easily run the lambdas
+using Micronaut HTTP Netty server. Here's the example of local server's build file:
+
+[source,indent=0,options="nowrap"]
+----
+apply plugin: "application"
+apply plugin: "com.github.johnrengelman.shadow"
+
+dependencies {
+    // lambda projects
+    compile project(':examples/planets')
+    compile project(':examples/spacecrafts')
+
+    // for local dynamodb mock
+    compile "com.agorapulse:dru-client-dynamodb:${druVersion}"
+
+    // for mocking of lambda context
+    compile "com.agorapulse:gru-api-gateway:$gruVersion"
+
+
+    // local netty server
+    compile "io.micronaut:http-server-netty"
+
+}
+
+
+shadowJar {
+    mergeServiceFiles()
+}
+
+runShadow {
+    // run in dev environment by default
+    systemProperties 'micronaut.environments': 'dev'
+}
+
+// your application class
+mainClassName = "com.agorapulse.micronaut.http.examples.Application"
+----
+
+The application class looks very simple:
+
+[source,java,indent=0,options="nowrap"]
+----
+package com.agorapulse.micronaut.http.examples;
+
+import io.micronaut.runtime.Micronaut;
+
+class Application {
+
+    static void main(String[] args) {
+        Micronaut.run(Application.class);
+    }
+
+}
+----
+
+Now you can run the server using `./gradlew shadowRun`. The server runs on random port by default.
+You can add following `application-dev.yml` file to `src/main/resources` of the `local-server` project to fix the number of the port:
+
+.application-dev.yml
+----
+micronaut:
+  server:
+    port: 46054
+----
