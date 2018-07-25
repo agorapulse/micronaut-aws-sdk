@@ -19,20 +19,7 @@ class LocalDataBootstrap {
         this.spacecraftDBService = spacecraftDBService
     }
 
-    @PostConstruct
-    void bootstrap() {
-        planetDBService.save(new Planet(star: 'sun', name: 'mercury'))
-        planetDBService.save(new Planet(star: 'sun', name: 'venus'))
-        planetDBService.save(new Planet(star: 'sun', name: 'earth'))
-        planetDBService.save(new Planet(star: 'sun', name: 'mars'))
-        planetDBService.save(new Planet(star: 'sun', name: 'jupiter'))
-        planetDBService.save(new Planet(star: 'sun', name: 'saturn'))
-        planetDBService.save(new Planet(star: 'sun', name: 'uranus'))
-        planetDBService.save(new Planet(star: 'sun', name: 'neptune'))
 
-        spacecraftDBService.save(new Spacecraft(country: 'russia', name: 'vostok'))
-        spacecraftDBService.save(new Spacecraft(country: 'usa', name: 'dragon'))
-    }
 
 
 }
