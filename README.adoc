@@ -44,7 +44,7 @@ public final APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEv
 <3> Handle the request
 <4> Convert the Micronaut's response to library's response
 
-=== Instalation
+=== Installation
 
 [source,indent=0,options="nowrap"]
 .Gradle Installation
@@ -72,7 +72,7 @@ Following beans can be injected if necessary:
   * `com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent.ProxyRequestContext`
   * `com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent.RequestIdentity`
 
-=== Instalation
+=== Installation
 
 It is recommended to only include this library in the final deployment package and tests. This enables an option
 to run the application locally using the Netty-based Micronaut server which is the biggest advantage of using this library.
