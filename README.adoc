@@ -267,7 +267,7 @@ public class GrailsConfig {
 
 }
 ----
-<1> List all classes of beans you want to include into Spring application context. Alternatively, you can declare the common annotation of these beans such as `@Prototype.
+<1> List all classes of beans you want to include into Spring application context. Alternatively, you can declare the common annotation of these beans such as `@Prototype`.
 
 Second, create `spring.factories` descriptor which will automatically load the configuration once on classpath.
 
