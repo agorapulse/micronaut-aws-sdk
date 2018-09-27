@@ -43,7 +43,7 @@ subprojects {
         testCompile "io.micronaut:inject-groovy"
         testCompile "io.micronaut:inject-java"
 
-        testCompile("org.spockframework:spock-core:1.1-groovy-2.4") {
+        testCompile("org.spockframework:spock-core:$spockVersion") {
             exclude group: "org.codehaus.groovy", module: "groovy-all"
         }
         testCompile 'cglib:cglib-nodep:3.2.0'

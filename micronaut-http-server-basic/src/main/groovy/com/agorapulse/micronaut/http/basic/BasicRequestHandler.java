@@ -743,7 +743,7 @@ public class BasicRequestHandler {
                 if (finalRoute instanceof MethodBasedRouteMatch) {
                     final MethodBasedRouteMatch rm = (MethodBasedRouteMatch) finalRoute;
                     if (rm.hasAnnotation(Status.class)) {
-                        status = rm.getAnnotation(Status.class).value();
+                        status = rm.getAnnotation(Status.class).getValue(HttpStatus.class).get();
                     }
                 }
                 response = HttpResponse.status(status).body(message);
