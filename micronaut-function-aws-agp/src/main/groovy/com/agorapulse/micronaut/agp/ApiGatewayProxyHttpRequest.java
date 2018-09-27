@@ -155,7 +155,7 @@ abstract class ApiGatewayProxyHttpRequest<B> implements HttpRequest<B> {
 
         Map<String, String> queryStringParameters = Optional.ofNullable(input.getQueryStringParameters()).orElseGet(Collections::emptyMap);
         this.parameters = new SimpleHttpParameters(conversionService);
-        queryStringParameters.forEach(this.parameters::put);
+        queryStringParameters.forEach(this.parameters::add);
     }
 
     @Override

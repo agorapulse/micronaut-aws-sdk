@@ -1,10 +1,10 @@
 rootProject.name = 'micronaut-libraries'
 
-// temporary micronaut module before extraction
 include 'micronaut-function-aws-agp'
 include 'micronaut-http-server-basic'
 include 'micronaut-http-server-tck'
 include 'micronaut-http-server-tck-netty-tests'
+include 'micronaut-grails'
 
 // examples
 include 'examples/planets'
