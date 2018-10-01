@@ -1,3 +1,5 @@
+import com.google.common.base.CaseFormat
+
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
 
@@ -23,6 +25,7 @@ bintray {
     user = getPropertyOrUseDefault('bintrayUser', 'fake_user')
     key = getPropertyOrUseDefault('bintrayKey', 'fake_key')
     publications = ['groovyMaven']
+    publish = true
 
     def projectName = project.name
     def projectDescription = project.description
@@ -58,5 +61,16 @@ artifacts {
 
 
 String getPropertyOrUseDefault(String propertyName, String defaultValue) {
-    hasProperty(propertyName) ? getProperty(propertyName) : defaultValue
+    if (hasProperty(propertyName)) {
+        return getProperty(propertyName)
+    }
+
+    String envVarName = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, propertyName)
+    String envValue = System.getenv(envVarName)
+
+    if (envValue) {
+        return envValue
+    }
+
+    return defaultValue
 }
