@@ -150,7 +150,7 @@ public class BasicRequestHandler {
             try {
                 Object result = errorRoute.execute();
                 io.micronaut.http.MutableHttpResponse<?> response = errorResultToResponse(result);
-                MethodBasedRouteMatch<?> methodBasedRoute = (MethodBasedRouteMatch) errorRoute;
+                MethodBasedRouteMatch<?, ?> methodBasedRoute = (MethodBasedRouteMatch) errorRoute;
                 AtomicReference<HttpRequest<?>> requestReference = new AtomicReference<>(httpRequest);
                 Flowable<MutableHttpResponse<?>> routePublisher = buildRoutePublisher(
                     methodBasedRoute.getDeclaringType(),
@@ -228,19 +228,19 @@ public class BasicRequestHandler {
             LOG.debug("Matching route {} - {}", httpMethod, requestPath);
         }
 
-        Optional<UriRouteMatch<Object>> routeMatch = Optional.empty();
+        Optional<UriRouteMatch<Object, Object>> routeMatch = Optional.empty();
 
-        List<UriRouteMatch<Object>> uriRoutes = router
+        List<UriRouteMatch<Object, Object>> uriRoutes = router
             .find(httpMethod, requestPath)
-            .filter((match) -> match.test(request))
+            .filter(match -> match.test(request))
             .collect(StreamUtils.minAll(
-                Comparator.comparingInt((match) -> match.getVariables().size()),
+                Comparator.comparingInt(match -> match.getVariableValues().size()),
                 Collectors.toList()));
 
         if (uriRoutes.size() > 1) {
             throw new DuplicateRouteException(requestPath, uriRoutes);
         } else if (uriRoutes.size() == 1) {
-            UriRouteMatch<Object> establishedRoute = uriRoutes.get(0);
+            UriRouteMatch<Object, Object> establishedRoute = uriRoutes.get(0);
             request.setAttribute(HttpAttributes.ROUTE, establishedRoute.getRoute());
             request.setAttribute(HttpAttributes.ROUTE_MATCH, establishedRoute);
             request.setAttribute(HttpAttributes.URI_TEMPLATE, establishedRoute.getRoute().getUriMatchTemplate().toString());
