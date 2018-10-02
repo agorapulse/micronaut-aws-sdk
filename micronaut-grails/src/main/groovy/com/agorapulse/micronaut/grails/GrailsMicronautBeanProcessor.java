@@ -95,8 +95,11 @@ public class GrailsMicronautBeanProcessor implements BeanFactoryPostProcessor, D
                                 beanDefinitionBuilder.addPropertyValue(MICRONAUT_BEAN_TYPE_PROPERTY_NAME, definition.getBeanType());
                                 beanDefinitionBuilder.addPropertyValue(MICRONAUT_CONTEXT_PROPERTY_NAME, micronautContext);
                                 beanDefinitionBuilder.addPropertyValue(MICRONAUT_SINGLETON_PROPERTY_NAME, definition.isSingleton());
+
                                 String name = definition.getName();
-                                if (name.equals(definition.getBeanType().getName())) {
+                                if (!micronautBeanQualifierType.isAnnotation() && micronautBeanQualifierType.isInterface()) {
+                                    name = NameUtils.decapitalize(micronautBeanQualifierType.getSimpleName());
+                                } else if (name.equals(definition.getBeanType().getName())) {
                                     name = NameUtils.decapitalize(definition.getBeanType().getSimpleName());
                                 }
                                 ((DefaultListableBeanFactory) beanFactory).registerBeanDefinition(name, beanDefinitionBuilder.getBeanDefinition());

@@ -1,6 +1,6 @@
 allprojects {
     group 'com.agorapulse'
-    version micronautVersion
+    version "${micronautVersion}.1"
 
     repositories {
         jcenter()

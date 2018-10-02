@@ -32,6 +32,8 @@ class GrailsMicronautBeanProcessorSpec extends Specification {
         expect:
             applicationContext.getBean('widget') instanceof Widget
             applicationContext.getBean('prototypeBean') instanceof PrototypeBean
+            applicationContext.getBean('someInterface') instanceof SomeInterface
+            applicationContext.getBean('someInterface') instanceof SomeImplementation
         when:
             PrototypeBean prototypeBean = applicationContext.getBean(PrototypeBean)
         then:
@@ -61,10 +63,15 @@ class GrailsConfig {
 
     @Bean
     GrailsMicronautBeanProcessor widgetProcessor() {
-        new GrailsMicronautBeanProcessor(Widget, Prototype)
+        new GrailsMicronautBeanProcessor(Widget, SomeInterface, Prototype)
     }
 
 }
+
+interface SomeInterface { }
+
+@Singleton
+class SomeImplementation implements SomeInterface { }
 
 @Singleton
 class Widget {}
