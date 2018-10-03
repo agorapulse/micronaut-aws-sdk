@@ -1,7 +1,8 @@
 package com.agorapulse.micronaut.grails
 
-
+import io.micronaut.context.annotation.Primary
 import io.micronaut.context.annotation.Prototype
+import io.micronaut.context.annotation.Requires
 import io.micronaut.context.annotation.Value
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -12,6 +13,7 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
 import spock.lang.Specification
 
+import javax.inject.Named
 import javax.inject.Singleton
 
 @ContextConfiguration(classes = [GrailsConfig])
@@ -31,9 +33,12 @@ class GrailsMicronautBeanProcessorSpec extends Specification {
     void 'test widget bean'() {
         expect:
             applicationContext.getBean('widget') instanceof Widget
-            applicationContext.getBean('prototypeBean') instanceof PrototypeBean
+            applicationContext.getBean('prototype') instanceof PrototypeBean
             applicationContext.getBean('someInterface') instanceof SomeInterface
             applicationContext.getBean('someInterface') instanceof SomeImplementation
+            applicationContext.getBean('gadget') instanceof SomeGadget
+            // see https://github.com/micronaut-projects/micronaut-core/issues/679
+            // applicationContext.getBean('otherMinion') instanceof OtherMinion
         when:
             PrototypeBean prototypeBean = applicationContext.getBean(PrototypeBean)
         then:
@@ -44,7 +49,7 @@ class GrailsMicronautBeanProcessorSpec extends Specification {
 
     void 'cannot preprocess without the environment'() {
         when:
-            new GrailsMicronautBeanProcessor().postProcessBeanFactory(null)
+            GrailsMicronautBeanProcessor.builder().build().postProcessBeanFactory(null)
         then:
             thrown(IllegalStateException)
     }
@@ -63,7 +68,14 @@ class GrailsConfig {
 
     @Bean
     GrailsMicronautBeanProcessor widgetProcessor() {
-        new GrailsMicronautBeanProcessor(Widget, SomeInterface, Prototype)
+        GrailsMicronautBeanProcessor.builder()
+            .addByType('widget', Widget)
+            .addByType('someInterface', SomeInterface)
+            .addByStereotype('prototype', Prototype)
+            .addByName('gadget')
+            // see https://github.com/micronaut-projects/micronaut-core/issues/679
+            // .addByQualifiers('otherMinion', Qualifiers.byName('other'), Qualifiers.byType(Minion))
+            .build()
     }
 
 }
@@ -73,8 +85,23 @@ interface SomeInterface { }
 @Singleton
 class SomeImplementation implements SomeInterface { }
 
+@Primary
 @Singleton
 class Widget {}
+
+@Singleton
+@Requires(notEnv = 'test')
+class TestWidget extends Widget { }
+
+
+interface Minion {}
+
+@Singleton
+@Named('other')
+class OtherMinion implements Minion {}
+
+@Singleton
+class NormalMinion implements Minion {}
 
 @Prototype
 class PrototypeBean {
@@ -93,3 +120,7 @@ class PrototypeBean {
         this.redisTimeout = redisTimeout
     }
 }
+
+@Singleton
+@Named('gadget')
+class SomeGadget { }
