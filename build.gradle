@@ -1,6 +1,6 @@
 allprojects {
     group 'com.agorapulse'
-    version "${micronautVersion}.2"
+    version "${micronautVersion}.3"
 
     repositories {
         jcenter()
@@ -38,6 +38,7 @@ subprojects {
         compileOnly "io.micronaut:inject-groovy"
         compileOnly "io.micronaut:inject-java"
 
+
         runtime "ch.qos.logback:logback-classic:1.2.3"
 
         testCompile "io.micronaut:inject-groovy"
@@ -48,6 +49,8 @@ subprojects {
         }
         testCompile 'cglib:cglib-nodep:3.2.0'
         testCompile 'org.objenesis:objenesis:1.2'
+
+        testCompileOnly 'com.agorapulse:remember:0.1'
     }
 
     compileJava.options.compilerArgs += '-parameters'
