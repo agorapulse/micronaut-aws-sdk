@@ -73,14 +73,15 @@ class GrailsConfig {
 
     @Bean
     GrailsMicronautBeanProcessor widgetProcessor() {
-        GrailsMicronautBeanProcessor.builder()
-                                    .addByType(Widget)
-                                    .addByType('someInterface', SomeInterface)
-                                    .addByStereotype('prototype', Prototype)
-                                    .addByName('gadget')
-        // see https://github.com/micronaut-projects/micronaut-core/issues/679
-        // .addByQualifiers('otherMinion', Qualifiers.byName('other'), Qualifiers.byType(Minion))
-                                    .build()
+        GrailsMicronautBeanProcessor
+            .builder()
+            .addByType(Widget)
+            .addByType('someInterface', SomeInterface)
+            .addByStereotype('prototype', Prototype)
+            .addByName('gadget')
+            // see https://github.com/micronaut-projects/micronaut-core/issues/679
+            // .addByQualifiers('otherMinion', Qualifiers.byName('other'), Qualifiers.byType(Minion))
+            .build()
     }
 
 }
@@ -100,13 +101,6 @@ class TestWidget extends Widget { }
 
 
 interface Minion {}
-
-@Singleton
-@Named('other')
-class OtherMinion implements Minion {}
-
-@Singleton
-class NormalMinion implements Minion {}
 
 @Prototype
 class PrototypeBean {
@@ -129,3 +123,10 @@ class PrototypeBean {
 @Singleton
 @Named('gadget')
 class SomeGadget { }
+
+@Singleton
+@Named('other')
+class OtherMinion implements Minion {}
+
+@Singleton
+class NormalMinion implements Minion {}

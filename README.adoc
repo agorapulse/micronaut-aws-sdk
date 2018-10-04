@@ -262,12 +262,12 @@ public class GrailsConfig {
 
     @Bean
     public GrailsMicronautBeanProcessor widgetProcessor() {
-        new GrailsMicronautBeanProcessor(Widget.class, Prototype.class);        // <1>
+        GrailsMicronautBeanProcessor.builder().addType('widget', Widget.class).build(); // <1>
     }
 
 }
 ----
-<1> List all classes of beans you want to include into Spring application context. Alternatively, you can declare the common annotation of these beans such as `@Prototype`.
+<1> List all classes of beans you want to include into Spring application context.
 
 Second, create `spring.factories` descriptor which will automatically load the configuration once on classpath.
 

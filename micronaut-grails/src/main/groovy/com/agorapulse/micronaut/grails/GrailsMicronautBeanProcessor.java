@@ -67,8 +67,7 @@ public class GrailsMicronautBeanProcessor implements BeanFactoryPostProcessor, D
         }
 
         public Builder addByStereotype(String grailsBeanName, Class<? extends Annotation> type) {
-            micronautBeanQualifiers.put(grailsBeanName, Qualifiers.byStereotype(type));
-            return this;
+            return addByQualifiers(grailsBeanName, Qualifiers.byStereotype(type));
         }
 
         public Builder addByName(String name) {
@@ -80,7 +79,8 @@ public class GrailsMicronautBeanProcessor implements BeanFactoryPostProcessor, D
             return this;
         }
 
-        public <T> Builder addByQualifiers(String grailsBeanName, Qualifier<T>... qualifiers) {
+        @SafeVarargs
+        public final <T> Builder addByQualifiers(String grailsBeanName, Qualifier<T>... qualifiers) {
             micronautBeanQualifiers.put(grailsBeanName, Qualifiers.byQualifiers(qualifiers));
             return this;
         }
@@ -149,6 +149,10 @@ public class GrailsMicronautBeanProcessor implements BeanFactoryPostProcessor, D
             String name = entry.getKey();
             Qualifier<?> micronautBeanQualifier = entry.getValue();
             Collection<BeanDefinition<?>> beanDefinitions = micronautContext.getBeanDefinitions((Qualifier<Object>) micronautBeanQualifier);
+
+            if (beanDefinitions.size() > 1) {
+                throw new IllegalArgumentException("There is too many candidates for " + micronautBeanQualifier + "! Candidates: " + beanDefinitions);
+            }
 
             Optional<BeanDefinition<?>> firstBean = beanDefinitions.stream().findFirst();
             BeanDefinition<?> definition = firstBean.orElseThrow(()-> new IllegalArgumentException("There is no candidate for " + micronautBeanQualifier));
