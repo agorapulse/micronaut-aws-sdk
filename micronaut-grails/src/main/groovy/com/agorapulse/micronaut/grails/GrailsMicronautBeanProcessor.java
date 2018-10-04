@@ -18,6 +18,7 @@ package com.agorapulse.micronaut.grails;
 
 import io.micronaut.context.DefaultBeanContext;
 import io.micronaut.context.Qualifier;
+import io.micronaut.core.naming.NameUtils;
 import io.micronaut.inject.BeanDefinition;
 import io.micronaut.inject.qualifiers.Qualifiers;
 import org.springframework.beans.BeansException;
@@ -56,6 +57,10 @@ public class GrailsMicronautBeanProcessor implements BeanFactoryPostProcessor, D
             this.customizer = customizer;
         }
 
+        public Builder addByType(Class<?> type) {
+            return addByQualifiers(NameUtils.decapitalize(type.getSimpleName()), Qualifiers.byType(type));
+        }
+
         public Builder addByType(String grailsBeanName, Class<?>... types) {
             micronautBeanQualifiers.put(grailsBeanName, Qualifiers.byType(types));
             return this;
@@ -75,11 +80,10 @@ public class GrailsMicronautBeanProcessor implements BeanFactoryPostProcessor, D
             return this;
         }
 
-        // see https://github.com/micronaut-projects/micronaut-core/issues/679
-//        public <T> Builder addByQualifiers(String grailsBeanName, Qualifier<T>... qualifiers) {
-//            micronautBeanQualifiers.put(grailsBeanName, Qualifiers.byQualifiers(qualifiers));
-//            return this;
-//        }
+        public <T> Builder addByQualifiers(String grailsBeanName, Qualifier<T>... qualifiers) {
+            micronautBeanQualifiers.put(grailsBeanName, Qualifiers.byQualifiers(qualifiers));
+            return this;
+        }
 
         public GrailsMicronautBeanProcessor build() {
             return new GrailsMicronautBeanProcessor(micronautBeanQualifiers, customizer);

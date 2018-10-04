@@ -1,5 +1,6 @@
 package com.agorapulse.micronaut.grails
 
+import com.agorapulse.remember.Remember
 import io.micronaut.context.annotation.Primary
 import io.micronaut.context.annotation.Prototype
 import io.micronaut.context.annotation.Requires
@@ -16,6 +17,10 @@ import spock.lang.Specification
 import javax.inject.Named
 import javax.inject.Singleton
 
+@Remember(
+    value = '2018-11-01',
+    description = 'Uncomment tests for combined quaifiers'
+)
 @ContextConfiguration(classes = [GrailsConfig])
 @TestPropertySource("classpath:com/agorapulse/micronaut/grails/GrailsMicronautBeanProcessorSpec.properties")
 class GrailsMicronautBeanProcessorSpec extends Specification {
@@ -69,13 +74,13 @@ class GrailsConfig {
     @Bean
     GrailsMicronautBeanProcessor widgetProcessor() {
         GrailsMicronautBeanProcessor.builder()
-            .addByType('widget', Widget)
-            .addByType('someInterface', SomeInterface)
-            .addByStereotype('prototype', Prototype)
-            .addByName('gadget')
-            // see https://github.com/micronaut-projects/micronaut-core/issues/679
-            // .addByQualifiers('otherMinion', Qualifiers.byName('other'), Qualifiers.byType(Minion))
-            .build()
+                                    .addByType(Widget)
+                                    .addByType('someInterface', SomeInterface)
+                                    .addByStereotype('prototype', Prototype)
+                                    .addByName('gadget')
+        // see https://github.com/micronaut-projects/micronaut-core/issues/679
+        // .addByQualifiers('otherMinion', Qualifiers.byName('other'), Qualifiers.byType(Minion))
+                                    .build()
     }
 
 }
