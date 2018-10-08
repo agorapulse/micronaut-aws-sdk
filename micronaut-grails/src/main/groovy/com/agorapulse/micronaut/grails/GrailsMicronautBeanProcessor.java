@@ -118,6 +118,7 @@ public class GrailsMicronautBeanProcessor implements BeanFactoryPostProcessor, D
 
     private static final String MICRONAUT_BEAN_TYPE_PROPERTY_NAME = "micronautBeanType";
     private static final String MICRONAUT_CONTEXT_PROPERTY_NAME = "micronautContext";
+    private static final String MICRONAUT_QUALIFIER_PROPERTY_NAME = "micronautQualifier";
     private static final String MICRONAUT_SINGLETON_PROPERTY_NAME = "micronautSingleton";
 
     private DefaultBeanContext micronautContext;
@@ -158,8 +159,9 @@ public class GrailsMicronautBeanProcessor implements BeanFactoryPostProcessor, D
             BeanDefinition<?> definition = firstBean.orElseThrow(()-> new IllegalArgumentException("There is no candidate for " + micronautBeanQualifier));
 
             final BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder
-                .rootBeanDefinition("io.micronaut.spring.beans.MicronautSpringBeanFactory");
+                .rootBeanDefinition(GrailsMicronautBeanFactory.class);
             beanDefinitionBuilder.addPropertyValue(MICRONAUT_BEAN_TYPE_PROPERTY_NAME, definition.getBeanType());
+            beanDefinitionBuilder.addPropertyValue(MICRONAUT_QUALIFIER_PROPERTY_NAME, micronautBeanQualifier);
             beanDefinitionBuilder.addPropertyValue(MICRONAUT_CONTEXT_PROPERTY_NAME, micronautContext);
             beanDefinitionBuilder.addPropertyValue(MICRONAUT_SINGLETON_PROPERTY_NAME, definition.isSingleton());
 
