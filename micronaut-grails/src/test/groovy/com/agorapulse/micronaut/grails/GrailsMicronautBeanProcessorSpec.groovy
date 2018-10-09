@@ -1,11 +1,11 @@
 package com.agorapulse.micronaut.grails
 
-import com.agorapulse.remember.Remember
 import io.micronaut.context.annotation.Factory
 import io.micronaut.context.annotation.Primary
 import io.micronaut.context.annotation.Prototype
 import io.micronaut.context.annotation.Requires
 import io.micronaut.context.annotation.Value
+import io.micronaut.inject.qualifiers.Qualifiers
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
@@ -18,10 +18,6 @@ import spock.lang.Specification
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Remember(
-    value = '2018-11-01',
-    description = 'Uncomment tests for combined quaifiers'
-)
 @ContextConfiguration(classes = [GrailsConfig])
 @TestPropertySource("classpath:com/agorapulse/micronaut/grails/GrailsMicronautBeanProcessorSpec.properties")
 class GrailsMicronautBeanProcessorSpec extends Specification {
@@ -50,8 +46,7 @@ class GrailsMicronautBeanProcessorSpec extends Specification {
             applicationContext.getBean('one').name == 'one'
             applicationContext.getBean('two').name == 'two'
 
-            // see https://github.com/micronaut-projects/micronaut-core/issues/679
-            // applicationContext.getBean('otherMinion') instanceof OtherMinion
+            applicationContext.getBean('otherMinion') instanceof OtherMinion
         when:
             PrototypeBean prototypeBean = applicationContext.getBean(PrototypeBean)
         then:
@@ -89,8 +84,7 @@ class GrailsConfig {
             .addByName('gadget')
             .addByName('one')
             .addByName('two')
-            // see https://github.com/micronaut-projects/micronaut-core/issues/679
-            // .addByQualifiers('otherMinion', Qualifiers.byName('other'), Qualifiers.byType(Minion))
+            .addByQualifiers('otherMinion', Qualifiers.byName('other'), Qualifiers.byType(Minion))
             .build()
     }
 
