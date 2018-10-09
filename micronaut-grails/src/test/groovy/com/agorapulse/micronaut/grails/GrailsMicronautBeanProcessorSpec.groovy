@@ -1,5 +1,6 @@
 package com.agorapulse.micronaut.grails
 
+import io.micronaut.context.annotation.Factory
 import io.micronaut.context.annotation.Primary
 import io.micronaut.context.annotation.Prototype
 import io.micronaut.context.annotation.Requires
@@ -38,6 +39,13 @@ class GrailsMicronautBeanProcessorSpec extends Specification {
             applicationContext.getBean('someInterface') instanceof SomeInterface
             applicationContext.getBean('someInterface') instanceof SomeImplementation
             applicationContext.getBean('gadget') instanceof SomeGadget
+
+            applicationContext.getBean('two') instanceof SomeNamed
+            applicationContext.getBean('one') instanceof SomeNamed
+
+            applicationContext.getBean('one').name == 'one'
+            applicationContext.getBean('two').name == 'two'
+
             applicationContext.getBean('otherMinion') instanceof OtherMinion
         when:
             PrototypeBean prototypeBean = applicationContext.getBean(PrototypeBean)
@@ -74,6 +82,8 @@ class GrailsConfig {
             .addByType('someInterface', SomeInterface)
             .addByStereotype('prototype', Prototype)
             .addByName('gadget')
+            .addByName('one')
+            .addByName('two')
             .addByQualifiers('otherMinion', Qualifiers.byName('other'), Qualifiers.byType(Minion))
             .build()
     }
@@ -83,7 +93,34 @@ class GrailsConfig {
 interface SomeInterface { }
 
 @Singleton
-class SomeImplementation implements SomeInterface { }
+class SomeImplementation implements SomeInterface {}
+
+class SomeNamed {
+    final String name
+
+    SomeNamed(String name) {
+        this.name = name
+    }
+}
+
+@Factory
+class SomeNamedFactory {
+
+    @io.micronaut.context.annotation.Bean
+    @Singleton
+    @Named('one')
+    SomeNamed one() {
+        return new SomeNamed('one')
+    }
+
+    @io.micronaut.context.annotation.Bean
+    @Singleton
+    @Named('two')
+    SomeNamed two() {
+        return new SomeNamed('two')
+    }
+
+}
 
 @Primary
 @Singleton
