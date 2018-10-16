@@ -72,6 +72,9 @@ Following beans can be injected if necessary:
   * `com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent.ProxyRequestContext`
   * `com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent.RequestIdentity`
 
+WARNING: Application context is shared for the lifetime of the Lambda instance. Request related beans are reset
+during each execution.
+
 === Installation
 
 It is recommended to only include this library in the final deployment package and tests. This enables an option

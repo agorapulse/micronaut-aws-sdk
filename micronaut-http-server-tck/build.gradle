@@ -1,5 +1,5 @@
 dependencies {
-    compile "io.micronaut:http-server"
-    compile "io.micronaut:router"
+    compile "io.micronaut:micronaut-http-server"
+    compile "io.micronaut:micronaut-router"
     compile "com.agorapulse:gru:$gruVersion"
 }

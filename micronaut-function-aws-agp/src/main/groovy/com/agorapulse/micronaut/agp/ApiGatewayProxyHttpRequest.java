@@ -28,17 +28,17 @@ abstract class ApiGatewayProxyHttpRequest<B> implements HttpRequest<B> {
             return new BinaryApiGatewayProxyHttpRequest(input, conversionService);
         }
 
-        boolean isJson = Optional
+        boolean isText = Optional
             .ofNullable(input.getHeaders())
             .flatMap(headers -> Optional.ofNullable(headers.get("Content-Type")))
-            .map(contentType -> contentType.contains("json"))
+            .map(contentType -> contentType.contains("text"))
             .orElse(false);
 
-        if (isJson) {
-            return new JsonApiGatewayProxyHttpRequest(input, conversionService, mapper);
+        if (isText) {
+            return new TextApiGatewayProxyHttpRequest(input, conversionService);
         }
 
-        return new TextApiGatewayProxyHttpRequest(input, conversionService);
+        return new JsonApiGatewayProxyHttpRequest(input, conversionService, mapper);
     }
 
     private static final int HTTPS_PORT = 443;
@@ -191,5 +191,10 @@ abstract class ApiGatewayProxyHttpRequest<B> implements HttpRequest<B> {
     @Override
     public MutableConvertibleValues<Object> getAttributes() {
         return attributes;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + ": " + input.toString();
     }
 }
