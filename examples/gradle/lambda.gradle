@@ -6,8 +6,8 @@ configurations {
 dependencies {
     lambda project(':micronaut-function-aws-agp')
 
-    compile "io.micronaut:http-server"
-    compile "io.micronaut:router"
+    compile "io.micronaut:micronaut-http-server"
+    compile "io.micronaut:micronaut-router"
 
     // gru lambda incubation
     testCompile "com.agorapulse:gru-api-gateway:$gruVersion"

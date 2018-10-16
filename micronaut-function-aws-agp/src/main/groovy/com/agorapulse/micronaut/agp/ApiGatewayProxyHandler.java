@@ -12,6 +12,8 @@ import io.micronaut.core.convert.ConversionService;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
 import io.netty.buffer.ByteBuf;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Optional;
@@ -19,16 +21,34 @@ import java.util.stream.Collectors;
 
 public class ApiGatewayProxyHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
+    private static final Logger LOG = LoggerFactory.getLogger(BasicRequestHandler.class);
+
     /**
      * This is the name of the environment which is set if the application in executed by this handler.
      */
     public static final String API_GATEWAY_PROXY_ENVIRONMENT = "api_gateway_proxy";
 
+    private final ApplicationContext context;
+
+    public ApiGatewayProxyHandler() {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Starting application context initialization");
+        }
+        this.context = buildApplicationContext();
+        startEnvironment(context);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Application context initialization finished");
+        }
+    }
+
     // tag::handler[]
     @Override
     public final APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context lambdaContext) {
-        ApplicationContext context = buildApplicationContext(lambdaContext);
-        startEnvironment(context);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Starting registration of custom request beans");
+        }
+        registerContextBeans(lambdaContext);
+
         context.registerSingleton(input);
 
         APIGatewayProxyRequestEvent.ProxyRequestContext requestContext = Optional.ofNullable(input.getRequestContext()).orElseGet(APIGatewayProxyRequestEvent.ProxyRequestContext::new);
@@ -38,6 +58,10 @@ public class ApiGatewayProxyHandler implements RequestHandler<APIGatewayProxyReq
         context.registerSingleton(requestIdentity);
 
         doWithApplicationContext(context);
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Registration of custom request beans finished");
+        }
 
         ObjectMapper mapper = context.getBean(ObjectMapper.class);
         ConversionService<?> conversionService = context.getConversionService();
@@ -79,33 +103,28 @@ public class ApiGatewayProxyHandler implements RequestHandler<APIGatewayProxyReq
         return responseEvent;
     }
 
-    private ApplicationContext buildApplicationContext(Context context) {
-        ApplicationContext applicationContext = ApplicationContext.build().environments(API_GATEWAY_PROXY_ENVIRONMENT).build();
-        if (context != null) {
-            registerContextBeans(context, applicationContext);
-        }
-        return applicationContext;
+    private ApplicationContext buildApplicationContext() {
+        return ApplicationContext.build().environments(API_GATEWAY_PROXY_ENVIRONMENT).build();
     }
 
     /**
      * Register the beans in the application.
      *
-     * @param context context
-     * @param applicationContext application context
+     * @param lambdaContext context
      */
-    private static void registerContextBeans(Context context, ApplicationContext applicationContext) {
-        applicationContext.registerSingleton(context);
-        LambdaLogger logger = context.getLogger();
+    private void registerContextBeans(Context lambdaContext) {
+        context.registerSingleton(lambdaContext);
+        LambdaLogger logger = lambdaContext.getLogger();
         if (logger != null) {
-            applicationContext.registerSingleton(logger);
+            context.registerSingleton(logger);
         }
-        ClientContext clientContext = context.getClientContext();
+        ClientContext clientContext = lambdaContext.getClientContext();
         if (clientContext != null) {
-            applicationContext.registerSingleton(clientContext);
+            context.registerSingleton(clientContext);
         }
-        CognitoIdentity identity = context.getIdentity();
+        CognitoIdentity identity = lambdaContext.getIdentity();
         if (identity != null) {
-            applicationContext.registerSingleton(identity);
+            context.registerSingleton(identity);
         }
     }
 
