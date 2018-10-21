@@ -93,8 +93,8 @@ configurations {
 dependencies {
     lambda "com.agorapulse:micronaut-function-aws-agp:$micronautLibrariesVersion"
 
-    compile "io.micronaut:http-server"
-    compile "io.micronaut:router"
+    compile "io.micronaut:micronaut-http-server"
+    compile "io.micronaut:micronaut-router"
 
     // gru for aws lambda can help you testing lambda fuctions
     // https://agorapulse.github.io/gru/
@@ -176,7 +176,7 @@ dependencies {
 
 
     // local netty server
-    compile "io.micronaut:http-server-netty"
+    compile "io.micronaut:micronaut-http-server-netty"
 
 }
 
