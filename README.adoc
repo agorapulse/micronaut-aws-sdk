@@ -86,12 +86,12 @@ First create following file to share configuration between your lambda libraries
 .lambda.gradle
 ----
 configurations {
-    lambda.extendsFrom runtime
-    testCompile.extendsFrom lambda
+    lambdaCompile.extendsFrom runtime
+    testCompile.extendsFrom lambdaCompile
 }
 
 dependencies {
-    lambda "com.agorapulse:micronaut-function-aws-agp:$micronautLibrariesVersion"
+    lambdaCompile "com.agorapulse:micronaut-function-aws-agp:$micronautLibrariesVersion"
 
     compile "io.micronaut:micronaut-http-server"
     compile "io.micronaut:micronaut-router"
@@ -102,6 +102,7 @@ dependencies {
 }
 
 task buildZip(type: Zip) {
+    from compileJava
     from compileGroovy
     from processResources
     into('lib') {
