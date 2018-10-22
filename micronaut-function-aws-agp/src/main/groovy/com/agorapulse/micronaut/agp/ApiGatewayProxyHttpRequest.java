@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.*;
+import java.util.regex.Pattern;
 
 abstract class ApiGatewayProxyHttpRequest<B> implements HttpRequest<B> {
 
@@ -145,7 +146,9 @@ abstract class ApiGatewayProxyHttpRequest<B> implements HttpRequest<B> {
 
         remoteAddress = new InetSocketAddress(identity.getSourceIp(), HTTPS_PORT);
 
-        MutableHttpRequest request = HttpRequest.create(this.method, "https://" + serverName + input.getPath());
+        MutableHttpRequest request = HttpRequest.create(this.method,
+            "https://" + serverName + reconstructPath(Optional.ofNullable(input.getResource()).orElse(input.getPath()), input.getPathParameters())
+        );
 
         this.uri = request.getUri();
 
@@ -196,5 +199,16 @@ abstract class ApiGatewayProxyHttpRequest<B> implements HttpRequest<B> {
     @Override
     public String toString() {
         return getClass().getSimpleName() + ": " + input.toString();
+    }
+
+    static String reconstructPath(String resource, Map<String, String> pathVariables) {
+        if (pathVariables == null) {
+            return resource;
+        }
+        String path = resource;
+        for (Map.Entry<String, String> variable : pathVariables.entrySet()) {
+            path = path.replaceAll("\\{" + Pattern.quote(variable.getKey()) +"\\+?}", variable.getValue());
+        }
+        return path;
     }
 }
