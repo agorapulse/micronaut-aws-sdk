@@ -1,0 +1,10 @@
+dependencies {
+    compile 'io.micronaut.configuration:micronaut-aws-common'
+
+    // optional dependencies for each service
+    optional group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: awsSdkVersion
+
+    testCompile group: 'org.testcontainers', name: 'testcontainers', version: testcontainersVersion
+}
+
+apply from: '../gradle/bintray.gradle'

@@ -18,6 +18,12 @@ subprojects {
     apply plugin:"net.ltgt.apt-eclipse"
     apply plugin:"net.ltgt.apt-idea"
 
+    configurations {
+        optional.extendsFrom compile
+
+        compileOnly.extendsFrom optional
+        testCompileOnly.extendsFrom optional
+    }
 
     dependencyManagement {
         imports {
