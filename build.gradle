@@ -22,7 +22,7 @@ subprojects {
         optional.extendsFrom compile
 
         compileOnly.extendsFrom optional
-        testCompileOnly.extendsFrom optional
+        testCompile.extendsFrom optional
     }
 
     dependencyManagement {

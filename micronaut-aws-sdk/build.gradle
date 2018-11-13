@@ -2,7 +2,7 @@ dependencies {
     compile 'io.micronaut.configuration:micronaut-aws-common'
 
     // optional dependencies for each service
-    optional group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: awsSdkVersion
+    optional group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb'
 
     testCompile group: 'org.testcontainers', name: 'testcontainers', version: testcontainersVersion
     testCompile group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
