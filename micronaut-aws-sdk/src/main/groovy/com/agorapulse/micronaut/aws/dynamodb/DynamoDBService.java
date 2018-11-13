@@ -189,6 +189,17 @@ public interface DynamoDBService<TItemClass> {
     }
 
     /**
+     * Decrement a count with an atomic operation
+     *
+     * @param hashKey
+     * @param attributeName
+     * @return
+     */
+    default Integer decrement(Object hashKey, String attributeName) {
+        return decrement(hashKey, null, attributeName, 1);
+    }
+
+    /**
      * Delete item by IDs.
      *
      * @param hashKey  hash key of the item to delete
@@ -213,7 +224,7 @@ public interface DynamoDBService<TItemClass> {
      * @param item
      * @param settings
      */
-    default void delete(Object item, Map settings) {
+    default void delete(TItemClass item, Map settings) {
         deleteAll(Collections.singletonList(item), settings);
     }
 
@@ -222,8 +233,17 @@ public interface DynamoDBService<TItemClass> {
      *
      * @param item
      */
-    default void delete(Object item) {
+    default void delete(TItemClass item) {
         delete(item, Collections.emptyMap());
+    }
+
+    /**
+     * Delete item from Java object
+     *
+     * @param id
+     */
+    default void deleteByHash(Object id) {
+        delete(id, null, Collections.emptyMap());
     }
 
     /**
@@ -232,14 +252,14 @@ public interface DynamoDBService<TItemClass> {
      * @param itemsToDelete a list of objects to delete
      * @param settings      settings
      */
-    void deleteAll(List itemsToDelete, Map settings);
+    void deleteAll(List<TItemClass> itemsToDelete, Map settings);
 
     /**
      * Delete a list of items from DynamoDB.
      *
      * @param itemsToDelete a list of objects to delete
      */
-    default void deleteAll(List itemsToDelete) {
+    default void deleteAll(List<TItemClass> itemsToDelete) {
         deleteAll(itemsToDelete, Collections.emptyMap());
     }
 
@@ -390,6 +410,17 @@ public interface DynamoDBService<TItemClass> {
      */
     default Integer increment(Object hashKey, Object rangeKey, String attributeName) {
         return increment(hashKey, rangeKey, attributeName, 1);
+    }
+
+    /**
+     * Increment a count with an atomic operation
+     *
+     * @param hashKey
+     * @param attributeName
+     * @return
+     */
+    default Integer increment(Object hashKey, String attributeName) {
+        return increment(hashKey, null, attributeName, 1);
     }
 
     TItemClass getNewInstance();
@@ -654,6 +685,11 @@ public interface DynamoDBService<TItemClass> {
      * @return
      */
     UpdateItemResult deleteItemAttribute(Object hashKey, Object rangeKey, String attributeName);
+
+    default UpdateItemResult deleteItemAttribute(Object hashKey, String attributeName) {
+        return deleteItemAttribute(hashKey, null, attributeName);
+    }
+
 
     /**
      * Update a single item attribute

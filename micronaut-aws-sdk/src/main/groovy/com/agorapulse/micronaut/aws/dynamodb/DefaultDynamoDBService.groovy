@@ -99,9 +99,8 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
             }
         }
 
-        // TODO: only require hash key
-        if (!rangeKeyName || !rangeKeyClass || !hashKeyName || !hashKeyClass) {
-            throw new RuntimeException("Missing hashkey and/or rangekey annotations on class: ${itemClass}")
+        if (!hashKeyName || !hashKeyClass) {
+            throw new RuntimeException("Missing hashkey annotations on class: ${itemClass}")
         }
     }
 
@@ -206,7 +205,11 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      * @param settings settings
      */
     void delete(Object hashKey, Object rangeKey, Map settings) {
-        delete(itemClass.newInstance((hashKeyName): hashKey, (rangeKeyName): rangeKey), settings)
+        if (rangeKey) {
+            delete(itemClass.newInstance((hashKeyName): hashKey, (rangeKeyName): rangeKey), settings)
+            return
+        }
+        delete(itemClass.newInstance((hashKeyName): hashKey), settings)
     }
 
     /**
@@ -215,7 +218,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      * @param itemsToDelete a list of objects to delete
      * @param settings settings
      */
-    void deleteAll(List itemsToDelete, Map settings) {
+    void deleteAll(List<TItemClass> itemsToDelete, Map settings) {
         if (!settings.containsKey('batchEnabled')) {
             settings = settings + [batchEnabled: true]
         }
@@ -561,12 +564,13 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      * @return
      */
     UpdateItemResult deleteItemAttribute(hashKey, rangeKey, String attributeName) {
+        Map<String, Object> key = [(hashKeyName) : buildAttributeValue(hashKey)]
+        if (rangeKey) {
+            key[rangeKeyName] = buildAttributeValue(rangeKey)
+        }
         UpdateItemRequest request = new UpdateItemRequest(
             tableName: mainTable.tableName(),
-            key: [
-                (hashKeyName) : buildAttributeValue(hashKey),
-                (rangeKeyName): buildAttributeValue(rangeKey)
-            ],
+            key: key,
             returnValues: ReturnValue.UPDATED_NEW
         ).addAttributeUpdatesEntry(
             attributeName,
@@ -588,12 +592,13 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      * @return
      */
     UpdateItemResult updateItemAttribute(hashKey, rangeKey, String attributeName, attributeValue, AttributeAction action = AttributeAction.PUT) {
+        Map<String, Object> key = [(hashKeyName) : buildAttributeValue(hashKey)]
+        if (rangeKey) {
+            key[rangeKeyName] = buildAttributeValue(rangeKey)
+        }
         UpdateItemRequest request = new UpdateItemRequest(
             tableName: mainTable.tableName(),
-            key: [
-                (hashKeyName) : buildAttributeValue(hashKey),
-                (rangeKeyName): buildAttributeValue(rangeKey)
-            ],
+            key: key,
             returnValues: ReturnValue.UPDATED_NEW
         ).addAttributeUpdatesEntry(
             attributeName,
