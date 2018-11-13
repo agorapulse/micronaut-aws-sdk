@@ -8,6 +8,7 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import io.micronaut.context.annotation.Parameter
 import io.micronaut.context.annotation.Prototype
+import org.joda.time.DateTime
 
 import java.lang.reflect.Field
 import java.lang.reflect.Method
@@ -16,15 +17,14 @@ import java.text.SimpleDateFormat
 
 @Slf4j
 @Prototype
-@CompileStatic
+//@CompileStatic
 class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> {
 
-    static String INDEX_NAME_SUFFIX = 'Index' // Specific ranges ending with 'Index' are String concatenated indexes, to keep ordering (ex.: createdByUserIdIndex=37641047|2011-02-21T17:15:23.000Z|2424353910)
+    static String INDEX_NAME_SUFFIX = 'Index'
+    // Specific ranges ending with 'Index' are String concatenated indexes, to keep ordering (ex.: createdByUserIdIndex=37641047|2011-02-21T17:15:23.000Z|2424353910)
     static int DEFAULT_QUERY_LIMIT = 20
     static int DEFAULT_COUNT_LIMIT = 100
-    static String ID_SEPARATOR = '_'
     static String SERIALIZED_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-    static String SERIALIZED_DATE_DAILY_FORMAT = "yyyy-MM-dd"
     static String SERIALIZED_DATE_TIMEZONE = 'GMT'
 
     protected static int BATCH_DELETE_LIMIT = 100
@@ -40,7 +40,6 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
     protected String rangeKeyName
     protected Class rangeKeyClass
     protected List<String> secondaryIndexes = new ArrayList<String>()
-
 
     /**
      * Initialize service for a given mapper class
@@ -100,6 +99,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
             }
         }
 
+        // TODO: only require hash key
         if (!rangeKeyName || !rangeKeyClass || !hashKeyName || !hashKeyClass) {
             throw new RuntimeException("Missing hashkey and/or rangekey annotations on class: ${itemClass}")
         }
@@ -117,8 +117,8 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      * @param settings
      * @return
      */
-    int count(Object hashKey, String rangeKeyName, rangeKeyValue, ComparisonOperator operator, Map settings) {
-        Map conditions = [(rangeKeyName): buildCondition(rangeKeyValue, operator)]
+    int count(Object hashKey, String rangeKeyName, Object rangeKeyValue, ComparisonOperator operator, Map settings) {
+        Map conditions = rangeKeyValue ? [(rangeKeyName): buildCondition(rangeKeyValue, operator)] : [:]
         countByConditions(hashKey, conditions, settings)
     }
 
@@ -150,9 +150,9 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      * @return
      */
     int countByConditions(Object hashKey, Map<String, Condition> rangeKeyConditions, Map settings) {
-        settings.batchGetDisabled = true
+        settings = settings + [batchGetDisabled: true]
         if (!settings.limit) {
-            settings.limit = DEFAULT_COUNT_LIMIT
+            settings = settings + [limit: DEFAULT_COUNT_LIMIT]
         }
         QueryResultPage resultPage = queryByConditions(hashKey, rangeKeyConditions, settings)
         resultPage?.results?.size() ?: 0
@@ -172,20 +172,21 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
             client.describeTable(table.tableName())
             return null
         } catch (ResourceNotFoundException ignored) {
-            CreateTableRequest createTableRequest = mapper.generateCreateTableRequest(itemClass) // new CreateTableRequest().withTableName(table.tableName())
+            CreateTableRequest createTableRequest = mapper.generateCreateTableRequest(itemClass)
+            // new CreateTableRequest().withTableName(table.tableName())
 
             // ProvisionedThroughput
             ProvisionedThroughput provisionedThroughput = new ProvisionedThroughput()
-                    .withReadCapacityUnits(readCapacityUnits)
-                    .withWriteCapacityUnits(writeCapacityUnits)
+                .withReadCapacityUnits(readCapacityUnits)
+                .withWriteCapacityUnits(writeCapacityUnits)
             createTableRequest.setProvisionedThroughput(provisionedThroughput)
 
             // ProvisionedThroughput for GSIs
             if (createTableRequest.globalSecondaryIndexes) {
                 createTableRequest.globalSecondaryIndexes.each { GlobalSecondaryIndex globalSecondaryIndex ->
                     provisionedThroughput = new ProvisionedThroughput()
-                            .withReadCapacityUnits(2)
-                            .withWriteCapacityUnits(2)
+                        .withReadCapacityUnits(2)
+                        .withWriteCapacityUnits(2)
                     globalSecondaryIndex.setProvisionedThroughput(provisionedThroughput)
                     log.info("Creating DynamoDB GSI: ${globalSecondaryIndex}")
                 }
@@ -216,10 +217,10 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      */
     void deleteAll(List itemsToDelete, Map settings) {
         if (!settings.containsKey('batchEnabled')) {
-            settings.batchEnabled = true
+            settings = settings + [batchEnabled: true]
         }
 
-        if (settings.batchEnabled  && itemsToDelete.size() > 1) {
+        if (settings.batchEnabled && itemsToDelete.size() > 1) {
             itemsToDelete.collate(WRITE_BATCH_SIZE).each { List batchItems ->
                 log.debug("Deleting items from DynamoDB ${batchItems}")
                 mapper.batchDelete(batchItems)
@@ -249,9 +250,9 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
                   Map settings) {
         Map conditions = [(rangeKeyName): buildCondition(rangeKeyValue, operator)]
         deleteAllByConditions(
-                hashKey,
-                conditions,
-                settings
+            hashKey,
+            conditions,
+            settings
         )
     }
 
@@ -265,10 +266,10 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      */
     int deleteAllByConditions(Object hashKey, Map<String, Condition> rangeKeyConditions, Map settings, String indexName) {
         if (!settings.containsKey('batchEnabled')) {
-            settings.batchEnabled = true
+            settings = settings + [batchEnabled: true]
         }
         if (!settings.limit) {
-            settings.limit = BATCH_DELETE_LIMIT
+            settings = settings + [limit: BATCH_DELETE_LIMIT]
         }
 
         DynamoDBQueryExpression query = buildQueryExpression(hashKeyName, hashKey, settings)
@@ -406,7 +407,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
     QueryResultPage<TItemClass> query(Object hashKey, String rangeKeyName, rangeKeyValue, ComparisonOperator operator, Map settings) {
         if (rangeKeyValue == 'ANY' || !operator) {
             if (!rangeKeyName.endsWith(INDEX_NAME_SUFFIX)) {
-                rangeKeyName =+ INDEX_NAME_SUFFIX
+                rangeKeyName += INDEX_NAME_SUFFIX
             }
             queryByConditions(hashKey, [:], settings, rangeKeyName)
         } else {
@@ -451,7 +452,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
             }
 
             // Query all
-            Map lastEvaluatedKey = [items:'none']
+            Map lastEvaluatedKey = [items: 'none']
             resultPage.results = []
             while (lastEvaluatedKey) {
                 QueryResultPage currentPage = mapper.queryPage(itemClass, query)
@@ -507,77 +508,6 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
     }
 
     /**
-     * Query by day dates with a prefix with 'after' and/or 'before' range value (used by FacebookAppInsight, FacebookCampaignInsight, etc)
-     * 1) After a certain date : [after: new Date()]
-     * 2) Before a certain date : [before: new Date()]
-     * 3) Between provided dates : [after: new Date() + 1, before: new Date()]
-     *
-     * Optional settings:
-     * - batchGetDisabled (only when secondary indexes are used, useful for count when all item attributes are not required)
-     * - consistentRead (default to false)
-     * - exclusiveStartKey a map with the rangeKey (ex: [id: 2555]), with optional indexRangeKey when using LSI (ex.: [id: 2555, totalCount: 45])
-     * - limit
-     * - maxAfterDate (default to null)
-     * - scanIndexForward (default to false)
-     * - emptyDaysFilled (default to false)
-     *
-     * @param hashKey
-     * @param rangeKeyName
-     * @param rangeKeyDates
-     * @param settings
-     * @return
-     */
-    QueryResultPage<TItemClass> queryByDailyDates(Object hashKey, String rangeKeyName, Map<String, Date> rangeKeyDates, String rangeKeyPrefix, Map settings) {
-        Map conditions = buildDailyDateConditions(rangeKeyName, rangeKeyDates, rangeKeyPrefix, settings['maxAfterDate'] as Date)
-        QueryResultPage resultPage = queryByConditions(hashKey, conditions, settings)
-
-        if (settings['emptyDaysFilled'] && resultPage && rangeKeyDates['after'] && rangeKeyDates['before']) {
-            // Build data for each day (to be sure that we don't get holes for dates without data)
-            Map itemByDay = [:]
-            if (resultPage?.results) {
-                itemByDay = resultPage.results.inject([:]) { result, item ->
-                    def rangeKeyValue = item[rangeKeyName]
-                    String dateKey
-                    if (rangeKeyPrefix && rangeKeyValue instanceof String && rangeKeyValue.tokenize(ID_SEPARATOR)) {
-                        // Get date part of range key
-                        dateKey = rangeKeyValue.tokenize(ID_SEPARATOR).last()
-                    } else if (rangeKeyValue instanceof Date) {
-                        dateKey = serializeDailyDate(rangeKeyValue)
-                    } else {
-                        dateKey = rangeKeyValue
-                    }
-                    result[dateKey] = item
-                    result
-                } as Map
-            }
-
-            resultPage.results = []
-            assert rangeKeyDates['before'].after(rangeKeyDates['after'])
-            Date afterDate = rangeKeyDates['after']
-            Date date = rangeKeyDates['before']
-            while(date.after(afterDate + 1)) {
-                String dateKey = serializeDailyDate(date)
-                if (itemByDay[dateKey]) {
-                    resultPage.results << (itemByDay[dateKey] as TItemClass)
-                } else {
-                    def rangeKeyValue
-                    if (rangeKeyPrefix) {
-                        rangeKeyValue = "${rangeKeyPrefix}${ID_SEPARATOR}${dateKey}"
-                    } else {
-                        rangeKeyValue = dateKey
-                    }
-                    resultPage.results << itemClass.newInstance(
-                            (hashKeyName): hashKey,
-                            (rangeKeyName): rangeKeyValue
-                    )
-                }
-                date-- // Remove 1 day
-            }
-        }
-        resultPage
-    }
-
-    /**
      * Save a list of objects in DynamoDB.
      *
      * @param itemsToSave a list of objects to save
@@ -585,7 +515,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      */
     List<TItemClass> saveAll(List<TItemClass> itemsToSave, Map settings) {
         if (!settings.containsKey('batchEnabled')) {
-            settings.batchEnabled = true
+            settings = settings + [batchEnabled: true]
         }
 
         // Nullify empty collection properties
@@ -632,17 +562,17 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      */
     UpdateItemResult deleteItemAttribute(hashKey, rangeKey, String attributeName) {
         UpdateItemRequest request = new UpdateItemRequest(
-                tableName: mainTable.tableName(),
-                key: [
-                        (hashKeyName): buildAttributeValue(hashKey),
-                        (rangeKeyName): buildAttributeValue(rangeKey)
-                ],
-                returnValues: ReturnValue.UPDATED_NEW
+            tableName: mainTable.tableName(),
+            key: [
+                (hashKeyName) : buildAttributeValue(hashKey),
+                (rangeKeyName): buildAttributeValue(rangeKey)
+            ],
+            returnValues: ReturnValue.UPDATED_NEW
         ).addAttributeUpdatesEntry(
-                attributeName,
-                new AttributeValueUpdate(
-                        action: AttributeAction.DELETE
-                )
+            attributeName,
+            new AttributeValueUpdate(
+                action: AttributeAction.DELETE
+            )
         )
         client.updateItem(request)
     }
@@ -659,44 +589,26 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      */
     UpdateItemResult updateItemAttribute(hashKey, rangeKey, String attributeName, attributeValue, AttributeAction action = AttributeAction.PUT) {
         UpdateItemRequest request = new UpdateItemRequest(
-                tableName: mainTable.tableName(),
-                key: [
-                        (hashKeyName): buildAttributeValue(hashKey),
-                        (rangeKeyName): buildAttributeValue(rangeKey)
-                ],
-                returnValues: ReturnValue.UPDATED_NEW
+            tableName: mainTable.tableName(),
+            key: [
+                (hashKeyName) : buildAttributeValue(hashKey),
+                (rangeKeyName): buildAttributeValue(rangeKey)
+            ],
+            returnValues: ReturnValue.UPDATED_NEW
         ).addAttributeUpdatesEntry(
-                attributeName,
-                new AttributeValueUpdate(
-                        action: action,
-                        value: buildAttributeValue(attributeValue)
-                )
+            attributeName,
+            new AttributeValueUpdate(
+                action: action,
+                value: buildAttributeValue(attributeValue)
+            )
         )
         client.updateItem(request)
-    }
-
-    static Date deserializeDate(String date) throws ParseException {
-        SimpleDateFormat dateFormatter = new SimpleDateFormat(SERIALIZED_DATE_FORMAT)
-        dateFormatter.timeZone = TimeZone.getTimeZone(SERIALIZED_DATE_TIMEZONE)
-        dateFormatter.parse(date)
-    }
-
-    static Date deserializeDayDate(String date) throws ParseException {
-        SimpleDateFormat dateDailyFormatter = new SimpleDateFormat(SERIALIZED_DATE_DAILY_FORMAT)
-        dateDailyFormatter.timeZone = TimeZone.getTimeZone(SERIALIZED_DATE_TIMEZONE)
-        dateDailyFormatter.parse(date)
     }
 
     static String serializeDate(Date date) {
         SimpleDateFormat dateFormatter = new SimpleDateFormat(SERIALIZED_DATE_FORMAT)
         dateFormatter.timeZone = TimeZone.getTimeZone(SERIALIZED_DATE_TIMEZONE)
         dateFormatter.format(date)
-    }
-
-    static String serializeDailyDate(Date date) {
-        SimpleDateFormat dateDailyFormatter = new SimpleDateFormat(SERIALIZED_DATE_DAILY_FORMAT)
-        dateDailyFormatter.timeZone = TimeZone.getTimeZone(SERIALIZED_DATE_TIMEZONE)
-        dateDailyFormatter.format(date)
     }
 
     /**
@@ -745,8 +657,8 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
     static protected Condition buildCondition(rangeKeyValue,
                                               ComparisonOperator operator = ComparisonOperator.EQ) {
         new Condition()
-                .withComparisonOperator(operator)
-                .withAttributeValueList(buildAttributeValue(rangeKeyValue))
+            .withComparisonOperator(operator)
+            .withAttributeValueList(buildAttributeValue(rangeKeyValue))
     }
 
     /**
@@ -777,53 +689,9 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
             operator = ComparisonOperator.BETWEEN
         }
         [
-                (rangeKeyName): new Condition()
-                        .withComparisonOperator(operator)
-                        .withAttributeValueList(attributeValueList)
-        ]
-    }
-
-    /**
-     *
-     * @param rangeKeyName
-     * @param rangeKeyDates
-     * @param rangeKeyPrefix
-     * @param maxAfterDate
-     * @return
-     */
-    static protected Map buildDailyDateConditions(String rangeKeyName,
-                                                  Map<String, Date> rangeKeyDates,
-                                                  String rangeKeyPrefix = '',
-                                                  Date maxAfterDate = null) {
-        assert rangeKeyDates.keySet().any { it in ['after', 'before'] }
-        ComparisonOperator operator
-        List attributeValueList = []
-        if (maxAfterDate) {
-            addMaxAfterDateCondition(rangeKeyDates, maxAfterDate)
-        }
-        if (rangeKeyDates.containsKey('after')) {
-            operator = ComparisonOperator.GE
-            if (rangeKeyPrefix) {
-                attributeValueList << new AttributeValue().withS("${rangeKeyPrefix}${ID_SEPARATOR}${serializeDailyDate(rangeKeyDates['after'])}")
-            } else {
-                attributeValueList << new AttributeValue().withS(serializeDailyDate(rangeKeyDates['after']))
-            }
-        }
-        if (rangeKeyDates.containsKey('before')) {
-            operator = ComparisonOperator.LE
-            if (rangeKeyPrefix) {
-                attributeValueList << new AttributeValue().withS("${rangeKeyPrefix}${ID_SEPARATOR}${serializeDailyDate(rangeKeyDates['before'])}")
-            } else {
-                attributeValueList << new AttributeValue().withS(serializeDailyDate(rangeKeyDates['before']))
-            }
-        }
-        if (rangeKeyDates.containsKey('after') && rangeKeyDates.containsKey('before')) {
-            operator = ComparisonOperator.BETWEEN
-        }
-        [
-                (rangeKeyName): new Condition()
-                        .withComparisonOperator(operator)
-                        .withAttributeValueList(attributeValueList)
+            (rangeKeyName): new Condition()
+                .withComparisonOperator(operator)
+                .withAttributeValueList(attributeValueList)
         ]
     }
 
@@ -877,33 +745,12 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
         } as Map
     }
 
-    /**
-     * Returns the DynamoDB type for a given Field.
-     *
-     * Currently handled types :
-     * 1) Primitive numbers : short, int, long, float, double
-     * 2) String
-     * Any other type will result in an exception.
-     *
-     * @param field Field to determine the type for
-     * @return the DynamoDB type associated to the given field
-     */
-    static protected String getDynamoType(Field field) {
-        if (field.type.name in ['short', 'int', 'long', 'float', 'double']) {
-            return 'N'
-        } else if (field.type.name == 'java.lang.String') {
-            return 'S'
-        } else {
-            throw new RuntimeException("DynamoDB Invalid property type: ${field.type.name}, property: ${field.name}")
-        }
-    }
-
     @CompileDynamic
     static void nullifyHashSets(Object object) {
         object.properties.each { String prop, val ->
             if (object.hasProperty(prop)
-                    && object[prop] instanceof HashSet
-                    && object[prop]?.size() == 0) {
+                && object[prop] instanceof HashSet
+                && object[prop]?.size() == 0) {
                 try {
                     // log.debug("Nullifying collection ${prop} before sending to DynamoDB")
                     String getterName = "get" + prop.substring(0, 1).toUpperCase() + prop.substring(1);
@@ -922,5 +769,20 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
         secondaryIndexes.contains(rangeName)
     }
 
+    String getHashKeyName() {
+        return hashKeyName
+    }
+
+    Class getHashKeyClass() {
+        return hashKeyClass
+    }
+
+    String getRangeKeyName() {
+        return rangeKeyName
+    }
+
+    Class getRangeKeyClass() {
+        return rangeKeyClass
+    }
 
 }

@@ -5,10 +5,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
 import com.amazonaws.services.dynamodbv2.datamodeling.QueryResultPage;
 import com.amazonaws.services.dynamodbv2.model.*;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public interface DynamoDBService<TItemClass> {
     
@@ -53,6 +50,42 @@ public interface DynamoDBService<TItemClass> {
      */
     default int count(Object hashKey, String rangeKeyName, Object rangeKeyValue) {
         return count(hashKey, rangeKeyName, rangeKeyValue, ComparisonOperator.EQ);
+    }
+
+    /**
+     * Optional settings:
+     * - consistentRead (default to false)
+     * - limit (default to DEFAULT_COUNT_LIMIT)
+     *
+     * @param hashKey
+     * @param rangeKeyValue
+     * @return
+     */
+    default int count(Object hashKey, Object rangeKeyValue) {
+        return count(hashKey, getRangeKeyName(), rangeKeyValue);
+    }
+
+    /**
+     * Optional settings:
+     * - consistentRead (default to false)
+     * - limit (default to DEFAULT_COUNT_LIMIT)
+     *
+     * @param hashKey
+     * @return
+     */
+    default int count(Object hashKey) {
+        return count(hashKey, null);
+    }
+
+    default int countByDates(Object hashKey, String rangeKeyName, Date after, Date before, Date maxAfterDate) {
+        Map<String, Object> rangeKeyDates = new HashMap<>(2);
+        rangeKeyDates.put("after", after);
+        rangeKeyDates.put("before", before);
+        return countByDates(hashKey, rangeKeyName, rangeKeyDates, Collections.singletonMap("maxAfterDate", maxAfterDate));
+    }
+
+    default int countByDates(Object hashKey, String rangeKeyName, Date after, Date before) {
+        return countByDates(hashKey, rangeKeyName, after, before, null);
     }
 
     /**
@@ -306,6 +339,16 @@ public interface DynamoDBService<TItemClass> {
     TItemClass get(Object hashKey, Object rangeKey);
 
     /**
+     * Load an item
+     *
+     * @param hashKey
+     * @return
+     */
+    default TItemClass get(Object hashKey) {
+        return get(hashKey, null);
+    }
+
+    /**
      * Retrieve batched items corresponding to a list of item IDs, in the same order.
      * Example: items = twitterItemDBService.getAll(1, [1, 2]).
      *
@@ -421,6 +464,10 @@ public interface DynamoDBService<TItemClass> {
      */
     default QueryResultPage<TItemClass> query(Object hashKey, String rangeKeyName, Object rangeKeyValue, ComparisonOperator operator) {
         return query(hashKey, rangeKeyName, rangeKeyValue, operator, Collections.emptyMap());
+    }
+
+    default QueryResultPage<TItemClass> query(Object hashKey, Object rangeKeyValue) {
+        return query(hashKey, getRangeKeyName(), rangeKeyValue);
     }
 
     /**
@@ -540,75 +587,15 @@ public interface DynamoDBService<TItemClass> {
         return queryByDates(hashKey, rangeKeyName, rangeKeyDates, Collections.emptyMap());
     }
 
-    /**
-     * Query by day dates with a prefix with 'after' and/or 'before' range value (used by FacebookAppInsight, FacebookCampaignInsight, etc)
-     * 1) After a certain date : [after: new Date()]
-     * 2) Before a certain date : [before: new Date()]
-     * 3) Between provided dates : [after: new Date() + 1, before: new Date()]
-     * <p>
-     * Optional settings:
-     * - batchGetDisabled (only when secondary indexes are used, useful for count when all item attributes are not required)
-     * - consistentRead (default to false)
-     * - exclusiveStartKey a map with the rangeKey (ex: [id: 2555]), with optional indexRangeKey when using LSI (ex.: [id: 2555, totalCount: 45])
-     * - limit
-     * - maxAfterDate (default to null)
-     * - scanIndexForward (default to false)
-     * - emptyDaysFilled (default to false)
-     *
-     * @param hashKey
-     * @param rangeKeyName
-     * @param rangeKeyDates
-     * @param settings
-     * @return
-     */
-    QueryResultPage<TItemClass> queryByDailyDates(Object hashKey, String rangeKeyName, Map<String, Date> rangeKeyDates, String rangeKeyPrefix, Map settings);
-
-    /**
-     * Query by day dates with a prefix with 'after' and/or 'before' range value (used by FacebookAppInsight, FacebookCampaignInsight, etc)
-     * 1) After a certain date : [after: new Date()]
-     * 2) Before a certain date : [before: new Date()]
-     * 3) Between provided dates : [after: new Date() + 1, before: new Date()]
-     * <p>
-     * Optional settings:
-     * - batchGetDisabled (only when secondary indexes are used, useful for count when all item attributes are not required)
-     * - consistentRead (default to false)
-     * - exclusiveStartKey a map with the rangeKey (ex: [id: 2555]), with optional indexRangeKey when using LSI (ex.: [id: 2555, totalCount: 45])
-     * - limit
-     * - maxAfterDate (default to null)
-     * - scanIndexForward (default to false)
-     * - emptyDaysFilled (default to false)
-     *
-     * @param hashKey
-     * @param rangeKeyName
-     * @param rangeKeyDates
-     * @return
-     */
-    default QueryResultPage<TItemClass> queryByDailyDates(Object hashKey, String rangeKeyName,  Map<String, Date> rangeKeyDates, String rangeKeyPrefix) {
-        return queryByDailyDates(hashKey, rangeKeyName, rangeKeyDates, rangeKeyPrefix, Collections.emptyMap());
+    default QueryResultPage<TItemClass> queryByDates(Object hashKey, String rangeKeyName, Date after, Date before) {
+        return queryByDates(hashKey, rangeKeyName, after, before, null);
     }
 
-    /**
-     * Query by day dates with a prefix with 'after' and/or 'before' range value (used by FacebookAppInsight, FacebookCampaignInsight, etc)
-     * 1) After a certain date : [after: new Date()]
-     * 2) Before a certain date : [before: new Date()]
-     * 3) Between provided dates : [after: new Date() + 1, before: new Date()]
-     * <p>
-     * Optional settings:
-     * - batchGetDisabled (only when secondary indexes are used, useful for count when all item attributes are not required)
-     * - consistentRead (default to false)
-     * - exclusiveStartKey a map with the rangeKey (ex: [id: 2555]), with optional indexRangeKey when using LSI (ex.: [id: 2555, totalCount: 45])
-     * - limit
-     * - maxAfterDate (default to null)
-     * - scanIndexForward (default to false)
-     * - emptyDaysFilled (default to false)
-     *
-     * @param hashKey
-     * @param rangeKeyName
-     * @param rangeKeyDates
-     * @return
-     */
-    default QueryResultPage<TItemClass> queryByDailyDates(Object hashKey, String rangeKeyName, Map<String, Date> rangeKeyDates) {
-        return queryByDailyDates(hashKey, rangeKeyName, rangeKeyDates, null);
+    default QueryResultPage<TItemClass> queryByDates(Object hashKey, String rangeKeyName, Date after, Date before, Date maxAfterDate) {
+        Map<String, Object> rangeKeyDates = new HashMap<>(2);
+        rangeKeyDates.put("after", after);
+        rangeKeyDates.put("before", before);
+        return queryByDates(hashKey, rangeKeyName, rangeKeyDates, Collections.singletonMap("maxAfterDate", maxAfterDate));
     }
 
     /**
@@ -650,6 +637,15 @@ public interface DynamoDBService<TItemClass> {
     }
 
     /**
+     * Save a list of objects in DynamoDB.
+     *
+     * @param itemsToSave a list of objects to save
+     */
+    default List<TItemClass> saveAll(TItemClass... itemsToSave) {
+        return saveAll(Arrays.asList(itemsToSave));
+    }
+
+    /**
      * Delete a single item attribute
      *
      * @param hashKey
@@ -683,5 +679,10 @@ public interface DynamoDBService<TItemClass> {
     UpdateItemResult updateItemAttribute(Object hashKey, Object rangeKey, String attributeName, Object attributeValue);
 
     boolean isIndexRangeKey(String rangeName);
+
+    String getHashKeyName();
+    Class<?> getHashKeyClass();
+    String getRangeKeyName();
+    Class<?> getRangeKeyClass();
 
 }

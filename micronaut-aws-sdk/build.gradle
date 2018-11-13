@@ -5,6 +5,8 @@ dependencies {
     optional group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: awsSdkVersion
 
     testCompile group: 'org.testcontainers', name: 'testcontainers', version: testcontainersVersion
+    testCompile group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
+    testCompile group: 'org.testcontainers', name: 'spock', version: testcontainersVersion
 }
 
 apply from: '../gradle/bintray.gradle'

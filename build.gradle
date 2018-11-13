@@ -29,6 +29,16 @@ subprojects {
         imports {
             mavenBom "io.micronaut:micronaut-bom:$micronautVersion"
         }
+
+        dependencies {
+            dependencySet(group: 'com.amazonaws', version: project.awsSdkVersion) {
+                entry 'aws-java-sdk-core'
+                entry 'aws-java-sdk-dynamodb'
+                entry 'aws-java-sdk-kms'
+                entry 'aws-java-sdk-s3'
+                entry 'jmespath'
+            }
+        }
     }
 
     dependencies {
