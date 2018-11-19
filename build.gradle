@@ -36,6 +36,7 @@ subprojects {
                 entry 'aws-java-sdk-dynamodb'
                 entry 'aws-java-sdk-kms'
                 entry 'aws-java-sdk-s3'
+                entry 'aws-java-sdk-ses'
                 entry 'aws-java-sdk-sqs'
                 entry 'jmespath'
             }

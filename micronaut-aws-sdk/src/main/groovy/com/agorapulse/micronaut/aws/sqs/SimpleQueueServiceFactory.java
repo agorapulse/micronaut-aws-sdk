@@ -13,7 +13,7 @@ import javax.inject.Singleton;
 
 @Factory
 @Requires(classes = AmazonSQS.class)
-public class SQSFactory {
+public class SimpleQueueServiceFactory {
 
     @Bean
     @Singleton

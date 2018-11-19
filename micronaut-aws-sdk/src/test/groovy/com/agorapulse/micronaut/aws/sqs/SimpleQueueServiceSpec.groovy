@@ -10,11 +10,11 @@ import com.amazonaws.services.sqs.model.QueueDoesNotExistException
 import io.micronaut.context.ApplicationContext
 import spock.lang.Specification
 
-class AmazonSQSServiceSpec extends Specification{
+class SimpleQueueServiceSpec extends Specification{
 
     AmazonSQSConfiguration configuration = new AmazonSQSConfiguration(cache: true)
     AmazonSQS amazonSQS = Mock(AmazonSQS)
-    AmazonSQSService service = new DefaultAmazonSQSService(amazonSQS, configuration)
+    SimpleQueueService service = new DefaultSimpleQueueService(amazonSQS, configuration)
 
     /*
      * Tests for createQueue(String queueName)
@@ -246,7 +246,7 @@ class AmazonSQSServiceSpec extends Specification{
             context.registerSingleton(AmazonSQS, amazonSQS)
             context.start()
 
-            AmazonSQSService service = context.getBean(AmazonSQSService)
+            SimpleQueueService service = context.getBean(SimpleQueueService)
             AmazonSQSConfiguration configuration = context.getBean(AmazonSQSConfiguration)
             service.createQueue('queueName')
         then:

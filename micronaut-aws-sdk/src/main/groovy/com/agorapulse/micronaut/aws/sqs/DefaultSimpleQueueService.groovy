@@ -7,20 +7,22 @@ import com.amazonaws.services.sqs.model.*
 import groovy.transform.CompileStatic
 import groovy.transform.Synchronized
 import groovy.util.logging.Slf4j
+import io.micronaut.context.annotation.Requires
 
 import javax.inject.Singleton
 
 @Slf4j
 @Singleton
 @CompileStatic
-class DefaultAmazonSQSService implements AmazonSQSService {
+@Requires(classes = AmazonSQS.class)
+class DefaultSimpleQueueService implements SimpleQueueService {
 
     private final AmazonSQS client
     private final AmazonSQSConfiguration configuration
 
     private final Map queueUrlByNames = [:]
 
-    DefaultAmazonSQSService(
+    DefaultSimpleQueueService(
         AmazonSQS client,
         AmazonSQSConfiguration configuration
     ) {

@@ -10,7 +10,7 @@ import java.util.Map;
  *
  * @see AmazonSQSConfiguration
  */
-interface AmazonSQSService {
+interface SimpleQueueService {
 
     /**
      * @return the default queue name from the configuration

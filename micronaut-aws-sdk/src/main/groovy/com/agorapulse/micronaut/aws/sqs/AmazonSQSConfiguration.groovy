@@ -1,13 +1,16 @@
 package com.agorapulse.micronaut.aws.sqs
 
+import com.amazonaws.services.sqs.AmazonSQS
 import groovy.transform.CompileStatic
 import io.micronaut.context.annotation.ConfigurationProperties
+import io.micronaut.context.annotation.Requires
 
 import javax.validation.constraints.Max
 import javax.validation.constraints.Min
 
 @CompileStatic
 @ConfigurationProperties("aws.sqs")
+@Requires(classes = AmazonSQS.class)
 class AmazonSQSConfiguration {
 
     String queue = ""
