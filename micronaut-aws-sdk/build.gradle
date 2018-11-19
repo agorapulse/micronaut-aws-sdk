@@ -3,6 +3,7 @@ dependencies {
 
     // optional dependencies for each service
     optional group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb'
+    optional group: 'com.amazonaws', name: 'aws-java-sdk-sqs'
 
     testCompile group: 'org.testcontainers', name: 'testcontainers', version: testcontainersVersion
     testCompile group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
