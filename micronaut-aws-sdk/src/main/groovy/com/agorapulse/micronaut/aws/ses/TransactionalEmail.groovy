@@ -1,20 +1,25 @@
 package com.agorapulse.micronaut.aws.ses
 
 import groovy.transform.CompileStatic
+import groovy.transform.PackageScope
+import groovy.transform.ToString
 
+@ToString
 @CompileStatic
 class TransactionalEmail {
-    String sourceEmail
-    String subject
-    String htmlBody = '<html><body></body></html>'
 
-    String replyToEmail
+    String from = ''
+    String subject = ''
+    String htmlBody = '<html><body></body></html>'
+    String replyTo = ''
 
     List<String> recipients = []
-
     List<TransactionalEmailAttachment> attachments = []
 
-    void attachment(Closure attachment) {
+    // Constructed via SimpleEmailService
+    @PackageScope TransactionalEmail() { }
+
+    void attachment(@DelegatesTo(value = TransactionalEmailAttachment, strategy = Closure.DELEGATE_FIRST) Closure attachment) {
         Closure cl = (Closure) attachment.clone()
         TransactionalEmailAttachment att = new TransactionalEmailAttachment()
         cl.delegate = att
@@ -24,35 +29,18 @@ class TransactionalEmail {
     }
 
     @SuppressWarnings('ConfusingMethodName')
-    void recipients(List<String> recipients) {
+    void to(List<String> recipients) {
         this.recipients = recipients
     }
 
     @SuppressWarnings('ConfusingMethodName')
-    void to(String str) {
-        this.recipients = [str]
+    void to(String... recipients) {
+        this.to Arrays.asList(recipients)
     }
 
     @SuppressWarnings('ConfusingMethodName')
     void from(String str) {
-        this.sourceEmail = str
-    }
-
-    @SuppressWarnings('ConfusingMethodName')
-    void sourceEmail(String str) {
-        this.sourceEmail = str
-    }
-
-    @SuppressWarnings('ConfusingMethodName')
-    void destinationEmail(String str) {
-        this.recipients = [str]
-    }
-
-    /**
-     * @deprecated this ignores multiple recipients if there are more then one for the email
-     */
-    String getDestinationEmail() {
-        (this.recipients.isEmpty()) ? null : this.recipients.first()
+        this.from = str
     }
 
     @SuppressWarnings('ConfusingMethodName')
@@ -66,7 +54,7 @@ class TransactionalEmail {
     }
 
     @SuppressWarnings('ConfusingMethodName')
-    void replyToEmail(String str) {
-        this.replyToEmail = str
+    void replyTo(String str) {
+        this.replyTo = str
     }
 }

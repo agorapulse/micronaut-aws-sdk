@@ -12,7 +12,7 @@ import spock.lang.Specification
 
 class SimpleQueueServiceSpec extends Specification{
 
-    AmazonSQSConfiguration configuration = new AmazonSQSConfiguration(cache: true)
+    SimpleQueueServiceConfiguration configuration = new SimpleQueueServiceConfiguration(cache: true)
     AmazonSQS amazonSQS = Mock(AmazonSQS)
     SimpleQueueService service = new DefaultSimpleQueueService(amazonSQS, configuration)
 
@@ -247,7 +247,7 @@ class SimpleQueueServiceSpec extends Specification{
             context.start()
 
             SimpleQueueService service = context.getBean(SimpleQueueService)
-            AmazonSQSConfiguration configuration = context.getBean(AmazonSQSConfiguration)
+            SimpleQueueServiceConfiguration configuration = context.getBean(SimpleQueueServiceConfiguration)
             service.createQueue('queueName')
         then:
             noExceptionThrown()

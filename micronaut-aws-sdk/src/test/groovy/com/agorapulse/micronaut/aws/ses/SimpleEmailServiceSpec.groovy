@@ -1,5 +1,6 @@
 package com.agorapulse.micronaut.aws.ses
 
+import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService
 import com.amazonaws.services.simpleemail.model.SendEmailRequest
 import com.amazonaws.services.simpleemail.model.SendEmailResult
@@ -18,7 +19,7 @@ class SimpleEmailServiceSpec extends Specification {
 
     void "test transactionalEmailWithClosure"() {
         when:
-        TransactionalEmail transactionalEmail = SimpleEmailService.transactionalEmailWithClosure {
+        TransactionalEmail transactionalEmail = SimpleEmailService.email {
             subject 'Hi Paul'
             htmlBody '<p>This is an example body</p>'
             to 'me@sergiodelamo.com'
@@ -35,9 +36,8 @@ class SimpleEmailServiceSpec extends Specification {
         transactionalEmail
         transactionalEmail.subject == 'Hi Paul'
         transactionalEmail.htmlBody == '<p>This is an example body</p>'
-        transactionalEmail.sourceEmail == 'subscribe@groovycalamari.com'
+        transactionalEmail.from == 'subscribe@groovycalamari.com'
         transactionalEmail.recipients == ['me@sergiodelamo.com']
-        transactionalEmail.destinationEmail == 'me@sergiodelamo.com'
         transactionalEmail.attachments.size() == 1
         transactionalEmail.attachments.first().filename == 'test.pdf'
         transactionalEmail.attachments.first().filepath == '/tmp/test.pdf'
@@ -52,7 +52,7 @@ class SimpleEmailServiceSpec extends Specification {
         f.exists()
 
         when:
-        transactionalEmail = SimpleEmailService.transactionalEmailWithClosure {
+        transactionalEmail = SimpleEmailService.email {
             subject 'Hi Paul'
             htmlBody '<p>This is an example body</p>'
             to 'me@sergiodelamo.com'
@@ -66,9 +66,8 @@ class SimpleEmailServiceSpec extends Specification {
         transactionalEmail
         transactionalEmail.subject == 'Hi Paul'
         transactionalEmail.htmlBody == '<p>This is an example body</p>'
-        transactionalEmail.sourceEmail == 'subscribe@groovycalamari.com'
+        transactionalEmail.from == 'subscribe@groovycalamari.com'
         transactionalEmail.recipients == ['me@sergiodelamo.com']
-        transactionalEmail.destinationEmail == 'me@sergiodelamo.com'
         transactionalEmail.attachments.size() == 1
         transactionalEmail.attachments.first().filename == 'groovylogo.png'
         transactionalEmail.attachments.first().filepath == f.absolutePath
@@ -76,39 +75,83 @@ class SimpleEmailServiceSpec extends Specification {
         transactionalEmail.attachments.first().description == ''
     }
 
+    void 'transaction email must have at least one recepient'() {
+        when:
+            SimpleEmailService.email {
+                from 'vladimir@orany.cz'
+            }
+        then:
+            thrown(IllegalArgumentException)
+    }
+
     void "test that if you try to send an unsupported attachment an exception is thrown "() {
         when:
-        String subjectStr = 'GROOVY AWS SDK SES with Attachment'
-
-        awsSesMailer.mailWithAttachment {
-            subject subjectStr
-            htmlBody '<p>This is an example body</p>'
-            to 'test.to@example.com'
-            from 'test.from@example.com'
-            attachment {
-                filepath '/temp/virus.exe'
-                filename 'virus.exe'
-                mimeType 'application/octet-stream'
+            awsSesMailer.send {
+                subject 'GROOVY AWS SDK SES with Attachment'
+                htmlBody '<p>This is an example body</p>'
+                to 'test.to@example.com'
+                from 'test.from@example.com'
+                attachment {
+                    filepath '/temp/virus.exe'
+                    filename 'virus.exe'
+                    mimeType 'application/octet-stream'
+                }
             }
-        }
 
         then:
         thrown UnsupportedAttachmentTypeException
     }
 
-    void "test AmazonSESService.mail method delivers an email"() {
+    void 'exe is not supported'() {
+        expect:
+            !MimeType.isFileExtensionSupported('virus.exe')
+    }
+
+    void "test send method delivers an email"() {
         when:
-            String subjectStr = 'Groovy AWS SDK SES Subject'
-            EmailDeliveryStatus deliveryIndicator = awsSesMailer.mail {
+            EmailDeliveryStatus deliveryIndicator = awsSesMailer.send {
                 to 'test.to@example.com'
-                subject subjectStr
+                subject 'Groovy AWS SDK SES Subject'
                 from 'test.from@example.com'
+                replyTo 'test.reply@example.com'
             }
         then:
             deliveryIndicator == EmailDeliveryStatus.STATUS_DELIVERED
 
             simpleEmailService.sendEmail(_) >> { SendEmailRequest request ->
                 return new SendEmailResult().withMessageId('foobar')
+            }
+    }
+
+    void "test send method handles blacklisted address"() {
+        when:
+            EmailDeliveryStatus deliveryIndicator = awsSesMailer.send {
+                to 'test.to@example.com'
+                subject 'Groovy AWS SDK SES Subject'
+                from 'test.from@example.com'
+                replyTo 'test.reply@example.com'
+            }
+        then:
+            deliveryIndicator == EmailDeliveryStatus.STATUS_BLACKLISTED
+
+            simpleEmailService.sendEmail(_) >> { SendEmailRequest request ->
+                throw new AmazonServiceException('Address blacklisted')
+            }
+    }
+
+    void "test send method handles exceptions"() {
+        when:
+            EmailDeliveryStatus deliveryIndicator = awsSesMailer.send {
+                to 'test.to@example.com'
+                subject 'Groovy AWS SDK SES Subject'
+                from 'test.from@example.com'
+                replyTo 'test.reply@example.com'
+            }
+        then:
+            deliveryIndicator == EmailDeliveryStatus.STATUS_NOT_DELIVERED
+
+            simpleEmailService.sendEmail(_) >> { SendEmailRequest request ->
+                throw new AmazonServiceException('Generic exception')
             }
     }
 
@@ -121,7 +164,7 @@ class SimpleEmailServiceSpec extends Specification {
 
         when:
             String subjectStr = 'GRAILS AWS SDK SES with Attachment'
-            EmailDeliveryStatus deliveryIndicator = awsSesMailer.mailWithAttachment {
+            EmailDeliveryStatus deliveryIndicator = awsSesMailer.send {
                 subject subjectStr
                 htmlBody '<p>This is an example body</p>'
                 to 'test.to@example.com'

@@ -18,13 +18,13 @@ import javax.inject.Singleton
 class DefaultSimpleQueueService implements SimpleQueueService {
 
     private final AmazonSQS client
-    private final AmazonSQSConfiguration configuration
+    private final SimpleQueueServiceConfiguration configuration
 
     private final Map queueUrlByNames = [:]
 
     DefaultSimpleQueueService(
         AmazonSQS client,
-        AmazonSQSConfiguration configuration
+        SimpleQueueServiceConfiguration configuration
     ) {
         this.client = client
         this.configuration = configuration

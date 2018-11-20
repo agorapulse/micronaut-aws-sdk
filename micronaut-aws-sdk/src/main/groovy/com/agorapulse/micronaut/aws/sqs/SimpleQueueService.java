@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Amazon SQS services
  *
- * @see AmazonSQSConfiguration
+ * @see SimpleQueueServiceConfiguration
  */
 interface SimpleQueueService {
 
