@@ -15,7 +15,7 @@ class SimpleEmailServiceSpec extends Specification {
     AmazonSimpleEmailService simpleEmailService = Mock(AmazonSimpleEmailService)
 
     @Subject
-    SimpleEmailService awsSesMailer = new SimpleEmailService(simpleEmailService)
+    SimpleEmailService service = new DefaultSimpleEmailService(simpleEmailService)
 
     void "test transactionalEmailWithClosure"() {
         when:
@@ -86,7 +86,7 @@ class SimpleEmailServiceSpec extends Specification {
 
     void "test that if you try to send an unsupported attachment an exception is thrown "() {
         when:
-            awsSesMailer.send {
+            service.send {
                 subject 'GROOVY AWS SDK SES with Attachment'
                 htmlBody '<p>This is an example body</p>'
                 to 'test.to@example.com'
@@ -109,7 +109,7 @@ class SimpleEmailServiceSpec extends Specification {
 
     void "test send method delivers an email"() {
         when:
-            EmailDeliveryStatus deliveryIndicator = awsSesMailer.send {
+            EmailDeliveryStatus deliveryIndicator = service.send {
                 to 'test.to@example.com'
                 subject 'Groovy AWS SDK SES Subject'
                 from 'test.from@example.com'
@@ -125,7 +125,7 @@ class SimpleEmailServiceSpec extends Specification {
 
     void "test send method handles blacklisted address"() {
         when:
-            EmailDeliveryStatus deliveryIndicator = awsSesMailer.send {
+            EmailDeliveryStatus deliveryIndicator = service.send {
                 to 'test.to@example.com'
                 subject 'Groovy AWS SDK SES Subject'
                 from 'test.from@example.com'
@@ -141,7 +141,7 @@ class SimpleEmailServiceSpec extends Specification {
 
     void "test send method handles exceptions"() {
         when:
-            EmailDeliveryStatus deliveryIndicator = awsSesMailer.send {
+            EmailDeliveryStatus deliveryIndicator = service.send {
                 to 'test.to@example.com'
                 subject 'Groovy AWS SDK SES Subject'
                 from 'test.from@example.com'
@@ -164,7 +164,7 @@ class SimpleEmailServiceSpec extends Specification {
 
         when:
             String subjectStr = 'GRAILS AWS SDK SES with Attachment'
-            EmailDeliveryStatus deliveryIndicator = awsSesMailer.send {
+            EmailDeliveryStatus deliveryIndicator = service.send {
                 subject subjectStr
                 htmlBody '<p>This is an example body</p>'
                 to 'test.to@example.com'

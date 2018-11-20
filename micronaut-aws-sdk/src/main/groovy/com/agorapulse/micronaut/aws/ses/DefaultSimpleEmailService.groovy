@@ -25,7 +25,7 @@ import static java.util.Collections.singletonList
 @Singleton
 @CompileStatic
 @Requires(classes = AmazonSimpleEmailServiceClient.class)
-class SimpleEmailService {
+class DefaultSimpleEmailService implements SimpleEmailService{
 
     static TransactionalEmail email(@DelegatesTo(value = TransactionalEmail, strategy = Closure.DELEGATE_FIRST) Closure composer) {
         Closure cl = composer.clone() as Closure
@@ -43,12 +43,8 @@ class SimpleEmailService {
 
     private final AmazonSimpleEmailService client
 
-    SimpleEmailService(AmazonSimpleEmailService client) {
+    DefaultSimpleEmailService(AmazonSimpleEmailService client) {
         this.client = client
-    }
-
-    EmailDeliveryStatus send(@DelegatesTo(value = TransactionalEmail, strategy = Closure.DELEGATE_FIRST) Closure composer) throws Exception {
-        return send(email(composer))
     }
 
     EmailDeliveryStatus send(TransactionalEmail email) throws Exception {
