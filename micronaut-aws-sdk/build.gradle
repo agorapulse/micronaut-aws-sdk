@@ -3,8 +3,9 @@ dependencies {
 
     // optional dependencies for each service
     optional group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb'
-    optional group: 'com.amazonaws', name: 'aws-java-sdk-sqs'
+    optional group: 'com.amazonaws', name: 'aws-java-sdk-s3'
     optional group: 'com.amazonaws', name: 'aws-java-sdk-ses'
+    optional group: 'com.amazonaws', name: 'aws-java-sdk-sqs'
 
     optional 'javax.mail:mail:1.4.4'
 
