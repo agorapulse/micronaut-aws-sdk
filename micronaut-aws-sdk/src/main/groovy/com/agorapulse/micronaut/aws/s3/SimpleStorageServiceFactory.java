@@ -31,7 +31,7 @@ public class SimpleStorageServiceFactory {
     @EachBean(SimpleStorageServiceConfiguration.class)
     @Requires(property = "aws.s3.buckets")
     SimpleStorageService simpleStorageService(AmazonS3 s3, SimpleStorageServiceConfiguration configuration) {
-        return new SimpleStorageService(s3, configuration.getBucket());
+        return new DefaultSimpleStorageService(s3, configuration.getBucket());
     }
 
     @Bean
@@ -39,7 +39,7 @@ public class SimpleStorageServiceFactory {
     @Named("default")
     @Requires(property = "aws.s3.bucket")
     SimpleStorageService defaultSimpleStorageService(AmazonS3 s3, @Value("aws.s3.bucket") String bucket) {
-        return new SimpleStorageService(s3, bucket);
+        return new DefaultSimpleStorageService(s3, bucket);
     }
 
 }
