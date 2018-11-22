@@ -14,7 +14,7 @@ import org.apache.commons.codec.digest.DigestUtils
 
 @Slf4j
 @CompileStatic
-class SimpleStorageService {
+class DefaultSimpleStorageService implements SimpleStorageService {
 
     private static final Map HTTP_CONTENTS = [
             audio: [contentType: 'audio/mpeg'],
@@ -30,23 +30,9 @@ class SimpleStorageService {
     private final String defaultBucketName
     TransferManager transferManager
 
-    SimpleStorageService(AmazonS3 client, String defaultBucketName) {
+    DefaultSimpleStorageService(AmazonS3 client, String defaultBucketName) {
         this.client = client
         this.defaultBucketName = defaultBucketName
-    }
-
-    /**
-     *
-     * @param path
-     * @param file
-     * @param cannedAcl
-     * @return
-     */
-    Upload transferFile(String path,
-                        File file,
-                        CannedAccessControlList cannedAcl = CannedAccessControlList.PublicRead) {
-        assertDefaultBucketName()
-        transferFile(defaultBucketName, path, file, cannedAcl)
     }
 
     /**
@@ -58,10 +44,7 @@ class SimpleStorageService {
      * @param contentType
      * @return
      */
-    Upload transferFile(String bucketName,
-                        String path,
-                        File file,
-                        CannedAccessControlList cannedAcl = CannedAccessControlList.PublicRead) {
+    Upload transferFile(String bucketName, String path, File file, CannedAccessControlList cannedAcl) {
         if (!transferManager) {
             // Create transfer manager (only create if required, since it may pool connections and threads)
             transferManager = new TransferManager(client)
@@ -170,16 +153,6 @@ class SimpleStorageService {
 
     /**
      *
-     * @param prefix
-     * @return
-     */
-    boolean deleteFiles(String prefix) {
-        assertDefaultBucketName()
-        deleteFiles(defaultBucketName, prefix)
-    }
-
-    /**
-     *
      * @param String
      * @param bucketName
      * @param prefix
@@ -204,16 +177,6 @@ class SimpleStorageService {
 
     /**
      *
-     * @param prefix
-     * @return
-     */
-    boolean exists(String prefix) {
-        assertDefaultBucketName()
-        exists(defaultBucketName, prefix)
-    }
-
-    /**
-     *
      * @param bucketName
      * @param key
      * @param localPath
@@ -224,44 +187,6 @@ class SimpleStorageService {
                  File localFile) {
         client.getObject(new GetObjectRequest(bucketName, key), localFile)
         localFile
-    }
-
-    /**
-     *
-     * @param bucketName
-     * @param key
-     * @param localPath
-     * @return
-     */
-    File getFile(String bucketName,
-                 String key,
-                 String localPath) {
-        getFile(bucketName, key, new File(localPath))
-    }
-
-
-    /**
-     *
-     * @param key
-     * @param localPath
-     * @return
-     */
-    File getFile(String key,
-                 File localPath) {
-        assertDefaultBucketName()
-        getFile(defaultBucketName, key, localPath)
-    }
-
-    /**
-     *
-     * @param key
-     * @param localPath
-     * @return
-     */
-    File getFile(String key,
-                 String localPath) {
-        assertDefaultBucketName()
-        getFile(defaultBucketName, key, localPath)
     }
 
     /**
@@ -284,16 +209,6 @@ class SimpleStorageService {
 
     /**
      *
-     * @param prefix
-     * @return
-     */
-    Flowable<ObjectListing> listObjects(String prefix = '') {
-        assertDefaultBucketName()
-        listObjects(defaultBucketName, prefix)
-    }
-
-    /**
-     *
      * @param String
      * @param bucketName
      * @param key
@@ -304,18 +219,6 @@ class SimpleStorageService {
                                 String key,
                                 Date expirationDate) {
         client.generatePresignedUrl(bucketName, key, expirationDate).toString()
-    }
-
-    /**
-     *
-     * @param key
-     * @param expirationDate
-     * @return
-     */
-    String generatePresignedUrl(String key,
-                                Date expirationDate) {
-        assertDefaultBucketName()
-        generatePresignedUrl(defaultBucketName, key, expirationDate)
     }
 
     /**
@@ -345,30 +248,13 @@ class SimpleStorageService {
 
     /**
      *
-     * @param path
-     * @param input
-     * @param metadata
-     * @return
-     */
-    String storeInputStream(String path,
-                            InputStream input,
-                            ObjectMetadata metadata) {
-        assertDefaultBucketName()
-        storeInputStream(defaultBucketName, path, input, metadata)
-    }
-
-    /**
-     *
      * @param bucketName
      * @param path
      * @param file
      * @param cannedAcl
      * @return
      */
-    String storeFile(String bucketName,
-                     String path,
-                     File file,
-                     CannedAccessControlList cannedAcl = CannedAccessControlList.PublicRead) {
+    String storeFile(String bucketName, String path, File file, CannedAccessControlList cannedAcl) {
         try {
             PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, path, file)
                     .withCannedAcl(cannedAcl)
@@ -383,31 +269,13 @@ class SimpleStorageService {
 
     /**
      *
-     * @param path
-     * @param file
-     * @param cannedAcl
-     * @return
-     */
-    String storeFile(String path,
-                     File file,
-                     CannedAccessControlList cannedAcl = CannedAccessControlList.PublicRead) {
-        assertDefaultBucketName()
-        storeFile(defaultBucketName, path, file, cannedAcl)
-    }
-
-    /**
-     *
      * @param bucketName
      * @param path
      * @param partData
      * @param metadata
      * @return
      */
-    String storeMultipartFile(String bucketName,
-                              String path,
-                              PartData partData,
-                              CannedAccessControlList cannedAcl = CannedAccessControlList.PublicRead,
-                              ObjectMetadata metadata = null) {
+    String storeMultipartFile(String bucketName, String path, PartData partData, CannedAccessControlList cannedAcl, ObjectMetadata metadata) {
         if (!metadata) {
             metadata = new ObjectMetadata()
         }
@@ -419,20 +287,9 @@ class SimpleStorageService {
         storeInputStream(bucketName, path, partData.inputStream, metadata)
     }
 
-    /**
-     *
-     * @param path
-     * @param multipartFile
-     * @param cannedAcl
-     * @param metadata
-     * @return
-     */
-    String storeMultipartFile(String path,
-                              PartData multipartFile,
-                              CannedAccessControlList cannedAcl = CannedAccessControlList.PublicRead,
-                              ObjectMetadata metadata = null) {
+    String getDefaultBucketName() {
         assertDefaultBucketName()
-        storeMultipartFile(defaultBucketName, path, multipartFile, cannedAcl, metadata)
+        return defaultBucketName
     }
 
     // PRIVATE

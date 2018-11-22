@@ -3,7 +3,7 @@ package com.agorapulse.micronaut.aws.ses;
 import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
 
-interface SimpleEmailService {
+public interface SimpleEmailService {
 
     static TransactionalEmail email(@DelegatesTo(value = TransactionalEmail.class, strategy = Closure.DELEGATE_FIRST) Closure composer) {
         Closure cl = (Closure) composer.clone();

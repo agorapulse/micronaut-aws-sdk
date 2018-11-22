@@ -10,7 +10,7 @@ import java.util.Map;
  *
  * @see SimpleQueueServiceConfiguration
  */
-interface SimpleQueueService {
+public interface SimpleQueueService {
 
     /**
      * @return the default queue name from the configuration

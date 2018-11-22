@@ -38,7 +38,7 @@ class SimpleStorageServiceSpec extends Specification {
         getRegionName() >> REGION
     }
 
-    SimpleStorageService service = new SimpleStorageService(client, BUCKET_NAME)
+    SimpleStorageService service = new DefaultSimpleStorageService(client, BUCKET_NAME)
 
     /**
      * Tests for deleteFile(String key)

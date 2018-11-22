@@ -5,12 +5,14 @@ import groovy.transform.CompileStatic
 import io.micronaut.context.annotation.ConfigurationProperties
 import io.micronaut.context.annotation.Requires
 
+import javax.inject.Named
 import javax.validation.constraints.Max
 import javax.validation.constraints.Min
 
+@Named('default')
 @CompileStatic
 @ConfigurationProperties("aws.sqs")
-@Requires(classes = AmazonSQS.class)
+@Requires(classes = AmazonSQS.class, property =  'aws.sqs.queue')
 class SimpleQueueServiceConfiguration {
 
     String queue = ""

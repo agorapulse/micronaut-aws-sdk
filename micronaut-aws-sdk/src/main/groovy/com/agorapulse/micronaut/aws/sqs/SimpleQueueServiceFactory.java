@@ -5,17 +5,14 @@ import com.amazonaws.regions.AwsRegionProvider;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import io.micronaut.configuration.aws.AWSClientConfiguration;
-import io.micronaut.context.annotation.Bean;
-import io.micronaut.context.annotation.Factory;
-import io.micronaut.context.annotation.Requires;
+import io.micronaut.context.annotation.*;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 @Factory
 @Requires(classes = AmazonSQS.class)
 public class SimpleQueueServiceFactory {
-
-    // TODO: allow multiple named beans
 
     @Bean
     @Singleton
@@ -29,6 +26,11 @@ public class SimpleQueueServiceFactory {
             .withRegion(awsRegionProvider.getRegion())
             .withClientConfiguration(clientConfiguration.getClientConfiguration())
             .build();
+    }
+
+    @EachBean(SimpleQueueServiceConfiguration.class)
+    SimpleQueueService simpleQueueService(AmazonSQS sqs, SimpleQueueServiceConfiguration configuration) {
+        return new DefaultSimpleQueueService(sqs, configuration);
     }
 
 }
