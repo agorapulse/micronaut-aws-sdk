@@ -9,11 +9,12 @@ class SimpleStorageServiceConfigurationSpec extends Specification {
 
     @AutoCleanup ApplicationContext context = null
 
-    void 'no service present by default'() {
+    void 'one service present by default'() {
         when:
             context = ApplicationContext.run()
         then:
-            context.getBeanDefinitions(SimpleStorageService).size() == 0
+            context.getBeanDefinitions(SimpleStorageService).size() == 1
+            context.getBean(SimpleStorageServiceConfiguration).bucket == ''
     }
 
     void 'configure single service'() {
@@ -23,6 +24,7 @@ class SimpleStorageServiceConfigurationSpec extends Specification {
             )
         then:
             context.getBeanDefinitions(SimpleStorageService).size() == 1
+            context.getBean(SimpleStorageServiceConfiguration).bucket == 'bucket.example.com'
             context.getBean(SimpleStorageService)
     }
 
@@ -32,8 +34,9 @@ class SimpleStorageServiceConfigurationSpec extends Specification {
                 'aws.s3.buckets.samplebucket.bucket': 'bucket.example.com'
             )
         then:
-            context.getBeanDefinitions(SimpleStorageService).size() == 1
+            context.getBeanDefinitions(SimpleStorageService).size() == 2
             context.getBean(SimpleStorageService)
+            context.getBean(SimpleStorageService, Qualifiers.byName('default'))
             context.getBean(SimpleStorageService, Qualifiers.byName('samplebucket'))
     }
 

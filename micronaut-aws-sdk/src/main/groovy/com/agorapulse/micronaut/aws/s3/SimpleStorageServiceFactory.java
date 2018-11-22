@@ -7,7 +7,6 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import io.micronaut.configuration.aws.AWSClientConfiguration;
 import io.micronaut.context.annotation.*;
 
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 @Factory
@@ -29,17 +28,8 @@ public class SimpleStorageServiceFactory {
     }
 
     @EachBean(SimpleStorageServiceConfiguration.class)
-    @Requires(property = "aws.s3.buckets")
     SimpleStorageService simpleStorageService(AmazonS3 s3, SimpleStorageServiceConfiguration configuration) {
         return new DefaultSimpleStorageService(s3, configuration.getBucket());
-    }
-
-    @Bean
-    @Singleton
-    @Named("default")
-    @Requires(property = "aws.s3.bucket")
-    SimpleStorageService defaultSimpleStorageService(AmazonS3 s3, @Value("aws.s3.bucket") String bucket) {
-        return new DefaultSimpleStorageService(s3, bucket);
     }
 
 }

@@ -11,8 +11,8 @@ import javax.validation.constraints.Min
 
 @Named('default')
 @CompileStatic
-@ConfigurationProperties("aws.sqs")
-@Requires(classes = AmazonSQS.class, property =  'aws.sqs.queue')
+@ConfigurationProperties('aws.sqs')
+@Requires(classes = AmazonSQS.class)
 class SimpleQueueServiceConfiguration {
 
     String queue = ""

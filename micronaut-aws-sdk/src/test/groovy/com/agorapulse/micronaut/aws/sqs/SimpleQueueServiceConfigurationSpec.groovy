@@ -8,11 +8,12 @@ import spock.lang.Specification
 class SimpleQueueServiceConfigurationSpec extends Specification {
     @AutoCleanup ApplicationContext context = null
 
-    void 'no service present by default'() {
+    void 'one present by default with empty queue'() {
         when:
             context = ApplicationContext.run()
         then:
-            context.getBeanDefinitions(SimpleQueueService).size() == 0
+            context.getBeanDefinitions(SimpleQueueService).size() == 1
+            context.getBean(SimpleQueueServiceConfiguration).queue == ''
     }
 
     void 'configure single service'() {
@@ -22,6 +23,7 @@ class SimpleQueueServiceConfigurationSpec extends Specification {
             )
         then:
             context.getBeanDefinitions(SimpleQueueService).size() == 1
+            context.getBean(SimpleQueueServiceConfiguration).queue == 'DefaultQueue'
             context.getBean(SimpleQueueService)
     }
 
@@ -31,7 +33,7 @@ class SimpleQueueServiceConfigurationSpec extends Specification {
                 'aws.sqs.queues.samplequeue.queue': 'SampleQueue'
             )
         then:
-            context.getBeanDefinitions(SimpleQueueService).size() == 1
+            context.getBeanDefinitions(SimpleQueueService).size() == 2
             context.getBean(SimpleQueueService)
             context.getBean(SimpleQueueService, Qualifiers.byName('samplequeue'))
     }
