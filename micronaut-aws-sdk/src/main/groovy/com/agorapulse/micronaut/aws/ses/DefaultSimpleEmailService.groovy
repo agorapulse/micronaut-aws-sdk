@@ -24,7 +24,7 @@ import static java.util.Collections.singletonList
 @Slf4j
 @Singleton
 @CompileStatic
-@Requires(classes = AmazonSimpleEmailServiceClient.class)
+@Requires(classes = AmazonSimpleEmailService.class)
 class DefaultSimpleEmailService implements SimpleEmailService{
 
     static TransactionalEmail email(@DelegatesTo(value = TransactionalEmail, strategy = Closure.DELEGATE_FIRST) Closure composer) {

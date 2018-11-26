@@ -35,11 +35,13 @@ subprojects {
                 entry 'aws-java-sdk-core'
                 entry 'aws-java-sdk-dynamodb'
                 entry 'aws-java-sdk-kms'
+                entry 'aws-java-sdk-kinesis'
                 entry 'aws-java-sdk-s3'
                 entry 'aws-java-sdk-ses'
                 entry 'aws-java-sdk-sqs'
                 entry 'jmespath'
             }
+            dependency group: 'com.amazonaws', name: 'amazon-kinesis-client', version: '1.9.3'
         }
     }
 

@@ -7,7 +7,6 @@ import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import io.micronaut.configuration.aws.AWSClientConfiguration;
 import io.micronaut.context.annotation.*;
 
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 @Factory
