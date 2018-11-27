@@ -151,7 +151,7 @@ class DefaultKinesisService implements KinesisService {
      * @return
      */
     @Override
-    PutRecordResult putEvent(String streamName, AbstractEvent event, String sequenceNumberForOrdering) {
+    PutRecordResult putEvent(String streamName, Event event, String sequenceNumberForOrdering) {
         if (configuration.consumerFilterKey) {
             event.consumerFilterKey = configuration.consumerFilterKey
         }
@@ -165,10 +165,10 @@ class DefaultKinesisService implements KinesisService {
      * @return
      */
     @Override
-    PutRecordsResult putEvents(String streamName, List<AbstractEvent> events) {
+    PutRecordsResult putEvents(String streamName, List<Event> events) {
         assert events.size() < MAX_PUT_RECORDS_SIZE, "Max put events size is ${MAX_PUT_RECORDS_SIZE}"
         List<PutRecordsRequestEntry> records = []
-        events.each { AbstractEvent event ->
+        events.each { Event event ->
             if (configuration.consumerFilterKey) {
                 event.consumerFilterKey = configuration.consumerFilterKey
             }

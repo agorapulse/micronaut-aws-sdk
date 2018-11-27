@@ -308,7 +308,7 @@ public interface KinesisService {
      * @param sequenceNumberForOrdering
      * @return
      */
-    PutRecordResult putEvent(String streamName, AbstractEvent event, String sequenceNumberForOrdering);
+    PutRecordResult putEvent(String streamName, Event event, String sequenceNumberForOrdering);
 
     /**
      *
@@ -316,7 +316,7 @@ public interface KinesisService {
      * @param event
      * @return
      */
-    default PutRecordResult putEvent(String streamName, AbstractEvent event) {
+    default PutRecordResult putEvent(String streamName, Event event) {
         return putEvent(streamName, event, "");
     }
 
@@ -326,7 +326,7 @@ public interface KinesisService {
      * @param sequenceNumberForOrdering
      * @return
      */
-    default PutRecordResult putEvent(AbstractEvent event, String sequenceNumberForOrdering) {
+    default PutRecordResult putEvent(Event event, String sequenceNumberForOrdering) {
         return putEvent(getDefaultStreamName(), event, sequenceNumberForOrdering);
     }
 
@@ -335,7 +335,7 @@ public interface KinesisService {
      * @param event
      * @return
      */
-    default PutRecordResult putEvent(AbstractEvent event) {
+    default PutRecordResult putEvent(Event event) {
         return putEvent(getDefaultStreamName(), event, "");
     }
 
@@ -345,14 +345,14 @@ public interface KinesisService {
      * @param events
      * @return
      */
-    PutRecordsResult putEvents(String streamName, List<AbstractEvent> events);
+    PutRecordsResult putEvents(String streamName, List<Event> events);
 
     /**
      *
      * @param events
      * @return
      */
-    default PutRecordsResult putEvents(List<AbstractEvent> events) {
+    default PutRecordsResult putEvents(List<Event> events) {
         return putEvents(getDefaultStreamName(), events);
     }
 
