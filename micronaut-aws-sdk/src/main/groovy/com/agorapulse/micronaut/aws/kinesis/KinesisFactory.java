@@ -33,7 +33,7 @@ public class KinesisFactory {
 
     @EachBean(KinesisConfiguration.class)
     KinesisService simpleQueueService(AmazonKinesis kinesis, KinesisConfiguration configuration, ObjectMapper mapper) {
-        return new KinesisService(kinesis, configuration, mapper);
+        return new DefaultKinesisService(kinesis, configuration, mapper);
     }
 
 }

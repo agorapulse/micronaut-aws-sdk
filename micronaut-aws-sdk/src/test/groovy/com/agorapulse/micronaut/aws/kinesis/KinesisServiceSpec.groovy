@@ -38,7 +38,7 @@ class KinesisServiceSpec extends Specification {
             .withCredentials(localstack.defaultCredentialsProvider)
             .build()
 
-        service = new KinesisService(kinesis, new KinesisConfiguration(stream: STREAM, consumerFilterKey: 'test_'), MAPPER)
+        service = new DefaultKinesisService(kinesis, new KinesisConfiguration(stream: STREAM, consumerFilterKey: 'test_'), MAPPER)
     }
 
     void 'create default stream'() {
@@ -100,7 +100,7 @@ class KinesisServiceSpec extends Specification {
 
             Shard shard = service.getShard(result.shardId)
         when:
-            Record record = service.getShardOldestRecord(shard)
+            Record record = service.getShardOldestRecord(shard).blockingGet()
         then:
             record
             shard
@@ -120,7 +120,7 @@ class KinesisServiceSpec extends Specification {
         when:
             PutRecordsResultEntry firstRecord = result.records.first()
             Shard shard = service.getShard(firstRecord.shardId)
-            Record record = service.getShardRecordAtSequenceNumber(shard, firstRecord.sequenceNumber)
+            Record record = service.getShardRecordAtSequenceNumber(shard, firstRecord.sequenceNumber).blockingGet()
         then:
             record
             shard
