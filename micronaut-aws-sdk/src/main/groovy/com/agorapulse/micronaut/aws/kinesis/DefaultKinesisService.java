@@ -183,9 +183,9 @@ public class DefaultKinesisService implements KinesisService {
     }
 
     @Override
-    public PutRecordResult putRecord(String streamName, String partitionKey, String data, String sequenceNumberForOrdering) {
+    public PutRecordResult putRecord(String streamName, String partitionKey, byte[] data, String sequenceNumberForOrdering) {
         PutRecordRequest request = new PutRecordRequest()
-            .withData(ByteBuffer.wrap(data.getBytes()))
+            .withData(ByteBuffer.wrap(data))
             .withPartitionKey(partitionKey)
             .withStreamName(streamName);
 

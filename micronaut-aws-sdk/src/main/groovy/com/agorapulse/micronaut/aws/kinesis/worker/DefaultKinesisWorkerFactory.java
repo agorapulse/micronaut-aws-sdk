@@ -1,6 +1,6 @@
 package com.agorapulse.micronaut.aws.kinesis.worker;
 
-import com.agorapulse.micronaut.aws.kinesis.KinesisListener;
+import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisListener;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.kinesis.AmazonKinesis;
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;

@@ -1,5 +1,6 @@
 package com.agorapulse.micronaut.aws.kinesis
 
+// FIXME - is this still required?
 abstract class AbstractEventService {
 
     def handleEvent(AbstractEvent event) {

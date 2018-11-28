@@ -364,7 +364,9 @@ public interface KinesisService {
      * @param sequenceNumberForOrdering
      * @return
      */
-    PutRecordResult putRecord(String streamName, String partitionKey, String data, String sequenceNumberForOrdering);
+    default PutRecordResult putRecord(String streamName, String partitionKey, String data, String sequenceNumberForOrdering) {
+        return putRecord(streamName, partitionKey, data.getBytes(), sequenceNumberForOrdering);
+    }
 
     /**
      *
@@ -374,6 +376,27 @@ public interface KinesisService {
      * @return
      */
     default PutRecordResult putRecord(String partitionKey, String data, String sequenceNumberForOrdering) {
+        return putRecord(getDefaultStreamName(), partitionKey, data, sequenceNumberForOrdering);
+    }
+
+    /**
+     *
+     * @param streamName the name of the stream
+     * @param partitionKey
+     * @param data
+     * @param sequenceNumberForOrdering
+     * @return
+     */
+    PutRecordResult putRecord(String streamName, String partitionKey, byte[] data, String sequenceNumberForOrdering);
+
+    /**
+     *
+     * @param partitionKey
+     * @param data
+     * @param sequenceNumberForOrdering
+     * @return
+     */
+    default PutRecordResult putRecord(String partitionKey, byte[] data, String sequenceNumberForOrdering) {
         return putRecord(getDefaultStreamName(), partitionKey, data, sequenceNumberForOrdering);
     }
 

@@ -1,6 +1,6 @@
 package com.agorapulse.micronaut.aws.kinesis.worker;
 
-import com.agorapulse.micronaut.aws.kinesis.KinesisListener;
+import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisListener;
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
 import com.amazonaws.services.kinesis.model.Record;
 import com.fasterxml.jackson.databind.ObjectMapper;

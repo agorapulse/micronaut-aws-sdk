@@ -1,4 +1,4 @@
-package com.agorapulse.micronaut.aws.kinesis;
+package com.agorapulse.micronaut.aws.kinesis.annotation;
 
 import io.micronaut.context.annotation.Executable;
 import io.micronaut.context.annotation.Parallel;

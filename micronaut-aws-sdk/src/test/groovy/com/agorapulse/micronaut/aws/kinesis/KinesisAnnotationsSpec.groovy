@@ -1,6 +1,7 @@
-package com.agorapulse.micronaut.aws.kinesis.worker
+package com.agorapulse.micronaut.aws.kinesis
 
-import com.agorapulse.micronaut.aws.kinesis.*
+import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisClient
+import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisListener
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.amazonaws.services.dynamodbv2.model.AttributeValueUpdate
@@ -19,6 +20,7 @@ import com.amazonaws.services.kinesis.AmazonKinesisClient
 import com.amazonaws.services.kinesis.model.Record
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.micronaut.context.ApplicationContext
+import io.micronaut.inject.qualifiers.Qualifiers
 import io.reactivex.Flowable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
@@ -84,16 +86,18 @@ class KinesisListenerSpec extends Specification {
                 'aws.kinesis.client.kinesisEndpoint': localstack.getEndpointConfiguration(LocalStackContainer.Service.KINESIS).serviceEndpoint,
             ).build()
             context.registerSingleton(AmazonDynamoDB, dynamo)
+            context.registerSingleton(KinesisService, kinesisService, Qualifiers.byName('default'))
             context.start()
 
             KinesisListenerTester tester = context.getBean(KinesisListenerTester)
+            KinesisClientTester clientTester = context.getBean(KinesisClientTester)
 
             Disposable subscription = Flowable
                 .interval(100, TimeUnit.MILLISECONDS, Schedulers.io())
                 .takeWhile { tester.executions.size() < 5 }
                 .subscribe {
                     try {
-                        kinesisService.putEvent(new MyEvent(value: 'foo'))
+                        clientTester.publish(new MyEvent(value: 'foo'))
 
                     } catch (Exception e) {
                         if (e.message.contains('Unable to execute HTTP request')) {
@@ -151,10 +155,6 @@ class KinesisListenerSpec extends Specification {
 
 }
 
-class MyEvent extends AbstractEvent {
-    String value
-}
-
 @Singleton
 class KinesisListenerTester {
 
@@ -184,5 +184,12 @@ class KinesisListenerTester {
     void listenObjectRecord(MyEvent event, Record record) {
         executions << "EXECUTED: listenObjectRecord($event, $record)".toString()
     }
+
+}
+
+@KinesisClient
+interface KinesisClientTester {
+
+    void publish(MyEvent event)
 
 }
