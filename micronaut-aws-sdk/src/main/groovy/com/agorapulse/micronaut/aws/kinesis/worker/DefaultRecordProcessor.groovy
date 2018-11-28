@@ -1,4 +1,4 @@
-package com.agorapulse.micronaut.aws.kinesis.client
+package com.agorapulse.micronaut.aws.kinesis.worker
 
 import com.amazonaws.services.kinesis.clientlibrary.exceptions.InvalidStateException
 import com.amazonaws.services.kinesis.clientlibrary.exceptions.ShutdownException

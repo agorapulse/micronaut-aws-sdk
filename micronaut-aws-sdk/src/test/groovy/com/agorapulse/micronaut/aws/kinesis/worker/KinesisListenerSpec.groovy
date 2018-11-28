@@ -1,22 +1,14 @@
-package com.agorapulse.micronaut.aws.kinesis.client
+package com.agorapulse.micronaut.aws.kinesis.worker
 
 import com.agorapulse.micronaut.aws.kinesis.*
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
-import com.amazonaws.services.dynamodbv2.document.Item
-import com.amazonaws.services.dynamodbv2.model.AttributeDefinition
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.amazonaws.services.dynamodbv2.model.AttributeValueUpdate
-import com.amazonaws.services.dynamodbv2.model.CreateTableRequest
 import com.amazonaws.services.dynamodbv2.model.DescribeTableResult
 import com.amazonaws.services.dynamodbv2.model.GetItemRequest
 import com.amazonaws.services.dynamodbv2.model.GetItemResult
-import com.amazonaws.services.dynamodbv2.model.KeySchemaElement
-import com.amazonaws.services.dynamodbv2.model.KeyType
-import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput
 import com.amazonaws.services.dynamodbv2.model.PutItemRequest
 import com.amazonaws.services.dynamodbv2.model.PutItemResult
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType
 import com.amazonaws.services.dynamodbv2.model.ScanResult
 import com.amazonaws.services.dynamodbv2.model.TableDescription
 import com.amazonaws.services.dynamodbv2.model.TableStatus
@@ -27,7 +19,6 @@ import com.amazonaws.services.kinesis.AmazonKinesisClient
 import com.amazonaws.services.kinesis.model.Record
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.micronaut.context.ApplicationContext
-import io.micronaut.context.ApplicationContextBuilder
 import io.reactivex.Flowable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers

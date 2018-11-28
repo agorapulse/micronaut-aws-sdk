@@ -1,4 +1,4 @@
-package com.agorapulse.micronaut.aws.kinesis.client;
+package com.agorapulse.micronaut.aws.kinesis.worker;
 
 import com.agorapulse.micronaut.aws.kinesis.KinesisListener;
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;

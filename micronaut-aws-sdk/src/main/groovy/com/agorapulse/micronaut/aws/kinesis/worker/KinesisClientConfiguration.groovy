@@ -1,4 +1,4 @@
-package com.agorapulse.micronaut.aws.kinesis.client
+package com.agorapulse.micronaut.aws.kinesis.worker
 
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.AWSCredentialsProvider
