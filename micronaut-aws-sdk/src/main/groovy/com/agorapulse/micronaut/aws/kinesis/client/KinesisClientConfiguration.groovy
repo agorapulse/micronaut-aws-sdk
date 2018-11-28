@@ -1,28 +1,27 @@
 package com.agorapulse.micronaut.aws.kinesis.client
 
+import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.AWSCredentialsProvider
+import com.amazonaws.services.kinesis.clientlibrary.lib.worker.InitialPositionInStream
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.SimpleRecordsFetcherFactory
+import com.amazonaws.services.kinesis.metrics.interfaces.MetricsLevel
+import groovy.transform.CompileStatic
+import io.micronaut.context.annotation.ConfigurationProperties
+import io.micronaut.context.annotation.Requires
+import io.micronaut.context.annotation.Value
 
+import javax.inject.Named
 import javax.validation.constraints.Min
+import javax.validation.constraints.NotEmpty
 
 import static com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration.*
 
-import com.amazonaws.ClientConfiguration
-import com.amazonaws.services.kinesis.clientlibrary.lib.worker.InitialPositionInStream
-import com.amazonaws.services.kinesis.metrics.interfaces.MetricsLevel
-import groovy.transform.CompileStatic
-import io.micronaut.context.annotation.EachProperty
-import io.micronaut.context.annotation.Parameter
-import io.micronaut.context.annotation.Value
-
-import javax.validation.constraints.NotEmpty
-
 @CompileStatic
-@EachProperty('aws.kinesis.clients')
+@Named('default')
+@ConfigurationProperties('aws.kinesis.client')
+@Requires(classes = KinesisClientLibConfiguration)
 class KinesisClientConfiguration {
-
-    final String name
 
     @NotEmpty
     String applicationName
@@ -75,11 +74,9 @@ class KinesisClientConfiguration {
     int maxListShardsRetryAttempts = DEFAULT_MAX_LIST_SHARDS_RETRY_ATTEMPTS;
 
     KinesisClientConfiguration(
-        @Parameter String name,
         @Value('${aws.kinesis.application.name:}') String applicationName,
         @Value('${aws.kinesis.worker.id:}') String workerId
     ) {
-        this.name = name
         this.applicationName = applicationName
         if (workerId) {
             this.workerId = workerId
@@ -117,7 +114,6 @@ class KinesisClientConfiguration {
             new SimpleRecordsFetcherFactory()
         )
         configuration
-            .withTableName(tableName)
             .withIgnoreUnexpectedChildShards(ignoreUnexpectedChildShards)
             .withMetricsLevel(metricsLevel)
             .withMetricsEnabledDimensions(metricsEnabledDimensions)
@@ -128,13 +124,27 @@ class KinesisClientConfiguration {
             .withInitialLeaseTableWriteCapacity(initialLeaseTableWriteCapacity)
             .withSkipShardSyncAtStartupIfLeasesExist(skipShardSyncAtWorkerInitializationIfLeasesExist)
             .withShutdownGraceMillis(shutdownGraceMillis)
-            .withRetryGetRecordsInSeconds(retryGetRecordsInSeconds)
-            .withMaxGetRecordsThreadPool(maxGetRecordsThreadPool)
-            .withLogWarningForTaskAfterMillis(logWarningForTaskAfterMillis)
             .withMaxLeaseRenewalThreads(maxLeaseRenewalThreads)
             .withListShardsBackoffTimeInMillis(listShardsBackoffTimeInMillis)
             .withMaxListShardsRetryAttempts(maxListShardsRetryAttempts)
-            .withTimeoutInSeconds(timeoutInSeconds)
+
+        if (tableName) {
+            configuration.withTableName(tableName)
+        }
+
+        if (timeoutInSeconds) {
+            configuration.withTimeoutInSeconds(timeoutInSeconds)
+        }
+        if (retryGetRecordsInSeconds) {
+            configuration.withRetryGetRecordsInSeconds(retryGetRecordsInSeconds)
+        }
+        if (maxGetRecordsThreadPool) {
+            configuration.withMaxGetRecordsThreadPool(maxGetRecordsThreadPool)
+        }
+        if (logWarningForTaskAfterMillis) {
+            configuration.withLogWarningForTaskAfterMillis(logWarningForTaskAfterMillis)
+        }
+
         return configuration
 
     }

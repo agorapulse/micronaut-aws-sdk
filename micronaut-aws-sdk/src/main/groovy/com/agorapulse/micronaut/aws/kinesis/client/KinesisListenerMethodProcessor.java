@@ -1,23 +1,34 @@
 package com.agorapulse.micronaut.aws.kinesis.client;
 
+import com.agorapulse.micronaut.aws.kinesis.KinesisListener;
+import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
 import com.amazonaws.services.kinesis.model.Record;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.context.BeanContext;
+import io.micronaut.context.annotation.Requires;
+import io.micronaut.context.exceptions.NoSuchBeanException;
 import io.micronaut.context.processor.ExecutableMethodProcessor;
 import io.micronaut.core.type.Argument;
 import io.micronaut.inject.BeanDefinition;
 import io.micronaut.inject.ExecutableMethod;
 import io.micronaut.inject.qualifiers.Qualifiers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Qualifier;
 import javax.inject.Singleton;
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 @Singleton
+@Requires(
+    property = "aws.kinesis",
+    classes = KinesisClientLibConfiguration.class
+)
 public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor<KinesisListener> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(KinesisListener.class);
 
     private static class StringListener implements BiConsumer<String, Record> {
 
@@ -40,7 +51,7 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
         private final ExecutableMethod method;
         private final Object bean;
 
-        public RecordListener(ExecutableMethod method, Object bean) {
+        RecordListener(ExecutableMethod method, Object bean) {
             this.method = method;
             this.bean = bean;
         }
@@ -56,7 +67,7 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
         private final ExecutableMethod method;
         private final Object bean;
 
-        public StringAndRecordListener(ExecutableMethod method, Object bean) {
+        StringAndRecordListener(ExecutableMethod method, Object bean) {
             this.method = method;
             this.bean = bean;
         }
@@ -73,7 +84,7 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
         private final Object bean;
         private final ObjectMapper mapper;
 
-        public EventListener(ExecutableMethod method, Object bean, ObjectMapper mapper) {
+        EventListener(ExecutableMethod method, Object bean, ObjectMapper mapper) {
             this.method = method;
             this.bean = bean;
             this.mapper = mapper;
@@ -96,7 +107,7 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
         private final Object bean;
         private final ObjectMapper mapper;
 
-        public EventAndRecordListener(ExecutableMethod method, Object bean, ObjectMapper mapper) {
+        EventAndRecordListener(ExecutableMethod method, Object bean, ObjectMapper mapper) {
             this.method = method;
             this.bean = bean;
             this.mapper = mapper;
@@ -115,17 +126,18 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
 
     private final BeanContext beanContext;
     private final ObjectMapper objectMapper;
+    private final KinesisWorkerFactory kinesisWorkerFactory;
 
-    public KinesisListenerMethodProcessor(BeanContext beanContext, ObjectMapper objectMapper) {
+    private final ConcurrentHashMap<String, KinesisWorker> workers = new ConcurrentHashMap<>();
+
+    public KinesisListenerMethodProcessor(BeanContext beanContext, ObjectMapper objectMapper, KinesisWorkerFactory kinesisWorkerFactory) {
         this.beanContext = beanContext;
         this.objectMapper = objectMapper;
+        this.kinesisWorkerFactory = kinesisWorkerFactory;
     }
 
     @Override
     public void process(BeanDefinition<?> beanDefinition, ExecutableMethod<?, ?> method) {
-        System.out.println("bean: " + beanDefinition);
-        System.out.println("method: " + method);
-
         Argument[] arguments = method.getArguments();
 
         if (arguments.length > 2) {
@@ -145,12 +157,37 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
             .map(type -> Qualifiers.byAnnotation(beanDefinition, type))
             .orElse(null);
 
-        Class<Object> beanType = (Class<Object>) beanDefinition.getBeanType();
+        Class beanType = beanDefinition.getBeanType();
         Object bean = beanContext.getBean(beanType, qualifer);
 
-        ExecutableMethod rawMethod = method;
+        BiConsumer<String, Record> consumer = createConsumer(method, bean);
 
-        createConsumer(method, bean).accept("{\"value\": \"foo\"}", new Record());
+        String configurationName = method.getValue(KinesisListener.class, String.class).get();
+
+        KinesisWorker worker = workers.computeIfAbsent(
+            configurationName, key -> {
+                KinesisWorker w = kinesisWorkerFactory.create(getKinesisConfiguration(key));
+
+                LOGGER.info("Kinesis worker for configuration {} created", key);
+
+                w.start();
+
+                return w;
+            }
+        );
+
+        worker.addConsumer(consumer);
+
+        LOGGER.info("Kinesis listener for method {} declared in {} registered", method, beanDefinition.getBeanType());
+    }
+
+    private KinesisClientLibConfiguration getKinesisConfiguration(String key) {
+        try {
+            return beanContext.getBean(KinesisClientLibConfiguration.class, Qualifiers.byName(key));
+        } catch (NoSuchBeanException ignored) {
+            LOGGER.error("Cannot setup listener Kinesis listener, application name is missing. Configuration for Kinesis client with name '{}' is missing", key);
+            return null;
+        }
     }
 
     private BiConsumer<String, Record> createConsumer(ExecutableMethod method, Object bean) {

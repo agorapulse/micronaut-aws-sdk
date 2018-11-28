@@ -10,8 +10,9 @@ import io.micronaut.context.annotation.Requires;
 
 @Factory
 @Requires(classes = KinesisClientLibConfiguration.class)
-public class KinesisClientFactory {
+public class KinesisClientConfigurationFactory {
 
+    @Requires(property = "aws.kinesis")
     @EachBean(KinesisClientConfiguration.class)
     KinesisClientLibConfiguration kinesisClientLibConfiguration(
         AWSClientConfiguration clientConfiguration,

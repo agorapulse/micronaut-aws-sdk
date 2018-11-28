@@ -42,6 +42,7 @@ subprojects {
                 entry 'jmespath'
             }
             dependency group: 'com.amazonaws', name: 'amazon-kinesis-client', version: '1.9.3'
+            dependency group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-cbor', version: project['jackson.datatype.version']
         }
     }
 
@@ -86,4 +87,10 @@ subprojects {
 
         systemProperty 'TEST_RESOURCES_FOLDER', new File(project.projectDir, 'src/test/resources').canonicalPath
     }
+
+    task cleanOut(type: Delete) {
+        delete file('out')
+    }
+
+    clean.dependsOn cleanOut
 }

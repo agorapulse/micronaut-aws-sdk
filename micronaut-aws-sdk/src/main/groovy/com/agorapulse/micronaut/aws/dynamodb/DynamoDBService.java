@@ -7,7 +7,7 @@ import com.amazonaws.services.dynamodbv2.model.*;
 
 import java.util.*;
 
-public interface DynamoDBService<TItemClass> {
+public interface DynamoDBService<T> {
     
     /**
      * Optional settings:
@@ -224,7 +224,7 @@ public interface DynamoDBService<TItemClass> {
      * @param item
      * @param settings
      */
-    default void delete(TItemClass item, Map settings) {
+    default void delete(T item, Map settings) {
         deleteAll(Collections.singletonList(item), settings);
     }
 
@@ -233,7 +233,7 @@ public interface DynamoDBService<TItemClass> {
      *
      * @param item
      */
-    default void delete(TItemClass item) {
+    default void delete(T item) {
         delete(item, Collections.emptyMap());
     }
 
@@ -252,14 +252,14 @@ public interface DynamoDBService<TItemClass> {
      * @param itemsToDelete a list of objects to delete
      * @param settings      settings
      */
-    void deleteAll(List<TItemClass> itemsToDelete, Map settings);
+    void deleteAll(List<T> itemsToDelete, Map settings);
 
     /**
      * Delete a list of items from DynamoDB.
      *
      * @param itemsToDelete a list of objects to delete
      */
-    default void deleteAll(List<TItemClass> itemsToDelete) {
+    default void deleteAll(List<T> itemsToDelete) {
         deleteAll(itemsToDelete, Collections.emptyMap());
     }
 
@@ -356,7 +356,7 @@ public interface DynamoDBService<TItemClass> {
      * @param rangeKey
      * @return
      */
-    TItemClass get(Object hashKey, Object rangeKey);
+    T get(Object hashKey, Object rangeKey);
 
     /**
      * Load an item
@@ -364,7 +364,7 @@ public interface DynamoDBService<TItemClass> {
      * @param hashKey
      * @return
      */
-    default TItemClass get(Object hashKey) {
+    default T get(Object hashKey) {
         return get(hashKey, null);
     }
 
@@ -376,7 +376,7 @@ public interface DynamoDBService<TItemClass> {
      * @param settings only used for setting throttle/readCapacityUnit when getting large sets
      * @return a list of DynamoDBItem
      */
-    List<TItemClass> getAll(Object hashKey, List rangeKeys, Map settings);
+    List<T> getAll(Object hashKey, List rangeKeys, Map settings);
 
     /**
      * Retrieve batched items corresponding to a list of item IDs, in the same order.
@@ -385,7 +385,7 @@ public interface DynamoDBService<TItemClass> {
      * @param hashKey  Hash Key of the items to retrieve
      * @return a list of DynamoDBItem
      */
-    default List<TItemClass> getAll(Object hashKey, List rangeKeys) {
+    default List<T> getAll(Object hashKey, List rangeKeys) {
         return getAll(hashKey, rangeKeys, Collections.emptyMap());
     }
 
@@ -423,9 +423,9 @@ public interface DynamoDBService<TItemClass> {
         return increment(hashKey, null, attributeName, 1);
     }
 
-    TItemClass getNewInstance();
+    T getNewInstance();
 
-    PaginatedQueryList<TItemClass> query(DynamoDBQueryExpression queryExpression);
+    PaginatedQueryList<T> query(DynamoDBQueryExpression queryExpression);
 
     /**
      * Optional settings:
@@ -440,7 +440,7 @@ public interface DynamoDBService<TItemClass> {
      * @param settings
      * @return
      */
-    default QueryResultPage<TItemClass> query(Object hashKey, Map settings) {
+    default QueryResultPage<T> query(Object hashKey, Map settings) {
         return queryByConditions(hashKey, Collections.emptyMap(), settings);
     }
 
@@ -456,7 +456,7 @@ public interface DynamoDBService<TItemClass> {
      * @param hashKey
      * @return
      */
-    default QueryResultPage<TItemClass> query(Object hashKey) {
+    default QueryResultPage<T> query(Object hashKey) {
         return query(hashKey, Collections.emptyMap());
     }
 
@@ -476,7 +476,7 @@ public interface DynamoDBService<TItemClass> {
      * @param settings
      * @return
      */
-    QueryResultPage<TItemClass> query(Object hashKey, String rangeKeyName, Object rangeKeyValue, ComparisonOperator operator, Map settings);
+    QueryResultPage<T> query(Object hashKey, String rangeKeyName, Object rangeKeyValue, ComparisonOperator operator, Map settings);
 
     /**
      * Optional settings:
@@ -493,11 +493,11 @@ public interface DynamoDBService<TItemClass> {
      * @param operator
      * @return
      */
-    default QueryResultPage<TItemClass> query(Object hashKey, String rangeKeyName, Object rangeKeyValue, ComparisonOperator operator) {
+    default QueryResultPage<T> query(Object hashKey, String rangeKeyName, Object rangeKeyValue, ComparisonOperator operator) {
         return query(hashKey, rangeKeyName, rangeKeyValue, operator, Collections.emptyMap());
     }
 
-    default QueryResultPage<TItemClass> query(Object hashKey, Object rangeKeyValue) {
+    default QueryResultPage<T> query(Object hashKey, Object rangeKeyValue) {
         return query(hashKey, getRangeKeyName(), rangeKeyValue);
     }
 
@@ -515,7 +515,7 @@ public interface DynamoDBService<TItemClass> {
      * @param rangeKeyValue
      * @return
      */
-    default QueryResultPage<TItemClass> query(Object hashKey, String rangeKeyName, Object rangeKeyValue) {
+    default QueryResultPage<T> query(Object hashKey, String rangeKeyName, Object rangeKeyValue) {
         return query(hashKey, rangeKeyName, rangeKeyValue, ComparisonOperator.EQ);
     }
 
@@ -534,7 +534,7 @@ public interface DynamoDBService<TItemClass> {
      * @param settings
      * @return
      */
-    QueryResultPage<TItemClass> queryByConditions(Object hashKey, Map<String, Condition> rangeKeyConditions, Map settings, String indexName);
+    QueryResultPage<T> queryByConditions(Object hashKey, Map<String, Condition> rangeKeyConditions, Map settings, String indexName);
 
     /**
      * Optional settings:
@@ -551,7 +551,7 @@ public interface DynamoDBService<TItemClass> {
      * @param settings
      * @return
      */
-    default QueryResultPage<TItemClass> queryByConditions(Object hashKey, Map<String, Condition> rangeKeyConditions, Map settings) {
+    default QueryResultPage<T> queryByConditions(Object hashKey, Map<String, Condition> rangeKeyConditions, Map settings) {
         return queryByConditions(hashKey, rangeKeyConditions, settings, null);
     }
 
@@ -569,7 +569,7 @@ public interface DynamoDBService<TItemClass> {
      * @param rangeKeyConditions
      * @return
      */
-    default QueryResultPage<TItemClass> queryByConditions(Object hashKey, Map<String, Condition> rangeKeyConditions) {
+    default QueryResultPage<T> queryByConditions(Object hashKey, Map<String, Condition> rangeKeyConditions) {
         return queryByConditions(hashKey, rangeKeyConditions, Collections.emptyMap());
     }
 
@@ -593,7 +593,7 @@ public interface DynamoDBService<TItemClass> {
      * @param settings
      * @return
      */
-    QueryResultPage<TItemClass> queryByDates(Object hashKey, String rangeKeyName, Map rangeKeyDates, Map settings);
+    QueryResultPage<T> queryByDates(Object hashKey, String rangeKeyName, Map rangeKeyDates, Map settings);
 
     /**
      * Query by dates with 'after' and/or 'before' range value
@@ -614,15 +614,15 @@ public interface DynamoDBService<TItemClass> {
      * @param rangeKeyDates
      * @return
      */
-    default QueryResultPage<TItemClass> queryByDates(Object hashKey, String rangeKeyName, Map rangeKeyDates) {
+    default QueryResultPage<T> queryByDates(Object hashKey, String rangeKeyName, Map rangeKeyDates) {
         return queryByDates(hashKey, rangeKeyName, rangeKeyDates, Collections.emptyMap());
     }
 
-    default QueryResultPage<TItemClass> queryByDates(Object hashKey, String rangeKeyName, Date after, Date before) {
+    default QueryResultPage<T> queryByDates(Object hashKey, String rangeKeyName, Date after, Date before) {
         return queryByDates(hashKey, rangeKeyName, after, before, null);
     }
 
-    default QueryResultPage<TItemClass> queryByDates(Object hashKey, String rangeKeyName, Date after, Date before, Date maxAfterDate) {
+    default QueryResultPage<T> queryByDates(Object hashKey, String rangeKeyName, Date after, Date before, Date maxAfterDate) {
         Map<String, Object> rangeKeyDates = new HashMap<>(2);
         rangeKeyDates.put("after", after);
         rangeKeyDates.put("before", before);
@@ -636,7 +636,7 @@ public interface DynamoDBService<TItemClass> {
      * @param settings settings
      * @return the Item after it's been saved
      */
-    default TItemClass save(TItemClass item, Map settings) {
+    default T save(T item, Map settings) {
         return saveAll(Collections.singletonList(item), settings).iterator().next();
     }
 
@@ -646,7 +646,7 @@ public interface DynamoDBService<TItemClass> {
      * @param item the item to save
      * @return the Item after it's been saved
      */
-    default TItemClass save(TItemClass item) {
+    default T save(T item) {
         return save(item, Collections.emptyMap());
     }
 
@@ -656,14 +656,14 @@ public interface DynamoDBService<TItemClass> {
      * @param itemsToSave a list of objects to save
      * @param settings    settings
      */
-    List<TItemClass> saveAll(List<TItemClass> itemsToSave, Map settings);
+    List<T> saveAll(List<T> itemsToSave, Map settings);
 
     /**
      * Save a list of objects in DynamoDB.
      *
      * @param itemsToSave a list of objects to save
      */
-    default List<TItemClass> saveAll(List<TItemClass> itemsToSave) {
+    default List<T> saveAll(List<T> itemsToSave) {
         return saveAll(itemsToSave, Collections.emptyMap());
     }
 
@@ -672,7 +672,7 @@ public interface DynamoDBService<TItemClass> {
      *
      * @param itemsToSave a list of objects to save
      */
-    default List<TItemClass> saveAll(TItemClass... itemsToSave) {
+    default List<T> saveAll(T... itemsToSave) {
         return saveAll(Arrays.asList(itemsToSave));
     }
 

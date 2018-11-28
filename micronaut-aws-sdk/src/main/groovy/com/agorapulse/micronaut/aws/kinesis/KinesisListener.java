@@ -1,4 +1,4 @@
-package com.agorapulse.micronaut.aws.kinesis.client;
+package com.agorapulse.micronaut.aws.kinesis;
 
 import io.micronaut.context.annotation.Executable;
 import io.micronaut.context.annotation.Parallel;
@@ -20,6 +20,6 @@ public @interface KinesisListener {
     /**
      * @return the name of the client configuration
      */
-    String value();
+    String value() default "default";
 
 }

@@ -23,8 +23,8 @@ class PlanetDBService {
             amazonDynamoDBClient.createTable(mapper.generateCreateTableRequest(Planet).withProvisionedThroughput(
                 new ProvisionedThroughput().withReadCapacityUnits(5).withWriteCapacityUnits(5)
             ))
-        } catch (Exception e) {
-            e.printStackTrace()
+        } catch (Exception ignored) {
+            // ok, already exits
         }
     }
 
