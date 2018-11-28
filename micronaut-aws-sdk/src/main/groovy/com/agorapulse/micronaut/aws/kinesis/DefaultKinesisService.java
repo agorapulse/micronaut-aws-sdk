@@ -212,7 +212,7 @@ public class DefaultKinesisService implements KinesisService {
             // Determine the hash key value that is half-way between the lowest and highest values in the shard
             BigInteger startingHashKey = new BigInteger(shard.getHashKeyRange().getStartingHashKey());
             BigInteger endingHashKey = new BigInteger(shard.getHashKeyRange().getEndingHashKey());
-            newStartingHashKey = startingHashKey.add(endingHashKey).divide(new BigInteger("2")).toString();
+            newStartingHashKey = startingHashKey.add(endingHashKey).divide(BigInteger.valueOf(2)).toString();
         }
 
         return client.splitShard(new SplitShardRequest()

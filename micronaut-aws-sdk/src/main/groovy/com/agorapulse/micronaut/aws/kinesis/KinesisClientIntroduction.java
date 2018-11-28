@@ -3,9 +3,11 @@ package com.agorapulse.micronaut.aws.kinesis;
 import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisClient;
 import com.agorapulse.micronaut.aws.kinesis.annotation.PartitionKey;
 import com.agorapulse.micronaut.aws.kinesis.annotation.SequenceNumber;
+import com.agorapulse.micronaut.aws.kinesis.annotation.Stream;
 import com.amazonaws.services.kinesis.model.PutRecordsRequestEntry;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import groovy.transform.Undefined;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.context.BeanContext;
@@ -55,8 +57,16 @@ public class KinesisClientIntroduction implements MethodInterceptor<Object, Obje
         String configurationName = clientAnnotationValue.getValue(String.class).orElse("default");
         KinesisService service = beanContext.getBean(KinesisService.class, Qualifiers.byName(configurationName));
 
-//        AnnotationValue<Stream> streamAnnotationValue = beanContext.getAnnotation(Stream.class);
+        String streamName = clientAnnotationValue.get(KinesisClient.Constants.STREAM, String.class).orElse(null);
 
+        AnnotationValue<Stream> streamAnnotationValue = context.getAnnotation(Stream.class);
+        if (streamAnnotationValue != null) {
+            streamName = streamAnnotationValue.getRequiredValue(String.class);
+        }
+
+        if (streamName == null || Undefined.STRING.equals(streamName)) {
+            streamName = service.getDefaultStreamName();
+        }
 
         if (context.getArguments().length == 1) {
             Argument arg = context.getArguments()[0];
@@ -64,32 +74,32 @@ public class KinesisClientIntroduction implements MethodInterceptor<Object, Obje
             Object param = context.getParameters().get(arg.getName()).getValue();
 
             if (Event.class.isAssignableFrom(argType)) {
-                return service.putEvent((Event) param);
+                return service.putEvent(streamName, (Event) param);
             }
 
             if (PutRecordsRequestEntry.class.isAssignableFrom(argType)) {
-                return service.putRecords(Collections.singletonList((PutRecordsRequestEntry) param));
+                return service.putRecords(streamName, Collections.singletonList((PutRecordsRequestEntry) param));
             }
 
             if (Iterable.class.isAssignableFrom(argType) && arg.hasTypeVariables() && arg.getFirstTypeVariable().isPresent()) {
                 Class iterableType = arg.getFirstTypeVariable().get().getType();
 
                 if (Event.class.isAssignableFrom(iterableType)) {
-                    return service.putEvents(toList((Iterable<Event>) param));
+                    return service.putEvents(streamName, toList((Iterable<Event>) param));
                 }
 
                 if (PutRecordsRequestEntry.class.isAssignableFrom(iterableType)) {
-                    return service.putRecords(toList((Iterable<PutRecordsRequestEntry>) param));
+                    return service.putRecords(streamName, toList((Iterable<PutRecordsRequestEntry>) param));
                 }
 
             }
 
             if (argType.isArray()) {
                 if (Event.class.isAssignableFrom(argType.getComponentType())) {
-                    return service.putEvents(toList(Arrays.asList((Event[]) param)));
+                    return service.putEvents(streamName, toList(Arrays.asList((Event[]) param)));
                 }
                 if (PutRecordsRequestEntry.class.isAssignableFrom(argType.getComponentType())) {
-                    return service.putRecords(toList(Arrays.asList((PutRecordsRequestEntry[]) param)));
+                    return service.putRecords(streamName, toList(Arrays.asList((PutRecordsRequestEntry[]) param)));
                 }
             }
 
@@ -105,15 +115,15 @@ public class KinesisClientIntroduction implements MethodInterceptor<Object, Obje
             Class<?> dataType = recordArguments.data.getType();
 
             if (String.class.isAssignableFrom(dataType)) {
-                return service.putRecord(partitionKey, (String) data, sequenceNumber);
+                return service.putRecord(streamName, partitionKey, (String) data, sequenceNumber);
             }
 
             if (dataType.isArray() && byte.class.equals(dataType.getComponentType())) {
-                return service.putRecord(partitionKey, (byte[]) data, sequenceNumber);
+                return service.putRecord(streamName, partitionKey, (byte[]) data, sequenceNumber);
             }
 
             try {
-                return service.putRecord(partitionKey, objectMapper.writeValueAsBytes(data), sequenceNumber);
+                return service.putRecord(streamName, partitionKey, objectMapper.writeValueAsBytes(data), sequenceNumber);
             } catch (JsonProcessingException e) {
                 throw new IllegalArgumentException("Failed to marshal " + data + " to JSON", e);
             }

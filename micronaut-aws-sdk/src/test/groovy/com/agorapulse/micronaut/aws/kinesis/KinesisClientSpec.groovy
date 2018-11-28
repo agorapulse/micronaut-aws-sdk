@@ -3,6 +3,7 @@ package com.agorapulse.micronaut.aws.kinesis
 import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisClient
 import com.agorapulse.micronaut.aws.kinesis.annotation.PartitionKey
 import com.agorapulse.micronaut.aws.kinesis.annotation.SequenceNumber
+import com.agorapulse.micronaut.aws.kinesis.annotation.Stream
 import com.amazonaws.services.kinesis.model.PutRecordResult
 import com.amazonaws.services.kinesis.model.PutRecordsRequestEntry
 import com.amazonaws.services.kinesis.model.PutRecordsResult
@@ -14,6 +15,7 @@ import spock.lang.Specification
 
 class KinesisClientSpec extends Specification {
 
+    private static final String DEFAULT_STREAM_NAME = 'DefaultStream'
     private static final String PARTITION_KEY = '1234567890'
     private static final String SEQUENCE_NUMBER = '987654321'
     private static final String RECORD = "Record"
@@ -24,8 +26,13 @@ class KinesisClientSpec extends Specification {
     private static final PutRecordResult PUT_RECORD_RESULT = new PutRecordResult().withSequenceNumber('1')
     private static final PutRecordsResult PUT_RECORDS_RESULT = new PutRecordsResult()
 
-    KinesisService defaultService = Mock(KinesisService)
-    KinesisService testService = Mock(KinesisService)
+    KinesisService defaultService = Mock(KinesisService) {
+        getDefaultStreamName() >> DEFAULT_STREAM_NAME
+    }
+
+    KinesisService testService = Mock(KinesisService) {
+        getDefaultStreamName() >> DEFAULT_STREAM_NAME
+    }
 
     @AutoCleanup ApplicationContext context
 
@@ -46,7 +53,7 @@ class KinesisClientSpec extends Specification {
         then:
             result == PUT_RECORD_RESULT
 
-            1 * defaultService.putEvent(EVENT_1) >> PUT_RECORD_RESULT
+            1 * defaultService.putEvent(DEFAULT_STREAM_NAME, EVENT_1) >> PUT_RECORD_RESULT
     }
 
     void 'can put single event and return void with specified configuration name'() {
@@ -57,7 +64,29 @@ class KinesisClientSpec extends Specification {
         then:
             result == PUT_RECORD_RESULT
 
-            1 * testService.putEvent(EVENT_1) >> PUT_RECORD_RESULT
+            1 * testService.putEvent(DEFAULT_STREAM_NAME, EVENT_1) >> PUT_RECORD_RESULT
+    }
+
+    void 'can put single event and return void with specified stream name'() {
+        given:
+            StreamClient client = context.getBean(StreamClient)
+        when:
+            PutRecordResult result = client.putEvent(EVENT_1)
+        then:
+            result == PUT_RECORD_RESULT
+
+            1 * defaultService.putEvent(StreamClient.SOME_STREAM, EVENT_1) >> PUT_RECORD_RESULT
+    }
+
+    void 'can put single event and return void with specified stream name in the annotation'() {
+        given:
+            DefaultClient client = context.getBean(DefaultClient)
+        when:
+            PutRecordResult result = client.putEventToStream(EVENT_1)
+        then:
+            result == PUT_RECORD_RESULT
+
+            1 * defaultService.putEvent(DefaultClient.OTHER_STREAM, EVENT_1) >> PUT_RECORD_RESULT
     }
 
     void 'can put multiple events and return put records results'() {
@@ -68,7 +97,7 @@ class KinesisClientSpec extends Specification {
         then:
             results == PUT_RECORDS_RESULT
 
-            1 * defaultService.putEvents([EVENT_1, EVENT_2]) >> PUT_RECORDS_RESULT
+            1 * defaultService.putEvents(DEFAULT_STREAM_NAME, [EVENT_1, EVENT_2]) >> PUT_RECORDS_RESULT
     }
 
     void 'can put array of events and return void'() {
@@ -77,7 +106,7 @@ class KinesisClientSpec extends Specification {
         when:
             client.putEventsArrayNoReturn(EVENT_1, EVENT_2)
         then:
-            1 * defaultService.putEvents([EVENT_1, EVENT_2]) >> PUT_RECORDS_RESULT
+            1 * defaultService.putEvents(DEFAULT_STREAM_NAME, [EVENT_1, EVENT_2]) >> PUT_RECORDS_RESULT
     }
 
     void 'cannot put just single byte array'() {
@@ -124,7 +153,7 @@ class KinesisClientSpec extends Specification {
         then:
             result == PUT_RECORD_RESULT
 
-            1 * defaultService.putRecord(PARTITION_KEY, RECORD, null) >> PUT_RECORD_RESULT
+            1 * defaultService.putRecord(DEFAULT_STREAM_NAME, PARTITION_KEY, RECORD, null) >> PUT_RECORD_RESULT
     }
 
     void 'can put record with annotated partition key'() {
@@ -133,7 +162,7 @@ class KinesisClientSpec extends Specification {
         when:
             client.putRecordAnno(PARTITION_KEY, RECORD)
         then:
-            1 * defaultService.putRecord(PARTITION_KEY, RECORD, null) >> PUT_RECORD_RESULT
+            1 * defaultService.putRecord(DEFAULT_STREAM_NAME, PARTITION_KEY, RECORD, null) >> PUT_RECORD_RESULT
     }
 
     void 'can put byte array record with annotated partition key'() {
@@ -142,7 +171,7 @@ class KinesisClientSpec extends Specification {
         when:
             client.putRecordDataByteArray(PARTITION_KEY, RECORD.bytes)
         then:
-            1 * defaultService.putRecord(PARTITION_KEY, RECORD.bytes, null) >> PUT_RECORD_RESULT
+            1 * defaultService.putRecord(DEFAULT_STREAM_NAME, PARTITION_KEY, RECORD.bytes, null) >> PUT_RECORD_RESULT
     }
 
     void 'can put pogo record with annotated partition key'() {
@@ -151,7 +180,7 @@ class KinesisClientSpec extends Specification {
         when:
             client.putRecordDataObject(PARTITION_KEY, POGO)
         then:
-            1 * defaultService.putRecord(PARTITION_KEY, context.getBean(ObjectMapper).writeValueAsBytes(POGO), null) >> PUT_RECORD_RESULT
+            1 * defaultService.putRecord(DEFAULT_STREAM_NAME, PARTITION_KEY, context.getBean(ObjectMapper).writeValueAsBytes(POGO), null) >> PUT_RECORD_RESULT
     }
 
     void 'can put record with partition key and sequence number'() {
@@ -160,7 +189,7 @@ class KinesisClientSpec extends Specification {
         when:
             client.putRecord(PARTITION_KEY, RECORD, SEQUENCE_NUMBER)
         then:
-            1 * defaultService.putRecord(PARTITION_KEY, RECORD, SEQUENCE_NUMBER) >> PUT_RECORD_RESULT
+            1 * defaultService.putRecord(DEFAULT_STREAM_NAME, PARTITION_KEY, RECORD, SEQUENCE_NUMBER) >> PUT_RECORD_RESULT
     }
 
     void 'can put record with partition key and annotated sequence number'() {
@@ -169,7 +198,7 @@ class KinesisClientSpec extends Specification {
         when:
             client.putRecordAnno(PARTITION_KEY, RECORD, SEQUENCE_NUMBER)
         then:
-            1 * defaultService.putRecord(PARTITION_KEY, RECORD, SEQUENCE_NUMBER) >> PUT_RECORD_RESULT
+            1 * defaultService.putRecord(DEFAULT_STREAM_NAME, PARTITION_KEY, RECORD, SEQUENCE_NUMBER) >> PUT_RECORD_RESULT
     }
 
     void 'can put record with partition key and annotated sequence number of any type'() {
@@ -178,7 +207,7 @@ class KinesisClientSpec extends Specification {
         when:
             client.putRecordAnnoNumbers(PARTITION_KEY.toLong(), RECORD, SEQUENCE_NUMBER.toInteger())
         then:
-            1 * defaultService.putRecord(PARTITION_KEY, RECORD, SEQUENCE_NUMBER) >> PUT_RECORD_RESULT
+            1 * defaultService.putRecord(DEFAULT_STREAM_NAME, PARTITION_KEY, RECORD, SEQUENCE_NUMBER) >> PUT_RECORD_RESULT
     }
 
     void 'can put records entries as iterable'() {
@@ -187,7 +216,7 @@ class KinesisClientSpec extends Specification {
         when:
             client.putRecords([PUT_RECORDS_REQUEST_ENTRY])
         then:
-            1 * defaultService.putRecords([PUT_RECORDS_REQUEST_ENTRY]) >> PUT_RECORDS_RESULT
+            1 * defaultService.putRecords(DEFAULT_STREAM_NAME, [PUT_RECORDS_REQUEST_ENTRY]) >> PUT_RECORDS_RESULT
     }
 
     void 'can put records entries as array'() {
@@ -196,7 +225,7 @@ class KinesisClientSpec extends Specification {
         when:
             client.putRecords(PUT_RECORDS_REQUEST_ENTRY)
         then:
-            1 * defaultService.putRecords([PUT_RECORDS_REQUEST_ENTRY]) >> PUT_RECORDS_RESULT
+            1 * defaultService.putRecords(DEFAULT_STREAM_NAME, [PUT_RECORDS_REQUEST_ENTRY]) >> PUT_RECORDS_RESULT
     }
 
     void 'can put records entries as single argument'() {
@@ -205,11 +234,15 @@ class KinesisClientSpec extends Specification {
         when:
             client.putRecord(PUT_RECORDS_REQUEST_ENTRY)
         then:
-            1 * defaultService.putRecords([PUT_RECORDS_REQUEST_ENTRY]) >> PUT_RECORDS_RESULT
+            1 * defaultService.putRecords(DEFAULT_STREAM_NAME, [PUT_RECORDS_REQUEST_ENTRY]) >> PUT_RECORDS_RESULT
     }
 }
 
 @KinesisClient interface DefaultClient {
+
+    public String OTHER_STREAM = 'OtherStream'
+
+    @Stream('OtherStream') PutRecordResult putEventToStream(MyEvent event)
 
     PutRecordResult putEvent(MyEvent event)
     PutRecordsResult putEventsIterable(Iterable<MyEvent> events)
@@ -240,8 +273,8 @@ class KinesisClientSpec extends Specification {
 
 @KinesisClient(stream = 'SomeStream') interface StreamClient {
 
+    public String SOME_STREAM = 'SomeStream'
+
+    PutRecordResult putEvent(MyEvent event)
 }
 
-class Pogo {
-    String foo
-}

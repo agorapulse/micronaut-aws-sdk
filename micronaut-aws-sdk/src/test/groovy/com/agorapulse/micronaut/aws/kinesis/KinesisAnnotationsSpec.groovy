@@ -41,6 +41,7 @@ class KinesisListenerSpec extends Specification {
 
     public static final String TEST_STREAM = 'TestStream'
     public static final String APP_NAME = 'AppName'
+    public static final int LISTENERS_COUNT = 5
 
     @Shared
     LocalStackContainer localstack = new LocalStackContainer('0.8.8')
@@ -94,10 +95,11 @@ class KinesisListenerSpec extends Specification {
 
             Disposable subscription = Flowable
                 .interval(100, TimeUnit.MILLISECONDS, Schedulers.io())
-                .takeWhile { tester.executions.size() < 5 }
+                .takeWhile { tester.executions.size() < LISTENERS_COUNT }
                 .subscribe {
                     try {
                         clientTester.publish(new MyEvent(value: 'foo'))
+                        clientTester.publish('1234567890', new Pogo(foo: 'bar'))
 
                     } catch (Exception e) {
                         if (e.message.contains('Unable to execute HTTP request')) {
@@ -109,7 +111,7 @@ class KinesisListenerSpec extends Specification {
                 }
 
             600.times {
-                if (tester.executions.size() < 5) {
+                if (tester.executions.size() < LISTENERS_COUNT) {
                     Thread.sleep(100)
                 }
             }
@@ -117,12 +119,13 @@ class KinesisListenerSpec extends Specification {
             subscription.dispose()
         then:
             tester.executions
-            tester.executions.size() >= 5
+            tester.executions.size() >= LISTENERS_COUNT
             tester.executions.any { it?.startsWith('EXECUTED: listenStringRecord') }
             tester.executions.any { it?.startsWith('EXECUTED: listenString') }
             tester.executions.any { it?.startsWith('EXECUTED: listenRecord') }
             tester.executions.any { it?.startsWith('EXECUTED: listenObject') }
             tester.executions.any { it?.startsWith('EXECUTED: listenObjectRecord') }
+            tester.executions.any { it == 'EXECUTED: listenPogoRecord(com.agorapulse.micronaut.aws.kinesis.Pogo(bar))' }
 
             _ * dynamo.setRegion(_)
             _ * dynamo.describeTable(_) >> new DescribeTableResult().withTable(new TableDescription().withTableStatus(TableStatus.ACTIVE))
@@ -185,11 +188,17 @@ class KinesisListenerTester {
         executions << "EXECUTED: listenObjectRecord($event, $record)".toString()
     }
 
+    @KinesisListener
+    void listenPogoRecord(Pogo event) {
+        executions << "EXECUTED: listenPogoRecord($event)".toString()
+    }
+
 }
 
 @KinesisClient
 interface KinesisClientTester {
 
     void publish(MyEvent event)
+    void publish(String key, Pogo event)
 
 }
