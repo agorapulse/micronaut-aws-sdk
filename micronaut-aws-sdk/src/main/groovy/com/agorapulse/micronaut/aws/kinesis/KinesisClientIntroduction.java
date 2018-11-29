@@ -4,6 +4,7 @@ import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisClient;
 import com.agorapulse.micronaut.aws.kinesis.annotation.PartitionKey;
 import com.agorapulse.micronaut.aws.kinesis.annotation.SequenceNumber;
 import com.agorapulse.micronaut.aws.kinesis.annotation.Stream;
+import com.amazonaws.services.kinesis.model.PutRecordResult;
 import com.amazonaws.services.kinesis.model.PutRecordsRequestEntry;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,10 +17,7 @@ import io.micronaut.core.type.Argument;
 import io.micronaut.inject.qualifiers.Qualifiers;
 
 import javax.inject.Singleton;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Singleton
 public class KinesisClientIntroduction implements MethodInterceptor<Object, Object> {
@@ -101,9 +99,16 @@ public class KinesisClientIntroduction implements MethodInterceptor<Object, Obje
                 if (PutRecordsRequestEntry.class.isAssignableFrom(argType.getComponentType())) {
                     return service.putRecords(streamName, toList(Arrays.asList((PutRecordsRequestEntry[]) param)));
                 }
+                if (byte.class.equals(argType.getComponentType())) {
+                    return service.putRecord(streamName, createDefaultParititonKey(), (byte[]) param);
+                }
             }
 
-            throw new UnsupportedOperationException("Method is not implemented for argument " + arg + "! You need to specify partition key. See @PartitionKey");
+            if (CharSequence.class.isAssignableFrom(argType)) {
+                return service.putRecord(streamName, createDefaultParititonKey(), ((CharSequence) param).toString());
+            }
+
+            return sendJson(service, streamName, createDefaultParititonKey(), param, null);
         }
 
         if (context.getArguments().length == 2 || context.getArguments().length == 3) {
@@ -122,14 +127,22 @@ public class KinesisClientIntroduction implements MethodInterceptor<Object, Obje
                 return service.putRecord(streamName, partitionKey, (byte[]) data, sequenceNumber);
             }
 
-            try {
-                return service.putRecord(streamName, partitionKey, objectMapper.writeValueAsBytes(data), sequenceNumber);
-            } catch (JsonProcessingException e) {
-                throw new IllegalArgumentException("Failed to marshal " + data + " to JSON", e);
-            }
+            return sendJson(service, streamName, partitionKey, data, sequenceNumber);
         }
 
         throw new UnsupportedOperationException("Cannot implement method " + context.getExecutableMethod());
+    }
+
+    private PutRecordResult sendJson(KinesisService service, String streamName, String partitionKey, Object data, String sequenceNumber) {
+        try {
+            return service.putRecord(streamName, partitionKey, objectMapper.writeValueAsBytes(data), sequenceNumber);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Failed to marshal " + data + " to JSON", e);
+        }
+    }
+
+    private String createDefaultParititonKey() {
+        return UUID.randomUUID().toString();
     }
 
     private RecordArguments findArguments(Argument[] arguments) {

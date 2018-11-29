@@ -391,6 +391,17 @@ public interface KinesisService {
 
     /**
      *
+     * @param streamName the name of the stream
+     * @param partitionKey
+     * @param data
+     * @return
+     */
+    default PutRecordResult putRecord(String streamName, String partitionKey, byte[] data) {
+        return putRecord(streamName, partitionKey, data, null);
+    }
+
+    /**
+     *
      * @param partitionKey
      * @param data
      * @param sequenceNumberForOrdering

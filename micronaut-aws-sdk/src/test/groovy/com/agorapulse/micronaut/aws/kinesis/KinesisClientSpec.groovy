@@ -109,31 +109,31 @@ class KinesisClientSpec extends Specification {
             1 * defaultService.putEvents(DEFAULT_STREAM_NAME, [EVENT_1, EVENT_2]) >> PUT_RECORDS_RESULT
     }
 
-    void 'cannot put just single byte array'() {
+    void 'can put just single byte array'() {
         given:
             DefaultClient client = context.getBean(DefaultClient)
         when:
             client.putRecordBytes(RECORD.toString().bytes)
         then:
-            thrown(UnsupportedOperationException)
+            1 * defaultService.putRecord(DEFAULT_STREAM_NAME, _ as String, RECORD.bytes) >> PUT_RECORD_RESULT
     }
 
-    void 'cannot put just single string'() {
+    void 'can put just single string'() {
         given:
             DefaultClient client = context.getBean(DefaultClient)
         when:
             client.putRecordString(RECORD)
         then:
-            thrown(UnsupportedOperationException)
+            1 * defaultService.putRecord(DEFAULT_STREAM_NAME, _ as String, RECORD) >> PUT_RECORD_RESULT
     }
 
-    void 'cannot put just single pojo'() {
+    void 'can put just single pojo'() {
         given:
             DefaultClient client = context.getBean(DefaultClient)
         when:
             client.putRecordObject(POGO)
         then:
-            thrown(UnsupportedOperationException)
+            1 * defaultService.putRecord(DEFAULT_STREAM_NAME, _ as String, context.getBean(ObjectMapper).writeValueAsBytes(POGO), null) >> PUT_RECORD_RESULT
     }
 
     void 'needs to follow the method convention rules'() {
