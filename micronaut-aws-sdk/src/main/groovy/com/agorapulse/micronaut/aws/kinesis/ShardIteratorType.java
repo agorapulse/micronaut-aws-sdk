@@ -1,7 +1,7 @@
 package com.agorapulse.micronaut.aws.kinesis;
 
 /**
- * Determines how the shard iterator is used to start reading data records from the shard.</p>
+ * Determines how the shard iterator is used to start reading data records from the shard.
  */
 public enum ShardIteratorType {
     /**
