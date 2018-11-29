@@ -1,5 +1,6 @@
 package com.agorapulse.micronaut.aws.kinesis
 
+import com.agorapulse.micronaut.aws.Pogo
 import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisClient
 import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisListener
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
@@ -41,7 +42,6 @@ class KinesisListenerSpec extends Specification {
 
     public static final String TEST_STREAM = 'TestStream'
     public static final String APP_NAME = 'AppName'
-    public static final int LISTENERS_COUNT = 5
 
     @Shared
     LocalStackContainer localstack = new LocalStackContainer('0.8.8')
@@ -84,8 +84,8 @@ class KinesisListenerSpec extends Specification {
             context = ApplicationContext.build().properties(
                 'aws.kinesis.application.name': APP_NAME,
                 'aws.kinesis.client.stream': TEST_STREAM,
-                'aws.kinesis.client.kinesisEndpoint': localstack.getEndpointConfiguration(LocalStackContainer.Service.KINESIS).serviceEndpoint,
             ).build()
+            context.registerSingleton(AmazonKinesis, kinesis)
             context.registerSingleton(AmazonDynamoDB, dynamo)
             context.registerSingleton(KinesisService, kinesisService, Qualifiers.byName('default'))
             context.start()
@@ -95,7 +95,7 @@ class KinesisListenerSpec extends Specification {
 
             Disposable subscription = Flowable
                 .interval(100, TimeUnit.MILLISECONDS, Schedulers.io())
-                .takeWhile { tester.executions.size() < LISTENERS_COUNT }
+                .takeWhile { !allTestEventsReceived(tester) }
                 .subscribe {
                     try {
                         clientTester.publish(new MyEvent(value: 'foo'))
@@ -111,21 +111,14 @@ class KinesisListenerSpec extends Specification {
                 }
 
             600.times {
-                if (tester.executions.size() < LISTENERS_COUNT) {
+                if (!allTestEventsReceived(tester)) {
                     Thread.sleep(100)
                 }
             }
 
             subscription.dispose()
         then:
-            tester.executions
-            tester.executions.size() >= LISTENERS_COUNT
-            tester.executions.any { it?.startsWith('EXECUTED: listenStringRecord') }
-            tester.executions.any { it?.startsWith('EXECUTED: listenString') }
-            tester.executions.any { it?.startsWith('EXECUTED: listenRecord') }
-            tester.executions.any { it?.startsWith('EXECUTED: listenObject') }
-            tester.executions.any { it?.startsWith('EXECUTED: listenObjectRecord') }
-            tester.executions.any { it == 'EXECUTED: listenPogoRecord(com.agorapulse.micronaut.aws.kinesis.Pogo(bar))' }
+            allTestEventsReceived(tester)
 
             _ * dynamo.setRegion(_)
             _ * dynamo.describeTable(_) >> new DescribeTableResult().withTable(new TableDescription().withTableStatus(TableStatus.ACTIVE))
@@ -154,6 +147,15 @@ class KinesisListenerSpec extends Specification {
             }
 
             0 * dynamo._
+    }
+
+    private static boolean allTestEventsReceived(KinesisListenerTester tester) {
+        return tester.executions.any { it?.startsWith('EXECUTED: listenStringRecord') } &&
+            tester.executions.any { it?.startsWith('EXECUTED: listenString') } &&
+            tester.executions.any { it?.startsWith('EXECUTED: listenRecord') } &&
+            tester.executions.any { it?.startsWith('EXECUTED: listenObject') } &&
+            tester.executions.any { it?.startsWith('EXECUTED: listenObjectRecord') } &&
+            tester.executions.any { it == 'EXECUTED: listenPogoRecord(com.agorapulse.micronaut.aws.Pogo(bar))' }
     }
 
 }

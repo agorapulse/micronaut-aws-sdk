@@ -55,39 +55,6 @@ public interface SimpleStorageService {
      */
     Upload transferFile(String bucketName, String path, File file, CannedAccessControlList cannedAcl);
 
-
-//    /**
-//     *
-//     * @param type
-//     * @param fileExtension
-//     * @param cannedAcl
-//     * @return
-//     */
-//    static ObjectMetadata buildMetadataFromType(String type,
-//                                         String fileExtension,
-//                                         CannedAccessControlList cannedAcl = null) {
-//        Map contentInfo
-//        if (HTTP_CONTENTS[type]) {
-//            contentInfo = HTTP_CONTENTS[type] as Map
-//        } else if (type in ['image', 'photo']) {
-//            contentInfo = [contentType: "image/${fileExtension == 'jpg' ? 'jpeg' : fileExtension}"] // Return image/jpeg for images to fix Safari issue (download image instead of inline display)
-//        } else if (fileExtension == 'swf') {
-//            contentInfo = [contentType: "application/x-shockwave-flash"]
-//        } else {
-//            contentInfo = [contentType: 'application/octet-stream', contentDisposition: 'attachment']
-//        }
-//
-//        ObjectMetadata metadata = new ObjectMetadata()
-//        metadata.setContentType(contentInfo.contentType as String)
-//        if (contentInfo.contentDisposition) {
-//            metadata.setContentDisposition(contentInfo.contentDisposition as String)
-//        }
-//        if (cannedAcl) {
-//            metadata.setHeader('x-amz-acl', cannedAcl.toString())
-//        }
-//        metadata
-//    }
-
     /**
      * @param bucketName
      */

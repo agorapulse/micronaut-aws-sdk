@@ -189,9 +189,21 @@ public interface SimpleQueueService {
      * @param queueName the name of the queue
      * @param messageBody the body of the message
      * @param delaySeconds the delay in seconds
+     * @param groupId group id for FIFO queues
      * @return the message id of the message sent
      */
-    String sendMessage(String queueName, String messageBody, int delaySeconds);
+    String sendMessage(String queueName, String messageBody, int delaySeconds, String groupId);
+
+    /**
+     * Send message with given delay.
+     * @param queueName the name of the queue
+     * @param messageBody the body of the message
+     * @param delaySeconds the delay in seconds
+     * @return the message id of the message sent
+     */
+    default String sendMessage(String queueName, String messageBody, int delaySeconds) {
+        return sendMessage(queueName, messageBody, delaySeconds, null);
+    }
 
     /**
      * Send message in default queue immediately
@@ -210,6 +222,17 @@ public interface SimpleQueueService {
      */
     default String sendMessage(String messageBody, int delaySeconds) {
         return sendMessage(getDefaultQueueName(), messageBody, delaySeconds);
+    }
+
+    /**
+     * Send message with given delay.
+     * @param messageBody the body of the message
+     * @param delaySeconds the delay in seconds
+     * @param groupId group id for FIFO queues
+     * @return the message id of the message sent
+     */
+    default String sendMessage(String messageBody, int delaySeconds, String groupId) {
+        return sendMessage(getDefaultQueueName(), messageBody, delaySeconds, null);
     }
 
 }

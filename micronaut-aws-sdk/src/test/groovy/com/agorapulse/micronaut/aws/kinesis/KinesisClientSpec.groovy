@@ -1,5 +1,6 @@
 package com.agorapulse.micronaut.aws.kinesis
 
+import com.agorapulse.micronaut.aws.Pogo
 import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisClient
 import com.agorapulse.micronaut.aws.kinesis.annotation.PartitionKey
 import com.agorapulse.micronaut.aws.kinesis.annotation.SequenceNumber

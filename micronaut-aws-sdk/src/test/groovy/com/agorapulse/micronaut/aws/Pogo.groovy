@@ -1,4 +1,4 @@
-package com.agorapulse.micronaut.aws.kinesis
+package com.agorapulse.micronaut.aws
 
 import groovy.transform.ToString
 

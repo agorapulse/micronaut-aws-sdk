@@ -54,6 +54,9 @@ class DefaultSimpleQueueService implements SimpleQueueService {
         if (configuration.visibilityTimeout) {
             createQueueRequest.attributes['VisibilityTimeout'] = configuration.visibilityTimeout.toString()
         }
+        if (configuration.fifo) {
+            createQueueRequest.attributes['FifoQueue'] = 'true'
+        }
         String queueUrl = client.createQueue(createQueueRequest).queueUrl
         log.debug "Queue created (queueUrl=$queueUrl)"
         addQueue(queueUrl)
@@ -197,12 +200,15 @@ class DefaultSimpleQueueService implements SimpleQueueService {
      * @param delaySeconds
      * @return
      */
-    String sendMessage(String queueName, String messageBody, int delaySeconds) {
+    String sendMessage(String queueName, String messageBody, int delaySeconds, String groupId) {
         String queueUrl = getQueueUrl(queueName)
 
         SendMessageRequest request = new SendMessageRequest(queueUrl, messageBody)
         if (delaySeconds) {
             request.delaySeconds = delaySeconds
+        }
+        if (groupId) {
+            request.messageGroupId = groupId
         }
         String messageId = client.sendMessage(request).messageId
         log.debug "Message sent (messageId=$messageId)"

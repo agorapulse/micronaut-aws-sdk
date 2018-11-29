@@ -19,6 +19,7 @@ class SimpleQueueServiceConfiguration {
     String queueNamePrefix = ""
     boolean autoCreateQueue = false
     boolean cache = false
+    boolean fifo = false
 
     @Min(0L) @Max(900L)
     Integer delaySeconds = 0
