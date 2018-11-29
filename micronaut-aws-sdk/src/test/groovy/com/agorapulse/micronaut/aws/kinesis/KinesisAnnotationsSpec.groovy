@@ -134,7 +134,7 @@ class KinesisListenerSpec extends Specification {
                 new ScanResult(items: leases.values())
             }
 
-            1 * dynamo.putItem(_ as PutItemRequest) >> { PutItemRequest request ->
+            _ * dynamo.putItem(_ as PutItemRequest) >> { PutItemRequest request ->
                 String leaseKey = request.item.leaseKey.s
                 leases[leaseKey] = request.item
                 return new PutItemResult()
