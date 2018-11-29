@@ -248,7 +248,6 @@ class KinesisClientSpec extends Specification {
     PutRecordsResult putEventsIterable(Iterable<MyEvent> events)
     void putEventsArrayNoReturn(MyEvent... events)
 
-    // failing
     void putRecordBytes(byte[] record)
     void putRecordString(String record)
     void putRecordObject(Pogo pogo)
