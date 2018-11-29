@@ -11,7 +11,7 @@ allprojects {
     }
 }
 
-subprojects {
+subprojects { Project subproject ->
     apply plugin:"io.spring.dependency-management"
     apply plugin:"groovy"
 
@@ -79,13 +79,16 @@ subprojects {
 
     test {
         testLogging {
+            events "PASSED", "STARTED", "FAILED", "SKIPPED", "STANDARD_ERROR", "STANDARD_OUT"
             showCauses = true
             showExceptions = true
             showStackTraces = true
             showStandardStreams = false
+            exceptionFormat "full"
         }
-
-        systemProperty 'TEST_RESOURCES_FOLDER', new File(project.projectDir, 'src/test/resources').canonicalPath
+        systemProperty 'TEST_RESOURCES_FOLDER', new File(subproject.projectDir, 'src/test/resources').canonicalPath
+        systemProperty 'user.timezone', 'UTC'
+        systemProperty 'user.language', 'en'
     }
 
     task cleanOut(type: Delete) {
