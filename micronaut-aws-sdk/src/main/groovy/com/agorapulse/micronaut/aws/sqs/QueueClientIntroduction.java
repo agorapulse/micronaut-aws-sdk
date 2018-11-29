@@ -1,7 +1,7 @@
 package com.agorapulse.micronaut.aws.sqs;
 
 import com.agorapulse.micronaut.aws.sqs.annotation.Queue;
-import com.agorapulse.micronaut.aws.sqs.annotation.SQSClient;
+import com.agorapulse.micronaut.aws.sqs.annotation.QueueClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import groovy.transform.Undefined;
@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 @Singleton
-public class SQSClientIntroduction implements MethodInterceptor<Object, Object> {
+public class QueueClientIntroduction implements MethodInterceptor<Object, Object> {
 
     private static final String GROUP = "group";
     private static final String DELAY = "delay";
@@ -40,32 +40,32 @@ public class SQSClientIntroduction implements MethodInterceptor<Object, Object> 
     private final BeanContext beanContext;
     private final ObjectMapper objectMapper;
 
-    public SQSClientIntroduction(BeanContext beanContext, ObjectMapper objectMapper) {
+    public QueueClientIntroduction(BeanContext beanContext, ObjectMapper objectMapper) {
         this.beanContext = beanContext;
         this.objectMapper = objectMapper;
     }
 
     @Override
     public Object intercept(MethodInvocationContext<Object, Object> context) {
-        AnnotationValue<SQSClient> clientAnnotationValue = context.getAnnotation(SQSClient.class);
+        AnnotationValue<QueueClient> clientAnnotationValue = context.getAnnotation(QueueClient.class);
 
         if (clientAnnotationValue == null) {
-            throw new IllegalStateException("Invocation beanContext is missing required annotation SQSClient");
+            throw new IllegalStateException("Invocation beanContext is missing required annotation QueueClient");
         }
 
         String configurationName = clientAnnotationValue.getValue(String.class).orElse("default");
         SimpleQueueService service = beanContext.getBean(SimpleQueueService.class, Qualifiers.byName(configurationName));
 
-        String queueName = clientAnnotationValue.get(SQSClient.Constants.QUEUE, String.class).flatMap(EMPTY_IF_UNDEFINED).orElse(null);
-        String group = clientAnnotationValue.get(SQSClient.Constants.GROUP, String.class).flatMap(EMPTY_IF_UNDEFINED).orElse(null);
-        Integer delay = clientAnnotationValue.get(SQSClient.Constants.DELAY, Integer.class).flatMap(EMPTY_IF_ZERO).orElse(0);
+        String queueName = clientAnnotationValue.get(QueueClient.Constants.QUEUE, String.class).flatMap(EMPTY_IF_UNDEFINED).orElse(null);
+        String group = clientAnnotationValue.get(QueueClient.Constants.GROUP, String.class).flatMap(EMPTY_IF_UNDEFINED).orElse(null);
+        Integer delay = clientAnnotationValue.get(QueueClient.Constants.DELAY, Integer.class).flatMap(EMPTY_IF_ZERO).orElse(0);
 
         AnnotationValue<Queue> queueAnnotationValue = context.getAnnotation(Queue.class);
 
         if (queueAnnotationValue != null) {
             queueName = queueAnnotationValue.getRequiredValue(String.class);
-            group = queueAnnotationValue.get(SQSClient.Constants.GROUP, String.class).flatMap(EMPTY_IF_UNDEFINED).orElse(group);
-            delay = queueAnnotationValue.get(SQSClient.Constants.DELAY, Integer.class).flatMap(EMPTY_IF_ZERO).orElse(delay);
+            group = queueAnnotationValue.get(QueueClient.Constants.GROUP, String.class).flatMap(EMPTY_IF_UNDEFINED).orElse(group);
+            delay = queueAnnotationValue.get(QueueClient.Constants.DELAY, Integer.class).flatMap(EMPTY_IF_ZERO).orElse(delay);
         }
 
         if (queueName == null) {

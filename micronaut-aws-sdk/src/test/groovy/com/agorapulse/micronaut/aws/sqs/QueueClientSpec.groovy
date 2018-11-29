@@ -2,14 +2,13 @@ package com.agorapulse.micronaut.aws.sqs
 
 import com.agorapulse.micronaut.aws.Pogo
 import com.agorapulse.micronaut.aws.sqs.annotation.Queue
-import com.agorapulse.micronaut.aws.sqs.annotation.SQSClient
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.micronaut.context.ApplicationContext
 import io.micronaut.inject.qualifiers.Qualifiers
 import spock.lang.AutoCleanup
 import spock.lang.Specification
 
-class SQSClientSpec extends Specification {
+class QueueClientSpec extends Specification {
 
     private static final String DEFAULT_QUEUE_NAME = 'DefaultQueue'
     private static final String MESSAGE = "MESSAGE"
@@ -160,7 +159,7 @@ class SQSClientSpec extends Specification {
     }
 }
 
-@SQSClient interface DefaultClient {
+@com.agorapulse.micronaut.aws.sqs.annotation.QueueClient interface DefaultClient {
 
     public String OTHER_QUEUE = 'OtherQueue'
 
@@ -181,11 +180,11 @@ class SQSClientSpec extends Specification {
     void deleteMessage(String messageId)
 }
 
-@SQSClient('test') interface TestClient {
+@com.agorapulse.micronaut.aws.sqs.annotation.QueueClient('test') interface TestClient {
     String sendMessage(Pogo event)
 }
 
-@SQSClient(queue = 'SomeQueue', delay = 10) interface QueueClient {
+@com.agorapulse.micronaut.aws.sqs.annotation.QueueClient(queue = 'SomeQueue', delay = 10) interface QueueClient {
 
     public String SOME_QUEUE = 'SomeQueue'
 
