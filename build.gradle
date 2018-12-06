@@ -38,6 +38,7 @@ subprojects { Project subproject ->
                 entry 'aws-java-sdk-kinesis'
                 entry 'aws-java-sdk-s3'
                 entry 'aws-java-sdk-ses'
+                entry 'aws-java-sdk-sns'
                 entry 'aws-java-sdk-sqs'
                 entry 'jmespath'
             }

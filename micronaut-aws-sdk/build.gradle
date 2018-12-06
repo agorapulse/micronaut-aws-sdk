@@ -7,6 +7,7 @@ dependencies {
     optional group: 'com.amazonaws', name: 'aws-java-sdk-kinesis'
     optional group: 'com.amazonaws', name: 'aws-java-sdk-s3'
     optional group: 'com.amazonaws', name: 'aws-java-sdk-ses'
+    optional group: 'com.amazonaws', name: 'aws-java-sdk-sns'
     optional group: 'com.amazonaws', name: 'aws-java-sdk-sqs'
 
 
