@@ -178,20 +178,19 @@ public class GrailsMicronautBeanProcessor implements BeanFactoryPostProcessor, D
                 LOGGER.error("Current class path: {}", System.getProperty("java.class.path"));
                 noClassDefFoundError = error;
             }
-
-            if (noClassDefFoundError == null) {
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("Successfully added following beans to the spring contest {} ", micronautBeanQualifiers);
-                    LOGGER.info("Current class loader: {}", printClassLoader(getClass().getClassLoader()));
-                    LOGGER.info("Parent class loader: {}",  printClassLoader(getClass().getClassLoader().getParent()));
-                    LOGGER.info("Current class path: {}", System.getProperty("java.class.path"));
-                }
-                return;
-            }
-
-            throw noClassDefFoundError;
-
         }
+
+        if (noClassDefFoundError == null) {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Successfully added following beans to the spring contest {} ", micronautBeanQualifiers);
+                LOGGER.info("Current class loader: {}", printClassLoader(getClass().getClassLoader()));
+                LOGGER.info("Parent class loader: {}",  printClassLoader(getClass().getClassLoader().getParent()));
+                LOGGER.info("Current class path: {}", System.getProperty("java.class.path"));
+            }
+            return;
+        }
+
+        throw noClassDefFoundError;
     }
 
     private static String printClassLoader(ClassLoader classLoader) {
