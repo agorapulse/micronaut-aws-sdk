@@ -21,6 +21,8 @@ import io.micronaut.context.Qualifier;
 import io.micronaut.core.naming.NameUtils;
 import io.micronaut.inject.BeanDefinition;
 import io.micronaut.inject.qualifiers.Qualifiers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -48,6 +50,8 @@ import java.util.Optional;
  * @since 1.0
  */
 public class GrailsMicronautBeanProcessor implements BeanFactoryPostProcessor, DisposableBean, EnvironmentAware {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GrailsMicronautBeanProcessor.class);
 
     public static class Builder {
         private final Map<String, Qualifier<?>> micronautBeanQualifiers = new LinkedHashMap<>();
@@ -149,23 +153,32 @@ public class GrailsMicronautBeanProcessor implements BeanFactoryPostProcessor, D
         for (Map.Entry<String, Qualifier<?>> entry : micronautBeanQualifiers.entrySet()) {
             String name = entry.getKey();
             Qualifier<?> micronautBeanQualifier = entry.getValue();
-            Collection<BeanDefinition<?>> beanDefinitions = micronautContext.getBeanDefinitions((Qualifier<Object>) micronautBeanQualifier);
+            try {
+                Collection<BeanDefinition<?>> beanDefinitions = micronautContext.getBeanDefinitions((Qualifier<Object>) micronautBeanQualifier);
 
-            if (beanDefinitions.size() > 1) {
-                throw new IllegalArgumentException("There is too many candidates for " + micronautBeanQualifier + "! Candidates: " + beanDefinitions);
+                if (beanDefinitions.size() > 1) {
+                    throw new IllegalArgumentException("There is too many candidates for " + micronautBeanQualifier + "! Candidates: " + beanDefinitions);
+                }
+
+                Optional<BeanDefinition<?>> firstBean = beanDefinitions.stream().findFirst();
+                BeanDefinition<?> definition = firstBean.orElseThrow(()-> new IllegalArgumentException("There is no candidate for " + micronautBeanQualifier));
+
+                final BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder
+                    .rootBeanDefinition(GrailsMicronautBeanFactory.class);
+                beanDefinitionBuilder.addPropertyValue(MICRONAUT_BEAN_TYPE_PROPERTY_NAME, definition.getBeanType());
+                beanDefinitionBuilder.addPropertyValue(MICRONAUT_QUALIFIER_PROPERTY_NAME, micronautBeanQualifier);
+                beanDefinitionBuilder.addPropertyValue(MICRONAUT_CONTEXT_PROPERTY_NAME, micronautContext);
+                beanDefinitionBuilder.addPropertyValue(MICRONAUT_SINGLETON_PROPERTY_NAME, definition.isSingleton());
+
+                ((DefaultListableBeanFactory) beanFactory).registerBeanDefinition(name, beanDefinitionBuilder.getBeanDefinition());
+            } catch (NoClassDefFoundError error) {
+                LOGGER.error("Exception loading class for qualifier {}. Bean {} will not be available in the runtime", micronautBeanQualifier, name);
+                LOGGER.error("Current class loader: {}", getClass().getClassLoader());
+                LOGGER.error("Parent class loader: {}", getClass().getClassLoader().getParent());
+                LOGGER.error("Current class path: {}", System.getProperty("java.class.path"));
+                LOGGER.error("",error);
             }
 
-            Optional<BeanDefinition<?>> firstBean = beanDefinitions.stream().findFirst();
-            BeanDefinition<?> definition = firstBean.orElseThrow(()-> new IllegalArgumentException("There is no candidate for " + micronautBeanQualifier));
-
-            final BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder
-                .rootBeanDefinition(GrailsMicronautBeanFactory.class);
-            beanDefinitionBuilder.addPropertyValue(MICRONAUT_BEAN_TYPE_PROPERTY_NAME, definition.getBeanType());
-            beanDefinitionBuilder.addPropertyValue(MICRONAUT_QUALIFIER_PROPERTY_NAME, micronautBeanQualifier);
-            beanDefinitionBuilder.addPropertyValue(MICRONAUT_CONTEXT_PROPERTY_NAME, micronautContext);
-            beanDefinitionBuilder.addPropertyValue(MICRONAUT_SINGLETON_PROPERTY_NAME, definition.isSingleton());
-
-            ((DefaultListableBeanFactory) beanFactory).registerBeanDefinition(name, beanDefinitionBuilder.getBeanDefinition());
         }
     }
 
