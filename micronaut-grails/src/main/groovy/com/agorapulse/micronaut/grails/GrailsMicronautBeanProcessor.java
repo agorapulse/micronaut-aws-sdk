@@ -33,10 +33,8 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 
 import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.net.URLClassLoader;
+import java.util.*;
 
 /**
  * Adds Micronaut beans to a Grails' Spring application context.  This processor will
@@ -150,6 +148,8 @@ public class GrailsMicronautBeanProcessor implements BeanFactoryPostProcessor, D
 
         micronautContext.start();
 
+        NoClassDefFoundError noClassDefFoundError = null;
+
         for (Map.Entry<String, Qualifier<?>> entry : micronautBeanQualifiers.entrySet()) {
             String name = entry.getKey();
             Qualifier<?> micronautBeanQualifier = entry.getValue();
@@ -173,13 +173,35 @@ public class GrailsMicronautBeanProcessor implements BeanFactoryPostProcessor, D
                 ((DefaultListableBeanFactory) beanFactory).registerBeanDefinition(name, beanDefinitionBuilder.getBeanDefinition());
             } catch (NoClassDefFoundError error) {
                 LOGGER.error("Exception loading class for qualifier {}. Bean {} will not be available in the runtime", micronautBeanQualifier, name);
-                LOGGER.error("Current class loader: {}", getClass().getClassLoader());
-                LOGGER.error("Parent class loader: {}", getClass().getClassLoader().getParent());
+                LOGGER.error("Current class loader: {}", printClassLoader(getClass().getClassLoader()));
+                LOGGER.error("Parent class loader: {}",  printClassLoader(getClass().getClassLoader().getParent()));
                 LOGGER.error("Current class path: {}", System.getProperty("java.class.path"));
-                LOGGER.error("",error);
+                noClassDefFoundError = error;
             }
 
+            if (noClassDefFoundError == null) {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("Successfully added following beans to the spring contest {} ", micronautBeanQualifiers);
+                    LOGGER.info("Current class loader: {}", printClassLoader(getClass().getClassLoader()));
+                    LOGGER.info("Parent class loader: {}",  printClassLoader(getClass().getClassLoader().getParent()));
+                    LOGGER.info("Current class path: {}", System.getProperty("java.class.path"));
+                }
+                return;
+            }
+
+            throw noClassDefFoundError;
+
         }
+    }
+
+    private static String printClassLoader(ClassLoader classLoader) {
+        if (classLoader instanceof URLClassLoader) {
+            return "URLClassLoader for URLS:" + Arrays.toString(((URLClassLoader) classLoader).getURLs());
+        }
+        if (classLoader == null) {
+            return null;
+        }
+        return classLoader.toString();
     }
 
     @Override
