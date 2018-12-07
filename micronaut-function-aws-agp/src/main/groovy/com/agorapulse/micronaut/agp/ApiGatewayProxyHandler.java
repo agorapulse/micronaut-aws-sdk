@@ -107,7 +107,6 @@ public class ApiGatewayProxyHandler implements RequestHandler<APIGatewayProxyReq
         return ApplicationContext.build().environments(
             API_GATEWAY_PROXY_ENVIRONMENT,
             Environment.AMAZON_EC2,
-            Environment.FUNCTION,
             Environment.CLOUD
         ).build();
     }
