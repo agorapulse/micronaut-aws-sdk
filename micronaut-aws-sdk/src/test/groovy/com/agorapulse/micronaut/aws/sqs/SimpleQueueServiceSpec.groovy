@@ -124,6 +124,28 @@ class SimpleQueueServiceSpec extends Specification{
             attributes.size() == 2
     }
 
+    /*
+    * Tests for getQueueAttributes(String queueUrl)
+    */
+
+    void 'Get queue arn'() {
+        given:
+            configuration.queue = 'queueName'
+            service.queueUrlByNames['queueName'] = 'somepath/queueName'
+
+        when:
+            String arn = service.getQueueArn('queueName')
+
+        then:
+            1 * amazonSQS.getQueueAttributes(_, ['QueueArn']) >> {
+                GetQueueAttributesResult attrResult = new GetQueueAttributesResult()
+                attrResult.setAttributes(['QueueArn': 'arn:sqs:queueName'])
+                attrResult
+            }
+
+            arn == 'arn:sqs:queueName'
+    }
+
     void 'Get queue attributes service exception'() {
         given:
             service.queueUrlByNames['queueName'] = 'somepath/queueName'

@@ -1,6 +1,5 @@
 package com.agorapulse.micronaut.aws.sns
 
-
 import com.amazonaws.services.sns.AmazonSNS
 import com.amazonaws.services.sns.model.*
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -14,9 +13,6 @@ import java.util.regex.Pattern
 @CompileStatic
 class DefaultSimpleNotificationService implements SimpleNotificationService {
 
-    private static final String MOBILE_PLATFORM_ANDROID = 'android'
-    private static final String MOBILE_PLATFORM_IOS = 'ios'
-
     private final AmazonSNS client
     private final SimpleNotificationServiceConfiguration configuration
     private final ObjectMapper objectMapper
@@ -27,30 +23,36 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
         this.objectMapper = objectMapper
     }
 
+    @Override
+    String getAmazonApplicationArn() {
+        return checkNotEmpty(configuration.amazon.arn, "Amazon application arn must be defined in config")
+    }
+
+    @Override
+    String getAndroidApplicationArn() {
+        return checkNotEmpty(configuration.android.arn, "Android application arn must be defined in config")
+    }
+
+    @Override
+    String getIosApplicationArn() {
+        return checkNotEmpty(configuration.ios.arn, "Ios application arn must be defined in config")
+    }
+
     /**
      * @param topicName
      * @return
      */
-    String createTopic(String topicName){
-        try {
-            log.debug("Creating topic sns with name " + topicName)
-            return client.createTopic(new CreateTopicRequest(topicName)).topicArn
-        } catch (Exception e){
-            log.error 'An exception was catched while creating a topic',  e
-            return null
-        }
+    String createTopic(String topicName) {
+        log.debug("Creating topic sns with name " + topicName)
+        return client.createTopic(new CreateTopicRequest(topicName)).topicArn
     }
 
     /**
      * @param topicArn
      */
-    void deleteTopic(String topicArn){
-        try {
-            log.debug("Deleting topic sns with arn " + topicArn)
-            client.deleteTopic(new DeleteTopicRequest(topicArn))
-        } catch (Exception e){
-            log.error 'An exception was catched while creating a topic',  e
-        }
+    void deleteTopic(String topicArn) {
+        log.debug("Deleting topic sns with arn " + topicArn)
+        client.deleteTopic(new DeleteTopicRequest(topicArn))
     }
 
     /**
@@ -59,47 +61,8 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
      * @param message
      * @return
      */
-    String publishTopic(String topicArn, String subject, String message){
-        try {
-            PublishResult publishResult = client.publish(new PublishRequest(topicArn, message,subject));
-            return publishResult.messageId
-        } catch (Exception e){
-            log.error 'An exception was catched while publishing',  e
-            return null
-        }
-    }
-
-
-    /**
-     *
-     * @param deviceToken
-     * @param customUserData
-     * @return
-     */
-    String registerAndroidDevice(String deviceToken, String customUserData) {
-        String platformApplicationArn = configuration.android.arn
-        assert platformApplicationArn, 'Android application arn must be defined in config'
-        createPlatformEndpoint(
-                platformApplicationArn,
-                deviceToken,
-                customUserData
-        )
-    }
-
-    /**
-     *
-     * @param deviceToken
-     * @param customUserData
-     * @return
-     */
-    String registerIosDevice(String deviceToken, String customUserData) {
-        String platformApplicationArn = configuration.ios.arn
-        assert platformApplicationArn, 'Ios application arn must be defined in config'
-        createPlatformEndpoint(
-                platformApplicationArn,
-                deviceToken,
-                customUserData
-        )
+    String publishMessageToTopic(String topicArn, String subject, String message) {
+        return client.publish(new PublishRequest(topicArn, message, subject)).messageId
     }
 
     /**
@@ -113,18 +76,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
      * @return
      */
     String sendAndroidAppNotification(String endpointArn, Map notification, String collapseKey, boolean delayWhileIdle, int timeToLive, boolean dryRun) {
-        String message = buildAndroidMessage(
-                notification,
-                collapseKey,
-                delayWhileIdle,
-                timeToLive,
-                dryRun
-        )
-        publish(
-                endpointArn,
-                'GCM',
-                message
-        )
+        publishToTarget(endpointArn, PLATFORM_TYPE_ANDROID, buildAndroidMessage(notification, collapseKey, delayWhileIdle, timeToLive, dryRun))
     }
 
     /**
@@ -135,8 +87,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
      * @return
      */
     String sendIosAppNotification(String endpointArn, Map notification, boolean sandbox) {
-        String message = buildIosMessage(notification)
-        publish(endpointArn, sandbox ? 'APNS_SANDBOX' : 'APNS', message)
+        publishToTarget(endpointArn, sandbox ? PLATFORM_TYPE_IOS_SANDBOX : PLATFORM_TYPE_IOS, buildIosMessage(notification))
     }
 
     /**
@@ -147,17 +98,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
      * @return
      */
     String sendSMSMessage(String phoneNumber, String message, Map smsAttributes) {
-        PublishResult result
-        try {
-            result = client.publish(new PublishRequest()
-                    .withMessage(message)
-                    .withPhoneNumber(phoneNumber)
-                    .withMessageAttributes(smsAttributes))
-        } catch (Exception e){
-            log.error 'An exception was catched while publishing',  e
-        }
-
-        result ? result.messageId : ''
+        client.publish(new PublishRequest().withMessage(message).withPhoneNumber(phoneNumber).withMessageAttributes(smsAttributes)).messageId
     }
 
     /**
@@ -166,76 +107,17 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
      * @param endpoint
      * @return
      */
-    String subscribeTopic(String topic, String protocol, String endpoint){
-
-        log.debug("Creating a topic subscription to endpoit " + endpoint)
-        SubscribeRequest subRequest = new SubscribeRequest(topic, protocol, endpoint);
-
-        try {
-            SubscribeResult result = client.subscribe(subRequest);
-            result.subscriptionArn
-        } catch (Exception e){
-            log.error 'An exception was catched while subscribe a topic',  e
-        }
-    }
-
-    /**
-     * @param topicArn
-     * @param number
-     * @return
-     */
-    String subscribeTopicWithSMS(String topicArn, String number){
-        try {
-            subscribeTopic(topicArn,'sms',number)
-        } catch (Exception e){
-            log.error 'An exception was catched while subscribe a topic with sms protocol',  e
-        }
+    String subscribeTopic(String topic, String protocol, String endpoint) {
+        log.debug("Creating a topic subscription to endpoint " + endpoint)
+        client.subscribe(new SubscribeRequest(topic, protocol, endpoint)).subscriptionArn
     }
 
     /**
      * @param arn
      */
-    void unsubscribeTopic(String arn){
+    void unsubscribeTopic(String arn) {
         log.debug("Deleting a topic subscription to number " + arn)
-        UnsubscribeRequest unSubRequest = new UnsubscribeRequest(arn);
-
-        try {
-            client.unsubscribe(unSubRequest);
-        } catch (Exception e){
-            log.error 'An exception was catched while unsubscribe a topic',  e
-        }
-    }
-
-    /**
-     *
-     * @param endpointArn
-     * @param deviceToken
-     * @param customUserData
-     * @return
-     */
-    String validateAndroidDevice(String endpointArn, String deviceToken, String customUserData) {
-        String platformApplicationArn = configuration.android.arn
-        assert platformApplicationArn, 'Android application arn must be defined in config'
-        validatePlatformDeviceToken(platformApplicationArn, MOBILE_PLATFORM_ANDROID, endpointArn, deviceToken, customUserData)
-    }
-
-    /**
-     *
-     * @param endpointArn
-     * @param deviceToken
-     * @param customUserData
-     * @return
-     */
-    String validateIosDevice(String endpointArn, String deviceToken, String customUserData) {
-        String platformApplicationArn = configuration.ios.arn
-        assert platformApplicationArn, 'Ios application arn must be defined in config'
-        validatePlatformDeviceToken(
-                platformApplicationArn,
-                MOBILE_PLATFORM_IOS,
-                endpointArn,
-                deviceToken,
-                customUserData
-        )
+        client.unsubscribe(new UnsubscribeRequest(arn))
     }
 
     /**
@@ -246,28 +128,35 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
         deleteEndpoint(endpointArn)
     }
 
-    private String buildAndroidMessage(Map data, String collapseKey, boolean delayWhileIdle, int timeToLive, boolean dryRun) {
-        objectMapper.writeValueAsString([
-                collapse_key: collapseKey,
-                data: data,
-                delay_while_idle: delayWhileIdle,
-                time_to_live: timeToLive,
-                dry_run: dryRun
-        ])
-    }
+    @Override
+    String createPlatformApplication(String name, String platform, String principal, String credential) {
+        CreatePlatformApplicationRequest request = new CreatePlatformApplicationRequest()
+            .withName(name)
+            .withPlatform(platform)
 
-    private String buildIosMessage(Map data) {
-        objectMapper.writeValueAsString([
-                aps: data
-        ])
+        Map<String, String> attributes = [:]
+
+        if (principal) {
+            attributes['PlatformPrincipal'] = principal
+        }
+
+        if (credential) {
+            attributes['PlatformCredential'] = credential
+        }
+
+        if (attributes) {
+            request.withAttributes(attributes)
+        }
+
+        return client.createPlatformApplication(request).platformApplicationArn
     }
 
     String createPlatformEndpoint(String platformApplicationArn, String deviceToken, String customUserData) {
         try {
             log.debug("Creating platform endpoint with token " + deviceToken)
             CreatePlatformEndpointRequest request = new CreatePlatformEndpointRequest()
-                    .withPlatformApplicationArn(platformApplicationArn)
-                    .withToken(deviceToken)
+                .withPlatformApplicationArn(platformApplicationArn)
+                .withToken(deviceToken)
             if (customUserData) {
                 request.customUserData = customUserData
             }
@@ -287,83 +176,92 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
         }
     }
 
+    private String buildAndroidMessage(Map data, String collapseKey, boolean delayWhileIdle, int timeToLive, boolean dryRun) {
+        objectMapper.writeValueAsString([
+            collapse_key    : collapseKey,
+            data            : data,
+            delay_while_idle: delayWhileIdle,
+            time_to_live    : timeToLive,
+            dry_run         : dryRun
+        ])
+    }
+
+    private String buildIosMessage(Map data) {
+        objectMapper.writeValueAsString([
+            aps: data
+        ])
+    }
+
     private DeleteEndpointResult deleteEndpoint(String endpointArn) {
         DeleteEndpointRequest depReq = new DeleteEndpointRequest()
-                .withEndpointArn(endpointArn)
+            .withEndpointArn(endpointArn)
         client.deleteEndpoint(depReq)
     }
 
-    private GetEndpointAttributesResult getEndpointAttributes(String endpointArn) {
-        GetEndpointAttributesRequest geaReq = new GetEndpointAttributesRequest().withEndpointArn(endpointArn)
-        client.getEndpointAttributes(geaReq)
-    }
 
     private SetEndpointAttributesResult setEndpointAttributes(String endpointArn,
                                                               Map attributes) {
         SetEndpointAttributesRequest saeReq = new SetEndpointAttributesRequest()
-                .withEndpointArn(endpointArn)
-                .withAttributes(attributes)
+            .withEndpointArn(endpointArn)
+            .withAttributes(attributes)
         client.setEndpointAttributes(saeReq)
     }
 
-    private String publish(String endpointArn,
-                           String platform,
-                           String message) {
+    private String publishToTarget(String endpointArn, String platform, String message) {
         PublishRequest request = new PublishRequest(
-                message: objectMapper.writeValueAsString([(platform): message]),
-                messageStructure: 'json',
-                targetArn: endpointArn, // For direct publish to mobile end points, topicArn is not relevant.
+            message: objectMapper.writeValueAsString([(platform): message]),
+            messageStructure: 'json',
+            targetArn: endpointArn, // For direct publish to mobile end points, topicArn is not relevant.
         )
 
-        PublishResult result = null
-        try {
-            result = client.publish(request)
-        } catch (Exception e) {
-            log.error 'An exception was catched while publishing',  e
-        }
-        result ? result.messageId : ''
+        client.publish(request).messageId
     }
 
-    private String validatePlatformDeviceToken(String platformApplicationArn,
-                                               String platformType,
-                                               String endpointArn,
-                                               String deviceToken,
-                                               String customUserData = '') {
-        boolean updateRequired = false
-
+    String validatePlatformDeviceToken(String platformApplicationArn, String platformType, String endpointArn, String deviceToken, String customUserData = '') {
         log.debug "Retrieving platform endpoint data..."
         // Look up the platform endpoint and make sure the data in it is current, even if it was just created.
         try {
-            GetEndpointAttributesResult result = getEndpointAttributes(endpointArn)
-            updateRequired = !result.attributes.get("Token").equals(deviceToken) || !result.attributes.get("Enabled").equalsIgnoreCase("true")
-        } catch (NotFoundException nfe) {
+            GetEndpointAttributesResult result = client.getEndpointAttributes(new GetEndpointAttributesRequest().withEndpointArn(endpointArn))
+            if (result.attributes.get("Token").equals(deviceToken) && result.attributes.get("Enabled").equalsIgnoreCase("true")) {
+                return endpointArn
+            }
+        } catch (NotFoundException ignored) {
             // We had a stored ARN, but the platform endpoint associated with it disappeared. Recreate it.
-            endpointArn = createPlatformEndpoint(platformApplicationArn, deviceToken, customUserData)
+            return createPlatformEndpoint(platformApplicationArn, deviceToken, customUserData)
         }
 
-        if (updateRequired) {
-            log.debug "Platform endpoint update required..."
-            if ((platformType == MOBILE_PLATFORM_IOS && endpointArn.contains('GCM')) ||
-                    (platformType == MOBILE_PLATFORM_ANDROID && endpointArn.contains('APNS'))) {
-                log.debug "Switching between IOS and ANDROID platforms..."
-                // Manager switched device between and android and an IOS device
-                deleteEndpoint(endpointArn)
-                endpointArn = createPlatformEndpoint(platformApplicationArn, deviceToken, customUserData)
-            } else {
-                // The platform endpoint is out of sync with the current data, update the token and enable it.
-                log.debug("Updating platform endpoint " + endpointArn)
-                try {
-                    setEndpointAttributes(endpointArn, [
-                            Token: deviceToken,
-                            Enabled: 'true'
-                    ])
-                } catch (InvalidParameterException ipe) {
-                    deleteEndpoint(endpointArn)
-                    endpointArn = createPlatformEndpoint(platformApplicationArn, deviceToken, customUserData)
-                }
-            }
+        log.debug "Platform endpoint update required..."
+        if (
+        (platformType == MOBILE_PLATFORM_IOS && endpointArn.contains(PLATFORM_TYPE_ANDROID))
+            ||
+            (platformType == MOBILE_PLATFORM_ANDROID && endpointArn.contains(PLATFORM_TYPE_IOS))
+        ) {
+            log.debug "Switching between IOS and ANDROID platforms..."
+            // Manager switched device between and android and an IOS device
+            deleteEndpoint(endpointArn)
+            return createPlatformEndpoint(platformApplicationArn, deviceToken, customUserData)
         }
-        endpointArn
+
+        // The platform endpoint is out of sync with the current data, update the token and enable it.
+        log.debug("Updating platform endpoint " + endpointArn)
+        try {
+            setEndpointAttributes(endpointArn, [
+                Token  : deviceToken,
+                Enabled: 'true'
+            ])
+            return endpointArn
+        } catch (InvalidParameterException ignored) {
+            deleteEndpoint(endpointArn)
+            return createPlatformEndpoint(platformApplicationArn, deviceToken, customUserData)
+        }
+
+    }
+
+    private static String checkNotEmpty(String arn, String errorMessage) {
+        if (!arn) {
+            throw new IllegalStateException(errorMessage)
+        }
+        return arn
     }
 
 }

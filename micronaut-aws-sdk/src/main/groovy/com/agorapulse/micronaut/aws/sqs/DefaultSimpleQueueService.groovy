@@ -12,10 +12,11 @@ import groovy.util.logging.Slf4j
 @CompileStatic
 class DefaultSimpleQueueService implements SimpleQueueService {
 
+    public static final String QUEUE_ARN = 'QueueArn'
     private final AmazonSQS client
     private final SimpleQueueServiceConfiguration configuration
 
-    private final Map queueUrlByNames = [:]
+    private final Map<String, String> queueUrlByNames = [:]
 
     DefaultSimpleQueueService(
         AmazonSQS client,
@@ -38,7 +39,7 @@ class DefaultSimpleQueueService implements SimpleQueueService {
 /**
      *
      * @param queueName
-     * @return
+     * @return queue URL
      */
     String createQueue(String queueName) {
         CreateQueueRequest createQueueRequest = new CreateQueueRequest(queueName)
@@ -143,7 +144,12 @@ class DefaultSimpleQueueService implements SimpleQueueService {
         }
     }
 
-    /**
+    @Override
+    String getQueueArn(String queueName) {
+        GetQueueAttributesResult attributes = client.getQueueAttributes(getQueueUrl(queueName), Collections.singletonList(QUEUE_ARN))
+        return attributes.getAttributes()[QUEUE_ARN]
+    }
+/**
      *
      * @param reload
      * @return

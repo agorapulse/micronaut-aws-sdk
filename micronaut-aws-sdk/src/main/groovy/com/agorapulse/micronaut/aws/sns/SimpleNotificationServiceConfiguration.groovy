@@ -20,5 +20,6 @@ class SimpleNotificationServiceConfiguration {
 
     Application ios = new Application()
     Application android = new Application()
+    Application amazon = new Application()
 
 }

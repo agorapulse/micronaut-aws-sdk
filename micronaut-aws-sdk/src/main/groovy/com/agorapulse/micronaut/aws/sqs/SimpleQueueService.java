@@ -79,6 +79,19 @@ public interface SimpleQueueService {
     }
 
     /**
+     * @param queueName the queue name
+     * @return the queue arn
+     */
+    String getQueueArn(String queueName);
+
+    /**
+     * @return the default queue arn
+     */
+    default String getQueueArn() {
+        return getQueueArn(getDefaultQueueName());
+    }
+
+    /**
      * @return list of all queues' names
      */
     default List<String> listQueueNames() {
