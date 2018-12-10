@@ -15,6 +15,7 @@ import java.lang.annotation.*;
 @Singleton
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
 public @interface KinesisClient {
 
     /**

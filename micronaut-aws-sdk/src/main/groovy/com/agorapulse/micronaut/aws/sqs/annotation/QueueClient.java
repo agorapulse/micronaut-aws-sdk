@@ -8,9 +8,7 @@ import io.micronaut.context.annotation.Type;
 
 import javax.inject.Scope;
 import javax.inject.Singleton;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.*;
 
 @Introduction
 @Type(QueueClientIntroduction.class)
@@ -18,6 +16,7 @@ import java.lang.annotation.RetentionPolicy;
 @Singleton
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
 public @interface QueueClient {
 
     /**

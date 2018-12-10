@@ -1,5 +1,8 @@
 package com.agorapulse.micronaut.aws.sns;
 
+import com.amazonaws.services.sns.model.Topic;
+import io.reactivex.Flowable;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
@@ -20,6 +23,8 @@ public interface SimpleNotificationService {
     String getAndroidApplicationArn();
 
     String getIosApplicationArn();
+
+    String getDefaultTopicNameOrArn();
 
     /**
      * @param topicName
@@ -330,6 +335,8 @@ public interface SimpleNotificationService {
     default String validateDevice(String platformType, String endpointArn, String deviceToken) {
         return validateDevice(platformType, endpointArn, deviceToken, "");
     }
+
+    Flowable<Topic> listTopics();
 
     /**
      * @param endpointArn

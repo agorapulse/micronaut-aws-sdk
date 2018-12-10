@@ -5,7 +5,10 @@ import com.amazonaws.services.sns.model.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+import io.reactivex.Flowable
+import io.reactivex.functions.Predicate
 
+import java.util.concurrent.ConcurrentHashMap
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -16,6 +19,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
     private final AmazonSNS client
     private final SimpleNotificationServiceConfiguration configuration
     private final ObjectMapper objectMapper
+    private final ConcurrentHashMap<String, String> namesToArn = new ConcurrentHashMap<>()
 
     DefaultSimpleNotificationService(AmazonSNS client, SimpleNotificationServiceConfiguration configuration, ObjectMapper objectMapper) {
         this.client = client
@@ -38,6 +42,11 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
         return checkNotEmpty(configuration.ios.arn, "Ios application arn must be defined in config")
     }
 
+    @Override
+    String getDefaultTopicNameOrArn() {
+        return checkNotEmpty(ensureTopicArn(configuration.topic), "Default topic not set for the configuration")
+    }
+
     /**
      * @param topicName
      * @return
@@ -51,8 +60,8 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
      * @param topicArn
      */
     void deleteTopic(String topicArn) {
-        log.debug("Deleting topic sns with arn " + topicArn)
-        client.deleteTopic(new DeleteTopicRequest(topicArn))
+        log.debug("Deleting topic " + topicArn)
+        client.deleteTopic(new DeleteTopicRequest(ensureTopicArn(topicArn)))
     }
 
     /**
@@ -62,7 +71,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
      * @return
      */
     String publishMessageToTopic(String topicArn, String subject, String message) {
-        return client.publish(new PublishRequest(topicArn, message, subject)).messageId
+        return client.publish(new PublishRequest(ensureTopicArn(topicArn), message, subject)).messageId
     }
 
     /**
@@ -109,7 +118,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
      */
     String subscribeTopic(String topic, String protocol, String endpoint) {
         log.debug("Creating a topic subscription to endpoint " + endpoint)
-        client.subscribe(new SubscribeRequest(topic, protocol, endpoint)).subscriptionArn
+        client.subscribe(new SubscribeRequest(ensureTopicArn(topic), protocol, endpoint)).subscriptionArn
     }
 
     /**
@@ -257,11 +266,41 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
 
     }
 
+    Flowable<Topic> listTopics() {
+        FlowableListTopicHelper.generateTopics(client)
+    }
+
     private static String checkNotEmpty(String arn, String errorMessage) {
         if (!arn) {
             throw new IllegalStateException(errorMessage)
         }
         return arn
+    }
+
+    private String ensureTopicArn(String nameOrArn) {
+        if (!nameOrArn) {
+            return ''
+        }
+        if (nameOrArn.startsWith('arn:aws:sns')) {
+            return nameOrArn
+        }
+
+        if (namesToArn.contains(nameOrArn)) {
+            return namesToArn[nameOrArn]
+        }
+
+        listTopics().takeUntil({ Topic topic -> topic.topicArn.endsWith(':' + nameOrArn) } as Predicate<Topic>).subscribe { Topic topic ->
+            String topicName = topic.topicArn.substring(topic.topicArn.lastIndexOf(':') + 1)
+            namesToArn[topicName] = topic.topicArn
+        }
+
+        String topicArn = namesToArn[nameOrArn]
+
+        if (topicArn) {
+            return topicArn
+        }
+
+        return createTopic(nameOrArn)
     }
 
 }

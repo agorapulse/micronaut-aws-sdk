@@ -18,6 +18,8 @@ class SimpleNotificationServiceConfiguration {
         @NotEmpty String arn
     }
 
+    String topic = ''
+
     Application ios = new Application()
     Application android = new Application()
     Application amazon = new Application()
