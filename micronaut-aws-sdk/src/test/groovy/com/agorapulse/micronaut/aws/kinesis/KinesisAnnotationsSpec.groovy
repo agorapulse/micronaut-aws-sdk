@@ -110,11 +110,13 @@ class KinesisListenerSpec extends Specification {
                     }
                 }
 
-            600.times {
+            120.times {
                 if (!allTestEventsReceived(tester)) {
                     Thread.sleep(100)
                 }
             }
+
+            Thread.sleep(1000)
 
             subscription.dispose()
         then:
