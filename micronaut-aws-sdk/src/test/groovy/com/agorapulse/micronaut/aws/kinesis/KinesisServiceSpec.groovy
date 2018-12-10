@@ -23,8 +23,7 @@ class KinesisServiceSpec extends Specification {
     @Shared
     LocalStackContainer localstack = new LocalStackContainer()
         .withServices(LocalStackContainer.Service.KINESIS)
-        .withEnv(DEBUG: '1')
-
+    
     AmazonKinesis kinesis
     KinesisService service
 

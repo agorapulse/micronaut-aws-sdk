@@ -3,6 +3,7 @@ package com.agorapulse.micronaut.aws.kinesis
 import com.agorapulse.micronaut.aws.Pogo
 import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisClient
 import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisListener
+import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.amazonaws.services.dynamodbv2.model.AttributeValueUpdate
@@ -38,7 +39,7 @@ import java.util.concurrent.TimeUnit
 
 @Testcontainers
 @RestoreSystemProperties
-class KinesisListenerSpec extends Specification {
+class KinesisAnnotationsSpec extends Specification {
 
     public static final String TEST_STREAM = 'TestStream'
     public static final String APP_NAME = 'AppName'
@@ -46,7 +47,6 @@ class KinesisListenerSpec extends Specification {
     @Shared
     LocalStackContainer localstack = new LocalStackContainer('0.8.8')
         .withServices(LocalStackContainer.Service.KINESIS)
-        .withEnv(DEBUG: '1')
 
     @AutoCleanup
     ApplicationContext context
@@ -88,6 +88,7 @@ class KinesisListenerSpec extends Specification {
             context.registerSingleton(AmazonKinesis, kinesis)
             context.registerSingleton(AmazonDynamoDB, dynamo)
             context.registerSingleton(KinesisService, kinesisService, Qualifiers.byName('default'))
+            context.registerSingleton(AWSCredentialsProvider, localstack.defaultCredentialsProvider)
             context.start()
 
             KinesisListenerTester tester = context.getBean(KinesisListenerTester)
