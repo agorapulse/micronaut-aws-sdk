@@ -3,8 +3,9 @@ package com.agorapulse.micronaut.aws.dynamodb.query;
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
 import io.reactivex.Flowable;
 
-public interface DetachedQuery<T> {
+public interface DetachedCriteria<T> {
 
-    Flowable<T> execute(IDynamoDBMapper mapper);
+    Flowable<T> query(IDynamoDBMapper mapper);
+    long count(IDynamoDBMapper mapper);
 
 }

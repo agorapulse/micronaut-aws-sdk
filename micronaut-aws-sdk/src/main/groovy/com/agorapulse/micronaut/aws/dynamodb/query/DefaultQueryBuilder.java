@@ -97,23 +97,15 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     }
 
     @Override
-    public Flowable<T> execute(IDynamoDBMapper mapper) {
-        DynamoDBMapperTableModel<T> model = mapper.getTableModel(metadata.getItemClass());
+    public long count(IDynamoDBMapper mapper) {
+        resolveExpression(mapper);
 
-        if (hashKey != null) {
-            expression.withHashKeyValues(model.createKey(hashKey, null));
-        }
+        return mapper.count(metadata.getItemClass(), expression);
+    }
 
-
-        applyConditions(model, rangeCollectorsConsumers, expression::withRangeKeyCondition);
-        applyConditions(model, filterCollectorsConsumers, expression::withQueryFilterEntry);
-
-
-        if (exclusiveStartKey != null) {
-            T exclusiveKey = model.createKey(exclusiveStartKey, null);
-            expression.withExclusiveStartKey(model.convertKey(exclusiveKey));
-        }
-
+    @Override
+    public Flowable<T> query(IDynamoDBMapper mapper) {
+        resolveExpression(mapper);
 
         Class<T> type = metadata.getItemClass();
         return Flowable.generate(() -> mapper.queryPage(type, expression), new BiFunction<QueryResultPage<T>, Emitter<List<T>>, QueryResultPage<T>>() {
@@ -141,6 +133,24 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
 
 
             filterCollector.getConditions().forEach(addFilterConsumer);
+        }
+    }
+
+    private void resolveExpression(IDynamoDBMapper mapper) {
+        DynamoDBMapperTableModel<T> model = mapper.getTableModel(metadata.getItemClass());
+
+        if (hashKey != null) {
+            expression.withHashKeyValues(model.createKey(hashKey, null));
+        }
+
+
+        applyConditions(model, rangeCollectorsConsumers, expression::withRangeKeyCondition);
+        applyConditions(model, filterCollectorsConsumers, expression::withQueryFilterEntry);
+
+
+        if (exclusiveStartKey != null) {
+            T exclusiveKey = model.createKey(exclusiveStartKey, null);
+            expression.withExclusiveStartKey(model.convertKey(exclusiveKey));
         }
     }
 

@@ -11,7 +11,7 @@ import space.jasan.support.groovy.closure.ConsumerWithDelegate;
 
 import java.util.function.Consumer;
 
-public interface QueryBuilder<T> extends DetachedQuery<T> {
+public interface QueryBuilder<T> extends DetachedCriteria<T> {
 
     enum Sort {
         ASC, DESC

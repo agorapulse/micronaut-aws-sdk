@@ -1,5 +1,6 @@
 package com.agorapulse.micronaut.aws.dynamodb
 
+
 import com.agorapulse.micronaut.aws.dynamodb.query.QueryBuilder
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
@@ -227,7 +228,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
         @ClosureParams(value = SimpleType.class, options = "com.agorapulse.micronaut.aws.dynamodb.query.QueryBuilder<DynamoDBEntity>")
             Closure<QueryBuilder<DynamoDBEntity>> definition
     ) {
-        return QueryBuilder.query(DynamoDBEntity, ConsumerWithDelegate.create(definition)).execute(mapper)
+        return QueryBuilder.query(DynamoDBEntity, ConsumerWithDelegate.create(definition)).query(mapper)
     }
 
 }
