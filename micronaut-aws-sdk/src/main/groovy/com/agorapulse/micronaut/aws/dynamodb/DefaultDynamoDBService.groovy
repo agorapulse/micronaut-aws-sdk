@@ -4,20 +4,15 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.datamodeling.*
 import com.amazonaws.services.dynamodbv2.model.*
 import groovy.transform.CompileDynamic
-import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import io.micronaut.context.annotation.Parameter
 import io.micronaut.context.annotation.Prototype
-import org.joda.time.DateTime
 
-import java.lang.reflect.Field
 import java.lang.reflect.Method
-import java.text.ParseException
 import java.text.SimpleDateFormat
 
 @Slf4j
 @Prototype
-//@CompileStatic
 class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> {
 
     static String INDEX_NAME_SUFFIX = 'Index'
@@ -33,13 +28,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
     protected final AmazonDynamoDB client
     protected final IDynamoDBMapper mapper
 
-    protected String hashKeyName
-    protected Class hashKeyClass
-    protected Class<TItemClass> itemClass
-    protected DynamoDBTable mainTable
-    protected String rangeKeyName
-    protected Class rangeKeyClass
-    protected List<String> secondaryIndexes = new ArrayList<String>()
+    protected DynamoDBMetadata<TItemClass> metadata
 
     /**
      * Initialize service for a given mapper class
@@ -51,57 +40,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
     protected DefaultDynamoDBService(AmazonDynamoDB client, IDynamoDBMapper mapper, @Parameter Class<TItemClass> itemClass) {
         this.client = client
         this.mapper = mapper
-
-        this.itemClass = itemClass
-        this.mainTable = (DynamoDBTable) itemClass.getAnnotation(DynamoDBTable.class)
-
-        if (!mainTable) {
-            throw new RuntimeException("Missing @DynamoDBTable annotation on class: ${itemClass}")
-        }
-
-        // Annotations on fields
-        itemClass.getDeclaredFields().findAll { Field field ->
-            // Get hash key
-            if (field.getAnnotation(DynamoDBHashKey.class)) {
-                hashKeyName = field.getName()
-                hashKeyClass = field.getType()
-            }
-            // Get range key
-            if (field.getAnnotation(DynamoDBRangeKey.class)) {
-                rangeKeyName = field.getName()
-                rangeKeyClass = field.getType()
-            }
-            // Get secondary indexes
-            DynamoDBIndexRangeKey indexRangeKeyAnnotation = field.getAnnotation(DynamoDBIndexRangeKey.class)
-            if (indexRangeKeyAnnotation) {
-                secondaryIndexes.add(indexRangeKeyAnnotation.localSecondaryIndexName())
-            }
-        }
-
-        // Annotations on methods
-        itemClass.getDeclaredMethods().findAll { Method method ->
-            method.name.startsWith('get') || method.name.startsWith('is')
-        }.each { Method method ->
-            // Get hash key
-            if (method.getAnnotation(DynamoDBHashKey.class)) {
-                hashKeyName = ReflectionUtils.getFieldNameByGetter(method, true)
-                hashKeyClass = itemClass.getDeclaredField(hashKeyName).type
-            }
-            // Get range key
-            if (method.getAnnotation(DynamoDBRangeKey.class)) {
-                rangeKeyName = ReflectionUtils.getFieldNameByGetter(method, true)
-                rangeKeyClass = itemClass.getDeclaredField(rangeKeyName).type
-            }
-            // Get secondary indexes
-            DynamoDBIndexRangeKey indexRangeKeyAnnotation = method.getAnnotation(DynamoDBIndexRangeKey.class)
-            if (indexRangeKeyAnnotation) {
-                secondaryIndexes.add(indexRangeKeyAnnotation.localSecondaryIndexName())
-            }
-        }
-
-        if (!hashKeyName || !hashKeyClass) {
-            throw new RuntimeException("Missing hashkey annotations on class: ${itemClass}")
-        }
+        this.metadata = DynamoDBMetadata.create(itemClass)
     }
 
     /**
@@ -164,14 +103,14 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      * @param dynamoDB the dynamoDB client
      */
     CreateTableResult createTable(Long readCapacityUnits, Long writeCapacityUnits) {
-        DynamoDBTable table = itemClass.getAnnotation(DynamoDBTable.class)
+        DynamoDBTable table = metadata.itemClass.getAnnotation(DynamoDBTable.class)
 
         try {
             // Check if the table exists
             client.describeTable(table.tableName())
             return null
         } catch (ResourceNotFoundException ignored) {
-            CreateTableRequest createTableRequest = mapper.generateCreateTableRequest(itemClass)
+            CreateTableRequest createTableRequest = mapper.generateCreateTableRequest(metadata.itemClass)
             // new CreateTableRequest().withTableName(table.tableName())
 
             // ProvisionedThroughput
@@ -206,10 +145,10 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      */
     void delete(Object hashKey, Object rangeKey, Map settings) {
         if (rangeKey) {
-            delete(itemClass.newInstance((hashKeyName): hashKey, (rangeKeyName): rangeKey), settings)
+            delete(metadata.itemClass.newInstance((hashKeyName): hashKey, (rangeKeyName): rangeKey), settings)
             return
         }
-        delete(itemClass.newInstance((hashKeyName): hashKey), settings)
+        delete(metadata.itemClass.newInstance((hashKeyName): hashKey), settings)
     }
 
     /**
@@ -276,7 +215,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
         }
 
         DynamoDBQueryExpression query = buildQueryExpression(hashKeyName, hashKey, settings)
-        query.hashKeyValues = itemClass.newInstance((hashKeyName): hashKey)
+        query.hashKeyValues = metadata.itemClass.newInstance((hashKeyName): hashKey)
         if (rangeKeyConditions) {
             query.rangeKeyConditions = rangeKeyConditions
         }
@@ -284,7 +223,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
             query.indexName = indexName
         }
 
-        QueryResultPage itemsPage = mapper.queryPage(itemClass, query)
+        QueryResultPage itemsPage = mapper.queryPage(metadata.itemClass, query)
 
         int deletedItemsCount = -1
         Map lastEvaluatedKey = itemsPage.lastEvaluatedKey
@@ -294,9 +233,9 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
             } else {
                 query.exclusiveStartKey = lastEvaluatedKey
             }
-            itemsPage = mapper.queryPage(itemClass, query)
+            itemsPage = mapper.queryPage(metadata.itemClass, query)
             if (itemsPage.results) {
-                log.debug "Deleting ${itemsPage.results.size()} items, class: ${itemClass}"
+                log.debug "Deleting ${itemsPage.results.size()} items, class: ${metadata.itemClass}"
                 deletedItemsCount = deletedItemsCount + itemsPage.results.size()
                 // Delete all items
                 deleteAll(itemsPage.results, settings)
@@ -315,7 +254,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      * @return
      */
     TItemClass get(Object hashKey, Object rangeKey) {
-        mapper.load(itemClass, hashKey, rangeKey)
+        mapper.load(metadata.itemClass, hashKey, rangeKey)
     }
 
     /**
@@ -329,12 +268,12 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      */
     List<TItemClass> getAll(Object hashKey, List rangeKeys, Map settings) {
         Map result = [:]
-        List objects = rangeKeys.unique().collect { it -> itemClass.newInstance((hashKeyName): hashKey, (rangeKeyName): it) }
+        List objects = rangeKeys.unique().collect { it -> metadata.itemClass.newInstance((hashKeyName): hashKey, (rangeKeyName): it) }
         if (settings.throttle) {
             int resultCursor = 0
             long readCapacityUnit = settings.readCapacityUnit
             if (!readCapacityUnit) {
-                DescribeTableResult tableResult = client.describeTable(mainTable.tableName())
+                DescribeTableResult tableResult = client.describeTable(metadata.mainTable.tableName())
                 readCapacityUnit = tableResult?.getTable()?.provisionedThroughput?.readCapacityUnits ?: 10
             }
             objects.collate(20).each { List batchObjects ->
@@ -348,8 +287,8 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
         } else {
             result = mapper.batchLoad(objects)
         }
-        if (result[mainTable.tableName()]) {
-            List unorderedItems = result[mainTable.tableName()]
+        if (result[metadata.mainTable.tableName()]) {
+            List unorderedItems = result[metadata.mainTable.tableName()]
             List items = []
 
             // Build an item list ordered in the same manner as the list of IDs we've been passed
@@ -384,11 +323,11 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
     }
 
     TItemClass getNewInstance() {
-        itemClass.newInstance()
+        metadata.itemClass.newInstance()
     }
 
     PaginatedQueryList<TItemClass> query(DynamoDBQueryExpression queryExpression) {
-        mapper.query(this.itemClass, queryExpression)
+        mapper.query(this.metadata.itemClass, queryExpression)
     }
 
     /**
@@ -436,7 +375,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      */
     QueryResultPage<TItemClass> queryByConditions(Object hashKey, Map<String, Condition> rangeKeyConditions, Map settings, String indexName) {
         DynamoDBQueryExpression query = buildQueryExpression(hashKeyName, hashKey, settings)
-        query.hashKeyValues = itemClass.newInstance((hashKeyName): hashKey)
+        query.hashKeyValues = metadata.itemClass.newInstance((hashKeyName): hashKey)
         if (rangeKeyConditions) {
             query.rangeKeyConditions = rangeKeyConditions
         }
@@ -450,7 +389,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
         if (settings.returnAll) {
             // Get table read Throughput
             if (settings.throttle) {
-                DescribeTableResult tableResult = client.describeTable(mainTable.tableName())
+                DescribeTableResult tableResult = client.describeTable(metadata.mainTable.tableName())
                 readCapacityUnit = tableResult?.getTable()?.provisionedThroughput?.readCapacityUnits ?: 0
             }
 
@@ -458,7 +397,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
             Map lastEvaluatedKey = [items: 'none']
             resultPage.results = []
             while (lastEvaluatedKey) {
-                QueryResultPage currentPage = mapper.queryPage(itemClass, query)
+                QueryResultPage currentPage = mapper.queryPage(metadata.itemClass, query)
                 resultPage.results.addAll(currentPage.results)
                 lastEvaluatedKey = currentPage.lastEvaluatedKey
                 query.exclusiveStartKey = currentPage.lastEvaluatedKey
@@ -472,7 +411,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
             }
         } else {
             // Query page
-            resultPage = mapper.queryPage(itemClass, query)
+            resultPage = mapper.queryPage(metadata.itemClass, query)
         }
 
         if (resultPage && (rangeKeyConditions || indexName) && !settings.batchGetDisabled) {
@@ -569,7 +508,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
             key[rangeKeyName] = buildAttributeValue(rangeKey)
         }
         UpdateItemRequest request = new UpdateItemRequest(
-            tableName: mainTable.tableName(),
+            tableName: metadata.mainTable.tableName(),
             key: key,
             returnValues: ReturnValue.UPDATED_NEW
         ).addAttributeUpdatesEntry(
@@ -597,7 +536,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
             key[rangeKeyName] = buildAttributeValue(rangeKey)
         }
         UpdateItemRequest request = new UpdateItemRequest(
-            tableName: mainTable.tableName(),
+            tableName: metadata.mainTable.tableName(),
             key: key,
             returnValues: ReturnValue.UPDATED_NEW
         ).addAttributeUpdatesEntry(
@@ -771,23 +710,23 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
     }
 
     boolean isIndexRangeKey(String rangeName) {
-        secondaryIndexes.contains(rangeName)
+        metadata.secondaryIndexes.contains(rangeName)
     }
 
     String getHashKeyName() {
-        return hashKeyName
+        return metadata.hashKeyName
     }
 
     Class getHashKeyClass() {
-        return hashKeyClass
+        return metadata.hashKeyClass
     }
 
     String getRangeKeyName() {
-        return rangeKeyName
+        return metadata.rangeKeyName
     }
 
     Class getRangeKeyClass() {
-        return rangeKeyClass
+        return metadata.rangeKeyClass
     }
 
 }

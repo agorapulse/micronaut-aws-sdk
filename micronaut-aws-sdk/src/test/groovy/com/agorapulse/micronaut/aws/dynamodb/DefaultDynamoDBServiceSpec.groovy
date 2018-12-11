@@ -1,13 +1,19 @@
 package com.agorapulse.micronaut.aws.dynamodb
 
+import com.agorapulse.micronaut.aws.dynamodb.query.QueryBuilder
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
+import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
 import com.amazonaws.services.dynamodbv2.model.CreateTableResult
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.SimpleType
+import io.reactivex.Flowable
 import org.joda.time.DateTime
 import org.testcontainers.containers.localstack.LocalStackContainer
 import org.testcontainers.spock.Testcontainers
+import space.jasan.support.groovy.closure.ConsumerWithDelegate
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
@@ -22,6 +28,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
 
     DefaultDynamoDBService<DynamoDBEntity> service
     AmazonDynamoDB amazonDynamoDB
+    IDynamoDBMapper mapper
 
     void setup() {
         amazonDynamoDB = AmazonDynamoDBClient
@@ -29,6 +36,8 @@ class DefaultDynamoDBServiceSpec extends Specification {
             .withEndpointConfiguration(localstack.getEndpointConfiguration(LocalStackContainer.Service.DYNAMODB))
             .withCredentials(localstack.defaultCredentialsProvider)
             .build()
+
+        mapper = new DynamoDBMapper(amazonDynamoDB)
 
         service = new DefaultDynamoDBService<>(this.amazonDynamoDB, new DynamoDBMapper(this.amazonDynamoDB), DynamoDBEntity)
     }
@@ -153,6 +162,41 @@ class DefaultDynamoDBServiceSpec extends Specification {
             ]).count == 1
     }
 
+    void 'query with builder'() {
+        expect:
+            query {
+                hash '1'
+            }.count().blockingGet() == 2
+
+            query {
+                hash '1'
+                range {
+                    eq '1'
+                }
+            }.count().blockingGet() == 1
+
+            query {
+                hash '1'
+                range {
+                    eq DynamoDBEntity.RANGE_INDEX, 'bar'
+                }
+            }.count().blockingGet() == 1
+
+            query {
+                hash '1'
+                range {
+                    between DynamoDBEntity.DATE_INDEX, REFERENCE_DATE.minusDays(1).toDate(), REFERENCE_DATE.plusDays(2).toDate()
+                }
+            }.count().blockingGet() == 2
+
+            query {
+                hash '3'
+                range {
+                    between DynamoDBEntity.DATE_INDEX, REFERENCE_DATE.plusDays(9).toDate(), REFERENCE_DATE.plusDays(20).toDate()
+                }
+            }.count().blockingGet() == 1
+    }
+
     void 'delete attribute'() {
         expect:
             service.get('1', '1').number == 2
@@ -176,6 +220,14 @@ class DefaultDynamoDBServiceSpec extends Specification {
             service.countByDates('2', DynamoDBEntity.DATE_INDEX, [
                 after: REFERENCE_DATE.minusDays(20).toDate(), before: REFERENCE_DATE.plusDays(20).toDate()]
             ) == 0
+    }
+
+    private Flowable<DynamoDBEntity> query(
+        @DelegatesTo(value = QueryBuilder.class, strategy = Closure.DELEGATE_FIRST, genericTypeIndex = 0)
+        @ClosureParams(value = SimpleType.class, options = "com.agorapulse.micronaut.aws.dynamodb.query.QueryBuilder<DynamoDBEntity>")
+            Closure<QueryBuilder<DynamoDBEntity>> definition
+    ) {
+        return QueryBuilder.query(DynamoDBEntity, ConsumerWithDelegate.create(definition)).execute(mapper)
     }
 
 }
