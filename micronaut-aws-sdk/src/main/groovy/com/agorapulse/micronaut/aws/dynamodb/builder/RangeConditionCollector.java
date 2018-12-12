@@ -1,4 +1,4 @@
-package com.agorapulse.micronaut.aws.dynamodb.query;
+package com.agorapulse.micronaut.aws.dynamodb.builder;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperTableModel;
 import com.amazonaws.services.dynamodbv2.model.Condition;

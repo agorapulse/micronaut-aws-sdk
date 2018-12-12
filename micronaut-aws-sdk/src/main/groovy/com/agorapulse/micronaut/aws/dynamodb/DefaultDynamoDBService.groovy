@@ -5,25 +5,23 @@ import com.amazonaws.services.dynamodbv2.datamodeling.*
 import com.amazonaws.services.dynamodbv2.model.*
 import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
-import io.micronaut.context.annotation.Parameter
-import io.micronaut.context.annotation.Prototype
 
 import java.lang.reflect.Method
 import java.text.SimpleDateFormat
 
 @Slf4j
-@Prototype
 class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> {
 
     static String INDEX_NAME_SUFFIX = 'Index'
     // Specific ranges ending with 'Index' are String concatenated indexes, to keep ordering (ex.: createdByUserIdIndex=37641047|2011-02-21T17:15:23.000Z|2424353910)
-    static int DEFAULT_QUERY_LIMIT = 20
-    static int DEFAULT_COUNT_LIMIT = 100
+    public static final int DEFAULT_QUERY_LIMIT = 20
+    public static final int DEFAULT_COUNT_LIMIT = 100
+    public static final int BATCH_DELETE_LIMIT = 100
+    public static final int WRITE_BATCH_SIZE = 100 // Max number of elements to write at once in DynamoDB (mixed tables)
+
     static String SERIALIZED_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
     static String SERIALIZED_DATE_TIMEZONE = 'GMT'
 
-    protected static int BATCH_DELETE_LIMIT = 100
-    protected static int WRITE_BATCH_SIZE = 100 // Max number of elements to write at once in DynamoDB (mixed tables)
 
     protected final AmazonDynamoDB client
     protected final IDynamoDBMapper mapper
@@ -37,7 +35,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      * @param amazonWebService
      */
     @CompileDynamic
-    protected DefaultDynamoDBService(AmazonDynamoDB client, IDynamoDBMapper mapper, @Parameter Class<TItemClass> itemClass) {
+    protected DefaultDynamoDBService(AmazonDynamoDB client, IDynamoDBMapper mapper, Class<TItemClass> itemClass) {
         this.client = client
         this.mapper = mapper
         this.metadata = DynamoDBMetadata.create(itemClass)
@@ -223,6 +221,18 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
             query.indexName = indexName
         }
 
+        deleteAllByConditions(query, settings)
+    }
+
+    /**
+     *
+     * @param hashKey
+     * @param rangeKeyConditions
+     * @param settings
+     * @param indexName
+     * @return
+     */
+    int deleteAllByConditions(DynamoDBQueryExpression query, Map settings) {
         QueryResultPage itemsPage = mapper.queryPage(metadata.itemClass, query)
 
         int deletedItemsCount = -1
@@ -268,7 +278,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      */
     List<TItemClass> getAll(Object hashKey, List rangeKeys, Map settings) {
         Map result = [:]
-        List objects = rangeKeys.unique().collect { it -> metadata.itemClass.newInstance((hashKeyName): hashKey, (rangeKeyName): it) }
+        List objects = rangeKeys.unique(false).collect { it -> metadata.itemClass.newInstance((hashKeyName): hashKey, (rangeKeyName): it) }
         if (settings.throttle) {
             int resultCursor = 0
             long readCapacityUnit = settings.readCapacityUnit

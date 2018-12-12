@@ -330,6 +330,8 @@ public interface DynamoDBService<T> {
      */
     int deleteAllByConditions(Object hashKey, Map<String, Condition> rangeKeyConditions, Map settings, String indexName);
 
+    int deleteAllByConditions(DynamoDBQueryExpression query, Map settings);
+
     /**
      * @param hashKey
      * @param rangeKeyConditions
