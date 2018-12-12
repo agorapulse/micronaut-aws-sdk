@@ -9,6 +9,7 @@ import com.amazonaws.services.dynamodbv2.model.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 class DefaultUpdateBuilder<T> implements UpdateBuilder<T> {
@@ -33,6 +34,8 @@ class DefaultUpdateBuilder<T> implements UpdateBuilder<T> {
 
     private ReturnValue returnValue = ReturnValue.NONE;
     private Function<T, ?> returnValueMapper = Function.identity();
+
+    private Consumer<UpdateItemRequest> configurer = u -> {};
 
     DefaultUpdateBuilder(Class<T> itemType) {
         this.itemType = itemType;
@@ -98,7 +101,15 @@ class DefaultUpdateBuilder<T> implements UpdateBuilder<T> {
             );
         }
 
+        configurer.accept(request);
+
         return request;
+    }
+
+    @Override
+    public UpdateBuilder<T> configure(Consumer<UpdateItemRequest> configurer) {
+        this.configurer = configurer;
+        return this;
     }
 
     @Override

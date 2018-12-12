@@ -1,5 +1,6 @@
 package com.agorapulse.micronaut.aws.dynamodb.builder;
 
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.model.ConditionalOperator;
 import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
@@ -43,5 +44,15 @@ public interface QueryBuilder<T> extends DetachedQuery<T> {
     QueryBuilder<T> page(int page);
 
     QueryBuilder<T> offset(Object exclusiveStartKeyValue);
+
+    QueryBuilder<T> configure(Consumer<DynamoDBQueryExpression<T>> configurer);
+
+    default QueryBuilder<T> configure(
+        @DelegatesTo(type = "com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression<T>", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = FromString.class, options = "com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression<T>")
+            Closure<Object> configurer
+    ) {
+        return configure(ConsumerWithDelegate.create(configurer));
+    }
 
 }

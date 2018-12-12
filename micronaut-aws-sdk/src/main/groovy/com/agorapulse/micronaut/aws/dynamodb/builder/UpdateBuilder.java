@@ -1,12 +1,15 @@
 package com.agorapulse.micronaut.aws.dynamodb.builder;
 
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
+import com.amazonaws.services.dynamodbv2.model.UpdateItemRequest;
 import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
 import groovy.transform.stc.ClosureParams;
 import groovy.transform.stc.FromString;
+import space.jasan.support.groovy.closure.ConsumerWithDelegate;
 import space.jasan.support.groovy.closure.FunctionWithDelegate;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public interface UpdateBuilder<T> extends DetachedUpdate<T> {
@@ -86,6 +89,16 @@ public interface UpdateBuilder<T> extends DetachedUpdate<T> {
             Closure<Object> mapper
     ) {
         return returns(returnValue, FunctionWithDelegate.create(mapper));
+    }
+
+    UpdateBuilder<T> configure(Consumer<UpdateItemRequest> configurer);
+
+    default UpdateBuilder<T> configure(
+        @DelegatesTo(type = "com.amazonaws.services.dynamodbv2.model.UpdateItemRequest", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = FromString.class, options = "com.amazonaws.services.dynamodbv2.model.UpdateItemRequest")
+            Closure<Object> configurer
+    ) {
+        return configure(ConsumerWithDelegate.create(configurer));
     }
 
 }

@@ -264,6 +264,18 @@ class DefaultDynamoDBServiceSpec extends Specification {
             s.countByDates('1002', REFERENCE_DATE.minusDays(20).toDate(), REFERENCE_DATE.plusDays(20).toDate()) == 0
     }
 
+    void 'count many items'() {
+        when:
+            String parentKey = "2001"
+            DynamoDBItemDBService s = context.getBean(DynamoDBItemDBService)
+
+            101.times {
+                s.save(new DynamoDBEntity(parentId: parentKey, id: "$it"))
+            }
+        then:
+            s.count(parentKey) == 101
+
+    }
     void 'delete attribute'() {
         expect:
             service.get('1', '1').number == 2

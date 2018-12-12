@@ -110,7 +110,15 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
             expression.withExclusiveStartKey(model.convertKey(exclusiveKey))
         }
 
+        configurer.accept(expression)
+
         return expression
+    }
+
+    @Override
+    QueryBuilder<T> configure(Consumer<DynamoDBQueryExpression<T>> configurer) {
+        this.configurer = configurer
+        return this
     }
 
     // for proper groovy evaluation of closure in the annotation
@@ -136,4 +144,5 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     private Object exclusiveStartKey
     private List<Consumer<RangeConditionCollector<T>>> rangeCollectorsConsumers = new ArrayList<>()
     private List<Consumer<RangeConditionCollector<T>>> filterCollectorsConsumers = new ArrayList<>()
+    private Consumer<DynamoDBQueryExpression<T>> configurer = {} as Consumer<DynamoDBQueryExpression<T>>
 }

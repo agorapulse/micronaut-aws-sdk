@@ -1,10 +1,6 @@
 package com.agorapulse.micronaut.aws.dynamodb
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIndexRangeKey
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable
-import com.amazonaws.services.dynamodbv2.datamodeling.ReflectionUtils
+import com.amazonaws.services.dynamodbv2.datamodeling.*
 
 import java.lang.reflect.Field
 import java.lang.reflect.Method

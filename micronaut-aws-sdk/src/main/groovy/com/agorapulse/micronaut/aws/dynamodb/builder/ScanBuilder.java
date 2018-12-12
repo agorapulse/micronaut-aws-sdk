@@ -1,5 +1,6 @@
 package com.agorapulse.micronaut.aws.dynamodb.builder;
 
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.model.ConditionalOperator;
 import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
@@ -30,5 +31,15 @@ public interface ScanBuilder<T> extends DetachedScan<T> {
     ScanBuilder<T> page(int page);
 
     ScanBuilder<T> offset(Object exclusiveStartKeyValue);
+
+    ScanBuilder<T> configure(Consumer<DynamoDBScanExpression> configurer);
+
+    default ScanBuilder<T> configure(
+        @DelegatesTo(type = "com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = FromString.class, options = "com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression")
+            Closure<Object> configurer
+    ) {
+        return configure(ConsumerWithDelegate.create(configurer));
+    }
 
 }

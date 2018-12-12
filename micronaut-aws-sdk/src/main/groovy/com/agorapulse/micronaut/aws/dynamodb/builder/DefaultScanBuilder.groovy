@@ -2,7 +2,6 @@ package com.agorapulse.micronaut.aws.dynamodb.builder
 
 import com.agorapulse.micronaut.aws.dynamodb.DynamoDBMetadata
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperTableModel
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
 import com.amazonaws.services.dynamodbv2.model.Condition
@@ -86,7 +85,15 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
             expression.withExclusiveStartKey(model.convertKey(exclusiveKey))
         }
 
+        configurer.accept(expression)
+
         return expression
+    }
+
+    @Override
+    ScanBuilder<T> configure(Consumer<DynamoDBScanExpression> configurer) {
+        this.configurer = configurer
+        return this
     }
 
     // for proper groovy evaluation of closure in the annotation
@@ -110,4 +117,5 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
     private final DynamoDBScanExpression expression
     private Object exclusiveStartKey
     private List<Consumer<RangeConditionCollector<T>>> filterCollectorsConsumers = new ArrayList<>()
+    private Consumer<DynamoDBScanExpression> configurer = {} as Consumer<DynamoDBScanExpression>
 }
