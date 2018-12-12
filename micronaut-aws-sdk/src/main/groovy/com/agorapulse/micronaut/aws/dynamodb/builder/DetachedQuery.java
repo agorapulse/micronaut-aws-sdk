@@ -4,7 +4,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
 import io.reactivex.Flowable;
 
-public interface DetachedCriteria<T> {
+public interface DetachedQuery<T> {
 
     Flowable<T> query(IDynamoDBMapper mapper);
     int count(IDynamoDBMapper mapper);

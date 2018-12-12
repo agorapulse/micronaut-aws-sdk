@@ -2,7 +2,8 @@ package com.agorapulse.micronaut.aws.dynamodb;
 
 import com.agorapulse.micronaut.aws.dynamodb.annotation.*;
 import com.agorapulse.micronaut.aws.dynamodb.builder.Builders;
-import com.agorapulse.micronaut.aws.dynamodb.builder.DetachedCriteria;
+import com.agorapulse.micronaut.aws.dynamodb.builder.DetachedQuery;
+import com.agorapulse.micronaut.aws.dynamodb.builder.DetachedScan;
 import com.agorapulse.micronaut.aws.dynamodb.builder.DetachedUpdate;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
@@ -71,7 +72,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         // TODO: change to annotation value when fixed
         // https://github.com/micronaut-projects/micronaut-core/issues/1022
         if (context.getTargetMethod().isAnnotationPresent(Query.class)) {
-            DetachedCriteria criteria = evaluateAnnotationType(context.getTargetMethod().getAnnotation(Query.class).value(), context);
+            DetachedQuery criteria = evaluateAnnotationType(context.getTargetMethod().getAnnotation(Query.class).value(), context);
 
             if (methodName.startsWith("count")) {
                 return criteria.count(mapper);
@@ -88,6 +89,12 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             DetachedUpdate criteria = evaluateAnnotationType(context.getTargetMethod().getAnnotation(Update.class).value(), context);
 
             return criteria.update(mapper, amazonDynamoDB);
+        }
+
+        if (context.getTargetMethod().isAnnotationPresent(Scan.class)) {
+            DetachedScan criteria = evaluateAnnotationType(context.getTargetMethod().getAnnotation(Scan.class).value(), context);
+
+            return criteria.scan(mapper);
         }
 
         if (methodName.startsWith("count")) {
@@ -219,7 +226,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         return service.get(hashKey, rangeKey);
     }
 
-    private DetachedCriteria simpleHashAndRangeQuery(
+    private DetachedQuery simpleHashAndRangeQuery(
         Class type,
         MethodInvocationContext<Object, Object> context
     ) {

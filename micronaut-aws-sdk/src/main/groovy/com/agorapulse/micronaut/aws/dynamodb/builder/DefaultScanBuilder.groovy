@@ -3,6 +3,7 @@ package com.agorapulse.micronaut.aws.dynamodb.builder
 import com.agorapulse.micronaut.aws.dynamodb.DynamoDBMetadata
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperTableModel
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
 import com.amazonaws.services.dynamodbv2.model.Condition
 import com.amazonaws.services.dynamodbv2.model.ConditionalOperator
@@ -15,23 +16,14 @@ import java.util.function.Consumer
 
 @PackageScope
 @CompileStatic
-class DefaultQueryBuilder<T> implements QueryBuilder<T> {
+class DefaultScanBuilder<T> implements ScanBuilder<T> {
 
-    DefaultQueryBuilder(Class<T> type, DynamoDBQueryExpression<T> expression) {
+    DefaultScanBuilder(Class<T> type, DynamoDBScanExpression expression) {
         this.metadata = DynamoDBMetadata.create(type)
         this.expression = expression
     }
 
-    DefaultQueryBuilder<T> sort(Builders.Sort sort) {
-        if (sort == Builders.Sort.ASC) {
-            expression.withScanIndexForward(true)
-        } else if (sort == Builders.Sort.DESC) {
-            expression.withScanIndexForward(false)
-        }
-        return this
-    }
-
-    DefaultQueryBuilder<T> inconsistent(Builders.Read read) {
+    DefaultScanBuilder<T> inconsistent(Builders.Read read) {
         if (read.equals(Builders.Read.READ)) {
             expression.withConsistentRead(false)
         }
@@ -39,7 +31,7 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
         return this
     }
 
-    DefaultQueryBuilder<T> consistent(Builders.Read read) {
+    DefaultScanBuilder<T> consistent(Builders.Read read) {
         if (read.equals(Builders.Read.READ)) {
             expression.withConsistentRead(true)
         }
@@ -47,37 +39,28 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
         return this
     }
 
-    DefaultQueryBuilder<T> index(String name) {
+    DefaultScanBuilder<T> index(String name) {
         expression.withIndexName(name)
         return this
     }
 
-    DefaultQueryBuilder<T> hash(Object hash) {
-        this.hashKey = hash
-        return this
-    }
 
-    DefaultQueryBuilder<T> range(Consumer<RangeConditionCollector<T>> conditions) {
-        rangeCollectorsConsumers.add(conditions)
-        return this
-    }
-
-    DefaultQueryBuilder<T> filter(Consumer<RangeConditionCollector<T>> conditions) {
+    DefaultScanBuilder<T> filter(Consumer<RangeConditionCollector<T>> conditions) {
         filterCollectorsConsumers.add(conditions)
         return this
     }
 
-    DefaultQueryBuilder<T> filter(ConditionalOperator or) {
+    DefaultScanBuilder<T> filter(ConditionalOperator or) {
         expression.withConditionalOperator(or)
         return this
     }
 
-    DefaultQueryBuilder<T> page(int page) {
+    DefaultScanBuilder<T> page(int page) {
         expression.withLimit(page)
         return this
     }
 
-    DefaultQueryBuilder<T> offset(Object exclusiveStartKeyValue) {
+    DefaultScanBuilder<T> offset(Object exclusiveStartKeyValue) {
         this.exclusiveStartKey = exclusiveStartKeyValue
         return this
     }
@@ -88,22 +71,15 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     }
 
     @Override
-    Flowable<T> query(IDynamoDBMapper mapper) {
+    Flowable<T> scan(IDynamoDBMapper mapper) {
         return FlowableQueryResultHelper.generate(metadata.itemClass, mapper, resolveExpression(mapper))
     }
 
     @Override
-    DynamoDBQueryExpression<T> resolveExpression(IDynamoDBMapper mapper) {
+    DynamoDBScanExpression resolveExpression(IDynamoDBMapper mapper) {
         DynamoDBMapperTableModel<T> model = mapper.getTableModel(metadata.getItemClass())
 
-        if (hashKey != null) {
-            expression.withHashKeyValues(model.createKey(hashKey, null))
-        }
-
-
-        applyConditions(model, rangeCollectorsConsumers, expression.&withRangeKeyCondition)
-        applyConditions(model, filterCollectorsConsumers, expression.&withQueryFilterEntry)
-
+        applyConditions(model, filterCollectorsConsumers, expression.&withFilterConditionEntry)
 
         if (exclusiveStartKey != null) {
             T exclusiveKey = model.createKey(exclusiveStartKey, null)
@@ -131,9 +107,7 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     }
 
     private final DynamoDBMetadata<T> metadata
-    private final DynamoDBQueryExpression<T> expression
-    private Object hashKey
+    private final DynamoDBScanExpression expression
     private Object exclusiveStartKey
-    private List<Consumer<RangeConditionCollector<T>>> rangeCollectorsConsumers = new ArrayList<>()
     private List<Consumer<RangeConditionCollector<T>>> filterCollectorsConsumers = new ArrayList<>()
 }

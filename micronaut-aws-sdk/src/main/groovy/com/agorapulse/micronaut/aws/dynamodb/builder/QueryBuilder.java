@@ -9,8 +9,9 @@ import space.jasan.support.groovy.closure.ConsumerWithDelegate;
 
 import java.util.function.Consumer;
 
-public interface QueryBuilder<T> extends DetachedCriteria<T> {
+public interface QueryBuilder<T> extends DetachedQuery<T> {
 
+    QueryBuilder<T> consistent(Builders.Read read);
     QueryBuilder<T> inconsistent(Builders.Read read);
 
     QueryBuilder<T> index(String name);
@@ -20,8 +21,8 @@ public interface QueryBuilder<T> extends DetachedCriteria<T> {
     QueryBuilder<T> range(Consumer<RangeConditionCollector<T>> conditions);
 
     default QueryBuilder<T> range(
-        @DelegatesTo(type = "com.agorapulse.micronaut.aws.dynamodb.query.RangeConditionCollector<T>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.aws.dynamodb.query.RangeConditionCollector<T>")
+        @DelegatesTo(type = "com.agorapulse.micronaut.aws.dynamodb.builder.RangeConditionCollector<T>", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.aws.dynamodb.builder.RangeConditionCollector<T>")
             Closure<RangeConditionCollector<T>> conditions
     ) {
         return range(ConsumerWithDelegate.create(conditions));
@@ -30,8 +31,8 @@ public interface QueryBuilder<T> extends DetachedCriteria<T> {
     QueryBuilder<T> filter(Consumer<RangeConditionCollector<T>> conditions);
 
     default QueryBuilder<T> filter(
-        @DelegatesTo(type = "com.agorapulse.micronaut.aws.dynamodb.query.RangeConditionCollector<T>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.aws.dynamodb.query.RangeConditionCollector<T>")
+        @DelegatesTo(type = "com.agorapulse.micronaut.aws.dynamodb.builder.RangeConditionCollector<T>", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.aws.dynamodb.builder.RangeConditionCollector<T>")
             Closure<RangeConditionCollector<T>> conditions
     ) {
         return filter(ConsumerWithDelegate.create(conditions));

@@ -1,6 +1,7 @@
 package com.agorapulse.micronaut.aws.dynamodb
 
 import com.agorapulse.micronaut.aws.dynamodb.annotation.Query
+import com.agorapulse.micronaut.aws.dynamodb.annotation.Scan
 import com.agorapulse.micronaut.aws.dynamodb.annotation.Service
 import com.agorapulse.micronaut.aws.dynamodb.annotation.Update
 import com.agorapulse.micronaut.aws.dynamodb.builder.QueryBuilder
@@ -245,6 +246,8 @@ class DefaultDynamoDBServiceSpec extends Specification {
             s.queryByDates('1', REFERENCE_DATE.minusDays(1).toDate(), REFERENCE_DATE.plusDays(2).toDate()).count().blockingGet() == 2
             s.queryByDates('3', REFERENCE_DATE.plusDays(9).toDate(), REFERENCE_DATE.plusDays(20).toDate()).count().blockingGet() == 1
 
+            s.scanAllByRangeIndex('bar').count().blockingGet() == 4
+
             s.increment('1001', '1')
             s.increment('1001', '1')
             s.increment('1001', '1')
@@ -392,6 +395,15 @@ interface DynamoDBItemDBService {
         }
     })
     Number decrement(String hashKey, String rangeKey)
+
+    @Scan({
+        scan(DynamoDBEntity) {
+            filter {
+                eq DynamoDBEntity.RANGE_INDEX, foo
+            }
+        }
+    })
+    Flowable<DynamoDBEntity> scanAllByRangeIndex(String foo)
 
     // TODO: test count with large numbers
 }

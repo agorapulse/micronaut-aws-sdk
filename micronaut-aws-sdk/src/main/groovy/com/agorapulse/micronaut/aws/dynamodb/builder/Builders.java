@@ -2,6 +2,7 @@ package com.agorapulse.micronaut.aws.dynamodb.builder;
 
 import com.agorapulse.micronaut.aws.dynamodb.DefaultDynamoDBService;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.model.ConditionalOperator;
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
 import groovy.lang.Closure;
@@ -50,6 +51,21 @@ public final class Builders {
             Closure<QueryBuilder<T>> definition
     ) {
         return query(type, ConsumerWithDelegate.create(definition));
+    }
+
+    public static <T> ScanBuilder<T> scan(Class<T> type, Consumer<ScanBuilder<T>> definition) {
+        ScanBuilder<T> builder = new DefaultScanBuilder<T>(type, new DynamoDBScanExpression().withLimit(DefaultDynamoDBService.DEFAULT_QUERY_LIMIT));
+        definition.accept(builder);
+        return builder;
+    }
+
+    public static <T> ScanBuilder<T> scan(
+        Class<T> type,
+        @DelegatesTo(type = "com.agorapulse.micronaut.aws.dynamodb.builder.ScanBuilder<T>", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = SimpleType.class, options = "com.agorapulse.micronaut.aws.dynamodb.builder.ScanBuilder<T>")
+            Closure<ScanBuilder<T>> definition
+    ) {
+        return scan(type, ConsumerWithDelegate.create(definition));
     }
 
     public static <T> UpdateBuilder<T> update(Class<T> type, Consumer<UpdateBuilder<T>> definition) {
