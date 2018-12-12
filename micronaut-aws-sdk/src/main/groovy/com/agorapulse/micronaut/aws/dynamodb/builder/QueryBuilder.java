@@ -8,6 +8,7 @@ import groovy.transform.stc.ClosureParams;
 import groovy.transform.stc.FromString;
 import space.jasan.support.groovy.closure.ConsumerWithDelegate;
 
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 public interface QueryBuilder<T> extends DetachedQuery<T> {
@@ -53,6 +54,20 @@ public interface QueryBuilder<T> extends DetachedQuery<T> {
             Closure<Object> configurer
     ) {
         return configure(ConsumerWithDelegate.create(configurer));
+    }
+
+    QueryBuilder<T> only(Iterable<String> propertyPaths);
+
+    default QueryBuilder<T> only(String... propertyPaths) {
+        return only(Arrays.asList(propertyPaths));
+    }
+
+    default QueryBuilder<T> only(
+        @DelegatesTo(type = "T", strategy = Closure.DELEGATE_ONLY)
+        @ClosureParams(value = FromString.class, options = "T")
+            Closure<Object> collector
+    ) {
+        return only(PathCollector.collectPaths(collector).getPropertyPaths());
     }
 
 }

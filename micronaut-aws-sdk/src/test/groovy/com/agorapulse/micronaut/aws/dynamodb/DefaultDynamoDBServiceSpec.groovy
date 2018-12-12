@@ -243,6 +243,8 @@ class DefaultDynamoDBServiceSpec extends Specification {
             s.query('1').count().blockingGet() == 2
             s.query('1', '1').count().blockingGet() == 1
             s.queryByRangeIndex('1', 'bar').count().blockingGet() == 1
+            s.queryByRangeIndex('1', 'bar').blockingSingle().parentId == null // projection
+            s.queryByRangeIndex('1', 'bar').blockingSingle().rangeIndex == 'bar' // projection
             s.queryByDates('1', REFERENCE_DATE.minusDays(1).toDate(), REFERENCE_DATE.plusDays(2).toDate()).count().blockingGet() == 2
             s.queryByDates('3', REFERENCE_DATE.plusDays(9).toDate(), REFERENCE_DATE.plusDays(20).toDate()).count().blockingGet() == 1
 
@@ -268,10 +270,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
         when:
             String parentKey = "2001"
             DynamoDBItemDBService s = context.getBean(DynamoDBItemDBService)
-
-            101.times {
-                s.save(new DynamoDBEntity(parentId: parentKey, id: "$it"))
-            }
+            s.saveAll((1..101).collect { new DynamoDBEntity(parentId: parentKey, id: "$it") })
         then:
             s.count(parentKey) == 101
 
@@ -355,6 +354,9 @@ interface DynamoDBItemDBService {
             range {
                 eq DynamoDBEntity.RANGE_INDEX, rangeKey
             }
+            only {
+                rangeIndex
+            }
         }
     })
     Flowable<DynamoDBEntity> queryByRangeIndex(String hashKey, String rangeKey)
@@ -416,6 +418,4 @@ interface DynamoDBItemDBService {
         }
     })
     Flowable<DynamoDBEntity> scanAllByRangeIndex(String foo)
-
-    // TODO: test count with large numbers
 }

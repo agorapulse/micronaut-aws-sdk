@@ -116,6 +116,12 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     }
 
     @Override
+    QueryBuilder<T> only(Iterable<String> propertyPaths) {
+        expression.projectionExpression = propertyPaths.join(',')
+        return this
+    }
+
+    @Override
     QueryBuilder<T> configure(Consumer<DynamoDBQueryExpression<T>> configurer) {
         this.configurer = configurer
         return this
