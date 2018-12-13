@@ -10,6 +10,7 @@ class GrailsPropertyTranslatingApplicationContext extends DefaultApplicationCont
     GrailsPropertyTranslatingApplicationContext(org.springframework.core.env.Environment environment, PropertyTranslatingCustomizer customizer) {
         super(environment.getActiveProfiles());
         this.environment = new GrailsPropertyTranslatingEnvironment(environment, customizer);
+        this.environment.addPropertySource(new EnvVarLikeSystemPropertiesPropertySource());
     }
 
     @Override
