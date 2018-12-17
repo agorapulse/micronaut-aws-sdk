@@ -7,7 +7,7 @@ import io.micronaut.http.annotation.Get
 import io.micronaut.http.annotation.Post
 import io.micronaut.http.annotation.Status
 
-@Controller
+@Controller('/spacecraft')
 class SpacecraftController {
 
     private final SpacecraftDBService spacecraftDBService
