@@ -1,0 +1,13 @@
+com.agorapulse.micronaut.aws
+com.agorapulse.micronaut.aws.dynamodb
+com.agorapulse.micronaut.aws.dynamodb.annotation
+com.agorapulse.micronaut.aws.dynamodb.builder
+com.agorapulse.micronaut.aws.kinesis
+com.agorapulse.micronaut.aws.kinesis.annotation
+com.agorapulse.micronaut.aws.kinesis.worker
+com.agorapulse.micronaut.aws.s3
+com.agorapulse.micronaut.aws.ses
+com.agorapulse.micronaut.aws.sns
+com.agorapulse.micronaut.aws.sns.annotation
+com.agorapulse.micronaut.aws.sqs
+com.agorapulse.micronaut.aws.sqs.annotation
