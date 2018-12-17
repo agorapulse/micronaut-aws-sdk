@@ -8,6 +8,7 @@ import com.agorapulse.micronaut.http.examples.planets.Planet
 import com.agorapulse.micronaut.http.examples.planets.PlanetDBService
 import com.agorapulse.micronaut.http.examples.spacecrafts.Spacecraft
 import com.agorapulse.micronaut.http.examples.spacecrafts.SpacecraftDBService
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.amazonaws.services.lambda.runtime.Context
 import groovy.transform.CompileStatic
@@ -52,7 +53,7 @@ class LocalServicesFactory {
     @Primary
     @Singleton
     PlanetDBService planetDBService() {
-        return new PlanetDBService(mapper: mapper)
+        return new PlanetDBService(AmazonDynamoDBClient.builder().build(), mapper)
     }
 
     @Bean

@@ -5,6 +5,7 @@ import com.agorapulse.dru.dynamodb.persistence.DynamoDB
 import com.agorapulse.gru.Gru
 import com.agorapulse.gru.agp.ApiGatewayProxy
 import com.agorapulse.micronaut.agp.ApiGatewayProxyHandler
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import io.micronaut.context.ApplicationContext
 import org.junit.Rule
 import spock.lang.Specification
@@ -18,10 +19,12 @@ class PlanetControllerSpec extends Specification {
 
     @Rule Dru dru = Dru.steal(this)
 
+    AmazonDynamoDB amazonDynamoDB = Mock(AmazonDynamoDB)
+
     ApiGatewayProxyHandler handler = new ApiGatewayProxyHandler(){
         @Override
         protected void doWithApplicationContext(ApplicationContext applicationContext) {
-            applicationContext.registerSingleton(PlanetDBService, new PlanetDBService(mapper: DynamoDB.createMapper(dru)))
+            applicationContext.registerSingleton(PlanetDBService, new PlanetDBService(amazonDynamoDB, DynamoDB.createMapper(dru)))
         }
     }
 

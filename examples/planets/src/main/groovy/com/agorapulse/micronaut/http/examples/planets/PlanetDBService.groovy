@@ -1,6 +1,6 @@
 package com.agorapulse.micronaut.http.examples.planets
 
-import com.amazonaws.AmazonClientException
+
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
@@ -14,8 +14,13 @@ import javax.inject.Singleton
 @Singleton
 class PlanetDBService {
 
-    AmazonDynamoDB amazonDynamoDBClient = new AmazonDynamoDBClient()
-    IDynamoDBMapper mapper = new DynamoDBMapper(amazonDynamoDBClient)
+    AmazonDynamoDB amazonDynamoDBClient
+    IDynamoDBMapper mapper
+
+    PlanetDBService(AmazonDynamoDB amazonDynamoDBClient, IDynamoDBMapper mapper) {
+        this.amazonDynamoDBClient = amazonDynamoDBClient
+        this.mapper = mapper
+    }
 
     @PostConstruct
     void init() {
