@@ -7,6 +7,7 @@ import com.agorapulse.micronaut.aws.dynamodb.builder.DetachedScan;
 import com.agorapulse.micronaut.aws.dynamodb.builder.DetachedUpdate;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException;
 import groovy.lang.Closure;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
@@ -56,10 +57,19 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             throw new IllegalStateException("Invocation context is missing required annotation Service");
         }
 
-        String methodName = context.getMethodName();
         Class type = serviceAnnotationValue.getValue(Class.class).orElseThrow(() -> new IllegalArgumentException("Annotation is missing the type value!"));
         DynamoDBService service = dynamoDBServiceFactory.findOrCreate(type);
 
+        try {
+            return doIntercept(context, type, service);
+        } catch (ResourceNotFoundException ignored) {
+            service.createTable();
+            return doIntercept(context, type, service);
+        }
+    }
+
+    private Object doIntercept(MethodInvocationContext<Object, Object> context, Class type, DynamoDBService service) {
+        String methodName = context.getMethodName();
         if (methodName.startsWith("save")) {
             return handleSave(service, context);
         }

@@ -2,6 +2,7 @@ package com.agorapulse.micronaut.aws.sqs;
 
 import com.agorapulse.micronaut.aws.sqs.annotation.Queue;
 import com.agorapulse.micronaut.aws.sqs.annotation.QueueClient;
+import com.amazonaws.services.sqs.model.QueueDoesNotExistException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import groovy.transform.Undefined;
@@ -72,6 +73,15 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
             queueName = service.getDefaultQueueName();
         }
 
+        try {
+            return doIntercept(context, service, queueName, group, delay);
+        } catch (QueueDoesNotExistException ignored) {
+            service.createQueue(queueName);
+            return doIntercept(context, service, queueName, group, delay);
+        }
+    }
+
+    private Object doIntercept(MethodInvocationContext<Object, Object> context, SimpleQueueService service, String queueName, String group, Integer delay) {
         Argument[] arguments = context.getArguments();
         Map<String, Object> params = context.getParameterValueMap();
 

@@ -3,6 +3,7 @@ package com.agorapulse.micronaut.aws.sns;
 import com.agorapulse.micronaut.aws.sns.annotation.NotificationClient;
 import com.agorapulse.micronaut.aws.sns.annotation.Topic;
 import com.amazonaws.services.sns.AmazonSNS;
+import com.amazonaws.services.sns.model.NotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import groovy.transform.Undefined;
@@ -79,6 +80,15 @@ public class NotificationClientIntroduction implements MethodInterceptor<Object,
             topicName = service.getDefaultTopicNameOrArn();
         }
 
+        try {
+            return doIntercept(context, service, topicName);
+        } catch (NotFoundException nfe) {
+            service.createTopic(topicName);
+            return doIntercept(context, service, topicName);
+        }
+    }
+
+    private Object doIntercept(MethodInvocationContext<Object, Object> context, SimpleNotificationService service, String topicName) {
         Argument[] arguments = context.getArguments();
         Map<String, Object> params = context.getParameterValueMap();
 

@@ -6,6 +6,7 @@ import com.agorapulse.micronaut.aws.kinesis.annotation.SequenceNumber;
 import com.agorapulse.micronaut.aws.kinesis.annotation.Stream;
 import com.amazonaws.services.kinesis.model.PutRecordResult;
 import com.amazonaws.services.kinesis.model.PutRecordsRequestEntry;
+import com.amazonaws.services.kinesis.model.ResourceNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import groovy.transform.Undefined;
@@ -66,6 +67,15 @@ public class KinesisClientIntroduction implements MethodInterceptor<Object, Obje
             streamName = service.getDefaultStreamName();
         }
 
+        try {
+            return doIntercept(context, service, streamName);
+        } catch (ResourceNotFoundException ignored) {
+            service.createStream(streamName);
+            return doIntercept(context, service, streamName);
+        }
+    }
+
+    private Object doIntercept(MethodInvocationContext<Object, Object> context, KinesisService service, String streamName) {
         if (context.getArguments().length == 1) {
             Argument arg = context.getArguments()[0];
             Class argType = arg.getType();
