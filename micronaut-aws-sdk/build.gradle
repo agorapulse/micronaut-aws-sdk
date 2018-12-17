@@ -1,0 +1,22 @@
+dependencies {
+    compile 'io.micronaut.configuration:micronaut-aws-common'
+    compile 'space.jasan:groovy-closure-support:0.5.0'
+
+    // optional dependencies for each service
+    optional group: 'com.amazonaws', name: 'amazon-kinesis-client'
+    optional group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb'
+    optional group: 'com.amazonaws', name: 'aws-java-sdk-kinesis'
+    optional group: 'com.amazonaws', name: 'aws-java-sdk-s3'
+    optional group: 'com.amazonaws', name: 'aws-java-sdk-ses'
+    optional group: 'com.amazonaws', name: 'aws-java-sdk-sns'
+    optional group: 'com.amazonaws', name: 'aws-java-sdk-sqs'
+
+
+    optional 'javax.mail:mail:1.4.4'
+
+    testCompile group: 'org.testcontainers', name: 'testcontainers', version: testcontainersVersion
+    testCompile group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
+    testCompile group: 'org.testcontainers', name: 'spock', version: testcontainersVersion
+}
+
+apply from: '../gradle/bintray.gradle'

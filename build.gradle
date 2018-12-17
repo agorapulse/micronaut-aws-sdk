@@ -11,17 +11,39 @@ allprojects {
     }
 }
 
-subprojects {
+subprojects { Project subproject ->
     apply plugin:"io.spring.dependency-management"
     apply plugin:"groovy"
 
     apply plugin:"net.ltgt.apt-eclipse"
     apply plugin:"net.ltgt.apt-idea"
 
+    configurations {
+        optional.extendsFrom compile
+
+        compileOnly.extendsFrom optional
+        testCompile.extendsFrom optional
+    }
 
     dependencyManagement {
         imports {
             mavenBom "io.micronaut:micronaut-bom:$micronautVersion"
+        }
+
+        dependencies {
+            dependencySet(group: 'com.amazonaws', version: project.awsSdkVersion) {
+                entry 'aws-java-sdk-core'
+                entry 'aws-java-sdk-dynamodb'
+                entry 'aws-java-sdk-kms'
+                entry 'aws-java-sdk-kinesis'
+                entry 'aws-java-sdk-s3'
+                entry 'aws-java-sdk-ses'
+                entry 'aws-java-sdk-sns'
+                entry 'aws-java-sdk-sqs'
+                entry 'jmespath'
+            }
+            dependency group: 'com.amazonaws', name: 'amazon-kinesis-client', version: '1.9.3'
+            dependency group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-cbor', version: project['jackson.datatype.version']
         }
     }
 
@@ -58,12 +80,21 @@ subprojects {
 
     test {
         testLogging {
+            events "PASSED", "STARTED", "FAILED", "SKIPPED", "STANDARD_ERROR", "STANDARD_OUT"
             showCauses = true
             showExceptions = true
             showStackTraces = true
             showStandardStreams = false
+            exceptionFormat "full"
         }
-
-        systemProperty 'TEST_RESOURCES_FOLDER', new File(project.projectDir, 'src/test/resources').canonicalPath
+        systemProperty 'TEST_RESOURCES_FOLDER', new File(subproject.projectDir, 'src/test/resources').canonicalPath
+        systemProperty 'user.timezone', 'UTC'
+        systemProperty 'user.language', 'en'
     }
+
+    task cleanOut(type: Delete) {
+        delete file('out')
+    }
+
+    clean.dependsOn cleanOut
 }
