@@ -668,7 +668,22 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 </div>
 <div class="sect3">
 <h4 id="_installation">Installation</h4>
-
+<div class="listingblock primary">
+<div class="title">Gradle</div>
+<div class="content">
+<pre class="highlightjs highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk:1.2.3'</code></pre>
+</div>
+</div>
+<div class="listingblock secondary">
+<div class="title">Maven</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
+    &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
+    &lt;artifactId&gt;micronaut-aws-sdk&lt;/artifactId&gt;
+    &lt;version&gt;{version}&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_declarative_services_with_service">Declarative Services with <code>@Service</code></h4>
@@ -783,7 +798,7 @@ Instead you can annotate any method with <code>@Query</code> annotation to make 
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy"><i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
 
 @Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
 interface DynamoDBItemDBService {
@@ -919,7 +934,7 @@ If you need to scan the table by unindexed attributes you can annotate any metho
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy"><i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
 
 @Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
 interface DynamoDBItemDBService {
@@ -1016,7 +1031,7 @@ public interface DynamoDBEntityService {
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy"><i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
 
 @Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
 interface DynamoDBItemDBService {
@@ -1144,7 +1159,7 @@ public interface DynamoDBEntityService {
 <div class="title">Groovy</div>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy">DynamoDBServiceProvider provider = context.getBean(DynamoDBServiceProvider)
-s = provider.findOrCreate(DynamoDBEntity)                                       <i class="conum" data-value="1"></i><b>(1)</b>
+DynamoDBService&lt;DynamoDBEntity&gt; s = provider.findOrCreate(DynamoDBEntity)       <i class="conum" data-value="1"></i><b>(1)</b>
 
 s.createTable()                                                                 <i class="conum" data-value="2"></i><b>(2)</b>
 
@@ -1296,7 +1311,213 @@ assertEquals(1,
 </div>
 <div class="sect3">
 <h4 id="_testing">Testing</h4>
+<div class="paragraph">
+<p>You can very easily mock any of the interfaces and declarative services but if you need to really
+DynamoDB integration works well with <a href="https://www.testcontainers.org/">Testcontainers</a> and <a href="https://localstack.cloud/">LocalStack</a>.</p>
+</div>
+<div class="paragraph">
+<p>You need to add following dependencies into your build file:</p>
+</div>
+<div class="listingblock primary">
+<div class="title">Gradle</div>
+<div class="content">
+<pre class="highlightjs highlight"><code>compile group: 'org.testcontainers', name: 'localstack', version: '1.10.2'
+compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pre>
+</div>
+</div>
+<div class="listingblock secondary">
+<div class="title">Maven</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
+    &lt;artifactId&gt;localstack&lt;/artifactId&gt;
+    &lt;version&gt;1.10.2&lt;/version&gt;
+    &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
+    &lt;artifactId&gt;spock&lt;/artifactId&gt;
+    &lt;version&gt;1.10.2&lt;/version&gt;
+    &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then you can setup your tests like this:</p>
+</div>
+<div class="listingblock primary">
+<div class="title">Gradle</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
+class DefaultDynamoDBServiceSpec extends Specification {
+    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="2"></i><b>(2)</b>
 
+    @Shared LocalStackContainer localstack = new LocalStackContainer()                  <i class="conum" data-value="3"></i><b>(3)</b>
+        .withServices(LocalStackContainer.Service.DYNAMODB)
+
+    DynamoDBService&lt;DynamoDBEntity&gt; s
+    AmazonDynamoDB amazonDynamoDB
+    IDynamoDBMapper mapper
+
+    void setup() {
+        amazonDynamoDB = AmazonDynamoDBClient                                           <i class="conum" data-value="4"></i><b>(4)</b>
+            .builder()
+            .withEndpointConfiguration(
+                localstack.getEndpointConfiguration(LocalStackContainer.Service.DYNAMODB)
+            )
+            .withCredentials(
+                localstack.defaultCredentialsProvider
+            )
+            .build()
+
+        mapper = new DynamoDBMapper(amazonDynamoDB)
+
+
+        context = ApplicationContext.build().build()
+        context.registerSingleton(AmazonDynamoDB, amazonDynamoDB)                       <i class="conum" data-value="5"></i><b>(5)</b>
+        context.registerSingleton(IDynamoDBMapper, mapper)                              <i class="conum" data-value="6"></i><b>(6)</b>
+        context.start()
+
+        DynamoDBServiceProvider provider = context.getBean(DynamoDBServiceProvider)     <i class="conum" data-value="7"></i><b>(7)</b>
+        s = provider.findOrCreate(DynamoDBEntity)                                       <i class="conum" data-value="8"></i><b>(8)</b>
+    }
+
+    // test methods
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Annotate the specification with <code>@Testcontainers</code> to let Spock manage the Testcontainers for you</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Prepare the reference to the <code>ApplicationContext</code>, <code>@AutoCleanup</code> guarantees closing the context after the tests</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Create an instance of <code>LocalStackContainer</code> with only DynamoDB support enabled</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Create <code>AmazonDynamoDB</code> client using the LocalStack configuration</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Register the client using LocalStack to the application context</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Register the mapper using LocalStack to the application context</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Obtain the provider bean</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>Obtain <code>DynamoDBService</code> for particular DynamoDB entity</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Maven</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class DynamoDBServiceTest {
+    @Rule
+    public LocalStackContainer localstack = new LocalStackContainer()                   <i class="conum" data-value="1"></i><b>(1)</b>
+        .withServices(LocalStackContainer.Service.DYNAMODB);
+
+    public ApplicationContext ctx;                                                      <i class="conum" data-value="2"></i><b>(2)</b>
+
+    @Before
+    public void setup() {
+        AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClient                            <i class="conum" data-value="3"></i><b>(3)</b>
+            .builder()
+            .withEndpointConfiguration(
+                localstack.getEndpointConfiguration(LocalStackContainer.Service.DYNAMODB)
+            )
+            .withCredentials(
+                localstack.getDefaultCredentialsProvider()
+            )
+            .build();
+
+        IDynamoDBMapper mapper = new DynamoDBMapper(amazonDynamoDB);
+
+        ctx = ApplicationContext.build().build();
+        ctx.registerSingleton(AmazonDynamoDB.class, amazonDynamoDB);                    <i class="conum" data-value="4"></i><b>(4)</b>
+        ctx.registerSingleton(IDynamoDBMapper.class, mapper);                           <i class="conum" data-value="5"></i><b>(5)</b>
+        ctx.start();
+    }
+
+    @After
+    public void cleanup() {
+        if (ctx != null) {                                                              <i class="conum" data-value="6"></i><b>(6)</b>
+            ctx.close();
+        }
+    }
+
+    @Test
+    public void testSomething() {
+        DynamoDBServiceProvider provider = ctx.getBean(DynamoDBServiceProvider.class);  <i class="conum" data-value="7"></i><b>(7)</b>
+        DynamoDBService&lt;DynamoDBEntity&gt; s = provider.findOrCreate(DynamoDBEntity.class);<i class="conum" data-value="8"></i><b>(8)</b>
+
+        // test code
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Create an instance of <code>LocalStackContainer</code> with only DynamoDB support enabled</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Prepare the reference to the <code>ApplicationContext</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Create <code>AmazonDynamoDB</code> client using the LocalStack configuration</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Register the client using LocalStack to the application context</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Register the mapper using LocalStack to the application context</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Close the application context after test execution</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Obtain the provider bean</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>Obtain <code>DynamoDBService</code> for particular DynamoDB entity</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+You can obtain instances of declarative client from the context as well.
+</td>
+</tr>
+</table>
+</div>
 </div>
 </div>
 </div>
@@ -1314,7 +1535,7 @@ assertEquals(1,
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-12-18 17:06:53 +0100
+Last updated 2018-12-18 17:49:16 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">
