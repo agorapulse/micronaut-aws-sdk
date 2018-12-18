@@ -973,7 +973,128 @@ public interface DynamoDBEntityService {
 </div>
 <div class="sect4">
 <h5 id="_updates">Updates</h5>
+<div class="paragraph">
+<p>Declarative services allows you to execute fine-grained updates. Any method annotated with <code>@Update</code> will perform the update in the DynamoDB table.</p>
+</div>
+<div class="listingblock primary">
+<div class="title">Groovy</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
 
+@Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
+interface DynamoDBItemDBService {
+
+    @Update({                                                                           <i class="conum" data-value="3"></i><b>(3)</b>
+        update(DynamoDBEntity) {
+            hash hashKey                                                                <i class="conum" data-value="4"></i><b>(4)</b>
+            range rangeKey                                                              <i class="conum" data-value="5"></i><b>(5)</b>
+            add 'number', 1                                                             <i class="conum" data-value="6"></i><b>(6)</b>
+            returnUpdatedNew { number }                                                 <i class="conum" data-value="7"></i><b>(7)</b>
+        }
+    })
+    Number increment(String hashKey, String rangeKey)                                   <i class="conum" data-value="8"></i><b>(8)</b>
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>Builders</code> class provides all necessary factory methods and keywords</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Annotate an interface with <code>@Service</code> with the type of the entity as its <code>value</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td><code>@Update</code> annotation accepts a closure which returns an update builder (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Specify a hash key with <code>hash</code> method and method&#8217;s <code>hashKey</code> argument</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Specify a range key with <code>range</code> method and method&#8217;s <code>rangeKey</code> argument</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Specify update operation - increment <code>number</code> attribute (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference). You may have multiple update operations.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Specify what should be returned from the method (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference).</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>The arguments have no special meaning but you can use them in the scan definition. The method&#8217;s return value depends on the value returned from <code>returnUpdatedNew</code> mapper.</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Java</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">@Service(DynamoDBEntity.class)                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+public interface DynamoDBEntityService {
+
+    class IncrementNumber implements Function&lt;Map&lt;String, Object&gt;, DetachedUpdate&gt; {    <i class="conum" data-value="2"></i><b>(2)</b>
+        public DetachedUpdate apply(Map&lt;String, Object&gt; arguments) {
+            return Builders.update(DynamoDBEntity.class)                                <i class="conum" data-value="3"></i><b>(3)</b>
+                .hash(arguments.get("hashKey"))                                         <i class="conum" data-value="4"></i><b>(4)</b>
+                .range(arguments.get("rangeKey"))                                       <i class="conum" data-value="5"></i><b>(5)</b>
+                .add("number", 1)                                                       <i class="conum" data-value="6"></i><b>(6)</b>
+                .returnUpdatedNew(DynamoDBEntity::getNumber);                           <i class="conum" data-value="7"></i><b>(7)</b>
+        }
+    }
+
+    @Update(IncrementNumber.class)                                                      <i class="conum" data-value="8"></i><b>(8)</b>
+    Number increment(String hashKey, String rangeKey);                                  <i class="conum" data-value="9"></i><b>(9)</b>
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Annotate an interface with <code>@Service</code> with the type of the entity as its <code>value</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Define class which implements <code>Function&lt;Map&lt;String, Object&gt;, DetachedUpdate&gt;</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Use <code>Builders</code> class to create an update builder for given DynamoDB entity (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Specify a hash key with <code>hash</code> method and method&#8217;s <code>hashKey</code> argument</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Specify a range key with <code>range</code> method and method&#8217;s <code>rangeKey</code> argument</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Specify update operation - increment <code>number</code> attribute (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference). You may have multiple update operations.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Specify what should be returned from the method (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference).</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td><code>@Update</code> annotation accepts a class which implements <code>Function&lt;Map&lt;String, Object&gt;, DetachedUpdate&gt;</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="9"></i><b>9</b></td>
+<td>The arguments have no special meaning but you can use them in the scan definition. The method&#8217;s return value depends on the value returned from <code>returnUpdatedNew</code> mapper.</td>
+</tr>
+</table>
+</div>
 </div>
 </div>
 <div class="sect3">
@@ -1000,7 +1121,7 @@ public interface DynamoDBEntityService {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-12-18 14:32:45 +0100
+Last updated 2018-12-18 15:07:30 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">
