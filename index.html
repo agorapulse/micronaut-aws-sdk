@@ -566,6 +566,31 @@ $(addBlockSwitches);
 If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK Plugin</a> user you should find many of services familiar.</p>
 </div>
 <div class="paragraph">
+<p>Provided integrations:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="#_dynamodb">DynamoDB</a></p>
+</li>
+<li>
+<p><a href="#Kinesis">[Kinesis]</a></p>
+</li>
+<li>
+<p><a href="#S3">[S3]</a></p>
+</li>
+<li>
+<p><a href="#SES">[SES]</a></p>
+</li>
+<li>
+<p><a href="#SNS">[SNS]</a></p>
+</li>
+<li>
+<p><a href="#SQS">[SQS]</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
 <p>Key concepts of the AWS SDK for Micronaut:</p>
 </div>
 <div class="ulist">
@@ -634,10 +659,10 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>High-level <a href="index.html">Declarative Services with <code>@Service</code></a></p>
+<p>High-level <a href="#_declarative_services_with_service">Declarative Services with <code>@Service</code></a></p>
 </li>
 <li>
-<p>Middle-level <a href="index.html">DynamoDB Service</a></p>
+<p>Middle-level <a href="#_dynamodb_service">DynamoDB Service</a></p>
 </li>
 </ol>
 </div>
@@ -695,7 +720,7 @@ matching predefined pattern will be automatically implemented.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Hash key and optional range key annotated with <code>@HashKey</code> and <code>@RangeKey</code> if the argument name does not contain word <code>hash</code> or <code>range</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>int count(String hashKey)</code></p>
 <p class="tableblock">    <code>int count(@HashKey String parentId, String rangeKey)</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Counts the items in the database. Beware, this can be very expensive operation in DynamoDB. See <a href="index.html">Advanced Queries</a> for advanced use cases</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Counts the items in the database. Beware, this can be very expensive operation in DynamoDB. See <a href="#_advanced_queries">Advanced Queries</a> for advanced use cases</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>void</code></p></td>
@@ -703,7 +728,7 @@ matching predefined pattern will be automatically implemented.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Entity or Hash key and optional range key annotated with <code>@HashKey</code> and <code>@RangeKey</code> if the argument name does not contain word <code>hash</code> or <code>range</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>void delete(DynamoDBEntity entity)</code></p>
 <p class="tableblock">    <code>void delete(String hashKey, String rangeKey)</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Deletes an item which can be specified with hash key and optional range key. See <a href="index.html">Advanced Queries</a> for advanced use cases</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Deletes an item which can be specified with hash key and optional range key. See <a href="#_advanced_queries">Advanced Queries</a> for advanced use cases</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Flowable&lt;T&gt;</code></p></td>
@@ -720,7 +745,7 @@ matching predefined pattern will be automatically implemented.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">(none of above)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Any arguments which will be translated into arguments map</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">(see below)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Query, scan or update. See <a href="index.html">Advanced Queries</a>, <a href="index.html">Scanning</a> and <a href="index.html">Updates</a> for advanced use cases</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Query, scan or update. See <a href="#_advanced_queries">Advanced Queries</a>, <a href="#_scanning">Scanning</a> and <a href="#_updates">Updates</a> for advanced use cases</p></td>
 </tr>
 </tbody>
 </table>
@@ -1121,7 +1146,7 @@ public interface DynamoDBEntityService {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-12-18 15:07:30 +0100
+Last updated 2018-12-18 15:21:48 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">
