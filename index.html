@@ -527,6 +527,7 @@ $(addBlockSwitches);
 <ul class="sectlevel4">
 <li><a href="#_advanced_queries">Advanced Queries</a></li>
 <li><a href="#_scanning">Scanning</a></li>
+<li><a href="#_updates">Updates</a></li>
 </ul>
 </li>
 <li><a href="#_dynamodb_service">DynamoDB Service</a></li>
@@ -706,12 +707,20 @@ matching predefined pattern will be automatically implemented.</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Flowable&lt;T&gt;</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>*</code></p>
-<p class="tableblock">(none of above)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>list</code></p>
+<p class="tableblock"><code>findAll</code></p>
+<p class="tableblock"><code>query</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Entity or Hash key and optional range key annotated with <code>@HashKey</code> and <code>@RangeKey</code> if the argument name does not contain word <code>hash</code> or <code>range</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Flowable&lt;DynamoDBEntity&gt; query(String hashKey)</code></p>
 <p class="tableblock">    <code>Flowable&lt;DynamoDBEntity&gt; query(String hashKey, String rangeKey)</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Queries for all entities with given hash key and/or range key. See <a href="index.html">Advanced Queries</a> and <a href="index.html">Scanning</a> for advanced use cases</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Queries for all entities with given hash key and/or range key.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">(contextual)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">(none of above)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Any arguments which will be translated into arguments map</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">(see below)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Query, scan or update. See <a href="index.html">Advanced Queries</a>, <a href="index.html">Scanning</a> and <a href="index.html">Updates</a> for advanced use cases</p></td>
 </tr>
 </tbody>
 </table>
@@ -719,7 +728,7 @@ matching predefined pattern will be automatically implemented.</p>
 <h5 id="_advanced_queries">Advanced Queries</h5>
 <div class="paragraph">
 <p>DynamoDB integration does not support feature known as <a href="http://gorm.grails.org/6.0.x/hibernate/manual/index.html#finders"><em>dynamic finders</em></a>.
-Instead you can annotate any method with <code>@Query</code> annotation to turn it into</p>
+Instead you can annotate any method with <code>@Query</code> annotation to make it</p>
 </div>
 <div class="ulist">
 <ul>
@@ -856,6 +865,116 @@ public interface DynamoDBEntityService {
 </div>
 <div class="sect4">
 <h5 id="_scanning">Scanning</h5>
+<div class="paragraph">
+<p>DynamoDB integration does not support feature known as <a href="http://gorm.grails.org/6.0.x/hibernate/manual/index.html#finders"><em>dynamic finders</em></a>.
+If you need to scan the table by unindexed attributes you can annotate any method with <code>@scan</code> annotation to make it</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>counting method if its name begins with <code>count</code></p>
+</li>
+<li>
+<p>otherwise an advanced query method</p>
+</li>
+</ul>
+</div>
+<div class="listingblock primary">
+<div class="title">Groovy</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
+
+@Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
+interface DynamoDBItemDBService {
+
+    @Scan({                                                                             <i class="conum" data-value="3"></i><b>(3)</b>
+        scan(DynamoDBEntity) {
+            filter {
+                eq DynamoDBEntity.RANGE_INDEX, foo                                      <i class="conum" data-value="4"></i><b>(4)</b>
+            }
+        }
+    })
+    Flowable&lt;DynamoDBEntity&gt; scanAllByRangeIndex(String foo)                            <i class="conum" data-value="5"></i><b>(5)</b>
+
+}
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>Builders</code> class provides all necessary factory methods and keywords</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Annotate an interface with <code>@Service</code> with the type of the entity as its <code>value</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td><code>@Scan</code> annotation accepts a closure which returns a scan builder (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/ScanBuilder.html">ScanBuilder</a> for full reference)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Specify some filter criteria with the method&#8217;s <code>foo</code> argument (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html">RangeConditionCollector</a> for full reference)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>The arguments have no special meaning but you can use them in the scan definition. The method must return <code>Flowable</code> of entities.</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Java</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">@Service(DynamoDBEntity.class)                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+public interface DynamoDBEntityService {
+
+    class EqRangeScan implements Function&lt;Map&lt;String, Object&gt;, DetachedScan&gt; {          <i class="conum" data-value="2"></i><b>(2)</b>
+        public DetachedScan apply(Map&lt;String, Object&gt; arguments) {
+            return Builders.scan(DynamoDBEntity.class)                                  <i class="conum" data-value="3"></i><b>(3)</b>
+                .filter(f -&gt; f.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("foo")));   <i class="conum" data-value="4"></i><b>(4)</b>
+        }
+    }
+
+    @Scan(EqRangeScan.class)                                                            <i class="conum" data-value="5"></i><b>(5)</b>
+    Flowable&lt;DynamoDBEntity&gt; scanAllByRangeIndex(String foo);                           <i class="conum" data-value="6"></i><b>(6)</b>
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Annotate an interface with <code>@Service</code> with the type of the entity as its <code>value</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Define class which implements <code>Function&lt;Map&lt;String, Object&gt;, DetachedScan&gt;</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Use <code>Builders</code> class to create a scan builder for given DynamoDB entity (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/ScanBuilder.html">ScanBuilder</a> for full reference)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Specify some filter criteria with the method&#8217;s <code>foo</code> argument (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html">RangeConditionCollector</a> for full reference)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td><code>@Scan</code> annotation accepts a class which implements <code>Function&lt;Map&lt;String, Object&gt;, DetachedScan&gt;</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>The arguments have no special meaning but you can use them in the scan definition. The method must return <code>Flowable</code> of entities.</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_updates">Updates</h5>
 
 </div>
 </div>
@@ -883,7 +1002,7 @@ public interface DynamoDBEntityService {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-12-18 13:57:11 +0100
+Last updated 2018-12-18 14:31:42 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">
