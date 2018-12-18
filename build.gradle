@@ -1,13 +1,23 @@
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.ajoberstar:gradle-git-publish:2.0.0'
+        classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.9.2'
+    }
+}
+
 allprojects {
     group 'com.agorapulse'
-    version "${micronautVersion}.5"
+    version "${micronautVersion}.RC1"
 
     repositories {
         jcenter()
         mavenCentral()
-        maven {
-            url  "https://dl.bintray.com/agorapulse/libs"
-        }
+        maven { url  "https://dl.bintray.com/agorapulse/libs" }
+        maven { url "https://repo.spring.io/release"  }
     }
 }
 
@@ -98,3 +108,53 @@ subprojects { Project subproject ->
 
     clean.dependsOn cleanOut
 }
+
+
+// docs
+apply plugin: 'org.ajoberstar.git-publish'
+apply plugin: 'org.asciidoctor.convert'
+
+dependencies {
+    // https://mvnrepository.com/artifact/io.spring.asciidoctor/spring-asciidoctor-extensions
+    asciidoctor group: 'io.spring.asciidoctor', name: 'spring-asciidoctor-extensions', version: '0.1.3.RELEASE'
+
+}
+
+// asciidoctor publishing
+asciidoctor {
+
+    sourceDir = file('docs')
+
+    resources {
+        from(sourceDir) {
+            include 'css/**', 'images/**'
+        }
+    }
+
+    attributes 'docinfo1': ['version': project.version],
+        'imagesdir': 'images',
+        'source-highlighter': 'highlight.js',
+        'stylesdir': 'css',
+        icons: 'font',
+        'toc': 'left',
+        'toclevels': '4',
+        version: project.version,
+        'projectUrl': 'https://github.com/agorapulse/micronaut-libraries'
+}
+
+gitPublish {
+    repoUri = 'git@github.com:agorapulse/micronaut-libraries.git'
+    branch = 'gh-pages'
+
+    contents {
+        from file(asciidoctor.outputDir.path + '/html5')
+        subprojects.each { Project subproject ->
+            from(subproject.javadoc.outputs.files) {
+                into "docs/javadoc/$subproject.name"
+            }
+        }
+    }
+}
+
+gitPublishCopy.dependsOn subprojects*.javadoc
+gitPublishCopy.dependsOn asciidoctor

@@ -77,8 +77,9 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
         return this
     }
 
-    DefaultQueryBuilder<T> offset(Object exclusiveStartKeyValue) {
-        this.exclusiveStartKey = exclusiveStartKeyValue
+    DefaultQueryBuilder<T> offset(Object exclusiveStartHashKeyValue, Object exclusiveRangeStartKey) {
+        this.exclusiveHashStartKey = exclusiveStartHashKeyValue
+        this.exclusiveRangeStartKey = exclusiveRangeStartKey
         return this
     }
 
@@ -105,8 +106,8 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
         applyConditions(model, filterCollectorsConsumers, expression.&withQueryFilterEntry)
 
 
-        if (exclusiveStartKey != null) {
-            T exclusiveKey = model.createKey(exclusiveStartKey, null)
+        if (exclusiveHashStartKey != null || exclusiveRangeStartKey != null) {
+            T exclusiveKey = model.createKey(exclusiveHashStartKey, exclusiveRangeStartKey)
             expression.withExclusiveStartKey(model.convertKey(exclusiveKey))
         }
 
@@ -147,7 +148,8 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     private final DynamoDBMetadata<T> metadata
     private final DynamoDBQueryExpression<T> expression
     private Object hashKey
-    private Object exclusiveStartKey
+    private Object exclusiveHashStartKey
+    private Object exclusiveRangeStartKey
     private List<Consumer<RangeConditionCollector<T>>> rangeCollectorsConsumers = new ArrayList<>()
     private List<Consumer<RangeConditionCollector<T>>> filterCollectorsConsumers = new ArrayList<>()
     private Consumer<DynamoDBQueryExpression<T>> configurer = {} as Consumer<DynamoDBQueryExpression<T>>

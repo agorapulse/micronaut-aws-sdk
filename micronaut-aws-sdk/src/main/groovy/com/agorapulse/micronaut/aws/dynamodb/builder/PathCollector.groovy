@@ -1,8 +1,10 @@
 package com.agorapulse.micronaut.aws.dynamodb.builder
 
 import groovy.transform.CompileStatic
+import groovy.transform.PackageScope
 
 @CompileStatic
+@PackageScope
 class PathCollector {
 
     static PathCollector collectPaths(Closure<Object> collector) {

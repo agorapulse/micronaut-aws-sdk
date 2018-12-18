@@ -59,8 +59,9 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
         return this
     }
 
-    DefaultScanBuilder<T> offset(Object exclusiveStartKeyValue) {
-        this.exclusiveStartKey = exclusiveStartKeyValue
+    DefaultScanBuilder<T> offset(Object exclusiveHashStartKeyValue, Object exclusiveRangeStartKeyValue) {
+        this.exclusiveHashStartKey = exclusiveHashStartKeyValue
+        this.exclusiveRangeStartKey = exclusiveRangeStartKeyValue
         return this
     }
 
@@ -80,8 +81,8 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
 
         applyConditions(model, filterCollectorsConsumers, expression.&withFilterConditionEntry)
 
-        if (exclusiveStartKey != null) {
-            T exclusiveKey = model.createKey(exclusiveStartKey, null)
+        if (exclusiveHashStartKey != null || exclusiveRangeStartKey != null) {
+            T exclusiveKey = model.createKey(exclusiveHashStartKey, exclusiveRangeStartKey)
             expression.withExclusiveStartKey(model.convertKey(exclusiveKey))
         }
 
@@ -115,7 +116,8 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
 
     private final DynamoDBMetadata<T> metadata
     private final DynamoDBScanExpression expression
-    private Object exclusiveStartKey
+    private Object exclusiveHashStartKey
+    private Object exclusiveRangeStartKey
     private List<Consumer<RangeConditionCollector<T>>> filterCollectorsConsumers = new ArrayList<>()
     private Consumer<DynamoDBScanExpression> configurer = {} as Consumer<DynamoDBScanExpression>
 }

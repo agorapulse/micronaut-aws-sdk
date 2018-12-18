@@ -1,0 +1,286 @@
+= Agorapulse Micronaut Libaries
+
+[.ribbon]
+image::ribbon.png[link={projectUrl}]
+
+image::https://api.bintray.com/packages/agorapulse/libs/micronaut-http-server-basic/images/download.svg[link="https://bintray.com/agorapulse/libs/micronaut-http-server-basic/_latestVersion"]
+
+Set of useful libraries for http://micronaut.io[Micronaut]. All of the libraries are available in https://bintray.com/bintray/jcenter[JCenter Maven repository].
+
+
+== AWS SDK for Micronaut
+
+AWS SDK for Micronaut is a successor of https://github.com/agorapulse/grails-aws-sdk[Grails AWS SDK Plugin].
+If you are https://github.com/agorapulse/grails-aws-sdk[Grails AWS SDK Plugin] user you should find many of services familiar.
+
+Key concepts of the AWS SDK for Micronaut:
+
+*   Fully leveraging of Micronaut best practises
+** Low-level API clients such as `AmazonDynamoDB` available for dependency injection
+** Declarative clients and services such as `@KinesisListener` where applicable
+** Configuration driven named service beans
+** Sensible defaults
+** Conditional beans based on presence of classes on the classpath or on the presence of specific properties
+* Fully leveraging existing AWS SDK configuration chains (e.g. https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/auth/DefaultAWSCredentialsProviderChain.html[default credential provider chain], https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/regions/DefaultAwsRegionProviderChain.html[default region provider chain])
+* Strong focus on the ease of testing
+** Low-level API clients such as `AmazonDynamoDB` injected by Micronaut and overridable in the tests
+** All high-level services hidden behind an interface for easy mocking in the tests
+** Declarative clients and services for easy mocking in the tests
+* Java-enabled but Groovy is a first-class citizen
+
+In this documentation, the high-level approaches will be discussed first before the lower-level services.
+
+
+=== DynamoDB
+
+> Amazon DynamoDB is a fully managed NoSQL database service that provides fast and predictable performance with seamless scalability.
+
+This library provides two approaches to work with DynamoDB tables and entities:
+
+1. High-level link:index.html[Declarative Services with `@Service`]
+2. Middle-level link:index.html[DynamoDB Service]
+
+==== Installation
+
+==== Declarative Services with `@Service`
+
+Declarative services are very similar to http://gorm.grails.org/6.1.x/hibernate/manual/#dataServices[Grails GORM Data Services].
+If you add place `com.agorapulse.micronaut.aws.dynamodb.annotation.Service` annotation on the interface then methods
+matching predefined pattern will be automatically implemented.
+
+
+.Basic Service Methods
+|===
+|Return Type | Method Name | Arguments | Example | Description
+
+|
+    `T`
+
+    `List<T>`
+| `save*`
+| An entity, array of entities or iterable of entities
+|
+    `DynamoDBEntity save(DynamoDBEntity entity)`
+
+    `List<DynamoDBEntity> saveAll(DynamoDBEntity... entities)`
+
+| Perists the entity or a list of entities and returns self
+
+
+|
+    `T`
+
+    `List<T>`
+| `get*`, `load*`
+| Hash key and optional range key, array of range keys or iterable of range keys annotated with `@HashKey` and `@RangeKey` if the argument name does not contain word `hash` or `range`
+|
+    `DynamoDBEntity load(String hashKey);`
+
+    `List<DynamoDBEntity> getAll(@HashKey String parentId, String... rangeKeys);`
+
+| Loads a single entity or a list of entities from the table. Range key is required for tables which defines the range key
+
+
+| `int`
+| `count*`
+| Hash key and optional range key annotated with `@HashKey` and `@RangeKey` if the argument name does not contain word `hash` or `range`
+|
+
+    `int count(String hashKey)`
+
+    `int count(@HashKey String parentId, String rangeKey)`
+
+| Counts the items in the database. Beware, this can be very expensive operation in DynamoDB. See link:index.html[Advanced Queries] for advanced use cases
+
+| `void`
+| `delete*`
+| Entity or Hash key and optional range key annotated with `@HashKey` and `@RangeKey` if the argument name does not contain word `hash` or `range`
+|
+
+    `void delete(DynamoDBEntity entity)`
+
+    `void delete(String hashKey, String rangeKey)`
+
+| Deletes an item which can be specified with hash key and optional range key. See link:index.html[Advanced Queries] for advanced use cases
+
+| `Flowable<T>`
+|
+`list`
+
+`findAll`
+
+`query`
+
+| Entity or Hash key and optional range key annotated with `@HashKey` and `@RangeKey` if the argument name does not contain word `hash` or `range`
+|
+    `Flowable<DynamoDBEntity> query(String hashKey)`
+
+    `Flowable<DynamoDBEntity> query(String hashKey, String rangeKey)`
+
+| Queries for all entities with given hash key and/or range key.
+
+
+|
+
+    (contextual)
+| (none of above)
+| Any arguments which will be translated into arguments map
+|
+
+(see below)
+
+| Query, scan or update. See link:index.html[Advanced Queries], link:index.html[Scanning] and link:index.html[Updates] for advanced use cases
+
+|===
+
+===== Advanced Queries
+
+DynamoDB integration does not support feature known as http://gorm.grails.org/6.0.x/hibernate/manual/index.html#finders[_dynamic finders_].
+Instead you can annotate any method with `@Query` annotation to make it
+
+ * counting method if its name begins with `count`
+ * batch delete method if its name begins with `delete`
+ * otherwise an advanced query method
+
+[source,groovy,indent=0,options="nowrap",role="primary"]
+.Groovy
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=builders-import]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-header]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=sample-queries]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-footer]
+----
+<1> `Builders` class provides all necessary factory methods and keywords
+<2> Annotate an interface with `@Service` with the type of the entity as its `value`
+<3> `@Query` annotation accepts a closure which returns a query builder (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/QueryBuilder.html[QueryBuilder] for full reference)
+<4> Specify a hash key with `hash` method and method's `hashKey` argument
+<5> Specify some range key criteria with the method's `rangeKey` argument (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
+<6> You can limit which properties are returned from the query
+<7> Only `rangeIndex` property will be populated in the entities returned
+<8> The arguments have no special meaning but you can use them in the query. The method must return `Flowable` of entities.
+
+
+[source,java,indent=0,options="nowrap",role="secondary"]
+.Java
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/java/DynamoDBEntityService.java[tags=header]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/java/DynamoDBEntityService.java[tags=sample-query-class]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/java/DynamoDBEntityService.java[tags=sample-query]
+
+}
+----
+<1> Annotate an interface with `@Service` with the type of the entity as its `value`
+<2> Define class which implements `Function<Map<String, Object>, DetachedQuery>`
+<3> Use `Builders` class to create a query builder for given DynamoDB entity (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/QueryBuilder.html[QueryBuilder] for full reference)
+<4> Specify a hash key with `hash` method and method's `hashKey` argument
+<5> Specify some range key criteria with the method's `rangeKey` argument (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
+<6> Only `rangeIndex` property will be populated in the entities returned
+<7> `@Query` annotation accepts a class which implements `Function<Map<String, Object>, DetachedQuery>`
+<8> The arguments have no special meaning but you can use them in the query using `arguments` map. The method must return `Flowable` of entities.
+
+
+===== Scanning
+
+DynamoDB integration does not support feature known as http://gorm.grails.org/6.0.x/hibernate/manual/index.html#finders[_dynamic finders_].
+If you need to scan the table by unindexed attributes you can annotate any method with `@scan` annotation to make it
+
+ * counting method if its name begins with `count`
+ * otherwise an advanced query method
+
+[source,groovy,indent=0,options="nowrap",role="primary"]
+.Groovy
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=builders-import]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-header]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=sample-scan]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-footer]
+----
+<1> `Builders` class provides all necessary factory methods and keywords
+<2> Annotate an interface with `@Service` with the type of the entity as its `value`
+<3> `@Scan` annotation accepts a closure which returns a scan builder (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/ScanBuilder.html[ScanBuilder] for full reference)
+<4> Specify some filter criteria with the method's `foo` argument (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
+<5> The arguments have no special meaning but you can use them in the scan definition. The method must return `Flowable` of entities.
+
+
+[source,java,indent=0,options="nowrap",role="secondary"]
+.Java
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/java/DynamoDBEntityService.java[tags=header]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/java/DynamoDBEntityService.java[tags=sample-scan-class]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/java/DynamoDBEntityService.java[tags=sample-scan]
+
+}
+----
+<1> Annotate an interface with `@Service` with the type of the entity as its `value`
+<2> Define class which implements `Function<Map<String, Object>, DetachedScan>`
+<3> Use `Builders` class to create a scan builder for given DynamoDB entity (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/ScanBuilder.html[ScanBuilder] for full reference)
+<4> Specify some filter criteria with the method's `foo` argument (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
+<5> `@Scan` annotation accepts a class which implements `Function<Map<String, Object>, DetachedScan>`
+<6> The arguments have no special meaning but you can use them in the scan definition. The method must return `Flowable` of entities.
+
+
+
+=====  Updates
+Declarative services allows you to execute fine-grained updates. Any method annotated with `@Update` will perform the update in the DynamoDB table.
+
+[source,groovy,indent=0,options="nowrap",role="primary"]
+.Groovy
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=builders-import]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-header]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=sample-update]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-footer]
+----
+<1> `Builders` class provides all necessary factory methods and keywords
+<2> Annotate an interface with `@Service` with the type of the entity as its `value`
+<3> `@Update` annotation accepts a closure which returns an update builder (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html[UpdateBuilder] for full reference)
+<4> Specify a hash key with `hash` method and method's `hashKey` argument
+<5> Specify a range key with `range` method and method's `rangeKey` argument
+<6> Specify update operation - increment `number` attribute (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html[UpdateBuilder] for full reference). You may have multiple update operations.
+<7> Specify what should be returned from the method (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html[UpdateBuilder] for full reference).
+<8> The arguments have no special meaning but you can use them in the scan definition. The method's return value depends on the value returned from `returnUpdatedNew` mapper.
+
+
+[source,java,indent=0,options="nowrap",role="secondary"]
+.Java
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/java/DynamoDBEntityService.java[tags=header]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/java/DynamoDBEntityService.java[tags=sample-update-class]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/java/DynamoDBEntityService.java[tags=sample-update]
+
+}
+----
+<1> Annotate an interface with `@Service` with the type of the entity as its `value`
+<2> Define class which implements `Function<Map<String, Object>, DetachedUpdate>`
+<3> Use `Builders` class to create an update builder for given DynamoDB entity (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html[UpdateBuilder] for full reference)
+<4> Specify a hash key with `hash` method and method's `hashKey` argument
+<5> Specify a range key with `range` method and method's `rangeKey` argument
+<6> Specify update operation - increment `number` attribute (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html[UpdateBuilder] for full reference). You may have multiple update operations.
+<7> Specify what should be returned from the method (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html[UpdateBuilder] for full reference).
+<8> `@Update` annotation accepts a class which implements `Function<Map<String, Object>, DetachedUpdate>`
+<9> The arguments have no special meaning but you can use them in the scan definition. The method's return value depends on the value returned from `returnUpdatedNew` mapper.
+
+==== DynamoDB Service
+
+==== Testing
+
+
+
+== Maintained by
+
+image::https://cloud.githubusercontent.com/assets/139017/17053391/4a44735a-5034-11e6-8e72-9f4b7139d7e0.png[link=https://www.agorapulse.com/]

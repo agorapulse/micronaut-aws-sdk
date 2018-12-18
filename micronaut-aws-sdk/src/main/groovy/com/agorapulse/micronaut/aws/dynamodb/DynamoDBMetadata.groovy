@@ -6,10 +6,19 @@ import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.util.concurrent.ConcurrentHashMap
 
-class DynamoDBMetadata<TItemClass> {
+/**
+ * Collector of DynamoDB metadata.
+ * @param <T> type of the DynamoDB entity
+ */
+class DynamoDBMetadata<T> {
 
     private static ConcurrentHashMap<Class, DynamoDBMetadata> metadataCache = new ConcurrentHashMap<>()
 
+    /**
+     * Crates metadata for particular type or populates it from cache if already resolved.
+     * @param type
+     * @return
+     */
     static <T> DynamoDBMetadata<T> create(Class<T> type) {
         return metadataCache.computeIfAbsent(type) {
             new DynamoDBMetadata<T>(it)
@@ -18,13 +27,13 @@ class DynamoDBMetadata<TItemClass> {
 
     final String hashKeyName
     final Class hashKeyClass
-    final Class<TItemClass> itemClass
+    final Class<T> itemClass
     final DynamoDBTable mainTable
     final String rangeKeyName
     final Class rangeKeyClass
     final List<String> secondaryIndexes
 
-    private DynamoDBMetadata(Class<TItemClass> itemClass) {
+    private DynamoDBMetadata(Class<T> itemClass) {
         this.itemClass = itemClass
         this.mainTable = (DynamoDBTable) itemClass.getAnnotation(DynamoDBTable.class)
 

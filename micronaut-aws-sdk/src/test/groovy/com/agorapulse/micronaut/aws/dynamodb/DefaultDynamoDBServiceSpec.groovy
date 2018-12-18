@@ -11,7 +11,6 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
 import com.amazonaws.services.dynamodbv2.model.CreateTableResult
-import groovy.transform.CompileStatic
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
 import io.micronaut.context.ApplicationContext
@@ -25,7 +24,11 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
 
-import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*
+// tag::builders-import[]
+import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  // <1>
+// end::builders-import[]
+
+
 
 @Stepwise
 @Testcontainers
@@ -310,8 +313,10 @@ class DefaultDynamoDBServiceSpec extends Specification {
 
 }
 
-@Service(DynamoDBEntity)
+// tag::service-header[]
+@Service(DynamoDBEntity)                                                                // <2>
 interface DynamoDBItemDBService {
+// end::service-header[]
 
     DynamoDBEntity get(String hash, String rangeKey)
     DynamoDBEntity load(String hash, String rangeKey)
@@ -348,18 +353,20 @@ interface DynamoDBItemDBService {
     Flowable<DynamoDBEntity> query(String hashKey)
     Flowable<DynamoDBEntity> query(String hashKey, String rangeKey)
 
-    @Query({
+    // tag::sample-queries[]
+    @Query({                                                                            // <3>
         query(DynamoDBEntity) {
-            hash hashKey
+            hash hashKey                                                                // <4>
             range {
-                eq DynamoDBEntity.RANGE_INDEX, rangeKey
+                eq DynamoDBEntity.RANGE_INDEX, rangeKey                                 // <5>
             }
-            only {
-                rangeIndex
+            only {                                                                      // <6>
+                rangeIndex                                                              // <7>
             }
         }
     })
-    Flowable<DynamoDBEntity> queryByRangeIndex(String hashKey, String rangeKey)
+    Flowable<DynamoDBEntity> queryByRangeIndex(String hashKey, String rangeKey)         // <8>
+    // end::sample-queries[]
 
     @Query({
         query(DynamoDBEntity) {
@@ -390,15 +397,17 @@ interface DynamoDBItemDBService {
     })
     int deleteByDates(String hashKey, Date after, Date before)
 
-    @Update({
+    // tag::sample-update[]
+    @Update({                                                                           // <3>
         update(DynamoDBEntity) {
-            hash hashKey
-            range rangeKey
-            add 'number', 1
-            returnUpdatedNew { number }
+            hash hashKey                                                                // <4>
+            range rangeKey                                                              // <5>
+            add 'number', 1                                                             // <6>
+            returnUpdatedNew { number }                                                 // <7>
         }
     })
-    Number increment(String hashKey, String rangeKey)
+    Number increment(String hashKey, String rangeKey)                                   // <8>
+    // end::sample-update[]
 
     @Update({
         update(DynamoDBEntity) {
@@ -410,12 +419,17 @@ interface DynamoDBItemDBService {
     })
     Number decrement(String hashKey, String rangeKey)
 
-    @Scan({
+    // tag::sample-scan[]
+    @Scan({                                                                             // <3>
         scan(DynamoDBEntity) {
             filter {
-                eq DynamoDBEntity.RANGE_INDEX, foo
+                eq DynamoDBEntity.RANGE_INDEX, foo                                      // <4>
             }
         }
     })
-    Flowable<DynamoDBEntity> scanAllByRangeIndex(String foo)
+    Flowable<DynamoDBEntity> scanAllByRangeIndex(String foo)                            // <5>
+    // end::sample-scan[]
+
+// tag::service-footer[]
 }
+// end::service-footer[]

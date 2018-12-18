@@ -11,7 +11,6 @@ import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException;
 import groovy.lang.Closure;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
-import io.micronaut.context.BeanContext;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.type.MutableArgumentValue;
@@ -21,6 +20,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Function;
 
+/**
+ * Introduction for {@link Service} annotation.
+ */
 @Singleton
 public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
 
@@ -37,16 +39,14 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
 
     }
 
-    private final BeanContext beanContext;
     private final IDynamoDBMapper mapper;
     private final AmazonDynamoDB amazonDynamoDB;
-    private final DynamoDBServiceFactory dynamoDBServiceFactory;
+    private final DynamoDBServiceProvider dynamoDBServiceProvider;
 
-    public ServiceIntroduction(BeanContext beanContext, IDynamoDBMapper mapper, AmazonDynamoDB amazonDynamoDB, DynamoDBServiceFactory dynamoDBServiceFactory) {
-        this.beanContext = beanContext;
+    public ServiceIntroduction(IDynamoDBMapper mapper, AmazonDynamoDB amazonDynamoDB, DynamoDBServiceProvider dynamoDBServiceProvider) {
         this.mapper = mapper;
         this.amazonDynamoDB = amazonDynamoDB;
-        this.dynamoDBServiceFactory = dynamoDBServiceFactory;
+        this.dynamoDBServiceProvider = dynamoDBServiceProvider;
     }
 
     @Override
@@ -58,7 +58,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         }
 
         Class type = serviceAnnotationValue.getValue(Class.class).orElseThrow(() -> new IllegalArgumentException("Annotation is missing the type value!"));
-        DynamoDBService service = dynamoDBServiceFactory.findOrCreate(type);
+        DynamoDBService service = dynamoDBServiceProvider.findOrCreate(type);
 
         try {
             return doIntercept(context, type, service);
@@ -78,9 +78,6 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             return handleGet(service, context);
         }
 
-
-        // TODO: change to annotation value when fixed
-        // https://github.com/micronaut-projects/micronaut-core/issues/1022
         if (context.getTargetMethod().isAnnotationPresent(Query.class)) {
             DetachedQuery criteria = evaluateAnnotationType(context.getTargetMethod().getAnnotation(Query.class).value(), context);
 
@@ -104,6 +101,10 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         if (context.getTargetMethod().isAnnotationPresent(Scan.class)) {
             DetachedScan criteria = evaluateAnnotationType(context.getTargetMethod().getAnnotation(Scan.class).value(), context);
 
+            if (methodName.startsWith("count")) {
+                return criteria.count(mapper);
+            }
+
             return criteria.scan(mapper);
         }
 
@@ -123,7 +124,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
     }
 
     private <T> T evaluateAnnotationType(Class<? extends Function<Map<String, Object>, T>> updateDefinitionType, MethodInvocationContext<Object, Object> context) {
-        Map<String, Object> parameterValueMap = context.getParameterValueMap();
+        Map<String, Object> parameterValueMap = new StrictMap<>(context.getParameterValueMap());
 
         if (Closure.class.isAssignableFrom(updateDefinitionType)) {
             try {

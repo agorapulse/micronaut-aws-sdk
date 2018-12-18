@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class RangeConditionCollector<T> {
+public final class RangeConditionCollector<T> {
     public RangeConditionCollector(DynamoDBMapperTableModel<T> model) {
         this.model = model;
     }
