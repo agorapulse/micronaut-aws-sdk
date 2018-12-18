@@ -525,6 +525,7 @@ $(addBlockSwitches);
 <ul class="sectlevel3">
 <li><a href="#_declarative_services_with_service">Declarative Services with <code>@Service</code></a>
 <ul class="sectlevel4">
+<li><a href="#_method_signatures">Method Signatures</a></li>
 <li><a href="#_advanced_queries">Advanced Queries</a></li>
 <li><a href="#_scanning">Scanning</a></li>
 <li><a href="#_updates">Updates</a></li>
@@ -759,6 +760,246 @@ compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.470'</c
 If you add place <code>com.agorapulse.micronaut.aws.dynamodb.annotation.Service</code> annotation on the interface then methods
 matching predefined pattern will be automatically implemented.</p>
 </div>
+<div class="sect4">
+<h5 id="_method_signatures">Method Signatures</h5>
+<div class="paragraph">
+<p>Following example shows many of available method signatures:</p>
+</div>
+<div class="listingblock primary">
+<div class="title">Groovy</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy">@Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
+interface DynamoDBItemDBService {
+
+    DynamoDBEntity get(String hash, String rangeKey)
+    DynamoDBEntity load(String hash, String rangeKey)
+    List&lt;DynamoDBEntity&gt; getAll(String hash, List&lt;String&gt; rangeKeys)
+    List&lt;DynamoDBEntity&gt; getAll(String hash, String... rangeKeys)
+    List&lt;DynamoDBEntity&gt; loadAll(String hash, List&lt;String&gt; rangeKeys)
+    List&lt;DynamoDBEntity&gt; loadAll(String hash, String... rangeKeys)
+
+    DynamoDBEntity save(DynamoDBEntity entity)
+    List&lt;DynamoDBEntity&gt; saveAll(DynamoDBEntity... entities)
+    List&lt;DynamoDBEntity&gt; saveAll(Iterable&lt;DynamoDBEntity&gt; entities)
+
+    int count(String hashKey)
+    int count(String hashKey, String rangeKey)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            range {
+                eq DynamoDBEntity.RANGE_INDEX, rangeKey
+            }
+        }
+    })
+    int countByRangeIndex(String hashKey, String rangeKey)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            range { between DynamoDBEntity.DATE_INDEX, after, before }
+        }
+    })
+    int countByDates(String hashKey, Date after, Date before)
+
+    Flowable&lt;DynamoDBEntity&gt; query(String hashKey)
+    Flowable&lt;DynamoDBEntity&gt; query(String hashKey, String rangeKey)
+
+    @Query({                                                                            <i class="conum" data-value="3"></i><b>(3)</b>
+        query(DynamoDBEntity) {
+            hash hashKey                                                                <i class="conum" data-value="4"></i><b>(4)</b>
+            range {
+                eq DynamoDBEntity.RANGE_INDEX, rangeKey                                 <i class="conum" data-value="5"></i><b>(5)</b>
+            }
+            only {                                                                      <i class="conum" data-value="6"></i><b>(6)</b>
+                rangeIndex                                                              <i class="conum" data-value="7"></i><b>(7)</b>
+            }
+        }
+    })
+    Flowable&lt;DynamoDBEntity&gt; queryByRangeIndex(String hashKey, String rangeKey)         <i class="conum" data-value="8"></i><b>(8)</b>
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            range { between DynamoDBEntity.DATE_INDEX, after, before }
+        }
+    })
+    Flowable&lt;DynamoDBEntity&gt; queryByDates(String hashKey, Date after, Date before)
+
+    void delete(DynamoDBEntity entity)
+    void delete(String hashKey, String rangeKey)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            range {
+                eq DynamoDBEntity.RANGE_INDEX, rangeKey
+            }
+        }
+    })
+    int deleteByRangeIndex(String hashKey, String rangeKey)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            range { between DynamoDBEntity.DATE_INDEX, after, before }
+        }
+    })
+    int deleteByDates(String hashKey, Date after, Date before)
+
+    @Update({                                                                           <i class="conum" data-value="3"></i><b>(3)</b>
+        update(DynamoDBEntity) {
+            hash hashKey                                                                <i class="conum" data-value="4"></i><b>(4)</b>
+            range rangeKey                                                              <i class="conum" data-value="5"></i><b>(5)</b>
+            add 'number', 1                                                             <i class="conum" data-value="6"></i><b>(6)</b>
+            returnUpdatedNew { number }                                                 <i class="conum" data-value="7"></i><b>(7)</b>
+        }
+    })
+    Number increment(String hashKey, String rangeKey)                                   <i class="conum" data-value="8"></i><b>(8)</b>
+
+    @Update({
+        update(DynamoDBEntity) {
+            hash hashKey
+            range rangeKey
+            add 'number', -1
+            returnUpdatedNew { number }
+        }
+    })
+    Number decrement(String hashKey, String rangeKey)
+
+    @Scan({                                                                             <i class="conum" data-value="3"></i><b>(3)</b>
+        scan(DynamoDBEntity) {
+            filter {
+                eq DynamoDBEntity.RANGE_INDEX, foo                                      <i class="conum" data-value="4"></i><b>(4)</b>
+            }
+        }
+    })
+    Flowable&lt;DynamoDBEntity&gt; scanAllByRangeIndex(String foo)                            <i class="conum" data-value="5"></i><b>(5)</b>
+
+}</code></pre>
+</div>
+</div>
+<div class="listingblock secondary">
+<div class="title">Java</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">@Service(DynamoDBEntity.class)                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+public interface DynamoDBEntityService {
+
+    class EqRangeIndex implements Function&lt;Map&lt;String, Object&gt;, DetachedQuery&gt; {
+        public DetachedQuery apply(Map&lt;String, Object&gt; arguments) {
+            return Builders.query(DynamoDBEntity.class)
+                .hash(arguments.get("hashKey"))
+                .range(r -&gt; r.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("rangeKey")));
+        }
+    }
+
+    class EqRangeProjection implements Function&lt;Map&lt;String, Object&gt;, DetachedQuery&gt; {   <i class="conum" data-value="2"></i><b>(2)</b>
+        public DetachedQuery apply(Map&lt;String, Object&gt; arguments) {
+            return Builders.query(DynamoDBEntity.class)                                 <i class="conum" data-value="3"></i><b>(3)</b>
+                .hash(arguments.get("hashKey"))                                         <i class="conum" data-value="4"></i><b>(4)</b>
+                .range(r -&gt;
+                    r.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("rangeKey"))         <i class="conum" data-value="5"></i><b>(5)</b>
+                )
+                .only(DynamoDBEntity.RANGE_INDEX);                                      <i class="conum" data-value="6"></i><b>(6)</b>
+        }
+    }
+
+    class EqRangeScan implements Function&lt;Map&lt;String, Object&gt;, DetachedScan&gt; {          <i class="conum" data-value="2"></i><b>(2)</b>
+        public DetachedScan apply(Map&lt;String, Object&gt; arguments) {
+            return Builders.scan(DynamoDBEntity.class)                                  <i class="conum" data-value="3"></i><b>(3)</b>
+                .filter(f -&gt; f.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("foo")));   <i class="conum" data-value="4"></i><b>(4)</b>
+        }
+    }
+
+    class BetweenDateIndex implements Function&lt;Map&lt;String, Object&gt;, DetachedQuery&gt; {
+        public DetachedQuery apply(Map&lt;String, Object&gt; arguments) {
+            return Builders.query(DynamoDBEntity.class)
+                .hash(arguments.get("hashKey"))
+                .range(r -&gt; r.between(DynamoDBEntity.DATE_INDEX, arguments.get("after"), arguments.get("before")));
+        }
+    }
+
+    class IncrementNumber implements Function&lt;Map&lt;String, Object&gt;, DetachedUpdate&gt; {    <i class="conum" data-value="2"></i><b>(2)</b>
+        public DetachedUpdate apply(Map&lt;String, Object&gt; arguments) {
+            return Builders.update(DynamoDBEntity.class)                                <i class="conum" data-value="3"></i><b>(3)</b>
+                .hash(arguments.get("hashKey"))                                         <i class="conum" data-value="4"></i><b>(4)</b>
+                .range(arguments.get("rangeKey"))                                       <i class="conum" data-value="5"></i><b>(5)</b>
+                .add("number", 1)                                                       <i class="conum" data-value="6"></i><b>(6)</b>
+                .returnUpdatedNew(DynamoDBEntity::getNumber);                           <i class="conum" data-value="7"></i><b>(7)</b>
+        }
+    }
+
+    class DecrementNumber implements Function&lt;Map&lt;String, Object&gt;, DetachedUpdate&gt; {
+        public DetachedUpdate apply(Map&lt;String, Object&gt; arguments) {
+            return Builders.update(DynamoDBEntity.class)
+                .hash(arguments.get("hashKey"))
+                .range(arguments.get("rangeKey"))
+                .add("number", -1)
+                .returnUpdatedNew(DynamoDBEntity::getNumber);
+        }
+    }
+
+    DynamoDBEntity get(String hash, String rangeKey);
+
+    DynamoDBEntity load(String hash, String rangeKey);
+
+    List&lt;DynamoDBEntity&gt; getAll(String hash, List&lt;String&gt; rangeKeys);
+
+    List&lt;DynamoDBEntity&gt; getAll(String hash, String... rangeKeys);
+
+    List&lt;DynamoDBEntity&gt; loadAll(String hash, List&lt;String&gt; rangeKeys);
+
+    List&lt;DynamoDBEntity&gt; loadAll(String hash, String... rangeKeys);
+
+    DynamoDBEntity save(DynamoDBEntity entity);
+
+    List&lt;DynamoDBEntity&gt; saveAll(DynamoDBEntity... entities);
+
+    List&lt;DynamoDBEntity&gt; saveAll(Iterable&lt;DynamoDBEntity&gt; entities);
+
+    int count(String hashKey);
+
+    int count(String hashKey, String rangeKey);
+
+    @Query(EqRangeIndex.class)
+    int countByRangeIndex(String hashKey, String rangeKey);
+
+    @Query(BetweenDateIndex.class)
+    int countByDates(String hashKey, Date after, Date before);
+
+    Flowable&lt;DynamoDBEntity&gt; query(String hashKey);
+
+    Flowable&lt;DynamoDBEntity&gt; query(String hashKey, String rangeKey);
+
+    @Query(EqRangeProjection.class)                                                     <i class="conum" data-value="7"></i><b>(7)</b>
+    Flowable&lt;DynamoDBEntity&gt; queryByRangeIndex(String hashKey, String rangeKey);        <i class="conum" data-value="8"></i><b>(8)</b>
+
+    @Query(BetweenDateIndex.class)
+    Flowable&lt;DynamoDBEntity&gt; queryByDates(String hashKey, Date after, Date before);
+
+    void delete(DynamoDBEntity entity);
+
+    void delete(String hashKey, String rangeKey);
+
+    @Query(EqRangeIndex.class)
+    int deleteByRangeIndex(String hashKey, String rangeKey);
+
+    @Query(BetweenDateIndex.class)
+    int deleteByDates(String hashKey, Date after, Date before);
+
+    @Update(IncrementNumber.class)                                                      <i class="conum" data-value="8"></i><b>(8)</b>
+    Number increment(String hashKey, String rangeKey);                                  <i class="conum" data-value="9"></i><b>(9)</b>
+
+    @Update(DecrementNumber.class)
+    Number decrement(String hashKey, String rangeKey);
+
+    @Scan(EqRangeScan.class)                                                            <i class="conum" data-value="5"></i><b>(5)</b>
+    Flowable&lt;DynamoDBEntity&gt; scanAllByRangeIndex(String foo);                           <i class="conum" data-value="6"></i><b>(6)</b>
+
+}</code></pre>
+</div>
+</div>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 1. Basic Service Methods</caption>
 <colgroup>
@@ -842,6 +1083,7 @@ Calling any of the declarative service method will create the DynamoDB table aut
 </td>
 </tr>
 </table>
+</div>
 </div>
 <div class="sect4">
 <h5 id="_advanced_queries">Advanced Queries</h5>
@@ -1602,7 +1844,7 @@ You can obtain instances of declarative client from the context as well.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-12-18 17:59:55 +0100
+Last updated 2018-12-18 18:20:02 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">
