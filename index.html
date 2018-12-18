@@ -521,7 +521,7 @@ $(addBlockSwitches);
 <li><a href="#_aws_sdk_for_micronaut">AWS SDK for Micronaut</a>
 <ul class="sectlevel2">
 <li><a href="#_dynamodb">DynamoDB</a>
-<ul class="sectlevel4">
+<ul class="sectlevel3">
 <li><a href="#_installation">Installation</a></li>
 <li><a href="#_declarative_services_with_service">Declarative Services with <code>@Service</code></a>
 <ul class="sectlevel4">
@@ -530,6 +530,7 @@ $(addBlockSwitches);
 </ul>
 </li>
 <li><a href="#_dynamodb_service">DynamoDB Service</a></li>
+<li><a href="#_testing">Testing</a></li>
 </ul>
 </li>
 </ul>
@@ -591,6 +592,9 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 </div>
 </li>
 <li>
+<p>Fully leveraging existing AWS SDK configuration chains (e.g. <a href="https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/auth/DefaultAWSCredentialsProviderChain.html">default credential provider chain</a>, <a href="https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/regions/DefaultAwsRegionProviderChain.html">default region provider chain</a>)</p>
+</li>
+<li>
 <p>Strong focus on the ease of testing</p>
 <div class="ulist">
 <ul>
@@ -607,7 +611,7 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 </div>
 </li>
 <li>
-<p>Groovy is a first-class citizen</p>
+<p>Java-enabled but Groovy is a first-class citizen</p>
 </li>
 </ul>
 </div>
@@ -629,15 +633,15 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p><a href="index.html">Declarative Services with <code>@Service</code></a></p>
+<p>High-level <a href="index.html">Declarative Services with <code>@Service</code></a></p>
 </li>
 <li>
-<p><a href="index.html">DynamoDB Service</a></p>
+<p>Middle-level <a href="index.html">DynamoDB Service</a></p>
 </li>
 </ol>
 </div>
-<div class="sect4">
-<h5 id="_installation">Installation</h5>
+<div class="sect3">
+<h4 id="_installation">Installation</h4>
 
 </div>
 <div class="sect3">
@@ -731,10 +735,72 @@ Instead you can annotate any method with <code>@Query</code> annotation to turn 
 </ul>
 </div>
 <div class="listingblock">
-<div class="title">Complex Path</div>
+<div class="title">Advanced Queries</div>
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code>Unresolved directive in index.adoc - include::../micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tag=snippets]</code></pre>
+<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
+
+@Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
+interface DynamoDBItemDBService {
+
+    @Query({                                                                            <i class="conum" data-value="3"></i><b>(3)</b>
+        query(DynamoDBEntity) {
+            hash hashKey                                                                <i class="conum" data-value="4"></i><b>(4)</b>
+            range {
+                eq DynamoDBEntity.RANGE_INDEX, rangeKey                                 <i class="conum" data-value="5"></i><b>(5)</b>
+            }
+            only {                                                                      <i class="conum" data-value="6"></i><b>(6)</b>
+                rangeIndex                                                              <i class="conum" data-value="7"></i><b>(7)</b>
+            }
+        }
+    })
+    Flowable&lt;DynamoDBEntity&gt; queryByRangeIndex(String hashKey, String rangeKey)         <i class="conum" data-value="8"></i><b>(8)</b>
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            range { between DynamoDBEntity.DATE_INDEX, after, before }
+        }
+    })
+    Flowable&lt;DynamoDBEntity&gt; queryByDates(String hashKey, Date after, Date before)
+
+}</code></pre>
 </div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>Builders</code> class provides all necessary factory methods and keywords</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Annotate an interface with <code>@Service</code> with the type of the entity as its <code>value</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td><code>@Query</code> annotation accepts a closure which returns a query builder (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/QueryBuilder.html">QueryBuilder</a> for full reference)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Specify a has key with <code>hash</code> method and method&#8217;s <code>hashKey</code> argument (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html">RangeConditionCollector</a> for full reference)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Specify some range key criteria with the method&#8217;s <code>rangeKey</code> argument</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>You can limit which properties are returned from the query</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Only <code>rangeIndex</code> property will be populated in the entities returned</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>The arguments have no special meaning but you can use them in the query. The method must return <code>Flowable</code> of entities.</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect4">
@@ -744,6 +810,10 @@ Instead you can annotate any method with <code>@Query</code> annotation to turn 
 </div>
 <div class="sect3">
 <h4 id="_dynamodb_service">DynamoDB Service</h4>
+
+</div>
+<div class="sect3">
+<h4 id="_testing">Testing</h4>
 
 </div>
 </div>
@@ -762,7 +832,7 @@ Instead you can annotate any method with <code>@Query</code> annotation to turn 
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-12-17 16:25:11 +0100
+Last updated 2018-12-18 11:42:50 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">
