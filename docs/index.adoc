@@ -13,6 +13,15 @@ Set of useful libraries for http://micronaut.io[Micronaut]. All of the libraries
 AWS SDK for Micronaut is a successor of https://github.com/agorapulse/grails-aws-sdk[Grails AWS SDK Plugin].
 If you are https://github.com/agorapulse/grails-aws-sdk[Grails AWS SDK Plugin] user you should find many of services familiar.
 
+Provided integrations:
+
+* <<DynamoDB>>
+* <<Kinesis>>
+* <<S3>>
+* <<SES>>
+* <<SNS>>
+* <<SQS>>
+
 Key concepts of the AWS SDK for Micronaut:
 
 *   Fully leveraging of Micronaut best practises
@@ -30,6 +39,90 @@ Key concepts of the AWS SDK for Micronaut:
 
 In this documentation, the high-level approaches will be discussed first before the lower-level services.
 
+=== Installation
+
+[source,indent=0,role="primary",subs='verbatim,attributes']
+.Gradle
+----
+compile 'com.agorapulse:micronaut-aws-sdk:{version}'
+
+// only required for DynamoDB and Kinesis integration
+compile group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: '1.11.470'
+
+// only required for Kinesis integration
+compile group: 'com.amazonaws', name: 'amazon-kinesis-client', version: '1.9.3'
+compile group: 'com.amazonaws', name: 'aws-java-sdk-kinesis', version: '1.11.470'
+
+// only required for S3 integration
+compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.470'
+
+// only required for SES integration
+compile group: 'com.amazonaws', name: 'aws-java-sdk-ses', version: '1.11.470'
+
+// only required for SNS integration
+compile group: 'com.amazonaws', name: 'aws-java-sdk-sns', version: '1.11.470'
+
+// only required for SQS integration
+compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.470'
+----
+
+[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
+.Maven
+----
+<dependency>
+    <groupId>com.agorapulse</groupId>
+    <artifactId>micronaut-aws-sdk</artifactId>
+    <version>{version}</version>
+</dependency>
+
+<!-- only required for DynamoDB and Kinesis integration -->
+<dependency>
+    <groupId>com.amazonaws</groupId>
+    <artifactId>aws-java-sdk-dynamodb</artifactId>
+    <version>1.11.470</version>
+</dependency>
+
+<!-- only required for Kinesis integration -->
+<dependency>
+    <groupId>com.amazonaws</groupId>
+    <artifactId>amazon-kinesis-client</artifactId>
+    <version>1.9.3</version>
+</dependency>
+
+<dependency>
+    <groupId>com.amazonaws</groupId>
+    <artifactId>aws-java-sdk-kinesis</artifactId>
+    <version>1.11.470</version>
+</dependency>
+
+<!-- only required for S3 integration -->
+<dependency>
+    <groupId>com.amazonaws</groupId>
+    <artifactId>aws-java-sdk-s3</artifactId>
+    <version>1.11.470</version>
+</dependency>
+
+<!-- only required for SES integration -->
+<dependency>
+    <groupId>com.amazonaws</groupId>
+    <artifactId>aws-java-sdk-ses</artifactId>
+    <version>1.11.470</version>
+</dependency>
+
+<!-- only required for SNS integration -->
+<dependency>
+    <groupId>com.amazonaws</groupId>
+    <artifactId>aws-java-sdk-sns</artifactId>
+    <version>1.11.470</version>
+</dependency>
+
+<!-- only required for SQS integration -->
+<dependency>
+    <groupId>com.amazonaws</groupId>
+    <artifactId>aws-java-sdk-sqs</artifactId>
+    <version>1.11.470</version>
+</dependency>
+----
 
 === DynamoDB
 
@@ -37,10 +130,8 @@ In this documentation, the high-level approaches will be discussed first before 
 
 This library provides two approaches to work with DynamoDB tables and entities:
 
-1. High-level link:index.html[Declarative Services with `@Service`]
-2. Middle-level link:index.html[DynamoDB Service]
-
-==== Installation
+1. High-level <<Declarative Services with `@Service`>>
+2. Middle-level <<DynamoDB Service>>
 
 ==== Declarative Services with `@Service`
 
@@ -48,6 +139,23 @@ Declarative services are very similar to http://gorm.grails.org/6.1.x/hibernate/
 If you add place `com.agorapulse.micronaut.aws.dynamodb.annotation.Service` annotation on the interface then methods
 matching predefined pattern will be automatically implemented.
 
+===== Method Signatures
+
+The following example shows many of available method signatures:
+
+[source,groovy,indent=0,options="nowrap",role="primary"]
+.Groovy
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-all]
+----
+
+[source,java,indent=0,options="nowrap",role="secondary"]
+.Java
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=all]
+----
+
+The following table summarizes the supported method signatures:
 
 .Basic Service Methods
 |===
@@ -90,7 +198,7 @@ matching predefined pattern will be automatically implemented.
 
     `int count(@HashKey String parentId, String rangeKey)`
 
-| Counts the items in the database. Beware, this can be very expensive operation in DynamoDB. See link:index.html[Advanced Queries] for advanced use cases
+| Counts the items in the database. Beware, this can be very expensive operation in DynamoDB. See <<Advanced Queries>> for advanced use cases
 
 | `void`
 | `delete*`
@@ -101,15 +209,15 @@ matching predefined pattern will be automatically implemented.
 
     `void delete(String hashKey, String rangeKey)`
 
-| Deletes an item which can be specified with hash key and optional range key. See link:index.html[Advanced Queries] for advanced use cases
+| Deletes an item which can be specified with hash key and optional range key. See <<Advanced Queries>> for advanced use cases
 
 | `Flowable<T>`
 |
-`list`
+`list*`
 
-`findAll`
+`findAll*`
 
-`query`
+`query*`
 
 | Entity or Hash key and optional range key annotated with `@HashKey` and `@RangeKey` if the argument name does not contain word `hash` or `range`
 |
@@ -129,9 +237,11 @@ matching predefined pattern will be automatically implemented.
 
 (see below)
 
-| Query, scan or update. See link:index.html[Advanced Queries], link:index.html[Scanning] and link:index.html[Updates] for advanced use cases
+| Query, scan or update. See <<Advanced Queries>>, <<Scanning>> and <<Updates>> for advanced use cases
 
 |===
+
+TIP: Calling any of the declarative service method will create the DynamoDB table automatically if it does not exist already.
 
 ===== Advanced Queries
 
@@ -166,11 +276,11 @@ include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynam
 [source,java,indent=0,options="nowrap",role="secondary"]
 .Java
 ----
-include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/java/DynamoDBEntityService.java[tags=header]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=header]
 
-include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/java/DynamoDBEntityService.java[tags=sample-query-class]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-query-class]
 
-include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/java/DynamoDBEntityService.java[tags=sample-query]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-query]
 
 }
 ----
@@ -213,11 +323,11 @@ include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynam
 [source,java,indent=0,options="nowrap",role="secondary"]
 .Java
 ----
-include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/java/DynamoDBEntityService.java[tags=header]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=header]
 
-include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/java/DynamoDBEntityService.java[tags=sample-scan-class]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-scan-class]
 
-include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/java/DynamoDBEntityService.java[tags=sample-scan]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-scan]
 
 }
 ----
@@ -257,11 +367,11 @@ include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynam
 [source,java,indent=0,options="nowrap",role="secondary"]
 .Java
 ----
-include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/java/DynamoDBEntityService.java[tags=header]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=header]
 
-include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/java/DynamoDBEntityService.java[tags=sample-update-class]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-update-class]
 
-include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/java/DynamoDBEntityService.java[tags=sample-update]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-update]
 
 }
 ----
@@ -277,9 +387,152 @@ include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynam
 
 ==== DynamoDB Service
 
+`DynamoDBService` provides middle-level API for working with DynamoDB tables and entites. You can obtain instance of `DynamoDBService` from
+`DynamoDBServiceProvider` which can be injected to any bean.
+
+[source,groovy,indent=0,options="nowrap",role="primary"]
+.Groovy
+----
+
+        DynamoDBServiceProvider provider = context.getBean(DynamoDBServiceProvider)
+        DynamoDBService<DynamoDBEntity> s = provider.findOrCreate(DynamoDBEntity)       // <1>
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=create-table]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=save-entity]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=load-entity]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=query-by-range-index]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=query-by-dates]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=increment]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=delete]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=delete-all]
+
+----
+<1> Obtain the instance of `DynamoDBService` from `DynamoDBServiceProvider` (provider can be injected)
+<2> Create table for the entity
+<3> Save an entity
+<4> Load the entity by its hash and range keys
+<5> Query the table for entities with given range index value
+<6> Query the table for entities having date between the specified dates
+<7> Increment a property for entity specified by hash and range keys
+<8> Delete an entity by object reference
+<9> Delete all entities with given range index value
+
+[source,java,indent=0,options="nowrap",role="secondary"]
+.Java
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=obtain-service]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=create-table]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=save-entity]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=load-entity]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=query-by-range-index]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=query-by-dates]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=increment]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=delete]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=delete-all]
+----
+<1> Obtain the instance of `DynamoDBService` from `DynamoDBServiceProvider` (provider can be injected)
+<2> Create table for the entity
+<3> Save an entity
+<4> Load the entity by its hash and range keys
+<5> Query the table for entities with given range index value
+<6> Query the table for entities having date between the specified dates
+<7> Increment a property for entity specified by hash and range keys
+<8> Delete an entity by object reference
+<9> Delete all entities with given range index value
+
+Please see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/DynamoDBService.html[DynamoDBService] for full reference.
+
 ==== Testing
 
+You can very easily mock any of the interfaces and declarative services but if you need to really
+DynamoDB integration works well with https://www.testcontainers.org/[Testcontainers] and https://localstack.cloud/[LocalStack].
 
+You need to add following dependencies into your build file:
+
+[source,indent=0,role="primary"]
+.Gradle
+----
+compile group: 'org.testcontainers', name: 'localstack', version: '1.10.2'
+compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'
+----
+
+[source,xml,indent=0,role="secondary"]
+.Maven
+----
+<dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>localstack</artifactId>
+    <version>1.10.2</version>
+    <scope>test</scope>
+</dependency>
+<dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>spock</artifactId>
+    <version>1.10.2</version>
+    <scope>test</scope>
+</dependency>
+
+----
+
+Then you can setup your tests like this:
+
+[source,groovy,indent=0,role="primary"]
+.Gradle
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=testcontainers-header]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=testcontainers-setup]
+    // test methods
+
+}
+----
+<1> Annotate the specification with `@Testcontainers` to let Spock manage the Testcontainers for you
+<2> Prepare the reference to the `ApplicationContext`, `@AutoCleanup` guarantees closing the context after the tests
+<3> Create an instance of `LocalStackContainer` with only DynamoDB support enabled
+<4> Create `AmazonDynamoDB` client using the LocalStack configuration
+<5> Register the client using LocalStack to the application context
+<6> Register the mapper using LocalStack to the application context
+<7> Obtain the provider bean
+<8> Obtain `DynamoDBService` for particular DynamoDB entity
+
+[source,java,indent=0,role="secondary"]
+.Maven
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=header]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=setup]
+    @Test
+    public void testSomething() {
+        DynamoDBServiceProvider provider = ctx.getBean(DynamoDBServiceProvider.class);  // <7>
+        DynamoDBService<DynamoDBEntity> s = provider.findOrCreate(DynamoDBEntity.class);// <8>
+
+        // test code
+    }
+}
+----
+<1> Create an instance of `LocalStackContainer` with only DynamoDB support enabled
+<2> Prepare the reference to the `ApplicationContext`
+<3> Create `AmazonDynamoDB` client using the LocalStack configuration
+<4> Register the client using LocalStack to the application context
+<5> Register the mapper using LocalStack to the application context
+<6> Close the application context after test execution
+<7> Obtain the provider bean
+<8> Obtain `DynamoDBService` for particular DynamoDB entity
+
+TIP: You can obtain instances of declarative client from the context as well.
 
 == Maintained by
 

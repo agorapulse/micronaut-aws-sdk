@@ -1,7 +1,6 @@
 package com.agorapulse.micronaut.aws.dynamodb;
 
 
-import com.agorapulse.micronaut.aws.dynamodb.java.DynamoDBEntityService;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;

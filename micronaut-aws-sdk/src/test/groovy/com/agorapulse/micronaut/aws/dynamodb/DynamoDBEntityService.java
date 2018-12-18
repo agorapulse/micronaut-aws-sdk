@@ -1,6 +1,5 @@
-package com.agorapulse.micronaut.aws.dynamodb.java;
+package com.agorapulse.micronaut.aws.dynamodb;
 
-import com.agorapulse.micronaut.aws.dynamodb.DynamoDBEntity;
 import com.agorapulse.micronaut.aws.dynamodb.annotation.Query;
 import com.agorapulse.micronaut.aws.dynamodb.annotation.Scan;
 import com.agorapulse.micronaut.aws.dynamodb.annotation.Service;
@@ -16,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+// tag::all[]
 // tag::header[]
 @Service(DynamoDBEntity.class)                                                          // <1>
 public interface DynamoDBEntityService {
@@ -147,3 +147,4 @@ public interface DynamoDBEntityService {
 // tag::footer[]
 }
 // end::footer[]
+// end::all[]
