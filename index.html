@@ -734,8 +734,8 @@ Instead you can annotate any method with <code>@Query</code> annotation to turn 
 </li>
 </ul>
 </div>
-<div class="listingblock">
-<div class="title">Advanced Queries</div>
+<div class="listingblock primary">
+<div class="title">Groovy</div>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
 
@@ -754,14 +754,6 @@ interface DynamoDBItemDBService {
         }
     })
     Flowable&lt;DynamoDBEntity&gt; queryByRangeIndex(String hashKey, String rangeKey)         <i class="conum" data-value="8"></i><b>(8)</b>
-
-    @Query({
-        query(DynamoDBEntity) {
-            hash hashKey
-            range { between DynamoDBEntity.DATE_INDEX, after, before }
-        }
-    })
-    Flowable&lt;DynamoDBEntity&gt; queryByDates(String hashKey, Date after, Date before)
 
 }</code></pre>
 </div>
@@ -782,11 +774,11 @@ interface DynamoDBItemDBService {
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Specify a has key with <code>hash</code> method and method&#8217;s <code>hashKey</code> argument (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html">RangeConditionCollector</a> for full reference)</td>
+<td>Specify a hash key with <code>hash</code> method and method&#8217;s <code>hashKey</code> argument</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Specify some range key criteria with the method&#8217;s <code>rangeKey</code> argument</td>
+<td>Specify some range key criteria with the method&#8217;s <code>rangeKey</code> argument (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html">RangeConditionCollector</a> for full reference)</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="6"></i><b>6</b></td>
@@ -799,6 +791,65 @@ interface DynamoDBItemDBService {
 <tr>
 <td><i class="conum" data-value="8"></i><b>8</b></td>
 <td>The arguments have no special meaning but you can use them in the query. The method must return <code>Flowable</code> of entities.</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Java</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">@Service(DynamoDBEntity.class)                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+public interface DynamoDBEntityService {
+
+    class EqRangeProjection implements Function&lt;Map&lt;String, Object&gt;, DetachedQuery&gt; {   <i class="conum" data-value="2"></i><b>(2)</b>
+        public DetachedQuery apply(Map&lt;String, Object&gt; arguments) {
+            return Builders.query(DynamoDBEntity.class)                                 <i class="conum" data-value="3"></i><b>(3)</b>
+                .hash(arguments.get("hashKey"))                                         <i class="conum" data-value="4"></i><b>(4)</b>
+                .range(r -&gt;
+                    r.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("rangeKey"))         <i class="conum" data-value="5"></i><b>(5)</b>
+                )
+                .only(DynamoDBEntity.RANGE_INDEX);                                      <i class="conum" data-value="6"></i><b>(6)</b>
+        }
+    }
+
+    @Query(EqRangeProjection.class)                                                     <i class="conum" data-value="7"></i><b>(7)</b>
+    Flowable&lt;DynamoDBEntity&gt; queryByRangeIndex(String hashKey, String rangeKey);        <i class="conum" data-value="8"></i><b>(8)</b>
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Annotate an interface with <code>@Service</code> with the type of the entity as its <code>value</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Define class which implements <code>Function&lt;Map&lt;String, Object&gt;, DetachedQuery&gt;</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Use <code>Builders</code> class to create a query builder for given DynamoDB entity (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/QueryBuilder.html">QueryBuilder</a> for full reference)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Specify a hash key with <code>hash</code> method and method&#8217;s <code>hashKey</code> argument</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Specify some range key criteria with the method&#8217;s <code>rangeKey</code> argument (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html">RangeConditionCollector</a> for full reference)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Only <code>rangeIndex</code> property will be populated in the entities returned</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td><code>@Query</code> annotation accepts a class which implements <code>Function&lt;Map&lt;String, Object&gt;, DetachedQuery&gt;</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>The arguments have no special meaning but you can use them in the query using <code>arguments</code> map. The method must return <code>Flowable</code> of entities.</td>
 </tr>
 </table>
 </div>
@@ -832,7 +883,7 @@ interface DynamoDBItemDBService {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-12-18 11:42:50 +0100
+Last updated 2018-12-18 13:57:11 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">
