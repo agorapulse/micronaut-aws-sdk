@@ -749,6 +749,18 @@ matching predefined pattern will be automatically implemented.</p>
 </tr>
 </tbody>
 </table>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+Calling any of the declarative service method will create the DynamoDB table automatically if it does not exist already.
+</td>
+</tr>
+</table>
+</div>
 <div class="sect4">
 <h5 id="_advanced_queries">Advanced Queries</h5>
 <div class="paragraph">
@@ -771,7 +783,7 @@ Instead you can annotate any method with <code>@Query</code> annotation to make 
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy"><i class="conum" data-value="1"></i><b>(1)</b>
 
 @Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
 interface DynamoDBItemDBService {
@@ -907,7 +919,7 @@ If you need to scan the table by unindexed attributes you can annotate any metho
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy"><i class="conum" data-value="1"></i><b>(1)</b>
 
 @Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
 interface DynamoDBItemDBService {
@@ -1004,7 +1016,7 @@ public interface DynamoDBEntityService {
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy"><i class="conum" data-value="1"></i><b>(1)</b>
 
 @Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
 interface DynamoDBItemDBService {
@@ -1124,7 +1136,163 @@ public interface DynamoDBEntityService {
 </div>
 <div class="sect3">
 <h4 id="_dynamodb_service">DynamoDB Service</h4>
+<div class="paragraph">
+<p><code>DynamoDBService</code> provides middle-level API for working with DynamoDB tables and entites. You can obtain instance of <code>DynamoDBService</code> from
+<code>DynamoDBServiceProvider</code> which can be injected to any bean.</p>
+</div>
+<div class="listingblock primary">
+<div class="title">Groovy</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy">DynamoDBServiceProvider provider = context.getBean(DynamoDBServiceProvider)
+s = provider.findOrCreate(DynamoDBEntity)                                       <i class="conum" data-value="1"></i><b>(1)</b>
 
+s.createTable()                                                                 <i class="conum" data-value="2"></i><b>(2)</b>
+
+s.save(new DynamoDBEntity(                                                      <i class="conum" data-value="3"></i><b>(3)</b>
+    parentId: '1',
+    id: '1',
+    rangeIndex: 'foo',
+    date: REFERENCE_DATE.toDate()
+))
+
+s.get('1', '1')                                                                 <i class="conum" data-value="4"></i><b>(4)</b>
+
+s.query('1', DynamoDBEntity.RANGE_INDEX, 'bar').count == 1                      <i class="conum" data-value="5"></i><b>(5)</b>
+
+s.queryByDates('3', DynamoDBEntity.DATE_INDEX, [                                <i class="conum" data-value="6"></i><b>(6)</b>
+    after: REFERENCE_DATE.plusDays(9).toDate(), before: REFERENCE_DATE.plusDays(20).toDate()
+]).count == 1
+
+s.increment('1', '1', 'number')                                                 <i class="conum" data-value="7"></i><b>(7)</b>
+
+s.delete(s.get('1', '1'))                                                       <i class="conum" data-value="8"></i><b>(8)</b>
+
+s.deleteAll('1', DynamoDBEntity.RANGE_INDEX, 'bar') == 1                        <i class="conum" data-value="9"></i><b>(9)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Obtain the instance of <code>DynamoDBService</code> from <code>DynamoDBServiceProvider</code> (provider can be injected)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Create table for the entity</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Save an entity</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Load the entity by its hash and range keys</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Query the table for entities with given range index value</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Query the table for entities having date between the specified dates</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Increment a property for entity specified by hash and range keys</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>Delete an entity by object reference</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="9"></i><b>9</b></td>
+<td>Delete all entities with given range index value</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Java</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">DynamoDBServiceProvider provider = ctx.getBean(DynamoDBServiceProvider.class);
+DynamoDBService&lt;DynamoDBEntity&gt; s = provider.findOrCreate(DynamoDBEntity.class);<i class="conum" data-value="1"></i><b>(1)</b>
+
+assertNotNull(
+    s.createTable(5L, 5L)                                                       <i class="conum" data-value="2"></i><b>(2)</b>
+);
+
+assertNotNull(
+    s.save(createEntity("1", "1", "foo", REFERENCE_DATE.toDate()))              <i class="conum" data-value="3"></i><b>(3)</b>
+);
+
+assertNotNull(
+    s.get("1", "1")                                                             <i class="conum" data-value="4"></i><b>(4)</b>
+);
+
+assertEquals(1,
+    s.query("1", DynamoDBEntity.RANGE_INDEX,"bar").getCount().intValue()        <i class="conum" data-value="5"></i><b>(5)</b>
+);
+
+assertEquals(1,
+    s.queryByDates(                                                             <i class="conum" data-value="6"></i><b>(6)</b>
+        "3",
+        DynamoDBEntity.DATE_INDEX,
+        REFERENCE_DATE.plusDays(9).toDate(),
+        REFERENCE_DATE.plusDays(20).toDate()
+    ).getCount().intValue()
+);
+
+s.increment("1", "1", "number");                                                <i class="conum" data-value="7"></i><b>(7)</b>
+
+s.delete(s.get("1", "1"));                                                      <i class="conum" data-value="8"></i><b>(8)</b>
+
+assertEquals(1,
+    s.deleteAll("1", DynamoDBEntity.RANGE_INDEX, "bar")                         <i class="conum" data-value="9"></i><b>(9)</b>
+);</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Obtain the instance of <code>DynamoDBService</code> from <code>DynamoDBServiceProvider</code> (provider can be injected)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Create table for the entity</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Save an entity</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Load the entity by its hash and range keys</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Query the table for entities with given range index value</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Query the table for entities having date between the specified dates</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Increment a property for entity specified by hash and range keys</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>Delete an entity by object reference</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="9"></i><b>9</b></td>
+<td>Delete all entities with given range index value</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Please see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/DynamoDBService.html">DynamoDBService</a> for full reference.</p>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_testing">Testing</h4>
@@ -1146,7 +1314,7 @@ public interface DynamoDBEntityService {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-12-18 15:21:48 +0100
+Last updated 2018-12-18 17:06:53 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">
