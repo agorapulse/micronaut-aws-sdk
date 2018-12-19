@@ -533,6 +533,10 @@ $(addBlockSwitches);
 </li>
 <li><a href="#_dynamodb_service">DynamoDB Service</a></li>
 <li><a href="#_testing">Testing</a></li>
+</ul>
+</li>
+<li><a href="#_kinesis">Kinesis</a>
+<ul class="sectlevel3">
 <li><a href="#_configuration">Configuration</a></li>
 <li><a href="#_publishing_with_kinesisclient">Publishing with <code>@KinesisClient</code></a></li>
 </ul>
@@ -577,7 +581,7 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <p><a href="#_dynamodb">DynamoDB</a></p>
 </li>
 <li>
-<p><a href="#Kinesis">[Kinesis]</a></p>
+<p><a href="#_kinesis">Kinesis</a></p>
 </li>
 <li>
 <p><a href="#S3">[S3]</a></p>
@@ -1828,11 +1832,14 @@ class DefaultDynamoDBServiceSpec extends Specification {
 </td>
 <td class="content">
 You can obtain instances of declarative client from the context as well.
-=== Kinesis
 </td>
 </tr>
 </table>
 </div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_kinesis">Kinesis</h3>
 <div class="quoteblock">
 <blockquote>
 <div class="paragraph">
@@ -1855,7 +1862,6 @@ You can obtain instances of declarative client from the context as well.
 <p>Middle-level <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/kinesis/KinesisService.html">KinesisService</a></p>
 </li>
 </ol>
-</div>
 </div>
 <div class="sect3">
 <h4 id="_configuration">Configuration</h4>
@@ -2119,7 +2125,7 @@ omitted and replaced with <code>void</code>.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-12-19 10:10:29 +0100
+Last updated 2018-12-19 14:29:43 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">
