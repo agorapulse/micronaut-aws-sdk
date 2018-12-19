@@ -1940,71 +1940,29 @@ the stream.</p>
 <p>The following example shows many of available method signatures for publishing records:</p>
 </div>
 <div class="listingblock">
-<div class="title">Kinesis Client</div>
+<div class="title">Publishing String Records</div>
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">package com.agorapulse.micronaut.aws.kinesis;
-
-import com.agorapulse.micronaut.aws.Pogo;
-import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisClient;
-import com.agorapulse.micronaut.aws.kinesis.annotation.PartitionKey;
-import com.agorapulse.micronaut.aws.kinesis.annotation.SequenceNumber;
-import com.agorapulse.micronaut.aws.kinesis.annotation.Stream;
-import com.amazonaws.services.kinesis.model.PutRecordResult;
-import com.amazonaws.services.kinesis.model.PutRecordsRequestEntry;
-import com.amazonaws.services.kinesis.model.PutRecordsResult;
-
-@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
 interface DefaultClient {
+    void putRecordString(String record);                                                <i class="conum" data-value="2"></i><b>(2)</b>
 
-    String OTHER_STREAM = "OtherStream";
+    PutRecordResult putRecord(String partitionKey, String record);                      <i class="conum" data-value="3"></i><b>(3)</b>
 
-    @Stream(OTHER_STREAM)
-    PutRecordResult putEventToStream(MyEvent event);                                    <i class="conum" data-value="2"></i><b>(2)</b>
+    void putRecordAnno(@PartitionKey String id, String record);                         <i class="conum" data-value="4"></i><b>(4)</b>
 
-    PutRecordResult putEvent(MyEvent event);                                            <i class="conum" data-value="3"></i><b>(3)</b>
+    void putRecord(String partitionKey, String record, String sequenceNumber);          <i class="conum" data-value="5"></i><b>(5)</b>
 
-    PutRecordsResult putEventsIterable(Iterable&lt;MyEvent&gt; events);                       <i class="conum" data-value="4"></i><b>(4)</b>
-
-    void putEventsArrayNoReturn(MyEvent... events);                                     <i class="conum" data-value="5"></i><b>(5)</b>
-
-    void putRecordBytes(byte[] record);                                                 <i class="conum" data-value="6"></i><b>(6)</b>
-
-    void putRecordString(String record);                                                <i class="conum" data-value="7"></i><b>(7)</b>
-
-    void putRecordObject(Pogo pogo);                                                    <i class="conum" data-value="8"></i><b>(8)</b>
-
-    PutRecordsResult putRecordObjects(Pogo... pogo);                                    <i class="conum" data-value="9"></i><b>(9)</b>
-
-    PutRecordsResult putRecordObjects(Iterable&lt;Pogo&gt; pogo);                             <i class="conum" data-value="10"></i><b>(10)</b>
-
-    PutRecordResult putRecord(String partitionKey, String record);                      <i class="conum" data-value="11"></i><b>(11)</b>
-
-    void putRecordAnno(@PartitionKey String id, String record);                         <i class="conum" data-value="12"></i><b>(12)</b>
-
-    void putRecordDataByteArray(@PartitionKey String id, byte[] value);                 <i class="conum" data-value="13"></i><b>(13)</b>
-
-    void putRecordDataObject(@PartitionKey String id, Pogo value);                      <i class="conum" data-value="14"></i><b>(14)</b>
-
-    void putRecord(String partitionKey, String record, String sequenceNumber);          <i class="conum" data-value="15"></i><b>(15)</b>
-
-    void putRecordAnno(                                                                 <i class="conum" data-value="16"></i><b>(16)</b>
+    void putRecordAnno(                                                                 <i class="conum" data-value="6"></i><b>(6)</b>
         @PartitionKey String id,
         String record,
         @SequenceNumber String sqn
     );
 
-    void putRecordAnnoNumbers(                                                          <i class="conum" data-value="17"></i><b>(17)</b>
+    void putRecordAnnoNumbers(                                                          <i class="conum" data-value="7"></i><b>(7)</b>
         @PartitionKey Long id,
         String record,
         @SequenceNumber int sequenceNumber
     );
-
-    PutRecordsResult putRecords(Iterable&lt;PutRecordsRequestEntry&gt; entries);              <i class="conum" data-value="18"></i><b>(18)</b>
-
-    PutRecordsResult putRecords(PutRecordsRequestEntry... entries);                     <i class="conum" data-value="19"></i><b>(19)</b>
-
-    PutRecordsResult putRecord(PutRecordsRequestEntry entry);                           <i class="conum" data-value="20"></i><b>(20)</b>
-
 }</code></pre>
 </div>
 </div>
@@ -2016,79 +1974,150 @@ interface DefaultClient {
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Without any parameters <code>@KinesisClient</code> publishes to default stream of the default configuration but you can change it using <code>@Stream</code> annotation on the method</td>
+<td>You can put String into the stream with generated UUID as partition key</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>You can put object implementing <code>Event</code> into the stream</td>
+<td>You can user predefined partition key</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>You can put iterable of objects implementing <code>Event</code> into the stream</td>
+<td>If the name of the argument does not contain word <code>parition</code> then <code>@PartitionKey</code> annotation must to be used</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>You can put array of objects implementing <code>Event</code> into the stream</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>You can put byte array into the stream, UUID as partition key will be generated</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>You can put String into the stream, UUID as partition key will be generated</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="8"></i><b>8</b></td>
-<td>You can put any object into the stream, UUID as partition key will be generated, the objects will be serialized to JSON</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="9"></i><b>9</b></td>
-<td>You can put array of any objects into the stream, UUID as partition key will be generated for each record, each object will be serialized to JSON</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="10"></i><b>10</b></td>
-<td>You can put iterable of any objects into the stream, UUID as partition key will be generated for each record, each object will be serialized to JSON</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="11"></i><b>11</b></td>
-<td>You can put String into the stream with predefined partition key</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="12"></i><b>12</b></td>
-<td>You can put String into the stream with predefined partition key, if the name of the argument does not contain word <code>parition</code> then <code>@PartitionKey</code> annotation must to be used</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="13"></i><b>13</b></td>
-<td>You can put byte array into the stream with predefined partition key, if the name of the argument does not contain word <code>parition</code> then <code>@PartitionKey</code> annotation must to be used</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="14"></i><b>14</b></td>
-<td>You can put any object into the stream with predefined partition key, if the name of the argument does not contain word <code>parition</code> then <code>@PartitionKey</code> annotation must to be used</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="15"></i><b>15</b></td>
 <td>You can put String into the stream with predefined partition key and a sequence number</td>
 </tr>
 <tr>
-<td><i class="conum" data-value="16"></i><b>16</b></td>
-<td>You can put String into the stream with predefined partition key and a sequence number, if the name of the argument does not contain word <code>sequence</code> then <code>@SequenceKey</code> annotation must to be used</td>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>If the name of the sequence number argument does not contain word <code>sequence</code> then <code>@SequenceKey</code> annotation must to be used</td>
 </tr>
 <tr>
-<td><i class="conum" data-value="17"></i><b>17</b></td>
-<td>The type of parition key and sequence number does not matter as the value will be always convereted to string</td>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>The type of parition key and sequence number does not matter as the value will be always converted to string</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">Publishing Byte Array Records</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+interface DefaultClient {
+    void putRecordBytes(byte[] record);                                                 <i class="conum" data-value="2"></i><b>(2)</b>
+
+    void putRecordDataByteArray(@PartitionKey String id, byte[] value);                 <i class="conum" data-value="3"></i><b>(3)</b>
+
+    PutRecordsResult putRecords(Iterable&lt;PutRecordsRequestEntry&gt; entries);              <i class="conum" data-value="4"></i><b>(4)</b>
+
+    PutRecordsResult putRecords(PutRecordsRequestEntry... entries);                     <i class="conum" data-value="5"></i><b>(5)</b>
+
+    PutRecordsResult putRecord(PutRecordsRequestEntry entry);                           <i class="conum" data-value="6"></i><b>(6)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>@KinesisClient</code> annotation makes the interface a Kinesis client</td>
 </tr>
 <tr>
-<td><i class="conum" data-value="18"></i><b>18</b></td>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>You can put byte array into the stream, UUID as partition key will be generated</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>If the name of the argument does not contain word <code>parition</code> then <code>@PartitionKey</code> annotation must to be used</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
 <td>You can put several records wrapped into iterable of <code>PutRecordsRequestEntry</code></td>
 </tr>
 <tr>
-<td><i class="conum" data-value="19"></i><b>19</b></td>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
 <td>You can put several records wrapped into array of <code>PutRecordsRequestEntry</code></td>
 </tr>
 <tr>
-<td><i class="conum" data-value="20"></i><b>20</b></td>
-<td>If the single argument is of type <code>PutRecordsRequestEntry</code> then <code>PutRecordsResult</code> object is returned from the method despite only single record has been put</td>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>If the single argument is of type <code>PutRecordsRequestEntry</code> then <code>PutRecordsResult</code> object is returned from the method despite only single record has been published</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">Publishing Plain Old Java Objects</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+interface DefaultClient {
+    void putRecordObject(Pogo pogo);                                                    <i class="conum" data-value="2"></i><b>(2)</b>
+
+    PutRecordsResult putRecordObjects(Pogo... pogo);                                    <i class="conum" data-value="3"></i><b>(3)</b>
+
+    PutRecordsResult putRecordObjects(Iterable&lt;Pogo&gt; pogo);                             <i class="conum" data-value="4"></i><b>(4)</b>
+
+    void putRecordDataObject(@PartitionKey String id, Pogo value);                      <i class="conum" data-value="5"></i><b>(5)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>@KinesisClient</code> annotation makes the interface a Kinesis client</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>You can put any object into the stream, UUID as partition key will be generated, the objects will be serialized to JSON</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>You can put array of any objects into the stream, UUID as partition key will be generated for each record, each object will be serialized to JSON</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>You can put iterable of any objects into the stream, UUID as partition key will be generated for each record, each object will be serialized to JSON</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>You can put any object into the stream with predefined partition key, if the name of the argument does not contain word <code>parition</code> then <code>@PartitionKey</code> annotation must to be used</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">Publishing Events</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+interface DefaultClient {
+    PutRecordResult putEvent(MyEvent event);                                            <i class="conum" data-value="2"></i><b>(2)</b>
+
+    PutRecordsResult putEventsIterable(Iterable&lt;MyEvent&gt; events);                       <i class="conum" data-value="3"></i><b>(3)</b>
+
+    void putEventsArrayNoReturn(MyEvent... events);                                     <i class="conum" data-value="4"></i><b>(4)</b>
+
+    @Stream("OtherStream") PutRecordResult putEventToStream(MyEvent event);             <i class="conum" data-value="5"></i><b>(5)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>@KinesisClient</code> annotation makes the interface a Kinesis client</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>You can put object implementing <code>Event</code> into the stream</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>You can put iterable of objects implementing <code>Event</code> into the stream</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>You can put array of objects implementing <code>Event</code> into the stream</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Without any parameters <code>@KinesisClient</code> publishes to default stream of the default configuration but you can change it using <code>@Stream</code> annotation on the method</td>
 </tr>
 </table>
 </div>
