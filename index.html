@@ -539,9 +539,10 @@ $(addBlockSwitches);
 <ul class="sectlevel3">
 <li><a href="#_configuration">Configuration</a></li>
 <li><a href="#_publishing_with_kinesisclient">Publishing with <code>@KinesisClient</code></a></li>
+<li><a href="#_listening_with_kinesislistener">Listening with <code>@KinesisListener</code></a></li>
+<li><a href="#_kinesis_service">Kinesis Service</a></li>
 </ul>
 </li>
-<li><a href="#_listening_with_kinesislistener">Listening with <code>@KinesisListener</code></a></li>
 </ul>
 </li>
 <li><a href="#_maintained_by">Maintained by</a></li>
@@ -1860,7 +1861,7 @@ You can obtain instances of declarative client from the context as well.
 <p>High-level <a href="#_listening_with_kinesislistener">Listening with <code>@KinesisListener</code></a></p>
 </li>
 <li>
-<p>Middle-level <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/kinesis/KinesisService.html">KinesisService</a></p>
+<p>Middle-level <a href="#_kinesis_service">Kinesis Service</a></p>
 </li>
 </ol>
 </div>
@@ -2142,9 +2143,8 @@ by setting the <code>stream</code> property of the annotation such as <code>@Kin
 used by particular method using <code>@Stream</code> annotation as mentioned above.</p>
 </div>
 </div>
-</div>
-<div class="sect2">
-<h3 id="_listening_with_kinesislistener">Listening with <code>@KinesisListener</code></h3>
+<div class="sect3">
+<h4 id="_listening_with_kinesislistener">Listening with <code>@KinesisListener</code></h4>
 <div class="admonitionblock tip">
 <table>
 <tr>
@@ -2253,8 +2253,16 @@ public class KinesisListenerTester {
 <p>Multiple methods in a single application can listen to the same configuration (stream). In that case, every method will be executed with the
 incoming payload.</p>
 </div>
+</div>
+<div class="sect3">
+<h4 id="_kinesis_service">Kinesis Service</h4>
 <div class="paragraph">
-<p>TODO: skeleton app for api gateway proxy</p>
+<p>Instance of <code>KinesisService</code> is created for the default Kinesis configuration and each stream configuration in <code>aws.kinesis.streams</code> map.
+You should always use <code>@Named</code> qualifier when injecting <code>KinesisService</code> if you have more than one stream configuration present, e.g. <code>@Named("other") KinesisService otherService</code>.</p>
+</div>
+<div class="paragraph">
+<p>Please, see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/kinesis/KinesisService.html">KinesisService</a> for the full reference.</p>
+</div>
 </div>
 </div>
 </div>
@@ -2272,7 +2280,7 @@ incoming payload.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-12-19 14:29:43 +0100
+Last updated 2018-12-19 16:25:01 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">
