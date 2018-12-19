@@ -128,7 +128,6 @@ include::dynamodb.adoc[]
 
 include::kinesis.adoc[]
 
-TODO: skeleton app for api gateway proxy
 
 == Maintained by
 

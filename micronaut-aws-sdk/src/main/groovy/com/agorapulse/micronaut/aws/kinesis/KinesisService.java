@@ -485,4 +485,19 @@ public interface KinesisService {
     default SplitShardResult splitShard(String shardId) {
         return splitShard(getDefaultStreamName(), shardId);
     }
+
+    default void waitForStatus() {
+        waitForStatus(StreamStatus.ACTIVE);
+    }
+
+
+    default void waitForStatus(StreamStatus status) {
+        waitForStatus(getDefaultStreamName(), status);
+    }
+
+    default void waitForStatus(String streamName) {
+        waitForStatus(streamName, StreamStatus.ACTIVE);
+    }
+
+    void waitForStatus(String streamName, StreamStatus status);
 }

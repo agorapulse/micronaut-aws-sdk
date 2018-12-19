@@ -2,7 +2,6 @@ package com.agorapulse.micronaut.aws.kinesis
 
 import com.agorapulse.micronaut.aws.Pogo
 import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisClient
-import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisListener
 import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
@@ -67,10 +66,8 @@ class KinesisAnnotationsSpec extends Specification {
 
         kinesisService = new DefaultKinesisService(this.kinesis, new KinesisConfiguration(stream: TEST_STREAM), new ObjectMapper())
         kinesisService.createStream()
+        kinesisService.waitForStatus()
 
-        while (kinesisService.describeStream().streamDescription.streamStatus != 'ACTIVE') {
-            Thread.sleep(100)
-        }
 
         assert kinesisService.listShards().size() == 1
 
@@ -159,43 +156,6 @@ class KinesisAnnotationsSpec extends Specification {
             tester.executions.any { it?.startsWith('EXECUTED: listenObject') } &&
             tester.executions.any { it?.startsWith('EXECUTED: listenObjectRecord') } &&
             tester.executions.any { it == 'EXECUTED: listenPogoRecord(com.agorapulse.micronaut.aws.Pogo(bar))' }
-    }
-
-}
-
-@Singleton
-class KinesisListenerTester {
-
-    List<String> executions = new CopyOnWriteArrayList()
-
-    @KinesisListener
-    void listenStringRecord(String string, Record record) {
-        executions << "EXECUTED: listenStringRecord($string, $record)".toString()
-    }
-
-    @KinesisListener
-    void listenString(String string) {
-        executions << "EXECUTED: listenString($string)".toString()
-    }
-
-    @KinesisListener
-    void listenRecord(Record record) {
-        executions << "EXECUTED: listenRecord($record)\n".toString()
-    }
-
-    @KinesisListener
-    void listenObject(MyEvent event) {
-        executions << "EXECUTED: listenObject($event)".toString()
-    }
-
-    @KinesisListener
-    void listenObjectRecord(MyEvent event, Record record) {
-        executions << "EXECUTED: listenObjectRecord($event, $record)".toString()
-    }
-
-    @KinesisListener
-    void listenPogoRecord(Pogo event) {
-        executions << "EXECUTED: listenPogoRecord($event)".toString()
     }
 
 }

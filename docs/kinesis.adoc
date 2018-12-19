@@ -94,3 +94,39 @@ include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kines
 
 NOTE: The return value of the method is `PutRecordResult` or `PutRecordsResult` for putting multiple records but it can be always
 omitted and replaced with `void`.
+
+By default, `KinesisClient` publishes records into the default stream defined by `aws.kinesis.stream` property.
+You can switch to different configuration by changing the `value` of the annotation such as `@KinesisClient("other")` or
+by setting the `stream` property of the annotation such as `@KinesisClient(stream = "MyStream")`. You can change stream
+used by particular method using `@Stream` annotation as mentioned above.
+
+
+
+==== Listening with `@KinesisListener`
+
+TIP: Before you start implementing your service with `@KinesisListener` you may consider implementing a Lambda function
+instead.
+
+If you place `com.agorapulse.micronaut.aws.kinesis.annotation.KinesisListener` annotation on the method in the bean
+then the method will be triggered with the new records in the stream.
+
+source,java,indent=0,options="nowrap"]
+.Publishing Events
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisListenerTester.java[tags=all]
+----
+<1> `@KinesisListener` method must be declared in a bean, e.g. `@Singleton`
+<2> You can listen to just plain string records
+<3> You can listen to `Record` objects
+<4> You can listen to both string and `Record` objects
+<5> You can listen to objects implementing `Event` interface
+<6> You can listen to both `Event` and `Record` objects
+<7> You can listen to any object as long as it can be unmarshalled from the record payload
+
+You can listen to different than default configuration by changing the `value` of the annotation such as `@KinesisListener("other")`.
+
+Multiple methods in a single application can listen to the same configuration (stream). In that case, every method will be executed with the
+incoming payload.
+
+
+
