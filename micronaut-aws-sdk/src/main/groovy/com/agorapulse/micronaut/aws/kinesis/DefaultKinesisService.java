@@ -22,7 +22,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class DefaultKinesisService implements KinesisService {
+class DefaultKinesisService implements KinesisService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KinesisService.class);
 

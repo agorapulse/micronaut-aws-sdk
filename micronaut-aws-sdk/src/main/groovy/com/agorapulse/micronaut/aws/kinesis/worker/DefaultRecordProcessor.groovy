@@ -8,6 +8,7 @@ import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessorC
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.ShutdownReason
 import com.amazonaws.services.kinesis.model.Record
 import groovy.transform.CompileStatic
+import groovy.transform.PackageScope
 import groovy.util.logging.Slf4j
 
 import java.nio.charset.CharacterCodingException
@@ -17,6 +18,7 @@ import java.util.function.BiConsumer
 
 @Slf4j
 @CompileStatic
+@PackageScope
 class DefaultRecordProcessor implements IRecordProcessor {
 
     // Backoff and retry settings

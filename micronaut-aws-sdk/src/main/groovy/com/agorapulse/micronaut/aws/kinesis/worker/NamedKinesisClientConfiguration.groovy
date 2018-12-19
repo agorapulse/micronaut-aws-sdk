@@ -9,7 +9,7 @@ import io.micronaut.context.annotation.Requires
 import io.micronaut.context.annotation.Value
 
 @CompileStatic
-@EachProperty('aws.kinesis.clients')
+@EachProperty('aws.kinesis.listeners')
 @Requires(classes = KinesisClientLibConfiguration)
 class NamedKinesisClientConfiguration extends KinesisClientConfiguration {
 

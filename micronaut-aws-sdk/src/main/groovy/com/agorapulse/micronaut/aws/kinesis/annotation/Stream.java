@@ -1,7 +1,5 @@
 package com.agorapulse.micronaut.aws.kinesis.annotation;
 
-import groovy.transform.Undefined;
-
 import java.lang.annotation.*;
 
 

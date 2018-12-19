@@ -8,6 +8,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * KinesisService provides middle-level API access to the Kinesis streams.
+ */
 public interface KinesisService {
 
     /**

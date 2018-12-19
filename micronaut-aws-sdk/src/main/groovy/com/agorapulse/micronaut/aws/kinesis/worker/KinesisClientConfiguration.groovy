@@ -19,7 +19,7 @@ import static com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisCli
 
 @CompileStatic
 @Named('default')
-@ConfigurationProperties('aws.kinesis.client')
+@ConfigurationProperties('aws.kinesis.listener')
 @Requires(classes = KinesisClientLibConfiguration)
 class KinesisClientConfiguration {
 

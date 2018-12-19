@@ -1,0 +1,96 @@
+=== Kinesis
+
+> Amazon Kinesis makes it easy to collect, process, and analyze real-time, streaming data so you can get timely insights and react quickly to new information.
+
+This library provides three approaches to work with Kinesis streams:
+
+1. High-level <<Publishing with `@KinesisClient`>>
+1. High-level <<Listening with `@KinesisListener`>>
+2. Middle-level https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/kinesis/KinesisService.html[KinesisService]
+
+==== Configuration
+
+By default, only `aws.kinesis.application.name` and `aws.kinesis.listener.stream` are required if you decide to use `@KinesisListener`.
+Otherwise you need no configuration at all but some of the configuration may be useful for you.
+
+[source,yaml,indent=0,options="nowrap"]
+.application.yml
+----
+include::../micronaut-aws-sdk/src/test/resources/application-docs.yml[]
+----
+<1> You can specify the default stream for https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/kinesis/KinesisService.html[KinesisService] and `@KinesisClient`
+<2> You can define multiple configurations
+<3> Each of the configuration can be access using `@Named('test') KinesisService` qualifier or you can define the configuration as `value` of `@KinesisClient('test')`
+<4> Application name is required for `@KinesisListner`
+<5> Optional id of the Kinesis worker (listener)
+<6> Stream to listen is required for `@KinesisListener`
+<7> You can define multiple listeners configurations
+<8> The name of the configuration will be used as `value` of `@KinesisListener('test')`
+
+
+==== Publishing with `@KinesisClient`
+
+If you place `com.agorapulse.micronaut.aws.kinesis.annotation.KinesisClient` annotation on the interface then methods
+matching predefined pattern will be automatically implemented. Every method of `KinesisClient` puts new records into
+the stream.
+
+The following example shows many of available method signatures for publishing records:
+
+[source,java,indent=0,options="nowrap"]
+.Publishing String Records
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=header]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=string]
+}
+----
+<1> `@KinesisClient` annotation makes the interface a Kinesis client
+<2> You can put String into the stream with generated UUID as partition key
+<3> You can user predefined partition key
+<4> If the name of the argument does not contain word `parition` then `@PartitionKey` annotation must to be used
+<5> You can put String into the stream with predefined partition key and a sequence number
+<6> If the name of the sequence number argument does not contain word `sequence` then `@SequenceKey` annotation must to be used
+<7> The type of parition key and sequence number does not matter as the value will be always converted to string
+
+[source,java,indent=0,options="nowrap"]
+.Publishing Byte Array Records
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=header]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=bytes]
+}
+----
+<1> `@KinesisClient` annotation makes the interface a Kinesis client
+<2> You can put byte array into the stream, UUID as partition key will be generated
+<3> If the name of the argument does not contain word `parition` then `@PartitionKey` annotation must to be used
+<4> You can put several records wrapped into iterable of `PutRecordsRequestEntry`
+<5> You can put several records wrapped into array of `PutRecordsRequestEntry`
+<6> If the single argument is of type `PutRecordsRequestEntry` then `PutRecordsResult` object is returned from the method despite only single record has been published
+
+[source,java,indent=0,options="nowrap"]
+.Publishing Plain Old Java Objects
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=header]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=pogo]
+}
+----
+<1> `@KinesisClient` annotation makes the interface a Kinesis client
+<2> You can put any object into the stream, UUID as partition key will be generated, the objects will be serialized to JSON
+<3> You can put array of any objects into the stream, UUID as partition key will be generated for each record, each object will be serialized to JSON
+<4> You can put iterable of any objects into the stream, UUID as partition key will be generated for each record, each object will be serialized to JSON
+<5> You can put any object into the stream with predefined partition key, if the name of the argument does not contain word `parition` then `@PartitionKey` annotation must to be used
+
+[source,java,indent=0,options="nowrap"]
+.Publishing Events
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=header]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=events]
+}
+----
+<1> `@KinesisClient` annotation makes the interface a Kinesis client
+<2> You can put object implementing `Event` into the stream
+<3> You can put iterable of objects implementing `Event` into the stream
+<4> You can put array of objects implementing `Event` into the stream
+<5> Without any parameters `@KinesisClient` publishes to default stream of the default configuration but you can change it using `@Stream` annotation on the method
+
+
+NOTE: The return value of the method is `PutRecordResult` or `PutRecordsResult` for putting multiple records but it can be always
+omitted and replaced with `void`.

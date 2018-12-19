@@ -83,7 +83,7 @@ class KinesisAnnotationsSpec extends Specification {
         when:
             context = ApplicationContext.build().properties(
                 'aws.kinesis.application.name': APP_NAME,
-                'aws.kinesis.client.stream': TEST_STREAM,
+                'aws.kinesis.listener.stream': TEST_STREAM,
             ).build()
             context.registerSingleton(AmazonKinesis, kinesis)
             context.registerSingleton(AmazonDynamoDB, dynamo)
