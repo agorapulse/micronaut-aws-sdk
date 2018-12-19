@@ -946,6 +946,10 @@ incoming payload.</p>
 <div class="sect3">
 <h4 id="_kinesis_service">Kinesis Service</h4>
 <div class="paragraph">
+<p><code>KinesisService</code> provides middle-level API for creating, describing, and deleting streams. You can manage shards as well as read records
+from particular shards.</p>
+</div>
+<div class="paragraph">
 <p>Instance of <code>KinesisService</code> is created for the default Kinesis configuration and each stream configuration in <code>aws.kinesis.streams</code> map.
 You should always use <code>@Named</code> qualifier when injecting <code>KinesisService</code> if you have more than one stream configuration present, e.g. <code>@Named("other") KinesisService otherService</code>.</p>
 </div>
@@ -957,7 +961,7 @@ You should always use <code>@Named</code> qualifier when injecting <code>Kinesis
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-12-19 16:44:01 +0100
+Last updated 2018-12-19 16:58:16 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">
