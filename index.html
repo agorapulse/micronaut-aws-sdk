@@ -541,6 +541,7 @@ $(addBlockSwitches);
 <li><a href="#_publishing_with_kinesisclient">Publishing with <code>@KinesisClient</code></a></li>
 </ul>
 </li>
+<li><a href="#_listening_with_kinesislistener">Listening with <code>@KinesisListener</code></a></li>
 </ul>
 </li>
 <li><a href="#_maintained_by">Maintained by</a></li>
@@ -1856,7 +1857,7 @@ You can obtain instances of declarative client from the context as well.
 <p>High-level <a href="#_publishing_with_kinesisclient">Publishing with <code>@KinesisClient</code></a></p>
 </li>
 <li>
-<p>High-level <a href="#Listening with <code>@KinesisListener</code>">[Listening with <code>@KinesisListener</code>]</a></p>
+<p>High-level <a href="#_listening_with_kinesislistener">Listening with <code>@KinesisListener</code></a></p>
 </li>
 <li>
 <p>Middle-level <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/kinesis/KinesisService.html">KinesisService</a></p>
@@ -2135,8 +2136,125 @@ omitted and replaced with <code>void</code>.
 </table>
 </div>
 <div class="paragraph">
-<p>TODO: skeleton app for api gateway proxy</p>
+<p>By default, <code>KinesisClient</code> publishes records into the default stream defined by <code>aws.kinesis.stream</code> property.
+You can switch to different configuration by changing the <code>value</code> of the annotation such as <code>@KinesisClient("other")</code> or
+by setting the <code>stream</code> property of the annotation such as <code>@KinesisClient(stream = "MyStream")</code>. You can change stream
+used by particular method using <code>@Stream</code> annotation as mentioned above.</p>
 </div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_listening_with_kinesislistener">Listening with <code>@KinesisListener</code></h3>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+Before you start implementing your service with <code>@KinesisListener</code> you may consider implementing a Lambda function
+instead.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If you place <code>com.agorapulse.micronaut.aws.kinesis.annotation.KinesisListener</code> annotation on the method in the bean
+then the method will be triggered with the new records in the stream.</p>
+</div>
+<div class="paragraph">
+<p>source,java,indent=0,options="nowrap"]
+.Publishing Events</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>@Singleton                                                                              <i class="conum" data-value="1"></i><b>(1)</b>
+public class KinesisListenerTester {
+
+    @KinesisListener
+    public void listenString(String string) {                                           <i class="conum" data-value="2"></i><b>(2)</b>
+        executions.add("EXECUTED: listenString(" + string + ")");
+    }
+
+    @KinesisListener
+    public void listenRecord(Record record) {                                           <i class="conum" data-value="3"></i><b>(3)</b>
+        executions.add("EXECUTED: listenRecord(" + record + ")");
+    }
+
+
+    @KinesisListener
+    public void listenStringRecord(String string, Record record) {                      <i class="conum" data-value="4"></i><b>(4)</b>
+        executions.add("EXECUTED: listenStringRecord(" + string + ", " + record + ")");
+    }
+
+    @KinesisListener
+    public void listenObject(MyEvent event) {                                           <i class="conum" data-value="5"></i><b>(5)</b>
+        executions.add("EXECUTED: listenObject(" + event + ")");
+    }
+
+    @KinesisListener
+    public void listenObjectRecord(MyEvent event, Record record) {                      <i class="conum" data-value="6"></i><b>(6)</b>
+        executions.add("EXECUTED: listenObjectRecord(" + event + ", " + record + ")");
+    }
+
+    @KinesisListener
+    public void listenPogoRecord(Pogo event) {                                          <i class="conum" data-value="7"></i><b>(7)</b>
+        executions.add("EXECUTED: listenPogoRecord(" + event + ")");
+    }
+
+    public List&lt;String&gt; getExecutions() {
+        return executions;
+    }
+
+    public void setExecutions(List&lt;String&gt; executions) {
+        this.executions = executions;
+    }
+
+    private List&lt;String&gt; executions = new CopyOnWriteArrayList&lt;&gt;();
+}</pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>@KinesisListener</code> method must be declared in a bean, e.g. <code>@Singleton</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>You can listen to just plain string records</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>You can listen to <code>Record</code> objects</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>You can listen to both string and <code>Record</code> objects</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>You can listen to objects implementing <code>Event</code> interface</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>You can listen to both <code>Event</code> and <code>Record</code> objects</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>You can listen to any object as long as it can be unmarshalled from the record payload</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>You can listen to different than default configuration by changing the <code>value</code> of the annotation such as <code>@KinesisListener("other")</code>.</p>
+</div>
+<div class="paragraph">
+<p>Multiple methods in a single application can listen to the same configuration (stream). In that case, every method will be executed with the
+incoming payload.</p>
+</div>
+<div class="paragraph">
+<p>TODO: skeleton app for api gateway proxy</p>
 </div>
 </div>
 </div>
