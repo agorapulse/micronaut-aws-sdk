@@ -136,5 +136,7 @@ You should always use `@Named` qualifier when injecting `KinesisService` if you 
 
 Please, see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/kinesis/KinesisService.html[KinesisService] for the full reference.
 
+// TODO: testing with LocalStack
+// ==== Testing
 
 

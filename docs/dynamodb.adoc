@@ -589,7 +589,7 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'
 Then you can setup your tests like this:
 
 [source,groovy,indent=0,role="primary"]
-.Gradle
+.Groovy
 ----
 include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=testcontainers-header]
 include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=testcontainers-setup]
@@ -607,7 +607,7 @@ include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynam
 <8> Obtain `DynamoDBService` for particular DynamoDB entity
 
 [source,java,indent=0,role="secondary"]
-.Maven
+.Java
 ----
 include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=header]
 include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=setup]
