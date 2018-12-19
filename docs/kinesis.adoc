@@ -5,8 +5,8 @@
 This library provides three approaches to work with Kinesis streams:
 
 1. High-level <<Publishing with `@KinesisClient`>>
-1. High-level <<Listening with `@KinesisListener`>>
-2. Middle-level <<Kinesis Service>>
+2. High-level <<Listening with `@KinesisListener`>>
+3. Middle-level <<Kinesis Service>>
 
 ==== Configuration
 
@@ -127,6 +127,10 @@ Multiple methods in a single application can listen to the same configuration (s
 incoming payload.
 
 ==== Kinesis Service
+
+`KinesisService` provides middle-level API for creating, describing, and deleting streams. You can manage shards as well as read records
+from particular shards.
+
 Instance of `KinesisService` is created for the default Kinesis configuration and each stream configuration in `aws.kinesis.streams` map.
 You should always use `@Named` qualifier when injecting `KinesisService` if you have more than one stream configuration present, e.g. `@Named("other") KinesisService otherService`.
 
