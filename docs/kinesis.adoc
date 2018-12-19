@@ -6,7 +6,7 @@ This library provides three approaches to work with Kinesis streams:
 
 1. High-level <<Publishing with `@KinesisClient`>>
 1. High-level <<Listening with `@KinesisListener`>>
-2. Middle-level https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/kinesis/KinesisService.html[KinesisService]
+2. Middle-level <<Kinesis Service>>
 
 ==== Configuration
 
@@ -100,8 +100,6 @@ You can switch to different configuration by changing the `value` of the annotat
 by setting the `stream` property of the annotation such as `@KinesisClient(stream = "MyStream")`. You can change stream
 used by particular method using `@Stream` annotation as mentioned above.
 
-
-
 ==== Listening with `@KinesisListener`
 
 TIP: Before you start implementing your service with `@KinesisListener` you may consider implementing a Lambda function
@@ -127,6 +125,12 @@ You can listen to different than default configuration by changing the `value` o
 
 Multiple methods in a single application can listen to the same configuration (stream). In that case, every method will be executed with the
 incoming payload.
+
+==== Kinesis Service
+Instance of `KinesisService` is created for the default Kinesis configuration and each stream configuration in `aws.kinesis.streams` map.
+You should always use `@Named` qualifier when injecting `KinesisService` if you have more than one stream configuration present, e.g. `@Named("other") KinesisService otherService`.
+
+Please, see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/kinesis/KinesisService.html[KinesisService] for the full reference.
 
 
 
