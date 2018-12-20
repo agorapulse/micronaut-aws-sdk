@@ -543,9 +543,9 @@ $(addBlockSwitches);
 <li><a href="#_kinesis_service">Kinesis Service</a></li>
 </ul>
 </li>
+<li><a href="#_testing_2">Testing</a></li>
 </ul>
 </li>
-<li><a href="#_testing_2">Testing</a></li>
 <li><a href="#_maintained_by">Maintained by</a></li>
 </ul>
 </div>
@@ -2270,11 +2270,8 @@ You should always use <code>@Named</code> qualifier when injecting <code>Kinesis
 </div>
 </div>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_testing_2">Testing</h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="_testing_2">Testing</h3>
 <div class="paragraph">
 <p>You can very easily mock any of the interfaces and declarative services but if you need close-to-production
 Kinesis integration works well with <a href="https://www.testcontainers.org/">Testcontainers</a> and <a href="https://localstack.cloud/">LocalStack</a>.</p>
@@ -2531,6 +2528,7 @@ class KinesisAnnotationsSpec extends Specification {
 <td>You can obtain instance of declarative client from the context</td>
 </tr>
 </table>
+</div>
 </div>
 </div>
 </div>
