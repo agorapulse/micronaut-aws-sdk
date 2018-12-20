@@ -136,7 +136,7 @@ You should always use `@Named` qualifier when injecting `KinesisService` if you 
 
 Please, see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/kinesis/KinesisService.html[KinesisService] for the full reference.
 
-== Testing
+==== Testing
 You can very easily mock any of the interfaces and declarative services but if you need close-to-production
 Kinesis integration works well with https://www.testcontainers.org/[Testcontainers] and https://localstack.cloud/[LocalStack].
 
@@ -173,7 +173,9 @@ Then you can setup your tests like this:
 .Groovy
 ----
 include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisAnnotationsSpec.groovy[tags=testcontainers-header]
+
 include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisAnnotationsSpec.groovy[tags=testcontainers-setup]
+
 include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisAnnotationsSpec.groovy[tags=testcontainers-test]
 
 }
@@ -194,7 +196,9 @@ include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kines
 .Java
 ----
 include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisTest.java[tags=testcontainers-header]
+
 include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisTest.java[tags=testcontainers-setup]
+
 include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisTest.java[tags=testcontainers-test]
 
 }
