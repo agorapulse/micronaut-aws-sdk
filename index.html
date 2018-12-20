@@ -541,9 +541,9 @@ $(addBlockSwitches);
 <li><a href="#_publishing_with_kinesisclient">Publishing with <code>@KinesisClient</code></a></li>
 <li><a href="#_listening_with_kinesislistener">Listening with <code>@KinesisListener</code></a></li>
 <li><a href="#_kinesis_service">Kinesis Service</a></li>
+<li><a href="#_testing_2">Testing</a></li>
 </ul>
 </li>
-<li><a href="#_testing_2">Testing</a></li>
 </ul>
 </li>
 <li><a href="#_maintained_by">Maintained by</a></li>
@@ -2269,9 +2269,8 @@ You should always use <code>@Named</code> qualifier when injecting <code>Kinesis
 <p>Please, see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/kinesis/KinesisService.html">KinesisService</a> for the full reference.</p>
 </div>
 </div>
-</div>
-<div class="sect2">
-<h3 id="_testing_2">Testing</h3>
+<div class="sect3">
+<h4 id="_testing_2">Testing</h4>
 <div class="paragraph">
 <p>You can very easily mock any of the interfaces and declarative services but if you need close-to-production
 Kinesis integration works well with <a href="https://www.testcontainers.org/">Testcontainers</a> and <a href="https://localstack.cloud/">LocalStack</a>.</p>
@@ -2312,6 +2311,7 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
 @RestoreSystemProperties                                                                <i class="conum" data-value="2"></i><b>(2)</b>
 class KinesisAnnotationsSpec extends Specification {
+
     public static final String TEST_STREAM = 'TestStream'
     public static final String APP_NAME = 'AppName'
 
@@ -2344,6 +2344,7 @@ class KinesisAnnotationsSpec extends Specification {
         context.registerSingleton(AmazonDynamoDB, dynamo)
         context.start()
     }
+
     void 'kinesis listener is executed'() {
         when:
             KinesisService service = context.getBean(KinesisService.class)              <i class="conum" data-value="9"></i><b>(9)</b>
@@ -2417,6 +2418,7 @@ class KinesisAnnotationsSpec extends Specification {
 <div class="title">Java</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class KinesisTest {
+
     public ApplicationContext context;                                                  <i class="conum" data-value="1"></i><b>(1)</b>
 
     @Rule
@@ -2457,6 +2459,7 @@ class KinesisAnnotationsSpec extends Specification {
             context.close();                                                            <i class="conum" data-value="9"></i><b>(9)</b>
         }
     }
+
     @Test
     public void testJavaService() throws InterruptedException {
         KinesisService service = context.getBean(KinesisService.class);                 <i class="conum" data-value="10"></i><b>(10)</b>
@@ -2528,6 +2531,7 @@ class KinesisAnnotationsSpec extends Specification {
 <td>You can obtain instance of declarative client from the context</td>
 </tr>
 </table>
+</div>
 </div>
 </div>
 </div>
