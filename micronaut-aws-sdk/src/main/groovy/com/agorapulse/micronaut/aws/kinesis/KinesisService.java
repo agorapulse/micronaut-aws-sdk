@@ -486,7 +486,7 @@ public interface KinesisService {
         return splitShard(getDefaultStreamName(), shardId);
     }
 
-    default void waitForStatus() {
+    default void waitForActive() {
         waitForStatus(StreamStatus.ACTIVE);
     }
 
@@ -495,7 +495,7 @@ public interface KinesisService {
         waitForStatus(getDefaultStreamName(), status);
     }
 
-    default void waitForStatus(String streamName) {
+    default void waitForActive(String streamName) {
         waitForStatus(streamName, StreamStatus.ACTIVE);
     }
 
