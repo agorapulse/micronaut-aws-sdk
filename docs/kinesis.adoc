@@ -136,7 +136,80 @@ You should always use `@Named` qualifier when injecting `KinesisService` if you 
 
 Please, see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/kinesis/KinesisService.html[KinesisService] for the full reference.
 
-// TODO: testing with LocalStack
-// ==== Testing
+== Testing
+You can very easily mock any of the interfaces and declarative services but if you need close-to-production
+Kinesis integration works well with https://www.testcontainers.org/[Testcontainers] and https://localstack.cloud/[LocalStack].
+
+You need to add following dependencies into your build file:
+
+[source,indent=0,role="primary"]
+.Gradle
+----
+compile group: 'org.testcontainers', name: 'localstack', version: '1.10.2'
+compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'
+----
+
+[source,xml,indent=0,role="secondary"]
+.Maven
+----
+<dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>localstack</artifactId>
+    <version>1.10.2</version>
+    <scope>test</scope>
+</dependency>
+<dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>spock</artifactId>
+    <version>1.10.2</version>
+    <scope>test</scope>
+</dependency>
+
+----
+
+Then you can setup your tests like this:
+
+[source,groovy,indent=0,role="primary"]
+.Groovy
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisAnnotationsSpec.groovy[tags=testcontainers-header]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisAnnotationsSpec.groovy[tags=testcontainers-setup]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisAnnotationsSpec.groovy[tags=testcontainers-test]
+
+}
+----
+<1> Annotate the specification with `@Testcontainers` to let Spock manage the Testcontainers for you
+<2> `@RestoreSystemProperties` will guarantee that system properties will be restore after the test
+<3> Create an instance of `LocalStackContainer` with Kinesis and  DynamoDB (required by the listener) support enabled
+<4> Prepare the reference to the `ApplicationContext`, `@AutoCleanup` guarantees closing the context after the tests
+<5> Disable CBOR protocol for Kinesis (not supported by LocalStack/Kinesilite)
+<6> Create `AmazonDynamoDB` client using the LocalStack configuration
+<7> Create `AmazonKinesis` client using the LocalStack configuration
+<8> Prepare the application context with required properties and service LocalStack
+<9> You can obtain instance of `KinesisService` from the context
+<10> You can obtain instance of declarative listener from the context
+<11> You can obtain instance of declarative client from the context
+
+[source,java,indent=0,role="secondary"]
+.Java
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisTest.java[tags=testcontainers-header]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisTest.java[tags=testcontainers-setup]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisTest.java[tags=testcontainers-test]
+
+}
+----
+<1> Prepare the reference to the `ApplicationContext`
+<2> Create an instance of `LocalStackContainer` with Kinesis and  DynamoDB (required by the listener) support enabled
+<3> Disable CBOR protocol for Kinesis (not supported by LocalStack/Kinesilite)
+<4> Create `AmazonDynamoDB` client using the LocalStack configuration
+<5> Create `AmazonKinesis` client using the LocalStack configuration
+<6> Prepare required properties
+<7> Prepare the application context with required properties and service LocalStack
+<8> Reset CBOR protocol settings after the test
+<9> Close the application context after the test
+<10> You can obtain instance of `KinesisService` from the context
+<11> You can obtain instance of declarative listener from the context
+<12> You can obtain instance of declarative client from the context
 
 

@@ -556,7 +556,7 @@ Please see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/microna
 
 ==== Testing
 
-You can very easily mock any of the interfaces and declarative services but if you need to really
+You can very easily mock any of the interfaces and declarative services but if you need close-to-production
 DynamoDB integration works well with https://www.testcontainers.org/[Testcontainers] and https://localstack.cloud/[LocalStack].
 
 You need to add following dependencies into your build file:

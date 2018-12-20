@@ -21,34 +21,37 @@ import java.util.concurrent.TimeUnit
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.DYNAMODB
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.KINESIS
 
-@Testcontainers
-@RestoreSystemProperties
+// tag::testcontainers-header[]
+@Testcontainers                                                                         // <1>
+@RestoreSystemProperties                                                                // <2>
 class KinesisAnnotationsSpec extends Specification {
+// end::testcontainers-header[]
 
+    // tag::testcontainers-setup[]
     public static final String TEST_STREAM = 'TestStream'
     public static final String APP_NAME = 'AppName'
 
-    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.8')
+    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.8')   // <3>
         .withServices(KINESIS, DYNAMODB)
 
-    @AutoCleanup ApplicationContext context
+    @AutoCleanup ApplicationContext context                                             // <4>
 
     void setup() {
-        System.setProperty('com.amazonaws.sdk.disableCbor', 'true')
+        System.setProperty('com.amazonaws.sdk.disableCbor', 'true')                     // <5>
 
-        AmazonDynamoDB dynamo = AmazonDynamoDBClient
+        AmazonDynamoDB dynamo = AmazonDynamoDBClient                                    // <6>
             .builder()
             .withEndpointConfiguration(localstack.getEndpointConfiguration(DYNAMODB))
             .withCredentials(localstack.defaultCredentialsProvider)
             .build()
 
-        AmazonKinesis kinesis = AmazonKinesisClient
+        AmazonKinesis kinesis = AmazonKinesisClient                                     // <7>
             .builder()
             .withEndpointConfiguration(localstack.getEndpointConfiguration(KINESIS))
             .withCredentials(localstack.defaultCredentialsProvider)
             .build()
 
-        context = ApplicationContext.build().properties(
+        context = ApplicationContext.build().properties(                                // <8>
             'aws.kinesis.application.name': APP_NAME,
             'aws.kinesis.stream': TEST_STREAM,
             'aws.kinesis.listener.stream': TEST_STREAM
@@ -57,29 +60,32 @@ class KinesisAnnotationsSpec extends Specification {
         context.registerSingleton(AmazonDynamoDB, dynamo)
         context.start()
     }
+    // end::testcontainers-setup[]
 
+    // tag::testcontainers-test[]
     void 'kinesis listener is executed'() {
         when:
-            KinesisService service = context.getBean(KinesisService.class);
-            KinesisListenerTester tester = context.getBean(KinesisListenerTester.class);
-            DefaultClient client = context.getBean(DefaultClient.class);
+            KinesisService service = context.getBean(KinesisService.class)              // <9>
+            KinesisListenerTester tester = context.getBean(KinesisListenerTester.class) // <10>
+            DefaultClient client = context.getBean(DefaultClient.class)                 // <11>
 
-            service.createStream();
-            service.waitForActive();
+            service.createStream()
+            service.waitForActive()
 
             Disposable subscription = publishEventAsync(tester, client)
 
-            waitForReceivedMessages(tester, 120, 1000);
+            waitForReceivedMessages(tester, 120, 1000)
 
             subscription.dispose()
         then:
             allTestEventsReceived(tester)
     }
+    // end::testcontainers-test[]
 
     private static void waitForReceivedMessages(KinesisListenerTester tester, int retries, int waitMillis) {
         for (int i = 0; i < retries; i++) {
             if (!allTestEventsReceived(tester)) {
-                Thread.sleep(waitMillis);
+                Thread.sleep(waitMillis)
             }
         }
     }

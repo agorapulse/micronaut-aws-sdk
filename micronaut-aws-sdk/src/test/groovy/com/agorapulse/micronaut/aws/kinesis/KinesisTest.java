@@ -3,8 +3,6 @@ package com.agorapulse.micronaut.aws.kinesis;
 import com.agorapulse.micronaut.aws.Pogo;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
 import com.amazonaws.services.kinesis.AmazonKinesis;
 import com.amazonaws.services.kinesis.AmazonKinesisClient;
 import io.micronaut.context.ApplicationContext;
@@ -21,57 +19,59 @@ import java.util.concurrent.TimeUnit;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.DYNAMODB;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.KINESIS;
 
+// tag::testcontainers-header[]
 public class KinesisTest {
+// end::testcontainers-header[]
 
-    public ApplicationContext context;
+    // tag::testcontainers-setup[]
+    public ApplicationContext context;                                                  // <1>
 
     @Rule
-    public LocalStackContainer localstack = new LocalStackContainer("0.8.8")
+    public LocalStackContainer localstack = new LocalStackContainer("0.8.8")            // <2>
         .withServices(DYNAMODB, KINESIS);
 
     @Before
     public void setup() {
-        System.setProperty("com.amazonaws.sdk.disableCbor", "true");
+        System.setProperty("com.amazonaws.sdk.disableCbor", "true");                    // <3>
 
-        AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClient
+        AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClient                            // <4>
             .builder()
             .withEndpointConfiguration(localstack.getEndpointConfiguration(DYNAMODB))
             .withCredentials(localstack.getDefaultCredentialsProvider())
             .build();
 
-        IDynamoDBMapper mapper = new DynamoDBMapper(amazonDynamoDB);
-
-        AmazonKinesis amazonKinesis = AmazonKinesisClient
+        AmazonKinesis amazonKinesis = AmazonKinesisClient                               // <5>
             .builder()
             .withEndpointConfiguration(localstack.getEndpointConfiguration(KINESIS))
             .withCredentials(localstack.getDefaultCredentialsProvider())
             .build();
 
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, Object> properties = new HashMap<>();                               // <6>
         properties.put("aws.kinesis.application.name", "TestApp");
         properties.put("aws.kinesis.stream", "MyStream");
         properties.put("aws.kinesis.listener.stream", "MyStream");
 
-        context = ApplicationContext.build(properties).build();
+        context = ApplicationContext.build(properties).build();                         // <7>
         context.registerSingleton(AmazonKinesis.class, amazonKinesis);
         context.registerSingleton(AmazonDynamoDB.class, amazonDynamoDB);
-        context.registerSingleton(IDynamoDBMapper.class, mapper);
         context.start();
     }
 
     @After
     public void cleanup() {
-        System.clearProperty("com.amazonaws.sdk.disableCbor");
+        System.clearProperty("com.amazonaws.sdk.disableCbor");                          // <8>
         if (context != null) {
-            context.close();
+            context.close();                                                            // <9>
         }
     }
+    // end::testcontainers-setup[]
 
+    // tag::testcontainers-test[]
     @Test
     public void testJavaService() throws InterruptedException {
-        KinesisService service = context.getBean(KinesisService.class);
-        KinesisListenerTester tester = context.getBean(KinesisListenerTester.class);
-        DefaultClient client = context.getBean(DefaultClient.class);
+        KinesisService service = context.getBean(KinesisService.class);                 // <10>
+        KinesisListenerTester tester = context.getBean(KinesisListenerTester.class);    // <11>
+        DefaultClient client = context.getBean(DefaultClient.class);                    // <12>
 
         service.createStream();
         service.waitForActive();
@@ -83,6 +83,7 @@ public class KinesisTest {
 
         Assert.assertTrue(allTestEventsReceived(tester));
     }
+    // end::testcontainers-test[]
 
     private void waitForRecievedMessages(KinesisListenerTester tester, int retries, int waitMillis) throws InterruptedException {
         for (int i = 0; i < retries; i++) {
