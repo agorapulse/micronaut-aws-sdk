@@ -76,11 +76,11 @@ public class ApiGatewayProxyHandler implements RequestHandler<APIGatewayProxyReq
         // an entry point to customize application context, useful for tests
     }
 
-    private HttpRequest convertToMicronautHttpRequest(APIGatewayProxyRequestEvent input, ConversionService conversionService, ObjectMapper mapper) {
+    protected HttpRequest convertToMicronautHttpRequest(APIGatewayProxyRequestEvent input, ConversionService conversionService, ObjectMapper mapper) {
         return ApiGatewayProxyHttpRequest.create(input, conversionService, mapper);
     }
 
-    private APIGatewayProxyResponseEvent convertToApiGatewayProxyResponse(HttpResponse response) {
+    protected APIGatewayProxyResponseEvent convertToApiGatewayProxyResponse(HttpResponse response) {
         APIGatewayProxyResponseEvent responseEvent = new APIGatewayProxyResponseEvent().withStatusCode(response.status().getCode());
 
         if (response.body() instanceof ByteBuf) {
@@ -103,7 +103,7 @@ public class ApiGatewayProxyHandler implements RequestHandler<APIGatewayProxyReq
         return responseEvent;
     }
 
-    private ApplicationContext buildApplicationContext() {
+    protected ApplicationContext buildApplicationContext() {
         return ApplicationContext.build().environments(
             API_GATEWAY_PROXY_ENVIRONMENT,
             Environment.AMAZON_EC2,
@@ -116,7 +116,7 @@ public class ApiGatewayProxyHandler implements RequestHandler<APIGatewayProxyReq
      *
      * @param lambdaContext context
      */
-    private void registerContextBeans(Context lambdaContext) {
+    protected void registerContextBeans(Context lambdaContext) {
         context.registerSingleton(lambdaContext);
         LambdaLogger logger = lambdaContext.getLogger();
         if (logger != null) {
@@ -137,7 +137,7 @@ public class ApiGatewayProxyHandler implements RequestHandler<APIGatewayProxyReq
      * @param applicationContext the application context with the environment
      * @return The environment within the context
      */
-    private Environment startEnvironment(ApplicationContext applicationContext) {
+    protected Environment startEnvironment(ApplicationContext applicationContext) {
         if (this instanceof PropertySource) {
             applicationContext.getEnvironment().addPropertySource((PropertySource) this);
         }
