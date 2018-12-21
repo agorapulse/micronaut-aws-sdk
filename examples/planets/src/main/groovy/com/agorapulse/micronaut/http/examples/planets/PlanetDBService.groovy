@@ -1,9 +1,7 @@
 package com.agorapulse.micronaut.http.examples.planets
 
-
+import com.amazonaws.AmazonClientException
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput
@@ -11,6 +9,9 @@ import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput
 import javax.annotation.PostConstruct
 import javax.inject.Singleton
 
+/**
+ * Service to access DynamoDB entities.
+ */
 @Singleton
 class PlanetDBService {
 
@@ -26,9 +27,9 @@ class PlanetDBService {
     void init() {
         try {
             amazonDynamoDBClient.createTable(mapper.generateCreateTableRequest(Planet).withProvisionedThroughput(
-                new ProvisionedThroughput().withReadCapacityUnits(5).withWriteCapacityUnits(5)
+                new ProvisionedThroughput().withReadCapacityUnits(5).withWriteCapacityUnits(1)
             ))
-        } catch (Exception ignored) {
+        } catch (AmazonClientException ignored) {
             // ok, already exits
         }
     }

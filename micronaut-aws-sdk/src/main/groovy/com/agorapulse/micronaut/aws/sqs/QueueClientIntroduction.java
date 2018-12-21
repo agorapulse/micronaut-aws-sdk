@@ -24,8 +24,8 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
     private static final String GROUP = "group";
     private static final String DELAY = "delay";
 
-    private static Function<String, Optional<String>> EMPTY_IF_UNDEFINED = (String s) -> Undefined.STRING.equals(s) ? Optional.empty() : Optional.of(s);
-    private static Function<Integer, Optional<Integer>> EMPTY_IF_ZERO = (Integer i) -> i == 0 ? Optional.empty() : Optional.of(i);
+    private static final Function<String, Optional<String>> EMPTY_IF_UNDEFINED = (String s) -> Undefined.STRING.equals(s) ? Optional.empty() : Optional.of(s);
+    private static final Function<Integer, Optional<Integer>> EMPTY_IF_ZERO = (Integer i) -> i == 0 ? Optional.empty() : Optional.of(i);
 
     private static class QueueArguments {
         Argument<?> message;

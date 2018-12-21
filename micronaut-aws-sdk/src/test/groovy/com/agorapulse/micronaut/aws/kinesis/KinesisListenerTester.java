@@ -2,7 +2,6 @@ package com.agorapulse.micronaut.aws.kinesis;
 
 import com.agorapulse.micronaut.aws.Pogo;
 import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisListener;
-import com.agorapulse.micronaut.aws.kinesis.annotation.Stream;
 import com.amazonaws.services.kinesis.model.Record;
 
 import javax.inject.Singleton;

@@ -10,18 +10,22 @@ import io.micronaut.context.ApplicationContext
 import org.junit.Rule
 import spock.lang.Specification
 
+/**
+ * Test for planet controller.
+ */
 class PlanetControllerSpec extends Specification {
 
-    @Rule Gru gru = Gru.equip(ApiGatewayProxy.steal(this) {
+    @Rule private final Gru gru = Gru.equip(ApiGatewayProxy.steal(this) {
         map '/planet/{star}' to ApiGatewayProxyHandler
         map '/planet/{star}/{name}' to ApiGatewayProxyHandler
     })
 
-    @Rule Dru dru = Dru.steal(this)
+    @Rule private final Dru dru = Dru.steal(this)
 
-    AmazonDynamoDB amazonDynamoDB = Mock(AmazonDynamoDB)
+    private final AmazonDynamoDB amazonDynamoDB = Mock(AmazonDynamoDB)
 
-    ApiGatewayProxyHandler handler = new ApiGatewayProxyHandler(){
+    @SuppressWarnings('UnusedPrivateField')
+    private final ApiGatewayProxyHandler handler = new ApiGatewayProxyHandler() {
         @Override
         protected void doWithApplicationContext(ApplicationContext applicationContext) {
             applicationContext.registerSingleton(PlanetDBService, new PlanetDBService(amazonDynamoDB, DynamoDB.createMapper(dru)))

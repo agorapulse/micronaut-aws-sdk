@@ -9,16 +9,20 @@ import io.micronaut.context.ApplicationContext
 import org.junit.Rule
 import spock.lang.Specification
 
+/**
+ * Specification for spacecraft controller.
+ */
 class SpacecraftControllerSpec extends Specification {
 
-    @Rule Gru gru = Gru.equip(ApiGatewayProxy.steal(this) {
+    @Rule private final Gru gru = Gru.equip(ApiGatewayProxy.steal(this) {
         map '/spacecraft/{country}' to ApiGatewayProxyHandler
         map '/spacecraft/{country}/{name}' to ApiGatewayProxyHandler
     })
 
-    @Rule Dru dru = Dru.steal(this)
+    @Rule private final Dru dru = Dru.steal(this)
 
-    ApiGatewayProxyHandler handler = new ApiGatewayProxyHandler(){
+    @SuppressWarnings('UnusedPrivateField')
+    private final ApiGatewayProxyHandler handler = new ApiGatewayProxyHandler() {
         @Override
         protected void doWithApplicationContext(ApplicationContext applicationContext) {
             applicationContext.registerSingleton(SpacecraftDBService, new SpacecraftDBService(mapper: DynamoDB.createMapper(dru)))

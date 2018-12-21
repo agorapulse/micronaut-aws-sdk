@@ -1,14 +1,3 @@
-buildscript {
-    repositories {
-        jcenter()
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'org.ajoberstar:gradle-git-publish:2.0.0'
-        classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.9.2'
-    }
-}
-
 allprojects {
     group 'com.agorapulse'
     version "${micronautVersion}.RC1"
@@ -22,8 +11,11 @@ allprojects {
 }
 
 subprojects { Project subproject ->
-    apply plugin:"io.spring.dependency-management"
-    apply plugin:"groovy"
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'groovy'
+    apply plugin: 'jacoco'
+    apply plugin: 'checkstyle'
+    apply plugin: 'codenarc'
 
     apply plugin:"net.ltgt.apt-eclipse"
     apply plugin:"net.ltgt.apt-idea"
@@ -107,12 +99,23 @@ subprojects { Project subproject ->
     }
 
     clean.dependsOn cleanOut
+
+    checkstyle {
+        configFile = rootProject.file('config/checkstyle/checkstyle.xml')
+    }
+
+    codenarc {
+        configFile = rootProject.file('config/codenarc.xml')
+        toolVersion = '1.2.1'
+    }
 }
 
 
 // docs
 apply plugin: 'org.ajoberstar.git-publish'
 apply plugin: 'org.asciidoctor.convert'
+apply plugin: 'com.palantir.jacoco-full-report'
+apply plugin: 'com.github.kt3k.coveralls'
 
 dependencies {
     // https://mvnrepository.com/artifact/io.spring.asciidoctor/spring-asciidoctor-extensions
@@ -158,3 +161,20 @@ gitPublish {
 
 gitPublishCopy.dependsOn subprojects*.javadoc
 gitPublishCopy.dependsOn asciidoctor
+
+tasks.jacocoFullReport.dependsOn subprojects.collect { it.tasks.check }
+
+gradle.taskGraph.whenReady {
+    coveralls {
+        sourceDirs = subprojects.sourceSets.main.allSource.srcDirs.flatten()
+        jacocoReportPath = "${buildDir}/reports/jacoco/jacocoFullReport/jacocoFullReport.xml"
+    }
+}
+
+tasks.coveralls {
+    group = 'Coverage reports'
+    description = 'Uploads the aggregated coverage report to Coveralls'
+
+    dependsOn jacocoFullReport
+    onlyIf { System.env.CI }
+}

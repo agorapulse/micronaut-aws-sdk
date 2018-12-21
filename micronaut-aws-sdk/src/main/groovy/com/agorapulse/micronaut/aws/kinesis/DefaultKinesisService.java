@@ -231,7 +231,7 @@ class DefaultKinesisService implements KinesisService {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
-                throw new IllegalStateException("Waiting for stream to become active was interrupted!",e);
+                throw new IllegalStateException("Waiting for stream to become active was interrupted!", e);
             }
         }
     }

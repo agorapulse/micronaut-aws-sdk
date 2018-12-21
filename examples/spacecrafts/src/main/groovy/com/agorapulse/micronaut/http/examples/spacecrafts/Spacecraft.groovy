@@ -4,6 +4,9 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable
 
+/**
+ * Spacecraft entity.
+ */
 @DynamoDBTable(tableName = 'spacecrafts')
 class Spacecraft {
 

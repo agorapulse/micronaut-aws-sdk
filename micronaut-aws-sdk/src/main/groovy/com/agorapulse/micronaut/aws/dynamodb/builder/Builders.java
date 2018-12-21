@@ -30,6 +30,7 @@ public final class Builders {
         READ
     }
 
+    //CHECKSTYLE:OFF: ConstantName - DSL keywords
     public static final Sort asc = Sort.ASC;
     public static final Sort desc = Sort.DESC;
     public static final Read read = Read.READ;
@@ -42,6 +43,7 @@ public final class Builders {
     public static final ReturnValue updatedOld = ReturnValue.UPDATED_OLD;
     public static final ReturnValue allNew = ReturnValue.ALL_NEW;
     public static final ReturnValue updatedNew = ReturnValue.UPDATED_NEW;
+    //CHECKSTYLE.ON: ConstantName
 
     /**
      * Creates query builder for given DynamoDB entity.

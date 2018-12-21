@@ -75,6 +75,7 @@ public class DynamoDBEntity {
         // ignore
     }
 
+    //CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -102,4 +103,5 @@ public class DynamoDBEntity {
             ", number=" + number +
             '}';
     }
+    //CHECKSTYLE:ON
 }

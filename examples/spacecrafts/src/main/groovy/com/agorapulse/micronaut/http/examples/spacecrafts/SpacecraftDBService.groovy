@@ -7,10 +7,15 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput
+import groovy.util.logging.Slf4j
 
 import javax.annotation.PostConstruct
 import javax.inject.Singleton
 
+/**
+ * Spacecraft entity DynamoDB service.
+ */
+@Slf4j
 @Singleton
 class SpacecraftDBService {
 
@@ -21,10 +26,10 @@ class SpacecraftDBService {
     void init() {
         try {
             amazonDynamoDBClient.createTable(mapper.generateCreateTableRequest(Spacecraft).withProvisionedThroughput(
-                new ProvisionedThroughput().withReadCapacityUnits(5).withWriteCapacityUnits(5)
+                new ProvisionedThroughput().withReadCapacityUnits(5).withWriteCapacityUnits(1)
             ))
-        } catch (AmazonClientException e) {
-            e.printStackTrace()
+        } catch (AmazonClientException ignored) {
+            // expected
         }
     }
 
