@@ -128,7 +128,8 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      * @param settings
      * @return
      */
-    int countByConditions(Object hashKey, Map<String, Condition> rangeKeyConditions, Map settings) {
+    int countByConditions(Object hashKey, Map<String, Condition> rangeKeyConditions, Map querySettings) {
+        Map settings = new LinkedHashMap(querySettings)
         settings.putAll(batchGetDisabled: true)
         if (!settings.limit) {
             settings.putAll(limit: DEFAULT_COUNT_LIMIT)
@@ -196,7 +197,8 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      * @param itemsToDelete a list of objects to delete
      * @param settings settings
      */
-    void deleteAll(List<TItemClass> itemsToDelete, Map settings) {
+    void deleteAll(List<TItemClass> itemsToDelete, Map querySettings) {
+        Map settings = new LinkedHashMap(querySettings)
         if (!settings.containsKey(BATCH_ENABLED_KEY)) {
             settings.putAll(batchEnabled: true)
         }
@@ -245,7 +247,8 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      * @param indexName
      * @return
      */
-    int deleteAllByConditions(Object hashKey, Map<String, Condition> rangeKeyConditions, Map settings, String indexName) {
+    int deleteAllByConditions(Object hashKey, Map<String, Condition> rangeKeyConditions, Map querySettings, String indexName) {
+        Map settings = new LinkedHashMap(querySettings)
         if (!settings.containsKey(BATCH_ENABLED_KEY)) {
             settings.putAll((BATCH_ENABLED_KEY): true)
         }
@@ -497,7 +500,8 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      * @param itemsToSave a list of objects to save
      * @param settings settings
      */
-    List<TItemClass> saveAll(List<TItemClass> itemsToSave, Map settings) {
+    List<TItemClass> saveAll(List<TItemClass> itemsToSave, Map querySettings) {
+        Map settings = new LinkedHashMap(querySettings)
         if (!settings.containsKey(BATCH_ENABLED_KEY)) {
             settings.putAll((BATCH_ENABLED_KEY): true)
         }

@@ -5,23 +5,23 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
 import com.amazonaws.services.dynamodbv2.model.CreateTableResult
-import org.joda.time.DateTime
 import org.testcontainers.containers.localstack.LocalStackContainer
 import org.testcontainers.spock.Testcontainers
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
 
+/**
+ * Specification for testing DefaultDynamoDBService using entity with no range key.
+ */
 @Stepwise
 @Testcontainers
 class DefaultDynamoDBServiceNoRangeSpec extends Specification {
 
-    private static final DateTime REFERENCE_DATE = new DateTime(1358487600000)
-
     @Shared LocalStackContainer localstack = new LocalStackContainer().withServices(LocalStackContainer.Service.DYNAMODB)
 
-    DefaultDynamoDBService<DynamoDBEntityNoRange> service
-    AmazonDynamoDB amazonDynamoDB
+    private DefaultDynamoDBService<DynamoDBEntityNoRange> service
+    private AmazonDynamoDB amazonDynamoDB
 
     void setup() {
         amazonDynamoDB = AmazonDynamoDBClient
@@ -49,7 +49,7 @@ class DefaultDynamoDBServiceNoRangeSpec extends Specification {
             service.newInstance instanceof DynamoDBEntityNoRange
     }
 
-    void 'create table'() {
+    void 'new table'() {
         when:
             CreateTableResult result = service.createTable()
         then:
@@ -95,7 +95,6 @@ class DefaultDynamoDBServiceNoRangeSpec extends Specification {
             service.decrement('1', 'number')
         then:
             service.get('1').number == 2
-
     }
 
     void 'query items'() {

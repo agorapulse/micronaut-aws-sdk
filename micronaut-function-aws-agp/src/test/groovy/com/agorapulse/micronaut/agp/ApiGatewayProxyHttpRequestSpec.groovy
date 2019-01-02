@@ -6,9 +6,10 @@ import com.agorapulse.micronaut.http.server.tck.AbstractApiGatewayProxyHttpReque
 import org.junit.Rule
 import spock.lang.Unroll
 
-
+/**
+ * Tests for api gateway proxy HTTP request.
+ */
 class ApiGatewayProxyHttpRequestSpec extends AbstractApiGatewayProxyHttpRequestSpec {
-
 
     @Rule Gru gru = Gru.equip(ApiGatewayProxy.steal(this) {
         map '/hello' to ApiGatewayProxyHandler
@@ -18,7 +19,7 @@ class ApiGatewayProxyHttpRequestSpec extends AbstractApiGatewayProxyHttpRequestS
     })
 
     @Unroll
-    void 'test reconstruct path #path with variable #variables to #original'() {
+    void 'reconstruct path #path with variable #variables to #original'() {
         expect:
             ApiGatewayProxyHttpRequest.reconstructPath(resource, variables) == original
         where:

@@ -10,7 +10,10 @@ import com.amazonaws.services.sqs.model.QueueDoesNotExistException
 import io.micronaut.context.ApplicationContext
 import spock.lang.Specification
 
-class SimpleQueueServiceSpec extends Specification{
+/**
+ * Tests for simple queue service.
+ */
+class SimpleQueueServiceSpec extends Specification {
 
     SimpleQueueServiceConfiguration configuration = new SimpleQueueServiceConfiguration(cache: true)
     AmazonSQS amazonSQS = Mock(AmazonSQS)
@@ -82,7 +85,6 @@ class SimpleQueueServiceSpec extends Specification{
             queueNames
             queueNames.size() == 3
             queueNames == ['queueName1', 'queueName2', 'queueName3']
-
     }
 
     /*
@@ -111,12 +113,12 @@ class SimpleQueueServiceSpec extends Specification{
             service.queueUrlByNames['queueName'] = 'somepath/queueName'
 
         when:
-            Map attributes = service.getQueueAttributes()
+            Map attributes = service.queueAttributes
 
         then:
             1 * amazonSQS.getQueueAttributes(_) >> {
                 GetQueueAttributesResult attrResult = new GetQueueAttributesResult()
-                attrResult.setAttributes(['attribute1': 'value1', 'attribute2': 'value2'])
+                attrResult.attributes = ['attribute1': 'value1', 'attribute2': 'value2']
                 attrResult
             }
 
@@ -139,7 +141,7 @@ class SimpleQueueServiceSpec extends Specification{
         then:
             1 * amazonSQS.getQueueAttributes(_, ['QueueArn']) >> {
                 GetQueueAttributesResult attrResult = new GetQueueAttributesResult()
-                attrResult.setAttributes(['QueueArn': 'arn:sqs:queueName'])
+                attrResult.attributes = ['QueueArn': 'arn:sqs:queueName']
                 attrResult
             }
 
@@ -156,7 +158,7 @@ class SimpleQueueServiceSpec extends Specification{
         then:
             1 * amazonSQS.getQueueAttributes(_) >> {
                 AmazonServiceException exception = new AmazonServiceException('Error')
-                exception.setErrorCode('AWS.SimpleQueueService.NonExistentQueue')
+                exception.errorCode = 'AWS.SimpleQueueService.NonExistentQueue'
                 throw exception
             }
             !attributes
@@ -187,7 +189,7 @@ class SimpleQueueServiceSpec extends Specification{
             configuration.queue = 'queueName'
 
         when:
-            String queueUrl = service.getQueueUrl()
+            String queueUrl = service.queueUrl
 
         then:
             amazonSQS.listQueues(_) >> ['queueUrls': ['somepath/queueName1', 'somepath/queueName2', 'somepath/queueName3']]
@@ -210,8 +212,7 @@ class SimpleQueueServiceSpec extends Specification{
         then:
             thrown(AmazonSQSException)
 
-            1 * amazonSQS.getQueueUrl('vlad_queueName') >> { throw new QueueDoesNotExistException("Queue does not exist") }
-
+            1 * amazonSQS.getQueueUrl('vlad_queueName') >> { throw new QueueDoesNotExistException('Queue does not exist') }
     }
 
     /*
@@ -259,7 +260,6 @@ class SimpleQueueServiceSpec extends Specification{
             url == myQueueUrl
         and:
             service.getQueueUrl(myQueueUrl) == myQueueUrl
-
     }
 
     void 'integration spec'() {
@@ -281,7 +281,5 @@ class SimpleQueueServiceSpec extends Specification{
 
         cleanup:
             context.stop()
-
-
     }
 }

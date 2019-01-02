@@ -12,12 +12,15 @@ import io.micronaut.inject.qualifiers.Qualifiers
 import spock.lang.AutoCleanup
 import spock.lang.Specification
 
+/**
+ * Tests for Kinesis declarative clients.
+ */
 class KinesisClientSpec extends Specification {
 
     private static final String DEFAULT_STREAM_NAME = 'DefaultStream'
     private static final String PARTITION_KEY = '1234567890'
     private static final String SEQUENCE_NUMBER = '987654321'
-    private static final String RECORD = "Record"
+    private static final String RECORD = 'Record'
     private static final MyEvent EVENT_1 = new MyEvent(value: 'foo')
     private static final MyEvent EVENT_2 = new MyEvent(value: 'bar')
     private static final Pogo POGO_1 = new Pogo(foo: 'bar')
@@ -279,7 +282,7 @@ class KinesisClientSpec extends Specification {
 
 @KinesisClient('test') interface TestClient {
     PutRecordResult putEvent(MyEvent event)
-    void doWhatever(Object one, Object two, Object three, Object four);
+    void doWhatever(Object one, Object two, Object three, Object four)
 }
 
 @KinesisClient(stream = 'SomeStream') interface StreamClient {

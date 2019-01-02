@@ -21,6 +21,9 @@ import java.util.concurrent.TimeUnit
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.DYNAMODB
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.KINESIS
 
+/**
+ * Tests for Kinesis related annotations - client and listener.
+ */
 // tag::testcontainers-header[]
 @Testcontainers                                                                         // <1>
 @RestoreSystemProperties                                                                // <2>
@@ -28,8 +31,8 @@ class KinesisAnnotationsSpec extends Specification {
 // end::testcontainers-header[]
 
     // tag::testcontainers-setup[]
-    public static final String TEST_STREAM = 'TestStream'
-    public static final String APP_NAME = 'AppName'
+    private static final String TEST_STREAM = 'TestStream'
+    private static final String APP_NAME = 'AppName'
 
     @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.8')   // <3>
         .withServices(KINESIS, DYNAMODB)
@@ -65,9 +68,9 @@ class KinesisAnnotationsSpec extends Specification {
     // tag::testcontainers-test[]
     void 'kinesis listener is executed'() {
         when:
-            KinesisService service = context.getBean(KinesisService.class)              // <9>
-            KinesisListenerTester tester = context.getBean(KinesisListenerTester.class) // <10>
-            DefaultClient client = context.getBean(DefaultClient.class)                 // <11>
+            KinesisService service = context.getBean(KinesisService)                    // <9>
+            KinesisListenerTester tester = context.getBean(KinesisListenerTester)       // <10>
+            DefaultClient client = context.getBean(DefaultClient)                       // <11>
 
             service.createStream()
             service.waitForActive()
@@ -90,6 +93,7 @@ class KinesisAnnotationsSpec extends Specification {
         }
     }
 
+    @SuppressWarnings('CatchException')
     private static Disposable publishEventAsync(KinesisListenerTester tester, DefaultClient client) {
         Flowable
             .interval(100, TimeUnit.MILLISECONDS, Schedulers.io())
@@ -99,7 +103,6 @@ class KinesisAnnotationsSpec extends Specification {
             try {
                 client.putEvent(new MyEvent(value: 'foo'))
                 client.putRecordDataObject('1234567890', new Pogo(foo: 'bar'))
-
             } catch (Exception e) {
                 if (e.message.contains('Unable to execute HTTP request')) {
                     // already finished

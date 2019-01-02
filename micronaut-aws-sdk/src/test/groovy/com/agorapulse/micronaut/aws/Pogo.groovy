@@ -2,6 +2,9 @@ package com.agorapulse.micronaut.aws
 
 import groovy.transform.ToString
 
+/**
+ * Plain old Groovy object for testing.
+ */
 @ToString
 class Pogo {
 
@@ -11,7 +14,7 @@ class Pogo {
     }
 
     // groovy way
-    Pogo() {}
+    Pogo() { }
 
     String foo
 }

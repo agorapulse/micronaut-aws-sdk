@@ -56,7 +56,6 @@ import java.util.stream.Collectors;
 /**
  * Simplified version of io.micronaut.http.server.netty.RoutingInBoundHandler.
  *
- * @author Graeme Rocher
  * @since 1.0
  */
 @Singleton
@@ -441,10 +440,10 @@ public class BasicRequestHandler {
             boolean isFuture = CompletableFuture.class.isAssignableFrom(javaReturnType);
             boolean isReactiveReturnType = Publishers.isConvertibleToPublisher(javaReturnType) || isFuture;
             boolean isSingle =
-                isReactiveReturnType && Publishers.isSingle(javaReturnType) ||
-                    isResponsePublisher(genericReturnType, javaReturnType) ||
-                    isFuture ||
-                    finalRoute.getAnnotationMetadata().getValue(Produces.class, "single", Boolean.class).orElse(false);
+                isReactiveReturnType && Publishers.isSingle(javaReturnType)
+                    || isResponsePublisher(genericReturnType, javaReturnType)
+                    || isFuture
+                    || finalRoute.getAnnotationMetadata().getValue(Produces.class, "single", Boolean.class).orElse(false);
 
             // build the result emitter. This result emitter emits the response from a controller action
             Flowable<?> resultEmitter = buildResultEmitter(finalRoute, requestReference, isReactiveReturnType, isSingle);

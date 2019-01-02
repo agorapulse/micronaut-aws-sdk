@@ -8,13 +8,16 @@ import io.micronaut.inject.qualifiers.Qualifiers
 import spock.lang.AutoCleanup
 import spock.lang.Specification
 
+/**
+ * Tests or queue client.
+ */
 class QueueClientSpec extends Specification {
 
     private static final String DEFAULT_QUEUE_NAME = 'DefaultQueue'
-    private static final String MESSAGE = "MESSAGE"
+    private static final String MESSAGE = 'MESSAGE'
     private static final Pogo POGO = new Pogo(foo: 'bar')
     private static final String GROUP = 'SomeGroup'
-    private static final int DELAY = 10;
+    private static final int DELAY = 10
     private static final String ID = '12345'
 
     SimpleQueueService defaultService = Mock(SimpleQueueService) {
@@ -145,7 +148,6 @@ class QueueClientSpec extends Specification {
         then:
             1 * defaultService.deleteMessage(DEFAULT_QUEUE_NAME, ID)
     }
-
 
     void 'can send message with specified queue name'() {
         given:

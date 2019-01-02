@@ -2,6 +2,9 @@ package com.agorapulse.micronaut.grails
 
 import spock.lang.Specification
 
+/**
+ * Tests for property translating customizer.
+ */
 class PropertyTranslatingCustomizerSpec extends Specification {
 
     void 'custom replacements works'() {

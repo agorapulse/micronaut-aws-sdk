@@ -22,11 +22,18 @@ import spock.lang.Stepwise
 
 // tag::builders-import[]
 import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  // <1>
+
 // end::builders-import[]
 
-@Stepwise
-
+/**
+ * Specification for testing DefaultDynamoDBService using entity with range key.
+ */
+@SuppressWarnings([
+    'NoWildcardImports',
+    'UnnecessaryObjectReferences',
+])
 // tag::testcontainers-header[]
+@Stepwise
 @Testcontainers                                                                         // <1>
 class DefaultDynamoDBServiceSpec extends Specification {
 // end::testcontainers-header[]
@@ -55,7 +62,6 @@ class DefaultDynamoDBServiceSpec extends Specification {
             .build()
 
         mapper = new DynamoDBMapper(amazonDynamoDB)
-
 
         context = ApplicationContext.build().build()
         context.registerSingleton(AmazonDynamoDB, amazonDynamoDB)                       // <5>
@@ -99,7 +105,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
             s.newInstance instanceof DynamoDBEntity
     }
 
-    void 'create table'() {
+    void 'new table'() {
         expect:
         // tag::create-table[]
         s.createTable()                                                                 // <2>
@@ -150,8 +156,9 @@ class DefaultDynamoDBServiceSpec extends Specification {
             s.count('1', '1') == 1
             s.count('1', DynamoDBEntity.RANGE_INDEX, 'bar') == 1
             s.countByDates('1', DynamoDBEntity.DATE_INDEX, [
-                after: REFERENCE_DATE.minusDays(1).toDate(), before: REFERENCE_DATE.plusDays(2).toDate()]
-            ) == 2
+                after: REFERENCE_DATE.minusDays(1).toDate(),
+                before: REFERENCE_DATE.plusDays(2).toDate(),
+            ]) == 2
             s.countByDates(
                 '1',
                 DynamoDBEntity.DATE_INDEX,
@@ -159,9 +166,9 @@ class DefaultDynamoDBServiceSpec extends Specification {
                 REFERENCE_DATE.plusDays(2).toDate()
             ) == 2
             s.countByDates('3', DynamoDBEntity.DATE_INDEX, [
-                after: REFERENCE_DATE.plusDays(9).toDate(), before: REFERENCE_DATE.plusDays(20).toDate()
+                after: REFERENCE_DATE.plusDays(9).toDate(),
+                before: REFERENCE_DATE.plusDays(20).toDate(),
             ]) == 1
-
     }
 
     void 'increment and decrement'() {
@@ -174,7 +181,6 @@ class DefaultDynamoDBServiceSpec extends Specification {
             s.decrement('1', '1', 'number')
         then:
             s.get('1', '1').number == 2
-
     }
 
     void 'query items'() {
@@ -189,8 +195,9 @@ class DefaultDynamoDBServiceSpec extends Specification {
         // end::query-by-range-index[]
 
             s.queryByDates('1', DynamoDBEntity.DATE_INDEX, [
-                after: REFERENCE_DATE.minusDays(1).toDate(), before: REFERENCE_DATE.plusDays(2).toDate()]
-            ).count == 2
+                after: REFERENCE_DATE.minusDays(1).toDate(),
+                before: REFERENCE_DATE.plusDays(2).toDate(),
+            ]).count == 2
             s.queryByDates(
                 '1',
                 DynamoDBEntity.DATE_INDEX,
@@ -200,11 +207,13 @@ class DefaultDynamoDBServiceSpec extends Specification {
 
         // tag::query-by-dates[]
         s.queryByDates('3', DynamoDBEntity.DATE_INDEX, [                                // <6>
-            after: REFERENCE_DATE.plusDays(9).toDate(), before: REFERENCE_DATE.plusDays(20).toDate()
+            after: REFERENCE_DATE.plusDays(9).toDate(),
+            before: REFERENCE_DATE.plusDays(20).toDate(),
         ]).count == 1
         // end::query-by-dates[]
     }
 
+    @SuppressWarnings('AbcMetric')
     void 'service introduction works'() {
         given:
             DynamoDBItemDBService s = context.getBean(DynamoDBItemDBService)
@@ -220,7 +229,8 @@ class DefaultDynamoDBServiceSpec extends Specification {
             s.save(new DynamoDBEntity(parentId: '1001', id: '2', rangeIndex: 'bar', date: REFERENCE_DATE.plusDays(1).toDate()))
             s.saveAll([
                 new DynamoDBEntity(parentId: '1002', id: '1', rangeIndex: 'foo',  date: REFERENCE_DATE.minusDays(5).toDate()),
-                new DynamoDBEntity(parentId: '1002', id: '2', rangeIndex: 'foo', date: REFERENCE_DATE.minusDays(2).toDate())])
+                new DynamoDBEntity(parentId: '1002', id: '2', rangeIndex: 'foo', date: REFERENCE_DATE.minusDays(2).toDate()),
+            ])
             s.saveAll(
                 new DynamoDBEntity(parentId: '1003', id: '1', rangeIndex: 'foo', date: REFERENCE_DATE.plusDays(7).toDate()),
                 new DynamoDBEntity(parentId: '1003', id: '2', rangeIndex: 'bar', date: REFERENCE_DATE.plusDays(14).toDate())
@@ -260,12 +270,11 @@ class DefaultDynamoDBServiceSpec extends Specification {
 
     void 'count many items'() {
         when:
-            String parentKey = "2001"
+            String parentKey = '2001'
             DynamoDBItemDBService s = context.getBean(DynamoDBItemDBService)
             s.saveAll((1..101).collect { new DynamoDBEntity(parentId: parentKey, id: "$it") })
         then:
             s.count(parentKey) == 101
-
     }
     void 'delete attribute'() {
         expect:
@@ -293,13 +302,14 @@ class DefaultDynamoDBServiceSpec extends Specification {
 
             s.count('1', DynamoDBEntity.RANGE_INDEX, 'bar') == 0
             s.deleteAllByConditions('2',  DefaultDynamoDBService.buildDateConditions(DynamoDBEntity.DATE_INDEX, [
-                after: REFERENCE_DATE.minusDays(20).toDate(), before: REFERENCE_DATE.plusDays(20).toDate()
+                after: REFERENCE_DATE.minusDays(20).toDate(),
+                before: REFERENCE_DATE.plusDays(20).toDate(),
             ]), [limit: 1]) == 2
             s.countByDates('2', DynamoDBEntity.DATE_INDEX, [
-                after: REFERENCE_DATE.minusDays(20).toDate(), before: REFERENCE_DATE.plusDays(20).toDate()]
-            ) == 0
+                after: REFERENCE_DATE.minusDays(20).toDate(),
+                before: REFERENCE_DATE.plusDays(20).toDate(),
+            ]) == 0
     }
-
 }
 
 // tag::service-all[]

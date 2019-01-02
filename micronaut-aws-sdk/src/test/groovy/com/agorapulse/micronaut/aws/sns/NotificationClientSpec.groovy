@@ -1,24 +1,17 @@
 package com.agorapulse.micronaut.aws.sns
 
 import com.agorapulse.micronaut.aws.Pogo
-import com.agorapulse.micronaut.aws.kinesis.KinesisService
-import com.agorapulse.micronaut.aws.kinesis.MyEvent
-import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisClient
-import com.agorapulse.micronaut.aws.kinesis.annotation.PartitionKey
-import com.agorapulse.micronaut.aws.kinesis.annotation.SequenceNumber
-import com.agorapulse.micronaut.aws.kinesis.annotation.Stream
 import com.agorapulse.micronaut.aws.sns.annotation.NotificationClient
 import com.agorapulse.micronaut.aws.sns.annotation.Topic
-import com.amazonaws.services.kinesis.model.PutRecordResult
-import com.amazonaws.services.kinesis.model.PutRecordsRequestEntry
-import com.amazonaws.services.kinesis.model.PutRecordsResult
-import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 import io.micronaut.context.ApplicationContext
 import io.micronaut.inject.qualifiers.Qualifiers
 import spock.lang.AutoCleanup
 import spock.lang.Specification
 
+/**
+ * Tests for notification client.
+ */
 class NotificationClientSpec extends Specification {
 
     private static final String DEFAULT_TOPIC = 'DefaultTopic'

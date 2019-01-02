@@ -13,8 +13,6 @@ import java.util.Optional;
 /**
  * Writes a {@link File} to the Netty context.
  *
- * @author James Kleeh
- * @author Graeme Rocher
  * @since 1.0
  */
 public class BasicSystemFileCustomizableResponseType extends SystemFileCustomizableResponseType {

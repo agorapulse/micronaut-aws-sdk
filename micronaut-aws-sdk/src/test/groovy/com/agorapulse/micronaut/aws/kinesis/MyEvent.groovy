@@ -1,5 +1,8 @@
-package com.agorapulse.micronaut.aws.kinesis;
+package com.agorapulse.micronaut.aws.kinesis
 
+/**
+ * Testing event.
+ */
 class MyEvent extends DefaultEvent {
 
     // java way
@@ -8,7 +11,7 @@ class MyEvent extends DefaultEvent {
     }
 
     // groovy way
-    MyEvent() {}
+    MyEvent() { }
 
     String value
 }

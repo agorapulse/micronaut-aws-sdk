@@ -2,7 +2,6 @@ package com.agorapulse.micronaut.aws.s3
 
 import com.amazonaws.AmazonClientException
 import com.amazonaws.services.s3.AmazonS3
-import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.AmazonS3Exception
 import com.amazonaws.services.s3.model.Bucket
 import com.amazonaws.services.s3.model.CannedAccessControlList
@@ -22,6 +21,9 @@ import spock.lang.Unroll
 
 import java.nio.ByteBuffer
 
+/**
+ * Tests for simple storage service.
+ */
 class SimpleStorageServiceSpec extends Specification {
 
     private static final String BUCKET_NAME = 'bucket'
@@ -84,10 +86,10 @@ class SimpleStorageServiceSpec extends Specification {
         then:
             deleted
             1 * client.listObjects(BUCKET_NAME, 'dir/subdir/*') >> {
-                def objectListing = [objectSummaries: []]
+                Map<String, List> objectListing = [objectSummaries: []]
                 3.times {
                     S3ObjectSummary summary = new S3ObjectSummary()
-                    summary.setKey("key$it")
+                    summary.key = "key$it"
                     objectListing.objectSummaries << summary
                 }
                 objectListing as ObjectListing
@@ -139,7 +141,7 @@ class SimpleStorageServiceSpec extends Specification {
             exists
             1 * client.listObjects(BUCKET_NAME, 'key') >> {
                 S3ObjectSummary summary = new S3ObjectSummary()
-                summary.setKey('key')
+                summary.key = 'key'
                 [objectSummaries: [summary]] as ObjectListing
             }
     }
@@ -189,6 +191,7 @@ class SimpleStorageServiceSpec extends Specification {
     /**
      * Tests for generatePresignedUrl(String key, Date expiration)
      */
+    @SuppressWarnings('NoJavaUtilDate')
     void "Generating presigned url"() {
         when:
             String presignedUrl = service.generatePresignedUrl('key', new Date(System.currentTimeMillis() + 24 * 3600 * 1000))
@@ -198,9 +201,6 @@ class SimpleStorageServiceSpec extends Specification {
             1 * client.generatePresignedUrl(BUCKET_NAME, 'key', _) >> new URL('http://some.domaine.com/some/path')
     }
 
-    /**
-     * Tests for storeFile(Object input, String type, String filePrefix, String fileExtension, String fileSuffix = '', CannedAccessControlList cannedAcl = CannedAccessControlList.PublicRead)
-     */
     InputStream mockInputStream() {
         new InputStream() {
             @Override
@@ -213,7 +213,7 @@ class SimpleStorageServiceSpec extends Specification {
     void "Storing file"() {
         given:
             File file = Mock(File)
-            String path = "filePrefix.txt"
+            String path = 'filePrefix.txt'
 
         when:
             String url = service.storeFile(path, file)
@@ -226,14 +226,14 @@ class SimpleStorageServiceSpec extends Specification {
     void "Storing file exception"() {
         given:
             File file = Mock(File)
-            String path = "filePrefix.txt"
+            String path = 'filePrefix.txt'
 
         when:
             String url = service.storeFile(path, file)
 
         then:
             url == ''
-            1 * client.putObject(_) >> { throw new AmazonS3Exception("failed") }
+            1 * client.putObject(_) >> { throw new AmazonS3Exception('failed') }
     }
 
     @Unroll
@@ -249,13 +249,12 @@ class SimpleStorageServiceSpec extends Specification {
             'any'   | 'swf' | 'application/x-shockwave-flash'   | null
             'any'   | 'foo' | 'application/octet-stream'        | 'attachment'
             'csv'   | 'csv' | 'text/csv'                        | 'attachment'
-
     }
 
     void "Storing input"() {
         given:
             InputStream input = mockInputStream()
-            String path = "filePrefix.txt"
+            String path = 'filePrefix.txt'
 
         when:
             ObjectMetadata metadata = service.buildMetadataFromType('file', 'txt')
@@ -269,7 +268,7 @@ class SimpleStorageServiceSpec extends Specification {
     void "Storing pdf input with private ACL"() {
         given:
             InputStream input = mockInputStream()
-            String path = "filePrefix.fileSuffix.pdf"
+            String path = 'filePrefix.fileSuffix.pdf'
 
         when:
             ObjectMetadata metadata = service.buildMetadataFromType('pdf', 'pdf')
@@ -283,7 +282,7 @@ class SimpleStorageServiceSpec extends Specification {
     void "Storing image input"() {
         given:
             InputStream input = mockInputStream()
-            String path = "filePrefix.fileSuffix.jpg"
+            String path = 'filePrefix.fileSuffix.jpg'
 
         when:
             ObjectMetadata metadata = service.buildMetadataFromType('image', 'jpg')
@@ -297,7 +296,7 @@ class SimpleStorageServiceSpec extends Specification {
     void "Storing flash input"() {
         given:
             InputStream input = mockInputStream()
-            String path = "filePrefix.fileSuffix.swf"
+            String path = 'filePrefix.fileSuffix.swf'
 
         when:
             ObjectMetadata metadata = service.buildMetadataFromType('flash', 'swf')
@@ -349,7 +348,7 @@ class SimpleStorageServiceSpec extends Specification {
             1 * client.putObject(_) >> new PutObjectResult()
     }
 
-    void 'create bucket'() {
+    void 'new bucket'() {
         when:
             service.createBucket('new-bucket')
         then:
@@ -401,11 +400,9 @@ class SimpleStorageServiceSpec extends Specification {
             service.storeMultipartFile('stored.txt', file)
         then:
             1 * client.putObject(BUCKET_NAME, 'stored.txt', _, _)
-
     }
 
 }
-
 
 class MockPartData implements PartData {
 

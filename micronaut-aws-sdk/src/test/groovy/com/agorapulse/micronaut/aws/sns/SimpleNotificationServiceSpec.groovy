@@ -11,6 +11,9 @@ import spock.lang.Stepwise
 
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.SNS
 
+/**
+ * Tests for simple notification service.
+ */
 @Stepwise
 @Testcontainers
 class SimpleNotificationServiceSpec extends Specification {
@@ -34,7 +37,7 @@ class SimpleNotificationServiceSpec extends Specification {
         service = new DefaultSimpleNotificationService(sns, configuration, new ObjectMapper())
     }
 
-    void 'create topic'() {
+    void 'new topic'() {
         when:
             topicArn = service.createTopic('TOPIC')
         then:
@@ -48,7 +51,7 @@ class SimpleNotificationServiceSpec extends Specification {
             subscriptionArn
     }
 
-    void 'create platform application'() {
+    void 'new platform application'() {
         when:
             platformApplicationArn = service.createAndroidApplication('ANDROID-APP', 'API-KEY')
         then:

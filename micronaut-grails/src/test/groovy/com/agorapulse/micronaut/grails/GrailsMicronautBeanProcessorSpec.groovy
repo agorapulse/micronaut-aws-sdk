@@ -18,8 +18,11 @@ import spock.lang.Specification
 import javax.inject.Named
 import javax.inject.Singleton
 
+/**
+ * Tests for micronaut Spring bean processor.
+ */
 @ContextConfiguration(classes = [GrailsConfig])
-@TestPropertySource("classpath:com/agorapulse/micronaut/grails/GrailsMicronautBeanProcessorSpec.properties")
+@TestPropertySource('classpath:com/agorapulse/micronaut/grails/GrailsMicronautBeanProcessorSpec.properties')
 class GrailsMicronautBeanProcessorSpec extends Specification {
 
     public static final int REDIS_PORT = 12345
@@ -64,7 +67,10 @@ class GrailsMicronautBeanProcessorSpec extends Specification {
 
     void 'none-translating environment'() {
         when:
-            GrailsPropertyTranslatingEnvironment translatingEnvironment = new GrailsPropertyTranslatingEnvironment(environment, PropertyTranslatingCustomizer.none())
+            GrailsPropertyTranslatingEnvironment translatingEnvironment = new GrailsPropertyTranslatingEnvironment(
+                environment,
+                PropertyTranslatingCustomizer.none()
+            )
         then:
             !translatingEnvironment.containsProperty('redis.host')
             !translatingEnvironment.getProperty('redis.host', String).present
@@ -93,7 +99,7 @@ class GrailsConfig {
 interface SomeInterface { }
 
 @Singleton
-class SomeImplementation implements SomeInterface {}
+class SomeImplementation implements SomeInterface { }
 
 class SomeNamed {
     final String name
@@ -124,14 +130,13 @@ class SomeNamedFactory {
 
 @Primary
 @Singleton
-class Widget {}
+class Widget { }
 
 @Singleton
 @Requires(notEnv = 'test')
 class TestWidget extends Widget { }
 
-
-interface Minion {}
+interface Minion { }
 
 @Prototype
 class PrototypeBean {
@@ -157,7 +162,7 @@ class SomeGadget { }
 
 @Singleton
 @Named('other')
-class OtherMinion implements Minion {}
+class OtherMinion implements Minion { }
 
 @Singleton
-class NormalMinion implements Minion {}
+class NormalMinion implements Minion { }

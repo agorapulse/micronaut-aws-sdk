@@ -9,6 +9,9 @@ import com.amazonaws.services.simpleemail.model.SendRawEmailResult
 import spock.lang.Specification
 import spock.lang.Subject
 
+/**
+ * Tests for simple email service.
+ */
 @SuppressWarnings(['AbcMetric', 'JavaIoPackageAccess'])
 class SimpleEmailServiceSpec extends Specification {
 
@@ -45,8 +48,7 @@ class SimpleEmailServiceSpec extends Specification {
         transactionalEmail.attachments.first().description == 'An example pdf'
 
         when:
-         
-        File f = new File(SimpleEmailServiceSpec.class.getResource("groovylogo.png").getFile())
+        File f = new File(SimpleEmailServiceSpec.getResource('groovylogo.png').file)
 
         then:
         f.exists()
@@ -157,7 +159,7 @@ class SimpleEmailServiceSpec extends Specification {
 
     void "test send attachment"() {
         when:
-            File f = new File(SimpleEmailServiceSpec.class.getResource("groovylogo.png").getFile())
+            File f = new File(SimpleEmailServiceSpec.getResource('groovylogo.png').file)
 
         then:
             f.exists()
