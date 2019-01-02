@@ -114,11 +114,11 @@ public class KinesisTest {
     }
 
     private static boolean allTestEventsReceived(KinesisListenerTester tester) {
-        return tester.getExecutions().stream().anyMatch(log -> log.startsWith("EXECUTED: listenStringRecord")) &&
-            tester.getExecutions().stream().anyMatch(log -> log.startsWith("EXECUTED: listenString")) &&
-            tester.getExecutions().stream().anyMatch(log -> log.startsWith("EXECUTED: listenRecord")) &&
-            tester.getExecutions().stream().anyMatch(log -> log.startsWith("EXECUTED: listenObject")) &&
-            tester.getExecutions().stream().anyMatch(log -> log.startsWith("EXECUTED: listenObjectRecord")) &&
-            tester.getExecutions().stream().anyMatch("EXECUTED: listenPogoRecord(com.agorapulse.micronaut.aws.Pogo(bar))"::equals);
+        return tester.getExecutions().stream().anyMatch(log -> log.startsWith("EXECUTED: listenStringRecord"))
+            && tester.getExecutions().stream().anyMatch(log -> log.startsWith("EXECUTED: listenString"))
+            && tester.getExecutions().stream().anyMatch(log -> log.startsWith("EXECUTED: listenRecord"))
+            && tester.getExecutions().stream().anyMatch(log -> log.startsWith("EXECUTED: listenObject"))
+            && tester.getExecutions().stream().anyMatch(log -> log.startsWith("EXECUTED: listenObjectRecord"))
+            && tester.getExecutions().stream().anyMatch("EXECUTED: listenPogoRecord(com.agorapulse.micronaut.aws.Pogo(bar))"::equals);
     }
 }

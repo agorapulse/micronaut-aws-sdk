@@ -3,6 +3,9 @@ package com.agorapulse.micronaut.aws.ses
 import groovy.transform.CompileStatic
 import groovy.transform.ToString
 
+/**
+ * Attachment builder.
+ */
 @ToString
 @CompileStatic
 class TransactionalEmailAttachment {
@@ -33,9 +36,9 @@ class TransactionalEmailAttachment {
 
     @SuppressWarnings('JavaIoPackageAccess')
     String getMimeType() {
-        if ( !this.mimeType && this.filepath ) {
-            def f = new File(this.filepath)
-            if ( f.exists() ) {
+        if (!this.mimeType && this.filepath) {
+            File f = new File(this.filepath)
+            if (f.exists()) {
                 this.mimeType = MimeType.mimeTypeFromFilename(f.name)
             }
         }
@@ -45,9 +48,9 @@ class TransactionalEmailAttachment {
 
     @SuppressWarnings('JavaIoPackageAccess')
     String getFilename() {
-        if ( !this.filename && this.filepath ) {
-            def f = new File(this.filepath)
-            if ( f.exists() ) {
+        if (!this.filename && this.filepath) {
+            File f = new File(this.filepath)
+            if (f.exists()) {
                 this.filename = f.name
             }
         }

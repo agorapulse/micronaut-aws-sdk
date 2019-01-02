@@ -13,6 +13,10 @@ import io.reactivex.Flowable
 import java.util.function.BiConsumer
 import java.util.function.Consumer
 
+/**
+ * Default implementation of the query builder.
+ * @param <T> type of the item queried
+ */
 @PackageScope
 @CompileStatic
 class DefaultQueryBuilder<T> implements QueryBuilder<T> {
@@ -32,7 +36,7 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     }
 
     DefaultQueryBuilder<T> inconsistent(Builders.Read read) {
-        if (read.equals(Builders.Read.READ)) {
+        if (read == Builders.Read.READ) {
             expression.withConsistentRead(false)
         }
 
@@ -40,7 +44,7 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     }
 
     DefaultQueryBuilder<T> consistent(Builders.Read read) {
-        if (read.equals(Builders.Read.READ)) {
+        if (read == Builders.Read.READ) {
             expression.withConsistentRead(true)
         }
 
@@ -85,7 +89,7 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
 
     @Override
     int count(IDynamoDBMapper mapper) {
-        return mapper.count(metadata.getItemClass(), resolveExpression(mapper))
+        return mapper.count(metadata.itemClass, resolveExpression(mapper))
     }
 
     @Override
@@ -95,16 +99,14 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
 
     @Override
     DynamoDBQueryExpression<T> resolveExpression(IDynamoDBMapper mapper) {
-        DynamoDBMapperTableModel<T> model = mapper.getTableModel(metadata.getItemClass())
+        DynamoDBMapperTableModel<T> model = mapper.getTableModel(metadata.itemClass)
 
         if (hashKey != null) {
             expression.withHashKeyValues(model.createKey(hashKey, null))
         }
 
-
         applyConditions(model, rangeCollectorsConsumers, expression.&withRangeKeyCondition)
         applyConditions(model, filterCollectorsConsumers, expression.&withQueryFilterEntry)
-
 
         if (exclusiveHashStartKey != null || exclusiveRangeStartKey != null) {
             T exclusiveKey = model.createKey(exclusiveHashStartKey, exclusiveRangeStartKey)
@@ -129,11 +131,16 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     }
 
     // for proper groovy evaluation of closure in the annotation
+    @SuppressWarnings('UnusedMethodParameter')
     Object getProperty(String name) {
-        throw new MissingPropertyException("No properties here!")
+        throw new MissingPropertyException('No properties here!')
     }
 
-    private void applyConditions(DynamoDBMapperTableModel<T> model, List<Consumer<RangeConditionCollector<T>>> filterCollectorsConsumers, BiConsumer<String, Condition> addFilterConsumer) {
+    private void applyConditions(
+        DynamoDBMapperTableModel<T> model,
+        List<Consumer<RangeConditionCollector<T>>> filterCollectorsConsumers,
+        BiConsumer<String, Condition> addFilterConsumer
+    ) {
         if (!filterCollectorsConsumers.isEmpty()) {
             RangeConditionCollector<T> filterCollector = new RangeConditionCollector<>(model)
 
@@ -141,16 +148,17 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
                 consumer.accept(filterCollector)
             }
 
-            filterCollector.getConditions().forEach(addFilterConsumer)
+            filterCollector.conditions.forEach(addFilterConsumer)
         }
     }
 
     private final DynamoDBMetadata<T> metadata
     private final DynamoDBQueryExpression<T> expression
+    private final List<Consumer<RangeConditionCollector<T>>> filterCollectorsConsumers = []
+    private final List<Consumer<RangeConditionCollector<T>>> rangeCollectorsConsumers = []
+
     private Object hashKey
     private Object exclusiveHashStartKey
     private Object exclusiveRangeStartKey
-    private List<Consumer<RangeConditionCollector<T>>> rangeCollectorsConsumers = new ArrayList<>()
-    private List<Consumer<RangeConditionCollector<T>>> filterCollectorsConsumers = new ArrayList<>()
-    private Consumer<DynamoDBQueryExpression<T>> configurer = {} as Consumer<DynamoDBQueryExpression<T>>
+    private Consumer<DynamoDBQueryExpression<T>> configurer = { } as Consumer<DynamoDBQueryExpression<T>>
 }

@@ -8,8 +8,12 @@ import groovy.transform.CompileStatic
 import groovy.transform.Synchronized
 import groovy.util.logging.Slf4j
 
+/**
+ * Default simple queue service implementation.
+ */
 @Slf4j
 @CompileStatic
+@SuppressWarnings('NoWildcardImports')
 class DefaultSimpleQueueService implements SimpleQueueService {
 
     public static final String QUEUE_ARN = 'QueueArn'
@@ -37,10 +41,10 @@ class DefaultSimpleQueueService implements SimpleQueueService {
         return configuration.cache
     }
 /**
-     *
-     * @param queueName
-     * @return queue URL
-     */
+ *
+ * @param queueName
+ * @return queue URL
+ */
     String createQueue(String queueName) {
         CreateQueueRequest createQueueRequest = new CreateQueueRequest(queueName)
         if (configuration.delaySeconds) {
@@ -98,7 +102,7 @@ class DefaultSimpleQueueService implements SimpleQueueService {
         Map attributes = [:]
         try {
             attributes = client.getQueueAttributes(getQueueAttributesRequest).attributes
-        } catch(AmazonServiceException exception) {
+        } catch (AmazonServiceException exception) {
             if (exception.errorCode == 'AWS.SimpleQueueService.NonExistentQueue') {
                 removeQueue(queueUrl)
             }
@@ -115,6 +119,7 @@ class DefaultSimpleQueueService implements SimpleQueueService {
      * @param autoCreate
      * @return
      */
+    @SuppressWarnings('ParameterReassignment')
     String getQueueUrl(String queueName) {
         if (queueName.startsWith('http://') || queueName.startsWith('https://')) {
             return queueName
@@ -136,20 +141,13 @@ class DefaultSimpleQueueService implements SimpleQueueService {
         queueUrl
     }
 
-    private String getQueueUrlDirect(String queueName) {
-        try {
-            return client.getQueueUrl(queueName).queueUrl
-        } catch (QueueDoesNotExistException ignored) {
-            return null
-        }
-    }
-
     @Override
     String getQueueArn(String queueName) {
         GetQueueAttributesResult attributes = client.getQueueAttributes(getQueueUrl(queueName), Collections.singletonList(QUEUE_ARN))
-        return attributes.getAttributes()[QUEUE_ARN]
+        return attributes.attributes[QUEUE_ARN]
     }
-/**
+
+    /**
      *
      * @param reload
      * @return
@@ -200,7 +198,7 @@ class DefaultSimpleQueueService implements SimpleQueueService {
     }
 
     /**
-     * 
+     *
      * @param queueName
      * @param messageBody
      * @param delaySeconds
@@ -221,15 +219,27 @@ class DefaultSimpleQueueService implements SimpleQueueService {
         messageId
     }
 
-    // PRIVATE
-
     void assertDefaultQueueName() {
-        assert configuration.queue, "Default queue must be defined"
+        assert configuration.queue, 'Default queue must be defined'
+    }
+
+    // PRIVATE
+    private static String getQueueNameFromUrl(String queueUrl) {
+        queueUrl.tokenize('/').last()
+    }
+
+    @SuppressWarnings('ReturnNullFromCatchBlock')
+    private String getQueueUrlDirect(String queueName) {
+        try {
+            return client.getQueueUrl(queueName).queueUrl
+        } catch (QueueDoesNotExistException ignored) {
+            return null
+        }
     }
 
     @Synchronized
     private void addQueue(String queueUrl) {
-        assert queueUrl, "Invalid queueUrl"
+        assert queueUrl, 'Invalid queueUrl'
         queueUrlByNames[getQueueNameFromUrl(queueUrl)] = queueUrl
     }
 
@@ -244,17 +254,12 @@ class DefaultSimpleQueueService implements SimpleQueueService {
         queueUrlByNames.putAll queueUrls?.collectEntries { queueUrl ->
             [getQueueNameFromUrl(queueUrl), queueUrl]
         }
-
     }
 
     @Synchronized
     private void removeQueue(String queueUrl) {
-        assert queueUrl, "Invalid queueUrl"
+        assert queueUrl, 'Invalid queueUrl'
         queueUrlByNames.remove(getQueueNameFromUrl(queueUrl))
-    }
-
-    private static String getQueueNameFromUrl(String queueUrl) {
-        queueUrl.tokenize('/').last()
     }
 
 }

@@ -33,10 +33,8 @@
         <rule-config name="LineLength">
             <property name="length" value="160"/>
         </rule-config>
-        <rule-config name="SpaceAroundMapEntryColon">
-            <property name="characterAfterColonRegex" value="\s"/>
-        </rule-config>
         <exclude name="Indentation"/>
+        <exclude name="SpaceAroundMapEntryColon"/>
     </ruleset-ref>
     <ruleset-ref path="rulesets/generic.xml"/>
     <ruleset-ref path="rulesets/grails.xml"/>

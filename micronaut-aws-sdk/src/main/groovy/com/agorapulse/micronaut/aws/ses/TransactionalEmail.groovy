@@ -4,6 +4,9 @@ import groovy.transform.CompileStatic
 import groovy.transform.PackageScope
 import groovy.transform.ToString
 
+/**
+ * Email builder.
+ */
 @ToString
 @CompileStatic
 class TransactionalEmail {
@@ -17,6 +20,7 @@ class TransactionalEmail {
     List<TransactionalEmailAttachment> attachments = []
 
     // Constructed via SimpleEmailService
+    @SuppressWarnings('UnnecessaryConstructor')
     @PackageScope TransactionalEmail() { }
 
     void attachment(@DelegatesTo(value = TransactionalEmailAttachment, strategy = Closure.DELEGATE_FIRST) Closure attachment) {

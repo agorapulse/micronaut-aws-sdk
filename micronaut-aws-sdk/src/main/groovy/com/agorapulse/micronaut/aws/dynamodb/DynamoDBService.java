@@ -726,7 +726,9 @@ public interface DynamoDBService<T> {
      * @param attributeValue
      * @return
      */
-    UpdateItemResult updateItemAttribute(Object hashKey, Object rangeKey, String attributeName, Object attributeValue);
+    default UpdateItemResult updateItemAttribute(Object hashKey, Object rangeKey, String attributeName, Object attributeValue) {
+        return updateItemAttribute(hashKey, rangeKey, attributeName, attributeValue, AttributeAction.PUT);
+    }
 
     boolean isIndexRangeKey(String rangeName);
 

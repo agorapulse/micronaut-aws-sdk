@@ -17,6 +17,7 @@ interface DefaultClient {
 
     String OTHER_STREAM = "OtherStream";
 
+    //CHECKSTYLE:OFF
     // tag::string[]
     void putRecordString(String record);                                                // <2>
 
@@ -38,6 +39,7 @@ interface DefaultClient {
         @SequenceNumber int sequenceNumber
     );
     // end::string[]
+    //CHECKSTYLE:ON
 
     // tag::bytes[]
     void putRecordBytes(byte[] record);                                                 // <2>

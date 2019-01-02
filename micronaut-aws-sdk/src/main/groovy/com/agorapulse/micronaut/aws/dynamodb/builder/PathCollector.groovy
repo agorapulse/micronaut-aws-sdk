@@ -3,13 +3,16 @@ package com.agorapulse.micronaut.aws.dynamodb.builder
 import groovy.transform.CompileStatic
 import groovy.transform.PackageScope
 
+/**
+ * Collect the property path segments using fake property access.
+ */
 @CompileStatic
 @PackageScope
 class PathCollector {
 
     static PathCollector collectPaths(Closure<Object> collector) {
         PathCollector pathCollector = new PathCollector(null, null)
-        Closure closure = collector.rehydrate(pathCollector, pathCollector, pathCollector);
+        Closure closure = collector.rehydrate(pathCollector, pathCollector, pathCollector)
         closure.resolveStrategy = Closure.DELEGATE_ONLY
         closure.call(pathCollector)
         pathCollector
@@ -26,7 +29,7 @@ class PathCollector {
 
     @Override
     Object getProperty(String propertyName) {
-        return children.computeIfAbsent(propertyName) { new PathCollector(this, propertyName)}
+        return children.computeIfAbsent(propertyName) { new PathCollector(this, propertyName) }
     }
 
     String getFullPath() {

@@ -6,9 +6,12 @@ import io.micronaut.context.annotation.EachProperty
 import io.micronaut.context.annotation.Parameter
 import io.micronaut.context.annotation.Requires
 
+/**
+ * Named configuration for simple queue service created for each key in the configuration.
+ */
 @CompileStatic
 @EachProperty('aws.sqs.queues')
-@Requires(classes = AmazonSQS.class, property =  'aws.sqs.queues')
+@Requires(classes = AmazonSQS, property =  'aws.sqs.queues')
 class NamedSimpleQueueServiceConfiguration extends SimpleQueueServiceConfiguration {
 
     final String name
@@ -16,4 +19,5 @@ class NamedSimpleQueueServiceConfiguration extends SimpleQueueServiceConfigurati
     NamedSimpleQueueServiceConfiguration(@Parameter String name) {
         this.name = name
     }
+
 }

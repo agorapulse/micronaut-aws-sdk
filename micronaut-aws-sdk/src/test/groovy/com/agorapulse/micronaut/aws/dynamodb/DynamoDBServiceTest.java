@@ -62,10 +62,13 @@ public class DynamoDBServiceTest {
 
     @Test
     public void testJavaService() {
+
+        //CHECKSTYLE:OFF
         // tag::obtain-service[]
         DynamoDBServiceProvider provider = ctx.getBean(DynamoDBServiceProvider.class);
         DynamoDBService<DynamoDBEntity> s = provider.findOrCreate(DynamoDBEntity.class);// <1>
         // end::obtain-service[]
+        //CHECKSTYLE:ON
 
         // tag::create-table[]
         assertNotNull(
@@ -97,8 +100,8 @@ public class DynamoDBServiceTest {
         assertEquals(2, s.getAll("1", Arrays.asList("2", "1")).size());
 
         assertEquals(2, s.count("1"));
-        assertEquals(1, s.count("1", "1"));
-        assertEquals(1, s.count("1", DynamoDBEntity.RANGE_INDEX,"bar"));
+        assertEquals(1, s.count("1",  "1"));
+        assertEquals(1, s.count("1", DynamoDBEntity.RANGE_INDEX, "bar"));
         assertEquals(2,
         s.countByDates(
             "1",
@@ -113,18 +116,19 @@ public class DynamoDBServiceTest {
             s.query("1")
         );
 
-        assertEquals(1, s.query("1", "1").getCount().intValue());
+        assertEquals(1, s.query("1",  "1").getCount().intValue());
         // tag::query-by-range-index[]
         assertEquals(1,
-            s.query("1", DynamoDBEntity.RANGE_INDEX,"bar").getCount().intValue()        // <5>
+            s.query("1", DynamoDBEntity.RANGE_INDEX, "bar").getCount().intValue()        // <5>
         );
         // end::query-by-range-index[]
-        assertEquals("bar", s.query("1", DynamoDBEntity.RANGE_INDEX,"bar").getResults().get(0).rangeIndex);
+        assertEquals("bar", s.query("1", DynamoDBEntity.RANGE_INDEX, "bar").getResults().get(0).rangeIndex);
 
         assertEquals(2,
 
         s.queryByDates("1", DynamoDBEntity.DATE_INDEX, REFERENCE_DATE.minusDays(1).toDate(), REFERENCE_DATE.plusDays(2).toDate()).getCount().intValue());
 
+        //CHECKSTYLE:OFF
         // tag::query-by-dates[]
         assertEquals(1,
             s.queryByDates(                                                             // <6>
@@ -135,6 +139,7 @@ public class DynamoDBServiceTest {
             ).getCount().intValue()
         );
         // end::query-by-dates[]
+        //CHECKSTYLE:ON
 
         // tag::increment[]
         s.increment("1", "1", "number");                                                // <7>

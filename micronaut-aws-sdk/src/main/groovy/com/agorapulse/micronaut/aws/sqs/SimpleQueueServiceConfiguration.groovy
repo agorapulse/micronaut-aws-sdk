@@ -9,14 +9,17 @@ import javax.inject.Named
 import javax.validation.constraints.Max
 import javax.validation.constraints.Min
 
+/**
+ * Defualt configuration for simple queue service.
+ */
 @Named('default')
 @CompileStatic
 @ConfigurationProperties('aws.sqs')
-@Requires(classes = AmazonSQS.class)
+@Requires(classes = AmazonSQS)
 class SimpleQueueServiceConfiguration {
 
-    String queue = ""
-    String queueNamePrefix = ""
+    String queue = ''
+    String queueNamePrefix = ''
     boolean autoCreateQueue = false
     boolean cache = false
     boolean fifo = false

@@ -213,7 +213,7 @@ class KinesisServiceSpec extends Specification {
 
 }
 
-class TestEvent extends AbstractEvent {
+class TestEvent extends DefaultEvent {
 
     String value
 
