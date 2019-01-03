@@ -1,4 +1,5 @@
 com.agorapulse.micronaut.aws
+com.agorapulse.micronaut.aws.cloudwatch
 com.agorapulse.micronaut.aws.dynamodb
 com.agorapulse.micronaut.aws.dynamodb.annotation
 com.agorapulse.micronaut.aws.dynamodb.builder

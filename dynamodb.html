@@ -916,6 +916,7 @@ Instead you can annotate any method with <code>@Query</code> annotation to make 
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
 
+
 @Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
 interface DynamoDBItemDBService {
 
@@ -1052,6 +1053,7 @@ If you need to scan the table by unindexed attributes you can annotate any metho
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
 
+
 @Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
 interface DynamoDBItemDBService {
 
@@ -1148,6 +1150,7 @@ public interface DynamoDBEntityService {
 <div class="title">Groovy</div>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
+
 
 @Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
 interface DynamoDBItemDBService {
@@ -1291,7 +1294,8 @@ s.get('1', '1')                                                                 
 s.query('1', DynamoDBEntity.RANGE_INDEX, 'bar').count == 1                      <i class="conum" data-value="5"></i><b>(5)</b>
 
 s.queryByDates('3', DynamoDBEntity.DATE_INDEX, [                                <i class="conum" data-value="6"></i><b>(6)</b>
-    after: REFERENCE_DATE.plusDays(9).toDate(), before: REFERENCE_DATE.plusDays(20).toDate()
+    after: REFERENCE_DATE.plusDays(9).toDate(),
+    before: REFERENCE_DATE.plusDays(20).toDate(),
 ]).count == 1
 
 s.increment('1', '1', 'number')                                                 <i class="conum" data-value="7"></i><b>(7)</b>
@@ -1360,7 +1364,7 @@ assertNotNull(
 );
 
 assertEquals(1,
-    s.query("1", DynamoDBEntity.RANGE_INDEX,"bar").getCount().intValue()        <i class="conum" data-value="5"></i><b>(5)</b>
+    s.query("1", DynamoDBEntity.RANGE_INDEX, "bar").getCount().intValue()        <i class="conum" data-value="5"></i><b>(5)</b>
 );
 
 assertEquals(1,
@@ -1464,7 +1468,8 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Stepwise
+@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
 class DefaultDynamoDBServiceSpec extends Specification {
     @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="2"></i><b>(2)</b>
 
@@ -1487,7 +1492,6 @@ class DefaultDynamoDBServiceSpec extends Specification {
             .build()
 
         mapper = new DynamoDBMapper(amazonDynamoDB)
-
 
         context = ApplicationContext.build().build()
         context.registerSingleton(AmazonDynamoDB, amazonDynamoDB)                       <i class="conum" data-value="5"></i><b>(5)</b>
@@ -1639,7 +1643,7 @@ You can obtain instances of declarative client from the context as well.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-12-20 14:24:00 +0100
+Last updated 2018-12-21 12:23:55 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">

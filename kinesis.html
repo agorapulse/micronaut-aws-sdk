@@ -863,33 +863,34 @@ public class KinesisListenerTester {
 
     @KinesisListener
     public void listenString(String string) {                                           <i class="conum" data-value="2"></i><b>(2)</b>
-        executions.add("EXECUTED: listenString(" + string + ")");
+        String message = "EXECUTED: listenString(" + string + ")";
+        logExecution(message);
     }
 
     @KinesisListener
     public void listenRecord(Record record) {                                           <i class="conum" data-value="3"></i><b>(3)</b>
-        executions.add("EXECUTED: listenRecord(" + record + ")");
+        logExecution("EXECUTED: listenRecord(" + record + ")");
     }
 
 
     @KinesisListener
     public void listenStringRecord(String string, Record record) {                      <i class="conum" data-value="4"></i><b>(4)</b>
-        executions.add("EXECUTED: listenStringRecord(" + string + ", " + record + ")");
+        logExecution("EXECUTED: listenStringRecord(" + string + ", " + record + ")");
     }
 
     @KinesisListener
     public void listenObject(MyEvent event) {                                           <i class="conum" data-value="5"></i><b>(5)</b>
-        executions.add("EXECUTED: listenObject(" + event + ")");
+        logExecution("EXECUTED: listenObject(" + event + ")");
     }
 
     @KinesisListener
     public void listenObjectRecord(MyEvent event, Record record) {                      <i class="conum" data-value="6"></i><b>(6)</b>
-        executions.add("EXECUTED: listenObjectRecord(" + event + ", " + record + ")");
+        logExecution("EXECUTED: listenObjectRecord(" + event + ", " + record + ")");
     }
 
     @KinesisListener
     public void listenPogoRecord(Pogo event) {                                          <i class="conum" data-value="7"></i><b>(7)</b>
-        executions.add("EXECUTED: listenPogoRecord(" + event + ")");
+        logExecution("EXECUTED: listenPogoRecord(" + event + ")");
     }
 
     public List&lt;String&gt; getExecutions() {
@@ -898,6 +899,11 @@ public class KinesisListenerTester {
 
     public void setExecutions(List&lt;String&gt; executions) {
         this.executions = executions;
+    }
+
+    private void logExecution(String message) {
+        executions.add(message);
+        System.err.println(message);
     }
 
     private List&lt;String&gt; executions = new CopyOnWriteArrayList&lt;&gt;();
@@ -1001,8 +1007,8 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 @RestoreSystemProperties                                                                <i class="conum" data-value="2"></i><b>(2)</b>
 class KinesisAnnotationsSpec extends Specification {
 
-    public static final String TEST_STREAM = 'TestStream'
-    public static final String APP_NAME = 'AppName'
+    private static final String TEST_STREAM = 'TestStream'
+    private static final String APP_NAME = 'AppName'
 
     @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.8')   <i class="conum" data-value="3"></i><b>(3)</b>
         .withServices(KINESIS, DYNAMODB)
@@ -1024,6 +1030,8 @@ class KinesisAnnotationsSpec extends Specification {
             .withCredentials(localstack.defaultCredentialsProvider)
             .build()
 
+        AmazonCloudWatch amazonCloudWatch = Mock(AmazonCloudWatch)
+
         context = ApplicationContext.build().properties(                                <i class="conum" data-value="8"></i><b>(8)</b>
             'aws.kinesis.application.name': APP_NAME,
             'aws.kinesis.stream': TEST_STREAM,
@@ -1031,21 +1039,25 @@ class KinesisAnnotationsSpec extends Specification {
         ).build()
         context.registerSingleton(AmazonKinesis, kinesis)
         context.registerSingleton(AmazonDynamoDB, dynamo)
+        context.registerSingleton(AmazonCloudWatch, amazonCloudWatch)
+        context.registerSingleton(AWSCredentialsProvider, localstack.defaultCredentialsProvider)
         context.start()
     }
 
     void 'kinesis listener is executed'() {
         when:
-            KinesisService service = context.getBean(KinesisService.class)              <i class="conum" data-value="9"></i><b>(9)</b>
-            KinesisListenerTester tester = context.getBean(KinesisListenerTester.class) <i class="conum" data-value="10"></i><b>(10)</b>
-            DefaultClient client = context.getBean(DefaultClient.class)                 <i class="conum" data-value="11"></i><b>(11)</b>
+            KinesisService service = context.getBean(KinesisService)                    <i class="conum" data-value="9"></i><b>(9)</b>
+            KinesisListenerTester tester = context.getBean(KinesisListenerTester)       <i class="conum" data-value="10"></i><b>(10)</b>
+            DefaultClient client = context.getBean(DefaultClient)                       <i class="conum" data-value="11"></i><b>(11)</b>
 
             service.createStream()
             service.waitForActive()
 
+            waitForWorkerReady(120, 100)
+
             Disposable subscription = publishEventAsync(tester, client)
 
-            waitForReceivedMessages(tester, 120, 1000)
+            waitForReceivedMessages(tester, 120, 100)
 
             subscription.dispose()
         then:
@@ -1130,6 +1142,8 @@ class KinesisAnnotationsSpec extends Specification {
             .withCredentials(localstack.getDefaultCredentialsProvider())
             .build();
 
+        AmazonCloudWatch cloudWatch = new MockCloudWatch();
+
         Map&lt;String, Object&gt; properties = new HashMap&lt;&gt;();                               <i class="conum" data-value="6"></i><b>(6)</b>
         properties.put("aws.kinesis.application.name", "TestApp");
         properties.put("aws.kinesis.stream", "MyStream");
@@ -1138,6 +1152,8 @@ class KinesisAnnotationsSpec extends Specification {
         context = ApplicationContext.build(properties).build();                         <i class="conum" data-value="7"></i><b>(7)</b>
         context.registerSingleton(AmazonKinesis.class, amazonKinesis);
         context.registerSingleton(AmazonDynamoDB.class, amazonDynamoDB);
+        context.registerSingleton(AmazonCloudWatch.class, cloudWatch);
+        context.registerSingleton(AWSCredentialsProvider.class, localstack.getDefaultCredentialsProvider());
         context.start();
     }
 
@@ -1158,8 +1174,9 @@ class KinesisAnnotationsSpec extends Specification {
         service.createStream();
         service.waitForActive();
 
+        waitForWorkerReady(120, 100);
         Disposable subscription = publishEventsAsync(tester, client);
-        waitForRecievedMessages(tester, 120, 1000);
+        waitForRecievedMessages(tester, 120, 100);
 
         subscription.dispose();
 
@@ -1226,7 +1243,7 @@ class KinesisAnnotationsSpec extends Specification {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-12-20 15:15:13 +0100
+Last updated 2019-01-03 09:56:13 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">
