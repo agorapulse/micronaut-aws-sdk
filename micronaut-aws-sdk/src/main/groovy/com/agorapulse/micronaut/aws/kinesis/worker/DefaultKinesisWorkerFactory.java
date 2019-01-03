@@ -7,6 +7,7 @@ import com.amazonaws.services.kinesis.AmazonKinesis;
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
 import com.amazonaws.services.kinesis.model.Record;
 import io.micronaut.context.annotation.Requires;
+import io.micronaut.context.event.ApplicationEventPublisher;
 import io.micronaut.core.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,12 +38,14 @@ public class DefaultKinesisWorkerFactory implements KinesisWorkerFactory {
     };
 
     private final ExecutorService executorService;
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final Optional<AmazonDynamoDB> amazonDynamoDB;
     private final Optional<AmazonKinesis> kinesis;
     private final Optional<AmazonCloudWatch> cloudWatch;
 
-    public DefaultKinesisWorkerFactory(ExecutorService executorService, Optional<AmazonDynamoDB> amazonDynamoDB, Optional<AmazonKinesis> kinesis, Optional<AmazonCloudWatch> cloudWatch) {
+    public DefaultKinesisWorkerFactory(ExecutorService executorService, ApplicationEventPublisher applicationEventPublisher, Optional<AmazonDynamoDB> amazonDynamoDB, Optional<AmazonKinesis> kinesis, Optional<AmazonCloudWatch> cloudWatch) {
         this.executorService = executorService;
+        this.applicationEventPublisher = applicationEventPublisher;
         this.amazonDynamoDB = amazonDynamoDB;
         this.kinesis = kinesis;
         this.cloudWatch = cloudWatch;
@@ -59,6 +62,6 @@ public class DefaultKinesisWorkerFactory implements KinesisWorkerFactory {
             return NOOP;
         }
 
-        return new DefaultKinesisWorker(kinesisConfiguration, executorService, amazonDynamoDB, kinesis, cloudWatch);
+        return new DefaultKinesisWorker(kinesisConfiguration, executorService, applicationEventPublisher, amazonDynamoDB, kinesis, cloudWatch);
     }
 }

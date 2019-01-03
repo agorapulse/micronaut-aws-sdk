@@ -1,6 +1,7 @@
 package com.agorapulse.micronaut.aws.kinesis;
 
 import com.agorapulse.micronaut.aws.Pogo;
+import com.agorapulse.micronaut.aws.kinesis.worker.WorkerStateListener;
 import com.amazonaws.AmazonWebServiceRequest;
 import com.amazonaws.ResponseMetadata;
 import com.amazonaws.auth.AWSCredentialsProvider;
@@ -87,8 +88,9 @@ public class KinesisTest {
         service.createStream();
         service.waitForActive();
 
+        waitForWorkerReady(120, 100);
         Disposable subscription = publishEventsAsync(tester, client);
-        waitForRecievedMessages(tester, 120, 1000);
+        waitForRecievedMessages(tester, 120, 100);
 
         subscription.dispose();
 
@@ -104,6 +106,20 @@ public class KinesisTest {
         }
     }
 
+    private void waitForWorkerReady(int retries, int waitMillis) throws InterruptedException {
+        WorkerStateListener listener = context.getBean(WorkerStateListener.class);
+        for (int i = 0; i < retries; i++) {
+            if (!listener.isReady("MyStream")) {
+                Thread.sleep(waitMillis);
+            }
+        }
+        if (!listener.isReady("MyStream")) {
+            throw new IllegalStateException("Worker not ready yet after " + retries * waitMillis + " milliseconds");
+        }
+        System.err.println("Worker is ready");
+        Thread.sleep(waitMillis);
+    }
+
     private Disposable publishEventsAsync(KinesisListenerTester tester, DefaultClient client) {
         return Flowable
             .interval(100, TimeUnit.MILLISECONDS, Schedulers.io())
@@ -112,6 +128,7 @@ public class KinesisTest {
             )
             .subscribe(t -> {
                 try {
+                    System.err.println("Publishing events");
                     client.putEvent(new MyEvent("foo"));
                     client.putRecordDataObject("1234567890", new Pogo("bar"));
                 } catch (Exception e) {

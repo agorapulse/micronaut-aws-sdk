@@ -7,6 +7,7 @@ import com.amazonaws.services.kinesis.AmazonKinesis;
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.Worker;
 import com.amazonaws.services.kinesis.model.Record;
+import io.micronaut.context.event.ApplicationEventPublisher;
 import io.micronaut.core.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +25,14 @@ class DefaultKinesisWorker implements KinesisWorker {
     DefaultKinesisWorker(
         KinesisClientLibConfiguration configuration,
         ExecutorService executorService,
+        ApplicationEventPublisher applicationEventPublisher,
         Optional<AmazonDynamoDB> amazonDynamoDB,
         Optional<AmazonKinesis> amazonKinesis,
         Optional<AmazonCloudWatch> amazonCloudWatch
     ) {
         this.configuration = configuration;
         this.executorService = executorService;
+        this.applicationEventPublisher = applicationEventPublisher;
         this.amazonDynamoDB = amazonDynamoDB;
         this.amazonKinesis = amazonKinesis;
         this.amazonCloudWatch = amazonCloudWatch;
@@ -59,6 +62,10 @@ class DefaultKinesisWorker implements KinesisWorker {
             }))
         );
 
+        builder.workerStateChangeListener(s -> {
+            applicationEventPublisher.publishEvent(new WorkerStateEvent(s, configuration.getStreamName()));
+        });
+
         try {
             LOGGER.info("Starting Kinesis worker for {}", configuration.getStreamName());
             executorService.execute(builder.build());
@@ -74,6 +81,7 @@ class DefaultKinesisWorker implements KinesisWorker {
 
     private final KinesisClientLibConfiguration configuration;
     private final ExecutorService executorService;
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final Optional<AmazonDynamoDB> amazonDynamoDB;
     private final Optional<AmazonKinesis> amazonKinesis;
     private final Optional<AmazonCloudWatch> amazonCloudWatch;

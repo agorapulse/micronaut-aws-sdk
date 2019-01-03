@@ -3,6 +3,7 @@ package com.agorapulse.micronaut.aws.s3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.Upload;
 import io.micronaut.http.multipart.PartData;
 import io.reactivex.Flowable;
@@ -61,9 +62,23 @@ public interface SimpleStorageService {
     void createBucket(String bucketName);
 
     /**
+     * Creates new bucket of the name specified as <code>aws.s3.bucket</code> property.
+     */
+    default void createBucket() {
+        createBucket(getDefaultBucketName());
+    }
+
+    /**
      * @param bucketName
      */
     void deleteBucket(String bucketName);
+
+    /**
+     * Creates new bucket of the name specified as <code>aws.s3.bucket</code> property.
+     */
+    default void deleteBucket() {
+        deleteBucket(getDefaultBucketName());
+    }
 
     /**
      * @param bucketName
@@ -170,6 +185,30 @@ public interface SimpleStorageService {
      */
     default Flowable<ObjectListing> listObjects() {
         return listObjects("");
+    }
+
+    /**
+     * @param bucketName
+     * @param prefix
+     * @return
+     */
+    default Flowable<S3ObjectSummary> listObjectSummaries(String bucketName, String prefix) {
+        return listObjects(bucketName, prefix).flatMap(l -> Flowable.fromIterable(l.getObjectSummaries()));
+    }
+
+    /**
+     * @param prefix
+     * @return
+     */
+    default Flowable<S3ObjectSummary> listObjectSummaries(String prefix) {
+        return listObjectSummaries(getDefaultBucketName(), prefix);
+    }
+
+    /**
+     * @return
+     */
+    default Flowable<S3ObjectSummary> listObjectSummaries() {
+        return listObjectSummaries("");
     }
 
     /**

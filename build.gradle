@@ -103,20 +103,24 @@ subprojects { Project subproject ->
         }
 
         onOutput { TestDescriptor td, TestOutputEvent toe ->
+            String[] lines = toe.getMessage().split('(?m)$')
             if (toe.destination == TestOutputEvent.Destination.StdErr) {
-                err.addAll(toe.getMessage().split('(?m)$'))
+                err.addAll(lines)
             } else {
-                out.addAll(toe.getMessage().split('(?m)$'))
+                out.addAll(lines)
             }
         }
 
         afterTest { TestDescriptor td, TestResult tr ->
             if (tr.resultType == TestResult.ResultType.FAILURE && (out || err)) {
-                println()
                 println("${td.className}.${td.name} failed!")
-                println("OUT:")
+                println()
+                println("\n=== OUT ===\n")
+                println()
                 out.each { print(it) }
-                println("ERR:")
+                println()
+                println("\n=== ERR ===\n")
+                println()
                 err.each { print(it) }
             }
         }

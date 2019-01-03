@@ -14,33 +14,34 @@ public class KinesisListenerTester {
 
     @KinesisListener
     public void listenString(String string) {                                           // <2>
-        executions.add("EXECUTED: listenString(" + string + ")");
+        String message = "EXECUTED: listenString(" + string + ")";
+        logExecution(message);
     }
 
     @KinesisListener
     public void listenRecord(Record record) {                                           // <3>
-        executions.add("EXECUTED: listenRecord(" + record + ")");
+        logExecution("EXECUTED: listenRecord(" + record + ")");
     }
 
 
     @KinesisListener
     public void listenStringRecord(String string, Record record) {                      // <4>
-        executions.add("EXECUTED: listenStringRecord(" + string + ", " + record + ")");
+        logExecution("EXECUTED: listenStringRecord(" + string + ", " + record + ")");
     }
 
     @KinesisListener
     public void listenObject(MyEvent event) {                                           // <5>
-        executions.add("EXECUTED: listenObject(" + event + ")");
+        logExecution("EXECUTED: listenObject(" + event + ")");
     }
 
     @KinesisListener
     public void listenObjectRecord(MyEvent event, Record record) {                      // <6>
-        executions.add("EXECUTED: listenObjectRecord(" + event + ", " + record + ")");
+        logExecution("EXECUTED: listenObjectRecord(" + event + ", " + record + ")");
     }
 
     @KinesisListener
     public void listenPogoRecord(Pogo event) {                                          // <7>
-        executions.add("EXECUTED: listenPogoRecord(" + event + ")");
+        logExecution("EXECUTED: listenPogoRecord(" + event + ")");
     }
 
     public List<String> getExecutions() {
@@ -49,6 +50,11 @@ public class KinesisListenerTester {
 
     public void setExecutions(List<String> executions) {
         this.executions = executions;
+    }
+
+    private void logExecution(String message) {
+        executions.add(message);
+        System.err.println(message);
     }
 
     private List<String> executions = new CopyOnWriteArrayList<>();

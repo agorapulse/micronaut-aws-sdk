@@ -1,6 +1,7 @@
 package com.agorapulse.micronaut.aws.kinesis
 
 import com.agorapulse.micronaut.aws.Pogo
+import com.agorapulse.micronaut.aws.kinesis.worker.WorkerStateListener
 import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
@@ -81,9 +82,11 @@ class KinesisAnnotationsSpec extends Specification {
             service.createStream()
             service.waitForActive()
 
+            waitForWorkerReady(120, 100)
+
             Disposable subscription = publishEventAsync(tester, client)
 
-            waitForReceivedMessages(tester, 120, 1000)
+            waitForReceivedMessages(tester, 120, 100)
 
             subscription.dispose()
         then:
@@ -126,6 +129,21 @@ class KinesisAnnotationsSpec extends Specification {
             tester.executions.any { it?.startsWith('EXECUTED: listenObject') } &&
             tester.executions.any { it?.startsWith('EXECUTED: listenObjectRecord') } &&
             tester.executions.any { it == 'EXECUTED: listenPogoRecord(com.agorapulse.micronaut.aws.Pogo(bar))' }
+    }
+
+    @SuppressWarnings('SystemErrPrint')
+    private void waitForWorkerReady(int retries, int waitMillis) throws InterruptedException {
+        WorkerStateListener listener = context.getBean(WorkerStateListener)
+        for (int i = 0; i < retries; i++) {
+            if (!listener.isReady('MyStream')) {
+                Thread.sleep(waitMillis)
+            }
+        }
+        if (!listener.isReady('MyStream')) {
+            throw new IllegalStateException("Worker not ready yet after ${retries * waitMillis} milliseconds")
+        }
+        System.err.println('Worker is ready')
+        Thread.sleep(waitMillis)
     }
 
 }
