@@ -82,11 +82,11 @@ class KinesisAnnotationsSpec extends Specification {
             service.createStream()
             service.waitForActive()
 
-            waitForWorkerReady(120, 100)
+            waitForWorkerReady(600, 100)
 
             Disposable subscription = publishEventAsync(tester, client)
 
-            waitForReceivedMessages(tester, 120, 100)
+            waitForReceivedMessages(tester, 600, 100)
 
             subscription.dispose()
         then:

@@ -88,9 +88,9 @@ public class KinesisTest {
         service.createStream();
         service.waitForActive();
 
-        waitForWorkerReady(120, 100);
+        waitForWorkerReady(600, 100);
         Disposable subscription = publishEventsAsync(tester, client);
-        waitForRecievedMessages(tester, 120, 100);
+        waitForRecievedMessages(tester, 600, 100);
 
         subscription.dispose();
 
