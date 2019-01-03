@@ -1,6 +1,7 @@
 package com.agorapulse.micronaut.aws.kinesis.worker;
 
 import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisListener;
+import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.kinesis.AmazonKinesis;
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
@@ -20,11 +21,18 @@ class DefaultKinesisWorker implements KinesisWorker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KinesisListener.class);
 
-    DefaultKinesisWorker(KinesisClientLibConfiguration configuration, ExecutorService executorService, Optional<AmazonDynamoDB> amazonDynamoDB, Optional<AmazonKinesis> amazonKinesis) {
+    DefaultKinesisWorker(
+        KinesisClientLibConfiguration configuration,
+        ExecutorService executorService,
+        Optional<AmazonDynamoDB> amazonDynamoDB,
+        Optional<AmazonKinesis> amazonKinesis,
+        Optional<AmazonCloudWatch> amazonCloudWatch
+    ) {
         this.configuration = configuration;
         this.executorService = executorService;
         this.amazonDynamoDB = amazonDynamoDB;
         this.amazonKinesis = amazonKinesis;
+        this.amazonCloudWatch = amazonCloudWatch;
     }
 
     @Override
@@ -38,6 +46,8 @@ class DefaultKinesisWorker implements KinesisWorker {
         if (StringUtils.isEmpty(configuration.getKinesisEndpoint())) {
             amazonKinesis.ifPresent(builder::kinesisClient);
         }
+
+        amazonCloudWatch.ifPresent(builder::cloudWatchClient);
 
         builder.recordProcessorFactory(DefaultRecordProcessorFactory.create((string, record) ->
             consumers.forEach(c -> {
@@ -66,5 +76,6 @@ class DefaultKinesisWorker implements KinesisWorker {
     private final ExecutorService executorService;
     private final Optional<AmazonDynamoDB> amazonDynamoDB;
     private final Optional<AmazonKinesis> amazonKinesis;
+    private final Optional<AmazonCloudWatch> amazonCloudWatch;
     private final List<BiConsumer<String, Record>> consumers = new CopyOnWriteArrayList<>();
 }

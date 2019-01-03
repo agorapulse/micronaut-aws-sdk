@@ -1,6 +1,8 @@
 package com.agorapulse.micronaut.aws.kinesis
 
 import com.agorapulse.micronaut.aws.Pogo
+import com.amazonaws.auth.AWSCredentialsProvider
+import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
 import com.amazonaws.services.kinesis.AmazonKinesis
@@ -54,6 +56,8 @@ class KinesisAnnotationsSpec extends Specification {
             .withCredentials(localstack.defaultCredentialsProvider)
             .build()
 
+        AmazonCloudWatch amazonCloudWatch = Mock(AmazonCloudWatch)
+
         context = ApplicationContext.build().properties(                                // <8>
             'aws.kinesis.application.name': APP_NAME,
             'aws.kinesis.stream': TEST_STREAM,
@@ -61,6 +65,8 @@ class KinesisAnnotationsSpec extends Specification {
         ).build()
         context.registerSingleton(AmazonKinesis, kinesis)
         context.registerSingleton(AmazonDynamoDB, dynamo)
+        context.registerSingleton(AmazonCloudWatch, amazonCloudWatch)
+        context.registerSingleton(AWSCredentialsProvider, localstack.defaultCredentialsProvider)
         context.start()
     }
     // end::testcontainers-setup[]

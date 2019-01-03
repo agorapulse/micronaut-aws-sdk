@@ -1,6 +1,7 @@
 package com.agorapulse.micronaut.aws.kinesis;
 
 import com.agorapulse.micronaut.aws.Pogo;
+import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.kinesis.AmazonKinesis;
@@ -54,6 +55,7 @@ public class KinesisTest {
         context = ApplicationContext.build(properties).build();                         // <7>
         context.registerSingleton(AmazonKinesis.class, amazonKinesis);
         context.registerSingleton(AmazonDynamoDB.class, amazonDynamoDB);
+        context.registerSingleton(AWSCredentialsProvider.class, localstack.getDefaultCredentialsProvider());
         context.start();
     }
 

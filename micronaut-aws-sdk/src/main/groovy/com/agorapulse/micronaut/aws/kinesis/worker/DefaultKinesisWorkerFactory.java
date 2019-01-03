@@ -1,6 +1,7 @@
 package com.agorapulse.micronaut.aws.kinesis.worker;
 
 import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisListener;
+import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.kinesis.AmazonKinesis;
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
@@ -38,11 +39,13 @@ public class DefaultKinesisWorkerFactory implements KinesisWorkerFactory {
     private final ExecutorService executorService;
     private final Optional<AmazonDynamoDB> amazonDynamoDB;
     private final Optional<AmazonKinesis> kinesis;
+    private final Optional<AmazonCloudWatch> cloudWatch;
 
-    public DefaultKinesisWorkerFactory(ExecutorService executorService, Optional<AmazonDynamoDB> amazonDynamoDB, Optional<AmazonKinesis> kinesis) {
+    public DefaultKinesisWorkerFactory(ExecutorService executorService, Optional<AmazonDynamoDB> amazonDynamoDB, Optional<AmazonKinesis> kinesis, Optional<AmazonCloudWatch> cloudWatch) {
         this.executorService = executorService;
         this.amazonDynamoDB = amazonDynamoDB;
         this.kinesis = kinesis;
+        this.cloudWatch = cloudWatch;
     }
 
     @Override
@@ -56,6 +59,6 @@ public class DefaultKinesisWorkerFactory implements KinesisWorkerFactory {
             return NOOP;
         }
 
-        return new DefaultKinesisWorker(kinesisConfiguration, executorService, amazonDynamoDB, kinesis);
+        return new DefaultKinesisWorker(kinesisConfiguration, executorService, amazonDynamoDB, kinesis, cloudWatch);
     }
 }

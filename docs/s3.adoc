@@ -1,6 +1,6 @@
 === Kinesis
 
-> Amazon Kinesis makes it easy to collect, process, and analyze real-time, streaming data so you can get timely insights and react quickly to new information.
+> Amazon Simple Storage Service (Amazon S3) is an object storage service that offers industry-leading scalability, data availability, security, and performance.
 
 This library provides three approaches to work with Kinesis streams:
 
@@ -16,7 +16,7 @@ Otherwise you need no configuration at all but some of the configuration may be 
 [source,yaml,indent=0,options="nowrap"]
 .application.yml
 ----
-include::../micronaut-aws-sdk/src/test/resources/application-docs-kinesis.yml[]
+include::../micronaut-aws-sdk/src/test/resources/application-docs-s3.yml[]
 ----
 <1> You can specify the default stream for https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/kinesis/KinesisService.html[KinesisService] and `@KinesisClient`
 <2> You can define multiple configurations
