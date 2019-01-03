@@ -92,6 +92,34 @@ subprojects { Project subproject ->
         systemProperty 'TEST_RESOURCES_FOLDER', new File(subproject.projectDir, 'src/test/resources').canonicalPath
         systemProperty 'user.timezone', 'UTC'
         systemProperty 'user.language', 'en'
+
+        // see https://discuss.gradle.org/t/show-stderr-for-failed-tests/8463/7
+        List<String> out = []
+        List<String> err = []
+
+        beforeTest { TestDescriptor td ->
+            out.clear()
+            err.clear()
+        }
+
+        onOutput { TestDescriptor td, TestOutputEvent toe ->
+            if (toe.destination == TestOutputEvent.Destination.StdErr) {
+                err.addAll(toe.getMessage().split('(?m)$'))
+            } else {
+                out.addAll(toe.getMessage().split('(?m)$'))
+            }
+        }
+
+        afterTest { TestDescriptor td, TestResult tr ->
+            if (tr.resultType == TestResult.ResultType.FAILURE && (out || err)) {
+                println()
+                println("${td.className}.${td.name} failed!")
+                println("OUT:")
+                out.each { print(it) }
+                println("ERR:")
+                err.each { print(it) }
+            }
+        }
     }
 
     task cleanOut(type: Delete) {
