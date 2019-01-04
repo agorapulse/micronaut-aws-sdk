@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.BiConsumer;
 
 class DefaultKinesisWorker implements KinesisWorker {
@@ -24,14 +25,12 @@ class DefaultKinesisWorker implements KinesisWorker {
 
     DefaultKinesisWorker(
         KinesisClientLibConfiguration configuration,
-        ExecutorService executorService,
         ApplicationEventPublisher applicationEventPublisher,
         Optional<AmazonDynamoDB> amazonDynamoDB,
         Optional<AmazonKinesis> amazonKinesis,
         Optional<AmazonCloudWatch> amazonCloudWatch
     ) {
         this.configuration = configuration;
-        this.executorService = executorService;
         this.applicationEventPublisher = applicationEventPublisher;
         this.amazonDynamoDB = amazonDynamoDB;
         this.amazonKinesis = amazonKinesis;
@@ -80,7 +79,7 @@ class DefaultKinesisWorker implements KinesisWorker {
     }
 
     private final KinesisClientLibConfiguration configuration;
-    private final ExecutorService executorService;
+    private final ExecutorService executorService = Executors.newCachedThreadPool();
     private final ApplicationEventPublisher applicationEventPublisher;
     private final Optional<AmazonDynamoDB> amazonDynamoDB;
     private final Optional<AmazonKinesis> amazonKinesis;

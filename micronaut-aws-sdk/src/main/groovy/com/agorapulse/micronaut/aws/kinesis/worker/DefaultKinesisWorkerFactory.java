@@ -62,6 +62,6 @@ public class DefaultKinesisWorkerFactory implements KinesisWorkerFactory {
             return NOOP;
         }
 
-        return new DefaultKinesisWorker(kinesisConfiguration, executorService, applicationEventPublisher, amazonDynamoDB, kinesis, cloudWatch);
+        return new DefaultKinesisWorker(kinesisConfiguration, applicationEventPublisher, amazonDynamoDB, kinesis, cloudWatch);
     }
 }

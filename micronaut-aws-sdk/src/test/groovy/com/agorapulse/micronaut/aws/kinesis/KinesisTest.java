@@ -31,6 +31,9 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
 public class KinesisTest {
 // end::testcontainers-header[]
 
+    @Rule
+    public Retry retry = new Retry(10);
+
     // tag::testcontainers-setup[]
     public ApplicationContext context;                                                  // <1>
 
@@ -60,6 +63,16 @@ public class KinesisTest {
         properties.put("aws.kinesis.application.name", "TestApp");
         properties.put("aws.kinesis.stream", "MyStream");
         properties.put("aws.kinesis.listener.stream", "MyStream");
+
+        // you can set other custom client configuration properties
+        properties.put("aws.kinesis.listener.failoverTimeMillis", "1000");
+        properties.put("aws.kinesis.listener.shardSyncIntervalMillis", "1000");
+        properties.put("aws.kinesis.listener.idleTimeBetweenReadsInMillis", "1000");
+        properties.put("aws.kinesis.listener.parentShardPollIntervalMillis", "1000");
+        properties.put("aws.kinesis.listener.timeoutInSeconds", "1000");
+        properties.put("aws.kinesis.listener.retryGetRecordsInSeconds", "1000");
+        properties.put("aws.kinesis.listener.metricsLevel", "NONE");
+
 
         context = ApplicationContext.build(properties).build();                         // <7>
         context.registerSingleton(AmazonKinesis.class, amazonKinesis);
