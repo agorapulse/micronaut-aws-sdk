@@ -20,3 +20,7 @@ deploy:
   on:
     tags: true
     branch: master
+addons:
+  hosts:
+    # ensure localhost for NIP.IO is resolved properly
+    - 127.0.0.1.nip.io
