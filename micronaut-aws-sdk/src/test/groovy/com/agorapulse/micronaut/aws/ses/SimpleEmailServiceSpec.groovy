@@ -24,9 +24,9 @@ class SimpleEmailServiceSpec extends Specification {
         when:
         TransactionalEmail transactionalEmail = SimpleEmailService.email {
             subject 'Hi Paul'
-            htmlBody '<p>This is an example body</p>'
-            to 'me@sergiodelamo.com'
             from 'subscribe@groovycalamari.com'
+            to 'me@sergiodelamo.com'
+            htmlBody '<p>This is an example body</p>'
             attachment {
                 filename 'test.pdf'
                 filepath '/tmp/test.pdf'

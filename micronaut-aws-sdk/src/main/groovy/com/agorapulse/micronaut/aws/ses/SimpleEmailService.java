@@ -2,15 +2,16 @@ package com.agorapulse.micronaut.aws.ses;
 
 import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
+import space.jasan.support.groovy.closure.ConsumerWithDelegate;
+
+import java.util.function.Consumer;
 
 public interface SimpleEmailService {
 
-    static TransactionalEmail email(@DelegatesTo(value = TransactionalEmail.class, strategy = Closure.DELEGATE_FIRST) Closure composer) {
-        Closure cl = (Closure) composer.clone();
+
+    static TransactionalEmail email(Consumer<TransactionalEmail> composer) {
         TransactionalEmail email = new TransactionalEmail();
-        cl.setDelegate(email);
-        cl.setResolveStrategy(Closure.DELEGATE_FIRST);
-        cl.call();
+        composer.accept(email);
 
         if (email.getRecipients().isEmpty()) {
             throw new IllegalArgumentException("Email does not contain recepients: " + email);
@@ -19,7 +20,15 @@ public interface SimpleEmailService {
         return email;
     }
 
-    default EmailDeliveryStatus send(@DelegatesTo(value = TransactionalEmail.class, strategy = Closure.DELEGATE_FIRST) Closure composer) {
+    static TransactionalEmail email(@DelegatesTo(value = TransactionalEmail.class, strategy = Closure.DELEGATE_FIRST) Closure<TransactionalEmail> composer) {
+        return email(ConsumerWithDelegate.create(composer));
+    }
+
+    default EmailDeliveryStatus send(Consumer<TransactionalEmail> composer) {
+        return send(email(composer));
+    }
+
+    default EmailDeliveryStatus send(@DelegatesTo(value = TransactionalEmail.class, strategy = Closure.DELEGATE_FIRST) Closure<TransactionalEmail> composer) {
         return send(email(composer));
     }
 

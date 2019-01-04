@@ -27,6 +27,7 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
 /**
  * Tests for Kinesis related annotations - client and listener.
  */
+@spock.lang.Retry(count = 10, delay = 10000)
 // tag::testcontainers-header[]
 @Testcontainers                                                                         // <1>
 @RestoreSystemProperties                                                                // <2>
@@ -62,7 +63,14 @@ class KinesisAnnotationsSpec extends Specification {
         context = ApplicationContext.build().properties(                                // <8>
             'aws.kinesis.application.name': APP_NAME,
             'aws.kinesis.stream': TEST_STREAM,
-            'aws.kinesis.listener.stream': TEST_STREAM
+            'aws.kinesis.listener.stream': TEST_STREAM,
+            'aws.kinesis.listener.failoverTimeMillis': '1000',
+            'aws.kinesis.listener.shardSyncIntervalMillis': '1000',
+            'aws.kinesis.listener.idleTimeBetweenReadsInMillis': '1000',
+            'aws.kinesis.listener.parentShardPollIntervalMillis': '1000',
+            'aws.kinesis.listener.timeoutInSeconds': '1000',
+            'aws.kinesis.listener.retryGetRecordsInSeconds': '1000',
+            'aws.kinesis.listener.metricsLevel': 'NONE',
         ).build()
         context.registerSingleton(AmazonKinesis, kinesis)
         context.registerSingleton(AmazonDynamoDB, dynamo)

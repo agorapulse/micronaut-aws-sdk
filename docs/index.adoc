@@ -17,10 +17,10 @@ Provided integrations:
 
 * <<DynamoDB>>
 * <<Kinesis>>
-* <<S3>>
-* <<SES>>
-* <<SNS>>
-* <<SQS>>
+* <<Simple Storage Service (S3)>>
+* <<Simple Email Service (SES)>>
+* <<Simple Notification Service (SNS)>>
+* <<Simple Queue Service (SQS)>>
 
 Key concepts of the AWS SDK for Micronaut:
 
