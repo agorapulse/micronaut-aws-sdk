@@ -90,11 +90,11 @@ class KinesisAnnotationsSpec extends Specification {
             service.createStream()
             service.waitForActive()
 
-            waitForWorkerReady(600, 100)
+            waitForWorkerReady(300, 100)
 
             Disposable subscription = publishEventAsync(tester, client)
 
-            waitForReceivedMessages(tester, 600, 100)
+            waitForReceivedMessages(tester, 300, 100)
 
             subscription.dispose()
         then:
@@ -143,11 +143,11 @@ class KinesisAnnotationsSpec extends Specification {
     private void waitForWorkerReady(int retries, int waitMillis) throws InterruptedException {
         WorkerStateListener listener = context.getBean(WorkerStateListener)
         for (int i = 0; i < retries; i++) {
-            if (!listener.isReady('MyStream')) {
+            if (!listener.isReady(TEST_STREAM)) {
                 Thread.sleep(waitMillis)
             }
         }
-        if (!listener.isReady('MyStream')) {
+        if (!listener.isReady(TEST_STREAM)) {
             throw new IllegalStateException("Worker not ready yet after ${retries * waitMillis} milliseconds")
         }
         System.err.println('Worker is ready')

@@ -31,8 +31,10 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
 public class KinesisTest {
 // end::testcontainers-header[]
 
+    private static final String TEST_STREAM = "MyStream";
+
     @Rule
-    public Retry retry = new Retry(3);
+    public Retry retry = new Retry(10);
 
     // tag::testcontainers-setup[]
     public ApplicationContext context;                                                  // <1>
@@ -61,8 +63,8 @@ public class KinesisTest {
 
         Map<String, Object> properties = new HashMap<>();                               // <6>
         properties.put("aws.kinesis.application.name", "TestApp");
-        properties.put("aws.kinesis.stream", "MyStream");
-        properties.put("aws.kinesis.listener.stream", "MyStream");
+        properties.put("aws.kinesis.stream", TEST_STREAM);
+        properties.put("aws.kinesis.listener.stream", TEST_STREAM);
 
         // you can set other custom client configuration properties
         properties.put("aws.kinesis.listener.failoverTimeMillis", "1000");
@@ -101,9 +103,9 @@ public class KinesisTest {
         service.createStream();
         service.waitForActive();
 
-        waitForWorkerReady(600, 100);
+        waitForWorkerReady(300, 100);
         Disposable subscription = publishEventsAsync(tester, client);
-        waitForRecievedMessages(tester, 600, 100);
+        waitForRecievedMessages(tester, 300, 100);
 
         subscription.dispose();
 
@@ -122,11 +124,11 @@ public class KinesisTest {
     private void waitForWorkerReady(int retries, int waitMillis) throws InterruptedException {
         WorkerStateListener listener = context.getBean(WorkerStateListener.class);
         for (int i = 0; i < retries; i++) {
-            if (!listener.isReady("MyStream")) {
+            if (!listener.isReady(TEST_STREAM)) {
                 Thread.sleep(waitMillis);
             }
         }
-        if (!listener.isReady("MyStream")) {
+        if (!listener.isReady(TEST_STREAM)) {
             throw new IllegalStateException("Worker not ready yet after " + retries * waitMillis + " milliseconds");
         }
         System.err.println("Worker is ready");
