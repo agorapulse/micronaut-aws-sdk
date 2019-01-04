@@ -5,7 +5,7 @@
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 1.5.8">
-<title>Simple Storage Service (S3)</title>
+<title>Simple Email Service (SES)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | http://asciidoctor.org */
@@ -517,10 +517,9 @@ $(addBlockSwitches);
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel2">
-<li><a href="#_simple_storage_service_s3">Simple Storage Service (S3)</a>
+<li><a href="#_simple_email_service_ses">Simple Email Service (SES)</a>
 <ul class="sectlevel3">
-<li><a href="#_configuration">Configuration</a></li>
-<li><a href="#_simple_storage_service">Simple Storage Service</a></li>
+<li><a href="#_simple_email_service">Simple Email Service</a></li>
 <li><a href="#_testing">Testing</a></li>
 </ul>
 </li>
@@ -529,295 +528,78 @@ $(addBlockSwitches);
 </div>
 <div id="content">
 <div class="sect2">
-<h3 id="_simple_storage_service_s3">Simple Storage Service (S3)</h3>
+<h3 id="_simple_email_service_ses">Simple Email Service (SES)</h3>
 <div class="quoteblock">
 <blockquote>
 <div class="paragraph">
-<p>Amazon Simple Storage Service (Amazon S3) is an object storage service that offers industry-leading scalability, data availability, security, and performance.</p>
+<p>Amazon Simple Email Service (Amazon SES) is a cloud-based email sending service designed to help digital marketers and application developers send marketing, notification, and transactional emails. It is a reliable, cost-effective service for businesses of all sizes that use email to keep in contact with their customers.</p>
 </div>
 </blockquote>
 </div>
 <div class="paragraph">
-<p>This library provides basic support for Amazon S3 using <a href="#_simple_storage_service">Simple Storage Service</a></p>
+<p>This library provides basic support for Amazon SES using <a href="#_simple_email_service">Simple Email Service</a></p>
 </div>
 <div class="sect3">
-<h4 id="_configuration">Configuration</h4>
+<h4 id="_simple_email_service">Simple Email Service</h4>
 <div class="paragraph">
-<p>You can store the name of the bucket in the configuration using <code>aws.s3.bucket</code> property. You can create additional configurations
-by providing 'aws.s3.buckets' configuration map.</p>
-</div>
-<div class="listingblock">
-<div class="title">application.yml</div>
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-yaml hljs" data-lang="yaml">aws:
-  s3:
-    bucket: MyBucket                                                                    <i class="conum" data-value="1"></i><b>(1)</b>
-
-    buckets:                                                                            <i class="conum" data-value="2"></i><b>(2)</b>
-      test:                                                                             <i class="conum" data-value="3"></i><b>(3)</b>
-        bucket: TestBucket</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>You can define default bucket for the service</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>You can define multiple configurations</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Each of the configuration can be access using <code>@Named('test') SimpleStorageService</code> qualifier</td>
-</tr>
-</table>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_simple_storage_service">Simple Storage Service</h4>
-<div class="paragraph">
-<p><code>SimpleStorageService</code> provides middle-level API for managing buckets and uploading and downloading files.</p>
+<p><code>SimpleEmailService</code> provides DSL for creating and sending simple emails with attachments. As the other services,
+it uses default credentials chain to obtain the credentials.</p>
 </div>
 <div class="paragraph">
-<p>Instance of <code>SimpleStorageService</code> is created for the default S3 configuration and each bucket configuration in <code>aws.s3.buckets</code> map.
-You should always use <code>@Named</code> qualifier when injecting <code>SimpleStorageService</code> if you have more than one bucket configuration present, e.g. <code>@Named("test") SimpleStorageService service</code>.</p>
-</div>
-<div class="paragraph">
-<p>Following example shows some of the most common use cases for working with S3 buckets.</p>
-</div>
-<div class="listingblock">
-<div class="title">Creating Bucket</div>
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">service.createBucket(MY_BUCKET);                                                <i class="conum" data-value="1"></i><b>(1)</b>
-
-assertTrue(service.listBucketNames().contains(MY_BUCKET));                      <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Create new bucket of given name</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>The bucket is present within the list of all bucket names</td>
-</tr>
-</table>
-</div>
-<div class="listingblock">
-<div class="title">Upload File</div>
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">File sampleContent = createFileWithSampleContent();
-
-service.storeFile(TEXT_FILE_PATH, sampleContent);                               <i class="conum" data-value="1"></i><b>(1)</b>
-
-assertTrue(service.exists(TEXT_FILE_PATH));                                     <i class="conum" data-value="2"></i><b>(2)</b>
-
-Flowable&lt;S3ObjectSummary&gt; summaries = service.listObjectSummaries("foo");       <i class="conum" data-value="3"></i><b>(3)</b>
-assertEquals(Long.valueOf(0L), summaries.count().blockingGet());</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Upload file</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>File is uploaded</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>File is present in the summaries of all files</td>
-</tr>
-</table>
-</div>
-<div class="listingblock">
-<div class="title">Upload from <code>InputStream</code></div>
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">service.storeInputStream(                                                       <i class="conum" data-value="1"></i><b>(1)</b>
-    KEY,
-    new ByteArrayInputStream(SAMPLE_CONTENT.getBytes()),
-    buildMetadata()
-);
-
-Flowable&lt;S3ObjectSummary&gt; fooSummaries = service.listObjectSummaries("foo");    <i class="conum" data-value="2"></i><b>(2)</b>
-assertEquals(KEY, fooSummaries.blockingFirst().getKey());</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Upload data from stream</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Stream is uploaded</td>
-</tr>
-</table>
-</div>
-<div class="listingblock">
-<div class="title">Generate URL</div>
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">String url = service.generatePresignedUrl(KEY, TOMORROW);                       <i class="conum" data-value="1"></i><b>(1)</b>
-
-assertEquals(SAMPLE_CONTENT, download(url));                                    <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Generate presigned URL</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Downloaded content corresponds with the expected content</td>
-</tr>
-</table>
-</div>
-<div class="listingblock">
-<div class="title">Download File</div>
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">File dir = tmp.newFolder();
-File file = new File(dir, "bar.baz");                                           <i class="conum" data-value="1"></i><b>(1)</b>
-
-service.getFile(KEY, file);                                                     <i class="conum" data-value="2"></i><b>(2)</b>
-assertTrue(file.exists());
-
-assertEquals(SAMPLE_CONTENT, new String(Files.readAllBytes(Paths.get(file.toURI()))));</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Prepare a destination file</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Download the file locally</td>
-</tr>
-</table>
-</div>
-<div class="listingblock">
-<div class="title">Delete File</div>
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">service.deleteFile(TEXT_FILE_PATH);                                             <i class="conum" data-value="1"></i><b>(1)</b>
-assertFalse(service.exists(TEXT_FILE_PATH));                                    <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Delete file</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>The file is no longer present</td>
-</tr>
-</table>
-</div>
-<div class="listingblock">
-<div class="title">Delete Bucket</div>
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">service.deleteBucket();                                                         <i class="conum" data-value="1"></i><b>(1)</b>
-assertFalse(service.listBucketNames().contains(MY_BUCKET));                     <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Delete bucket</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>The Bucket is no longer present</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>Please, see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/s3/SimpleStorageService.html">SimpleStorageService</a> for the full reference.</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_testing">Testing</h4>
-<div class="paragraph">
-<p>You can very easily mock the <code>SimpleStorageService</code> but if you need close-to-production
-S3 integration works well with <a href="https://www.testcontainers.org/">Testcontainers</a> and <a href="https://localstack.cloud/">LocalStack</a>.</p>
-</div>
-<div class="paragraph">
-<p>You need to add following dependencies into your build file:</p>
-</div>
-<div class="listingblock primary">
-<div class="title">Gradle</div>
-<div class="content">
-<pre class="highlightjs highlight"><code>compile group: 'org.testcontainers', name: 'localstack', version: '1.10.2'
-compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pre>
-</div>
-</div>
-<div class="listingblock secondary">
-<div class="title">Maven</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
-    &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
-    &lt;artifactId&gt;localstack&lt;/artifactId&gt;
-    &lt;version&gt;1.10.2&lt;/version&gt;
-    &lt;scope&gt;test&lt;/scope&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
-    &lt;artifactId&gt;spock&lt;/artifactId&gt;
-    &lt;version&gt;1.10.2&lt;/version&gt;
-    &lt;scope&gt;test&lt;/scope&gt;
-&lt;/dependency&gt;</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Then you can setup your tests like this:</p>
+<p>Following example shows how to send an email with attachment.</p>
 </div>
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Stepwise
-@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
-class SimpleStorageServiceSpec extends Specification {
+<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy">package com.agorapulse.micronaut.aws.ses
 
-    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="2"></i><b>(2)</b>
+import com.amazonaws.services.simpleemail.AmazonSimpleEmailService
+import com.amazonaws.services.simpleemail.model.SendRawEmailRequest
+import com.amazonaws.services.simpleemail.model.SendRawEmailResult
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
+import spock.lang.Subject
 
-    @Shared LocalStackContainer localstack = new LocalStackContainer()                  <i class="conum" data-value="3"></i><b>(3)</b>
-        .withServices(S3)
+/**
+ * Tests for sending emails with Groovy.
+ */
+class SendEmailSpec extends Specification {
 
-    @Rule TemporaryFolder tmp
+    AmazonSimpleEmailService simpleEmailService = Mock(AmazonSimpleEmailService)
 
-    AmazonS3 amazonS3
-    SimpleStorageService service
+    @Rule
+    TemporaryFolder tmp = new TemporaryFolder()
 
-    void setup() {
-        amazonS3 = AmazonS3Client                                                       <i class="conum" data-value="4"></i><b>(4)</b>
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(S3))
-            .withCredentials(localstack.defaultCredentialsProvider)
-            .build()
+    @Subject
+    SimpleEmailService service = new DefaultSimpleEmailService(simpleEmailService)
 
-        context = ApplicationContext
-            .build('aws.s3.bucket': MY_BUCKET)                                          <i class="conum" data-value="5"></i><b>(5)</b>
-            .build()
-        context.registerSingleton(AmazonS3, amazonS3)                                   <i class="conum" data-value="6"></i><b>(6)</b>
-        context.start()
+    void "send email"() {
+        given:
+            File file = tmp.newFile('test.pdf')
+            file.text = 'not a real PDF'
+            String thePath = file.canonicalPath
+        when:
+            EmailDeliveryStatus status = service.send {                                 <i class="conum" data-value="1"></i><b>(1)</b>
+                subject 'Hi Paul'                                                       <i class="conum" data-value="2"></i><b>(2)</b>
+                from 'subscribe@groovycalamari.com'                                     <i class="conum" data-value="3"></i><b>(3)</b>
+                to 'me@sergiodelamo.com'                                                <i class="conum" data-value="4"></i><b>(4)</b>
+                htmlBody '&lt;p&gt;This is an example body&lt;/p&gt;'                               <i class="conum" data-value="5"></i><b>(5)</b>
+                attachment {                                                            <i class="conum" data-value="6"></i><b>(6)</b>
+                    filepath thePath                                                    <i class="conum" data-value="7"></i><b>(7)</b>
+                    filename 'test.pdf'                                                 <i class="conum" data-value="8"></i><b>(8)</b>
+                    mimeType 'application/pdf'                                          <i class="conum" data-value="9"></i><b>(9)</b>
+                    description 'An example pdf'                                        <i class="conum" data-value="10"></i><b>(10)</b>
+                }
+            }
 
-        service = context.getBean(SimpleStorageService)                                 <i class="conum" data-value="7"></i><b>(7)</b>
+        then:
+            status == EmailDeliveryStatus.STATUS_DELIVERED
+
+            simpleEmailService.sendRawEmail(_) &gt;&gt; { SendRawEmailRequest request -&gt;
+                return new SendRawEmailResult().withMessageId('foobar')
+            }
     }
-
-    // test methods
-
 }</code></pre>
 </div>
 </div>
@@ -825,72 +607,102 @@ class SimpleStorageServiceSpec extends Specification {
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Annotate the specification with <code>@Testcontainers</code> to let Spock manage the Testcontainers for you</td>
+<td>Start building an email</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Prepare the reference to the <code>ApplicationContext</code>, <code>@AutoCleanup</code> guarantees closing the context after the tests</td>
+<td>Define subject of the email</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with S3 support enabled</td>
+<td>Define the from address</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Create <code>AmazonS3</code> client using the LocalStack configuration</td>
+<td>Define one or more recipients</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Set the default bucket</td>
+<td>Define HTML body (alternatively you can declare plain text body as well)</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Register <code>AmazonS3</code> service running against LocalStack</td>
+<td>Build an attachment</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>You can obtain instance of <code>SimpleStorageService</code> from the context</td>
+<td>Define the location of the file to be sent</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>Define the file name (optional - deduced from the file)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="9"></i><b>9</b></td>
+<td>Define the mime type (usually optional - deduced from the file)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="10"></i><b>10</b></td>
+<td>Define the description of the file (optional)</td>
 </tr>
 </table>
 </div>
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class SimpleStorageServiceTest {
+<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">package com.agorapulse.micronaut.aws.ses;
 
-    @Rule
-    public final LocalStackContainer localstack = new LocalStackContainer()            <i class="conum" data-value="1"></i><b>(1)</b>
-        .withServices(S3);
+import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
+import com.amazonaws.services.simpleemail.model.SendRawEmailResult;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.mockito.Mockito;
 
-    @Rule
-    public final TemporaryFolder tmp = new TemporaryFolder();
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Collections;
 
-    private ApplicationContext ctx;                                                     <i class="conum" data-value="2"></i><b>(2)</b>
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-    @Before
-    public void setup() {
-        AmazonS3 amazonS3 = AmazonS3Client                                              <i class="conum" data-value="3"></i><b>(3)</b>
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(S3))
-            .withCredentials(localstack.getDefaultCredentialsProvider())
-            .build();
+/**
+ * Tests for sending emails with Java.
+ */
+public class SendEmailTest {
 
-        ctx = ApplicationContext
-            .build(Collections.singletonMap("aws.s3.bucket", MY_BUCKET))
-            .build();
-        ctx.registerSingleton(AmazonS3.class, amazonS3);                                <i class="conum" data-value="4"></i><b>(4)</b>
-        ctx.start();
+    @Rule public TemporaryFolder tmp = new TemporaryFolder();
+
+    private AmazonSimpleEmailService simpleEmailService = mock(AmazonSimpleEmailService.class);
+
+    private SimpleEmailService service = new DefaultSimpleEmailService(simpleEmailService);
+
+    @Test
+    public void testSendEmail() throws IOException {
+        when(simpleEmailService.sendRawEmail(Mockito.any()))
+            .thenReturn(new SendRawEmailResult().withMessageId("foobar"));
+
+        File file = tmp.newFile("test.pdf");
+        Files.write(file.toPath(), Collections.singletonList("not a real PDF"));
+        String filepath = file.getCanonicalPath();
+
+        EmailDeliveryStatus status = service.send(e -&gt;                                  <i class="conum" data-value="1"></i><b>(1)</b>
+            e.subject("Hi Paul")                                                        <i class="conum" data-value="2"></i><b>(2)</b>
+                .from("subscribe@groovycalamari.com")                                   <i class="conum" data-value="3"></i><b>(3)</b>
+                .to("me@sergiodelamo.com")                                              <i class="conum" data-value="4"></i><b>(4)</b>
+                .htmlBody("&lt;p&gt;This is an example body&lt;/p&gt;")                             <i class="conum" data-value="5"></i><b>(5)</b>
+                .attachment(a -&gt;                                                        <i class="conum" data-value="6"></i><b>(6)</b>
+                    a.filepath(filepath)                                                <i class="conum" data-value="7"></i><b>(7)</b>
+                        .filename("test.pdf")                                           <i class="conum" data-value="8"></i><b>(8)</b>
+                        .mimeType("application/pdf")                                    <i class="conum" data-value="9"></i><b>(9)</b>
+                        .description("An example pdf")                                  <i class="conum" data-value="10"></i><b>(10)</b>
+                )
+        );
+
+        Assert.assertEquals(EmailDeliveryStatus.STATUS_DELIVERED, status);
     }
-
-    @After
-    public void cleanup() {
-        if (ctx != null) {                                                              <i class="conum" data-value="5"></i><b>(5)</b>
-            ctx.close();
-        }
-    }
-
-    // test methods
-
 }</code></pre>
 </div>
 </div>
@@ -898,32 +710,61 @@ class SimpleStorageServiceSpec extends Specification {
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with Kinesis and  DynamoDB (required by the listener) support enabled</td>
+<td>Start building an email</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Prepare the reference to the <code>ApplicationContext</code></td>
+<td>Define subject of the email</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Create <code>AmazonS3</code> client using the LocalStack configuration</td>
+<td>Define the from address</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Register <code>AmazonS3</code> service running against LocalStack</td>
+<td>Define one or more recipients</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Don&#8217;t forget to close <code>ApplicationContext</code></td>
+<td>Define HTML body (alternatively you can declare plain text body as well)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Build an attachment</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Define the location of the file to be sent</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>Define the file name (optional - deduced from the file)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="9"></i><b>9</b></td>
+<td>Define the mime type (usually optional - deduced from the file)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="10"></i><b>10</b></td>
+<td>Define the description of the file (optional)</td>
 </tr>
 </table>
+</div>
+<div class="paragraph">
+<p>Please, see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/ses/SimpleEmailService.html">SimpleEmailService</a> for the full reference.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_testing">Testing</h4>
+<div class="paragraph">
+<p>It is recommended just to mock the <code>SimpleEmailService</code> in your tests as it only contains single abstract method.</p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-01-04 09:24:19 +0100
+Last updated 2019-01-04 10:47:27 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">

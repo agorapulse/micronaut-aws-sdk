@@ -1035,7 +1035,14 @@ class KinesisAnnotationsSpec extends Specification {
         context = ApplicationContext.build().properties(                                <i class="conum" data-value="8"></i><b>(8)</b>
             'aws.kinesis.application.name': APP_NAME,
             'aws.kinesis.stream': TEST_STREAM,
-            'aws.kinesis.listener.stream': TEST_STREAM
+            'aws.kinesis.listener.stream': TEST_STREAM,
+            'aws.kinesis.listener.failoverTimeMillis': '1000',
+            'aws.kinesis.listener.shardSyncIntervalMillis': '1000',
+            'aws.kinesis.listener.idleTimeBetweenReadsInMillis': '1000',
+            'aws.kinesis.listener.parentShardPollIntervalMillis': '1000',
+            'aws.kinesis.listener.timeoutInSeconds': '1000',
+            'aws.kinesis.listener.retryGetRecordsInSeconds': '1000',
+            'aws.kinesis.listener.metricsLevel': 'NONE',
         ).build()
         context.registerSingleton(AmazonKinesis, kinesis)
         context.registerSingleton(AmazonDynamoDB, dynamo)
@@ -1053,11 +1060,11 @@ class KinesisAnnotationsSpec extends Specification {
             service.createStream()
             service.waitForActive()
 
-            waitForWorkerReady(120, 100)
+            waitForWorkerReady(600, 100)
 
             Disposable subscription = publishEventAsync(tester, client)
 
-            waitForReceivedMessages(tester, 120, 100)
+            waitForReceivedMessages(tester, 600, 100)
 
             subscription.dispose()
         then:
@@ -1149,6 +1156,16 @@ class KinesisAnnotationsSpec extends Specification {
         properties.put("aws.kinesis.stream", "MyStream");
         properties.put("aws.kinesis.listener.stream", "MyStream");
 
+        // you can set other custom client configuration properties
+        properties.put("aws.kinesis.listener.failoverTimeMillis", "1000");
+        properties.put("aws.kinesis.listener.shardSyncIntervalMillis", "1000");
+        properties.put("aws.kinesis.listener.idleTimeBetweenReadsInMillis", "1000");
+        properties.put("aws.kinesis.listener.parentShardPollIntervalMillis", "1000");
+        properties.put("aws.kinesis.listener.timeoutInSeconds", "1000");
+        properties.put("aws.kinesis.listener.retryGetRecordsInSeconds", "1000");
+        properties.put("aws.kinesis.listener.metricsLevel", "NONE");
+
+
         context = ApplicationContext.build(properties).build();                         <i class="conum" data-value="7"></i><b>(7)</b>
         context.registerSingleton(AmazonKinesis.class, amazonKinesis);
         context.registerSingleton(AmazonDynamoDB.class, amazonDynamoDB);
@@ -1174,9 +1191,9 @@ class KinesisAnnotationsSpec extends Specification {
         service.createStream();
         service.waitForActive();
 
-        waitForWorkerReady(120, 100);
+        waitForWorkerReady(600, 100);
         Disposable subscription = publishEventsAsync(tester, client);
-        waitForRecievedMessages(tester, 120, 100);
+        waitForRecievedMessages(tester, 600, 100);
 
         subscription.dispose();
 

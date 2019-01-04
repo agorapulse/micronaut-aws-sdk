@@ -544,7 +544,7 @@ $(addBlockSwitches);
 <li><a href="#_testing_2">Testing</a></li>
 </ul>
 </li>
-<li><a href="#_s3">S3</a>
+<li><a href="#_simple_storage_service_s3">Simple Storage Service (S3)</a>
 <ul class="sectlevel3">
 <li><a href="#_configuration_2">Configuration</a></li>
 <li><a href="#_simple_storage_service">Simple Storage Service</a></li>
@@ -594,16 +594,16 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <p><a href="#_kinesis">Kinesis</a></p>
 </li>
 <li>
-<p><a href="#_s3">S3</a></p>
+<p><a href="#_simple_storage_service_s3">Simple Storage Service (S3)</a></p>
 </li>
 <li>
-<p><a href="#SES">[SES]</a></p>
+<p><a href="#Simple Email Service (SES)">[Simple Email Service (SES)]</a></p>
 </li>
 <li>
-<p><a href="#SNS">[SNS]</a></p>
+<p><a href="#Simple Notification Service (SNS)">[Simple Notification Service (SNS)]</a></p>
 </li>
 <li>
-<p><a href="#SQS">[SQS]</a></p>
+<p><a href="#Simple Queue Service (SQS)">[Simple Queue Service (SQS)]</a></p>
 </li>
 </ul>
 </div>
@@ -2357,7 +2357,14 @@ class KinesisAnnotationsSpec extends Specification {
         context = ApplicationContext.build().properties(                                <i class="conum" data-value="8"></i><b>(8)</b>
             'aws.kinesis.application.name': APP_NAME,
             'aws.kinesis.stream': TEST_STREAM,
-            'aws.kinesis.listener.stream': TEST_STREAM
+            'aws.kinesis.listener.stream': TEST_STREAM,
+            'aws.kinesis.listener.failoverTimeMillis': '1000',
+            'aws.kinesis.listener.shardSyncIntervalMillis': '1000',
+            'aws.kinesis.listener.idleTimeBetweenReadsInMillis': '1000',
+            'aws.kinesis.listener.parentShardPollIntervalMillis': '1000',
+            'aws.kinesis.listener.timeoutInSeconds': '1000',
+            'aws.kinesis.listener.retryGetRecordsInSeconds': '1000',
+            'aws.kinesis.listener.metricsLevel': 'NONE',
         ).build()
         context.registerSingleton(AmazonKinesis, kinesis)
         context.registerSingleton(AmazonDynamoDB, dynamo)
@@ -2375,11 +2382,11 @@ class KinesisAnnotationsSpec extends Specification {
             service.createStream()
             service.waitForActive()
 
-            waitForWorkerReady(120, 100)
+            waitForWorkerReady(600, 100)
 
             Disposable subscription = publishEventAsync(tester, client)
 
-            waitForReceivedMessages(tester, 120, 100)
+            waitForReceivedMessages(tester, 600, 100)
 
             subscription.dispose()
         then:
@@ -2471,6 +2478,16 @@ class KinesisAnnotationsSpec extends Specification {
         properties.put("aws.kinesis.stream", "MyStream");
         properties.put("aws.kinesis.listener.stream", "MyStream");
 
+        // you can set other custom client configuration properties
+        properties.put("aws.kinesis.listener.failoverTimeMillis", "1000");
+        properties.put("aws.kinesis.listener.shardSyncIntervalMillis", "1000");
+        properties.put("aws.kinesis.listener.idleTimeBetweenReadsInMillis", "1000");
+        properties.put("aws.kinesis.listener.parentShardPollIntervalMillis", "1000");
+        properties.put("aws.kinesis.listener.timeoutInSeconds", "1000");
+        properties.put("aws.kinesis.listener.retryGetRecordsInSeconds", "1000");
+        properties.put("aws.kinesis.listener.metricsLevel", "NONE");
+
+
         context = ApplicationContext.build(properties).build();                         <i class="conum" data-value="7"></i><b>(7)</b>
         context.registerSingleton(AmazonKinesis.class, amazonKinesis);
         context.registerSingleton(AmazonDynamoDB.class, amazonDynamoDB);
@@ -2496,9 +2513,9 @@ class KinesisAnnotationsSpec extends Specification {
         service.createStream();
         service.waitForActive();
 
-        waitForWorkerReady(120, 100);
+        waitForWorkerReady(600, 100);
         Disposable subscription = publishEventsAsync(tester, client);
-        waitForRecievedMessages(tester, 120, 100);
+        waitForRecievedMessages(tester, 600, 100);
 
         subscription.dispose();
 
@@ -2563,7 +2580,7 @@ class KinesisAnnotationsSpec extends Specification {
 </div>
 </div>
 <div class="sect2">
-<h3 id="_s3">S3</h3>
+<h3 id="_simple_storage_service_s3">Simple Storage Service (S3)</h3>
 <div class="quoteblock">
 <blockquote>
 <div class="paragraph">
@@ -2969,7 +2986,7 @@ class SimpleStorageServiceSpec extends Specification {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-01-03 09:54:44 +0100
+Last updated 2019-01-04 09:25:44 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">
