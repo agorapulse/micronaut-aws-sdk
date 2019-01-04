@@ -32,7 +32,7 @@ public class KinesisTest {
 // end::testcontainers-header[]
 
     @Rule
-    public Retry retry = new Retry(10);
+    public Retry retry = new Retry(3);
 
     // tag::testcontainers-setup[]
     public ApplicationContext context;                                                  // <1>

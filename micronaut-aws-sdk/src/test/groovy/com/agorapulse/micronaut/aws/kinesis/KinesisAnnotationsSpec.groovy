@@ -27,7 +27,7 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
 /**
  * Tests for Kinesis related annotations - client and listener.
  */
-@spock.lang.Retry(count = 10, delay = 10000)
+@spock.lang.Retry(count = 3, delay = 10000)
 // tag::testcontainers-header[]
 @Testcontainers                                                                         // <1>
 @RestoreSystemProperties                                                                // <2>
