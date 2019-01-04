@@ -15,6 +15,7 @@ import io.reactivex.schedulers.Schedulers
 import org.testcontainers.containers.localstack.LocalStackContainer
 import org.testcontainers.spock.Testcontainers
 import spock.lang.AutoCleanup
+import spock.lang.Requires
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
@@ -27,7 +28,7 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
 /**
  * Tests for Kinesis related annotations - client and listener.
  */
-@spock.lang.Retry(count = 3, delay = 10000)
+@Requires({ System.getenv('CI') != 'true' })
 // tag::testcontainers-header[]
 @Testcontainers                                                                         // <1>
 @RestoreSystemProperties                                                                // <2>
