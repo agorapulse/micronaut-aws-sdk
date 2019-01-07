@@ -1060,11 +1060,11 @@ class KinesisAnnotationsSpec extends Specification {
             service.createStream()
             service.waitForActive()
 
-            waitForWorkerReady(600, 100)
+            waitForWorkerReady(300, 100)
 
             Disposable subscription = publishEventAsync(tester, client)
 
-            waitForReceivedMessages(tester, 600, 100)
+            waitForReceivedMessages(tester, 300, 100)
 
             subscription.dispose()
         then:
@@ -1153,8 +1153,8 @@ class KinesisAnnotationsSpec extends Specification {
 
         Map&lt;String, Object&gt; properties = new HashMap&lt;&gt;();                               <i class="conum" data-value="6"></i><b>(6)</b>
         properties.put("aws.kinesis.application.name", "TestApp");
-        properties.put("aws.kinesis.stream", "MyStream");
-        properties.put("aws.kinesis.listener.stream", "MyStream");
+        properties.put("aws.kinesis.stream", TEST_STREAM);
+        properties.put("aws.kinesis.listener.stream", TEST_STREAM);
 
         // you can set other custom client configuration properties
         properties.put("aws.kinesis.listener.failoverTimeMillis", "1000");
@@ -1191,9 +1191,9 @@ class KinesisAnnotationsSpec extends Specification {
         service.createStream();
         service.waitForActive();
 
-        waitForWorkerReady(600, 100);
+        waitForWorkerReady(300, 100);
         Disposable subscription = publishEventsAsync(tester, client);
-        waitForRecievedMessages(tester, 600, 100);
+        waitForRecievedMessages(tester, 300, 100);
 
         subscription.dispose();
 
