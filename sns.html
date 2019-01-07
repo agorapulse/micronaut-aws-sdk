@@ -899,72 +899,30 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <div class="title">Groovy</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
-@RestoreSystemProperties                                                                <i class="conum" data-value="2"></i><b>(2)</b>
-class KinesisAnnotationsSpec extends Specification {
+class SimpleNotificationServiceSpec extends Specification {
 
-    private static final String TEST_STREAM = 'TestStream'
-    private static final String APP_NAME = 'AppName'
+    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.8')           <i class="conum" data-value="2"></i><b>(2)</b>
+        .withServices(SNS)
 
-    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.8')   <i class="conum" data-value="3"></i><b>(3)</b>
-        .withServices(KINESIS, DYNAMODB)
+    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="3"></i><b>(3)</b>
 
-    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="4"></i><b>(4)</b>
+    SimpleNotificationService service
 
     void setup() {
-        System.setProperty('com.amazonaws.sdk.disableCbor', 'true')                     <i class="conum" data-value="5"></i><b>(5)</b>
-
-        AmazonDynamoDB dynamo = AmazonDynamoDBClient                                    <i class="conum" data-value="6"></i><b>(6)</b>
+        AmazonSNS sns = AmazonSNSClient                                                 <i class="conum" data-value="4"></i><b>(4)</b>
             .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(DYNAMODB))
+            .withEndpointConfiguration(localstack.getEndpointConfiguration(SNS))
             .withCredentials(localstack.defaultCredentialsProvider)
             .build()
 
-        AmazonKinesis kinesis = AmazonKinesisClient                                     <i class="conum" data-value="7"></i><b>(7)</b>
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(KINESIS))
-            .withCredentials(localstack.defaultCredentialsProvider)
-            .build()
+        context = ApplicationContext.build('aws.sns.topic', TEST_TOPIC).build()         <i class="conum" data-value="5"></i><b>(5)</b>
+        context.registerSingleton(AmazonSNS.class, sns);
+        context.start();
 
-        AmazonCloudWatch amazonCloudWatch = Mock(AmazonCloudWatch)
-
-        context = ApplicationContext.build().properties(                                <i class="conum" data-value="8"></i><b>(8)</b>
-            'aws.kinesis.application.name': APP_NAME,
-            'aws.kinesis.stream': TEST_STREAM,
-            'aws.kinesis.listener.stream': TEST_STREAM,
-            'aws.kinesis.listener.failoverTimeMillis': '1000',
-            'aws.kinesis.listener.shardSyncIntervalMillis': '1000',
-            'aws.kinesis.listener.idleTimeBetweenReadsInMillis': '1000',
-            'aws.kinesis.listener.parentShardPollIntervalMillis': '1000',
-            'aws.kinesis.listener.timeoutInSeconds': '1000',
-            'aws.kinesis.listener.retryGetRecordsInSeconds': '1000',
-            'aws.kinesis.listener.metricsLevel': 'NONE',
-        ).build()
-        context.registerSingleton(AmazonKinesis, kinesis)
-        context.registerSingleton(AmazonDynamoDB, dynamo)
-        context.registerSingleton(AmazonCloudWatch, amazonCloudWatch)
-        context.registerSingleton(AWSCredentialsProvider, localstack.defaultCredentialsProvider)
-        context.start()
+        service = context.getBean(SimpleNotificationService)                            <i class="conum" data-value="6"></i><b>(6)</b>
     }
 
-    void 'kinesis listener is executed'() {
-        when:
-            KinesisService service = context.getBean(KinesisService)                    <i class="conum" data-value="9"></i><b>(9)</b>
-            KinesisListenerTester tester = context.getBean(KinesisListenerTester)       <i class="conum" data-value="10"></i><b>(10)</b>
-            DefaultClient client = context.getBean(DefaultClient)                       <i class="conum" data-value="11"></i><b>(11)</b>
-
-            service.createStream()
-            service.waitForActive()
-
-            waitForWorkerReady(300, 100)
-
-            Disposable subscription = publishEventAsync(tester, client)
-
-            waitForReceivedMessages(tester, 300, 100)
-
-            subscription.dispose()
-        then:
-            allTestEventsReceived(tester)
-    }
+    // tests
 
 }</code></pre>
 </div>
@@ -977,123 +935,67 @@ class KinesisAnnotationsSpec extends Specification {
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td><code>@RestoreSystemProperties</code> will guarantee that system properties will be restore after the test</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
 <td>Create an instance of <code>LocalStackContainer</code> with Kinesis and  DynamoDB (required by the listener) support enabled</td>
 </tr>
 <tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
 <td>Prepare the reference to the <code>ApplicationContext</code>, <code>@AutoCleanup</code> guarantees closing the context after the tests</td>
 </tr>
 <tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Create <code>AmazonSNS</code> client using the LocalStack configuration</td>
+</tr>
+<tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Disable CBOR protocol for Kinesis (not supported by LocalStack/Kinesilite)</td>
+<td>Prepare the application context with required properties and service using LocalStack</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Create <code>AmazonDynamoDB</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>Create <code>AmazonKinesis</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="8"></i><b>8</b></td>
-<td>Prepare the application context with required properties and service LocalStack</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="9"></i><b>9</b></td>
-<td>You can obtain instance of <code>KinesisService</code> from the context</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="10"></i><b>10</b></td>
-<td>You can obtain instance of declarative listener from the context</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="11"></i><b>11</b></td>
-<td>You can obtain instance of declarative client from the context</td>
+<td>You can obtain instance of <code>SimpleNotificationService</code> from the context</td>
 </tr>
 </table>
 </div>
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class KinesisTest {
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">class SimpleNotificationServiceTest {
 
     public ApplicationContext context;                                                  <i class="conum" data-value="1"></i><b>(1)</b>
 
+    public SimpleNotificationService service;
+
     @Rule
     public LocalStackContainer localstack = new LocalStackContainer("0.8.8")            <i class="conum" data-value="2"></i><b>(2)</b>
-        .withServices(DYNAMODB, KINESIS);
+        .withServices(SNS);
 
     @Before
     public void setup() {
-        System.setProperty("com.amazonaws.sdk.disableCbor", "true");                    <i class="conum" data-value="3"></i><b>(3)</b>
-
-        AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClient                            <i class="conum" data-value="4"></i><b>(4)</b>
+        AmazonSNS amazonSNS = AmazonSNSClient                                           <i class="conum" data-value="3"></i><b>(3)</b>
             .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(DYNAMODB))
+            .withEndpointConfiguration(localstack.getEndpointConfiguration(SNS))
             .withCredentials(localstack.getDefaultCredentialsProvider())
             .build();
 
-        AmazonKinesis amazonKinesis = AmazonKinesisClient                               <i class="conum" data-value="5"></i><b>(5)</b>
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(KINESIS))
-            .withCredentials(localstack.getDefaultCredentialsProvider())
-            .build();
 
-        AmazonCloudWatch cloudWatch = new MockCloudWatch();
-
-        Map&lt;String, Object&gt; properties = new HashMap&lt;&gt;();                               <i class="conum" data-value="6"></i><b>(6)</b>
-        properties.put("aws.kinesis.application.name", "TestApp");
-        properties.put("aws.kinesis.stream", TEST_STREAM);
-        properties.put("aws.kinesis.listener.stream", TEST_STREAM);
-
-        // you can set other custom client configuration properties
-        properties.put("aws.kinesis.listener.failoverTimeMillis", "1000");
-        properties.put("aws.kinesis.listener.shardSyncIntervalMillis", "1000");
-        properties.put("aws.kinesis.listener.idleTimeBetweenReadsInMillis", "1000");
-        properties.put("aws.kinesis.listener.parentShardPollIntervalMillis", "1000");
-        properties.put("aws.kinesis.listener.timeoutInSeconds", "1000");
-        properties.put("aws.kinesis.listener.retryGetRecordsInSeconds", "1000");
-        properties.put("aws.kinesis.listener.metricsLevel", "NONE");
+        Map&lt;String, Object&gt; properties = new HashMap&lt;&gt;();                               <i class="conum" data-value="4"></i><b>(4)</b>
+        properties.put("aws.sns.topic", TEST_TOPIC);
 
 
-        context = ApplicationContext.build(properties).build();                         <i class="conum" data-value="7"></i><b>(7)</b>
-        context.registerSingleton(AmazonKinesis.class, amazonKinesis);
-        context.registerSingleton(AmazonDynamoDB.class, amazonDynamoDB);
-        context.registerSingleton(AmazonCloudWatch.class, cloudWatch);
-        context.registerSingleton(AWSCredentialsProvider.class, localstack.getDefaultCredentialsProvider());
+        context = ApplicationContext.build(properties).build();                         <i class="conum" data-value="5"></i><b>(5)</b>
+        context.registerSingleton(AmazonSNS.class, amazonSNS);
         context.start();
+
+        service = context.getBean(SimpleNotificationService.class);
     }
 
     @After
     public void cleanup() {
-        System.clearProperty("com.amazonaws.sdk.disableCbor");                          <i class="conum" data-value="8"></i><b>(8)</b>
         if (context != null) {
-            context.close();                                                            <i class="conum" data-value="9"></i><b>(9)</b>
+            context.close();                                                            <i class="conum" data-value="6"></i><b>(6)</b>
         }
     }
 
-    @Test
-    public void testJavaService() throws InterruptedException {
-        KinesisService service = context.getBean(KinesisService.class);                 <i class="conum" data-value="10"></i><b>(10)</b>
-        KinesisListenerTester tester = context.getBean(KinesisListenerTester.class);    <i class="conum" data-value="11"></i><b>(11)</b>
-        DefaultClient client = context.getBean(DefaultClient.class);                    <i class="conum" data-value="12"></i><b>(12)</b>
-
-        service.createStream();
-        service.waitForActive();
-
-        waitForWorkerReady(300, 100);
-        Disposable subscription = publishEventsAsync(tester, client);
-        waitForRecievedMessages(tester, 300, 100);
-
-        subscription.dispose();
-
-        Assert.assertTrue(allTestEventsReceived(tester));
-    }
+    // tests
 
 }</code></pre>
 </div>
@@ -1106,47 +1008,23 @@ class KinesisAnnotationsSpec extends Specification {
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with Kinesis and  DynamoDB (required by the listener) support enabled</td>
+<td>Create an instance of <code>LocalStackContainer</code> with SNS support enabled</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Disable CBOR protocol for Kinesis (not supported by LocalStack/Kinesilite)</td>
+<td>Create <code>AmazonSNS</code> client using the LocalStack configuration</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Create <code>AmazonDynamoDB</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Create <code>AmazonKinesis</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
 <td>Prepare required properties</td>
 </tr>
 <tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
 <td>Prepare the application context with required properties and service LocalStack</td>
 </tr>
 <tr>
-<td><i class="conum" data-value="8"></i><b>8</b></td>
-<td>Reset CBOR protocol settings after the test</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="9"></i><b>9</b></td>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
 <td>Close the application context after the test</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="10"></i><b>10</b></td>
-<td>You can obtain instance of <code>KinesisService</code> from the context</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="11"></i><b>11</b></td>
-<td>You can obtain instance of declarative listener from the context</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="12"></i><b>12</b></td>
-<td>You can obtain instance of declarative client from the context</td>
 </tr>
 </table>
 </div>
@@ -1155,7 +1033,7 @@ class KinesisAnnotationsSpec extends Specification {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-01-07 14:49:54 +0100
+Last updated 2019-01-07 16:14:54 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">
