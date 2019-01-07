@@ -13,51 +13,62 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Service to simplify interaction with Amazon S3.
+ */
 public interface SimpleStorageService {
 
 
+    /**
+     * @return default name of the bucket
+     */
     String getDefaultBucketName();
 
     /**
-     * @param path
-     * @param file
-     * @param cannedAcl
-     * @return
+     * Tranfers the local file to S3.
+     * @param path S3 path
+     * @param file local file
+     * @param cannedAcl ACLs
+     * @return upload object to monitor the progress
      */
     default Upload transferFile(String path, File file, CannedAccessControlList cannedAcl) {
         return transferFile(getDefaultBucketName(), path, file, cannedAcl);
     }
 
     /**
-     * @param path
-     * @param file
-     * @return
+     * Tranfers the local file to S3.
+     * @param path S3 path
+     * @param file local file
+     * @return upload object to monitor the progress
      */
     default Upload transferFile(String path, File file) {
         return transferFile(path, file, CannedAccessControlList.PublicRead);
     }
 
     /**
-     * @param bucketName
-     * @param path
-     * @param file
-     * @return
+     * Tranfers the local file to S3.
+     * @param bucketName the name of the bucket
+     * @param path S3 path
+     * @param file local file
+     * @return upload object to monitor the progress
      */
     default Upload transferFile(String bucketName, String path, File file) {
         return transferFile(bucketName, path, file, CannedAccessControlList.PublicRead);
     }
 
     /**
-     * @param bucketName
-     * @param path
-     * @param file
-     * @param cannedAcl
-     * @return
+     * Tranfers the local file to S3.
+     * @param bucketName the name of the bucket
+     * @param path S3 path
+     * @param file local file
+     * @param cannedAcl ACLs
+     * @return upload object to monitor the progress
      */
     Upload transferFile(String bucketName, String path, File file, CannedAccessControlList cannedAcl);
 
     /**
-     * @param bucketName
+     * Creates new bucket.
+     * @param bucketName the name of the bucket.
      */
     void createBucket(String bucketName);
 
@@ -69,7 +80,8 @@ public interface SimpleStorageService {
     }
 
     /**
-     * @param bucketName
+     * Deletes existing bucket.
+     * @param bucketName the name of the bucket
      */
     void deleteBucket(String bucketName);
 
@@ -81,61 +93,69 @@ public interface SimpleStorageService {
     }
 
     /**
-     * @param bucketName
-     * @param key
-     * @return
+     * Delete file specified by the object key.
+     * @param bucketName the name of the bucket
+     * @param key the key of the object
+     * @return true if the object has been deleted
      */
     boolean deleteFile(String bucketName, String key);
 
     /**
-     * @param key
-     * @return
+     * Delete file specified by the object key.
+     * @param key the key of the object
+     * @return true if the object has been deleted
      */
     boolean deleteFile(String key);
 
     /**
-     * @param bucketName
-     * @param prefix
-     * @return
+     * Delete all files specified by the common prefix (aka folder).
+     * @param bucketName the name of the bucket
+     * @param prefix common prefix of the objects to be deleted
+     * @return true if the objects has been deleted
      */
     boolean deleteFiles(String bucketName, String prefix);
 
     /**
-     * @param prefix
-     * @return
+     * Delete all files specified by the common prefix (aka folder).
+     * @param prefix common prefix of the objects to be deleted
+     * @return true if the objects has been deleted
      */
     default boolean deleteFiles(String prefix) {
         return deleteFiles(getDefaultBucketName(), prefix);
     }
 
     /**
-     * @param bucketName
-     * @param prefix
-     * @return
+     * Check whether the object exists.
+     * @param bucketName the name of the bucket
+     * @param key the file key
+     * @return true if the file with given key exist
      */
-    boolean exists(String bucketName, String prefix);
+    boolean exists(String bucketName, String key);
 
     /**
-     * @param prefix
-     * @return
+     * Check whether the object exists.
+     * @param key the file key
+     * @return true if the file with given key exist
      */
-    default boolean exists(String prefix) {
-        return exists(getDefaultBucketName(), prefix);
+    default boolean exists(String key) {
+        return exists(getDefaultBucketName(), key);
     }
 
     /**
-     * @param bucketName
-     * @param key
-     * @param localFile
-     * @return
+     * Downloads the file locally.
+     * @param bucketName the name of the bucket
+     * @param key the key of the object
+     * @param localFile the destination file
+     * @return the destination file
      */
     File getFile(String bucketName, String key, File localFile);
 
     /**
-     * @param bucketName
-     * @param key
-     * @param localPath
-     * @return
+     * Downloads the file locally.
+     * @param bucketName the name of the bucket
+     * @param key the key of the object
+     * @param localPath the destination file's path
+     * @return the destination file
      */
     default File getFile(String bucketName, String key, String localPath) {
         return getFile(bucketName, key, new File(localPath));
@@ -143,202 +163,245 @@ public interface SimpleStorageService {
 
 
     /**
-     * @param key
-     * @param localPath
-     * @return
+     * Downloads the file locally.
+     * @param key the key of the object
+     * @param localPath the destination file's path
+     * @return the destination file
      */
     default File getFile(String key, File localPath) {
         return getFile(getDefaultBucketName(), key, localPath);
     }
 
     /**
-     * @param key
-     * @param localPath
-     * @return
+     * Downloads the file locally.
+     * @param key the key of the object
+     * @param localPath the destination file's path
+     * @return the destination file
      */
     default File getFile(String key, String localPath) {
         return getFile(getDefaultBucketName(), key, localPath);
     }
 
     /**
-     * @return
+     * @return the list of all available buckets
      */
     List<String> listBucketNames();
 
     /**
-     * @param bucketName
-     * @param prefix
-     * @return
+     * Returns the flowable of ObjectListing which each contains list of objects.
+     *
+     * Use {@link #listObjectSummaries()} to get flowable of object summaries themselves.
+     *
+     * @param bucketName the name of the bucket
+     * @param prefix the common prefix of the object being fetched
+     * @return the list of all objects available as flowable of ObjectListing which each contains list of objects.
      */
     Flowable<ObjectListing> listObjects(String bucketName, String prefix);
 
     /**
-     * @param prefix
-     * @return
+     * Returns the flowable of ObjectListing which each contains list of objects.
+     *
+     * Use {@link #listObjectSummaries()} to get flowable of object summaries themselves.
+     *
+     * @param prefix the common prefix of the object being fetched
+     * @return the flowable of ObjectListing which each contains list of objects
      */
     default Flowable<ObjectListing> listObjects(String prefix) {
         return listObjects(getDefaultBucketName(), prefix);
     }
 
     /**
-     * @return
+     * Returns the flowable of ObjectListing which each contains list of objects.
+     *
+     * Use {@link #listObjectSummaries()} to get flowable of object summaries themselves.
+     *
+     * @return the flowable of ObjectListing which each contains list of objects
      */
     default Flowable<ObjectListing> listObjects() {
         return listObjects("");
     }
 
     /**
-     * @param bucketName
-     * @param prefix
-     * @return
+     * Returns the flowable of object summaries.
+     *
+     * @param bucketName the name of the bucket
+     * @param prefix the common prefix of the object being fetched
+     * @return the flowable of object summaries
      */
     default Flowable<S3ObjectSummary> listObjectSummaries(String bucketName, String prefix) {
         return listObjects(bucketName, prefix).flatMap(l -> Flowable.fromIterable(l.getObjectSummaries()));
     }
 
     /**
-     * @param prefix
-     * @return
+     * Returns the flowable of object summaries.
+     *
+     * @param prefix the common prefix of the object being fetched
+     * @return the flowable of object summaries
      */
     default Flowable<S3ObjectSummary> listObjectSummaries(String prefix) {
         return listObjectSummaries(getDefaultBucketName(), prefix);
     }
 
     /**
-     * @return
+     * Returns the flowable of object summaries.
+     *
+     * @return the flowable of object summaries
      */
     default Flowable<S3ObjectSummary> listObjectSummaries() {
         return listObjectSummaries("");
     }
 
     /**
-     * @param bucketName
-     * @param key
-     * @param expirationDate
-     * @return
+     * Generates the pre-signed URL for downloading an object by clients.
+     *
+     * @param bucketName the name of the bucket
+     * @param key the key of the object
+     * @param expirationDate the expiration date of the link
+     * @return the URL to download the object without any credentials required
      */
     String generatePresignedUrl(String bucketName, String key, Date expirationDate);
 
     /**
-     * @param key
-     * @param expirationDate
-     * @return
+     * Generates the pre-signed URL for downloading an object by clients.
+     *
+     * @param key the key of the object
+     * @param expirationDate the expiration date of the link
+     * @return the URL to download the object without any credentials required
      */
     default String generatePresignedUrl(String key, Date expirationDate) {
         return generatePresignedUrl(getDefaultBucketName(), key, expirationDate);
     }
 
     /**
-     * @param bucketName
-     * @param path
-     * @param input
-     * @param metadata
-     * @return
+     * Uploads data from the input stream to desired path on S3.
+     * @param bucketName the name of the bucket
+     * @param path the destination path (key) on S3
+     * @param input the input data as stream
+     * @param metadata the object metadata
+     * @return the URL to newly created object
      */
     String storeInputStream(String bucketName, String path, InputStream input, ObjectMetadata metadata);
 
     /**
-     * @param path
-     * @param input
-     * @param metadata
-     * @return
+     * Uploads data from the input stream to desired path on S3.
+     * @param path the destination path (key) on S3
+     * @param input the input data as stream
+     * @param metadata the object metadata
+     * @return the URL to newly created object
      */
     default String storeInputStream(String path, InputStream input, ObjectMetadata metadata) {
         return storeInputStream(getDefaultBucketName(), path, input, metadata);
     }
 
     /**
-     * @param bucketName
-     * @param path
-     * @param file
-     * @param cannedAcl
-     * @return
+     * Uploads data from the file to desired path on S3.
+     * @param bucketName the name of the bucket
+     * @param path the destination path (key) on S3
+     * @param file the input file
+     * @param cannedAcl ACLs
+     * @return the URL to newly created object
      */
     String storeFile(String bucketName, String path, File file, CannedAccessControlList cannedAcl);
 
     /**
-     * @param bucketName
-     * @param path
-     * @param file
-     * @return
+     * Uploads data from the file to desired path on S3.
+     * @param bucketName the name of the bucket
+     * @param path the destination path (key) on S3
+     * @param file the input file
+     * @return the URL to newly created object
      */
     default String storeFile(String bucketName, String path, File file) {
         return storeFile(bucketName, path, file, CannedAccessControlList.PublicRead);
     }
 
     /**
-     * @param path
-     * @param file
-     * @param cannedAcl
-     * @return
+     * Uploads data from the file to desired path on S3.
+     * @param path the destination path (key) on S3
+     * @param file the input file
+     * @param cannedAcl ACLs
+     * @return the URL to newly created object
      */
     default String storeFile(String path, File file, CannedAccessControlList cannedAcl) {
         return storeFile(getDefaultBucketName(), path, file, cannedAcl);
     }
 
     /**
-     * @param path
-     * @param file
-     * @return
+     * Uploads data from the file to desired path on S3.
+     * @param path the destination path (key) on S3
+     * @param file the input file
+     * @return the URL to newly created object
      */
     default String storeFile(String path, File file) {
         return storeFile(getDefaultBucketName(), path, file, CannedAccessControlList.PublicRead);
     }
 
     /**
-     * @param bucketName
-     * @param path
-     * @param partData
-     * @param metadata
-     * @return
+     * Uploads data from the multipart file to desired path on S3.
+     *
+     * @param bucketName the name of the bucket
+     * @param path the destination path (key) on S3
+     * @param partData the input data
+     * @param cannedAcl ACLs
+     * @param metadata the object metadata
+     * @return the URL to newly created object
      */
     String storeMultipartFile(String bucketName, String path, PartData partData, CannedAccessControlList cannedAcl, ObjectMetadata metadata);
 
     /**
-     * @param bucketName
-     * @param path
-     * @param partData
-     * @return
+     * Uploads data from the multipart file to desired path on S3.
+     *
+     * @param bucketName the name of the bucket
+     * @param path the destination path (key) on S3
+     * @param partData the input data
+     * @param cannedAcl ACLs
+     * @return the URL to newly created object
      */
     default String storeMultipartFile(String bucketName, String path, PartData partData, CannedAccessControlList cannedAcl) {
         return storeMultipartFile(bucketName, path, partData, cannedAcl, null);
     }
 
     /**
-     * @param bucketName
-     * @param path
-     * @param partData
-     * @return
+     * Uploads data from the multipart file to desired path on S3.
+     *
+     * @param bucketName the name of the bucket
+     * @param path the destination path (key) on S3
+     * @param partData the input data
+     * @return the URL to newly created object
      */
     default String storeMultipartFile(String bucketName, String path, PartData partData) {
         return storeMultipartFile(bucketName, path, partData, CannedAccessControlList.PublicRead);
     }
 
     /**
-     * @param path
-     * @param multipartFile
-     * @param cannedAcl
-     * @return
+     * Uploads data from the multipart file to desired path on S3.
+     *
+     * @param path the destination path (key) on S3
+     * @param cannedAcl ACLs
+     * @return the URL to newly created object
      */
     default String storeMultipartFile(String path, PartData multipartFile, CannedAccessControlList cannedAcl) {
         return storeMultipartFile(path, multipartFile, cannedAcl, null);
     }
 
     /**
-     * @param path
-     * @param multipartFile
-     * @return
+     * Uploads data from the multipart file to desired path on S3.
+     *
+     * @param path the destination path (key) on S3
+     * @param multipartFile the input data
+     * @return the URL to newly created object
      */
     default String storeMultipartFile(String path, PartData multipartFile) {
         return storeMultipartFile(path, multipartFile, CannedAccessControlList.PublicRead);
     }
 
     /**
-     * @param path
-     * @param multipartFile
-     * @param cannedAcl
-     * @param metadata
-     * @return
+     * Uploads data from the multipart file to desired path on S3.
+     *
+     * @param path the destination path (key) on S3
+     * @param multipartFile the input data
+     * @param cannedAcl ACLs
+     * @param metadata the object metadata
+     * @return the URL to newly created object
      */
     default String storeMultipartFile(String path, PartData multipartFile, CannedAccessControlList cannedAcl, ObjectMetadata metadata) {
         return storeMultipartFile(getDefaultBucketName(), path, multipartFile, cannedAcl, metadata);

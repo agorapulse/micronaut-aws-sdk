@@ -172,15 +172,15 @@ class DefaultSimpleStorageService implements SimpleStorageService {
      *
      * @param String
      * @param bucketName
-     * @param prefix
+     * @param key
      * @return
      */
-    boolean exists(String bucketName, String prefix) {
-        if (!prefix) {
+    boolean exists(String bucketName, String key) {
+        if (!key) {
             return false
         }
         try {
-            ObjectListing objectListing = client.listObjects(bucketName, prefix)
+            ObjectListing objectListing = client.listObjects(bucketName, key)
             if (objectListing.objectSummaries) {
                 return true
             }
