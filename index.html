@@ -3336,7 +3336,6 @@ interface DefaultClient {
     String sendSMS(String phoneNumber, String message);                                 <i class="conum" data-value="6"></i><b>(6)</b>
     String sendSms(String phoneNumber, String message, Map attributes);                 <i class="conum" data-value="7"></i><b>(7)</b>
 
-}
 }</code></pre>
 </div>
 </div>
@@ -3606,8 +3605,8 @@ class SimpleNotificationServiceSpec extends Specification {
             .build()
 
         context = ApplicationContext.build('aws.sns.topic', TEST_TOPIC).build()         <i class="conum" data-value="5"></i><b>(5)</b>
-        context.registerSingleton(AmazonSNS.class, sns);
-        context.start();
+        context.registerSingleton(AmazonSNS, sns)
+        context.start()
 
         service = context.getBean(SimpleNotificationService)                            <i class="conum" data-value="6"></i><b>(6)</b>
     }
