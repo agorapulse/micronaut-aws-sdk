@@ -551,6 +551,12 @@ $(addBlockSwitches);
 <li><a href="#_testing_3">Testing</a></li>
 </ul>
 </li>
+<li><a href="#_simple_email_service_ses">Simple Email Service (SES)</a>
+<ul class="sectlevel3">
+<li><a href="#_simple_email_service">Simple Email Service</a></li>
+<li><a href="#_testing_4">Testing</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><a href="#_maintained_by">Maintained by</a></li>
@@ -597,7 +603,7 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <p><a href="#_simple_storage_service_s3">Simple Storage Service (S3)</a></p>
 </li>
 <li>
-<p><a href="#Simple Email Service (SES)">[Simple Email Service (SES)]</a></p>
+<p><a href="#_simple_email_service_ses">Simple Email Service (SES)</a></p>
 </li>
 <li>
 <p><a href="#Simple Notification Service (SNS)">[Simple Notification Service (SNS)]</a></p>
@@ -2971,6 +2977,240 @@ class SimpleStorageServiceSpec extends Specification {
 </div>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_simple_email_service_ses">Simple Email Service (SES)</h3>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>Amazon Simple Email Service (Amazon SES) is a cloud-based email sending service designed to help digital marketers and application developers send marketing, notification, and transactional emails. It is a reliable, cost-effective service for businesses of all sizes that use email to keep in contact with their customers.</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>This library provides basic support for Amazon SES using <a href="#_simple_email_service">Simple Email Service</a></p>
+</div>
+<div class="sect3">
+<h4 id="_simple_email_service">Simple Email Service</h4>
+<div class="paragraph">
+<p><code>SimpleEmailService</code> provides DSL for creating and sending simple emails with attachments. As the other services,
+it uses default credentials chain to obtain the credentials.</p>
+</div>
+<div class="paragraph">
+<p>Following example shows how to send an email with attachment.</p>
+</div>
+<div class="listingblock primary">
+<div class="title">Groovy</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy">package com.agorapulse.micronaut.aws.ses
+
+import com.amazonaws.services.simpleemail.AmazonSimpleEmailService
+import com.amazonaws.services.simpleemail.model.SendRawEmailRequest
+import com.amazonaws.services.simpleemail.model.SendRawEmailResult
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
+import spock.lang.Subject
+
+/**
+ * Tests for sending emails with Groovy.
+ */
+class SendEmailSpec extends Specification {
+
+    AmazonSimpleEmailService simpleEmailService = Mock(AmazonSimpleEmailService)
+
+    @Rule
+    TemporaryFolder tmp = new TemporaryFolder()
+
+    @Subject
+    SimpleEmailService service = new DefaultSimpleEmailService(simpleEmailService)
+
+    void "send email"() {
+        given:
+            File file = tmp.newFile('test.pdf')
+            file.text = 'not a real PDF'
+            String thePath = file.canonicalPath
+        when:
+            EmailDeliveryStatus status = service.send {                                 <i class="conum" data-value="1"></i><b>(1)</b>
+                subject 'Hi Paul'                                                       <i class="conum" data-value="2"></i><b>(2)</b>
+                from 'subscribe@groovycalamari.com'                                     <i class="conum" data-value="3"></i><b>(3)</b>
+                to 'me@sergiodelamo.com'                                                <i class="conum" data-value="4"></i><b>(4)</b>
+                htmlBody '&lt;p&gt;This is an example body&lt;/p&gt;'                               <i class="conum" data-value="5"></i><b>(5)</b>
+                attachment {                                                            <i class="conum" data-value="6"></i><b>(6)</b>
+                    filepath thePath                                                    <i class="conum" data-value="7"></i><b>(7)</b>
+                    filename 'test.pdf'                                                 <i class="conum" data-value="8"></i><b>(8)</b>
+                    mimeType 'application/pdf'                                          <i class="conum" data-value="9"></i><b>(9)</b>
+                    description 'An example pdf'                                        <i class="conum" data-value="10"></i><b>(10)</b>
+                }
+            }
+
+        then:
+            status == EmailDeliveryStatus.STATUS_DELIVERED
+
+            simpleEmailService.sendRawEmail(_) &gt;&gt; { SendRawEmailRequest request -&gt;
+                return new SendRawEmailResult().withMessageId('foobar')
+            }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Start building an email</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Define subject of the email</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Define the from address</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Define one or more recipients</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Define HTML body (alternatively you can declare plain text body as well)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Build an attachment</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Define the location of the file to be sent</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>Define the file name (optional - deduced from the file)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="9"></i><b>9</b></td>
+<td>Define the mime type (usually optional - deduced from the file)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="10"></i><b>10</b></td>
+<td>Define the description of the file (optional)</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Java</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">package com.agorapulse.micronaut.aws.ses;
+
+import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
+import com.amazonaws.services.simpleemail.model.SendRawEmailResult;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.mockito.Mockito;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Collections;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+/**
+ * Tests for sending emails with Java.
+ */
+public class SendEmailTest {
+
+    @Rule public TemporaryFolder tmp = new TemporaryFolder();
+
+    private AmazonSimpleEmailService simpleEmailService = mock(AmazonSimpleEmailService.class);
+
+    private SimpleEmailService service = new DefaultSimpleEmailService(simpleEmailService);
+
+    @Test
+    public void testSendEmail() throws IOException {
+        when(simpleEmailService.sendRawEmail(Mockito.any()))
+            .thenReturn(new SendRawEmailResult().withMessageId("foobar"));
+
+        File file = tmp.newFile("test.pdf");
+        Files.write(file.toPath(), Collections.singletonList("not a real PDF"));
+        String filepath = file.getCanonicalPath();
+
+        EmailDeliveryStatus status = service.send(e -&gt;                                  <i class="conum" data-value="1"></i><b>(1)</b>
+            e.subject("Hi Paul")                                                        <i class="conum" data-value="2"></i><b>(2)</b>
+                .from("subscribe@groovycalamari.com")                                   <i class="conum" data-value="3"></i><b>(3)</b>
+                .to("me@sergiodelamo.com")                                              <i class="conum" data-value="4"></i><b>(4)</b>
+                .htmlBody("&lt;p&gt;This is an example body&lt;/p&gt;")                             <i class="conum" data-value="5"></i><b>(5)</b>
+                .attachment(a -&gt;                                                        <i class="conum" data-value="6"></i><b>(6)</b>
+                    a.filepath(filepath)                                                <i class="conum" data-value="7"></i><b>(7)</b>
+                        .filename("test.pdf")                                           <i class="conum" data-value="8"></i><b>(8)</b>
+                        .mimeType("application/pdf")                                    <i class="conum" data-value="9"></i><b>(9)</b>
+                        .description("An example pdf")                                  <i class="conum" data-value="10"></i><b>(10)</b>
+                )
+        );
+
+        Assert.assertEquals(EmailDeliveryStatus.STATUS_DELIVERED, status);
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Start building an email</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Define subject of the email</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Define the from address</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Define one or more recipients</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Define HTML body (alternatively you can declare plain text body as well)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Build an attachment</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Define the location of the file to be sent</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>Define the file name (optional - deduced from the file)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="9"></i><b>9</b></td>
+<td>Define the mime type (usually optional - deduced from the file)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="10"></i><b>10</b></td>
+<td>Define the description of the file (optional)</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Please, see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/ses/SimpleEmailService.html">SimpleEmailService</a> for the full reference.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_testing_4">Testing</h4>
+<div class="paragraph">
+<p>It is recommended just to mock the <code>SimpleEmailService</code> in your tests as it only contains single abstract method.</p>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -2986,7 +3226,7 @@ class SimpleStorageServiceSpec extends Specification {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-01-04 09:25:44 +0100
+Last updated 2019-01-07 10:06:22 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">
