@@ -130,6 +130,10 @@ include::kinesis.adoc[]
 
 include::s3.adoc[]
 
+include::ses.adoc[]
+
+include::sns.adoc[]
+
 
 == Maintained by
 

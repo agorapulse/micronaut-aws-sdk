@@ -1,8 +1,6 @@
 package com.agorapulse.micronaut.aws.sns
 
 import com.agorapulse.micronaut.aws.Pogo
-import com.agorapulse.micronaut.aws.sns.annotation.NotificationClient
-import com.agorapulse.micronaut.aws.sns.annotation.Topic
 import groovy.json.JsonOutput
 import io.micronaut.context.ApplicationContext
 import io.micronaut.inject.qualifiers.Qualifiers
@@ -140,34 +138,5 @@ class NotificationClientSpec extends Specification {
 
             1 * defaultService.publishMessageToTopic(StreamClient.SOME_STREAM, null, POGO_AS_JSON) >> MESSAGE_ID
     }
-}
-
-@NotificationClient interface DefaultClient {
-
-    public String OTHER_TOPIC = 'OtherTopic'
-
-    @Topic('OtherTopic') String publishMessageToDifferentTopic(Pogo pogo)
-
-    String publishMessage(Pogo message)
-    String publishMessage(String subject, Pogo message)
-    String publishMessage(String message)
-    String publishMessage(String subject, String message)
-
-    String sendSMS(String phoneNumber, String message)
-    String sendSms(String phoneNumber, String message, Map attributes)
-
-    // TODO: publish to target once there is nicer API for publishing
-
-}
-
-@NotificationClient('test') interface TestClient {
-    String publishMessage(Pogo message)
-}
-
-@NotificationClient(topic = 'SomeTopic') interface StreamClient {
-
-    public String SOME_STREAM = 'SomeTopic'
-
-    String publishMessage(Pogo message)
 }
 
