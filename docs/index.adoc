@@ -7,9 +7,10 @@ image::https://api.bintray.com/packages/agorapulse/libs/micronaut-http-server-ba
 
 Set of useful libraries for http://micronaut.io[Micronaut]. All of the libraries are available in https://bintray.com/bintray/jcenter[JCenter Maven repository].
 
+include::grails.adoc[]
+
 include::aws.adoc[]
 
-include::micronaut-grails.adoc[]
 
 == Maintained by
 

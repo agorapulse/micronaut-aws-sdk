@@ -15,8 +15,8 @@ import spock.lang.Specification
  */
 class PlanetControllerSpec extends Specification {
 
-    @Rule private final Gru gru = Gru.equip(ApiGatewayProxy.steal(this) {
-        map '/planet/{star}' to ApiGatewayProxyHandler
+    @Rule private final Gru gru = Gru.equip(ApiGatewayProxy.steal(this) {               // <1>
+        map '/planet/{star}' to ApiGatewayProxyHandler                                  // <2>
         map '/planet/{star}/{name}' to ApiGatewayProxyHandler
     })
 
@@ -27,8 +27,11 @@ class PlanetControllerSpec extends Specification {
     @SuppressWarnings('UnusedPrivateField')
     private final ApiGatewayProxyHandler handler = new ApiGatewayProxyHandler() {
         @Override
-        protected void doWithApplicationContext(ApplicationContext applicationContext) {
-            applicationContext.registerSingleton(PlanetDBService, new PlanetDBService(amazonDynamoDB, DynamoDB.createMapper(dru)))
+        protected void doWithApplicationContext(ApplicationContext ctx) {               // <3>
+            ctx.registerSingleton(
+                PlanetDBService,
+                new PlanetDBService(amazonDynamoDB, DynamoDB.createMapper(dru))
+            )
         }
     }
 
@@ -39,7 +42,7 @@ class PlanetControllerSpec extends Specification {
         dru.add(new Planet(star: 'sun', name: 'mars'))
     }
 
-    void 'get planet'() {
+    void 'get planet'() {                                                               // <4>
         expect:
             gru.test {
                 get('/planet/sun/earth')

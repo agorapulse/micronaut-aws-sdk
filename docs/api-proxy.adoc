@@ -1,0 +1,305 @@
+== Micronaut for API Gateway Proxy
+
+API Gateway Lambda Proxy support for Micronaut which enables using most of the Micronaut HTTP Server features such
+as controllers, filters and annotation statuses. Follow http://docs.micronaut.io/latest/guide/index.html[Micronaut website for extensive documentation].
+
+You develop your application as you would develop any other server application using Micronaut HTTP capabilities. For example you
+can create following controller
+
+[source,groovy,indent=0,options="nowrap"]
+.Example Controller
+----
+include::../examples/planets/src/main/groovy/com/agorapulse/micronaut/http/examples/planets/PlanetController.groovy[]
+----
+
+This controller would be able to handle following URIs and methods after deployment using Micronaut for API Gateway Proxy:
+
+ * `GET /planet/{star}`
+ * `GET /planet/{star}/{name}`
+ * `POST /planet/{star}/{name}`
+ * `DELETE /planet/{star}/{name}`
+
+WARNING: This library helps with translating API Gateway Proxy requests and responses into their Micronaut counterparts. It currently does not handle creating the
+API mappings on the AWS. These needs to be created manually and must match the URL routes
+
+
+A top of the standard features, you can use `api_gateway_proxy` https://docs.micronaut.io/latest/guide/index.html#environments[environment]
+to distinguish the application is running using this library.
+
+Also following beans can be injected if necessary:
+
+  * `com.amazonaws.services.lambda.runtime.Context`
+  * `com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent`
+  * `com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent.ProxyRequestContext`
+  * `com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent.RequestIdentity`
+
+WARNING: Application context is shared for the lifetime of the Lambda instance. Request related beans are reset before each execution.
+This is a standard behaviour of Micronaut functions to take benefit from the hot deployments.
+
+
+=== Installation
+
+Easiest way how to start is to fork https://github.com/agorapulse/micronaut-aws-api-gateway-proxy-starter[Micronaut AWS API Gateway Proxy Starter Project].
+
+NOTE: For lack of Maven skils, this guide explains Gradle build setup only.
+
+If you want to add the library to existing project then you need to do a manual setup.
+
+==== Gradle `buildSrc`
+
+To prevent errors from machines which does not have any AWS credentials set you need to provides `LambdaHelper` class
+to obtain the AWS account ID for the deployments. It is also a convenient place to manage all the dependencies for
+the build scripts.
+
+[source,indent=0,options="nowrap"]
+.buildSrc/build.gradle
+----
+apply plugin: 'groovy'                                                                  // <1>
+
+repositories {
+    jcenter()
+    mavenCentral()
+    maven { url 'https://plugins.gradle.org/m2/' }
+}
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+
+    compile 'jp.classmethod.aws:gradle-aws-plugin:0.38'                                 // <2>
+    compile 'io.spring.gradle:dependency-management-plugin:1.0.6.RELEASE'               // <3>
+    compile "com.github.jengelman.gradle.plugins:shadow:4.0.2"                          // <4>
+    compile 'net.ltgt.gradle:gradle-apt-plugin:0.19'                                    // <5>
+}
+----
+<1> Applying Groovy plugin for the `buildSrc` itself (for `LambdaHelper` implementation)
+<2> Gradle AWS plugin used for deployment
+<3> Gradle Dependency Management plugin used for managing Micronaut dependencies
+<4> Gradle Shadow plugin optionally used by the local server subproject
+<5> Gradle APT plugin used for Micronaut annotation processing
+
+
+[source,groovy,indent=0,options="nowrap"]
+.buildSrc/src/main/groovy/lambda/LambdaHelper.groovy
+----
+package lambda
+
+import com.amazonaws.SdkClientException
+import groovy.transform.CompileStatic
+import jp.classmethod.aws.gradle.AwsPluginExtension
+import org.gradle.api.Project
+
+@CompileStatic
+class LambdaHelper {
+
+    private LambdaHelper() { }
+
+    // see https://github.com/classmethod/gradle-aws-plugin/pull/160
+    static String getAwsAccountId(Project project) {                                    // <1>
+        try {
+            return project.getExtensions().getByType(AwsPluginExtension).accountId
+        } catch (SdkClientException ignored) {
+            project.logger.lifecycle("AWS credentials not configured!")
+            return '000000000000'
+        }
+    }
+
+}
+----
+<1> Helper class provides single method to obtains AWS account id safely
+
+
+==== Shared Gradle Files
+
+As far as you expect all the subprojects to be Micronaut projects you can share the configuration in the root `build.gradle` file.
+Following configuration will enable subprojects with full Java and Groovy Micronaut support.
+
+
+[source,indent=0,options="nowrap",subs='verbatim,attributes']
+.build.gradle
+----
+subprojects {
+
+    apply plugin: "groovy"
+    apply plugin: "io.spring.dependency-management"
+    apply plugin: "com.github.johnrengelman.shadow"
+    apply plugin: "net.ltgt.apt-eclipse"
+    apply plugin: "net.ltgt.apt-idea"
+
+
+    version "0.1"
+    group "micronaut.aws.api.gateway.proxy.starter"
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url "https://jcenter.bintray.com" }
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "io.micronaut:micronaut-bom:{version}"
+        }
+    }
+
+    dependencies {
+        annotationProcessor "io.micronaut:micronaut-inject-java"
+        annotationProcessor "io.micronaut:micronaut-validation"
+
+        compile "io.micronaut:micronaut-inject"
+        compile "io.micronaut:micronaut-validation"
+        compile "io.micronaut:micronaut-runtime"
+        compile "io.micronaut:micronaut-runtime-groovy"
+
+        compileOnly "io.micronaut:micronaut-inject-java"
+        compileOnly "io.micronaut:micronaut-inject-groovy"
+
+        runtime "ch.qos.logback:logback-classic:1.2.3"
+
+        testCompile("org.spockframework:spock-core") {
+            exclude group: "org.codehaus.groovy", module: "groovy-all"
+        }
+
+        testCompile "io.micronaut:micronaut-inject-groovy"
+        testCompile "io.micronaut:micronaut-inject-java"
+
+        testCompile "junit:junit:4.12"
+        testCompile "org.hamcrest:hamcrest-all:1.3"
+    }
+
+    compileJava.options.compilerArgs += '-parameters'
+    compileTestJava.options.compilerArgs += '-parameters'
+}
+----
+
+Each AWS Lambda subproject also shares common setup. We can store it in `gradle/lambda.gradle` file.
+
+[source,indent=0,options="nowrap",subs='verbatim,attributes']
+.gradle/lambda.gradle
+----
+configurations {
+    lambdaCompile.extendsFrom runtime                                                   // <1>
+    testCompile.extendsFrom lambdaCompile                                               // <2>
+}
+
+dependencies {
+    lambdaCompile "com.agorapulse:micronaut-function-aws-agp:{version}"                 // <3>
+
+    compile "io.micronaut:micronaut-http-server"                                        // <4>
+    compile "io.micronaut:micronaut-router"                                             // <5>
+
+    // gru for aws lambda can help you testing lambda fuctions
+    // https://agorapulse.github.io/gru/
+    testCompile "com.agorapulse:gru-api-gateway:0.6.6"                                  // <6>
+}
+
+task buildZip(type: Zip) {                                                              // <7>
+    from compileJava
+    from compileGroovy
+    from processResources
+    into('lib') {
+        from configurations.lambdaCompile
+    }
+}
+
+build.dependsOn buildZip                                                                // <8>
+----
+<1> Create new configuration `lambdaCompile` to be used only for tests and deployed package
+<2> Include `lambdaCompile` libraries in also in tests
+<3> The integration library is only important for the package deployed
+<4> Use just `micronaut-http-server` library as a dependency (not `micronaut-http-server-netty`)
+<5> Micronaut router is also required
+<6> You can optionally use https://agorapulse.github.io/gru/#_aws_api_gateway[Gru] for testing
+<7> Adds a task to build Lambda deployment archive
+<8> Adds `buildZip` to the default `build` task
+
+
+==== API Gateway Subproject Build File
+
+Every API Gateway Lambda project must at least contain following definition of the deployment
+as well as it needs to apply the shared `lambda.gradle` file.
+
+[source,indent=0,options="nowrap"]
+.build.gradle
+----
+import lambda.LambdaHelper
+import com.amazonaws.services.lambda.model.Runtime
+import jp.classmethod.aws.gradle.lambda.AWSLambdaMigrateFunctionTask
+
+apply from: '../gradle/lambda.gradle'                                                   // <1>
+
+task deployLambda(                                                                      // <2>
+    type: AWSLambdaMigrateFunctionTask,
+    dependsOn: build,
+    group: 'deploy'
+)  {
+    functionName = 'MicronautHelloWorld'
+    handler = 'com.agorapulse.micronaut.agp.ApiGatewayProxyHandler::handleRequest'      // <3>
+    role = "arn:aws:iam::${LambdaHelper.getAwsAccountId(project)}:role/lambda_basic_execution"
+    runtime = Runtime.Java8                                                             // <4>
+    zipFile = buildZip.archivePath                                                      // <5>
+    memorySize = 1024
+    timeout = 30
+}
+----
+<1> Import helper Gradle script
+<2> Add task to deploy to AWS Lambda
+<3> Lambda function handler must be `com.agorapulse.micronaut.agp.ApiGatewayProxyHandler::handleRequest`
+<4> Runtime must be `Java8`
+<5> Archive must be the result of `buildZip task
+
+==== Local Server
+
+The biggest advantage of Micronaut for Api Gateway Proxy integration library is the ability to easily run locally.
+
+
+[source,indent=0,options="nowrap"]
+.build.gradle
+----
+apply plugin: 'application'                                                             // <1>
+
+dependencies {
+    compile project(':hello-world')                                                     // <2>
+
+    compile "io.micronaut:micronaut-http-server-netty"                                  // <3>
+
+    testCompile "com.agorapulse:gru-http:0.6.6"                                         // <4>
+}
+
+shadowJar {                                                                             // <5>
+    mergeServiceFiles()
+}
+
+run.jvmArgs('-noverify', '-XX:TieredStopAtLevel=1')
+
+mainClassName = "starter.Application"                                                   // <6>
+----
+<1> Apply `application` plugin so you will be able to run the server as application locally
+<2> Depend on every API Gateway subproject you want to include into the local server
+<3> You need real Micronaut's HTTP server implementation to run the server
+<4> You can optionally use https://agorapulse.github.io/gru/#_http[Gru] for testing the local server
+<5> If you decide to run from Shadow JAR you need to merge the service files
+<6> Replace with your own application class
+
+
+=== Testing
+
+The easiest way to test the API Gateway Proxy integration is using https://agorapulse.github.io/gru/#_aws_api_gateway[Gru for API Gateway]
+testing client. The library should be already on the classpath if you have followed the steps or if
+you are using the starter project.
+
+
+[source,groovy,indent=0,options="nowrap"]
+.Controller Spec
+----
+include::../examples/planets/src/test/groovy/com/agorapulse/micronaut/http/examples/planets/PlanetControllerSpec.groovy[]
+----
+<1> Use `ApiGatewayProxy` client with https://agorapulse.github.io/gru[Gru]
+<2> Configure which URLs and methods are handled by the Micronaut, the handler must always be `ApiGatewayProxyHandler`
+or its successors
+<3> You can customize the handler initialization by providing a mock beans
+<4> Test method using https://agorapulse.github.io/gru[Gru]
+
+TIP: The advantage of using Gru is that you can reuse the existing test with the local server if required.
+Only thing which changes it the handler setup and the client being used (HTTP instead of API Gateway Proxy).
+
