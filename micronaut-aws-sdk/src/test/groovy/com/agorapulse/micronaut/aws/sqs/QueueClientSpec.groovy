@@ -132,7 +132,7 @@ class QueueClientSpec extends Specification {
 
     void 'needs to follow the method convention rules'() {
         given:
-            DefaultClient client = context.getBean(DefaultClient)
+            TestClient client = context.getBean(TestClient)
         when:
             client.doWhatever(POGO, POGO, POGO, POGO)
         then:
