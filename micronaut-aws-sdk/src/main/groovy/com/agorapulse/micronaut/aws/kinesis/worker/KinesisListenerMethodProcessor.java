@@ -6,6 +6,8 @@ import com.amazonaws.services.kinesis.model.Record;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.context.BeanContext;
 import io.micronaut.context.annotation.Requires;
+import io.micronaut.context.event.ApplicationEventListener;
+import io.micronaut.context.event.ShutdownEvent;
 import io.micronaut.context.exceptions.NoSuchBeanException;
 import io.micronaut.context.processor.ExecutableMethodProcessor;
 import io.micronaut.core.type.Argument;
@@ -26,7 +28,7 @@ import java.util.function.BiConsumer;
     property = "aws.kinesis",
     classes = KinesisClientLibConfiguration.class
 )
-public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor<KinesisListener> {
+public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor<KinesisListener>, ApplicationEventListener<ShutdownEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KinesisListener.class);
 
@@ -179,6 +181,11 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
         worker.addConsumer(consumer);
 
         LOGGER.info("Kinesis listener for method {} declared in {} registered", method, beanDefinition.getBeanType());
+    }
+
+    @Override
+    public void onApplicationEvent(ShutdownEvent event) {
+        workers.values().forEach(KinesisWorker::shutdown);
     }
 
     private KinesisClientLibConfiguration getKinesisConfiguration(String key) {

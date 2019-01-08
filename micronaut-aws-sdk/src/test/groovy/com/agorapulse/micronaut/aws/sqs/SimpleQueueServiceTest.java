@@ -1,5 +1,6 @@
 package com.agorapulse.micronaut.aws.sqs;
 
+import com.agorapulse.micronaut.aws.kinesis.Retry;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClient;
 import com.amazonaws.services.sqs.model.Message;
@@ -20,13 +21,16 @@ public class SimpleQueueServiceTest {
     private static final String TEST_QUEUE = "TestQueue";
     private static final String DATA = "Hello World";
 
+    @Rule
+    public Retry retry = new Retry(5);
+
     // tag::testcontainers-setup[]
     public ApplicationContext context;                                                  // <1>
 
     public SimpleQueueService service;
 
     @Rule
-    public LocalStackContainer localstack = new LocalStackContainer("0.8.8")            // <2>
+    public LocalStackContainer localstack = new LocalStackContainer("0.8.10")           // <2>
         .withServices(SQS);
 
     @Before

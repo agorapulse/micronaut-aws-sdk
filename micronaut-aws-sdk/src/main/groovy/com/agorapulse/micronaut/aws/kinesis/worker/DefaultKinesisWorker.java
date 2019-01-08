@@ -61,15 +61,30 @@ class DefaultKinesisWorker implements KinesisWorker {
             }))
         );
 
-        builder.workerStateChangeListener(s -> {
-            applicationEventPublisher.publishEvent(new WorkerStateEvent(s, configuration.getStreamName()));
-        });
+        builder.workerStateChangeListener(s -> applicationEventPublisher.publishEvent(new WorkerStateEvent(s, configuration.getStreamName())));
 
         try {
             LOGGER.info("Starting Kinesis worker for {}", configuration.getStreamName());
-            executorService.execute(builder.build());
+            worker = builder.build();
+            executorService.execute(worker);
         } catch (Exception t) {
             LOGGER.error("Caught throwable while processing Kinesis data.", t);
+        }
+    }
+
+    @Override
+    public void shutdown() {
+        if (worker != null) {
+            try {
+                worker.shutdown();
+            } catch (Exception e) {
+                LOGGER.warn("Exception shutting down worker", e);
+            }
+        }
+        try {
+            executorService.shutdown();
+        } catch (Exception e) {
+            LOGGER.warn("Exception shutting down worker's executor service", e);
         }
     }
 
@@ -85,4 +100,5 @@ class DefaultKinesisWorker implements KinesisWorker {
     private final Optional<AmazonKinesis> amazonKinesis;
     private final Optional<AmazonCloudWatch> amazonCloudWatch;
     private final List<BiConsumer<String, Record>> consumers = new CopyOnWriteArrayList<>();
+    private Worker worker;
 }

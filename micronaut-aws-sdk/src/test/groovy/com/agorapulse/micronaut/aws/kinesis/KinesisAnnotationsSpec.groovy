@@ -39,7 +39,7 @@ class KinesisAnnotationsSpec extends Specification {
     private static final String TEST_STREAM = 'TestStream'
     private static final String APP_NAME = 'AppName'
 
-    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.8')   // <3>
+    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.10')          // <3>
         .withServices(KINESIS, DYNAMODB)
 
     @AutoCleanup ApplicationContext context                                             // <4>

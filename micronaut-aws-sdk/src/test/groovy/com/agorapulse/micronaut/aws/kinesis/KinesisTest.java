@@ -40,7 +40,7 @@ public class KinesisTest {
     public ApplicationContext context;                                                  // <1>
 
     @Rule
-    public LocalStackContainer localstack = new LocalStackContainer("0.8.8")            // <2>
+    public LocalStackContainer localstack = new LocalStackContainer("0.8.10")           // <2>
         .withServices(DYNAMODB, KINESIS);
 
     @Before

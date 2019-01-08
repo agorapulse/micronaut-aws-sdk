@@ -32,6 +32,11 @@ public class DefaultKinesisWorkerFactory implements KinesisWorkerFactory {
         }
 
         @Override
+        public void shutdown() {
+            // do nothing
+        }
+
+        @Override
         public void addConsumer(BiConsumer<String, Record> next) {
             // do nothing
         }

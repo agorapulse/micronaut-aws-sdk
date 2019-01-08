@@ -7,6 +7,7 @@ import io.micronaut.context.ApplicationContext
 import org.testcontainers.containers.localstack.LocalStackContainer
 import org.testcontainers.spock.Testcontainers
 import spock.lang.AutoCleanup
+import spock.lang.Retry
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
@@ -17,6 +18,7 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
 /**
  * Tests for simple queue service.
  */
+@Retry(count =  5)
 @Stepwise
 // tag::testcontainers-header[]
 @Testcontainers                                                                         // <1>
@@ -28,7 +30,7 @@ class SimpleQueueServiceSpec extends Specification {
     private static final String DATA = 'Hello World'
 
     // tag::testcontainers-fields[]
-    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.8')           // <3>
+    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.10')          // <3>
         .withServices(SQS)
 
     @AutoCleanup ApplicationContext context                                             // <4>

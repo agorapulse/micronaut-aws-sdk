@@ -89,6 +89,9 @@ subprojects { Project subproject ->
             showStandardStreams = false
             exceptionFormat "full"
         }
+
+        environment 'AWS_CBOR_DISABLE', 'true'
+
         systemProperty 'TEST_RESOURCES_FOLDER', new File(subproject.projectDir, 'src/test/resources').canonicalPath
         systemProperty 'user.timezone', 'UTC'
         systemProperty 'user.language', 'en'
