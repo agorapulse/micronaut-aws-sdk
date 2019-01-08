@@ -5,7 +5,7 @@
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 1.5.8">
-<title>Simple Notification Service (SNS)</title>
+<title>Simple Queue Service (SQS)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | http://asciidoctor.org */
@@ -517,17 +517,11 @@ $(addBlockSwitches);
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel2">
-<li><a href="#_simple_notification_service_sns">Simple Notification Service (SNS)</a>
+<li><a href="#_simple_queue_service_sqs">Simple Queue Service (SQS)</a>
 <ul class="sectlevel3">
 <li><a href="#_configuration">Configuration</a></li>
-<li><a href="#_publishing_with_notificationclient">Publishing with <code>@NotificationClient</code></a></li>
-<li><a href="#_simple_notification_service">Simple Notification Service</a>
-<ul class="sectlevel4">
-<li><a href="#_working_with_topics">Working with Topics</a></li>
-<li><a href="#_working_with_applications">Working with Applications</a></li>
-<li><a href="#_sending_sms">Sending SMS</a></li>
-</ul>
-</li>
+<li><a href="#_publishing_with_queueclient">Publishing with <code>@QueueClient</code></a></li>
+<li><a href="#_simple_queue_service">Simple Queue Service</a></li>
 <li><a href="#_testing">Testing</a></li>
 </ul>
 </li>
@@ -536,24 +530,24 @@ $(addBlockSwitches);
 </div>
 <div id="content">
 <div class="sect2">
-<h3 id="_simple_notification_service_sns">Simple Notification Service (SNS)</h3>
+<h3 id="_simple_queue_service_sqs">Simple Queue Service (SQS)</h3>
 <div class="quoteblock">
 <blockquote>
 <div class="paragraph">
-<p>Amazon Simple Notification Service (SNS) is a highly available, durable, secure, fully managed pub/sub messaging service that enables you to decouple microservices, distributed systems, and serverless applications.</p>
+<p>Amazon Simple Queue Service (SQS) is a fully managed message queuing service that enables you to decouple and scale microservices, distributed systems, and serverless applications. SQS eliminates the complexity and overhead associated with managing and operating message oriented middleware, and empowers developers to focus on differentiating work.</p>
 </div>
 </blockquote>
 </div>
 <div class="paragraph">
-<p>This library provides two approaches to work with Simple Notification Service topics:</p>
+<p>This library provides two approaches to work with Simple Queue Service queues:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>High-level <a href="#_publishing_with_notificationclient">Publishing with <code>@NotificationClient</code></a></p>
+<p>High-level <a href="#_publishing_with_queueclient">Publishing with <code>@QueueClient</code></a></p>
 </li>
 <li>
-<p>Middle-level <a href="#_simple_notification_service">Simple Notification Service</a></p>
+<p>Middle-level <a href="#_simple_queue_service">Simple Queue Service</a></p>
 </li>
 </ol>
 </div>
@@ -590,37 +584,57 @@ $(addBlockSwitches);
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>You can specify the default topic for <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/sns/SimpleNotificationService.html">SimpleNotificationService</a> and <code>@NotificationClient</code></td>
+<td>Queue prefix is prepended to every queue name (may be useful for local development)</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Amazon Resource Name for the iOS application mobile push</td>
+<td>Whether to create any missing queue automatically (default <code>false</code>)</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Amazon Resource Name for the Android application mobile push</td>
+<td>Whether to first fetch all queues and set up queue to url cache first time the service is prompted for the queue URL (default <code>false</code>)</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Amazon Resource Name for the Amazon application mobile push</td>
+<td>You can specify the default topic for <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/sqs/SimpleQueueService.html">SimpleQueueService</a> and <code>@QueueClient</code></td>
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>You can define multiple configurations</td>
+<td>Whether the newly created queues are supposed to be <a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html">FIFO queues</a> (default <code>false</code>)</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>The length of time, in seconds, for which the delivery of all messages in the queue is delayed. Valid values: An integer from <code>0</code> to <code>900</code> (15 minutes). Default: <code>0</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>The length of time, in seconds, for which Amazon SQS retains a message. Valid values: An integer representing seconds, from <code>60</code> (1 minute) to <code>1,209,600</code> (14 days). Default: <code>345,600</code> (4 days).</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>The limit of how many bytes a message can contain before Amazon SQS rejects it. Valid values: An integer from <code>1,024</code> bytes (1 KiB) up to <code>262,144</code> bytes (256 KiB). Default: <code>262,144</code> (256 KiB).</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="9"></i><b>9</b></td>
+<td>The visibility timeout for the queue, in seconds. Valid values: an integer from <code>0</code> to <code>43,200</code> (12 hours). Default: <code>30</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="10"></i><b>10</b></td>
+<td>You can define multiple configurations</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="11"></i><b>11</b></td>
 <td>Each of the configuration can be access using <code>@Named('test') SimpleNotificationService</code> qualifier or you can define the configuration as <code>value</code> of <code>@NotificationClient('test')</code></td>
 </tr>
 </table>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_publishing_with_notificationclient">Publishing with <code>@NotificationClient</code></h4>
+<h4 id="_publishing_with_queueclient">Publishing with <code>@QueueClient</code></h4>
 <div class="paragraph">
-<p>If you place <code>com.agorapulse.micronaut.aws.sns.annotation.NotificationClient</code> annotation on the interface then methods
-matching predefined pattern will be automatically implemented. Methods containing word <code>sms</code> will send text messages.
-Other methods of <code>NotificationClient</code> will publish new messages into the topic.</p>
+<p>If you place <code>com.agorapulse.micronaut.aws.sqs.annotation.QueueClient</code> annotation on the interface then methods
+matching predefined pattern will be automatically implemented. Methods containing word <code>delete</code> will delete queue messages.
+Other methods of <code>QueueClient</code> will publish new records into the queue.</p>
 </div>
 <div class="paragraph">
 <p>The following example shows many of available method signatures for publishing records:</p>
@@ -628,29 +642,33 @@ Other methods of <code>NotificationClient</code> will publish new messages into 
 <div class="listingblock">
 <div class="title">Publishing String Records</div>
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">package com.agorapulse.micronaut.aws.sns;
+<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">package com.agorapulse.micronaut.aws.sqs;
 
 import com.agorapulse.micronaut.aws.Pogo;
-import com.agorapulse.micronaut.aws.sns.annotation.NotificationClient;
-import com.agorapulse.micronaut.aws.sns.annotation.Topic;
+import com.agorapulse.micronaut.aws.sqs.annotation.Queue;
+import com.agorapulse.micronaut.aws.sqs.annotation.QueueClient;
 
-import java.util.Map;
-
-@NotificationClient                                                                     <i class="conum" data-value="1"></i><b>(1)</b>
+@QueueClient                                                                            <i class="conum" data-value="1"></i><b>(1)</b>
 interface DefaultClient {
 
-    String OTHER_TOPIC = "OtherTopic";
+    @Queue(value = "OtherQueue", group = "SomeGroup")
+    String sendMessageToQueue(String message);                                          <i class="conum" data-value="2"></i><b>(2)</b>
 
-    @Topic("OtherTopic") String publishMessageToDifferentTopic(Pogo pogo);              <i class="conum" data-value="2"></i><b>(2)</b>
+    String sendMessage(Pogo message);                                                   <i class="conum" data-value="3"></i><b>(3)</b>
 
-    String publishMessage(Pogo message);                                                <i class="conum" data-value="3"></i><b>(3)</b>
-    String publishMessage(String subject, Pogo message);                                <i class="conum" data-value="4"></i><b>(4)</b>
-    String publishMessage(String message);                                              <i class="conum" data-value="5"></i><b>(5)</b>
-    String publishMessage(String subject, String message);
+    String sendMessage(byte[] record);                                                  <i class="conum" data-value="4"></i><b>(4)</b>
 
-    String sendSMS(String phoneNumber, String message);                                 <i class="conum" data-value="6"></i><b>(6)</b>
-    String sendSms(String phoneNumber, String message, Map attributes);                 <i class="conum" data-value="7"></i><b>(7)</b>
+    String sendMessage(String record);                                                  <i class="conum" data-value="5"></i><b>(5)</b>
 
+    String sendMessage(String record, int delay);                                       <i class="conum" data-value="6"></i><b>(6)</b>
+
+    String sendMessage(String record, String group);                                    <i class="conum" data-value="7"></i><b>(7)</b>
+
+    String sendMessage(String record, int delay, String group);                         <i class="conum" data-value="8"></i><b>(8)</b>
+
+    void deleteMessage(String messageId);                                               <i class="conum" data-value="9"></i><b>(9)</b>
+
+    String OTHER_QUEUE = "OtherQueue";
 }</code></pre>
 </div>
 </div>
@@ -658,31 +676,39 @@ interface DefaultClient {
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td><code>@NotificationClient</code> annotation makes the interface a SNS client</td>
+<td><code>@QueueClient</code> annotation makes the interface a SQS client</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>You can specify to which topic is the message published using <code>@Topic</code> annotation</td>
+<td>You can specify to which queue is the message published using <code>@Queue</code> annotation, you can also specify the <code>group</code> for FIFO queues</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>You can publish any object which can be converted into JSON.</td>
+<td>You can publish any record object which can be converted into JSON.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>You can add additional subject to published message (only useful for few protocols, e.g. email)</td>
+<td>You can publish a byte array record</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>You can publish a string message</td>
+<td>You can publish a string record</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>You can send SMS using the word <code>SMS</code> in the name of the method. One argument must be phone number and its name must contain the word <code>number</code></td>
+<td>You can publish a string with custom delay</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>You can provide additional attributes for the SMS message</td>
+<td>You can publish a string with custom FIFO queue group</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>You can publish a string with custom delay and FIFO queue group</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="9"></i><b>9</b></td>
+<td>You can delete published message using the message ID if the</td>
 </tr>
 </table>
 </div>
@@ -693,181 +719,149 @@ interface DefaultClient {
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-The return value of the methods is message id returned by AWS.
+The return value of the publishing methods is message id returned by AWS.
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>By default, <code>NotificationClient</code> publishes messages into the default topic defined by <code>aws.sns.topic</code> property.
-You can switch to different configuration by changing the <code>value</code> of the annotation such as <code>@NotificationClient("other")</code> or
-by setting the <code>topic</code> property of the annotation such as <code>@NotificationClient(topic = "SomeTopic")</code>. You can change topic
-used by particular method using <code>@Topic</code> annotation as mentioned above.</p>
+<p>By default, <code>QueueClient</code> publishes recoreds into the default queue defined by <code>aws.sns.queue</code> property.
+You can switch to different configuration by changing the <code>value</code> of the annotation such as <code>@QueueClient("other")</code> or
+by setting the <code>queue</code> property of the annotation such as <code>@QueueClient(queue = "SomeQueue")</code>. You can change queue
+used by particular method using <code>@Queue</code> annotation as mentioned above.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_simple_notification_service">Simple Notification Service</h4>
+<h4 id="_simple_queue_service">Simple Queue Service</h4>
 <div class="paragraph">
-<p><code>SimpleNotificationService</code> provides middle-level API for creating, describing, and deleting topics. You can manage applications, endpoints and devices.
-You can send messages and notifications.</p>
+<p><code>SimpleQueuenService</code> provides middle-level API for creating, describing, and deleting queues. It allows to publish, receive and delete records.</p>
 </div>
 <div class="paragraph">
-<p>Instance of <code>SimpleNotificationService</code> is created for the default SNS configuration and each topics configuration in <code>aws.sns.topics</code> map.
-You should always use <code>@Named</code> qualifier when injecting <code>SimpleNotificationService</code> if you have more than one topic configuration present, e.g. <code>@Named("other") SimpleNotificationService otherService</code>.</p>
+<p>Instance of <code>SimpleQueueService</code> is created for the default SQS configuration and each queue configuration in <code>aws.sqs.queues</code> map.
+You should always use <code>@Named</code> qualifier when injecting <code>SimpleQueueService</code> if you have more than one topic configuration present, e.g. <code>@Named("other") SimpleQueueService otherService</code>.</p>
 </div>
 <div class="paragraph">
-<p>Following example shows some of the most common use cases for working with Amazon SNS.</p>
+<p>Following example shows some of the most common use cases for working with Amazon SQS.</p>
 </div>
-<div class="sect4">
-<h5 id="_working_with_topics">Working with Topics</h5>
 <div class="listingblock">
-<div class="title">Creating Topic</div>
+<div class="title">Creating Queue</div>
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">String topicArn = service.createTopic(TEST_TOPIC);                              <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">String queueUrl = service.createQueue(TEST_QUEUE);                              <i class="conum" data-value="1"></i><b>(1)</b>
 
-Topic found = service.listTopics().filter(t -&gt;                                  <i class="conum" data-value="2"></i><b>(2)</b>
-    t.getTopicArn().endsWith(TEST_TOPIC)
-).blockingFirst();</code></pre>
+assertTrue(service.listQueueUrls().contains(queueUrl));                         <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Create new topic of given name</td>
+<td>Create new queue of given name</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>The topic is present within the list of all topics' names</td>
+<td>The queue URL is present within the list of all queues' URLs</td>
 </tr>
 </table>
 </div>
 <div class="listingblock">
-<div class="title">Subscribe to Topic</div>
+<div class="title">Describing Queue Attributes</div>
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">String subArn = service.subscribeTopicWithEmail(topicArn, EMAIL);               <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">Map&lt;String, String&gt; queueAttributes = service.getQueueAttributes(TEST_QUEUE);   <i class="conum" data-value="1"></i><b>(1)</b>
 
-String messageId = service.publishMessageToTopic(                               <i class="conum" data-value="2"></i><b>(2)</b>
-    topicArn,
-    "Test Email",
-    "Hello World"
-);
-
-service.unsubscribeTopic(subArn);                                               <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
+assertEquals("0", queueAttributes.get("DelaySeconds"));                         <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Subscribe to the topic with an email (there are more variants of this method to subscribe to most common protocols such as HTTP(S) endpoints, SQS, &#8230;&#8203;)</td>
+<td>Fetch queue&#8217;s attributes</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Publish message to the topic</td>
+<td>You can read the queue&#8217;s attributes from the map</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">Delete Queue</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">service.deleteQueue(TEST_QUEUE);                                                <i class="conum" data-value="1"></i><b>(1)</b>
+
+assertFalse(service.listQueueUrls().contains(queueUrl));                        <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Delete queue</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The queue URL is no longer present within the list of all queues' URLs</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">Working with Messages</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">String msgId = service.sendMessage(DATA);                                       <i class="conum" data-value="1"></i><b>(1)</b>
+
+assertNotNull(msgId);
+
+List&lt;Message&gt; messages = service.receiveMessages();                             <i class="conum" data-value="2"></i><b>(2)</b>
+Message first = messages.get(0);
+
+assertEquals(DATA, first.getBody());                                            <i class="conum" data-value="3"></i><b>(3)</b>
+assertEquals(msgId, first.getMessageId());
+assertEquals(1, messages.size());
+
+service.deleteMessage(msgId);                                                   <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Send a message</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Receive messages from the queue (in another application)</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Use the subscription ARN to unsubscribe from the topic</td>
-</tr>
-</table>
-</div>
-<div class="listingblock">
-<div class="title">Delete Topic</div>
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">service.deleteTopic(topicArn);                                                  <i class="conum" data-value="1"></i><b>(1)</b>
-
-Long zero = service.listTopics().filter(t -&gt;                                    <i class="conum" data-value="2"></i><b>(2)</b>
-    t.getTopicArn().endsWith(TEST_TOPIC)
-).count().blockingGet();</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Delete the topic</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>The topic is no longer present within the list of all topics' names</td>
-</tr>
-</table>
-</div>
-</div>
-<div class="sect4">
-<h5 id="_working_with_applications">Working with Applications</h5>
-<div class="listingblock">
-<div class="title">Working with Applications</div>
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">String appArn = service.createAndroidApplication("my-app", API_KEY);        <i class="conum" data-value="1"></i><b>(1)</b>
-
-String endpoint = service.registerAndroidDevice(appArn, DEVICE_TOKEN, DATA);    <i class="conum" data-value="2"></i><b>(2)</b>
-
-Map&lt;String, String&gt; notif = new LinkedHashMap&lt;&gt;();
-notif.put("badge", "9");
-notif.put("data", "{\"foo\": \"some bar\"}");
-notif.put("title", "Some Title");
-
-String msgId = service.sendAndroidAppNotification(endpoint, notif, "Welcome");  <i class="conum" data-value="3"></i><b>(3)</b>
-
-service.validateAndroidDevice(appArn, endpoint, DEVICE_TOKEN, DATA);            <i class="conum" data-value="4"></i><b>(4)</b>
-
-service.unregisterDevice(endpoint);                                             <i class="conum" data-value="5"></i><b>(5)</b></code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Create new Android application (more platforms available)</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Register Android device (more platforms available)</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Send Android notification (more platforms available)</td>
+<td>Read message body</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Validate Android device</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Unregister device</td>
+<td>Developers are responsible to delete the message from the queue themselves</td>
 </tr>
 </table>
 </div>
-</div>
-<div class="sect4">
-<h5 id="_sending_sms">Sending SMS</h5>
-<div class="listingblock">
-<div class="title">Sending SMS</div>
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">Map&lt;Object, Object&gt; attrs = Collections.emptyMap();
-String msgId = service.sendSMSMessage(PHONE_NUMBER, "Hello World", attrs);      <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
-</div>
-</div>
-<div class="colist arabic">
+<div class="admonitionblock tip">
 <table>
 <tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Send a message to the phone number</td>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+Try to use AWS Lambda functions triggered by SQS messages to handle incoming SQS messages instead of implementing
+complex message handling logic yourselves.
+</td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>Please, see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/sns/SimpleNotificationService.html">SimpleNotificationService</a> for the full reference.</p>
-</div>
+<p>Please, see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/sqs/SimpleQueueService.html">SimpleQueueService</a> for the full reference.</p>
 </div>
 </div>
 <div class="sect3">
 <h4 id="_testing">Testing</h4>
 <div class="paragraph">
 <p>You can very easily mock any of the interfaces and declarative services but if you need close-to-production
-SNS integration works well with <a href="https://www.testcontainers.org/">Testcontainers</a> and <a href="https://localstack.cloud/">LocalStack</a>.</p>
+SQS integration works well with <a href="https://www.testcontainers.org/">Testcontainers</a> and <a href="https://localstack.cloud/">LocalStack</a>.</p>
 </div>
 <div class="paragraph">
 <p>You need to add following dependencies into your build file:</p>
@@ -903,27 +897,29 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <div class="title">Groovy</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
-class SimpleNotificationServiceSpec extends Specification {
+@RestoreSystemProperties                                                                <i class="conum" data-value="2"></i><b>(2)</b>
+class SimpleQueueServiceSpec extends Specification {
 
-    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.8')           <i class="conum" data-value="2"></i><b>(2)</b>
-        .withServices(SNS)
+    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.8')           <i class="conum" data-value="3"></i><b>(3)</b>
+        .withServices(SQS)
 
-    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="3"></i><b>(3)</b>
+    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="4"></i><b>(4)</b>
 
-    SimpleNotificationService service
+    SimpleQueueService service
 
     void setup() {
-        AmazonSNS sns = AmazonSNSClient                                                 <i class="conum" data-value="4"></i><b>(4)</b>
+        System.setProperty('com.amazonaws.sdk.disableCbor', 'true')                     <i class="conum" data-value="5"></i><b>(5)</b>
+        AmazonSQS sqs = AmazonSQSClient                                                 <i class="conum" data-value="6"></i><b>(6)</b>
             .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(SNS))
+            .withEndpointConfiguration(localstack.getEndpointConfiguration(SQS))
             .withCredentials(localstack.defaultCredentialsProvider)
             .build()
 
-        context = ApplicationContext.build('aws.sns.topic', TEST_TOPIC).build()         <i class="conum" data-value="5"></i><b>(5)</b>
-        context.registerSingleton(AmazonSNS, sns)
+        context = ApplicationContext.build('aws.sqs.queue': TEST_QUEUE).build()         <i class="conum" data-value="7"></i><b>(7)</b>
+        context.registerSingleton(AmazonSQS, sqs)
         context.start()
 
-        service = context.getBean(SimpleNotificationService)                            <i class="conum" data-value="6"></i><b>(6)</b>
+        service = context.getBean(SimpleQueueService)                                   <i class="conum" data-value="8"></i><b>(8)</b>
     }
 
     // tests
@@ -939,23 +935,31 @@ class SimpleNotificationServiceSpec extends Specification {
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with SNS support enabled</td>
+<td><code>@RestoreSystemProperties</code> will guarantee that system properties will be restore after the test</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Prepare the reference to the <code>ApplicationContext</code>, <code>@AutoCleanup</code> guarantees closing the context after the tests</td>
+<td>Create an instance of <code>LocalStackContainer</code> with SQS support enabled</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Create <code>AmazonSNS</code> client using the LocalStack configuration</td>
+<td>Prepare the reference to the <code>ApplicationContext</code>, <code>@AutoCleanup</code> guarantees closing the context after the tests</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Prepare the application context with required properties and service using LocalStack</td>
+<td>Disable CBOR protocol for SQS (not supported by the mock implementation)</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>You can obtain instance of <code>SimpleNotificationService</code> from the context</td>
+<td>Create <code>AmazonSQS</code> client using the LocalStack configuration</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Prepare the application context with required properties and service using LocalStack</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>You can obtain instance of <code>SimpleQueueService</code> from the context</td>
 </tr>
 </table>
 </div>
@@ -966,36 +970,40 @@ class SimpleNotificationServiceSpec extends Specification {
 
     public ApplicationContext context;                                                  <i class="conum" data-value="1"></i><b>(1)</b>
 
-    public SimpleNotificationService service;
+    public SimpleQueueService service;
 
     @Rule
     public LocalStackContainer localstack = new LocalStackContainer("0.8.8")            <i class="conum" data-value="2"></i><b>(2)</b>
-        .withServices(SNS);
+        .withServices(SQS);
 
     @Before
     public void setup() {
-        AmazonSNS amazonSNS = AmazonSNSClient                                           <i class="conum" data-value="3"></i><b>(3)</b>
+        System.setProperty("com.amazonaws.sdk.disableCbor", "true");                    <i class="conum" data-value="3"></i><b>(3)</b>
+
+        AmazonSQS amazonSQS = AmazonSQSClient                                           <i class="conum" data-value="4"></i><b>(4)</b>
             .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(SNS))
+            .withEndpointConfiguration(localstack.getEndpointConfiguration(SQS))
             .withCredentials(localstack.getDefaultCredentialsProvider())
             .build();
 
 
-        Map&lt;String, Object&gt; properties = new HashMap&lt;&gt;();                               <i class="conum" data-value="4"></i><b>(4)</b>
-        properties.put("aws.sns.topic", TEST_TOPIC);
+        Map&lt;String, Object&gt; properties = new HashMap&lt;&gt;();                               <i class="conum" data-value="5"></i><b>(5)</b>
+        properties.put("aws.sqs.queue", TEST_QUEUE);
 
 
-        context = ApplicationContext.build(properties).build();                         <i class="conum" data-value="5"></i><b>(5)</b>
-        context.registerSingleton(AmazonSNS.class, amazonSNS);
+        context = ApplicationContext.build(properties).build();                         <i class="conum" data-value="6"></i><b>(6)</b>
+        context.registerSingleton(AmazonSQS.class, amazonSQS);
         context.start();
 
-        service = context.getBean(SimpleNotificationService.class);
+        service = context.getBean(SimpleQueueService.class);
     }
 
     @After
     public void cleanup() {
+        System.clearProperty("com.amazonaws.sdk.disableCbor");
+
         if (context != null) {
-            context.close();                                                            <i class="conum" data-value="6"></i><b>(6)</b>
+            context.close();                                                            <i class="conum" data-value="7"></i><b>(7)</b>
         }
     }
 
@@ -1012,22 +1020,26 @@ class SimpleNotificationServiceSpec extends Specification {
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with SNS support enabled</td>
+<td>Create an instance of <code>LocalStackContainer</code> with SQS support enabled</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Create <code>AmazonSNS</code> client using the LocalStack configuration</td>
+<td>Disable CBOR protocol for SQS (not supported by the mock implementation)</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Prepare required properties</td>
+<td>Create <code>AmazonSQS</code> client using the LocalStack configuration</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Prepare the application context with required properties and service LocalStack</td>
+<td>Prepare required properties</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Prepare the application context with required properties and service LocalStack</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
 <td>Close the application context after the test</td>
 </tr>
 </table>
@@ -1037,7 +1049,7 @@ class SimpleNotificationServiceSpec extends Specification {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-01-08 11:54:22 +0100
+Last updated 2019-01-08 11:56:53 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">
