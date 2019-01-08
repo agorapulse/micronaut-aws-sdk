@@ -1,5 +1,6 @@
 package com.agorapulse.micronaut.grails
 
+import groovy.transform.CompileStatic
 import io.micronaut.context.annotation.Factory
 import io.micronaut.context.annotation.Primary
 import io.micronaut.context.annotation.Prototype
@@ -77,24 +78,31 @@ class GrailsMicronautBeanProcessorSpec extends Specification {
     }
 }
 
-@Configuration
+// tag::configuration[]
+@CompileStatic
+@Configuration                                                                          // <1>
 class GrailsConfig {
 
     @Bean
-    GrailsMicronautBeanProcessor widgetProcessor() {
+    GrailsMicronautBeanProcessor widgetProcessor() {                                    // <2>
         GrailsMicronautBeanProcessor
-            .builder()
-            .addByType(Widget)
-            .addByType('someInterface', SomeInterface)
-            .addByStereotype('prototype', Prototype)
-            .addByName('gadget')
+            .builder()                                                                  // <3>
+            .addByType(Widget)                                                          // <4>
+            .addByType('someInterface', SomeInterface)                                  // <5>
+            .addByStereotype('prototype', Prototype)                                    // <6>
+            .addByName('gadget')                                                        // <7>
             .addByName('one')
             .addByName('two')
-            .addByQualifiers('otherMinion', Qualifiers.byName('other'), Qualifiers.byType(Minion))
+            .addByQualifiers(                                                           // <8>
+                'otherMinion',
+                Qualifiers.byName('other'),
+                Qualifiers.byType(Minion)
+            )
             .build()
     }
 
 }
+// end::configuration[]
 
 interface SomeInterface { }
 
