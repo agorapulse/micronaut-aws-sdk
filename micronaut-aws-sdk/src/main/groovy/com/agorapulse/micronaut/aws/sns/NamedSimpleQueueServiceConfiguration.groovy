@@ -6,9 +6,12 @@ import io.micronaut.context.annotation.EachProperty
 import io.micronaut.context.annotation.Parameter
 import io.micronaut.context.annotation.Requires
 
+/**
+ * Named simple queue service configuration for each property key.
+ */
 @CompileStatic
 @EachProperty('aws.sns.topics')
-@Requires(classes = AmazonSNS.class, property =  'aws.sns.topics')
+@Requires(classes = AmazonSNS, property =  'aws.sns.topics')
 class NamedSimpleQueueServiceConfiguration extends SimpleNotificationServiceConfiguration {
 
     final String name

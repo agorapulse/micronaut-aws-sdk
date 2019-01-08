@@ -1,0 +1,14 @@
+aws:
+  sns:
+    topic: MyTopic                                                                      # <1>
+    ios:
+      arn: 'arn:aws:sns:eu-west-1:123456789:app/APNS/my-ios-app'                        # <2>
+    android:
+      arn: 'arn:aws:sns:eu-west-1:123456789:app/GCM/my-android-app'                     # <3>
+    amazon:
+      arn: 'arn:aws:sns:eu-west-1:123456789:app/ADM/my-amazon-app'                      # <4>
+
+
+    topics:                                                                             # <5>
+      test:                                                                             # <6>
+        topic: TestTopic

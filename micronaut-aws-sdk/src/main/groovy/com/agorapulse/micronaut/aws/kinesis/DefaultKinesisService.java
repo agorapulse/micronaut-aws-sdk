@@ -22,7 +22,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class DefaultKinesisService implements KinesisService {
+class DefaultKinesisService implements KinesisService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KinesisService.class);
 
@@ -43,7 +43,11 @@ public class DefaultKinesisService implements KinesisService {
 
     @Override
     public CreateStreamResult createStream(String streamName, int shardCount) {
-        return client.createStream(streamName, shardCount);
+        try {
+            return client.createStream(streamName, shardCount);
+        } catch (ResourceInUseException ignored) {
+            return new CreateStreamResult();
+        }
     }
 
     @Override
@@ -219,6 +223,17 @@ public class DefaultKinesisService implements KinesisService {
             .withStreamName(streamName)
             .withShardToSplit(shard.getShardId())
             .withNewStartingHashKey(newStartingHashKey));
+    }
+
+    @Override
+    public void waitForStatus(String streamName, StreamStatus status) {
+        while (!status.name().equals(describeStream(streamName).getStreamDescription().getStreamStatus())) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw new IllegalStateException("Waiting for stream to become active was interrupted!", e);
+            }
+        }
     }
 
     private static final int DEFAULT_GET_RECORDS_WAIT = 1000;

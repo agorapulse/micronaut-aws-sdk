@@ -7,8 +7,20 @@ import com.amazonaws.services.dynamodbv2.model.*;
 
 import java.util.*;
 
+/**
+ * The middle-level API for working with DynamoDB tables.
+ *
+ * Using declarative services using {@link com.agorapulse.micronaut.aws.dynamodb.annotation.Service} is preferred.
+ *
+ * @param <T> The type of the DynamoDB entity.
+ */
 public interface DynamoDBService<T> {
-    
+
+    int DEFAULT_QUERY_LIMIT = 20;
+    int DEFAULT_COUNT_LIMIT = 100;
+    int BATCH_DELETE_LIMIT = 100;
+    int WRITE_BATCH_SIZE = 100; // Max number of elements to write at once in DynamoDB (mixed tables)
+
     /**
      * Optional settings:
      * - consistentRead (default to false)
@@ -714,7 +726,9 @@ public interface DynamoDBService<T> {
      * @param attributeValue
      * @return
      */
-    UpdateItemResult updateItemAttribute(Object hashKey, Object rangeKey, String attributeName, Object attributeValue);
+    default UpdateItemResult updateItemAttribute(Object hashKey, Object rangeKey, String attributeName, Object attributeValue) {
+        return updateItemAttribute(hashKey, rangeKey, attributeName, attributeValue, AttributeAction.PUT);
+    }
 
     boolean isIndexRangeKey(String rangeName);
 

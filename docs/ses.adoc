@@ -1,0 +1,52 @@
+=== Simple Email Service (SES)
+
+> Amazon Simple Email Service (Amazon SES) is a cloud-based email sending service designed to help digital marketers and application developers send marketing, notification, and transactional emails. It is a reliable, cost-effective service for businesses of all sizes that use email to keep in contact with their customers.
+
+This library provides basic support for Amazon SES using <<Simple Email Service>>
+
+==== Simple Email Service
+
+`SimpleEmailService` provides DSL for creating and sending simple emails with attachments. As the other services,
+it uses default credentials chain to obtain the credentials.
+
+Following example shows how to send an email with attachment.
+
+[source,groovy,indent=0,options="nowrap",role="primary"]
+.Groovy
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/ses/SendEmailSpec.groovy[]
+----
+<1> Start building an email
+<2> Define subject of the email
+<3> Define the from address
+<4> Define one or more recipients
+<5> Define HTML body (alternatively you can declare plain text body as well)
+<6> Build an attachment
+<7> Define the location of the file to be sent
+<8> Define the file name (optional - deduced from the file)
+<9> Define the mime type (usually optional - deduced from the file)
+<10> Define the description of the file (optional)
+
+
+[source,java,indent=0,options="nowrap",role="secondary"]
+.Java
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/ses/SendEmailTest.java[]
+----
+<1> Start building an email
+<2> Define subject of the email
+<3> Define the from address
+<4> Define one or more recipients
+<5> Define HTML body (alternatively you can declare plain text body as well)
+<6> Build an attachment
+<7> Define the location of the file to be sent
+<8> Define the file name (optional - deduced from the file)
+<9> Define the mime type (usually optional - deduced from the file)
+<10> Define the description of the file (optional)
+
+Please, see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/ses/SimpleEmailService.html[SimpleEmailService] for the full reference.
+
+==== Testing
+It is recommended just to mock the `SimpleEmailService` in your tests as it only contains single abstract method.
+
+

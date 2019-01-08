@@ -3,7 +3,11 @@ package com.agorapulse.micronaut.aws.ses
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 
+/**
+ * Mime types mapping.
+ */
 @CompileStatic
+@SuppressWarnings('DuplicateStringLiteral')
 class MimeType {
 
     private static final List<List<String>> ALL = [
@@ -662,7 +666,7 @@ class MimeType {
     }
 
     static boolean isFileExtensionSupported(String filename) {
-        def ext = fileExtension(filename)
+        String ext = fileExtension(filename)
         !awsSESUnsupportedAttachmentTypes().any { it == ext }
     }
 

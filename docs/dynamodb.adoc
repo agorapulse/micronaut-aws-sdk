@@ -1,0 +1,632 @@
+=== DynamoDB
+
+> Amazon DynamoDB is a fully managed NoSQL database service that provides fast and predictable performance with seamless scalability.
+
+This library provides two approaches to work with DynamoDB tables and entities:
+
+1. High-level <<Declarative Services with `@Service`>>
+2. Middle-level <<DynamoDB Service>>
+
+==== Declarative Services with `@Service`
+
+Declarative services are very similar to http://gorm.grails.org/6.1.x/hibernate/manual/#dataServices[Grails GORM Data Services].
+If you place `com.agorapulse.micronaut.aws.dynamodb.annotation.Service` annotation on the interface then methods
+matching predefined pattern will be automatically implemented.
+
+===== Method Signatures
+
+The following example shows many of available method signatures:
+
+[source,groovy,indent=0,options="nowrap",role="primary"]
+.Groovy
+----
+@Service(DynamoDBEntity)
+interface DynamoDBItemDBService {
+
+    DynamoDBEntity get(String hash, String rangeKey)
+    DynamoDBEntity load(String hash, String rangeKey)
+    List<DynamoDBEntity> getAll(String hash, List<String> rangeKeys)
+    List<DynamoDBEntity> getAll(String hash, String... rangeKeys)
+    List<DynamoDBEntity> loadAll(String hash, List<String> rangeKeys)
+    List<DynamoDBEntity> loadAll(String hash, String... rangeKeys)
+
+    DynamoDBEntity save(DynamoDBEntity entity)
+    List<DynamoDBEntity> saveAll(DynamoDBEntity... entities)
+    List<DynamoDBEntity> saveAll(Iterable<DynamoDBEntity> entities)
+
+    int count(String hashKey)
+    int count(String hashKey, String rangeKey)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            range {
+                eq DynamoDBEntity.RANGE_INDEX, rangeKey
+            }
+        }
+    })
+    int countByRangeIndex(String hashKey, String rangeKey)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            range { between DynamoDBEntity.DATE_INDEX, after, before }
+        }
+    })
+    int countByDates(String hashKey, Date after, Date before)
+
+    Flowable<DynamoDBEntity> query(String hashKey)
+    Flowable<DynamoDBEntity> query(String hashKey, String rangeKey)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            range {
+                eq DynamoDBEntity.RANGE_INDEX, rangeKey
+            }
+            only {
+                rangeIndex
+            }
+        }
+    })
+    Flowable<DynamoDBEntity> queryByRangeIndex(String hashKey, String rangeKey)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            range { between DynamoDBEntity.DATE_INDEX, after, before }
+        }
+    })
+    Flowable<DynamoDBEntity> queryByDates(String hashKey, Date after, Date before)
+
+    void delete(DynamoDBEntity entity)
+    void delete(String hashKey, String rangeKey)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            range {
+                eq DynamoDBEntity.RANGE_INDEX, rangeKey
+            }
+        }
+    })
+    int deleteByRangeIndex(String hashKey, String rangeKey)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            range { between DynamoDBEntity.DATE_INDEX, after, before }
+        }
+    })
+    int deleteByDates(String hashKey, Date after, Date before)
+
+    @Update({
+        update(DynamoDBEntity) {
+            hash hashKey
+            range rangeKey
+            add 'number', 1
+            returnUpdatedNew { number }
+        }
+    })
+    Number increment(String hashKey, String rangeKey)
+
+    @Update({
+        update(DynamoDBEntity) {
+            hash hashKey
+            range rangeKey
+            add 'number', -1
+            returnUpdatedNew { number }
+        }
+    })
+    Number decrement(String hashKey, String rangeKey)
+
+    @Scan({
+        scan(DynamoDBEntity) {
+            filter {
+                eq DynamoDBEntity.RANGE_INDEX, foo
+            }
+        }
+    })
+    Flowable<DynamoDBEntity> scanAllByRangeIndex(String foo)
+
+}
+----
+
+[source,java,indent=0,options="nowrap",role="secondary"]
+.Java
+----
+@Service(DynamoDBEntity.class)
+public interface DynamoDBEntityService {
+
+    class EqRangeIndex implements Function<Map<String, Object>, DetachedQuery> {
+        public DetachedQuery apply(Map<String, Object> arguments) {
+            return Builders.query(DynamoDBEntity.class)
+                .hash(arguments.get("hashKey"))
+                .range(r -> r.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("rangeKey")));
+        }
+    }
+
+    class EqRangeProjection implements Function<Map<String, Object>, DetachedQuery> {
+        public DetachedQuery apply(Map<String, Object> arguments) {
+            return Builders.query(DynamoDBEntity.class)
+                .hash(arguments.get("hashKey"))
+                .range(r ->
+                    r.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("rangeKey"))
+                )
+                .only(DynamoDBEntity.RANGE_INDEX);
+        }
+    }
+
+    class EqRangeScan implements Function<Map<String, Object>, DetachedScan> {
+        public DetachedScan apply(Map<String, Object> arguments) {
+            return Builders.scan(DynamoDBEntity.class)
+                .filter(f -> f.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("foo")));
+        }
+    }
+
+    class BetweenDateIndex implements Function<Map<String, Object>, DetachedQuery> {
+        public DetachedQuery apply(Map<String, Object> arguments) {
+            return Builders.query(DynamoDBEntity.class)
+                .hash(arguments.get("hashKey"))
+                .range(r -> r.between(DynamoDBEntity.DATE_INDEX, arguments.get("after"), arguments.get("before")));
+        }
+    }
+
+    class IncrementNumber implements Function<Map<String, Object>, DetachedUpdate> {
+        public DetachedUpdate apply(Map<String, Object> arguments) {
+            return Builders.update(DynamoDBEntity.class)
+                .hash(arguments.get("hashKey"))
+                .range(arguments.get("rangeKey"))
+                .add("number", 1)
+                .returnUpdatedNew(DynamoDBEntity::getNumber);
+        }
+    }
+
+    class DecrementNumber implements Function<Map<String, Object>, DetachedUpdate> {
+        public DetachedUpdate apply(Map<String, Object> arguments) {
+            return Builders.update(DynamoDBEntity.class)
+                .hash(arguments.get("hashKey"))
+                .range(arguments.get("rangeKey"))
+                .add("number", -1)
+                .returnUpdatedNew(DynamoDBEntity::getNumber);
+        }
+    }
+
+    DynamoDBEntity get(String hash, String rangeKey);
+
+    DynamoDBEntity load(String hash, String rangeKey);
+
+    List<DynamoDBEntity> getAll(String hash, List<String> rangeKeys);
+
+    List<DynamoDBEntity> getAll(String hash, String... rangeKeys);
+
+    List<DynamoDBEntity> loadAll(String hash, List<String> rangeKeys);
+
+    List<DynamoDBEntity> loadAll(String hash, String... rangeKeys);
+
+    DynamoDBEntity save(DynamoDBEntity entity);
+
+    List<DynamoDBEntity> saveAll(DynamoDBEntity... entities);
+
+    List<DynamoDBEntity> saveAll(Iterable<DynamoDBEntity> entities);
+
+    int count(String hashKey);
+
+    int count(String hashKey, String rangeKey);
+
+    @Query(EqRangeIndex.class)
+    int countByRangeIndex(String hashKey, String rangeKey);
+
+    @Query(BetweenDateIndex.class)
+    int countByDates(String hashKey, Date after, Date before);
+
+    Flowable<DynamoDBEntity> query(String hashKey);
+
+    Flowable<DynamoDBEntity> query(String hashKey, String rangeKey);
+
+    @Query(EqRangeProjection.class)
+    Flowable<DynamoDBEntity> queryByRangeIndex(String hashKey, String rangeKey);
+
+    @Query(BetweenDateIndex.class)
+    Flowable<DynamoDBEntity> queryByDates(String hashKey, Date after, Date before);
+
+    void delete(DynamoDBEntity entity);
+
+    void delete(String hashKey, String rangeKey);
+
+    @Query(EqRangeIndex.class)
+    int deleteByRangeIndex(String hashKey, String rangeKey);
+
+    @Query(BetweenDateIndex.class)
+    int deleteByDates(String hashKey, Date after, Date before);
+
+    @Update(IncrementNumber.class)
+    Number increment(String hashKey, String rangeKey);
+
+    @Update(DecrementNumber.class)
+    Number decrement(String hashKey, String rangeKey);
+
+    @Scan(EqRangeScan.class)
+    Flowable<DynamoDBEntity> scanAllByRangeIndex(String foo);
+
+}
+----
+
+The following table summarizes the supported method signatures:
+
+.Basic Service Methods
+|===
+|Return Type | Method Name | Arguments | Example | Description
+
+|
+    `T`
+
+    `List<T>`
+| `save*`
+| An entity, array of entities or iterable of entities
+|
+    `DynamoDBEntity save(DynamoDBEntity entity)`
+
+    `List<DynamoDBEntity> saveAll(DynamoDBEntity... entities)`
+
+| Perists the entity or a list of entities and returns self
+
+
+|
+    `T`
+
+    `List<T>`
+| `get*`, `load*`
+| Hash key and optional range key, array of range keys or iterable of range keys annotated with `@HashKey` and `@RangeKey` if the argument name does not contain word `hash` or `range`
+|
+    `DynamoDBEntity load(String hashKey);`
+
+    `List<DynamoDBEntity> getAll(@HashKey String parentId, String... rangeKeys);`
+
+| Loads a single entity or a list of entities from the table. Range key is required for tables which defines the range key
+
+
+| `int`
+| `count*`
+| Hash key and optional range key annotated with `@HashKey` and `@RangeKey` if the argument name does not contain word `hash` or `range`
+|
+
+    `int count(String hashKey)`
+
+    `int count(@HashKey String parentId, String rangeKey)`
+
+| Counts the items in the database. Beware, this can be very expensive operation in DynamoDB. See <<Advanced Queries>> for advanced use cases
+
+| `void`
+| `delete*`
+| Entity or Hash key and optional range key annotated with `@HashKey` and `@RangeKey` if the argument name does not contain word `hash` or `range`
+|
+
+    `void delete(DynamoDBEntity entity)`
+
+    `void delete(String hashKey, String rangeKey)`
+
+| Deletes an item which can be specified with hash key and optional range key. See <<Advanced Queries>> for advanced use cases
+
+| `Flowable<T>`
+|
+`list*`
+
+`findAll*`
+
+`query*`
+
+| Entity or Hash key and optional range key annotated with `@HashKey` and `@RangeKey` if the argument name does not contain word `hash` or `range`
+|
+    `Flowable<DynamoDBEntity> query(String hashKey)`
+
+    `Flowable<DynamoDBEntity> query(String hashKey, String rangeKey)`
+
+| Queries for all entities with given hash key and/or range key.
+
+
+|
+
+    (contextual)
+| (none of above)
+| Any arguments which will be translated into arguments map
+|
+
+(see below)
+
+| Query, scan or update. See <<Advanced Queries>>, <<Scanning>> and <<Updates>> for advanced use cases
+
+|===
+
+TIP: Calling any of the declarative service method will create the DynamoDB table automatically if it does not exist already.
+
+===== Advanced Queries
+
+DynamoDB integration does not support feature known as http://gorm.grails.org/6.0.x/hibernate/manual/index.html#finders[_dynamic finders_].
+Instead you can annotate any method with `@Query` annotation to make it
+
+ * counting method if its name begins with `count`
+ * batch delete method if its name begins with `delete`
+ * otherwise an advanced query method
+
+[source,groovy,indent=0,options="nowrap",role="primary"]
+.Groovy
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=builders-import]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-header]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=sample-queries]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-footer]
+----
+<1> `Builders` class provides all necessary factory methods and keywords
+<2> Annotate an interface with `@Service` with the type of the entity as its `value`
+<3> `@Query` annotation accepts a closure which returns a query builder (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/QueryBuilder.html[QueryBuilder] for full reference)
+<4> Specify a hash key with `hash` method and method's `hashKey` argument
+<5> Specify some range key criteria with the method's `rangeKey` argument (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
+<6> You can limit which properties are returned from the query
+<7> Only `rangeIndex` property will be populated in the entities returned
+<8> The arguments have no special meaning but you can use them in the query. The method must return `Flowable` of entities.
+
+
+[source,java,indent=0,options="nowrap",role="secondary"]
+.Java
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=header]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-query-class]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-query]
+
+}
+----
+<1> Annotate an interface with `@Service` with the type of the entity as its `value`
+<2> Define class which implements `Function<Map<String, Object>, DetachedQuery>`
+<3> Use `Builders` class to create a query builder for given DynamoDB entity (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/QueryBuilder.html[QueryBuilder] for full reference)
+<4> Specify a hash key with `hash` method and method's `hashKey` argument
+<5> Specify some range key criteria with the method's `rangeKey` argument (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
+<6> Only `rangeIndex` property will be populated in the entities returned
+<7> `@Query` annotation accepts a class which implements `Function<Map<String, Object>, DetachedQuery>`
+<8> The arguments have no special meaning but you can use them in the query using `arguments` map. The method must return `Flowable` of entities.
+
+
+===== Scanning
+
+DynamoDB integration does not support feature known as http://gorm.grails.org/6.0.x/hibernate/manual/index.html#finders[_dynamic finders_].
+If you need to scan the table by unindexed attributes you can annotate any method with `@scan` annotation to make it
+
+ * counting method if its name begins with `count`
+ * otherwise an advanced query method
+
+[source,groovy,indent=0,options="nowrap",role="primary"]
+.Groovy
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=builders-import]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-header]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=sample-scan]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-footer]
+----
+<1> `Builders` class provides all necessary factory methods and keywords
+<2> Annotate an interface with `@Service` with the type of the entity as its `value`
+<3> `@Scan` annotation accepts a closure which returns a scan builder (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/ScanBuilder.html[ScanBuilder] for full reference)
+<4> Specify some filter criteria with the method's `foo` argument (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
+<5> The arguments have no special meaning but you can use them in the scan definition. The method must return `Flowable` of entities.
+
+
+[source,java,indent=0,options="nowrap",role="secondary"]
+.Java
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=header]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-scan-class]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-scan]
+
+}
+----
+<1> Annotate an interface with `@Service` with the type of the entity as its `value`
+<2> Define class which implements `Function<Map<String, Object>, DetachedScan>`
+<3> Use `Builders` class to create a scan builder for given DynamoDB entity (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/ScanBuilder.html[ScanBuilder] for full reference)
+<4> Specify some filter criteria with the method's `foo` argument (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
+<5> `@Scan` annotation accepts a class which implements `Function<Map<String, Object>, DetachedScan>`
+<6> The arguments have no special meaning but you can use them in the scan definition. The method must return `Flowable` of entities.
+
+
+
+=====  Updates
+Declarative services allows you to execute fine-grained updates. Any method annotated with `@Update` will perform the update in the DynamoDB table.
+
+[source,groovy,indent=0,options="nowrap",role="primary"]
+.Groovy
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=builders-import]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-header]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=sample-update]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-footer]
+----
+<1> `Builders` class provides all necessary factory methods and keywords
+<2> Annotate an interface with `@Service` with the type of the entity as its `value`
+<3> `@Update` annotation accepts a closure which returns an update builder (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html[UpdateBuilder] for full reference)
+<4> Specify a hash key with `hash` method and method's `hashKey` argument
+<5> Specify a range key with `range` method and method's `rangeKey` argument
+<6> Specify update operation - increment `number` attribute (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html[UpdateBuilder] for full reference). You may have multiple update operations.
+<7> Specify what should be returned from the method (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html[UpdateBuilder] for full reference).
+<8> The arguments have no special meaning but you can use them in the scan definition. The method's return value depends on the value returned from `returnUpdatedNew` mapper.
+
+
+[source,java,indent=0,options="nowrap",role="secondary"]
+.Java
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=header]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-update-class]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-update]
+
+}
+----
+<1> Annotate an interface with `@Service` with the type of the entity as its `value`
+<2> Define class which implements `Function<Map<String, Object>, DetachedUpdate>`
+<3> Use `Builders` class to create an update builder for given DynamoDB entity (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html[UpdateBuilder] for full reference)
+<4> Specify a hash key with `hash` method and method's `hashKey` argument
+<5> Specify a range key with `range` method and method's `rangeKey` argument
+<6> Specify update operation - increment `number` attribute (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html[UpdateBuilder] for full reference). You may have multiple update operations.
+<7> Specify what should be returned from the method (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html[UpdateBuilder] for full reference).
+<8> `@Update` annotation accepts a class which implements `Function<Map<String, Object>, DetachedUpdate>`
+<9> The arguments have no special meaning but you can use them in the scan definition. The method's return value depends on the value returned from `returnUpdatedNew` mapper.
+
+==== DynamoDB Service
+
+`DynamoDBService` provides middle-level API for working with DynamoDB tables and entites. You can obtain instance of `DynamoDBService` from
+`DynamoDBServiceProvider` which can be injected to any bean.
+
+[source,groovy,indent=0,options="nowrap",role="primary"]
+.Groovy
+----
+
+        DynamoDBServiceProvider provider = context.getBean(DynamoDBServiceProvider)
+        DynamoDBService<DynamoDBEntity> s = provider.findOrCreate(DynamoDBEntity)       // <1>
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=create-table]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=save-entity]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=load-entity]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=query-by-range-index]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=query-by-dates]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=increment]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=delete]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=delete-all]
+
+----
+<1> Obtain the instance of `DynamoDBService` from `DynamoDBServiceProvider` (provider can be injected)
+<2> Create table for the entity
+<3> Save an entity
+<4> Load the entity by its hash and range keys
+<5> Query the table for entities with given range index value
+<6> Query the table for entities having date between the specified dates
+<7> Increment a property for entity specified by hash and range keys
+<8> Delete an entity by object reference
+<9> Delete all entities with given range index value
+
+[source,java,indent=0,options="nowrap",role="secondary"]
+.Java
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=obtain-service]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=create-table]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=save-entity]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=load-entity]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=query-by-range-index]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=query-by-dates]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=increment]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=delete]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=delete-all]
+----
+<1> Obtain the instance of `DynamoDBService` from `DynamoDBServiceProvider` (provider can be injected)
+<2> Create table for the entity
+<3> Save an entity
+<4> Load the entity by its hash and range keys
+<5> Query the table for entities with given range index value
+<6> Query the table for entities having date between the specified dates
+<7> Increment a property for entity specified by hash and range keys
+<8> Delete an entity by object reference
+<9> Delete all entities with given range index value
+
+Please see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/DynamoDBService.html[DynamoDBService] for full reference.
+
+==== Testing
+
+You can very easily mock any of the interfaces and declarative services but if you need close-to-production
+DynamoDB integration works well with https://www.testcontainers.org/[Testcontainers] and https://localstack.cloud/[LocalStack].
+
+You need to add following dependencies into your build file:
+
+[source,indent=0,role="primary"]
+.Gradle
+----
+compile group: 'org.testcontainers', name: 'localstack', version: '1.10.2'
+compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'
+----
+
+[source,xml,indent=0,role="secondary"]
+.Maven
+----
+<dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>localstack</artifactId>
+    <version>1.10.2</version>
+    <scope>test</scope>
+</dependency>
+<dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>spock</artifactId>
+    <version>1.10.2</version>
+    <scope>test</scope>
+</dependency>
+
+----
+
+Then you can setup your tests like this:
+
+[source,groovy,indent=0,role="primary"]
+.Groovy
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=testcontainers-header]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=testcontainers-setup]
+    // test methods
+
+}
+----
+<1> Annotate the specification with `@Testcontainers` to let Spock manage the Testcontainers for you
+<2> Prepare the reference to the `ApplicationContext`, `@AutoCleanup` guarantees closing the context after the tests
+<3> Create an instance of `LocalStackContainer` with only DynamoDB support enabled
+<4> Create `AmazonDynamoDB` client using the LocalStack configuration
+<5> Register the client using LocalStack to the application context
+<6> Register the mapper using LocalStack to the application context
+<7> Obtain the provider bean
+<8> Obtain `DynamoDBService` for particular DynamoDB entity
+
+[source,java,indent=0,role="secondary"]
+.Java
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=header]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=setup]
+    @Test
+    public void testSomething() {
+        DynamoDBServiceProvider provider = ctx.getBean(DynamoDBServiceProvider.class);  // <7>
+        DynamoDBService<DynamoDBEntity> s = provider.findOrCreate(DynamoDBEntity.class);// <8>
+
+        // test code
+    }
+}
+----
+<1> Create an instance of `LocalStackContainer` with only DynamoDB support enabled
+<2> Prepare the reference to the `ApplicationContext`
+<3> Create `AmazonDynamoDB` client using the LocalStack configuration
+<4> Register the client using LocalStack to the application context
+<5> Register the mapper using LocalStack to the application context
+<6> Close the application context after test execution
+<7> Obtain the provider bean
+<8> Obtain `DynamoDBService` for particular DynamoDB entity
+
+TIP: You can obtain instances of declarative client from the context as well.

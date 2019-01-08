@@ -1,6 +1,6 @@
 package com.agorapulse.micronaut.aws.dynamodb.builder;
 
-import com.agorapulse.micronaut.aws.dynamodb.DefaultDynamoDBService;
+import com.agorapulse.micronaut.aws.dynamodb.DynamoDBService;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.model.ConditionalOperator;
@@ -13,6 +13,11 @@ import space.jasan.support.groovy.closure.ConsumerWithDelegate;
 
 import java.util.function.Consumer;
 
+/**
+ * Utility class for building queries, updates and scan.
+ *
+ * This class is designed to be statically star-imported in the service interface.
+ */
 public final class Builders {
 
     private Builders() {}
@@ -25,6 +30,7 @@ public final class Builders {
         READ
     }
 
+    //CHECKSTYLE:OFF: ConstantName - DSL keywords
     public static final Sort asc = Sort.ASC;
     public static final Sort desc = Sort.DESC;
     public static final Read read = Read.READ;
@@ -37,13 +43,41 @@ public final class Builders {
     public static final ReturnValue updatedOld = ReturnValue.UPDATED_OLD;
     public static final ReturnValue allNew = ReturnValue.ALL_NEW;
     public static final ReturnValue updatedNew = ReturnValue.UPDATED_NEW;
+    //CHECKSTYLE.ON: ConstantName
 
+    /**
+     * Creates query builder for given DynamoDB entity.
+     *
+     * @param type DynamoDB entity type
+     * @param <T> type of DynamoDB entity
+     * @return query builder for given DynamoDB entity
+     */
+    public static <T> QueryBuilder<T> query(Class<T> type) {
+        return new DefaultQueryBuilder<T>(type, new DynamoDBQueryExpression<T>().withLimit(DynamoDBService.DEFAULT_QUERY_LIMIT));
+    }
+
+    /**
+     * Creates query builder for given DynamoDB entity.
+     *
+     * @param type DynamoDB entity type
+     * @param definition definition of the query
+     * @param <T> type of DynamoDB entity
+     * @return query builder for given DynamoDB entity
+     */
     public static <T> QueryBuilder<T> query(Class<T> type, Consumer<QueryBuilder<T>> definition) {
-        QueryBuilder<T> builder = new DefaultQueryBuilder<T>(type, new DynamoDBQueryExpression<T>().withLimit(DefaultDynamoDBService.DEFAULT_QUERY_LIMIT));
+        QueryBuilder<T> builder = query(type);
         definition.accept(builder);
         return builder;
     }
 
+    /**
+     * Creates query builder for given DynamoDB entity.
+     *
+     * @param type DynamoDB entity type
+     * @param definition definition of the query
+     * @param <T> type of DynamoDB entity
+     * @return query builder for given DynamoDB entity
+     */
     public static <T> QueryBuilder<T> query(
         Class<T> type,
         @DelegatesTo(type = "com.agorapulse.micronaut.aws.dynamodb.builder.QueryBuilder<T>", strategy = Closure.DELEGATE_FIRST)
@@ -53,12 +87,39 @@ public final class Builders {
         return query(type, ConsumerWithDelegate.create(definition));
     }
 
+    /**
+     * Creates scan builder for given DynamoDB entity.
+     *
+     * @param type DynamoDB entity type
+     * @param <T> type of DynamoDB entity
+     * @return scan builder for given DynamoDB entity
+     */
+    public static <T> ScanBuilder<T> scan(Class<T> type) {
+        return new DefaultScanBuilder<T>(type, new DynamoDBScanExpression().withLimit(DynamoDBService.DEFAULT_QUERY_LIMIT));
+    }
+
+    /**
+     * Creates scan builder for given DynamoDB entity.
+     *
+     * @param type DynamoDB entity type
+     * @param definition definition of the query
+     * @param <T> type of DynamoDB entity
+     * @return scan builder for given DynamoDB entity
+     */
     public static <T> ScanBuilder<T> scan(Class<T> type, Consumer<ScanBuilder<T>> definition) {
-        ScanBuilder<T> builder = new DefaultScanBuilder<T>(type, new DynamoDBScanExpression().withLimit(DefaultDynamoDBService.DEFAULT_QUERY_LIMIT));
+        ScanBuilder<T> builder = scan(type);
         definition.accept(builder);
         return builder;
     }
 
+    /**
+     * Creates scan builder for given DynamoDB entity.
+     *
+     * @param type DynamoDB entity type
+     * @param definition definition of the query
+     * @param <T> type of DynamoDB entity
+     * @return scan builder for given DynamoDB entity
+     */
     public static <T> ScanBuilder<T> scan(
         Class<T> type,
         @DelegatesTo(type = "com.agorapulse.micronaut.aws.dynamodb.builder.ScanBuilder<T>", strategy = Closure.DELEGATE_FIRST)
@@ -68,12 +129,39 @@ public final class Builders {
         return scan(type, ConsumerWithDelegate.create(definition));
     }
 
+    /**
+     * Creates update builder for given DynamoDB entity.
+     *
+     * @param type DynamoDB entity type
+     * @param <T> type of DynamoDB entity
+     * @return update builder for given DynamoDB entity
+     */
+    public static <T> UpdateBuilder<T> update(Class<T> type) {
+        return new DefaultUpdateBuilder<>(type);
+    }
+
+    /**
+     * Creates update builder for given DynamoDB entity.
+     *
+     * @param type DynamoDB entity type
+     * @param definition definition of the query
+     * @param <T> type of DynamoDB entity
+     * @return update builder for given DynamoDB entity
+     */
     public static <T> UpdateBuilder<T> update(Class<T> type, Consumer<UpdateBuilder<T>> definition) {
-        UpdateBuilder<T> builder = new DefaultUpdateBuilder<>(type);
+        UpdateBuilder<T> builder = update(type);
         definition.accept(builder);
         return builder;
     }
 
+    /**
+     * Creates update builder for given DynamoDB entity.
+     *
+     * @param type DynamoDB entity type
+     * @param definition definition of the query
+     * @param <T> type of DynamoDB entity
+     * @return update builder for given DynamoDB entity
+     */
     public static <T> UpdateBuilder<T> update(
         Class<T> type,
         @DelegatesTo(type = "com.agorapulse.micronaut.aws.dynamodb.builder.UpdateBuilder<T>", strategy = Closure.DELEGATE_FIRST)

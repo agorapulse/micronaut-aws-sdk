@@ -9,6 +9,9 @@ import org.junit.Rule
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 
+/**
+ * Test for basic http server using Netty implementation.
+ */
 class NettyHttpServerSpec extends AbstractApiGatewayProxyHttpRequestSpec {
 
     @Shared @AutoCleanup EmbeddedServer embeddedServer = ApplicationContext.run(EmbeddedServer)
@@ -16,7 +19,7 @@ class NettyHttpServerSpec extends AbstractApiGatewayProxyHttpRequestSpec {
     @Rule Gru gru = Gru.equip(Http.steal(this))
 
     void setup() {
-        String serverUrl = embeddedServer.getURL().toString()
+        String serverUrl = embeddedServer.URL
         gru.prepare {
             baseUri serverUrl
         }

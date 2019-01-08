@@ -43,8 +43,6 @@ import java.util.*;
  * <p>
  * The Grails properties can be translated to Micronaut properties if required.
  *
- * @author jeffbrown
- * @author musketyr
  * @since 1.0
  */
 public class GrailsMicronautBeanProcessor implements BeanFactoryPostProcessor, DisposableBean, EnvironmentAware {

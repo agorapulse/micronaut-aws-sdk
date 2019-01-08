@@ -3,16 +3,19 @@ package com.agorapulse.micronaut.http.server.tck
 import com.agorapulse.gru.Gru
 import spock.lang.Specification
 
+/**
+ * Base class for api gateway proxy request tests.
+ */
 abstract class AbstractApiGatewayProxyHttpRequestSpec extends Specification {
 
-    abstract Gru getGru();
+    abstract Gru getGru()
 
     void 'should return hello'() {
         expect:
             gru.test {
                 get '/hello'
                 expect {
-                    text inline("Hello Galaxy!")
+                    text inline('Hello Galaxy!')
                 }
             }
     }

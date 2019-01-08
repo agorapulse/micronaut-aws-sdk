@@ -30,7 +30,7 @@ public class AwsConfiguration {
     @Bean
     @Singleton
     AwsRegionProvider defaultAwsRegionProvider(Environment environment) {
-        return new AwsRegionProviderChain(
+        return new SafeAwsRegionProviderChain(
             new EnvironmentAwsRegionProvider(environment),
             new AwsEnvVarOverrideRegionProvider(),
             new AwsSystemPropertyRegionProvider(),

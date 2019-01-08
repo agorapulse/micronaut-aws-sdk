@@ -4,8 +4,6 @@ import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.regions.AwsRegionProvider;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
-import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import io.micronaut.configuration.aws.AWSClientConfiguration;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;

@@ -5,6 +5,9 @@ import io.micronaut.inject.qualifiers.Qualifiers
 import spock.lang.AutoCleanup
 import spock.lang.Specification
 
+/**
+ * Test for simple storage service auto-configuration.
+ */
 class SimpleStorageServiceConfigurationSpec extends Specification {
 
     @AutoCleanup ApplicationContext context = null

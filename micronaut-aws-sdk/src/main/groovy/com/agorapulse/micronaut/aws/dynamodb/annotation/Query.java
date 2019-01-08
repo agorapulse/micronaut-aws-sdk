@@ -6,6 +6,9 @@ import java.lang.annotation.*;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * Makes annotated method in the service interface a query method.
+ */
 @Inherited
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

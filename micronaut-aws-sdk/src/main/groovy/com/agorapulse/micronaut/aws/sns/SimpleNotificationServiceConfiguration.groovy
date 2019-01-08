@@ -8,10 +8,13 @@ import io.micronaut.context.annotation.Requires
 import javax.inject.Named
 import javax.validation.constraints.NotEmpty
 
+/**
+ * Default simple queue service configuration.
+ */
 @Named('default')
 @CompileStatic
 @ConfigurationProperties('aws.sns')
-@Requires(classes = AmazonSNS.class)
+@Requires(classes = AmazonSNS)
 class SimpleNotificationServiceConfiguration {
 
     static class Application {

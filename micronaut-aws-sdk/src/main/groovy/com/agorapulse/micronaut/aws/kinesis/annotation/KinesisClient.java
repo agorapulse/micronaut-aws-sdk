@@ -9,6 +9,9 @@ import javax.inject.Scope;
 import javax.inject.Singleton;
 import java.lang.annotation.*;
 
+/**
+ * Makes annotated interface a declarative Kinesis client.
+ */
 @Introduction
 @Type(KinesisClientIntroduction.class)
 @Scope

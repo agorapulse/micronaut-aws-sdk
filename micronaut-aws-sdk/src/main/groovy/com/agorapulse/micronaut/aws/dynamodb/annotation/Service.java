@@ -8,6 +8,9 @@ import javax.inject.Scope;
 import javax.inject.Singleton;
 import java.lang.annotation.*;
 
+/**
+ * Makes annotated interface a declarative DynamoDB service.
+ */
 @Introduction
 @Type(ServiceIntroduction.class)
 @Scope

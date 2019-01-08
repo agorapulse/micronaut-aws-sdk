@@ -12,18 +12,31 @@ import io.micronaut.http.multipart.PartData
 import io.reactivex.Flowable
 import org.apache.commons.codec.digest.DigestUtils
 
+/**
+ * Default implementation of the simple storage service.
+ */
 @Slf4j
 @CompileStatic
+@SuppressWarnings(
+    [
+        'NoWildcardImports',
+        'SpaceAroundMapEntryColon',
+    ]
+)
 class DefaultSimpleStorageService implements SimpleStorageService {
 
+    private static final String ATTACHMENT = 'attachment'
+    private static final Map<String, String> CONTENT_FLASH = Collections.singletonMap('contentType', 'application/x-shockwave-flash')
+    private static final Map<String, String> CONTENT_BINARY = [contentType: 'application/octet-stream', contentDisposition: ATTACHMENT]
+
     private static final Map HTTP_CONTENTS = [
-            audio: [contentType: 'audio/mpeg'],
-            csv:   [contentType: 'text/csv', contentDisposition: 'attachment'],
-            excel: [contentType: 'application/vnd.ms-excel', contentDisposition: 'attachment'],
-            flash: [contentType: 'application/x-shockwave-flash'],
-            pdf:   [contentType: 'application/pdf'],
-            file:  [contentType: 'application/octet-stream', contentDisposition: 'attachment'],
-            video: [contentType: 'video/x-flv']
+        audio: [contentType: 'audio/mpeg'],
+        csv  : [contentType: 'text/csv', contentDisposition: ATTACHMENT],
+        excel: [contentType: 'application/vnd.ms-excel', contentDisposition: ATTACHMENT],
+        flash: CONTENT_FLASH,
+        pdf  : [contentType: 'application/pdf'],
+        file : CONTENT_BINARY,
+        video: [contentType: 'video/x-flv'],
     ].asImmutable()
 
     private final AmazonS3 client
@@ -37,6 +50,40 @@ class DefaultSimpleStorageService implements SimpleStorageService {
 
     /**
      *
+     * @param type
+     * @param fileExtension
+     * @param cannedAcl
+     * @return
+     */
+    @SuppressWarnings('DuplicateStringLiteral')
+    static ObjectMetadata buildMetadataFromType(String type,
+                                                String fileExtension,
+                                                CannedAccessControlList cannedAcl = null) {
+        Map contentInfo
+        if (HTTP_CONTENTS[type]) {
+            contentInfo = HTTP_CONTENTS[type] as Map
+        } else if (type in ['image', 'photo']) {
+            // Return image/jpeg for images to fix Safari issue (download image instead of inline display)
+            contentInfo = [contentType: "image/${fileExtension == 'jpg' ? 'jpeg' : fileExtension}"]
+        } else if (fileExtension == 'swf') {
+            contentInfo = CONTENT_FLASH
+        } else {
+            contentInfo = CONTENT_BINARY
+        }
+
+        ObjectMetadata metadata = new ObjectMetadata()
+        metadata.contentType = contentInfo.contentType as String
+        if (contentInfo.contentDisposition) {
+            metadata.contentDisposition = contentInfo.contentDisposition as String
+        }
+        if (cannedAcl) {
+            metadata.setHeader('x-amz-acl', cannedAcl.toString())
+        }
+        metadata
+    }
+
+    /**
+     *
      * @param bucketName
      * @param path
      * @param file
@@ -44,6 +91,7 @@ class DefaultSimpleStorageService implements SimpleStorageService {
      * @param contentType
      * @return
      */
+    @SuppressWarnings('CouldBeElvis')
     Upload transferFile(String bucketName, String path, File file, CannedAccessControlList cannedAcl) {
         if (!transferManager) {
             // Create transfer manager (only create if required, since it may pool connections and threads)
@@ -56,41 +104,10 @@ class DefaultSimpleStorageService implements SimpleStorageService {
 
     /**
      *
-     * @param type
-     * @param fileExtension
-     * @param cannedAcl
-     * @return
-     */
-    static ObjectMetadata buildMetadataFromType(String type,
-                                         String fileExtension,
-                                         CannedAccessControlList cannedAcl = null) {
-        Map contentInfo
-        if (HTTP_CONTENTS[type]) {
-            contentInfo = HTTP_CONTENTS[type] as Map
-        } else if (type in ['image', 'photo']) {
-            contentInfo = [contentType: "image/${fileExtension == 'jpg' ? 'jpeg' : fileExtension}"] // Return image/jpeg for images to fix Safari issue (download image instead of inline display)
-        } else if (fileExtension == 'swf') {
-            contentInfo = [contentType: "application/x-shockwave-flash"]
-        } else {
-            contentInfo = [contentType: 'application/octet-stream', contentDisposition: 'attachment']
-        }
-
-        ObjectMetadata metadata = new ObjectMetadata()
-        metadata.setContentType(contentInfo.contentType as String)
-        if (contentInfo.contentDisposition) {
-            metadata.setContentDisposition(contentInfo.contentDisposition as String)
-        }
-        if (cannedAcl) {
-            metadata.setHeader('x-amz-acl', cannedAcl.toString())
-        }
-        metadata
-    }
-
-    /**
-     *
      * @param bucketName
      * @param region
      */
+    @SuppressWarnings('BuilderMethodWithSideEffects')
     void createBucket(String bucketName) {
         client.createBucket(bucketName)
     }
@@ -137,7 +154,7 @@ class DefaultSimpleStorageService implements SimpleStorageService {
      * @return
      */
     boolean deleteFiles(String bucketName, String prefix) {
-        assert prefix.tokenize('/').size() >= 2, "Multiple delete are only allowed in sub/sub directories"
+        assert prefix.tokenize('/').size() >= 2, 'Multiple delete are only allowed in sub/sub directories'
 
         Flowable<Boolean> results = listObjects(bucketName, prefix).flatMap {
             Flowable.fromIterable(it.objectSummaries)
@@ -155,22 +172,22 @@ class DefaultSimpleStorageService implements SimpleStorageService {
      *
      * @param String
      * @param bucketName
-     * @param prefix
+     * @param key
      * @return
      */
-    boolean exists(String bucketName, String prefix) {
-        if (!prefix) {
+    boolean exists(String bucketName, String key) {
+        if (!key) {
             return false
         }
         try {
-            ObjectListing objectListing = client.listObjects(bucketName, prefix)
+            ObjectListing objectListing = client.listObjects(bucketName, key)
             if (objectListing.objectSummaries) {
                 return true
             }
         } catch (AmazonS3Exception exception) {
-            log.warn 'An amazon S3 exception was catched while checking if file exists', exception
+            log.warn 'An amazon S3 exception was caught while checking if file exists', exception
         } catch (AmazonClientException exception) {
-            log.warn 'An amazon client exception was catched while checking if file exists', exception
+            log.warn 'An amazon client exception was caught while checking if file exists', exception
         }
         return false
     }
@@ -194,7 +211,7 @@ class DefaultSimpleStorageService implements SimpleStorageService {
      * @return
      */
     List listBucketNames() {
-        client.listBuckets().collect { it.name }
+        client.listBuckets()*.name
     }
 
     /**
@@ -257,7 +274,7 @@ class DefaultSimpleStorageService implements SimpleStorageService {
     String storeFile(String bucketName, String path, File file, CannedAccessControlList cannedAcl) {
         try {
             PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, path, file)
-                    .withCannedAcl(cannedAcl)
+                .withCannedAcl(cannedAcl)
             client.putObject(putObjectRequest)
         } catch (AmazonClientException exception) {
             log.warn "An amazon client exception was catched while storing file $bucketName/$path", exception
@@ -275,15 +292,19 @@ class DefaultSimpleStorageService implements SimpleStorageService {
      * @param metadata
      * @return
      */
+    @SuppressWarnings([
+        'CouldBeElvis',
+        'ParameterReassignment',
+    ])
     String storeMultipartFile(String bucketName, String path, PartData partData, CannedAccessControlList cannedAcl, ObjectMetadata metadata) {
         if (!metadata) {
             metadata = new ObjectMetadata()
         }
         metadata.setHeader(Headers.S3_CANNED_ACL, cannedAcl.toString())
-        metadata.setContentLength(partData.bytes.size())
+        metadata.contentLength = partData.bytes.size()
         byte[] resultByte = DigestUtils.md5(partData.inputStream)
-        metadata.setContentMD5(resultByte.encodeBase64().toString())
-        partData.contentType.ifPresent { metadata.setContentType(it.name) }
+        metadata.contentMD5 = resultByte.encodeBase64().toString()
+        partData.contentType.ifPresent { metadata.contentType = it.name }
         storeInputStream(bucketName, path, partData.inputStream, metadata)
     }
 
@@ -294,6 +315,6 @@ class DefaultSimpleStorageService implements SimpleStorageService {
 
     // PRIVATE
     private void assertDefaultBucketName() {
-        assert defaultBucketName, "Default bucket must be defined"
+        assert defaultBucketName, 'Default bucket must be defined'
     }
 }

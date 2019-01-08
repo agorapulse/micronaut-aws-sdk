@@ -7,7 +7,7 @@ import io.reactivex.functions.BiFunction;
 
 import java.util.List;
 
-public class FlowableQueryResultHelper {
+class FlowableQueryResultHelper {
 
     public static <T> Flowable<T> generate(Class<T> type, IDynamoDBMapper mapper, DynamoDBQueryExpression<T> queryExpression) {
         return Flowable.generate(() -> mapper.queryPage(type, queryExpression), new BiFunction<QueryResultPage<T>, Emitter<List<T>>, QueryResultPage<T>>() {

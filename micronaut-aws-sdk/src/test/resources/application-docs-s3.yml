@@ -1,0 +1,7 @@
+aws:
+  s3:
+    bucket: MyBucket                                                                    # <1>
+
+    buckets:                                                                            # <2>
+      test:                                                                             # <3>
+        bucket: TestBucket
