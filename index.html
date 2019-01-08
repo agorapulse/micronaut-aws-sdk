@@ -518,9 +518,15 @@ $(addBlockSwitches);
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_aws_sdk_for_micronaut">AWS SDK for Micronaut</a>
+<li><a href="#_micronaut_grails">Micronaut Grails</a>
 <ul class="sectlevel2">
 <li><a href="#_installation">Installation</a></li>
+<li><a href="#_usage">Usage</a></li>
+</ul>
+</li>
+<li><a href="#_aws_sdk_for_micronaut">AWS SDK for Micronaut</a>
+<ul class="sectlevel2">
+<li><a href="#_installation_2">Installation</a></li>
 <li><a href="#_dynamodb">DynamoDB</a>
 <ul class="sectlevel3">
 <li><a href="#_declarative_services_with_service">Declarative Services with <code>@Service</code></a>
@@ -581,12 +587,6 @@ $(addBlockSwitches);
 </li>
 </ul>
 </li>
-<li><a href="#_micronaut_grails">Micronaut Grails</a>
-<ul class="sectlevel2">
-<li><a href="#_installation_2">Installation</a></li>
-<li><a href="#_usage">Usage</a></li>
-</ul>
-</li>
 <li><a href="#_maintained_by">Maintained by</a></li>
 </ul>
 </div>
@@ -606,6 +606,149 @@ $(addBlockSwitches);
 </div>
 <div class="paragraph">
 <p>Set of useful libraries for <a href="http://micronaut.io">Micronaut</a>. All of the libraries are available in <a href="https://bintray.com/bintray/jcenter">JCenter Maven repository</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_micronaut_grails">Micronaut Grails</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Micronaut Grails package helps using Micronaut beans in the Grails application. There are two additional features which
+cannot be found the official <a href="https://docs.micronaut.io/latest/guide/index.html#springBeans">Spring support for Micronaut</a>:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Micronaut beans' names defaults to lower-cased simple name of the class as expected by Grails</p>
+</li>
+<li>
+<p>Ability to reuse existing properties declared by Grails - e.g. <code>grails.redis.port</code> can be injected as <code>@Value('${redis.port}')</code></p>
+</li>
+</ol>
+</div>
+<div class="sect2">
+<h3 id="_installation">Installation</h3>
+<div class="listingblock primary">
+<div class="title">Gradle</div>
+<div class="content">
+<pre class="highlightjs highlight"><code>compileOnly 'com.agorapulse:micronaut-grails:1.0.1.RC1'</code></pre>
+</div>
+</div>
+<div class="listingblock secondary">
+<div class="title">Maven</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
+    &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
+    &lt;artifactId&gt;micronaut-grails&lt;/artifactId&gt;
+    &lt;version&gt;1.0.1.RC1&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+If you plan to reuse same library for Micronaut and Grails, you can declare the dependency as  <code>compileOnly</code>.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_usage">Usage</h3>
+<div class="paragraph">
+<p>The integration is handle by bean processor which needs to be injected into Spring application context. The easiest
+thing is to create Spring configuration placed next to your Micronaut classes. The Spring configuration class will
+create the processor bean:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy">@CompileStatic
+@Configuration                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+class GrailsConfig {
+
+    @Bean
+    GrailsMicronautBeanProcessor widgetProcessor() {                                    <i class="conum" data-value="2"></i><b>(2)</b>
+        GrailsMicronautBeanProcessor
+            .builder()                                                                  <i class="conum" data-value="3"></i><b>(3)</b>
+            .addByType(Widget)                                                          <i class="conum" data-value="4"></i><b>(4)</b>
+            .addByType('someInterface', SomeInterface)                                  <i class="conum" data-value="5"></i><b>(5)</b>
+            .addByStereotype('prototype', Prototype)                                    <i class="conum" data-value="6"></i><b>(6)</b>
+            .addByName('gadget')                                                        <i class="conum" data-value="7"></i><b>(7)</b>
+            .addByName('one')
+            .addByName('two')
+            .addByQualifiers(                                                           <i class="conum" data-value="8"></i><b>(8)</b>
+                'otherMinion',
+                Qualifiers.byName('other'),
+                Qualifiers.byType(Minion)
+            )
+            .build()
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Define class as Spring <code>@Configuration</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Declare method which returns bean processor <code>@Bean</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Use builder to add all exported beans to the Spring application context</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>The name of the Spring bean defaults to the <em>property name</em> of the class, e.g. <code>widget</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>You can provide different name</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>You can qualify using a stereotype (annotation)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>You can qualify using the name of the bean which will be the same in the Spring application</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>You can combine any qualifiers possible to narrow the search to single bean which needs to be available from the Spring application context</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+If more then one bean qualifies the criteria then an exception will be thrown.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Once you have your configuration class ready then you can create <code>META-INF/spring.factories</code> descriptor in resources folder
+which will automatically load the configuration once the JAR is on classpath.</p>
+</div>
+<div class="listingblock">
+<div class="title">META-INF/spring.factories</div>
+<div class="content">
+<pre>org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.agorapulse.micronaut.grails.example.GrailsConfig</pre>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -708,7 +851,7 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <p>In this documentation, the high-level approaches will be discussed first before the lower-level services.</p>
 </div>
 <div class="sect2">
-<h3 id="_installation">Installation</h3>
+<h3 id="_installation_2">Installation</h3>
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
@@ -4270,149 +4413,6 @@ class SimpleQueueServiceSpec extends Specification {
 </div>
 </div>
 <div class="sect1">
-<h2 id="_micronaut_grails">Micronaut Grails</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Micronaut Grails package helps using Micronaut beans in the Grails application. There are two additional features which
-cannot be found the official <a href="https://docs.micronaut.io/latest/guide/index.html#springBeans">Spring support for Micronaut</a>:</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Micronaut beans' names defaults to lower-cased simple name of the class as expected by Grails</p>
-</li>
-<li>
-<p>Ability to reuse existing properties declared by Grails - e.g. <code>grails.redis.port</code> can be injected as <code>@Value('${redis.port}')</code></p>
-</li>
-</ol>
-</div>
-<div class="sect2">
-<h3 id="_installation_2">Installation</h3>
-<div class="listingblock primary">
-<div class="title">Gradle</div>
-<div class="content">
-<pre class="highlightjs highlight"><code>compileOnly 'com.agorapulse:micronaut-grails:1.0.1.RC1'</code></pre>
-</div>
-</div>
-<div class="listingblock secondary">
-<div class="title">Maven</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
-    &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
-    &lt;artifactId&gt;micronaut-grails&lt;/artifactId&gt;
-    &lt;version&gt;1.0.1.RC1&lt;/version&gt;
-&lt;/dependency&gt;</code></pre>
-</div>
-</div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
-</td>
-<td class="content">
-If you plan to reuse same library for Micronaut and Grails, you can declare the dependency as  <code>compileOnly</code>.
-</td>
-</tr>
-</table>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_usage">Usage</h3>
-<div class="paragraph">
-<p>The integration is handle by bean processor which needs to be injected into Spring application context. The easiest
-thing is to create Spring configuration placed next to your Micronaut classes. The Spring configuration class will
-create the processor bean:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy">@CompileStatic
-@Configuration                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
-class GrailsConfig {
-
-    @Bean
-    GrailsMicronautBeanProcessor widgetProcessor() {                                    <i class="conum" data-value="2"></i><b>(2)</b>
-        GrailsMicronautBeanProcessor
-            .builder()                                                                  <i class="conum" data-value="3"></i><b>(3)</b>
-            .addByType(Widget)                                                          <i class="conum" data-value="4"></i><b>(4)</b>
-            .addByType('someInterface', SomeInterface)                                  <i class="conum" data-value="5"></i><b>(5)</b>
-            .addByStereotype('prototype', Prototype)                                    <i class="conum" data-value="6"></i><b>(6)</b>
-            .addByName('gadget')                                                        <i class="conum" data-value="7"></i><b>(7)</b>
-            .addByName('one')
-            .addByName('two')
-            .addByQualifiers(                                                           <i class="conum" data-value="8"></i><b>(8)</b>
-                'otherMinion',
-                Qualifiers.byName('other'),
-                Qualifiers.byType(Minion)
-            )
-            .build()
-    }
-
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Define class as Spring <code>@Configuration</code></td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Declare method which returns bean processor <code>@Bean</code></td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Use builder to add all exported beans to the Spring application context</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>The name of the Spring bean defaults to the <em>property name</em> of the class, e.g. <code>widget</code></td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>You can provide different name</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>You can qualify using a stereotype (annotation)</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>You can qualify using the name of the bean which will be the same in the Spring application</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="8"></i><b>8</b></td>
-<td>You can combine any qualifiers possible to narrow the search to single bean which needs to be available from the Spring application context</td>
-</tr>
-</table>
-</div>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-If more then one bean qualifies the criteria then an exception will be thrown.
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>Once you have your configuration class ready then you can create <code>META-INF/spring.factories</code> descriptor in resources folder
-which will automatically load the configuration once the JAR is on classpath.</p>
-</div>
-<div class="listingblock">
-<div class="title">META-INF/spring.factories</div>
-<div class="content">
-<pre>org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.agorapulse.micronaut.grails.example.GrailsConfig</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
 <h2 id="_maintained_by">Maintained by</h2>
 <div class="sectionbody">
 <div class="imageblock">
@@ -4425,7 +4425,7 @@ which will automatically load the configuration once the JAR is on classpath.</p
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-01-08 12:54:13 +0100
+Last updated 2019-01-08 13:15:31 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">
