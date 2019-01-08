@@ -430,7 +430,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.0.1.RC1" />
+<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.0.3.RC1" />
 <style>
 .hidden {
 	display: none;
@@ -900,7 +900,7 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 @RestoreSystemProperties                                                                <i class="conum" data-value="2"></i><b>(2)</b>
 class SimpleQueueServiceSpec extends Specification {
 
-    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.8')           <i class="conum" data-value="3"></i><b>(3)</b>
+    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.10')          <i class="conum" data-value="3"></i><b>(3)</b>
         .withServices(SQS)
 
     @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="4"></i><b>(4)</b>
@@ -973,7 +973,7 @@ class SimpleQueueServiceSpec extends Specification {
     public SimpleQueueService service;
 
     @Rule
-    public LocalStackContainer localstack = new LocalStackContainer("0.8.8")            <i class="conum" data-value="2"></i><b>(2)</b>
+    public LocalStackContainer localstack = new LocalStackContainer("0.8.10")           <i class="conum" data-value="2"></i><b>(2)</b>
         .withServices(SQS);
 
     @Before

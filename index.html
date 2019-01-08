@@ -430,7 +430,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.0.1.RC1" />
+<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.0.3.RC1" />
 <style>
 .hidden {
 	display: none;
@@ -631,7 +631,7 @@ cannot be found the official <a href="https://docs.micronaut.io/latest/guide/ind
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code>compileOnly 'com.agorapulse:micronaut-grails:1.0.1.RC1'</code></pre>
+<pre class="highlightjs highlight"><code>compileOnly 'com.agorapulse:micronaut-grails:1.0.3.RC1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -640,7 +640,7 @@ cannot be found the official <a href="https://docs.micronaut.io/latest/guide/ind
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-grails&lt;/artifactId&gt;
-    &lt;version&gt;1.0.1.RC1&lt;/version&gt;
+    &lt;version&gt;1.0.3.RC1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -855,7 +855,7 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk:1.0.1.RC1'
+<pre class="highlightjs highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk:1.0.3.RC1'
 
 // only required for DynamoDB and Kinesis integration
 compile group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: '1.11.470'
@@ -883,7 +883,7 @@ compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.470'</c
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk&lt;/artifactId&gt;
-    &lt;version&gt;1.0.1.RC1&lt;/version&gt;
+    &lt;version&gt;1.0.3.RC1&lt;/version&gt;
 &lt;/dependency&gt;
 
 &lt;!-- only required for DynamoDB and Kinesis integration --&gt;
@@ -2521,7 +2521,7 @@ class KinesisAnnotationsSpec extends Specification {
     private static final String TEST_STREAM = 'TestStream'
     private static final String APP_NAME = 'AppName'
 
-    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.8')   <i class="conum" data-value="3"></i><b>(3)</b>
+    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.10')          <i class="conum" data-value="3"></i><b>(3)</b>
         .withServices(KINESIS, DYNAMODB)
 
     @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="4"></i><b>(4)</b>
@@ -2641,7 +2641,7 @@ class KinesisAnnotationsSpec extends Specification {
     public ApplicationContext context;                                                  <i class="conum" data-value="1"></i><b>(1)</b>
 
     @Rule
-    public LocalStackContainer localstack = new LocalStackContainer("0.8.8")            <i class="conum" data-value="2"></i><b>(2)</b>
+    public LocalStackContainer localstack = new LocalStackContainer("0.8.10")           <i class="conum" data-value="2"></i><b>(2)</b>
         .withServices(DYNAMODB, KINESIS);
 
     @Before
@@ -3764,7 +3764,7 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
 class SimpleNotificationServiceSpec extends Specification {
 
-    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.8')           <i class="conum" data-value="2"></i><b>(2)</b>
+    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.10')          <i class="conum" data-value="2"></i><b>(2)</b>
         .withServices(SNS)
 
     @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="3"></i><b>(3)</b>
@@ -3828,7 +3828,7 @@ class SimpleNotificationServiceSpec extends Specification {
     public SimpleNotificationService service;
 
     @Rule
-    public LocalStackContainer localstack = new LocalStackContainer("0.8.8")            <i class="conum" data-value="2"></i><b>(2)</b>
+    public LocalStackContainer localstack = new LocalStackContainer("0.8.10")            <i class="conum" data-value="2"></i><b>(2)</b>
         .withServices(SNS);
 
     @Before
@@ -4264,7 +4264,7 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 @RestoreSystemProperties                                                                <i class="conum" data-value="2"></i><b>(2)</b>
 class SimpleQueueServiceSpec extends Specification {
 
-    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.8')           <i class="conum" data-value="3"></i><b>(3)</b>
+    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.10')          <i class="conum" data-value="3"></i><b>(3)</b>
         .withServices(SQS)
 
     @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="4"></i><b>(4)</b>
@@ -4337,7 +4337,7 @@ class SimpleQueueServiceSpec extends Specification {
     public SimpleQueueService service;
 
     @Rule
-    public LocalStackContainer localstack = new LocalStackContainer("0.8.8")            <i class="conum" data-value="2"></i><b>(2)</b>
+    public LocalStackContainer localstack = new LocalStackContainer("0.8.10")           <i class="conum" data-value="2"></i><b>(2)</b>
         .withServices(SQS);
 
     @Before
