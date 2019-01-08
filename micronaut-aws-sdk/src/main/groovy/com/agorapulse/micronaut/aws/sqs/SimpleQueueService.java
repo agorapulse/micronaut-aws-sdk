@@ -23,6 +23,8 @@ public interface SimpleQueueService {
      */
     boolean isCaching();
 
+    String createQueue(QueueConfiguration queueConfiguration);
+
     /**
      * Creates new queue with given name.
      * @param queueName the queue name

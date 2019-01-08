@@ -1,285 +1,87 @@
 package com.agorapulse.micronaut.aws.sqs
 
-import com.amazonaws.AmazonClientException
-import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.sqs.AmazonSQS
-import com.amazonaws.services.sqs.model.AmazonSQSException
-import com.amazonaws.services.sqs.model.CreateQueueResult
-import com.amazonaws.services.sqs.model.GetQueueAttributesResult
-import com.amazonaws.services.sqs.model.QueueDoesNotExistException
+import com.amazonaws.services.sqs.AmazonSQSClient
+import com.amazonaws.services.sqs.model.Message
 import io.micronaut.context.ApplicationContext
+import org.testcontainers.containers.localstack.LocalStackContainer
+import org.testcontainers.spock.Testcontainers
+import spock.lang.AutoCleanup
+import spock.lang.Shared
 import spock.lang.Specification
+import spock.lang.Stepwise
+import spock.util.environment.RestoreSystemProperties
+
+import static org.testcontainers.containers.localstack.LocalStackContainer.Service.SQS
 
 /**
  * Tests for simple queue service.
  */
+@Stepwise
+// tag::testcontainers-header[]
+@Testcontainers                                                                         // <1>
+@RestoreSystemProperties                                                                // <2>
 class SimpleQueueServiceSpec extends Specification {
+// end::testcontainers-header[]
 
-    SimpleQueueServiceConfiguration configuration = new SimpleQueueServiceConfiguration(cache: true)
-    AmazonSQS amazonSQS = Mock(AmazonSQS)
-    SimpleQueueService service = new DefaultSimpleQueueService(amazonSQS, configuration)
+    private static final String TEST_QUEUE = 'TestQueue'
+    private static final String DATA = 'Hello World'
 
-    /*
-     * Tests for createQueue(String queueName)
-     */
+    // tag::testcontainers-fields[]
+    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.8')           // <3>
+        .withServices(SQS)
 
-    void 'Create queue'() {
+    @AutoCleanup ApplicationContext context                                             // <4>
+
+    SimpleQueueService service
+    // end::testcontainers-fields[]
+
+    // tag::testcontainers-setup[]
+    void setup() {
+        System.setProperty('com.amazonaws.sdk.disableCbor', 'true')                     // <5>
+        AmazonSQS sqs = AmazonSQSClient                                                 // <6>
+            .builder()
+            .withEndpointConfiguration(localstack.getEndpointConfiguration(SQS))
+            .withCredentials(localstack.defaultCredentialsProvider)
+            .build()
+
+        context = ApplicationContext.build('aws.sqs.queue': TEST_QUEUE).build()         // <7>
+        context.registerSingleton(AmazonSQS, sqs)
+        context.start()
+
+        service = context.getBean(SimpleQueueService)                                   // <8>
+    }
+    // end::testcontainers-setup[]
+
+    void 'working with queues'() {
         when:
-            configuration.delaySeconds = 100
-            String queueUrl = service.createQueue('someQueue')
-
+            String queueUrl = service.createQueue(TEST_QUEUE)
         then:
-            1 * amazonSQS.createQueue(_) >> ['queueUrl': 'somepath/queueName']
             queueUrl
-            queueUrl == 'somepath/queueName'
-    }
-
-    /*
-     * Tests for deleteMessage(String queueUrl, String receiptHandle)
-     */
-
-    void 'Delete message'() {
-        given:
-            service.queueUrlByNames['queueName'] = 'somepath/queueName'
+            service.listQueueUrls().contains(queueUrl)
 
         when:
-            service.deleteMessage('queueName', 'receiptHandle')
-
+            Map<String, String> queueAttributes = service.getQueueAttributes(TEST_QUEUE)
         then:
-            1 * amazonSQS.deleteMessage(_)
-    }
-
-    void 'Delete message in default queue'() {
-        given:
-            configuration.queue = 'queueName'
-            service.queueUrlByNames['queueName'] = 'somepath/queueName'
+            queueAttributes.DelaySeconds == '0'
 
         when:
-            service.deleteMessage('receiptHandle')
-
+            String msgId = service.sendMessage(DATA)
+            List<Message> messages = service.receiveMessages()
         then:
-            1 * amazonSQS.deleteMessage(_)
-    }
-
-    void 'Delete queue'() {
-        given:
-            service.queueUrlByNames['queueName'] = 'somepath/queueName'
-
-        when:
-            service.deleteQueue('queueName')
-
-        then:
-            1 * amazonSQS.deleteQueue('somepath/queueName')
-    }
-
-    /*
-     * Tests for listQueueNames()
-     */
-
-    void 'List queue names'() {
-        when:
-            List queueNames = service.listQueueNames()
-
-        then:
-            1 * amazonSQS.listQueues(_) >> ['queueUrls': ['somepath/queueName1', 'somepath/queueName2', 'somepath/queueName3']]
-            queueNames
-            queueNames.size() == 3
-            queueNames == ['queueName1', 'queueName2', 'queueName3']
-    }
-
-    /*
-     * Tests for listQueueUrls()
-     */
-
-    void 'List queue urls'() {
-        when:
-            List queueUrls = service.listQueueUrls()
-
-        then:
-            1 * amazonSQS.listQueues(_) >> ['queueUrls': ['somepath/queueName1', 'somepath/queueName2', 'somepath/queueName3']]
-
-            queueUrls
-            queueUrls.size() == 3
-            queueUrls == ['somepath/queueName1', 'somepath/queueName2', 'somepath/queueName3']
-    }
-
-    /*
-     * Tests for getQueueAttributes(String queueUrl)
-     */
-
-    void 'Get queue attributes'() {
-        given:
-            configuration.queue = 'queueName'
-            service.queueUrlByNames['queueName'] = 'somepath/queueName'
-
-        when:
-            Map attributes = service.queueAttributes
-
-        then:
-            1 * amazonSQS.getQueueAttributes(_) >> {
-                GetQueueAttributesResult attrResult = new GetQueueAttributesResult()
-                attrResult.attributes = ['attribute1': 'value1', 'attribute2': 'value2']
-                attrResult
-            }
-
-            attributes
-            attributes.size() == 2
-    }
-
-    /*
-    * Tests for getQueueAttributes(String queueUrl)
-    */
-
-    void 'Get queue arn'() {
-        given:
-            configuration.queue = 'queueName'
-            service.queueUrlByNames['queueName'] = 'somepath/queueName'
-
-        when:
-            String arn = service.getQueueArn('queueName')
-
-        then:
-            1 * amazonSQS.getQueueAttributes(_, ['QueueArn']) >> {
-                GetQueueAttributesResult attrResult = new GetQueueAttributesResult()
-                attrResult.attributes = ['QueueArn': 'arn:sqs:queueName']
-                attrResult
-            }
-
-            arn == 'arn:sqs:queueName'
-    }
-
-    void 'Get queue attributes service exception'() {
-        given:
-            service.queueUrlByNames['queueName'] = 'somepath/queueName'
-
-        when:
-            Map attributes = service.getQueueAttributes('queueName')
-
-        then:
-            1 * amazonSQS.getQueueAttributes(_) >> {
-                AmazonServiceException exception = new AmazonServiceException('Error')
-                exception.errorCode = 'AWS.SimpleQueueService.NonExistentQueue'
-                throw exception
-            }
-            !attributes
-            old(service.queueUrlByNames.size() == 1)
-            service.queueUrlByNames.size() == 0
-    }
-
-    void 'Get queue attributes client exception'() {
-        given:
-            service.queueUrlByNames['queueName'] = 'somepath/queueName'
-
-        when:
-            Map attributes = service.getQueueAttributes('queueName')
-
-        then:
-            1 * amazonSQS.getQueueAttributes(_) >> { throw new AmazonClientException('Error') }
-
-            !attributes
-    }
-
-    /*
-     * Tests for getQueueUrl()
-     */
-
-    void 'Get queue url with autocreate'() {
-        given:
-            configuration.autoCreateQueue = true
-            configuration.queue = 'queueName'
-
-        when:
-            String queueUrl = service.queueUrl
-
-        then:
-            amazonSQS.listQueues(_) >> ['queueUrls': ['somepath/queueName1', 'somepath/queueName2', 'somepath/queueName3']]
-            amazonSQS.createQueue(_) >> ['queueUrl': 'somepath/queueName']
-            amazonSQS
-            queueUrl == 'somepath/queueName'
-            old(service.queueUrlByNames.size() == 0)
-            service.queueUrlByNames.size() == 4
-            service.queueUrlByNames['queueName'] == 'somepath/queueName'
-    }
-
-    void 'Get queue url without autocreate'() {
-        given:
-            configuration.queueNamePrefix = 'vlad_'
-            configuration.cache = false
-
-        when:
-            service.getQueueUrl('queueName')
-
-        then:
-            thrown(AmazonSQSException)
-
-            1 * amazonSQS.getQueueUrl('vlad_queueName') >> { throw new QueueDoesNotExistException('Queue does not exist') }
-    }
-
-    /*
-     * Tests for receiveMessages(String queueUrl, int maxNumberOfMessages = 0, int visibilityTimeout = 0, int waitTimeSeconds = 0)
-     */
-
-    void 'Receive messages'() {
-        given:
-            configuration.queue = 'queueName'
-            service.queueUrlByNames['queueName'] = 'somepath/queueName'
-
-        when:
-            List messages = service.receiveMessages(1, 1, 1)
-
-        then:
-            1 * amazonSQS.receiveMessage(_) >> ['messages': ['message1', 'message2']]
+            msgId
             messages
-            messages.size() == 2
-    }
-
-    /*
-     * Tests for sendMessage(String queueUrl, String messageBody)
-     */
-
-    void 'Send messages'() {
-        given:
-            service.queueUrlByNames['queueName'] = 'somepath/queueName'
+            messages.first().body == DATA
+            messages.first().messageId == msgId
 
         when:
-            String messageId = service.sendMessage('queueName', 'messageBody')
-
+            service.deleteMessage(msgId)
         then:
-            1 * amazonSQS.sendMessage(_) >> ['messageId': 'msg_id']
+            !service.receiveMessages()
 
-            messageId == 'msg_id'
-    }
-
-    void 'queue name can be url'() {
-        given:
-            String myQueueUrl = 'http://test.example.com/my-queue'
         when:
-            service.queueUrlByNames['my-queue'] = myQueueUrl
-            String url = service.getQueueUrl('my-queue')
+            service.deleteQueue(TEST_QUEUE)
         then:
-            url == myQueueUrl
-        and:
-            service.getQueueUrl(myQueueUrl) == myQueueUrl
-    }
-
-    void 'integration spec'() {
-        when:
-            ApplicationContext context = ApplicationContext.build().build()
-            context.registerSingleton(AmazonSQS, amazonSQS)
-            context.start()
-
-            SimpleQueueService service = context.getBean(SimpleQueueService)
-            SimpleQueueServiceConfiguration configuration = context.getBean(SimpleQueueServiceConfiguration)
-            service.createQueue('queueName')
-        then:
-            noExceptionThrown()
-
-            configuration
-            service
-
-            amazonSQS.createQueue(_) >> new CreateQueueResult().withQueueUrl('http://test.example.com/my-queue')
-
-        cleanup:
-            context.stop()
+            !service.listQueueUrls().contains(queueUrl)
     }
 }

@@ -2,18 +2,18 @@
 
 > Amazon Simple Notification Service (SNS) is a highly available, durable, secure, fully managed pub/sub messaging service that enables you to decouple microservices, distributed systems, and serverless applications.
 
-This library provides two approaches to work with Simple Notification Service queues:
+This library provides two approaches to work with Simple Notification Service topics:
 
 1. High-level <<Publishing with `@NotificationClient`>>
 2. Middle-level <<Simple Notification Service>>
 
 ==== Configuration
-No configuration is required but some of the configuration propertis may be useful for you.
+No configuration is required but some of the configuration properties may be useful for you.
 
 [source,yaml,indent=0,options="nowrap"]
 .application.yml
 ----
-include::../micronaut-aws-sdk/src/test/resources/application-docs-sns.yml[]
+include::../micronaut-aws-sdk/src/test/resources/application-docs-sqs.yml[]
 ----
 <1> You can specify the default topic for https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/sns/SimpleNotificationService.html[SimpleNotificationService] and `@NotificationClient`
 <2> Amazon Resource Name for the iOS application mobile push
@@ -48,7 +48,7 @@ NOTE: The return value of the methods is message id returned by AWS.
 
 By default, `NotificationClient` publishes messages into the default topic defined by `aws.sns.topic` property.
 You can switch to different configuration by changing the `value` of the annotation such as `@NotificationClient("other")` or
-by setting the `topic` property of the annotation such as `@NotificationClient(topic = "SomeTopic")`. You can change stream
+by setting the `topic` property of the annotation such as `@NotificationClient(topic = "SomeTopic")`. You can change topic
 used by particular method using `@Topic` annotation as mentioned above.
 
 ==== Simple Notification Service
@@ -115,7 +115,7 @@ Please, see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micron
 
 ==== Testing
 You can very easily mock any of the interfaces and declarative services but if you need close-to-production
-Kinesis integration works well with https://www.testcontainers.org/[Testcontainers] and https://localstack.cloud/[LocalStack].
+SNS integration works well with https://www.testcontainers.org/[Testcontainers] and https://localstack.cloud/[LocalStack].
 
 You need to add following dependencies into your build file:
 
@@ -160,7 +160,7 @@ include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/S
 }
 ----
 <1> Annotate the specification with `@Testcontainers` to let Spock manage the Testcontainers for you
-<2> Create an instance of `LocalStackContainer` with Kinesis and  DynamoDB (required by the listener) support enabled
+<2> Create an instance of `LocalStackContainer` with SNS support enabled
 <3> Prepare the reference to the `ApplicationContext`, `@AutoCleanup` guarantees closing the context after the tests
 <4> Create `AmazonSNS` client using the LocalStack configuration
 <5> Prepare the application context with required properties and service using LocalStack

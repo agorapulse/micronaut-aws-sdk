@@ -40,13 +40,26 @@ class DefaultSimpleQueueService implements SimpleQueueService {
     boolean isCaching() {
         return configuration.cache
     }
-/**
- *
- * @param queueName
- * @return queue URL
- */
+
+    /**
+     *
+     * @param queueName
+     * @return queue URL
+     */
     String createQueue(String queueName) {
-        CreateQueueRequest createQueueRequest = new CreateQueueRequest(queueName)
+        QueueConfiguration configuration = configuration.copy()
+        configuration.queue = queueName
+
+        return createQueue(configuration)
+    }
+
+    /**
+     *
+     * @param queueName
+     * @return queue URL
+     */
+    String createQueue(QueueConfiguration configuration) {
+        CreateQueueRequest createQueueRequest = new CreateQueueRequest(configuration.queue)
         if (configuration.delaySeconds) {
             createQueueRequest.attributes['DelaySeconds'] = configuration.delaySeconds.toString()
         }

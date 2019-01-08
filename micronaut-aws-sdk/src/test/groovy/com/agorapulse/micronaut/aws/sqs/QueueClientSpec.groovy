@@ -1,7 +1,6 @@
 package com.agorapulse.micronaut.aws.sqs
 
 import com.agorapulse.micronaut.aws.Pogo
-import com.agorapulse.micronaut.aws.sqs.annotation.Queue
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.micronaut.context.ApplicationContext
 import io.micronaut.inject.qualifiers.Qualifiers
@@ -151,45 +150,12 @@ class QueueClientSpec extends Specification {
 
     void 'can send message with specified queue name'() {
         given:
-            QueueClient client = context.getBean(QueueClient)
+            SomeClient client = context.getBean(SomeClient)
         when:
             String id = client.sendMessage(POGO)
         then:
             id == ID
 
-            1 * defaultService.sendMessage(QueueClient.SOME_QUEUE, marshalledPogo, DELAY, null) >> ID
+            1 * defaultService.sendMessage(SomeClient.SOME_QUEUE, marshalledPogo, DELAY, null) >> ID
     }
 }
-
-@com.agorapulse.micronaut.aws.sqs.annotation.QueueClient interface DefaultClient {
-
-    public String OTHER_QUEUE = 'OtherQueue'
-
-    @Queue(value = 'OtherQueue', group = 'SomeGroup') String sendMessageToQueue(String message)
-
-    String sendMessage(Pogo message)
-
-    String sendMessage(byte[] record)
-    String sendMessage(String record)
-    String sendMessage(String record, int delay)
-    String sendMessage(String record, String group)
-    String sendMessage(String record, int delay, String group)
-
-    // fails
-    void doWhatever(Object one, Object two, Object three, Object four)
-
-    // delete
-    void deleteMessage(String messageId)
-}
-
-@com.agorapulse.micronaut.aws.sqs.annotation.QueueClient('test') interface TestClient {
-    String sendMessage(Pogo event)
-}
-
-@com.agorapulse.micronaut.aws.sqs.annotation.QueueClient(queue = 'SomeQueue', delay = 10) interface QueueClient {
-
-    public String SOME_QUEUE = 'SomeQueue'
-
-    String sendMessage(Pogo event)
-}
-
