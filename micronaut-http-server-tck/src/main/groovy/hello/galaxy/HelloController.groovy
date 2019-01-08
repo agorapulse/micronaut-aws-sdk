@@ -2,22 +2,29 @@ package hello.galaxy
 
 import groovy.transform.CompileStatic
 import io.micronaut.http.HttpResponse
-import io.micronaut.http.annotation.*
+import io.micronaut.http.annotation.Body
+import io.micronaut.http.annotation.Controller
+import io.micronaut.http.annotation.Get
+import io.micronaut.http.annotation.Post
+import io.micronaut.http.annotation.Put
 
+/**
+ * Sample controller.
+ */
 @CompileStatic
-@Controller("/hello")
+@Controller('/hello')
 class HelloController {
-    @Get("/")
+    @Get('/')
     String index() {
-        return "Hello Galaxy!"
+        return 'Hello Galaxy!'
     }
 
-    @Post("/greet")
+    @Post('/greet')
     HttpResponse<Greetings> newGreeting(@Body Greetings body) {
         return HttpResponse.created(body)
     }
 
-    @Get("/greet/{message}/{language}")
+    @Get('/greet/{message}/{language}')
     Greetings greet(String message, String language) {
         return new Greetings(message: message, language: language)
     }

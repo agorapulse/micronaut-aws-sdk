@@ -1,8 +1,9 @@
 package com.agorapulse.micronaut.aws.dynamodb;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.*;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIndexHashKey;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
-import java.util.Date;
 import java.util.Objects;
 
 @DynamoDBTable(tableName = "entityNoRange")
@@ -40,6 +41,7 @@ public class DynamoDBEntityNoRange {
         // ignore
     }
 
+    //CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -61,4 +63,5 @@ public class DynamoDBEntityNoRange {
             ", number=" + number +
             '}';
     }
+    //CHECKSTYLE:ON
 }

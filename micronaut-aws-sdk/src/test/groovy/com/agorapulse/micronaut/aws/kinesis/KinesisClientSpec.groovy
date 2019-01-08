@@ -2,27 +2,29 @@ package com.agorapulse.micronaut.aws.kinesis
 
 import com.agorapulse.micronaut.aws.Pogo
 import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisClient
-import com.agorapulse.micronaut.aws.kinesis.annotation.PartitionKey
-import com.agorapulse.micronaut.aws.kinesis.annotation.SequenceNumber
-import com.agorapulse.micronaut.aws.kinesis.annotation.Stream
 import com.amazonaws.services.kinesis.model.PutRecordResult
 import com.amazonaws.services.kinesis.model.PutRecordsRequestEntry
 import com.amazonaws.services.kinesis.model.PutRecordsResult
+import com.amazonaws.services.kinesis.model.ResourceNotFoundException
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.micronaut.context.ApplicationContext
 import io.micronaut.inject.qualifiers.Qualifiers
 import spock.lang.AutoCleanup
 import spock.lang.Specification
 
+/**
+ * Tests for Kinesis declarative clients.
+ */
 class KinesisClientSpec extends Specification {
 
     private static final String DEFAULT_STREAM_NAME = 'DefaultStream'
     private static final String PARTITION_KEY = '1234567890'
     private static final String SEQUENCE_NUMBER = '987654321'
-    private static final String RECORD = "Record"
+    private static final String RECORD = 'Record'
     private static final MyEvent EVENT_1 = new MyEvent(value: 'foo')
     private static final MyEvent EVENT_2 = new MyEvent(value: 'bar')
-    private static final Pogo POGO = new Pogo(foo: 'bar')
+    private static final Pogo POGO_1 = new Pogo(foo: 'bar')
+    private static final Pogo POGO_2 = new Pogo(foo: 'baz')
     private static final PutRecordsRequestEntry PUT_RECORDS_REQUEST_ENTRY = new PutRecordsRequestEntry()
     private static final PutRecordResult PUT_RECORD_RESULT = new PutRecordResult().withSequenceNumber('1')
     private static final PutRecordsResult PUT_RECORDS_RESULT = new PutRecordsResult()
@@ -132,16 +134,38 @@ class KinesisClientSpec extends Specification {
         given:
             DefaultClient client = context.getBean(DefaultClient)
         when:
-            client.putRecordObject(POGO)
+            client.putRecordObject(POGO_1)
         then:
-            1 * defaultService.putRecord(DEFAULT_STREAM_NAME, _ as String, context.getBean(ObjectMapper).writeValueAsBytes(POGO), null) >> PUT_RECORD_RESULT
+            1 * defaultService.putRecord(DEFAULT_STREAM_NAME, _ as String, json(POGO_1), null) >> PUT_RECORD_RESULT
+    }
+
+    void 'can put multiple pogos and return put records results'() {
+        given:
+            DefaultClient client = context.getBean(DefaultClient)
+        when:
+            PutRecordsResult results = client.putRecordObjects([POGO_1, POGO_2])
+        then:
+            results == PUT_RECORDS_RESULT
+
+            1 * defaultService.putRecords(DEFAULT_STREAM_NAME, _) >> PUT_RECORDS_RESULT
+    }
+
+    void 'can put array of pogos and return put records results'() {
+        given:
+            DefaultClient client = context.getBean(DefaultClient)
+        when:
+            PutRecordsResult results = client.putRecordObjects(POGO_1, POGO_2)
+        then:
+            results == PUT_RECORDS_RESULT
+
+            1 * defaultService.putRecords(DEFAULT_STREAM_NAME, _) >> PUT_RECORDS_RESULT
     }
 
     void 'needs to follow the method convention rules'() {
         given:
-            DefaultClient client = context.getBean(DefaultClient)
+            TestClient client = context.getBean(TestClient)
         when:
-            client.doWhatever(POGO, PARTITION_KEY, SEQUENCE_NUMBER, PUT_RECORDS_REQUEST_ENTRY)
+            client.doWhatever(POGO_1, PARTITION_KEY, SEQUENCE_NUMBER, PUT_RECORDS_REQUEST_ENTRY)
         then:
             thrown(UnsupportedOperationException)
     }
@@ -179,9 +203,9 @@ class KinesisClientSpec extends Specification {
         given:
             DefaultClient client = context.getBean(DefaultClient)
         when:
-            client.putRecordDataObject(PARTITION_KEY, POGO)
+            client.putRecordDataObject(PARTITION_KEY, POGO_1)
         then:
-            1 * defaultService.putRecord(DEFAULT_STREAM_NAME, PARTITION_KEY, context.getBean(ObjectMapper).writeValueAsBytes(POGO), null) >> PUT_RECORD_RESULT
+            1 * defaultService.putRecord(DEFAULT_STREAM_NAME, PARTITION_KEY, json(POGO_1), null) >> PUT_RECORD_RESULT
     }
 
     void 'can put record with partition key and sequence number'() {
@@ -237,38 +261,28 @@ class KinesisClientSpec extends Specification {
         then:
             1 * defaultService.putRecords(DEFAULT_STREAM_NAME, [PUT_RECORDS_REQUEST_ENTRY]) >> PUT_RECORDS_RESULT
     }
-}
 
-@KinesisClient interface DefaultClient {
+    void 'stream in created automatically'() {
+        given:
+            DefaultClient client = context.getBean(DefaultClient)
+        when:
+            PutRecordResult result = client.putEvent(EVENT_1)
+        then:
+            result == PUT_RECORD_RESULT
 
-    public String OTHER_STREAM = 'OtherStream'
+            1 * defaultService.putEvent(DEFAULT_STREAM_NAME, EVENT_1) >> { throw new ResourceNotFoundException() }
+            1 * defaultService.createStream(DEFAULT_STREAM_NAME)
+            1 * defaultService.putEvent(DEFAULT_STREAM_NAME, EVENT_1) >> PUT_RECORD_RESULT
+    }
 
-    @Stream('OtherStream') PutRecordResult putEventToStream(MyEvent event)
-
-    PutRecordResult putEvent(MyEvent event)
-    PutRecordsResult putEventsIterable(Iterable<MyEvent> events)
-    void putEventsArrayNoReturn(MyEvent... events)
-
-    void putRecordBytes(byte[] record)
-    void putRecordString(String record)
-    void putRecordObject(Pogo pogo)
-    void doWhatever(Object one, Object two, Object three, Object four)
-
-    PutRecordResult putRecord(String partitionKey, String record)
-    void putRecordAnno(@PartitionKey String id, String record)
-    void putRecordDataByteArray(@PartitionKey String id, byte[] value)
-    void putRecordDataObject(@PartitionKey String id, Pogo value)
-    void putRecord(String partitionKey, String record, String sequenceNumber)
-    void putRecordAnno(@PartitionKey String id, String record, @SequenceNumber String sqn)
-    void putRecordAnnoNumbers(@PartitionKey Long id, String record, @SequenceNumber int sequenceNumber)
-    PutRecordsResult putRecords(Iterable<PutRecordsRequestEntry> entries)
-    PutRecordsResult putRecords(PutRecordsRequestEntry... entries)
-    PutRecordsResult putRecord(PutRecordsRequestEntry entry)
-
+    private byte[] json(Object object) {
+        context.getBean(ObjectMapper).writeValueAsBytes(object)
+    }
 }
 
 @KinesisClient('test') interface TestClient {
     PutRecordResult putEvent(MyEvent event)
+    void doWhatever(Object one, Object two, Object three, Object four)
 }
 
 @KinesisClient(stream = 'SomeStream') interface StreamClient {

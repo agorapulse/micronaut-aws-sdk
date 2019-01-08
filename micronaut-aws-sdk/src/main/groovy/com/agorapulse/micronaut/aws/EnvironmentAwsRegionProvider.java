@@ -22,9 +22,7 @@ import io.micronaut.context.env.Environment;
 /**
  * A {@link AwsRegionProvider} that reads from the {@link Environment}.
  *
- * @author graemerocher
- * @author musketyr
- * @since 1.0
+ * @since 1.0.0
  */
 public class EnvironmentAwsRegionProvider extends AwsRegionProvider {
 

@@ -14,6 +14,9 @@ import io.micronaut.context.annotation.Requires;
 
 import javax.inject.Singleton;
 
+/**
+ * Factory class which provides the {@link AmazonDynamoDB} and {@link IDynamoDBMapper} into the application context.
+ */
 @Factory
 @Requires(classes = DynamoDB.class)
 public class DynamoDBFactory {

@@ -1,0 +1,19 @@
+aws:
+  sqs:
+
+    # related to service behaviour
+    queueNamePrefix: 'vlad_'                                                            # <1>
+    autoCreateQueue: false                                                              # <2>
+    cache: false                                                                        # <3>
+
+    # related to default queue
+    queue: MyQueue                                                                      # <4>
+    fifo: true                                                                          # <5>
+    delaySeconds: 0                                                                     # <6>
+    messageRetentionPeriod: 345600                                                      # <7>
+    maximumMessageSize: 262144                                                          # <8>
+    visibilityTimeout: 30                                                               # <9>
+
+    queues:                                                                             # <10>
+      test:                                                                             # <11>
+        queue: TestQueue

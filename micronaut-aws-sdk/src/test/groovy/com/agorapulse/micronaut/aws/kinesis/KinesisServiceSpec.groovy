@@ -2,13 +2,28 @@ package com.agorapulse.micronaut.aws.kinesis
 
 import com.amazonaws.services.kinesis.AmazonKinesis
 import com.amazonaws.services.kinesis.AmazonKinesisClient
-import com.amazonaws.services.kinesis.model.*
+import com.amazonaws.services.kinesis.model.CreateStreamResult
+import com.amazonaws.services.kinesis.model.DeleteStreamResult
+import com.amazonaws.services.kinesis.model.DescribeStreamResult
+import com.amazonaws.services.kinesis.model.MergeShardsResult
+import com.amazonaws.services.kinesis.model.PutRecordResult
+import com.amazonaws.services.kinesis.model.PutRecordsResult
+import com.amazonaws.services.kinesis.model.PutRecordsResultEntry
+import com.amazonaws.services.kinesis.model.Record
+import com.amazonaws.services.kinesis.model.Shard
+import com.amazonaws.services.kinesis.model.SplitShardResult
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.testcontainers.containers.localstack.LocalStackContainer
 import org.testcontainers.spock.Testcontainers
-import spock.lang.*
+import spock.lang.Retry
+import spock.lang.Shared
+import spock.lang.Specification
+import spock.lang.Stepwise
 import spock.util.environment.RestoreSystemProperties
 
+/**
+ * Tests for kinesis service.
+ */
 @Stepwise
 @Testcontainers
 @RestoreSystemProperties
@@ -23,7 +38,7 @@ class KinesisServiceSpec extends Specification {
     @Shared
     LocalStackContainer localstack = new LocalStackContainer()
         .withServices(LocalStackContainer.Service.KINESIS)
-    
+
     AmazonKinesis kinesis
     KinesisService service
 
@@ -40,12 +55,11 @@ class KinesisServiceSpec extends Specification {
         service = new DefaultKinesisService(kinesis, new KinesisConfiguration(stream: STREAM, consumerFilterKey: 'test_'), MAPPER)
     }
 
-    void 'create default stream'() {
+    void 'new default stream'() {
         when:
             CreateStreamResult result = service.createStream(SHARD_COUNT)
         then:
             result
-
     }
 
     void 'stream is creating'() {
@@ -213,7 +227,7 @@ class KinesisServiceSpec extends Specification {
 
 }
 
-class TestEvent extends AbstractEvent {
+class TestEvent extends DefaultEvent {
 
     String value
 

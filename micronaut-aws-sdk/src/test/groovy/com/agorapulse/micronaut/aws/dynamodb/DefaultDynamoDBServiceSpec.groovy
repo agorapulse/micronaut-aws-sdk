@@ -4,59 +4,75 @@ import com.agorapulse.micronaut.aws.dynamodb.annotation.Query
 import com.agorapulse.micronaut.aws.dynamodb.annotation.Scan
 import com.agorapulse.micronaut.aws.dynamodb.annotation.Service
 import com.agorapulse.micronaut.aws.dynamodb.annotation.Update
-import com.agorapulse.micronaut.aws.dynamodb.builder.QueryBuilder
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
 import com.amazonaws.services.dynamodbv2.model.CreateTableResult
-import groovy.transform.CompileStatic
-import groovy.transform.stc.ClosureParams
-import groovy.transform.stc.SimpleType
 import io.micronaut.context.ApplicationContext
 import io.reactivex.Flowable
 import org.joda.time.DateTime
 import org.testcontainers.containers.localstack.LocalStackContainer
 import org.testcontainers.spock.Testcontainers
-import space.jasan.support.groovy.closure.ConsumerWithDelegate
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
 
-import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*
+// tag::builders-import[]
+import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  // <1>
 
+// end::builders-import[]
+
+/**
+ * Specification for testing DefaultDynamoDBService using entity with range key.
+ */
+@SuppressWarnings([
+    'NoWildcardImports',
+    'UnnecessaryObjectReferences',
+])
+// tag::testcontainers-header[]
 @Stepwise
-@Testcontainers
+@Testcontainers                                                                         // <1>
 class DefaultDynamoDBServiceSpec extends Specification {
+// end::testcontainers-header[]
 
     private static final DateTime REFERENCE_DATE = new DateTime(1358487600000)
 
-    @AutoCleanup ApplicationContext context
+    // tag::testcontainers-setup[]
+    @AutoCleanup ApplicationContext context                                             // <2>
 
-    @Shared LocalStackContainer localstack = new LocalStackContainer().withServices(LocalStackContainer.Service.DYNAMODB)
+    @Shared LocalStackContainer localstack = new LocalStackContainer()                  // <3>
+        .withServices(LocalStackContainer.Service.DYNAMODB)
 
-    DefaultDynamoDBService<DynamoDBEntity> service
+    DynamoDBService<DynamoDBEntity> s
     AmazonDynamoDB amazonDynamoDB
     IDynamoDBMapper mapper
 
     void setup() {
-        amazonDynamoDB = AmazonDynamoDBClient
+        amazonDynamoDB = AmazonDynamoDBClient                                           // <4>
             .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(LocalStackContainer.Service.DYNAMODB))
-            .withCredentials(localstack.defaultCredentialsProvider)
+            .withEndpointConfiguration(
+                localstack.getEndpointConfiguration(LocalStackContainer.Service.DYNAMODB)
+            )
+            .withCredentials(
+                localstack.defaultCredentialsProvider
+            )
             .build()
 
         mapper = new DynamoDBMapper(amazonDynamoDB)
 
-        service = new DefaultDynamoDBService<>(this.amazonDynamoDB, new DynamoDBMapper(this.amazonDynamoDB), DynamoDBEntity)
-
         context = ApplicationContext.build().build()
-        context.registerSingleton(AmazonDynamoDB, amazonDynamoDB)
-        context.registerSingleton(IDynamoDBMapper, mapper)
+        context.registerSingleton(AmazonDynamoDB, amazonDynamoDB)                       // <5>
+        context.registerSingleton(IDynamoDBMapper, mapper)                              // <6>
         context.start()
+
+        DynamoDBServiceProvider provider = context.getBean(DynamoDBServiceProvider)     // <7>
+        s = provider.findOrCreate(DynamoDBEntity)                                       // <8>
     }
+
+    // end::testcontainers-setup[]
 
     void 'required DynamoDB table annotation'() {
         when:
@@ -80,35 +96,42 @@ class DefaultDynamoDBServiceSpec extends Specification {
 
     void 'check metadata'() {
         expect:
-            service.hashKeyName == 'parentId'
-            service.hashKeyClass == String
-            service.rangeKeyName == 'id'
-            service.rangeKeyClass == String
-            service.isIndexRangeKey(DynamoDBEntity.RANGE_INDEX)
-            service.isIndexRangeKey(DynamoDBEntity.DATE_INDEX)
-            service.newInstance instanceof DynamoDBEntity
+            s.hashKeyName == 'parentId'
+            s.hashKeyClass == String
+            s.rangeKeyName == 'id'
+            s.rangeKeyClass == String
+            s.isIndexRangeKey(DynamoDBEntity.RANGE_INDEX)
+            s.isIndexRangeKey(DynamoDBEntity.DATE_INDEX)
+            s.newInstance instanceof DynamoDBEntity
     }
 
-    void 'create table'() {
-        when:
-            CreateTableResult result = service.createTable()
-        then:
-            result.tableDescription.tableName == 'entity'
+    void 'new table'() {
+        expect:
+        // tag::create-table[]
+        s.createTable()                                                                 // <2>
+        // end::create-table[]
 
         when:
-            CreateTableResult none = service.createTable()
+            CreateTableResult none = s.createTable()
         then:
             !none
     }
 
     void 'save items'() {
         when:
-            service.save(new DynamoDBEntity(parentId: '1', id: '1', rangeIndex: 'foo', date: REFERENCE_DATE.toDate()))
-            service.save(new DynamoDBEntity(parentId: '1', id: '2', rangeIndex: 'bar', date: REFERENCE_DATE.plusDays(1).toDate()))
-            service.saveAll([
+        // tag::save-entity[]
+        s.save(new DynamoDBEntity(                                                      // <3>
+            parentId: '1',
+            id: '1',
+            rangeIndex: 'foo',
+            date: REFERENCE_DATE.toDate()
+        ))
+        // end::save-entity[]
+            s.save(new DynamoDBEntity(parentId: '1', id: '2', rangeIndex: 'bar', date: REFERENCE_DATE.plusDays(1).toDate()))
+            s.saveAll([
                 new DynamoDBEntity(parentId: '2', id: '1', rangeIndex: 'foo',  date: REFERENCE_DATE.minusDays(5).toDate()),
                 new DynamoDBEntity(parentId: '2', id: '2', rangeIndex: 'foo', date: REFERENCE_DATE.minusDays(2).toDate())])
-            service.saveAll(
+            s.saveAll(
                 new DynamoDBEntity(parentId: '3', id: '1', rangeIndex: 'foo', date: REFERENCE_DATE.plusDays(7).toDate()),
                 new DynamoDBEntity(parentId: '3', id: '2', rangeIndex: 'bar', date: REFERENCE_DATE.plusDays(14).toDate())
             )
@@ -119,100 +142,78 @@ class DefaultDynamoDBServiceSpec extends Specification {
 
     void 'get items'() {
         expect:
-            service.get('1', '1')
-            service.getAll('1', ['2', '1']).size() == 2
-            service.getAll('1', ['2', '1'], [throttle: true]).size() == 2
-            service.getAll('1', ['3', '4']).size() == 0
+        // tag::load-entity[]
+        s.get('1', '1')                                                                 // <4>
+        // end::load-entity[]
+            s.getAll('1', ['2', '1']).size() == 2
+            s.getAll('1', ['2', '1'], [throttle: true]).size() == 2
+            s.getAll('1', ['3', '4']).size() == 0
     }
 
     void 'count items'() {
         expect:
-            service.count('1') == 2
-            service.count('1', '1') == 1
-            service.count('1', DynamoDBEntity.RANGE_INDEX, 'bar') == 1
-            service.countByDates('1', DynamoDBEntity.DATE_INDEX, [
-                after: REFERENCE_DATE.minusDays(1).toDate(), before: REFERENCE_DATE.plusDays(2).toDate()]
-            ) == 2
-            service.countByDates(
+            s.count('1') == 2
+            s.count('1', '1') == 1
+            s.count('1', DynamoDBEntity.RANGE_INDEX, 'bar') == 1
+            s.countByDates('1', DynamoDBEntity.DATE_INDEX, [
+                after: REFERENCE_DATE.minusDays(1).toDate(),
+                before: REFERENCE_DATE.plusDays(2).toDate(),
+            ]) == 2
+            s.countByDates(
                 '1',
                 DynamoDBEntity.DATE_INDEX,
                 REFERENCE_DATE.minusDays(1).toDate(),
                 REFERENCE_DATE.plusDays(2).toDate()
             ) == 2
-            service.countByDates('3', DynamoDBEntity.DATE_INDEX, [
-                after: REFERENCE_DATE.plusDays(9).toDate(), before: REFERENCE_DATE.plusDays(20).toDate()
+            s.countByDates('3', DynamoDBEntity.DATE_INDEX, [
+                after: REFERENCE_DATE.plusDays(9).toDate(),
+                before: REFERENCE_DATE.plusDays(20).toDate(),
             ]) == 1
-
     }
 
     void 'increment and decrement'() {
         when:
-            service.increment('1', '1', 'number')
-            service.increment('1', '1', 'number')
-            service.increment('1', '1', 'number')
-            service.decrement('1', '1', 'number')
+        // tag::increment[]
+        s.increment('1', '1', 'number')                                                 // <7>
+        // end::increment[]
+            s.increment('1', '1', 'number')
+            s.increment('1', '1', 'number')
+            s.decrement('1', '1', 'number')
         then:
-            service.get('1', '1').number == 2
-
+            s.get('1', '1').number == 2
     }
 
     void 'query items'() {
         expect:
-            service.query('1').count == 2
-            service.query('1', '1').count == 1
-            service.query(new DynamoDBQueryExpression().withHashKeyValues(new DynamoDBEntity(parentId: '1'))).size() == 2
-            service.query('1', 'range' , 'ANY', null, [returnAll: true, throttle: true])
-            service.query('1', DynamoDBEntity.RANGE_INDEX, 'bar').count == 1
+            s.query('1').count == 2
+            s.query('1', '1').count == 1
+            s.query(new DynamoDBQueryExpression().withHashKeyValues(new DynamoDBEntity(parentId: '1'))).size() == 2
+            s.query('1', 'range' , 'ANY', null, [returnAll: true, throttle: true])
 
-            service.queryByDates('1', DynamoDBEntity.DATE_INDEX, [
-                after: REFERENCE_DATE.minusDays(1).toDate(), before: REFERENCE_DATE.plusDays(2).toDate()]
-            ).count == 2
-            service.queryByDates(
+        // tag::query-by-range-index[]
+        s.query('1', DynamoDBEntity.RANGE_INDEX, 'bar').count == 1                      // <5>
+        // end::query-by-range-index[]
+
+            s.queryByDates('1', DynamoDBEntity.DATE_INDEX, [
+                after: REFERENCE_DATE.minusDays(1).toDate(),
+                before: REFERENCE_DATE.plusDays(2).toDate(),
+            ]).count == 2
+            s.queryByDates(
                 '1',
                 DynamoDBEntity.DATE_INDEX,
                 REFERENCE_DATE.minusDays(1).toDate(),
                 REFERENCE_DATE.plusDays(2).toDate()
             ).count == 2
-            service.queryByDates('3', DynamoDBEntity.DATE_INDEX, [
-                after: REFERENCE_DATE.plusDays(9).toDate(), before: REFERENCE_DATE.plusDays(20).toDate()
-            ]).count == 1
+
+        // tag::query-by-dates[]
+        s.queryByDates('3', DynamoDBEntity.DATE_INDEX, [                                // <6>
+            after: REFERENCE_DATE.plusDays(9).toDate(),
+            before: REFERENCE_DATE.plusDays(20).toDate(),
+        ]).count == 1
+        // end::query-by-dates[]
     }
 
-    void 'query with builder'() {
-        expect:
-            query {
-                hash '1'
-            }.count().blockingGet() == 2
-
-            query {
-                hash '1'
-                range {
-                    eq '1'
-                }
-            }.count().blockingGet() == 1
-
-            query {
-                hash '1'
-                range {
-                    eq DynamoDBEntity.RANGE_INDEX, 'bar'
-                }
-            }.count().blockingGet() == 1
-
-            query {
-                hash '1'
-                range {
-                    between DynamoDBEntity.DATE_INDEX, REFERENCE_DATE.minusDays(1).toDate(), REFERENCE_DATE.plusDays(2).toDate()
-                }
-            }.count().blockingGet() == 2
-
-            query {
-                hash '3'
-                range {
-                    between DynamoDBEntity.DATE_INDEX, REFERENCE_DATE.plusDays(9).toDate(), REFERENCE_DATE.plusDays(20).toDate()
-                }
-            }.count().blockingGet() == 1
-    }
-
+    @SuppressWarnings('AbcMetric')
     void 'service introduction works'() {
         given:
             DynamoDBItemDBService s = context.getBean(DynamoDBItemDBService)
@@ -228,7 +229,8 @@ class DefaultDynamoDBServiceSpec extends Specification {
             s.save(new DynamoDBEntity(parentId: '1001', id: '2', rangeIndex: 'bar', date: REFERENCE_DATE.plusDays(1).toDate()))
             s.saveAll([
                 new DynamoDBEntity(parentId: '1002', id: '1', rangeIndex: 'foo',  date: REFERENCE_DATE.minusDays(5).toDate()),
-                new DynamoDBEntity(parentId: '1002', id: '2', rangeIndex: 'foo', date: REFERENCE_DATE.minusDays(2).toDate())])
+                new DynamoDBEntity(parentId: '1002', id: '2', rangeIndex: 'foo', date: REFERENCE_DATE.minusDays(2).toDate()),
+            ])
             s.saveAll(
                 new DynamoDBEntity(parentId: '1003', id: '1', rangeIndex: 'foo', date: REFERENCE_DATE.plusDays(7).toDate()),
                 new DynamoDBEntity(parentId: '1003', id: '2', rangeIndex: 'bar', date: REFERENCE_DATE.plusDays(14).toDate())
@@ -268,50 +270,53 @@ class DefaultDynamoDBServiceSpec extends Specification {
 
     void 'count many items'() {
         when:
-            String parentKey = "2001"
+            String parentKey = '2001'
             DynamoDBItemDBService s = context.getBean(DynamoDBItemDBService)
             s.saveAll((1..101).collect { new DynamoDBEntity(parentId: parentKey, id: "$it") })
         then:
             s.count(parentKey) == 101
-
     }
     void 'delete attribute'() {
         expect:
-            service.get('1', '1').number == 2
+            s.get('1', '1').number == 2
         when:
-            service.deleteItemAttribute('1', '1', 'number')
+            s.deleteItemAttribute('1', '1', 'number')
         then:
-            !service.get('1', '1').number
+            !s.get('1', '1').number
     }
 
     void 'delete items'() {
         expect:
-            service.delete(service.get('1', '1'))
-            service.count('1', '1') == 0
-            service.delete('3', '1')
-            service.count('3', '1') == 0
-            service.deleteAll('1', DynamoDBEntity.RANGE_INDEX, 'bar') == 1
-            service.count('1', DynamoDBEntity.RANGE_INDEX, 'bar') == 0
-            service.deleteAllByConditions('2',  DefaultDynamoDBService.buildDateConditions(DynamoDBEntity.DATE_INDEX, [
-                after: REFERENCE_DATE.minusDays(20).toDate(), before: REFERENCE_DATE.plusDays(20).toDate()
+
+        // tag::delete[]
+        s.delete(s.get('1', '1'))                                                       // <8>
+        // end::delete[]
+
+            s.count('1', '1') == 0
+            s.delete('3', '1')
+            s.count('3', '1') == 0
+
+        // tag::delete-all[]
+        s.deleteAll('1', DynamoDBEntity.RANGE_INDEX, 'bar') == 1                        // <9>
+        // end::delete-all[]
+
+            s.count('1', DynamoDBEntity.RANGE_INDEX, 'bar') == 0
+            s.deleteAllByConditions('2',  DefaultDynamoDBService.buildDateConditions(DynamoDBEntity.DATE_INDEX, [
+                after: REFERENCE_DATE.minusDays(20).toDate(),
+                before: REFERENCE_DATE.plusDays(20).toDate(),
             ]), [limit: 1]) == 2
-            service.countByDates('2', DynamoDBEntity.DATE_INDEX, [
-                after: REFERENCE_DATE.minusDays(20).toDate(), before: REFERENCE_DATE.plusDays(20).toDate()]
-            ) == 0
+            s.countByDates('2', DynamoDBEntity.DATE_INDEX, [
+                after: REFERENCE_DATE.minusDays(20).toDate(),
+                before: REFERENCE_DATE.plusDays(20).toDate(),
+            ]) == 0
     }
-
-    private Flowable<DynamoDBEntity> query(
-        @DelegatesTo(type = "com.agorapulse.micronaut.aws.dynamodb.builder.QueryBuilder<DynamoDBEntity>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = SimpleType.class, options = "com.agorapulse.micronaut.aws.dynamodb.builder.QueryBuilder<DynamoDBEntity>")
-            Closure<QueryBuilder<DynamoDBEntity>> definition
-    ) {
-        return query(DynamoDBEntity, ConsumerWithDelegate.create(definition)).query(mapper)
-    }
-
 }
 
-@Service(DynamoDBEntity)
+// tag::service-all[]
+// tag::service-header[]
+@Service(DynamoDBEntity)                                                                // <2>
 interface DynamoDBItemDBService {
+// end::service-header[]
 
     DynamoDBEntity get(String hash, String rangeKey)
     DynamoDBEntity load(String hash, String rangeKey)
@@ -348,18 +353,20 @@ interface DynamoDBItemDBService {
     Flowable<DynamoDBEntity> query(String hashKey)
     Flowable<DynamoDBEntity> query(String hashKey, String rangeKey)
 
-    @Query({
+    // tag::sample-queries[]
+    @Query({                                                                            // <3>
         query(DynamoDBEntity) {
-            hash hashKey
+            hash hashKey                                                                // <4>
             range {
-                eq DynamoDBEntity.RANGE_INDEX, rangeKey
+                eq DynamoDBEntity.RANGE_INDEX, rangeKey                                 // <5>
             }
-            only {
-                rangeIndex
+            only {                                                                      // <6>
+                rangeIndex                                                              // <7>
             }
         }
     })
-    Flowable<DynamoDBEntity> queryByRangeIndex(String hashKey, String rangeKey)
+    Flowable<DynamoDBEntity> queryByRangeIndex(String hashKey, String rangeKey)         // <8>
+    // end::sample-queries[]
 
     @Query({
         query(DynamoDBEntity) {
@@ -390,15 +397,17 @@ interface DynamoDBItemDBService {
     })
     int deleteByDates(String hashKey, Date after, Date before)
 
-    @Update({
+    // tag::sample-update[]
+    @Update({                                                                           // <3>
         update(DynamoDBEntity) {
-            hash hashKey
-            range rangeKey
-            add 'number', 1
-            returnUpdatedNew { number }
+            hash hashKey                                                                // <4>
+            range rangeKey                                                              // <5>
+            add 'number', 1                                                             // <6>
+            returnUpdatedNew { number }                                                 // <7>
         }
     })
-    Number increment(String hashKey, String rangeKey)
+    Number increment(String hashKey, String rangeKey)                                   // <8>
+    // end::sample-update[]
 
     @Update({
         update(DynamoDBEntity) {
@@ -410,12 +419,18 @@ interface DynamoDBItemDBService {
     })
     Number decrement(String hashKey, String rangeKey)
 
-    @Scan({
+    // tag::sample-scan[]
+    @Scan({                                                                             // <3>
         scan(DynamoDBEntity) {
             filter {
-                eq DynamoDBEntity.RANGE_INDEX, foo
+                eq DynamoDBEntity.RANGE_INDEX, foo                                      // <4>
             }
         }
     })
-    Flowable<DynamoDBEntity> scanAllByRangeIndex(String foo)
+    Flowable<DynamoDBEntity> scanAllByRangeIndex(String foo)                            // <5>
+    // end::sample-scan[]
+
+// tag::service-footer[]
 }
+// end::service-footer[]
+// end::service-all[]

@@ -8,6 +8,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * KinesisService provides middle-level API access to the Kinesis streams.
+ */
 public interface KinesisService {
 
     /**
@@ -482,4 +485,19 @@ public interface KinesisService {
     default SplitShardResult splitShard(String shardId) {
         return splitShard(getDefaultStreamName(), shardId);
     }
+
+    default void waitForActive() {
+        waitForStatus(StreamStatus.ACTIVE);
+    }
+
+
+    default void waitForStatus(StreamStatus status) {
+        waitForStatus(getDefaultStreamName(), status);
+    }
+
+    default void waitForActive(String streamName) {
+        waitForStatus(streamName, StreamStatus.ACTIVE);
+    }
+
+    void waitForStatus(String streamName, StreamStatus status);
 }

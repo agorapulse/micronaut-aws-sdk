@@ -2,7 +2,7 @@ language: groovy
 jdk:
 - oraclejdk8
 script:
-- "./gradlew check"
+- "./gradlew check jacocoFullReport coveralls"
 before_cache:
 - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
 - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
@@ -20,3 +20,7 @@ deploy:
   on:
     tags: true
     branch: master
+addons:
+  hosts:
+    # ensure localhost for NIP.IO is resolved properly
+    - 127.0.0.1.nip.io

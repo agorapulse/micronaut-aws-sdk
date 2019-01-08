@@ -2,39 +2,58 @@ package com.agorapulse.micronaut.aws.sns
 
 import com.amazonaws.services.sns.AmazonSNS
 import com.amazonaws.services.sns.AmazonSNSClient
-import com.fasterxml.jackson.databind.ObjectMapper
+import io.micronaut.context.ApplicationContext
 import org.testcontainers.containers.localstack.LocalStackContainer
 import org.testcontainers.spock.Testcontainers
+import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
 
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.SNS
 
+/**
+ * Tests for simple notification service.
+ */
 @Stepwise
-@Testcontainers
+// tag::testcontainers-header[]
+@Testcontainers                                                                         // <1>
 class SimpleNotificationServiceSpec extends Specification {
+// end::testcontainers-header[]
 
-    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.8').withServices(SNS).withEnv('DEBUG', '1')
-    @Shared SimpleNotificationServiceConfiguration configuration = new SimpleNotificationServiceConfiguration()
+    private static final String TEST_TOPIC = 'TestTopic'
+
+    // tag::testcontainers-fields[]
+    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.10')          // <2>
+        .withServices(SNS)
+
+    @AutoCleanup ApplicationContext context                                             // <3>
+
+    SimpleNotificationService service
+    // end::testcontainers-fields[]
+
     @Shared String endpointArn
     @Shared String platformApplicationArn
     @Shared String subscriptionArn
     @Shared String topicArn
 
-    AmazonSNS sns
-    SimpleNotificationService service
-
+    // tag::testcontainers-setup[]
     void setup() {
-        sns = AmazonSNSClient
+        AmazonSNS sns = AmazonSNSClient                                                 // <4>
             .builder()
             .withEndpointConfiguration(localstack.getEndpointConfiguration(SNS))
             .withCredentials(localstack.defaultCredentialsProvider)
             .build()
-        service = new DefaultSimpleNotificationService(sns, configuration, new ObjectMapper())
-    }
 
-    void 'create topic'() {
+        context = ApplicationContext.build('aws.sns.topic', TEST_TOPIC).build()         // <5>
+        context.registerSingleton(AmazonSNS, sns)
+        context.start()
+
+        service = context.getBean(SimpleNotificationService)                            // <6>
+    }
+    // end::testcontainers-setup[]
+
+    void 'new topic'() {
         when:
             topicArn = service.createTopic('TOPIC')
         then:
@@ -48,21 +67,16 @@ class SimpleNotificationServiceSpec extends Specification {
             subscriptionArn
     }
 
-    void 'create platform application'() {
+    void 'new platform application'() {
         when:
             platformApplicationArn = service.createAndroidApplication('ANDROID-APP', 'API-KEY')
         then:
             platformApplicationArn
-
-        when:
-            configuration.android.arn = platformApplicationArn
-        then:
-            noExceptionThrown()
     }
 
     void 'register device'() {
         when:
-            endpointArn = service.registerAndroidDevice('TOKEN', 'CUSTOMER-DATA')
+            endpointArn = service.registerAndroidDevice(platformApplicationArn, 'TOKEN', 'CUSTOMER-DATA')
         then:
             endpointArn
     }
@@ -76,7 +90,7 @@ class SimpleNotificationServiceSpec extends Specification {
 
     void 'validate device'() {
         when:
-            String newEndpointArn = service.validateAndroidDevice(endpointArn, 'OTHER-TOKEN', 'OTHER-CUSTOMER-DATA')
+            String newEndpointArn = service.validateAndroidDevice(platformApplicationArn, endpointArn, 'OTHER-TOKEN', 'OTHER-CUSTOMER-DATA')
         then:
             endpointArn == newEndpointArn
     }

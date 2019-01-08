@@ -1,5 +1,17 @@
-package com.agorapulse.micronaut.aws.kinesis;
+package com.agorapulse.micronaut.aws.kinesis
 
-class MyEvent extends AbstractEvent {
+/**
+ * Testing event.
+ */
+class MyEvent extends DefaultEvent {
+
+    // java way
+    MyEvent(String value) {
+        this.value = value
+    }
+
+    // groovy way
+    MyEvent() { }
+
     String value
 }

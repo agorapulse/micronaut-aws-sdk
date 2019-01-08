@@ -8,19 +8,29 @@ import io.micronaut.inject.qualifiers.Qualifiers;
 import javax.inject.Singleton;
 import java.util.Optional;
 
+/**
+ * Provider of {@link DynamoDBService} for particular DynamoDB entities.
+ */
 @Singleton
-public class DynamoDBServiceFactory {
+public class DynamoDBServiceProvider {
 
     private final AmazonDynamoDB client;
     private final IDynamoDBMapper mapper;
     private final BeanContext context;
 
-    public DynamoDBServiceFactory(AmazonDynamoDB client, IDynamoDBMapper mapper, BeanContext context) {
+    public DynamoDBServiceProvider(AmazonDynamoDB client, IDynamoDBMapper mapper, BeanContext context) {
         this.client = client;
         this.mapper = mapper;
         this.context = context;
     }
 
+    /**
+     * Provides {@link DynamoDBService} for given type.
+     *
+     * @param type DynamoDB entity type.
+     * @param <T> the type of the DynamoDB entity
+     * @return {@link DynamoDBService} for given type
+     */
     public <T> DynamoDBService<T> findOrCreate(Class<T> type) {
         Optional<DynamoDBService> existingService = context.findBean(DynamoDBService.class, Qualifiers.byTypeArguments(type));
 

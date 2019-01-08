@@ -8,6 +8,7 @@ import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessorC
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.ShutdownReason
 import com.amazonaws.services.kinesis.model.Record
 import groovy.transform.CompileStatic
+import groovy.transform.PackageScope
 import groovy.util.logging.Slf4j
 
 import java.nio.charset.CharacterCodingException
@@ -15,8 +16,12 @@ import java.nio.charset.Charset
 import java.nio.charset.CharsetDecoder
 import java.util.function.BiConsumer
 
+/**
+ * Default record processor used by the Kinesis listeners.
+ */
 @Slf4j
 @CompileStatic
+@PackageScope
 class DefaultRecordProcessor implements IRecordProcessor {
 
     // Backoff and retry settings
@@ -36,10 +41,6 @@ class DefaultRecordProcessor implements IRecordProcessor {
     String shardId = ''
 
     private final BiConsumer<String, Record> processor
-
-    private DefaultRecordProcessor(BiConsumer<String, Record> processor) {
-        this.processor = processor
-    }
 
     @Override
     void initialize(String shardId) {
@@ -61,11 +62,24 @@ class DefaultRecordProcessor implements IRecordProcessor {
         }
     }
 
+    @Override
+    void shutdown(IRecordProcessorCheckpointer checkpointer, ShutdownReason shutdownReason) {
+        log.debug "[${shardId}] Shutting down: ${shutdownReason}, thread = ${Thread.currentThread().id}, ${Thread.currentThread().name}"
+        if (shutdownReason == ShutdownReason.TERMINATE) {
+            checkpoint(checkpointer)
+        }
+    }
+
+    private DefaultRecordProcessor(BiConsumer<String, Record> processor) {
+        this.processor = processor
+    }
+
     /**
      * Process records performing retries as needed. Skip "poison pill" records.
      *
      * @param records Data records to be processed.
      */
+    @SuppressWarnings('CatchThrowable')
     private void processRecordsWithRetries(List<Record> records) {
         records.each { Record record ->
             boolean processedSuccessfully = false
@@ -108,17 +122,8 @@ class DefaultRecordProcessor implements IRecordProcessor {
             // Process record (method to be overriden with custom code)
             log.debug "[${shardId}] ${record.sequenceNumber}, ${record.partitionKey}, processRecordData not implemented"
             processor.accept(data, record)
-
         } catch (CharacterCodingException e) {
             log.error "[${shardId}] Malformed data: ${data}", e
-        }
-    }
-
-    @Override
-    void shutdown(IRecordProcessorCheckpointer checkpointer, ShutdownReason shutdownReason) {
-        log.debug "[${shardId}] Shutting down: ${shutdownReason}, thread = ${Thread.currentThread().id}, ${Thread.currentThread().name}"
-        if (shutdownReason == ShutdownReason.TERMINATE) {
-            checkpoint(checkpointer)
         }
     }
 
@@ -134,14 +139,14 @@ class DefaultRecordProcessor implements IRecordProcessor {
             } catch (ShutdownException se) {
                 // Ignore checkpoint if the processor instance has been shutdown (fail over).
                 log.info "[${shardId}] Caught shutdown exception, skipping checkpoint.", se
-                break;
+                break
             } catch (ThrottlingException e) {
                 // Backoff and re-attempt checkpoint upon transient failures
                 if (i >= (NUM_RETRIES - 1)) {
-                    log.error "[${shardId}] Checkpoint failed after " + (i + 1) + "attempts.", e
+                    log.error "[${shardId}] Checkpoint failed after ${i + 1} attempts.", e
                     break
                 } else {
-                    log.info "[${shardId}] Transient issue when checkpointing - attempt " + (i + 1) + " of " + NUM_RETRIES, e
+                    log.info "[${shardId}] Transient issue when checkpointing - attempt ${i + 1} of $NUM_RETRIES", e
                 }
             } catch (InvalidStateException e) {
                 // This indicates an issue with the DynamoDB table (check for table, provisioned IOPS).

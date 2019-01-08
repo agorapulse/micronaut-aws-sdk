@@ -18,6 +18,7 @@ import io.micronaut.core.type.Argument;
 import io.micronaut.inject.qualifiers.Qualifiers;
 
 import javax.inject.Singleton;
+import java.nio.ByteBuffer;
 import java.util.*;
 
 @Singleton
@@ -100,6 +101,7 @@ public class KinesisClientIntroduction implements MethodInterceptor<Object, Obje
                     return service.putRecords(streamName, toList((Iterable<PutRecordsRequestEntry>) param));
                 }
 
+                return service.putRecords(streamName, toJsonPutRequests(param));
             }
 
             if (argType.isArray()) {
@@ -112,6 +114,7 @@ public class KinesisClientIntroduction implements MethodInterceptor<Object, Obje
                 if (byte.class.equals(argType.getComponentType())) {
                     return service.putRecord(streamName, createDefaultParititonKey(), (byte[]) param);
                 }
+                return service.putRecords(streamName, toJsonPutRequests(param));
             }
 
             if (CharSequence.class.isAssignableFrom(argType)) {
@@ -143,12 +146,25 @@ public class KinesisClientIntroduction implements MethodInterceptor<Object, Obje
         throw new UnsupportedOperationException("Cannot implement method " + context.getExecutableMethod());
     }
 
-    private PutRecordResult sendJson(KinesisService service, String streamName, String partitionKey, Object data, String sequenceNumber) {
+    private List<PutRecordsRequestEntry> toJsonPutRequests(Object param) {
+        Iterable objects = param instanceof Iterable ? (Iterable) param : Arrays.asList((Object[]) param);
+        List<PutRecordsRequestEntry> ret = new ArrayList<>();
+        for (Object o : objects) {
+            ret.add(new PutRecordsRequestEntry().withData(ByteBuffer.wrap(json(o))).withPartitionKey(createDefaultParititonKey()));
+        }
+        return ret;
+    }
+
+    private byte[] json(Object data) {
         try {
-            return service.putRecord(streamName, partitionKey, objectMapper.writeValueAsBytes(data), sequenceNumber);
+            return objectMapper.writeValueAsBytes(data);
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException("Failed to marshal " + data + " to JSON", e);
         }
+    }
+
+    private PutRecordResult sendJson(KinesisService service, String streamName, String partitionKey, Object data, String sequenceNumber) {
+        return service.putRecord(streamName, partitionKey, json(data), sequenceNumber);
     }
 
     private String createDefaultParititonKey() {

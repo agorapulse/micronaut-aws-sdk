@@ -5,7 +5,11 @@ import io.micronaut.inject.qualifiers.Qualifiers
 import spock.lang.AutoCleanup
 import spock.lang.Specification
 
+/**
+ * Tests for simple queue service configuration.
+ */
 class SimpleQueueServiceConfigurationSpec extends Specification {
+
     @AutoCleanup ApplicationContext context = null
 
     void 'one present by default with empty queue'() {

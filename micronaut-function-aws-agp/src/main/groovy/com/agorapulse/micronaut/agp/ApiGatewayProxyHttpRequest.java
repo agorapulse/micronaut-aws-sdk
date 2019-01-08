@@ -70,7 +70,6 @@ abstract class ApiGatewayProxyHttpRequest<B> implements HttpRequest<B> {
 
     /**
      * I don't know how any other way how to tell Micronaut that the body is JSON so I parse it for it
-     * @author vlad
      */
     private static class JsonApiGatewayProxyHttpRequest extends ApiGatewayProxyHttpRequest<JsonNode> {
 

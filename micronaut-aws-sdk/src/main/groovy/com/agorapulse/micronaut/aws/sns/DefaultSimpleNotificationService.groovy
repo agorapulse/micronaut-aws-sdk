@@ -12,14 +12,18 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
+/**
+ * Default implementation of simple notification service.
+ */
 @Slf4j
 @CompileStatic
+@SuppressWarnings('NoWildcardImports')
 class DefaultSimpleNotificationService implements SimpleNotificationService {
 
     private final AmazonSNS client
     private final SimpleNotificationServiceConfiguration configuration
     private final ObjectMapper objectMapper
-    private final ConcurrentHashMap<String, String> namesToArn = new ConcurrentHashMap<>()
+    private final Map<String, String> namesToArn = new ConcurrentHashMap<>()
 
     DefaultSimpleNotificationService(AmazonSNS client, SimpleNotificationServiceConfiguration configuration, ObjectMapper objectMapper) {
         this.client = client
@@ -29,22 +33,22 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
 
     @Override
     String getAmazonApplicationArn() {
-        return checkNotEmpty(configuration.amazon.arn, "Amazon application arn must be defined in config")
+        return checkNotEmpty(configuration.amazon.arn, 'Amazon application arn must be defined in config')
     }
 
     @Override
     String getAndroidApplicationArn() {
-        return checkNotEmpty(configuration.android.arn, "Android application arn must be defined in config")
+        return checkNotEmpty(configuration.android.arn, 'Android application arn must be defined in config')
     }
 
     @Override
     String getIosApplicationArn() {
-        return checkNotEmpty(configuration.ios.arn, "Ios application arn must be defined in config")
+        return checkNotEmpty(configuration.ios.arn, 'Ios application arn must be defined in config')
     }
 
     @Override
     String getDefaultTopicNameOrArn() {
-        return checkNotEmpty(ensureTopicArn(configuration.topic), "Default topic not set for the configuration")
+        return checkNotEmpty(ensureTopicArn(configuration.topic), 'Default topic not set for the configuration')
     }
 
     /**
@@ -52,7 +56,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
      * @return
      */
     String createTopic(String topicName) {
-        log.debug("Creating topic sns with name " + topicName)
+        log.debug("Creating topic sns with name $topicName")
         return client.createTopic(new CreateTopicRequest(topicName)).topicArn
     }
 
@@ -60,7 +64,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
      * @param topicArn
      */
     void deleteTopic(String topicArn) {
-        log.debug("Deleting topic " + topicArn)
+        log.debug("Deleting topic $topicArn")
         client.deleteTopic(new DeleteTopicRequest(ensureTopicArn(topicArn)))
     }
 
@@ -84,6 +88,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
      * @param dryRun
      * @return
      */
+    @SuppressWarnings('ParameterCount')
     String sendAndroidAppNotification(String endpointArn, Map notification, String collapseKey, boolean delayWhileIdle, int timeToLive, boolean dryRun) {
         publishToTarget(endpointArn, PLATFORM_TYPE_ANDROID, buildAndroidMessage(notification, collapseKey, delayWhileIdle, timeToLive, dryRun))
     }
@@ -117,7 +122,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
      * @return
      */
     String subscribeTopic(String topic, String protocol, String endpoint) {
-        log.debug("Creating a topic subscription to endpoint " + endpoint)
+        log.debug("Creating a topic subscription to endpoint $endpoint")
         client.subscribe(new SubscribeRequest(ensureTopicArn(topic), protocol, endpoint)).subscriptionArn
     }
 
@@ -125,7 +130,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
      * @param arn
      */
     void unsubscribeTopic(String arn) {
-        log.debug("Deleting a topic subscription to number " + arn)
+        log.debug("Deleting a topic subscription to number $arn")
         client.unsubscribe(new UnsubscribeRequest(arn))
     }
 
@@ -162,7 +167,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
 
     String createPlatformEndpoint(String platformApplicationArn, String deviceToken, String customUserData) {
         try {
-            log.debug("Creating platform endpoint with token " + deviceToken)
+            log.debug("Creating platform endpoint with token $deviceToken")
             CreatePlatformEndpointRequest request = new CreatePlatformEndpointRequest()
                 .withPlatformApplicationArn(platformApplicationArn)
                 .withToken(deviceToken)
@@ -172,8 +177,8 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
             return client.createPlatformEndpoint(request).endpointArn
         } catch (InvalidParameterException ipe) {
             String message = ipe.errorMessage
-            log.debug("Exception message: " + message)
-            Pattern p = Pattern.compile(".*Endpoint (arn:aws:sns[^ ]+) already exists with the same Token.*")
+            log.debug("Exception message: $message")
+            Pattern p = Pattern.compile('.*Endpoint (arn:aws:sns[^ ]+) already exists with the same Token.*')
             Matcher m = p.matcher(message)
             if (m.matches()) {
                 // The platform endpoint already exists for this token, but with additional custom data that
@@ -185,19 +190,69 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
         }
     }
 
+    String validatePlatformDeviceToken(String platformApplicationArn, String platformType, String endpointArn, String deviceToken, String customUserData = '') {
+        log.debug 'Retrieving platform endpoint data...'
+        // Look up the platform endpoint and make sure the data in it is current, even if it was just created.
+        try {
+            GetEndpointAttributesResult result = client.getEndpointAttributes(new GetEndpointAttributesRequest().withEndpointArn(endpointArn))
+            if (result.attributes.get('Token') == deviceToken && result.attributes.get('Enabled').equalsIgnoreCase(Boolean.TRUE.toString())) {
+                return endpointArn
+            }
+        } catch (NotFoundException ignored) {
+            // We had a stored ARN, but the platform endpoint associated with it disappeared. Recreate it.
+            return createPlatformEndpoint(platformApplicationArn, deviceToken, customUserData)
+        }
+
+        log.debug 'Platform endpoint update required...'
+
+        if (
+        (platformType == MOBILE_PLATFORM_IOS && endpointArn.contains(PLATFORM_TYPE_ANDROID))
+            ||
+            (platformType == MOBILE_PLATFORM_ANDROID && endpointArn.contains(PLATFORM_TYPE_IOS))
+        ) {
+            log.debug 'Switching between IOS and ANDROID platforms...'
+            // Manager switched device between and android and an IOS device
+            deleteEndpoint(endpointArn)
+            return createPlatformEndpoint(platformApplicationArn, deviceToken, customUserData)
+        }
+
+        // The platform endpoint is out of sync with the current data, update the token and enable it.
+        log.debug("Updating platform endpoint $endpointArn")
+        try {
+            setEndpointAttributes(endpointArn, [
+                Token  : deviceToken,
+                Enabled: Boolean.TRUE.toString(),
+            ])
+            return endpointArn
+        } catch (InvalidParameterException ignored) {
+            deleteEndpoint(endpointArn)
+            return createPlatformEndpoint(platformApplicationArn, deviceToken, customUserData)
+        }
+    }
+
+    Flowable<Topic> listTopics() {
+        FlowableListTopicHelper.generateTopics(client)
+    }
+
+    private static String checkNotEmpty(String arn, String errorMessage) {
+        if (!arn) {
+            throw new IllegalStateException(errorMessage)
+        }
+        return arn
+    }
     private String buildAndroidMessage(Map data, String collapseKey, boolean delayWhileIdle, int timeToLive, boolean dryRun) {
         objectMapper.writeValueAsString([
             collapse_key    : collapseKey,
             data            : data,
             delay_while_idle: delayWhileIdle,
             time_to_live    : timeToLive,
-            dry_run         : dryRun
+            dry_run         : dryRun,
         ])
     }
 
     private String buildIosMessage(Map data) {
         objectMapper.writeValueAsString([
-            aps: data
+            aps: data,
         ])
     }
 
@@ -207,7 +262,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
         client.deleteEndpoint(depReq)
     }
 
-
+    @SuppressWarnings('UnnecessarySetter')
     private SetEndpointAttributesResult setEndpointAttributes(String endpointArn,
                                                               Map attributes) {
         SetEndpointAttributesRequest saeReq = new SetEndpointAttributesRequest()
@@ -226,57 +281,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
         client.publish(request).messageId
     }
 
-    String validatePlatformDeviceToken(String platformApplicationArn, String platformType, String endpointArn, String deviceToken, String customUserData = '') {
-        log.debug "Retrieving platform endpoint data..."
-        // Look up the platform endpoint and make sure the data in it is current, even if it was just created.
-        try {
-            GetEndpointAttributesResult result = client.getEndpointAttributes(new GetEndpointAttributesRequest().withEndpointArn(endpointArn))
-            if (result.attributes.get("Token").equals(deviceToken) && result.attributes.get("Enabled").equalsIgnoreCase("true")) {
-                return endpointArn
-            }
-        } catch (NotFoundException ignored) {
-            // We had a stored ARN, but the platform endpoint associated with it disappeared. Recreate it.
-            return createPlatformEndpoint(platformApplicationArn, deviceToken, customUserData)
-        }
-
-        log.debug "Platform endpoint update required..."
-        if (
-        (platformType == MOBILE_PLATFORM_IOS && endpointArn.contains(PLATFORM_TYPE_ANDROID))
-            ||
-            (platformType == MOBILE_PLATFORM_ANDROID && endpointArn.contains(PLATFORM_TYPE_IOS))
-        ) {
-            log.debug "Switching between IOS and ANDROID platforms..."
-            // Manager switched device between and android and an IOS device
-            deleteEndpoint(endpointArn)
-            return createPlatformEndpoint(platformApplicationArn, deviceToken, customUserData)
-        }
-
-        // The platform endpoint is out of sync with the current data, update the token and enable it.
-        log.debug("Updating platform endpoint " + endpointArn)
-        try {
-            setEndpointAttributes(endpointArn, [
-                Token  : deviceToken,
-                Enabled: 'true'
-            ])
-            return endpointArn
-        } catch (InvalidParameterException ignored) {
-            deleteEndpoint(endpointArn)
-            return createPlatformEndpoint(platformApplicationArn, deviceToken, customUserData)
-        }
-
-    }
-
-    Flowable<Topic> listTopics() {
-        FlowableListTopicHelper.generateTopics(client)
-    }
-
-    private static String checkNotEmpty(String arn, String errorMessage) {
-        if (!arn) {
-            throw new IllegalStateException(errorMessage)
-        }
-        return arn
-    }
-
+    @SuppressWarnings('UnnecessarySubstring')
     private String ensureTopicArn(String nameOrArn) {
         if (!nameOrArn) {
             return ''
@@ -285,11 +290,11 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
             return nameOrArn
         }
 
-        if (namesToArn.contains(nameOrArn)) {
+        if (namesToArn.containsKey(nameOrArn)) {
             return namesToArn[nameOrArn]
         }
 
-        listTopics().takeUntil({ Topic topic -> topic.topicArn.endsWith(':' + nameOrArn) } as Predicate<Topic>).subscribe { Topic topic ->
+        listTopics().takeUntil({ Topic topic -> topic.topicArn.endsWith(":$nameOrArn") } as Predicate<Topic>).subscribe { Topic topic ->
             String topicName = topic.topicArn.substring(topic.topicArn.lastIndexOf(':') + 1)
             namesToArn[topicName] = topic.topicArn
         }

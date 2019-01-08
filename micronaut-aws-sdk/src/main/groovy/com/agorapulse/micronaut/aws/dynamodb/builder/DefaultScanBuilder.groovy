@@ -13,6 +13,10 @@ import io.reactivex.Flowable
 import java.util.function.BiConsumer
 import java.util.function.Consumer
 
+/**
+ * Default implementation of the scan builder.
+ * @param <T> type of the item scanned
+ */
 @PackageScope
 @CompileStatic
 class DefaultScanBuilder<T> implements ScanBuilder<T> {
@@ -23,7 +27,7 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
     }
 
     DefaultScanBuilder<T> inconsistent(Builders.Read read) {
-        if (read.equals(Builders.Read.READ)) {
+        if (read == Builders.Read.READ) {
             expression.withConsistentRead(false)
         }
 
@@ -31,7 +35,7 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
     }
 
     DefaultScanBuilder<T> consistent(Builders.Read read) {
-        if (read.equals(Builders.Read.READ)) {
+        if (read == Builders.Read.READ) {
             expression.withConsistentRead(true)
         }
 
@@ -42,7 +46,6 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
         expression.withIndexName(name)
         return this
     }
-
 
     DefaultScanBuilder<T> filter(Consumer<RangeConditionCollector<T>> conditions) {
         filterCollectorsConsumers.add(conditions)
@@ -59,14 +62,15 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
         return this
     }
 
-    DefaultScanBuilder<T> offset(Object exclusiveStartKeyValue) {
-        this.exclusiveStartKey = exclusiveStartKeyValue
+    DefaultScanBuilder<T> offset(Object exclusiveHashStartKeyValue, Object exclusiveRangeStartKeyValue) {
+        this.exclusiveHashStartKey = exclusiveHashStartKeyValue
+        this.exclusiveRangeStartKey = exclusiveRangeStartKeyValue
         return this
     }
 
     @Override
     int count(IDynamoDBMapper mapper) {
-        return mapper.count(metadata.getItemClass(), resolveExpression(mapper))
+        return mapper.count(metadata.itemClass, resolveExpression(mapper))
     }
 
     @Override
@@ -76,12 +80,12 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
 
     @Override
     DynamoDBScanExpression resolveExpression(IDynamoDBMapper mapper) {
-        DynamoDBMapperTableModel<T> model = mapper.getTableModel(metadata.getItemClass())
+        DynamoDBMapperTableModel<T> model = mapper.getTableModel(metadata.itemClass)
 
         applyConditions(model, filterCollectorsConsumers, expression.&withFilterConditionEntry)
 
-        if (exclusiveStartKey != null) {
-            T exclusiveKey = model.createKey(exclusiveStartKey, null)
+        if (exclusiveHashStartKey != null || exclusiveRangeStartKey != null) {
+            T exclusiveKey = model.createKey(exclusiveHashStartKey, exclusiveRangeStartKey)
             expression.withExclusiveStartKey(model.convertKey(exclusiveKey))
         }
 
@@ -97,11 +101,16 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
     }
 
     // for proper groovy evaluation of closure in the annotation
+    @SuppressWarnings('UnusedMethodParameter')
     Object getProperty(String name) {
-        throw new MissingPropertyException("No properties here!")
+        throw new MissingPropertyException('No properties here!')
     }
 
-    private void applyConditions(DynamoDBMapperTableModel<T> model, List<Consumer<RangeConditionCollector<T>>> filterCollectorsConsumers, BiConsumer<String, Condition> addFilterConsumer) {
+    private void applyConditions(
+        DynamoDBMapperTableModel<T> model,
+        List<Consumer<RangeConditionCollector<T>>> filterCollectorsConsumers,
+        BiConsumer<String, Condition> addFilterConsumer
+    ) {
         if (!filterCollectorsConsumers.isEmpty()) {
             RangeConditionCollector<T> filterCollector = new RangeConditionCollector<>(model)
 
@@ -109,13 +118,15 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
                 consumer.accept(filterCollector)
             }
 
-            filterCollector.getConditions().forEach(addFilterConsumer)
+            filterCollector.conditions.forEach(addFilterConsumer)
         }
     }
 
     private final DynamoDBMetadata<T> metadata
     private final DynamoDBScanExpression expression
-    private Object exclusiveStartKey
-    private List<Consumer<RangeConditionCollector<T>>> filterCollectorsConsumers = new ArrayList<>()
-    private Consumer<DynamoDBScanExpression> configurer = {} as Consumer<DynamoDBScanExpression>
+    private final List<Consumer<RangeConditionCollector<T>>> filterCollectorsConsumers = []
+
+    private Consumer<DynamoDBScanExpression> configurer = { } as Consumer<DynamoDBScanExpression>
+    private Object exclusiveHashStartKey
+    private Object exclusiveRangeStartKey
 }

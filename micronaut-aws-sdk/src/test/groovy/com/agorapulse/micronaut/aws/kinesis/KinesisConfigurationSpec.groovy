@@ -5,6 +5,9 @@ import io.micronaut.inject.qualifiers.Qualifiers
 import spock.lang.AutoCleanup
 import spock.lang.Specification
 
+/**
+ * Tests for Kinesis configuration setup.
+ */
 class KinesisConfigurationSpec extends Specification {
 
     @AutoCleanup ApplicationContext context = null

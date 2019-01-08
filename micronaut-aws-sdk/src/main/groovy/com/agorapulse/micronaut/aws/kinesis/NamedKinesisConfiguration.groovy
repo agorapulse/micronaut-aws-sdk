@@ -6,6 +6,9 @@ import io.micronaut.context.annotation.EachProperty
 import io.micronaut.context.annotation.Parameter
 import io.micronaut.context.annotation.Requires
 
+/**
+ * Named Kinesis configuration, published with named qualifier of the same name as is the key of this configuration.
+ */
 @CompileStatic
 @EachProperty('aws.kinesis.streams')
 @Requires(classes = AmazonKinesis)

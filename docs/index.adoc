@@ -1,0 +1,17 @@
+= Agorapulse Micronaut Libaries
+
+[.ribbon]
+image::ribbon.png[link={projectUrl}]
+
+image::https://api.bintray.com/packages/agorapulse/libs/micronaut-http-server-basic/images/download.svg[link="https://bintray.com/agorapulse/libs/micronaut-http-server-basic/_latestVersion"]
+
+Set of useful libraries for http://micronaut.io[Micronaut]. All of the libraries are available in https://bintray.com/bintray/jcenter[JCenter Maven repository].
+
+include::grails.adoc[]
+
+include::aws.adoc[]
+
+
+== Maintained by
+
+image::https://cloud.githubusercontent.com/assets/139017/17053391/4a44735a-5034-11e6-8e72-9f4b7139d7e0.png[link=https://www.agorapulse.com/]

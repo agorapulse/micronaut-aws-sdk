@@ -20,26 +20,32 @@ import io.micronaut.retry.annotation.Fallback
 import javax.annotation.PostConstruct
 import javax.inject.Singleton
 
+/**
+ * Mock services for the example application.
+ */
 @Factory
 @CompileStatic
 class LocalServicesFactory {
+
+    private static final String SUN = 'sun'
 
     private final DataSet dataSet = Dru.steal(this)
     private final DynamoDBMapper mapper = DynamoDB.createMapper(dataSet)
 
     @PostConstruct
     void bootstrap() {
-        dataSet.add(new Planet(star: 'sun', name: 'mercury'))
-        dataSet.add(new Planet(star: 'sun', name: 'venus'))
-        dataSet.add(new Planet(star: 'sun', name: 'earth'))
-        dataSet.add(new Planet(star: 'sun', name: 'mars'))
-        dataSet.add(new Planet(star: 'sun', name: 'jupiter'))
-        dataSet.add(new Planet(star: 'sun', name: 'saturn'))
-        dataSet.add(new Planet(star: 'sun', name: 'uranus'))
-        dataSet.add(new Planet(star: 'sun', name: 'neptune'))
-
-        dataSet.add(new Spacecraft(country: 'russia', name: 'vostok'))
-        dataSet.add(new Spacecraft(country: 'usa', name: 'dragon'))
+        dataSet.with {
+            add(new Planet(star: SUN, name: 'mercury'))
+            add(new Planet(star: SUN, name: 'venus'))
+            add(new Planet(star: SUN, name: 'earth'))
+            add(new Planet(star: SUN, name: 'mars'))
+            add(new Planet(star: SUN, name: 'jupiter'))
+            add(new Planet(star: SUN, name: 'saturn'))
+            add(new Planet(star: SUN, name: 'uranus'))
+            add(new Planet(star: SUN, name: 'neptune'))
+            add(new Spacecraft(country: 'russia', name: 'vostok'))
+            add(new Spacecraft(country: 'usa', name: 'dragon'))
+        }
     }
 
     @Bean

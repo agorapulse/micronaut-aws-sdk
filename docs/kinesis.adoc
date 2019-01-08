@@ -1,0 +1,219 @@
+=== Kinesis
+
+> Amazon Kinesis makes it easy to collect, process, and analyze real-time, streaming data so you can get timely insights and react quickly to new information.
+
+This library provides three approaches to work with Kinesis streams:
+
+1. High-level <<Publishing with `@KinesisClient`>>
+2. High-level <<Listening with `@KinesisListener`>>
+3. Middle-level <<Kinesis Service>>
+
+==== Configuration
+
+By default, only `aws.kinesis.application.name` and `aws.kinesis.listener.stream` are required if you decide to use `@KinesisListener`.
+Otherwise you need no configuration at all but some of the configuration may be useful for you.
+
+[source,yaml,indent=0,options="nowrap"]
+.application.yml
+----
+include::../micronaut-aws-sdk/src/test/resources/application-docs-kinesis.yml[]
+----
+<1> You can specify the default stream for https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/kinesis/KinesisService.html[KinesisService] and `@KinesisClient`
+<2> You can define multiple configurations
+<3> Each of the configuration can be access using `@Named('test') KinesisService` qualifier or you can define the configuration as `value` of `@KinesisClient('test')`
+<4> Application name is required for `@KinesisListner`
+<5> Optional id of the Kinesis worker (listener)
+<6> Stream to listen is required for `@KinesisListener`
+<7> You can define multiple listeners configurations
+<8> The name of the configuration will be used as `value` of `@KinesisListener('test')`
+
+
+==== Publishing with `@KinesisClient`
+
+If you place `com.agorapulse.micronaut.aws.kinesis.annotation.KinesisClient` annotation on the interface then methods
+matching predefined pattern will be automatically implemented. Every method of `KinesisClient` puts new records into
+the stream.
+
+The following example shows many of available method signatures for publishing records:
+
+[source,java,indent=0,options="nowrap"]
+.Publishing String Records
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=header]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=string]
+}
+----
+<1> `@KinesisClient` annotation makes the interface a Kinesis client
+<2> You can put String into the stream with generated UUID as partition key
+<3> You can user predefined partition key
+<4> If the name of the argument does not contain word `parition` then `@PartitionKey` annotation must to be used
+<5> You can put String into the stream with predefined partition key and a sequence number
+<6> If the name of the sequence number argument does not contain word `sequence` then `@SequenceKey` annotation must to be used
+<7> The type of parition key and sequence number does not matter as the value will be always converted to string
+
+[source,java,indent=0,options="nowrap"]
+.Publishing Byte Array Records
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=header]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=bytes]
+}
+----
+<1> `@KinesisClient` annotation makes the interface a Kinesis client
+<2> You can put byte array into the stream, UUID as partition key will be generated
+<3> If the name of the argument does not contain word `parition` then `@PartitionKey` annotation must to be used
+<4> You can put several records wrapped into iterable of `PutRecordsRequestEntry`
+<5> You can put several records wrapped into array of `PutRecordsRequestEntry`
+<6> If the single argument is of type `PutRecordsRequestEntry` then `PutRecordsResult` object is returned from the method despite only single record has been published
+
+[source,java,indent=0,options="nowrap"]
+.Publishing Plain Old Java Objects
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=header]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=pogo]
+}
+----
+<1> `@KinesisClient` annotation makes the interface a Kinesis client
+<2> You can put any object into the stream, UUID as partition key will be generated, the objects will be serialized to JSON
+<3> You can put array of any objects into the stream, UUID as partition key will be generated for each record, each object will be serialized to JSON
+<4> You can put iterable of any objects into the stream, UUID as partition key will be generated for each record, each object will be serialized to JSON
+<5> You can put any object into the stream with predefined partition key, if the name of the argument does not contain word `parition` then `@PartitionKey` annotation must to be used
+
+[source,java,indent=0,options="nowrap"]
+.Publishing Events
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=header]
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=events]
+}
+----
+<1> `@KinesisClient` annotation makes the interface a Kinesis client
+<2> You can put object implementing `Event` into the stream
+<3> You can put iterable of objects implementing `Event` into the stream
+<4> You can put array of objects implementing `Event` into the stream
+<5> Without any parameters `@KinesisClient` publishes to default stream of the default configuration but you can change it using `@Stream` annotation on the method
+
+
+NOTE: The return value of the method is `PutRecordResult` or `PutRecordsResult` for putting multiple records but it can be always
+omitted and replaced with `void`.
+
+By default, `KinesisClient` publishes records into the default stream defined by `aws.kinesis.stream` property.
+You can switch to different configuration by changing the `value` of the annotation such as `@KinesisClient("other")` or
+by setting the `stream` property of the annotation such as `@KinesisClient(stream = "MyStream")`. You can change stream
+used by particular method using `@Stream` annotation as mentioned above.
+
+==== Listening with `@KinesisListener`
+
+TIP: Before you start implementing your service with `@KinesisListener` you may consider implementing a Lambda function
+instead.
+
+If you place `com.agorapulse.micronaut.aws.kinesis.annotation.KinesisListener` annotation on the method in the bean
+then the method will be triggered with the new records in the stream.
+
+source,java,indent=0,options="nowrap"]
+.Publishing Events
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisListenerTester.java[tags=all]
+----
+<1> `@KinesisListener` method must be declared in a bean, e.g. `@Singleton`
+<2> You can listen to just plain string records
+<3> You can listen to `Record` objects
+<4> You can listen to both string and `Record` objects
+<5> You can listen to objects implementing `Event` interface
+<6> You can listen to both `Event` and `Record` objects
+<7> You can listen to any object as long as it can be unmarshalled from the record payload
+
+You can listen to different than default configuration by changing the `value` of the annotation such as `@KinesisListener("other")`.
+
+Multiple methods in a single application can listen to the same configuration (stream). In that case, every method will be executed with the
+incoming payload.
+
+==== Kinesis Service
+
+`KinesisService` provides middle-level API for creating, describing, and deleting streams. You can manage shards as well as read records
+from particular shards.
+
+Instance of `KinesisService` is created for the default Kinesis configuration and each stream configuration in `aws.kinesis.streams` map.
+You should always use `@Named` qualifier when injecting `KinesisService` if you have more than one stream configuration present, e.g. `@Named("other") KinesisService otherService`.
+
+Please, see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/kinesis/KinesisService.html[KinesisService] for the full reference.
+
+==== Testing
+You can very easily mock any of the interfaces and declarative services but if you need close-to-production
+Kinesis integration works well with https://www.testcontainers.org/[Testcontainers] and https://localstack.cloud/[LocalStack].
+
+You need to add following dependencies into your build file:
+
+[source,indent=0,role="primary"]
+.Gradle
+----
+compile group: 'org.testcontainers', name: 'localstack', version: '1.10.2'
+compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'
+----
+
+[source,xml,indent=0,role="secondary"]
+.Maven
+----
+<dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>localstack</artifactId>
+    <version>1.10.2</version>
+    <scope>test</scope>
+</dependency>
+<dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>spock</artifactId>
+    <version>1.10.2</version>
+    <scope>test</scope>
+</dependency>
+
+----
+
+Then you can setup your tests like this:
+
+[source,groovy,indent=0,role="primary"]
+.Groovy
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisAnnotationsSpec.groovy[tags=testcontainers-header]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisAnnotationsSpec.groovy[tags=testcontainers-setup]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisAnnotationsSpec.groovy[tags=testcontainers-test]
+
+}
+----
+<1> Annotate the specification with `@Testcontainers` to let Spock manage the Testcontainers for you
+<2> `@RestoreSystemProperties` will guarantee that system properties will be restore after the test
+<3> Create an instance of `LocalStackContainer` with Kinesis and  DynamoDB (required by the listener) support enabled
+<4> Prepare the reference to the `ApplicationContext`, `@AutoCleanup` guarantees closing the context after the tests
+<5> Disable CBOR protocol for Kinesis (not supported by LocalStack/Kinesilite)
+<6> Create `AmazonDynamoDB` client using the LocalStack configuration
+<7> Create `AmazonKinesis` client using the LocalStack configuration
+<8> Prepare the application context with required properties and service LocalStack
+<9> You can obtain instance of `KinesisService` from the context
+<10> You can obtain instance of declarative listener from the context
+<11> You can obtain instance of declarative client from the context
+
+[source,java,indent=0,role="secondary"]
+.Java
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisTest.java[tags=testcontainers-header]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisTest.java[tags=testcontainers-setup]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisTest.java[tags=testcontainers-test]
+
+}
+----
+<1> Prepare the reference to the `ApplicationContext`
+<2> Create an instance of `LocalStackContainer` with Kinesis and  DynamoDB (required by the listener) support enabled
+<3> Disable CBOR protocol for Kinesis (not supported by LocalStack/Kinesilite)
+<4> Create `AmazonDynamoDB` client using the LocalStack configuration
+<5> Create `AmazonKinesis` client using the LocalStack configuration
+<6> Prepare required properties
+<7> Prepare the application context with required properties and service LocalStack
+<8> Reset CBOR protocol settings after the test
+<9> Close the application context after the test
+<10> You can obtain instance of `KinesisService` from the context
+<11> You can obtain instance of declarative listener from the context
+<12> You can obtain instance of declarative client from the context
+
+

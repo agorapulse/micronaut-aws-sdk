@@ -1,0 +1,186 @@
+=== Simple Notification Service (SNS)
+
+> Amazon Simple Notification Service (SNS) is a highly available, durable, secure, fully managed pub/sub messaging service that enables you to decouple microservices, distributed systems, and serverless applications.
+
+This library provides two approaches to work with Simple Notification Service topics:
+
+1. High-level <<Publishing with `@NotificationClient`>>
+2. Middle-level <<Simple Notification Service>>
+
+==== Configuration
+No configuration is required but some of the configuration properties may be useful for you.
+
+[source,yaml,indent=0,options="nowrap"]
+.application.yml
+----
+include::../micronaut-aws-sdk/src/test/resources/application-docs-sqs.yml[]
+----
+<1> You can specify the default topic for https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/sns/SimpleNotificationService.html[SimpleNotificationService] and `@NotificationClient`
+<2> Amazon Resource Name for the iOS application mobile push
+<3> Amazon Resource Name for the Android application mobile push
+<4> Amazon Resource Name for the Amazon application mobile push
+<5> You can define multiple configurations
+<6> Each of the configuration can be access using `@Named('test') SimpleNotificationService` qualifier or you can define the configuration as `value` of `@NotificationClient('test')`
+
+
+==== Publishing with `@NotificationClient`
+
+If you place `com.agorapulse.micronaut.aws.sns.annotation.NotificationClient` annotation on the interface then methods
+matching predefined pattern will be automatically implemented. Methods containing word `sms` will send text messages.
+Other methods of `NotificationClient` will publish new messages into the topic.
+
+The following example shows many of available method signatures for publishing records:
+
+[source,java,indent=0,options="nowrap"]
+.Publishing String Records
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/DefaultClient.java[]
+----
+<1> `@NotificationClient` annotation makes the interface a SNS client
+<2> You can specify to which topic is the message published using `@Topic` annotation
+<3> You can publish any object which can be converted into JSON.
+<4> You can add additional subject to published message (only useful for few protocols, e.g. email)
+<5> You can publish a string message
+<6> You can send SMS using the word `SMS` in the name of the method. One argument must be phone number and its name must contain the word `number`
+<7> You can provide additional attributes for the SMS message
+
+NOTE: The return value of the methods is message id returned by AWS.
+
+By default, `NotificationClient` publishes messages into the default topic defined by `aws.sns.topic` property.
+You can switch to different configuration by changing the `value` of the annotation such as `@NotificationClient("other")` or
+by setting the `topic` property of the annotation such as `@NotificationClient(topic = "SomeTopic")`. You can change topic
+used by particular method using `@Topic` annotation as mentioned above.
+
+==== Simple Notification Service
+
+`SimpleNotificationService` provides middle-level API for creating, describing, and deleting topics. You can manage applications, endpoints and devices.
+You can send messages and notifications.
+
+Instance of `SimpleNotificationService` is created for the default SNS configuration and each topics configuration in `aws.sns.topics` map.
+You should always use `@Named` qualifier when injecting `SimpleNotificationService` if you have more than one topic configuration present, e.g. `@Named("other") SimpleNotificationService otherService`.
+
+Following example shows some of the most common use cases for working with Amazon SNS.
+
+===== Working with Topics
+
+[source,java,indent=0,options="nowrap"]
+.Creating Topic
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=new-topic]
+----
+<1> Create new topic of given name
+<2> The topic is present within the list of all topics' names
+
+
+[source,java,indent=0,options="nowrap"]
+.Subscribe to Topic
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=subscription]
+----
+<1> Subscribe to the topic with an email (there are more variants of this method to subscribe to most common protocols such as HTTP(S) endpoints, SQS, ...)
+<2> Publish message to the topic
+<3> Use the subscription ARN to unsubscribe from the topic
+
+[source,java,indent=0,options="nowrap"]
+.Delete Topic
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=delete-topic]
+----
+<1> Delete the topic
+<2> The topic is no longer present within the list of all topics' names
+
+===== Working with Applications
+
+[source,java,indent=0,options="nowrap"]
+.Working with Applications
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=applications]
+----
+<1> Create new Android application (more platforms available)
+<2> Register Android device (more platforms available)
+<3> Send Android notification (more platforms available)
+<4> Validate Android device
+<5> Unregister device
+
+===== Sending SMS
+
+[source,java,indent=0,options="nowrap"]
+.Sending SMS
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=sms]
+----
+<1> Send a message to the phone number
+
+Please, see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/sns/SimpleNotificationService.html[SimpleNotificationService] for the full reference.
+
+==== Testing
+You can very easily mock any of the interfaces and declarative services but if you need close-to-production
+SNS integration works well with https://www.testcontainers.org/[Testcontainers] and https://localstack.cloud/[LocalStack].
+
+You need to add following dependencies into your build file:
+
+[source,indent=0,role="primary"]
+.Gradle
+----
+compile group: 'org.testcontainers', name: 'localstack', version: '1.10.2'
+compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'
+----
+
+[source,xml,indent=0,role="secondary"]
+.Maven
+----
+<dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>localstack</artifactId>
+    <version>1.10.2</version>
+    <scope>test</scope>
+</dependency>
+<dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>spock</artifactId>
+    <version>1.10.2</version>
+    <scope>test</scope>
+</dependency>
+
+----
+
+Then you can setup your tests like this:
+
+[source,groovy,indent=0,role="primary"]
+.Groovy
+----
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-header]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-fields]
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-setup]
+
+    // tests
+
+}
+----
+<1> Annotate the specification with `@Testcontainers` to let Spock manage the Testcontainers for you
+<2> Create an instance of `LocalStackContainer` with SNS support enabled
+<3> Prepare the reference to the `ApplicationContext`, `@AutoCleanup` guarantees closing the context after the tests
+<4> Create `AmazonSNS` client using the LocalStack configuration
+<5> Prepare the application context with required properties and service using LocalStack
+<6> You can obtain instance of `SimpleNotificationService` from the context
+
+[source,java,indent=0,role="secondary"]
+.Java
+----
+class SimpleNotificationServiceTest {
+
+include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=testcontainers-setup]
+
+    // tests
+
+}
+----
+<1> Prepare the reference to the `ApplicationContext`
+<2> Create an instance of `LocalStackContainer` with SNS support enabled
+<3> Create `AmazonSNS` client using the LocalStack configuration
+<4> Prepare required properties
+<5> Prepare the application context with required properties and service LocalStack
+<6> Close the application context after the test
+
