@@ -524,9 +524,22 @@ $(addBlockSwitches);
 <li><a href="#_usage">Usage</a></li>
 </ul>
 </li>
+<li><a href="#_micronaut_for_api_gateway_proxy">Micronaut for API Gateway Proxy</a>
+<ul class="sectlevel2">
+<li><a href="#_installation_2">Installation</a>
+<ul class="sectlevel3">
+<li><a href="#_gradle_buildsrc">Gradle <code>buildSrc</code></a></li>
+<li><a href="#_shared_gradle_files">Shared Gradle Files</a></li>
+<li><a href="#_api_gateway_subproject_build_file">API Gateway Subproject Build File</a></li>
+<li><a href="#_local_server">Local Server</a></li>
+</ul>
+</li>
+<li><a href="#_testing">Testing</a></li>
+</ul>
+</li>
 <li><a href="#_aws_sdk_for_micronaut">AWS SDK for Micronaut</a>
 <ul class="sectlevel2">
-<li><a href="#_installation_2">Installation</a></li>
+<li><a href="#_installation_3">Installation</a></li>
 <li><a href="#_dynamodb">DynamoDB</a>
 <ul class="sectlevel3">
 <li><a href="#_declarative_services_with_service">Declarative Services with <code>@Service</code></a>
@@ -538,7 +551,7 @@ $(addBlockSwitches);
 </ul>
 </li>
 <li><a href="#_dynamodb_service">DynamoDB Service</a></li>
-<li><a href="#_testing">Testing</a></li>
+<li><a href="#_testing_2">Testing</a></li>
 </ul>
 </li>
 <li><a href="#_kinesis">Kinesis</a>
@@ -547,20 +560,20 @@ $(addBlockSwitches);
 <li><a href="#_publishing_with_kinesisclient">Publishing with <code>@KinesisClient</code></a></li>
 <li><a href="#_listening_with_kinesislistener">Listening with <code>@KinesisListener</code></a></li>
 <li><a href="#_kinesis_service">Kinesis Service</a></li>
-<li><a href="#_testing_2">Testing</a></li>
+<li><a href="#_testing_3">Testing</a></li>
 </ul>
 </li>
 <li><a href="#_simple_storage_service_s3">Simple Storage Service (S3)</a>
 <ul class="sectlevel3">
 <li><a href="#_configuration_2">Configuration</a></li>
 <li><a href="#_simple_storage_service">Simple Storage Service</a></li>
-<li><a href="#_testing_3">Testing</a></li>
+<li><a href="#_testing_4">Testing</a></li>
 </ul>
 </li>
 <li><a href="#_simple_email_service_ses">Simple Email Service (SES)</a>
 <ul class="sectlevel3">
 <li><a href="#_simple_email_service">Simple Email Service</a></li>
-<li><a href="#_testing_4">Testing</a></li>
+<li><a href="#_testing_5">Testing</a></li>
 </ul>
 </li>
 <li><a href="#_simple_notification_service_sns">Simple Notification Service (SNS)</a>
@@ -574,7 +587,7 @@ $(addBlockSwitches);
 <li><a href="#_sending_sms">Sending SMS</a></li>
 </ul>
 </li>
-<li><a href="#_testing_5">Testing</a></li>
+<li><a href="#_testing_6">Testing</a></li>
 </ul>
 </li>
 <li><a href="#_simple_queue_service_sqs">Simple Queue Service (SQS)</a>
@@ -582,7 +595,7 @@ $(addBlockSwitches);
 <li><a href="#_configuration_4">Configuration</a></li>
 <li><a href="#_publishing_with_queueclient">Publishing with <code>@QueueClient</code></a></li>
 <li><a href="#_simple_queue_service">Simple Queue Service</a></li>
-<li><a href="#_testing_6">Testing</a></li>
+<li><a href="#_testing_7">Testing</a></li>
 </ul>
 </li>
 </ul>
@@ -759,8 +772,644 @@ which will automatically load the configuration once the JAR is on classpath.</p
 <pre>org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.agorapulse.micronaut.grails.example.GrailsConfig</pre>
 </div>
 </div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_micronaut_for_api_gateway_proxy">Micronaut for API Gateway Proxy</h2>
+<div class="sectionbody">
 <div class="paragraph">
-<p>include::api-proxy.adoc</p>
+<p>API Gateway Lambda Proxy support for Micronaut which enables using most of the Micronaut HTTP Server features such
+as controllers, filters and annotation statuses. Follow <a href="http://docs.micronaut.io/latest/guide/index.html">Micronaut website for extensive documentation</a>.</p>
+</div>
+<div class="paragraph">
+<p>You develop your application as you would develop any other server application using Micronaut HTTP capabilities. For example you
+can create following controller</p>
+</div>
+<div class="listingblock">
+<div class="title">Example Controller</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy">package com.agorapulse.micronaut.http.examples.planets
+
+import io.micronaut.http.HttpStatus
+import io.micronaut.http.annotation.Controller
+import io.micronaut.http.annotation.Delete
+import io.micronaut.http.annotation.Get
+import io.micronaut.http.annotation.Post
+import io.micronaut.http.annotation.Status
+
+/**
+ * Planet controller.
+ */
+@Controller('/planet')
+class PlanetController {
+
+    private final PlanetDBService planetDBService
+
+    PlanetController(PlanetDBService planetDBService) {
+        this.planetDBService = planetDBService
+    }
+
+    @Get('/{star}')
+    List&lt;Planet&gt; list(String star) {
+        return planetDBService.findAllByStar(star)
+    }
+
+    @Get('/{star}/{name}')
+    Planet show(String star, String name) {
+        return planetDBService.get(star, name)
+    }
+
+    @Post('/{star}/{name}') @Status(HttpStatus.CREATED)
+    Planet save(String star, String name) {
+        Planet planet = new Planet(star: star, name: name)
+        planetDBService.save(planet)
+        return planet
+    }
+
+    @Delete('/{star}/{name}') @Status(HttpStatus.NO_CONTENT)
+    Planet delete(String star, String name) {
+        Planet planet = show(star, name)
+        planetDBService.delete(planet)
+        return planet
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This controller would be able to handle following URIs and methods after deployment using Micronaut for API Gateway Proxy:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>GET /planet/{star}</code></p>
+</li>
+<li>
+<p><code>GET /planet/{star}/{name}</code></p>
+</li>
+<li>
+<p><code>POST /planet/{star}/{name}</code></p>
+</li>
+<li>
+<p><code>DELETE /planet/{star}/{name}</code></p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+This library helps with translating API Gateway Proxy requests and responses into their Micronaut counterparts. It currently does not handle creating the
+API mappings on the AWS. These needs to be created manually and must match the URL routes
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>A top of the standard features, you can use <code>api_gateway_proxy</code> <a href="https://docs.micronaut.io/latest/guide/index.html#environments">environment</a>
+to distinguish the application is running using this library.</p>
+</div>
+<div class="paragraph">
+<p>Also following beans can be injected if necessary:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>com.amazonaws.services.lambda.runtime.Context</code></p>
+</li>
+<li>
+<p><code>com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent</code></p>
+</li>
+<li>
+<p><code>com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent.ProxyRequestContext</code></p>
+</li>
+<li>
+<p><code>com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent.RequestIdentity</code></p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Application context is shared for the lifetime of the Lambda instance. Request related beans are reset before each execution.
+This is a standard behaviour of Micronaut functions to take benefit from the hot deployments.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_installation_2">Installation</h3>
+<div class="paragraph">
+<p>Easiest way how to start is to fork <a href="https://github.com/agorapulse/micronaut-aws-api-gateway-proxy-starter">Micronaut AWS API Gateway Proxy Starter Project</a>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+For lack of Maven skils, this guide explains Gradle build setup only.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If you want to add the library to existing project then you need to do a manual setup.</p>
+</div>
+<div class="sect3">
+<h4 id="_gradle_buildsrc">Gradle <code>buildSrc</code></h4>
+<div class="paragraph">
+<p>To prevent errors from machines which does not have any AWS credentials set you need to provides <code>LambdaHelper</code> class
+to obtain the AWS account ID for the deployments. It is also a convenient place to manage all the dependencies for
+the build scripts.</p>
+</div>
+<div class="listingblock">
+<div class="title">buildSrc/build.gradle</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code>apply plugin: 'groovy'                                                                  <i class="conum" data-value="1"></i><b>(1)</b>
+
+repositories {
+    jcenter()
+    mavenCentral()
+    maven { url 'https://plugins.gradle.org/m2/' }
+}
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+
+    compile 'jp.classmethod.aws:gradle-aws-plugin:0.38'                                 <i class="conum" data-value="2"></i><b>(2)</b>
+    compile 'io.spring.gradle:dependency-management-plugin:1.0.6.RELEASE'               <i class="conum" data-value="3"></i><b>(3)</b>
+    compile "com.github.jengelman.gradle.plugins:shadow:4.0.2"                          <i class="conum" data-value="4"></i><b>(4)</b>
+    compile 'net.ltgt.gradle:gradle-apt-plugin:0.19'                                    <i class="conum" data-value="5"></i><b>(5)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Applying Groovy plugin for the <code>buildSrc</code> itself (for <code>LambdaHelper</code> implementation)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Gradle AWS plugin used for deployment</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Gradle Dependency Management plugin used for managing Micronaut dependencies</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Gradle Shadow plugin optionally used by the local server subproject</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Gradle APT plugin used for Micronaut annotation processing</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">buildSrc/src/main/groovy/lambda/LambdaHelper.groovy</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy">package lambda
+
+import com.amazonaws.SdkClientException
+import groovy.transform.CompileStatic
+import jp.classmethod.aws.gradle.AwsPluginExtension
+import org.gradle.api.Project
+
+@CompileStatic
+class LambdaHelper {
+
+    private LambdaHelper() { }
+
+    // see https://github.com/classmethod/gradle-aws-plugin/pull/160
+    static String getAwsAccountId(Project project) {                                    <i class="conum" data-value="1"></i><b>(1)</b>
+        try {
+            return project.getExtensions().getByType(AwsPluginExtension).accountId
+        } catch (SdkClientException ignored) {
+            project.logger.lifecycle("AWS credentials not configured!")
+            return '000000000000'
+        }
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Helper class provides single method to obtains AWS account id safely</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_shared_gradle_files">Shared Gradle Files</h4>
+<div class="paragraph">
+<p>As far as you expect all the subprojects to be Micronaut projects you can share the configuration in the root <code>build.gradle</code> file.
+Following configuration will enable subprojects with full Java and Groovy Micronaut support.</p>
+</div>
+<div class="listingblock">
+<div class="title">build.gradle</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code>subprojects {
+
+    apply plugin: "groovy"
+    apply plugin: "io.spring.dependency-management"
+    apply plugin: "com.github.johnrengelman.shadow"
+    apply plugin: "net.ltgt.apt-eclipse"
+    apply plugin: "net.ltgt.apt-idea"
+
+
+    version "0.1"
+    group "micronaut.aws.api.gateway.proxy.starter"
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url "https://jcenter.bintray.com" }
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "io.micronaut:micronaut-bom:1.0.3"
+        }
+    }
+
+    dependencies {
+        annotationProcessor "io.micronaut:micronaut-inject-java"
+        annotationProcessor "io.micronaut:micronaut-validation"
+
+        compile "io.micronaut:micronaut-inject"
+        compile "io.micronaut:micronaut-validation"
+        compile "io.micronaut:micronaut-runtime"
+        compile "io.micronaut:micronaut-runtime-groovy"
+
+        compileOnly "io.micronaut:micronaut-inject-java"
+        compileOnly "io.micronaut:micronaut-inject-groovy"
+
+        runtime "ch.qos.logback:logback-classic:1.2.3"
+
+        testCompile("org.spockframework:spock-core") {
+            exclude group: "org.codehaus.groovy", module: "groovy-all"
+        }
+
+        testCompile "io.micronaut:micronaut-inject-groovy"
+        testCompile "io.micronaut:micronaut-inject-java"
+
+        testCompile "junit:junit:4.12"
+        testCompile "org.hamcrest:hamcrest-all:1.3"
+    }
+
+    compileJava.options.compilerArgs += '-parameters'
+    compileTestJava.options.compilerArgs += '-parameters'
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Each AWS Lambda subproject also shares common setup. We can store it in <code>gradle/lambda.gradle</code> file.</p>
+</div>
+<div class="listingblock">
+<div class="title">gradle/lambda.gradle</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code>configurations {
+    lambdaCompile.extendsFrom runtime                                                   <i class="conum" data-value="1"></i><b>(1)</b>
+    testCompile.extendsFrom lambdaCompile                                               <i class="conum" data-value="2"></i><b>(2)</b>
+}
+
+dependencies {
+    lambdaCompile "com.agorapulse:micronaut-function-aws-agp:1.0.3"                 <i class="conum" data-value="3"></i><b>(3)</b>
+
+    compile "io.micronaut:micronaut-http-server"                                        <i class="conum" data-value="4"></i><b>(4)</b>
+    compile "io.micronaut:micronaut-router"                                             <i class="conum" data-value="5"></i><b>(5)</b>
+
+    // gru for aws lambda can help you testing lambda fuctions
+    // https://agorapulse.github.io/gru/
+    testCompile "com.agorapulse:gru-api-gateway:0.6.6"                                  <i class="conum" data-value="6"></i><b>(6)</b>
+}
+
+task buildZip(type: Zip) {                                                              <i class="conum" data-value="7"></i><b>(7)</b>
+    from compileJava
+    from compileGroovy
+    from processResources
+    into('lib') {
+        from configurations.lambdaCompile
+    }
+}
+
+build.dependsOn buildZip                                                                <i class="conum" data-value="8"></i><b>(8)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Create new configuration <code>lambdaCompile</code> to be used only for tests and deployed package</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Include <code>lambdaCompile</code> libraries in also in tests</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The integration library is only important for the package deployed</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Use just <code>micronaut-http-server</code> library as a dependency (not <code>micronaut-http-server-netty</code>)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Micronaut router is also required</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>You can optionally use <a href="https://agorapulse.github.io/gru/#_aws_api_gateway">Gru</a> for testing</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Adds a task to build Lambda deployment archive</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>Adds <code>buildZip</code> to the default <code>build</code> task</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_api_gateway_subproject_build_file">API Gateway Subproject Build File</h4>
+<div class="paragraph">
+<p>Every API Gateway Lambda project must at least contain following definition of the deployment
+as well as it needs to apply the shared <code>lambda.gradle</code> file.</p>
+</div>
+<div class="listingblock">
+<div class="title">build.gradle</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code>import lambda.LambdaHelper
+import com.amazonaws.services.lambda.model.Runtime
+import jp.classmethod.aws.gradle.lambda.AWSLambdaMigrateFunctionTask
+
+apply from: '../gradle/lambda.gradle'                                                   <i class="conum" data-value="1"></i><b>(1)</b>
+
+task deployLambda(                                                                      <i class="conum" data-value="2"></i><b>(2)</b>
+    type: AWSLambdaMigrateFunctionTask,
+    dependsOn: build,
+    group: 'deploy'
+)  {
+    functionName = 'MicronautHelloWorld'
+    handler = 'com.agorapulse.micronaut.agp.ApiGatewayProxyHandler::handleRequest'      <i class="conum" data-value="3"></i><b>(3)</b>
+    role = "arn:aws:iam::${LambdaHelper.getAwsAccountId(project)}:role/lambda_basic_execution"
+    runtime = Runtime.Java8                                                             <i class="conum" data-value="4"></i><b>(4)</b>
+    zipFile = buildZip.archivePath                                                      <i class="conum" data-value="5"></i><b>(5)</b>
+    memorySize = 1024
+    timeout = 30
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Import helper Gradle script</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Add task to deploy to AWS Lambda</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Lambda function handler must be <code>com.agorapulse.micronaut.agp.ApiGatewayProxyHandler::handleRequest</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Runtime must be <code>Java8</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Archive must be the result of `buildZip task</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_local_server">Local Server</h4>
+<div class="paragraph">
+<p>The biggest advantage of Micronaut for Api Gateway Proxy integration library is the ability to easily run locally.</p>
+</div>
+<div class="listingblock">
+<div class="title">build.gradle</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code>apply plugin: 'application'                                                             <i class="conum" data-value="1"></i><b>(1)</b>
+
+dependencies {
+    compile project(':hello-world')                                                     <i class="conum" data-value="2"></i><b>(2)</b>
+
+    compile "io.micronaut:micronaut-http-server-netty"                                  <i class="conum" data-value="3"></i><b>(3)</b>
+
+    testCompile "com.agorapulse:gru-http:0.6.6"                                         <i class="conum" data-value="4"></i><b>(4)</b>
+}
+
+shadowJar {                                                                             <i class="conum" data-value="5"></i><b>(5)</b>
+    mergeServiceFiles()
+}
+
+run.jvmArgs('-noverify', '-XX:TieredStopAtLevel=1')
+
+mainClassName = "starter.Application"                                                   <i class="conum" data-value="6"></i><b>(6)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Apply <code>application</code> plugin so you will be able to run the server as application locally</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Depend on every API Gateway subproject you want to include into the local server</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>You need real Micronaut&#8217;s HTTP server implementation to run the server</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>You can optionally use <a href="https://agorapulse.github.io/gru/#_http">Gru</a> for testing the local server</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>If you decide to run from Shadow JAR you need to merge the service files</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Replace with your own application class</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_testing">Testing</h3>
+<div class="paragraph">
+<p>The easiest way to test the API Gateway Proxy integration is using <a href="https://agorapulse.github.io/gru/#_aws_api_gateway">Gru for API Gateway</a>
+testing client. The library should be already on the classpath if you have followed the steps or if
+you are using the starter project.</p>
+</div>
+<div class="listingblock">
+<div class="title">Controller Spec</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy">package com.agorapulse.micronaut.http.examples.planets
+
+import com.agorapulse.dru.Dru
+import com.agorapulse.dru.dynamodb.persistence.DynamoDB
+import com.agorapulse.gru.Gru
+import com.agorapulse.gru.agp.ApiGatewayProxy
+import com.agorapulse.micronaut.agp.ApiGatewayProxyHandler
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
+import io.micronaut.context.ApplicationContext
+import org.junit.Rule
+import spock.lang.Specification
+
+/**
+ * Test for planet controller.
+ */
+class PlanetControllerSpec extends Specification {
+
+    @Rule private final Gru gru = Gru.equip(ApiGatewayProxy.steal(this) {               <i class="conum" data-value="1"></i><b>(1)</b>
+        map '/planet/{star}' to ApiGatewayProxyHandler                                  <i class="conum" data-value="2"></i><b>(2)</b>
+        map '/planet/{star}/{name}' to ApiGatewayProxyHandler
+    })
+
+    @Rule private final Dru dru = Dru.steal(this)
+
+    private final AmazonDynamoDB amazonDynamoDB = Mock(AmazonDynamoDB)
+
+    @SuppressWarnings('UnusedPrivateField')
+    private final ApiGatewayProxyHandler handler = new ApiGatewayProxyHandler() {
+        @Override
+        protected void doWithApplicationContext(ApplicationContext ctx) {               <i class="conum" data-value="3"></i><b>(3)</b>
+            ctx.registerSingleton(
+                PlanetDBService,
+                new PlanetDBService(amazonDynamoDB, DynamoDB.createMapper(dru))
+            )
+        }
+    }
+
+    void setup() {
+        dru.add(new Planet(star: 'sun', name: 'mercury'))
+        dru.add(new Planet(star: 'sun', name: 'venus'))
+        dru.add(new Planet(star: 'sun', name: 'earth'))
+        dru.add(new Planet(star: 'sun', name: 'mars'))
+    }
+
+    void 'get planet'() {                                                               <i class="conum" data-value="4"></i><b>(4)</b>
+        expect:
+            gru.test {
+                get('/planet/sun/earth')
+                expect {
+                    json 'earth.json'
+                }
+            }
+    }
+
+    void 'get planet which does not exist'() {
+        expect:
+            gru.test {
+                get('/planet/sun/vulcan')
+                expect {
+                    status NOT_FOUND
+                }
+            }
+    }
+
+    void 'list planets by existing star'() {
+        expect:
+            gru.test {
+                get('/planet/sun')
+                expect {
+                    json 'planetsOfSun.json'
+                }
+            }
+    }
+
+    void 'add planet'() {
+        when:
+            gru.test {
+                post '/planet/sun/jupiter'
+                expect {
+                    status CREATED
+                    json 'jupiter.json'
+                }
+            }
+        then:
+            gru.verify()
+            dru.findAllByType(Planet).size() == 5
+    }
+
+    void 'delete planet'() {
+        given:
+            dru.add(new Planet(star: 'sun', name: 'pluto'))
+        expect:
+            dru.findAllByType(Planet).size() == 5
+            gru.test {
+                delete '/planet/sun/pluto'
+                expect {
+                    status NO_CONTENT
+                    json 'pluto.json'
+                }
+            }
+            dru.findAllByType(Planet).size() == 4
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Use <code>ApiGatewayProxy</code> client with <a href="https://agorapulse.github.io/gru">Gru</a></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Configure which URLs and methods are handled by the Micronaut, the handler must always be <code>ApiGatewayProxyHandler</code>
+or its successors</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>You can customize the handler initialization by providing a mock beans</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Test method using <a href="https://agorapulse.github.io/gru">Gru</a></td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+The advantage of using Gru is that you can reuse the existing test with the local server if required.
+Only thing which changes it the handler setup and the client being used (HTTP instead of API Gateway Proxy).
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -864,7 +1513,7 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <p>In this documentation, the high-level approaches will be discussed first before the lower-level services.</p>
 </div>
 <div class="sect2">
-<h3 id="_installation_2">Installation</h3>
+<h3 id="_installation_3">Installation</h3>
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
@@ -1844,7 +2493,7 @@ assertEquals(1,
 </div>
 </div>
 <div class="sect3">
-<h4 id="_testing">Testing</h4>
+<h4 id="_testing_2">Testing</h4>
 <div class="paragraph">
 <p>You can very easily mock any of the interfaces and declarative services but if you need close-to-production
 DynamoDB integration works well with <a href="https://www.testcontainers.org/">Testcontainers</a> and <a href="https://localstack.cloud/">LocalStack</a>.</p>
@@ -2489,7 +3138,7 @@ You should always use <code>@Named</code> qualifier when injecting <code>Kinesis
 </div>
 </div>
 <div class="sect3">
-<h4 id="_testing_2">Testing</h4>
+<h4 id="_testing_3">Testing</h4>
 <div class="paragraph">
 <p>You can very easily mock any of the interfaces and declarative services but if you need close-to-production
 Kinesis integration works well with <a href="https://www.testcontainers.org/">Testcontainers</a> and <a href="https://localstack.cloud/">LocalStack</a>.</p>
@@ -3001,7 +3650,7 @@ assertFalse(service.listBucketNames().contains(MY_BUCKET));                     
 </div>
 </div>
 <div class="sect3">
-<h4 id="_testing_3">Testing</h4>
+<h4 id="_testing_4">Testing</h4>
 <div class="paragraph">
 <p>You can very easily mock the <code>SimpleStorageService</code> but if you need close-to-production
 S3 integration works well with <a href="https://www.testcontainers.org/">Testcontainers</a> and <a href="https://localstack.cloud/">LocalStack</a>.</p>
@@ -3401,7 +4050,7 @@ public class SendEmailTest {
 </div>
 </div>
 <div class="sect3">
-<h4 id="_testing_4">Testing</h4>
+<h4 id="_testing_5">Testing</h4>
 <div class="paragraph">
 <p>It is recommended just to mock the <code>SimpleEmailService</code> in your tests as it only contains single abstract method.</p>
 </div>
@@ -3736,7 +4385,7 @@ String msgId = service.sendSMSMessage(PHONE_NUMBER, "Hello World", attrs);      
 </div>
 </div>
 <div class="sect3">
-<h4 id="_testing_5">Testing</h4>
+<h4 id="_testing_6">Testing</h4>
 <div class="paragraph">
 <p>You can very easily mock any of the interfaces and declarative services but if you need close-to-production
 SNS integration works well with <a href="https://www.testcontainers.org/">Testcontainers</a> and <a href="https://localstack.cloud/">LocalStack</a>.</p>
@@ -4235,7 +4884,7 @@ complex message handling logic yourselves.
 </div>
 </div>
 <div class="sect3">
-<h4 id="_testing_6">Testing</h4>
+<h4 id="_testing_7">Testing</h4>
 <div class="paragraph">
 <p>You can very easily mock any of the interfaces and declarative services but if you need close-to-production
 SQS integration works well with <a href="https://www.testcontainers.org/">Testcontainers</a> and <a href="https://localstack.cloud/">LocalStack</a>.</p>
@@ -4438,7 +5087,7 @@ class SimpleQueueServiceSpec extends Specification {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-01-09 08:51:36 +0100
+Last updated 2019-01-09 08:59:17 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">
