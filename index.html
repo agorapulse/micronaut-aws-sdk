@@ -430,7 +430,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.0.3.RC1" />
+<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.0.3" />
 <style>
 .hidden {
 	display: none;
@@ -631,7 +631,7 @@ cannot be found the official <a href="https://docs.micronaut.io/latest/guide/ind
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code>compileOnly 'com.agorapulse:micronaut-grails:1.0.3.RC1'</code></pre>
+<pre class="highlightjs highlight"><code>compileOnly 'com.agorapulse:micronaut-grails:1.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -640,7 +640,7 @@ cannot be found the official <a href="https://docs.micronaut.io/latest/guide/ind
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-grails&lt;/artifactId&gt;
-    &lt;version&gt;1.0.3.RC1&lt;/version&gt;
+    &lt;version&gt;1.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -749,6 +749,9 @@ which will automatically load the configuration once the JAR is on classpath.</p
 <pre>org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.agorapulse.micronaut.grails.example.GrailsConfig</pre>
 </div>
 </div>
+<div class="paragraph">
+<p>include::api-proxy.adoc</p>
+</div>
 </div>
 </div>
 </div>
@@ -855,7 +858,7 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk:1.0.3.RC1'
+<pre class="highlightjs highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk:1.0.3'
 
 // only required for DynamoDB and Kinesis integration
 compile group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: '1.11.470'
@@ -883,7 +886,7 @@ compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.470'</c
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk&lt;/artifactId&gt;
-    &lt;version&gt;1.0.3.RC1&lt;/version&gt;
+    &lt;version&gt;1.0.3&lt;/version&gt;
 &lt;/dependency&gt;
 
 &lt;!-- only required for DynamoDB and Kinesis integration --&gt;
@@ -4425,7 +4428,7 @@ class SimpleQueueServiceSpec extends Specification {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-01-08 13:42:54 +0100
+Last updated 2019-01-09 08:43:50 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">
