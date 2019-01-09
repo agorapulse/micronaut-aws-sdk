@@ -526,78 +526,19 @@ $(addBlockSwitches);
 </li>
 <li><a href="#_micronaut_for_api_gateway_proxy">Micronaut for API Gateway Proxy</a>
 <ul class="sectlevel2">
-<li><a href="#_installation_2">Installation</a>
-<ul class="sectlevel3">
-<li><a href="#_gradle_buildsrc">Gradle <code>buildSrc</code></a></li>
-<li><a href="#_shared_gradle_files">Shared Gradle Files</a></li>
-<li><a href="#_api_gateway_subproject_build_file">API Gateway Subproject Build File</a></li>
-<li><a href="#_local_server">Local Server</a></li>
-</ul>
-</li>
+<li><a href="#_installation_2">Installation</a></li>
 <li><a href="#_testing">Testing</a></li>
 </ul>
 </li>
 <li><a href="#_aws_sdk_for_micronaut">AWS SDK for Micronaut</a>
 <ul class="sectlevel2">
 <li><a href="#_installation_3">Installation</a></li>
-<li><a href="#_dynamodb">DynamoDB</a>
-<ul class="sectlevel3">
-<li><a href="#_declarative_services_with_service">Declarative Services with <code>@Service</code></a>
-<ul class="sectlevel4">
-<li><a href="#_method_signatures">Method Signatures</a></li>
-<li><a href="#_advanced_queries">Advanced Queries</a></li>
-<li><a href="#_scanning">Scanning</a></li>
-<li><a href="#_updates">Updates</a></li>
-</ul>
-</li>
-<li><a href="#_dynamodb_service">DynamoDB Service</a></li>
-<li><a href="#_testing_2">Testing</a></li>
-</ul>
-</li>
-<li><a href="#_kinesis">Kinesis</a>
-<ul class="sectlevel3">
-<li><a href="#_configuration">Configuration</a></li>
-<li><a href="#_publishing_with_kinesisclient">Publishing with <code>@KinesisClient</code></a></li>
-<li><a href="#_listening_with_kinesislistener">Listening with <code>@KinesisListener</code></a></li>
-<li><a href="#_kinesis_service">Kinesis Service</a></li>
-<li><a href="#_testing_3">Testing</a></li>
-</ul>
-</li>
-<li><a href="#_simple_storage_service_s3">Simple Storage Service (S3)</a>
-<ul class="sectlevel3">
-<li><a href="#_configuration_2">Configuration</a></li>
-<li><a href="#_simple_storage_service">Simple Storage Service</a></li>
-<li><a href="#_testing_4">Testing</a></li>
-</ul>
-</li>
-<li><a href="#_simple_email_service_ses">Simple Email Service (SES)</a>
-<ul class="sectlevel3">
-<li><a href="#_simple_email_service">Simple Email Service</a></li>
-<li><a href="#_testing_5">Testing</a></li>
-</ul>
-</li>
-<li><a href="#_simple_notification_service_sns">Simple Notification Service (SNS)</a>
-<ul class="sectlevel3">
-<li><a href="#_configuration_3">Configuration</a></li>
-<li><a href="#_publishing_with_notificationclient">Publishing with <code>@NotificationClient</code></a></li>
-<li><a href="#_simple_notification_service">Simple Notification Service</a>
-<ul class="sectlevel4">
-<li><a href="#_working_with_topics">Working with Topics</a></li>
-<li><a href="#_working_with_applications">Working with Applications</a></li>
-<li><a href="#_sending_sms">Sending SMS</a></li>
-</ul>
-</li>
-<li><a href="#_testing_6">Testing</a></li>
-</ul>
-</li>
-<li><a href="#_simple_queue_service_sqs">Simple Queue Service (SQS)</a>
-<ul class="sectlevel3">
-<li><a href="#_configuration_4">Configuration</a></li>
-<li><a href="#_publishing_with_queueclient">Publishing with <code>@QueueClient</code></a></li>
-<li><a href="#_simple_queue_service">Simple Queue Service</a></li>
-<li><a href="#_testing_7">Testing</a></li>
-</ul>
-</li>
+<li><a href="#_dynamodb">DynamoDB</a></li>
+<li><a href="#_kinesis">Kinesis</a></li>
+<li><a href="#_simple_storage_service_s3">Simple Storage Service (S3)</a></li>
+<li><a href="#_simple_email_service_ses">Simple Email Service (SES)</a></li>
+<li><a href="#_simple_notification_service_sns">Simple Notification Service (SNS)</a></li>
+<li><a href="#_simple_queue_service_sqs">Simple Queue Service (SQS)</a></li>
 </ul>
 </li>
 <li><a href="#_maintained_by">Maintained by</a></li>
@@ -655,16 +596,6 @@ There are two additional features which cannot be found the official <a href="ht
 <div class="title">Gradle</div>
 <div class="content">
 <pre class="highlightjs highlight"><code>compileOnly 'com.agorapulse:micronaut-grails:1.0.3'</code></pre>
-</div>
-</div>
-<div class="listingblock secondary">
-<div class="title">Maven</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
-    &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
-    &lt;artifactId&gt;micronaut-grails&lt;/artifactId&gt;
-    &lt;version&gt;1.0.3&lt;/version&gt;
-&lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="admonitionblock tip">
