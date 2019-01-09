@@ -175,7 +175,7 @@ asciidoctor {
         'stylesdir': 'css',
         icons: 'font',
         'toc': 'left',
-        'toclevels': '4',
+        'toclevels': '3',
         version: project.version,
         'projectUrl': 'https://github.com/agorapulse/micronaut-libraries'
 }

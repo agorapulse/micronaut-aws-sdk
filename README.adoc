@@ -1,6 +1,12 @@
 = Agorapulse Micronaut Libraries
 
-image::https://api.bintray.com/packages/agorapulse/libs/micronaut-http-server-basic/images/download.svg[link="https://bintray.com/agorapulse/libs/micronaut-http-server-basic/_latestVersion"]
+--
+image::https://api.bintray.com/packages/agorapulse/libs/micronaut-http-server-basic/images/download.svg[link="https://bintray.com/agorapulse/libs/micronaut-http-server-basic/_latestVersion",float="left"]
+image::https://travis-ci.org/agorapulse/micronaut-libraries.svg?branch=master["Build Status", link="https://travis-ci.org/agorapulse/micronaut-libraries"float="left"]
+image::https://coveralls.io/repos/github/agorapulse/micronaut-libraries/badge.svg?branch=master[link=https://coveralls.io/github/agorapulse/micronaut-libraries?branch=master",float="left"]
+--
+
+---
 
 Set of useful libraries for http://micronaut.io[Micronaut]. All of the libraries are available in https://bintray.com/bintray/jcenter[JCenter Maven repository].
 

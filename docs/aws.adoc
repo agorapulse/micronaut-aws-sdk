@@ -12,7 +12,7 @@ Provided integrations:
 * <<Simple Notification Service (SNS)>>
 * <<Simple Queue Service (SQS)>>
 
-NOTE: <<API Gateway Proxy Integration>> is handled separately in its own library.
+NOTE: <<Micronaut for API Gateway Proxy>> is handled separately in its own library.
 
 Key concepts of the AWS SDK for Micronaut:
 

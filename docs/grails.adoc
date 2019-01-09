@@ -1,7 +1,7 @@
 == Micronaut Grails
 
-Micronaut Grails package helps using Micronaut beans in the Grails application. There are two additional features which
-cannot be found the official https://docs.micronaut.io/latest/guide/index.html#springBeans[Spring support for Micronaut]:
+Micronaut Grails package helps using Micronaut beans in the Grails application or any other Spring application.
+There are two additional features which cannot be found the official https://docs.micronaut.io/latest/guide/index.html#springBeans[Spring support for Micronaut]:
 
   1. Micronaut beans' names defaults to lower-cased simple name of the class as expected by Grails
   2. Ability to reuse existing properties declared by Grails - e.g. `grails.redis.port` can be injected as `@Value('${redis.port}')`
@@ -13,16 +13,6 @@ cannot be found the official https://docs.micronaut.io/latest/guide/index.html#s
 .Gradle
 ----
 compileOnly 'com.agorapulse:micronaut-grails:{version}'
-----
-
-[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
-.Maven
-----
-<dependency>
-    <groupId>com.agorapulse</groupId>
-    <artifactId>micronaut-grails</artifactId>
-    <version>{version}</version>
-</dependency>
 ----
 
 TIP: If you plan to reuse same library for Micronaut and Grails, you can declare the dependency as  `compileOnly`.

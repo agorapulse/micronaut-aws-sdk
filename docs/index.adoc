@@ -3,14 +3,25 @@
 [.ribbon]
 image::ribbon.png[link={projectUrl}]
 
-image::https://api.bintray.com/packages/agorapulse/libs/micronaut-http-server-basic/images/download.svg[link="https://bintray.com/agorapulse/libs/micronaut-http-server-basic/_latestVersion"]
+--
+image::https://api.bintray.com/packages/agorapulse/libs/micronaut-http-server-basic/images/download.svg[link="https://bintray.com/agorapulse/libs/micronaut-http-server-basic/_latestVersion",float="left"]
+image::https://travis-ci.org/agorapulse/micronaut-libraries.svg?branch=master["Build Status", link="https://travis-ci.org/agorapulse/micronaut-libraries"float="left"]
+image::https://coveralls.io/repos/github/agorapulse/micronaut-libraries/badge.svg?branch=master[link=https://coveralls.io/github/agorapulse/micronaut-libraries?branch=master",float="left"]
+--
 
-Set of useful libraries for http://micronaut.io[Micronaut]. All of the libraries are available in https://bintray.com/bintray/jcenter[JCenter Maven repository].
+---
 
-include::grails.adoc[]
+Set of useful libraries for http://micronaut.io[Micronaut]. All the libraries are available in https://bintray.com/bintray/jcenter[JCenter Maven repository].
+
+ * <<AWS SDK for Micronaut>> - integration for <<DynamoDB>>, <<Kinesis>>, <<Simple Storage Service (S3)>>, <<Simple Email Service (SES)>>, <<Simple Notification Service (SNS)>> and <<Simple Queue Service (SQS)>>
+ * <<Micronaut for API Gateway Proxy>> - develop API Gateway Proxy Lambda functions using Micronaut HTTP server capabilities
+ * <<Micronaut Grails>> - publish your Micronaut beans into Spring application context
 
 include::aws.adoc[]
 
+include::api-proxy.adoc[]
+
+include::grails.adoc[]
 
 == Maintained by
 
