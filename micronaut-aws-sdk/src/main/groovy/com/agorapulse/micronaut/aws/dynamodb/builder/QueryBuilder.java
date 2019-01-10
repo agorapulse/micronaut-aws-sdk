@@ -43,7 +43,7 @@ public interface QueryBuilder<T> extends DetachedQuery<T> {
      *
      * This parameter is required for every query.
      *
-     * @param key the hash key of the query
+     * @param key the hash key of the query or an instance of the object with the hash key set
      * @return self
      */
     QueryBuilder<T> hash(Object key);

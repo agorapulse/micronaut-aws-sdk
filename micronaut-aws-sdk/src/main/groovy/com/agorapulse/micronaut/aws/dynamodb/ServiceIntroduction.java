@@ -118,7 +118,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         }
 
         if (methodName.startsWith("query") || methodName.startsWith("findAll") || methodName.startsWith("list")) {
-            return simpleHashAndRangeQuery(type, context).query(mapper);
+            return flowableOrList(simpleHashAndRangeQuery(type, context).query(mapper), context.getReturnType().getType());
         }
 
         throw new UnsupportedOperationException("Cannot implement method " + context.getExecutableMethod());

@@ -20,7 +20,7 @@ public interface UpdateBuilder<T> extends DetachedUpdate<T> {
 
     /**
      * Sets the hash key value of the updated entity.
-     * @param key the hash key of the updated entity
+     * @param key the hash key of the query or an instance of the object with the hash key set
      * @return self
      */
     UpdateBuilder<T> hash(Object key);
