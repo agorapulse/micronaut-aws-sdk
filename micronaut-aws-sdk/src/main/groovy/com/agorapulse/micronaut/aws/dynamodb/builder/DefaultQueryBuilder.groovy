@@ -102,7 +102,11 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
         DynamoDBMapperTableModel<T> model = mapper.getTableModel(metadata.itemClass)
 
         if (hashKey != null) {
-            expression.withHashKeyValues(model.createKey(hashKey, null))
+            if (metadata.itemClass.isInstance(hashKey)) {
+                expression.withHashKeyValues(metadata.itemClass.cast(hashKey))
+            } else {
+                expression.withHashKeyValues(model.createKey(hashKey, null))
+            }
         }
 
         applyConditions(model, rangeCollectorsConsumers, expression.&withRangeKeyCondition)

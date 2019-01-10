@@ -14,6 +14,7 @@ import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.type.MutableArgumentValue;
+import io.reactivex.Flowable;
 
 import javax.inject.Singleton;
 import java.lang.reflect.InvocationTargetException;
@@ -89,7 +90,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
                 return service.deleteAllByConditions(criteria.resolveExpression(mapper), Collections.emptyMap());
             }
 
-            return criteria.query(mapper);
+            return flowableOrList(criteria.query(mapper), context.getReturnType().getType());
         }
 
         if (context.getTargetMethod().isAnnotationPresent(Update.class)) {
@@ -105,7 +106,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
                 return criteria.count(mapper);
             }
 
-            return criteria.scan(mapper);
+            return flowableOrList(criteria.scan(mapper), context.getReturnType().getType());
         }
 
         if (methodName.startsWith("count")) {
@@ -121,6 +122,13 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         }
 
         throw new UnsupportedOperationException("Cannot implement method " + context.getExecutableMethod());
+    }
+
+    private Object flowableOrList(Flowable result, Class type) {
+        if (List.class.isAssignableFrom(type)) {
+            return result.toList().blockingGet();
+        }
+        return result;
     }
 
     private <T> T evaluateAnnotationType(Class<? extends Function<Map<String, Object>, T>> updateDefinitionType, MethodInvocationContext<Object, Object> context) {

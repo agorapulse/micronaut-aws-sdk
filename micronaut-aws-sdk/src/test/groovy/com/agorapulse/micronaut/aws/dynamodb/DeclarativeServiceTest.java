@@ -50,7 +50,6 @@ public class DeclarativeServiceTest {
     public void testJavaService() {
         DynamoDBEntityService s = context.getBean(DynamoDBEntityService.class);
 
-
         assertNotNull(s.save(createEntity("1", "1", "foo", REFERENCE_DATE.toDate())));
         assertNotNull(s.save(createEntity("1", "2", "bar", REFERENCE_DATE.plusDays(1).toDate())));
         assertNotNull(s.saveAll(Arrays.asList(
@@ -82,8 +81,8 @@ public class DeclarativeServiceTest {
         assertEquals(1, s.queryByRangeIndex("1", "bar").count().blockingGet().intValue());
         assertNull(s.queryByRangeIndex("1", "bar").blockingSingle().parentId);
         assertEquals("bar", s.queryByRangeIndex("1", "bar").blockingSingle().rangeIndex);
-        assertEquals(2, s.queryByDates("1", REFERENCE_DATE.minusDays(1).toDate(), REFERENCE_DATE.plusDays(2).toDate()).count().blockingGet().intValue());
-        assertEquals(1, s.queryByDates("3", REFERENCE_DATE.plusDays(9).toDate(), REFERENCE_DATE.plusDays(20).toDate()).count().blockingGet().intValue());
+        assertEquals(2, s.queryByDates("1", REFERENCE_DATE.minusDays(1).toDate(), REFERENCE_DATE.plusDays(2).toDate()).size());
+        assertEquals(1, s.queryByDates("3", REFERENCE_DATE.plusDays(9).toDate(), REFERENCE_DATE.plusDays(20).toDate()).size());
 
         assertEquals(2, s.scanAllByRangeIndex("bar").count().blockingGet().intValue());
 
