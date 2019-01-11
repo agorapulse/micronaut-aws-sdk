@@ -430,7 +430,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.0.3" />
+<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.0.3.1" />
 <style>
 .hidden {
 	display: none;
@@ -740,7 +740,7 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk:1.0.3'
+<pre class="highlightjs highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk:1.0.3.1'
 
 // only required for DynamoDB and Kinesis integration
 compile group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: '1.11.470'
@@ -768,7 +768,7 @@ compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.470'</c
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk&lt;/artifactId&gt;
-    &lt;version&gt;1.0.3&lt;/version&gt;
+    &lt;version&gt;1.0.3.1&lt;/version&gt;
 &lt;/dependency&gt;
 
 &lt;!-- only required for DynamoDB and Kinesis integration --&gt;
@@ -915,7 +915,7 @@ interface DynamoDBItemDBService {
             range { between DynamoDBEntity.DATE_INDEX, after, before }
         }
     })
-    Flowable&lt;DynamoDBEntity&gt; queryByDates(String hashKey, Date after, Date before)
+    List&lt;DynamoDBEntity&gt; queryByDates(String hashKey, Date after, Date before)
 
     void delete(DynamoDBEntity entity)
     void delete(String hashKey, String rangeKey)
@@ -1066,7 +1066,7 @@ public interface DynamoDBEntityService {
     Flowable&lt;DynamoDBEntity&gt; queryByRangeIndex(String hashKey, String rangeKey);
 
     @Query(BetweenDateIndex.class)
-    Flowable&lt;DynamoDBEntity&gt; queryByDates(String hashKey, Date after, Date before);
+    List&lt;DynamoDBEntity&gt; queryByDates(String hashKey, Date after, Date before);
 
     void delete(DynamoDBEntity entity);
 
@@ -1153,7 +1153,7 @@ public interface DynamoDBEntityService {
 <p class="tableblock"><code>query*</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Entity or Hash key and optional range key annotated with <code>@HashKey</code> and <code>@RangeKey</code> if the argument name does not contain word <code>hash</code> or <code>range</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Flowable&lt;DynamoDBEntity&gt; query(String hashKey)</code></p>
-<p class="tableblock">    <code>Flowable&lt;DynamoDBEntity&gt; query(String hashKey, String rangeKey)</code></p></td>
+<p class="tableblock">    <code>List&lt;DynamoDBEntity&gt; query(String hashKey, String rangeKey)</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Queries for all entities with given hash key and/or range key.</p></td>
 </tr>
 <tr>
@@ -1254,7 +1254,7 @@ interface DynamoDBItemDBService {
 </tr>
 <tr>
 <td><i class="conum" data-value="8"></i><b>8</b></td>
-<td>The arguments have no special meaning but you can use them in the query. The method must return <code>Flowable</code> of entities.</td>
+<td>The arguments have no special meaning but you can use them in the query. The method must return either <code>Flowable</code> or <code>List</code> of entities.</td>
 </tr>
 </table>
 </div>
@@ -1313,7 +1313,7 @@ public interface DynamoDBEntityService {
 </tr>
 <tr>
 <td><i class="conum" data-value="8"></i><b>8</b></td>
-<td>The arguments have no special meaning but you can use them in the query using <code>arguments</code> map. The method must return <code>Flowable</code> of entities.</td>
+<td>The arguments have no special meaning but you can use them in the query using <code>arguments</code> map. The method must return either <code>Flowable</code> or <code>List</code> of entities.</td>
 </tr>
 </table>
 </div>
@@ -1375,7 +1375,7 @@ interface DynamoDBItemDBService {
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>The arguments have no special meaning but you can use them in the scan definition. The method must return <code>Flowable</code> of entities.</td>
+<td>The arguments have no special meaning but you can use them in the scan definition. The method must return either <code>Flowable</code> or <code>List</code> of entities.</td>
 </tr>
 </table>
 </div>
@@ -1422,7 +1422,7 @@ public interface DynamoDBEntityService {
 </tr>
 <tr>
 <td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>The arguments have no special meaning but you can use them in the scan definition. The method must return <code>Flowable</code> of entities.</td>
+<td>The arguments have no special meaning but you can use them in the scan definition. The method must return either <code>Flowable</code> or <code>List</code> of entities.</td>
 </tr>
 </table>
 </div>
@@ -4566,7 +4566,7 @@ Following configuration will enable subprojects with full Java and Groovy Micron
 
     dependencyManagement {
         imports {
-            mavenBom "io.micronaut:micronaut-bom:1.0.3"
+            mavenBom "io.micronaut:micronaut-bom:1.0.3.1"
         }
     }
 
@@ -4612,7 +4612,7 @@ Following configuration will enable subprojects with full Java and Groovy Micron
 }
 
 dependencies {
-    lambdaCompile "com.agorapulse:micronaut-function-aws-agp:1.0.3"                 <i class="conum" data-value="3"></i><b>(3)</b>
+    lambdaCompile "com.agorapulse:micronaut-function-aws-agp:1.0.3.1"                 <i class="conum" data-value="3"></i><b>(3)</b>
 
     compile "io.micronaut:micronaut-http-server"                                        <i class="conum" data-value="4"></i><b>(4)</b>
     compile "io.micronaut:micronaut-router"                                             <i class="conum" data-value="5"></i><b>(5)</b>
@@ -4958,7 +4958,7 @@ There are two additional features which cannot be found the official <a href="ht
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code>compileOnly 'com.agorapulse:micronaut-grails:1.0.3'</code></pre>
+<pre class="highlightjs highlight"><code>compileOnly 'com.agorapulse:micronaut-grails:1.0.3.1'</code></pre>
 </div>
 </div>
 <div class="admonitionblock tip">
