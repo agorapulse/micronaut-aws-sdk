@@ -278,7 +278,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         }
 
         if (!names.isValid()) {
-            throw new UnsupportedOperationException("Method needs to have at least one argument annotated with @DynamoDBHashKey or with called 'hash'");
+            throw new UnsupportedOperationException("Method needs to have at least one argument annotated with @HashKey or with called 'hash'");
         }
 
         return names;

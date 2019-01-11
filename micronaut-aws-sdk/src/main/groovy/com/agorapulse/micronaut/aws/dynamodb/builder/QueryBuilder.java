@@ -18,6 +18,13 @@ import java.util.function.Consumer;
 public interface QueryBuilder<T> extends DetachedQuery<T> {
 
     /**
+     * Sort the results by the range index
+     * @param sort the sort keyword
+     * @return self
+     */
+    QueryBuilder<T> sort(Builders.Sort sort);
+
+    /**
      * Demand consistent reads.
      * @param read the read keyword
      * @return self
