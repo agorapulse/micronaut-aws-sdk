@@ -1,7 +1,5 @@
 allprojects {
     group 'com.agorapulse'
-    version micronautVersion
-
     repositories {
         jcenter()
         mavenCentral()

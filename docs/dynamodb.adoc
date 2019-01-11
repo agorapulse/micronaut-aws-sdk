@@ -77,7 +77,7 @@ interface DynamoDBItemDBService {
             range { between DynamoDBEntity.DATE_INDEX, after, before }
         }
     })
-    Flowable<DynamoDBEntity> queryByDates(String hashKey, Date after, Date before)
+    List<DynamoDBEntity> queryByDates(String hashKey, Date after, Date before)
 
     void delete(DynamoDBEntity entity)
     void delete(String hashKey, String rangeKey)
@@ -228,7 +228,7 @@ public interface DynamoDBEntityService {
     Flowable<DynamoDBEntity> queryByRangeIndex(String hashKey, String rangeKey);
 
     @Query(BetweenDateIndex.class)
-    Flowable<DynamoDBEntity> queryByDates(String hashKey, Date after, Date before);
+    List<DynamoDBEntity> queryByDates(String hashKey, Date after, Date before);
 
     void delete(DynamoDBEntity entity);
 
@@ -320,7 +320,7 @@ The following table summarizes the supported method signatures:
 |
     `Flowable<DynamoDBEntity> query(String hashKey)`
 
-    `Flowable<DynamoDBEntity> query(String hashKey, String rangeKey)`
+    `List<DynamoDBEntity> query(String hashKey, String rangeKey)`
 
 | Queries for all entities with given hash key and/or range key.
 
@@ -367,7 +367,7 @@ include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynam
 <5> Specify some range key criteria with the method's `rangeKey` argument (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
 <6> You can limit which properties are returned from the query
 <7> Only `rangeIndex` property will be populated in the entities returned
-<8> The arguments have no special meaning but you can use them in the query. The method must return `Flowable` of entities.
+<8> The arguments have no special meaning but you can use them in the query. The method must return either `Flowable` or `List` of entities.
 
 
 [source,java,indent=0,options="nowrap",role="secondary"]
@@ -388,7 +388,7 @@ include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynam
 <5> Specify some range key criteria with the method's `rangeKey` argument (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
 <6> Only `rangeIndex` property will be populated in the entities returned
 <7> `@Query` annotation accepts a class which implements `Function<Map<String, Object>, DetachedQuery>`
-<8> The arguments have no special meaning but you can use them in the query using `arguments` map. The method must return `Flowable` of entities.
+<8> The arguments have no special meaning but you can use them in the query using `arguments` map. The method must return either `Flowable` or `List` of entities.
 
 
 ===== Scanning
@@ -414,7 +414,7 @@ include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynam
 <2> Annotate an interface with `@Service` with the type of the entity as its `value`
 <3> `@Scan` annotation accepts a closure which returns a scan builder (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/ScanBuilder.html[ScanBuilder] for full reference)
 <4> Specify some filter criteria with the method's `foo` argument (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
-<5> The arguments have no special meaning but you can use them in the scan definition. The method must return `Flowable` of entities.
+<5> The arguments have no special meaning but you can use them in the scan definition. The method must return either `Flowable` or `List` of entities.
 
 
 [source,java,indent=0,options="nowrap",role="secondary"]
@@ -433,7 +433,7 @@ include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynam
 <3> Use `Builders` class to create a scan builder for given DynamoDB entity (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/ScanBuilder.html[ScanBuilder] for full reference)
 <4> Specify some filter criteria with the method's `foo` argument (see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
 <5> `@Scan` annotation accepts a class which implements `Function<Map<String, Object>, DetachedScan>`
-<6> The arguments have no special meaning but you can use them in the scan definition. The method must return `Flowable` of entities.
+<6> The arguments have no special meaning but you can use them in the scan definition. The method must return either `Flowable` or `List` of entities.
 
 
 

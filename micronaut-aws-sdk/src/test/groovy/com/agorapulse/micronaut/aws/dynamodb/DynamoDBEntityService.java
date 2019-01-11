@@ -119,7 +119,7 @@ public interface DynamoDBEntityService {
     // end::sample-query[]
 
     @Query(BetweenDateIndex.class)
-    Flowable<DynamoDBEntity> queryByDates(String hashKey, Date after, Date before);
+    List<DynamoDBEntity> queryByDates(String hashKey, Date after, Date before);
 
     void delete(DynamoDBEntity entity);
 
