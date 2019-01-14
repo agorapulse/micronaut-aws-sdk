@@ -2,6 +2,7 @@ package com.agorapulse.micronaut.aws.sqs;
 
 import com.agorapulse.micronaut.aws.sqs.annotation.Queue;
 import com.agorapulse.micronaut.aws.sqs.annotation.QueueClient;
+import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.QueueDoesNotExistException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,6 +10,7 @@ import groovy.transform.Undefined;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.context.BeanContext;
+import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.type.Argument;
 import io.micronaut.inject.qualifiers.Qualifiers;
@@ -19,6 +21,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 @Singleton
+@Requires(classes = AmazonSQS.class)
 public class QueueClientIntroduction implements MethodInterceptor<Object, Object> {
 
     private static final String GROUP = "group";

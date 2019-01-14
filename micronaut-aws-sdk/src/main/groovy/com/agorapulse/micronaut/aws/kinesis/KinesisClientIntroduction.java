@@ -4,6 +4,7 @@ import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisClient;
 import com.agorapulse.micronaut.aws.kinesis.annotation.PartitionKey;
 import com.agorapulse.micronaut.aws.kinesis.annotation.SequenceNumber;
 import com.agorapulse.micronaut.aws.kinesis.annotation.Stream;
+import com.amazonaws.services.kinesis.AmazonKinesis;
 import com.amazonaws.services.kinesis.model.PutRecordResult;
 import com.amazonaws.services.kinesis.model.PutRecordsRequestEntry;
 import com.amazonaws.services.kinesis.model.ResourceNotFoundException;
@@ -13,6 +14,7 @@ import groovy.transform.Undefined;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.context.BeanContext;
+import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.type.Argument;
 import io.micronaut.inject.qualifiers.Qualifiers;
@@ -22,6 +24,7 @@ import java.nio.ByteBuffer;
 import java.util.*;
 
 @Singleton
+@Requires(classes = AmazonKinesis.class)
 public class KinesisClientIntroduction implements MethodInterceptor<Object, Object> {
 
     private static final String KEY = "key";
