@@ -3,6 +3,7 @@ package com.agorapulse.micronaut.aws.dynamodb;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
 import io.micronaut.context.BeanContext;
+import io.micronaut.context.annotation.Requires;
 import io.micronaut.inject.qualifiers.Qualifiers;
 
 import javax.inject.Singleton;
@@ -12,6 +13,7 @@ import java.util.Optional;
  * Provider of {@link DynamoDBService} for particular DynamoDB entities.
  */
 @Singleton
+@Requires(classes = IDynamoDBMapper.class)
 public class DynamoDBServiceProvider {
 
     private final AmazonDynamoDB client;
