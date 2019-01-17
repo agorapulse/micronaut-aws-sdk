@@ -17,6 +17,11 @@ public class Identity {
         this.sourceIp = sourceIp;
     }
 
+    public Identity withSourceIp(String sourceIp) {
+        this.sourceIp = sourceIp;
+        return this;
+    }
+
     // CHECKSTYLE:OFF
     @Override
     public String toString() {

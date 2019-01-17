@@ -19,6 +19,11 @@ public class WebSocketRequest {
         this.requestContext = requestContext;
     }
 
+    public WebSocketRequest withRequestContext(RequestContext requestContext) {
+        this.requestContext = requestContext;
+        return this;
+    }
+
     public String getBody() {
         return body;
     }
@@ -27,12 +32,22 @@ public class WebSocketRequest {
         this.body = body;
     }
 
+    public WebSocketRequest withBody(String body) {
+        this.body = body;
+        return this;
+    }
+
     public Boolean getBase64Encoded() {
         return isBase64Encoded;
     }
 
     public void setBase64Encoded(Boolean base64Encoded) {
         isBase64Encoded = base64Encoded;
+    }
+
+    public WebSocketRequest withBase64Encoded(Boolean base64Encoded) {
+        isBase64Encoded = base64Encoded;
+        return this;
     }
 
     // CHECKSTYLE:OFF

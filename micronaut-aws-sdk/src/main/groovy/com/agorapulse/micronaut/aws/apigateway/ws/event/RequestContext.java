@@ -32,12 +32,22 @@ public class RequestContext {
         this.routeKey = routeKey;
     }
 
+    public RequestContext withRouteKey(String routeKey) {
+        this.routeKey = routeKey;
+        return this;
+    }
+
     public String getMessageId() {
         return messageId;
     }
 
     public void setMessageId(String messageId) {
         this.messageId = messageId;
+    }
+
+    public RequestContext withMessageId(String messageId) {
+        this.messageId = messageId;
+        return this;
     }
 
     public EventType getEventType() {
@@ -48,12 +58,22 @@ public class RequestContext {
         this.eventType = eventType;
     }
 
+    public RequestContext withEventType(EventType eventType) {
+        this.eventType = eventType;
+        return this;
+    }
+
     public String getExtendedRequestId() {
         return extendedRequestId;
     }
 
     public void setExtendedRequestId(String extendedRequestId) {
         this.extendedRequestId = extendedRequestId;
+    }
+
+    public RequestContext withExtendedRequestId(String extendedRequestId) {
+        this.extendedRequestId = extendedRequestId;
+        return this;
     }
 
     public MessageDirection getMessageDirection() {
@@ -64,12 +84,22 @@ public class RequestContext {
         this.messageDirection = messageDirection;
     }
 
+    public RequestContext withMessageDirection(MessageDirection messageDirection) {
+        this.messageDirection = messageDirection;
+        return this;
+    }
+
     public String getStage() {
         return stage;
     }
 
     public void setStage(String stage) {
         this.stage = stage;
+    }
+
+    public RequestContext withStage(String stage) {
+        this.stage = stage;
+        return this;
     }
 
     public Long getConnectedAt() {
@@ -80,12 +110,22 @@ public class RequestContext {
         this.connectedAt = connectedAt;
     }
 
+    public RequestContext withConnectedAt(Long connectedAt) {
+        this.connectedAt = connectedAt;
+        return this;
+    }
+
     public Long getRequestTimeEpoch() {
         return requestTimeEpoch;
     }
 
     public void setRequestTimeEpoch(Long requestTimeEpoch) {
         this.requestTimeEpoch = requestTimeEpoch;
+    }
+
+    public RequestContext withRequestTimeEpoch(Long requestTimeEpoch) {
+        this.requestTimeEpoch = requestTimeEpoch;
+        return this;
     }
 
     public Identity getIdentity() {
@@ -96,12 +136,22 @@ public class RequestContext {
         this.identity = identity;
     }
 
+    public RequestContext withIdentity(Identity identity) {
+        this.identity = identity;
+        return this;
+    }
+
     public String getRequestId() {
         return requestId;
     }
 
     public void setRequestId(String requestId) {
         this.requestId = requestId;
+    }
+
+    public RequestContext withRequestId(String requestId) {
+        this.requestId = requestId;
+        return this;
     }
 
     public String getDomainName() {
@@ -112,6 +162,11 @@ public class RequestContext {
         this.domainName = domainName;
     }
 
+    public RequestContext withDomainName(String domainName) {
+        this.domainName = domainName;
+        return this;
+    }
+
     public String getConnectionId() {
         return connectionId;
     }
@@ -120,12 +175,22 @@ public class RequestContext {
         this.connectionId = connectionId;
     }
 
+    public RequestContext withConnectionId(String connectionId) {
+        this.connectionId = connectionId;
+        return this;
+    }
+
     public String getApiId() {
         return apiId;
     }
 
     public void setApiId(String apiId) {
         this.apiId = apiId;
+    }
+
+    public RequestContext withApiId(String apiId) {
+        this.apiId = apiId;
+        return this;
     }
 
     // CHECKSTYLE:OFF

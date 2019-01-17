@@ -19,7 +19,7 @@ WebSocketResponse lambdaEcho(WebSocketRequest event) {                          
             // do nothing
             break
         case EventType.MESSAGE:                                                         // <7>
-            String message = "[$connectionId] ${event.body.reverse()}"
+            String message = "[$connectionId] ${event.body}"
             sender.send(connectionId, message)
             publisher.publishMessage(connectionId, message)
             break

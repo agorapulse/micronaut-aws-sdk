@@ -16,7 +16,7 @@ class LambdaEchoFunctionSpec extends Specification {
 
     public static final String CONNECTION_ID = 'abcdefghij'
     public static final String BODY = 'Hello'
-    public static final String RESPONSE = "[$CONNECTION_ID] ${BODY.reverse()}"
+    public static final String RESPONSE = "[$CONNECTION_ID] ${BODY}"
 
     @AutoCleanup ApplicationContext ctx
     @AutoCleanup EmbeddedServer server
