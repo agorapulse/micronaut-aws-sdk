@@ -1,0 +1,105 @@
+package com.agorapulse.micronaut.aws.apigateway.ws;
+
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.ClientConfiguration;
+import com.amazonaws.DefaultRequest;
+import com.amazonaws.Request;
+import com.amazonaws.auth.AWS4Signer;
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.http.*;
+import com.amazonaws.regions.AwsRegionProvider;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+
+/**
+ * Default implementation of {@link MessageSender}.
+ */
+public class DefaultMessageSender implements MessageSender {
+
+    private final String connectionsUrl;
+    private final AWSCredentialsProvider credentialsProvider;
+    private final AwsRegionProvider regionProvider;
+    private final ObjectMapper mapper;
+
+    public DefaultMessageSender(String connectionsUrl, AWSCredentialsProvider credentialsProvider, AwsRegionProvider regionProvider, ObjectMapper mapper) {
+        this.connectionsUrl = connectionsUrl;
+        this.credentialsProvider = credentialsProvider;
+        this.regionProvider = regionProvider;
+        this.mapper = mapper;
+    }
+
+    @Override
+    public void send(String connectionId, Object payload) {
+        try {
+            send(connectionId, mapper.writeValueAsString(payload));
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Cannot serialize object to JSON", e);
+        }
+    }
+
+    @Override
+    public void send(String connectionId, InputStream payload) {
+        String url = connectionsUrl + "/" + connectionId;
+
+        Request<Void> request = new DefaultRequest<>("execute-api");
+        request.setHttpMethod(HttpMethodName.POST);
+        request.setEndpoint(URI.create(url));
+        request.setContent(payload);
+
+        AWS4Signer signer = new AWS4Signer();
+        signer.setRegionName(regionProvider.getRegion());
+        signer.setServiceName(request.getServiceName());
+        signer.sign(request, credentialsProvider.getCredentials());
+
+        new AmazonHttpClient(new ClientConfiguration())
+            .requestExecutionBuilder()
+            .executionContext(new ExecutionContext(true))
+            .request(request)
+            .errorResponseHandler(new HttpResponseHandler<AmazonClientException>() {
+                @Override
+                public AmazonClientException handle(HttpResponse response) {
+                    return new AmazonClientException("Exception publishing messages to WS endpoint "
+                        + " POST " + url + " "
+                        + response.getStatusCode() + ": "
+                        + response.getStatusText() + "\n"
+                        + readErrorMessage(response.getContent()));
+                }
+
+                @Override
+                public boolean needsConnectionLeftOpen() {
+                    return false;
+                }
+            }).execute(new HttpResponseHandler<Void>() {
+            @Override
+            public Void handle(HttpResponse response) {
+                return null;
+            }
+
+            @Override
+            public boolean needsConnectionLeftOpen() {
+                return false;
+            }
+        });
+    }
+
+    private String readErrorMessage(InputStream inputStream) {
+        try {
+            ByteArrayOutputStream result = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) != -1) {
+                result.write(buffer, 0, length);
+            }
+            return result.toString(StandardCharsets.UTF_8.name());
+        } catch (IOException e) {
+            // error reading the error's message, print the exception message
+            return e.toString();
+        }
+    }
+}

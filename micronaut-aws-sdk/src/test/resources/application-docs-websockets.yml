@@ -1,0 +1,9 @@
+aws:
+  websocket:
+    connections:
+      url: https://abcefgh.execute-api.eu-west-1.amazonaws.com/test/@connections        # <1>
+
+# Java Only
+micronaut:
+  function:
+    name: lambda-echo-java                                                              # <2>

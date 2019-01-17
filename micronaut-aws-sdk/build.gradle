@@ -14,6 +14,10 @@ dependencies {
 
     optional 'javax.mail:mail:1.4.4'
 
+    testCompile "io.micronaut:micronaut-function-groovy"
+    testCompile "io.micronaut:micronaut-function-aws"
+    testCompile 'com.amazonaws:aws-lambda-java-events'
+
     testCompile group: 'org.testcontainers', name: 'testcontainers', version: testcontainersVersion
     testCompile group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
     testCompile group: 'org.testcontainers', name: 'spock', version: testcontainersVersion
