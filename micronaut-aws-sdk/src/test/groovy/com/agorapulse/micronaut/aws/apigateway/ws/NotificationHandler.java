@@ -19,10 +19,9 @@ public class NotificationHandler implements Consumer<SNSEvent> {
     public void accept(SNSEvent event) {                                                // <2>
         event.getRecords().forEach(it -> {
             try {
-                sender.send(                                                            // <3>
-                    it.getSNS().getSubject(),
-                    "[SNS] " + it.getSNS().getMessage()
-                );
+                String connectionId = it.getSNS().getSubject();
+                String payload = "[SNS] " + it.getSNS().getMessage();
+                sender.send(connectionId, payload);                                     // <3>
             } catch (AmazonClientException ignored) {
                 // can be gone                                                          // <4>
             }

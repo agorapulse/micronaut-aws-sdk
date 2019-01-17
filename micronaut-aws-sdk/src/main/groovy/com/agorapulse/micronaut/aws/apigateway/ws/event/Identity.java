@@ -17,6 +17,7 @@ public class Identity {
         this.sourceIp = sourceIp;
     }
 
+    // CHECKSTYLE:OFF
     @Override
     public String toString() {
         return "Identity{" +
@@ -36,4 +37,5 @@ public class Identity {
     public int hashCode() {
         return Objects.hash(sourceIp);
     }
+    // CHECKSTYLE:ON
 }

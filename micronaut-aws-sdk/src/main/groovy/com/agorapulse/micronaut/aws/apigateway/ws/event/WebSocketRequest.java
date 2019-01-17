@@ -35,6 +35,7 @@ public class WebSocketRequest {
         isBase64Encoded = base64Encoded;
     }
 
+    // CHECKSTYLE:OFF
     @Override
     public String toString() {
         return "WebSocketRequest{" +
@@ -58,4 +59,5 @@ public class WebSocketRequest {
     public int hashCode() {
         return Objects.hash(requestContext, body, isBase64Encoded);
     }
+    // CHECKSTYLE:ON
 }

@@ -12,6 +12,7 @@ public class WebSocketConnectionRequest extends WebSocketRequest {
     private Map<String, String> headers;
     private Map<String, List<String>> multiValueHeaders;
 
+    // CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
 
@@ -35,4 +36,5 @@ public class WebSocketConnectionRequest extends WebSocketRequest {
             ", multiValueHeaders=" + multiValueHeaders +
             '}';
     }
+    // CHECKSTYLE:ON
 }

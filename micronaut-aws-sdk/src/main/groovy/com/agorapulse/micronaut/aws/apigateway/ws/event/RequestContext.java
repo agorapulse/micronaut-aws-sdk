@@ -128,6 +128,7 @@ public class RequestContext {
         this.apiId = apiId;
     }
 
+    // CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -171,4 +172,5 @@ public class RequestContext {
             ", apiId='" + apiId + '\'' +
             '}';
     }
+    // CHECKSTYLE:ON
 }

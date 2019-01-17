@@ -17,6 +17,7 @@ public class WebSocketResponse {
         this.statusCode = statusCode;
     }
 
+    // CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -36,4 +37,5 @@ public class WebSocketResponse {
             "statusCode=" + statusCode +
             '}';
     }
+    // CHECKSTYLE:ON
 }
