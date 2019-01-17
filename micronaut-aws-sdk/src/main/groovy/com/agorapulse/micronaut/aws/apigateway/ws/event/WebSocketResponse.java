@@ -1,5 +1,6 @@
 package com.agorapulse.micronaut.aws.apigateway.ws.event;
 
+import java.beans.ConstructorProperties;
 import java.util.Objects;
 
 /**
@@ -13,8 +14,13 @@ public class WebSocketResponse {
 
     private final Integer statusCode;
 
+    @ConstructorProperties("statusCode")
     public WebSocketResponse(Integer statusCode) {
         this.statusCode = statusCode;
+    }
+
+    public Integer getStatusCode() {
+        return statusCode;
     }
 
     // CHECKSTYLE:OFF

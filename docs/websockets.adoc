@@ -121,6 +121,6 @@ your Lambda function's role must have following permissions (preferably constrai
 
 
 ==== Testing
-You can very easily mock any of the interfaces. Create request event manually and follow the guides for testing
-functions
+You can very easily mock any of the interfaces. Create request event manually and follow
+http://guides.micronaut.io/micronaut-function-aws-lambda/guide/index.html#functiontests[the guide to test functions with Micronaut].
 
