@@ -9,10 +9,13 @@ import io.micronaut.runtime.server.EmbeddedServer
 import spock.lang.AutoCleanup
 import spock.lang.Specification
 
+/**
+ * Tests for LabdaEchoFunction.
+ */
 class LambdaEchoFunctionSpec extends Specification {
 
     public static final String CONNECTION_ID = 'abcdefghij'
-    public static final String BODY = "Hello"
+    public static final String BODY = 'Hello'
     public static final String RESPONSE = "[$CONNECTION_ID] ${BODY.reverse()}"
 
     @AutoCleanup ApplicationContext ctx
