@@ -63,7 +63,7 @@ public class DefaultMessageSender implements MessageSender {
             .request(request)
             .errorResponseHandler(new HttpResponseHandler<AmazonClientException>() {
                 @Override
-                public AmazonClientException handle(HttpResponse response) {
+                public AmazonClientException handle(HttpResponse response) throws Exception {
                     return new AmazonClientException("Exception publishing messages to WS endpoint "
                         + " POST " + url + " "
                         + response.getStatusCode() + ": "
@@ -88,18 +88,13 @@ public class DefaultMessageSender implements MessageSender {
         });
     }
 
-    private String readErrorMessage(InputStream inputStream) {
-        try {
-            ByteArrayOutputStream result = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = inputStream.read(buffer)) != -1) {
-                result.write(buffer, 0, length);
-            }
-            return result.toString(StandardCharsets.UTF_8.name());
-        } catch (IOException e) {
-            // error reading the error's message, print the exception message
-            return e.toString();
+    private String readErrorMessage(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream result = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = inputStream.read(buffer)) != -1) {
+            result.write(buffer, 0, length);
         }
+        return result.toString(StandardCharsets.UTF_8.name());
     }
 }

@@ -37,15 +37,15 @@ public class WebSocketRequest {
         return this;
     }
 
-    public Boolean getBase64Encoded() {
+    public Boolean getIsBase64Encoded() {
         return isBase64Encoded;
     }
 
-    public void setBase64Encoded(Boolean base64Encoded) {
+    public void setIsBase64Encoded(Boolean base64Encoded) {
         isBase64Encoded = base64Encoded;
     }
 
-    public WebSocketRequest withBase64Encoded(Boolean base64Encoded) {
+    public WebSocketRequest withIsBase64Encoded(Boolean base64Encoded) {
         isBase64Encoded = base64Encoded;
         return this;
     }

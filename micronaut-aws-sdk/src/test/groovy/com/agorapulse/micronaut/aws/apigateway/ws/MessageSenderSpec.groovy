@@ -9,6 +9,7 @@ import com.stehno.ersatz.ErsatzServer
 import com.stehno.ersatz.RequestWithContent
 import io.micronaut.context.ApplicationContext
 import org.hamcrest.Matchers
+import com.fasterxml.jackson.databind.JsonMappingException
 import spock.lang.AutoCleanup
 import spock.lang.Specification
 
@@ -58,6 +59,20 @@ class MessageSenderSpec extends Specification {
             defaultSender.send(CONNECTION_ID, PAYLOAD)
         then:
             thrown(AmazonClientException)
+    }
+
+    void 'send unsupported payload'() {
+        given:
+            prepareServerAndContext {
+                header('Authorization', Matchers.iterableWithSize(1))
+                responds().code(200)
+            }
+            MessageSender defaultSender = ctx.getBean(MessageSender)
+        when:
+            defaultSender.send(CONNECTION_ID) { 'not supported' }
+        then:
+            IllegalArgumentException illegalArgumentException = thrown(IllegalArgumentException)
+            illegalArgumentException.cause instanceof JsonMappingException
     }
 
     void prepareServerAndContext(@DelegatesTo(value = RequestWithContent, strategy = DELEGATE_FIRST) Closure response) {

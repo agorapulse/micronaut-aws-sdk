@@ -60,7 +60,11 @@ public class WebSocketConnectionRequest extends WebSocketRequest {
         return "WebSocketConnectionRequest{" +
             "headers=" + headers +
             ", multiValueHeaders=" + multiValueHeaders +
+            "requestContext=" + getRequestContext() +
+            ", body='" + getBody() + '\'' +
+            ", isBase64Encoded=" + getIsBase64Encoded() +
             '}';
     }
+
     // CHECKSTYLE:ON
 }
