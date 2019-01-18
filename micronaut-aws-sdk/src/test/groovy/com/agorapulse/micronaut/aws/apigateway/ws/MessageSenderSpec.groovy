@@ -51,7 +51,7 @@ class MessageSenderSpec extends Specification {
             prepareServerAndContext {
                 header('Authorization', Matchers.iterableWithSize(1))
                 called(1)
-                responds().code(410).body("Already Gone", ContentType.TEXT_PLAIN)
+                responds().code(410).body('Already Gone', ContentType.TEXT_PLAIN)
             }
             MessageSender defaultSender = ctx.getBean(MessageSender)
         when:
