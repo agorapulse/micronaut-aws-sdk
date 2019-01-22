@@ -5,11 +5,9 @@ import com.agorapulse.dru.Dru
 import com.agorapulse.dru.dynamodb.persistence.DynamoDB
 import com.agorapulse.gru.agp.MockContext
 import com.agorapulse.micronaut.http.examples.planets.Planet
-import com.agorapulse.micronaut.http.examples.planets.PlanetDBService
 import com.agorapulse.micronaut.http.examples.spacecrafts.Spacecraft
-import com.agorapulse.micronaut.http.examples.spacecrafts.SpacecraftDBService
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
+import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
 import com.amazonaws.services.lambda.runtime.Context
 import groovy.transform.CompileStatic
 import io.micronaut.context.annotation.Bean
@@ -58,15 +56,8 @@ class LocalServicesFactory {
     @Bean
     @Primary
     @Singleton
-    PlanetDBService planetDBService() {
-        return new PlanetDBService(AmazonDynamoDBClient.builder().build(), mapper)
-    }
-
-    @Bean
-    @Primary
-    @Singleton
-    SpacecraftDBService spacecraftDBService() {
-        return new SpacecraftDBService(mapper: mapper)
+    IDynamoDBMapper dynamoDBMapper() {
+        mapper
     }
 
 }

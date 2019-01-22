@@ -1,53 +1,26 @@
 package com.agorapulse.micronaut.http.examples.planets
 
-import com.amazonaws.AmazonClientException
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
-import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
-import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput
-
-import javax.annotation.PostConstruct
-import javax.inject.Singleton
+import com.agorapulse.micronaut.aws.dynamodb.annotation.HashKey
+import com.agorapulse.micronaut.aws.dynamodb.annotation.Query
+import com.agorapulse.micronaut.aws.dynamodb.annotation.RangeKey
+import com.agorapulse.micronaut.aws.dynamodb.annotation.Service
+import com.agorapulse.micronaut.aws.dynamodb.builder.Builders
 
 /**
  * Service to access DynamoDB entities.
  */
-@Singleton
-class PlanetDBService {
+@Service(Planet)
+interface PlanetDBService {
 
-    AmazonDynamoDB amazonDynamoDBClient
-    IDynamoDBMapper mapper
+    void save(Planet planet)
+    void delete(Planet planet)
 
-    PlanetDBService(AmazonDynamoDB amazonDynamoDBClient, IDynamoDBMapper mapper) {
-        this.amazonDynamoDBClient = amazonDynamoDBClient
-        this.mapper = mapper
-    }
-
-    @PostConstruct
-    void init() {
-        try {
-            amazonDynamoDBClient.createTable(mapper.generateCreateTableRequest(Planet).withProvisionedThroughput(
-                new ProvisionedThroughput().withReadCapacityUnits(5).withWriteCapacityUnits(1)
-            ))
-        } catch (AmazonClientException ignored) {
-            // ok, already exits
+    @Query({
+        Builders.query(Planet) {
+            hash starName
         }
-    }
-
-    void save(Planet planet) {
-        mapper.save(planet)
-    }
-
-    void delete(Planet planet) {
-        mapper.delete(planet)
-    }
-
-    List<Planet> findAllByStar(String starName) {
-        mapper.query(Planet, new DynamoDBQueryExpression<Planet>().withHashKeyValues(new Planet(star: starName)))
-    }
-
-    Planet get(String starName, String planetName) {
-        mapper.load(Planet, starName, planetName)
-    }
+    })
+    List<Planet> findAllByStar(String starName)
+    Planet get(@HashKey String starName, @RangeKey String planetName)
 
 }
