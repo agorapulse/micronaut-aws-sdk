@@ -430,7 +430,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.0.3.2" />
+<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.0.3.3" />
 <style>
 .hidden {
 	display: none;
@@ -560,24 +560,19 @@ $(addBlockSwitches);
 <div class="title">application.yml</div>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-yaml hljs" data-lang="yaml">aws:
-  sqs:
+  sns:
+    topic: MyTopic                                                                      <i class="conum" data-value="1"></i><b>(1)</b>
+    ios:
+      arn: 'arn:aws:sns:eu-west-1:123456789:app/APNS/my-ios-app'                        <i class="conum" data-value="2"></i><b>(2)</b>
+    android:
+      arn: 'arn:aws:sns:eu-west-1:123456789:app/GCM/my-android-app'                     <i class="conum" data-value="3"></i><b>(3)</b>
+    amazon:
+      arn: 'arn:aws:sns:eu-west-1:123456789:app/ADM/my-amazon-app'                      <i class="conum" data-value="4"></i><b>(4)</b>
 
-    # related to service behaviour
-    queueNamePrefix: 'vlad_'                                                            <i class="conum" data-value="1"></i><b>(1)</b>
-    autoCreateQueue: false                                                              <i class="conum" data-value="2"></i><b>(2)</b>
-    cache: false                                                                        <i class="conum" data-value="3"></i><b>(3)</b>
 
-    # related to default queue
-    queue: MyQueue                                                                      <i class="conum" data-value="4"></i><b>(4)</b>
-    fifo: true                                                                          <i class="conum" data-value="5"></i><b>(5)</b>
-    delaySeconds: 0                                                                     <i class="conum" data-value="6"></i><b>(6)</b>
-    messageRetentionPeriod: 345600                                                      <i class="conum" data-value="7"></i><b>(7)</b>
-    maximumMessageSize: 262144                                                          <i class="conum" data-value="8"></i><b>(8)</b>
-    visibilityTimeout: 30                                                               <i class="conum" data-value="9"></i><b>(9)</b>
-
-    queues:                                                                             <i class="conum" data-value="10"></i><b>(10)</b>
-      test:                                                                             <i class="conum" data-value="11"></i><b>(11)</b>
-        queue: TestQueue</code></pre>
+    topics:                                                                             <i class="conum" data-value="5"></i><b>(5)</b>
+      test:                                                                             <i class="conum" data-value="6"></i><b>(6)</b>
+        topic: TestTopic</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -1031,7 +1026,7 @@ class SimpleNotificationServiceSpec extends Specification {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-01-08 18:14:19 +0100
+Last updated 2019-01-22 15:22:35 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">

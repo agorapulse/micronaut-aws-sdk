@@ -430,7 +430,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.0.3.2" />
+<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.0.3.3" />
 <style>
 .hidden {
 	display: none;
@@ -803,7 +803,7 @@ Following configuration will enable subprojects with full Java and Groovy Micron
 
     dependencyManagement {
         imports {
-            mavenBom "io.micronaut:micronaut-bom:1.0.3.2"
+            mavenBom "io.micronaut:micronaut-bom:1.0.3.3"
         }
     }
 
@@ -849,7 +849,7 @@ Following configuration will enable subprojects with full Java and Groovy Micron
 }
 
 dependencies {
-    lambdaCompile "com.agorapulse:micronaut-function-aws-agp:1.0.3.2"                 <i class="conum" data-value="3"></i><b>(3)</b>
+    lambdaCompile "com.agorapulse:micronaut-function-aws-agp:1.0.3.3"                 <i class="conum" data-value="3"></i><b>(3)</b>
 
     compile "io.micronaut:micronaut-http-server"                                        <i class="conum" data-value="4"></i><b>(4)</b>
     compile "io.micronaut:micronaut-router"                                             <i class="conum" data-value="5"></i><b>(5)</b>
@@ -1037,7 +1037,7 @@ import com.agorapulse.dru.dynamodb.persistence.DynamoDB
 import com.agorapulse.gru.Gru
 import com.agorapulse.gru.agp.ApiGatewayProxy
 import com.agorapulse.micronaut.agp.ApiGatewayProxyHandler
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
+import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
 import io.micronaut.context.ApplicationContext
 import org.junit.Rule
 import spock.lang.Specification
@@ -1054,16 +1054,11 @@ class PlanetControllerSpec extends Specification {
 
     @Rule private final Dru dru = Dru.steal(this)
 
-    private final AmazonDynamoDB amazonDynamoDB = Mock(AmazonDynamoDB)
-
     @SuppressWarnings('UnusedPrivateField')
     private final ApiGatewayProxyHandler handler = new ApiGatewayProxyHandler() {
         @Override
         protected void doWithApplicationContext(ApplicationContext ctx) {               <i class="conum" data-value="3"></i><b>(3)</b>
-            ctx.registerSingleton(
-                PlanetDBService,
-                new PlanetDBService(amazonDynamoDB, DynamoDB.createMapper(dru))
-            )
+            ctx.registerSingleton(IDynamoDBMapper, DynamoDB.createMapper(dru))
         }
     }
 

@@ -430,7 +430,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.0.3.2" />
+<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.0.3.3" />
 <style>
 .hidden {
 	display: none;
@@ -565,6 +565,13 @@ $(addBlockSwitches);
 <li><a href="#_testing_6">Testing</a></li>
 </ul>
 </li>
+<li><a href="#_websockets_for_api_gateway">WebSockets for API Gateway</a>
+<ul class="sectlevel3">
+<li><a href="#_configuration_5">Configuration</a></li>
+<li><a href="#_usage">Usage</a></li>
+<li><a href="#_testing_7">Testing</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -600,6 +607,9 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 </li>
 <li>
 <p><a href="#_simple_queue_service_sqs">Simple Queue Service (SQS)</a></p>
+</li>
+<li>
+<p><a href="#_websockets_for_api_gateway">WebSockets for API Gateway</a></p>
 </li>
 </ul>
 </div>
@@ -674,7 +684,7 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk:1.0.3.2'
+<pre class="highlightjs highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk:1.0.3.3'
 
 // only required for DynamoDB and Kinesis integration
 compile group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: '1.11.470'
@@ -702,7 +712,7 @@ compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.470'</c
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk&lt;/artifactId&gt;
-    &lt;version&gt;1.0.3.2&lt;/version&gt;
+    &lt;version&gt;1.0.3.3&lt;/version&gt;
 &lt;/dependency&gt;
 
 &lt;!-- only required for DynamoDB and Kinesis integration --&gt;
@@ -3244,24 +3254,19 @@ public class SendEmailTest {
 <div class="title">application.yml</div>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-yaml hljs" data-lang="yaml">aws:
-  sqs:
+  sns:
+    topic: MyTopic                                                                      <i class="conum" data-value="1"></i><b>(1)</b>
+    ios:
+      arn: 'arn:aws:sns:eu-west-1:123456789:app/APNS/my-ios-app'                        <i class="conum" data-value="2"></i><b>(2)</b>
+    android:
+      arn: 'arn:aws:sns:eu-west-1:123456789:app/GCM/my-android-app'                     <i class="conum" data-value="3"></i><b>(3)</b>
+    amazon:
+      arn: 'arn:aws:sns:eu-west-1:123456789:app/ADM/my-amazon-app'                      <i class="conum" data-value="4"></i><b>(4)</b>
 
-    # related to service behaviour
-    queueNamePrefix: 'vlad_'                                                            <i class="conum" data-value="1"></i><b>(1)</b>
-    autoCreateQueue: false                                                              <i class="conum" data-value="2"></i><b>(2)</b>
-    cache: false                                                                        <i class="conum" data-value="3"></i><b>(3)</b>
 
-    # related to default queue
-    queue: MyQueue                                                                      <i class="conum" data-value="4"></i><b>(4)</b>
-    fifo: true                                                                          <i class="conum" data-value="5"></i><b>(5)</b>
-    delaySeconds: 0                                                                     <i class="conum" data-value="6"></i><b>(6)</b>
-    messageRetentionPeriod: 345600                                                      <i class="conum" data-value="7"></i><b>(7)</b>
-    maximumMessageSize: 262144                                                          <i class="conum" data-value="8"></i><b>(8)</b>
-    visibilityTimeout: 30                                                               <i class="conum" data-value="9"></i><b>(9)</b>
-
-    queues:                                                                             <i class="conum" data-value="10"></i><b>(10)</b>
-      test:                                                                             <i class="conum" data-value="11"></i><b>(11)</b>
-        queue: TestQueue</code></pre>
+    topics:                                                                             <i class="conum" data-value="5"></i><b>(5)</b>
+      test:                                                                             <i class="conum" data-value="6"></i><b>(6)</b>
+        topic: TestTopic</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -4229,12 +4234,411 @@ class SimpleQueueServiceSpec extends Specification {
 </div>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_websockets_for_api_gateway">WebSockets for API Gateway</h3>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>In a WebSocket API, the client and the server can both send messages to each other at any time. Backend servers can easily push data to connected users and devices, avoiding the need to implement complex polling mechanisms.</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>This library provides components for easy handling of incoming WebSocket proxied events as well as for sending
+messages back to the clients</p>
+</div>
+<div class="sect3">
+<h4 id="_configuration_5">Configuration</h4>
+<div class="paragraph">
+<p>No configuration is required but some of the configuration properties may be useful for you.</p>
+</div>
+<div class="listingblock">
+<div class="title">application.yml</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-yaml hljs" data-lang="yaml">aws:
+  websocket:
+    connections:
+      url: https://abcefgh.execute-api.eu-west-1.amazonaws.com/test/@connections        <i class="conum" data-value="1"></i><b>(1)</b>
+
+# Java Only
+micronaut:
+  function:
+    name: lambda-echo-java                                                              <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>You can specify the default connections URL for <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html">MessageSender</a></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>If you are creating Java functions don&#8217;t forget to specify the function&#8217;s name for deployments</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html">MessageSender</a> bean
+is only present in the context if <code>aws.websocket.connectins.url</code> configuration property is present.Use <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/apigateway/ws/MessageSenderFactory.html">MessageSenderFactory</a>
+If you want to create <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html">MessageSender</a>
+manually using URL which is not predefined.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_usage">Usage</h4>
+<div class="paragraph">
+<p><a href="https://github.com/aws/aws-lambda-java-libs/tree/master/aws-lambda-java-events">AWS SDK Lambda Events library</a> does not contain the events dedicated to WebSocket API Gateway yet.
+You can use <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/apigateway/ws/WebSocketConnectionRequest.html">WebSocketConnectionRequest</a>
+as an argument to function handling connection and disconnection of the WebSocket and <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/apigateway/ws/WebSocketRequest.html">WebSocketRequest</a> for handling
+incoming messages.</p>
+</div>
+<div class="paragraph">
+<p><strong>The following examples assume that you have created function using <code>mn create-function</code> command.</strong></p>
+</div>
+<div class="paragraph">
+<p>The simplest example is a echo method can be used to handle all the incoming events and reply to the incoming messages and also
+publishes to SNS:</p>
+</div>
+<div class="listingblock primary">
+<div class="title">Groovy</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">package com.agorapulse.micronaut.aws.apigateway.ws
+
+import com.agorapulse.micronaut.aws.apigateway.ws.event.EventType
+import com.agorapulse.micronaut.aws.apigateway.ws.event.WebSocketRequest
+import com.agorapulse.micronaut.aws.apigateway.ws.event.WebSocketResponse
+import groovy.transform.Field
+
+import javax.inject.Inject
+
+@Inject @Field MessageSenderFactory factory                                             <i class="conum" data-value="1"></i><b>(1)</b>
+@Inject @Field TestTopicPublisher publisher                                             <i class="conum" data-value="2"></i><b>(2)</b>
+
+WebSocketResponse lambdaEcho(WebSocketRequest event) {                                  <i class="conum" data-value="3"></i><b>(3)</b>
+    MessageSender sender = factory.create(event.requestContext)                         <i class="conum" data-value="4"></i><b>(4)</b>
+    String connectionId = event.requestContext.connectionId                             <i class="conum" data-value="5"></i><b>(5)</b>
+
+    switch (event.requestContext.eventType) {
+        case EventType.CONNECT:                                                         <i class="conum" data-value="6"></i><b>(6)</b>
+            // do nothing
+            break
+        case EventType.MESSAGE:                                                         <i class="conum" data-value="7"></i><b>(7)</b>
+            String message = "[$connectionId] ${event.body}"
+            sender.send(connectionId, message)
+            publisher.publishMessage(connectionId, message)
+            break
+        case EventType.DISCONNECT:                                                      <i class="conum" data-value="8"></i><b>(8)</b>
+            // do nothing
+            break
+    }
+
+    return WebSocketResponse.OK                                                         <i class="conum" data-value="9"></i><b>(9)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Factory to create <code>MessageSender</code> if we want to reply to the message immediately</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Service to publish to SNS to forward the message</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td><a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/apigateway/ws/WebSocketRequest.html">WebSocketRequest</a> can handle any incoming event</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Create <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html">MessageSender</a> for current client</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td><code>connectionId</code> is unique identifier of the client</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td><code>CONNECT</code> event signals new client has been connected</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td><code>MESSAGE</code> event signals new incoming message</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td><code>DISCONNECT</code> event signals client has been disconnected</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="9"></i><b>9</b></td>
+<td>The method must always return <code>WebSocketResponse.OK</code> to signal success</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Java</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package com.agorapulse.micronaut.aws.apigateway.ws;
+
+import com.agorapulse.micronaut.aws.apigateway.ws.event.WebSocketRequest;
+import com.agorapulse.micronaut.aws.apigateway.ws.event.WebSocketResponse;
+import io.micronaut.function.FunctionBean;
+
+import java.util.function.Function;
+
+@FunctionBean("lambda-echo-java")
+public class LambdaEchoJava implements Function&lt;WebSocketRequest, WebSocketResponse&gt; {
+
+    private final MessageSenderFactory factory;                                         <i class="conum" data-value="1"></i><b>(1)</b>
+    private final TestTopicPublisher publisher;                                         <i class="conum" data-value="2"></i><b>(2)</b>
+
+    public LambdaEchoJava(MessageSenderFactory factory, TestTopicPublisher publisher) {
+        this.factory = factory;
+        this.publisher = publisher;
+    }
+
+    @Override
+    public WebSocketResponse apply(WebSocketRequest event) {                            <i class="conum" data-value="3"></i><b>(3)</b>
+        MessageSender sender = factory.create(event.getRequestContext());               <i class="conum" data-value="4"></i><b>(4)</b>
+        String connectionId = event.getRequestContext().getConnectionId();              <i class="conum" data-value="5"></i><b>(5)</b>
+
+        switch (event.getRequestContext().getEventType()) {
+            case CONNECT:                                                               <i class="conum" data-value="6"></i><b>(6)</b>
+                // do nothing
+                break;
+            case MESSAGE:                                                               <i class="conum" data-value="7"></i><b>(7)</b>
+                String message = "[" + connectionId + "] " + event.getBody();
+                sender.send(connectionId, message);
+                publisher.publishMessage(connectionId, message);
+                break;
+            case DISCONNECT:                                                            <i class="conum" data-value="8"></i><b>(8)</b>
+                // do nothing
+                break;
+        }
+
+        return WebSocketResponse.OK;                                                    <i class="conum" data-value="9"></i><b>(9)</b>
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Factory to create <code>MessageSender</code> if we want to reply to the message immediately</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Service to publish to SNS to forward the message</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td><a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/apigateway/ws/WebSocketRequest.html">WebSocketRequest</a> can handle any incoming event</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Create <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html">MessageSender</a> for current client</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td><code>connectionId</code> is unique identifier of the client</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td><code>CONNECT</code> event signals new client has been connected</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td><code>MESSAGE</code> event signals new incoming message</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td><code>DISCONNECT</code> event signals client has been disconnected</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="9"></i><b>9</b></td>
+<td>The method must always return <code>WebSocketResponse.OK</code> to signal success</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Once the function is ready you can deploy the function to AWS Lambda and setup the new API Gateway with WebSocket API</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="images/new-websocket-api.png" alt="new websocket api">
+</div>
+<div class="title">Figure 1. Create new WebSocket API</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="images/new-websocket-route.png" alt="new websocket route">
+</div>
+<div class="title">Figure 2. Create WebSocket API Routes</div>
+</div>
+<div class="paragraph">
+<p>Another example is a simple AWS Lambda function to react to any of events supported by AWS Lambda and push to WebSocket clients.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+There is no support for routing at the moment, but you can get the matched route from
+<code>event.requestContext.routeKey</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock primary">
+<div class="title">Groovy</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">package com.agorapulse.micronaut.aws.apigateway.ws
+
+import com.amazonaws.AmazonClientException
+import com.amazonaws.services.lambda.runtime.events.SNSEvent
+import groovy.transform.Field
+
+import javax.inject.Inject
+
+@Inject @Field MessageSender sender                                                     <i class="conum" data-value="1"></i><b>(1)</b>
+
+void notify(SNSEvent event) {                                                           <i class="conum" data-value="2"></i><b>(2)</b>
+    event.records.each {
+        try {
+            sender.send(it.SNS.subject, "[SNS] $it.SNS.message")                        <i class="conum" data-value="3"></i><b>(3)</b>
+        } catch (AmazonClientException ignored) {
+            // can be gone                                                              <i class="conum" data-value="4"></i><b>(4)</b>
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>MessageSender</code> can be injected if you specify <code>aws.websocket.connnections.url</code> configuration property</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>You can for example react on records published into Simple Notification Service</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Send message to the client (in previous example the <code>connectionId</code> was set to the <code>subject</code> of the SNS record)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>If the client is already disconnected then <code>AmazonClientException</code> may occur</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Java</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package com.agorapulse.micronaut.aws.apigateway.ws;
+
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.services.lambda.runtime.events.SNSEvent;
+import io.micronaut.function.FunctionBean;
+
+import java.util.function.Consumer;
+
+@FunctionBean("notification-handler")
+public class NotificationHandler implements Consumer&lt;SNSEvent&gt; {
+
+    private final MessageSender sender;                                                 <i class="conum" data-value="1"></i><b>(1)</b>
+
+    public NotificationHandler(MessageSender sender) {
+        this.sender = sender;
+    }
+
+    @Override
+    public void accept(SNSEvent event) {                                                <i class="conum" data-value="2"></i><b>(2)</b>
+        event.getRecords().forEach(it -&gt; {
+            try {
+                String connectionId = it.getSNS().getSubject();
+                String payload = "[SNS] " + it.getSNS().getMessage();
+                sender.send(connectionId, payload);                                     <i class="conum" data-value="3"></i><b>(3)</b>
+            } catch (AmazonClientException ignored) {
+                // can be gone                                                          <i class="conum" data-value="4"></i><b>(4)</b>
+            }
+        });
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>MessageSender</code> can be injected if you specify <code>aws.websocket.connnections.url</code> configuration property</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>You can for example react on records published into Simple Notification Service</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Send message to the client (in previous example the <code>connectionId</code> was set to the <code>subject</code> of the SNS record)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>If the client is already disconnected then <code>AmazonClientException</code> may occur</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If you want to publish to the WebSockets using <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html">MessageSender</a>
+your Lambda function&#8217;s role must have following permissions (preferably constrained just your API resource):</p>
+</div>
+<div class="listingblock">
+<div class="title">ExecuteApiFullAccess Policy</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-JSON hljs" data-lang="JSON">{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": "execute-api:*",
+            "Resource": "*"
+        }
+    ]
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_testing_7">Testing</h4>
+<div class="paragraph">
+<p>You can very easily mock any of the interfaces. Create request event manually and follow
+<a href="http://guides.micronaut.io/micronaut-function-aws-lambda/guide/index.html#functiontests">the guide to test functions with Micronaut</a>.</p>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-01-09 09:33:31 +0100
+Last updated 2019-01-22 15:22:35 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">

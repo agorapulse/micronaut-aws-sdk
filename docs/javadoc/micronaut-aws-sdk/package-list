@@ -1,4 +1,6 @@
 com.agorapulse.micronaut.aws
+com.agorapulse.micronaut.aws.apigateway.ws
+com.agorapulse.micronaut.aws.apigateway.ws.event
 com.agorapulse.micronaut.aws.cloudwatch
 com.agorapulse.micronaut.aws.dynamodb
 com.agorapulse.micronaut.aws.dynamodb.annotation
