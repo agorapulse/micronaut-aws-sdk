@@ -11,6 +11,7 @@ Provided integrations:
 * <<Simple Email Service (SES)>>
 * <<Simple Notification Service (SNS)>>
 * <<Simple Queue Service (SQS)>>
+* <<WebSockets for API Gateway>>
 
 NOTE: <<Micronaut for API Gateway Proxy>> is handled separately in its own library.
 
@@ -127,3 +128,5 @@ include::ses.adoc[]
 include::sns.adoc[]
 
 include::sqs.adoc[]
+
+include::websockets.adoc[]

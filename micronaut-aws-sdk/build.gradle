@@ -14,12 +14,27 @@ dependencies {
 
     optional 'javax.mail:mail:1.4.4'
 
+    testCompile 'com.amazonaws:aws-lambda-java-events'
+
+    testCompile "io.micronaut:micronaut-function-groovy"
+    testCompile "io.micronaut:micronaut-function-aws"
+    testCompile "io.micronaut:micronaut-function-client"
+    testRuntime "io.micronaut:micronaut-http-server-netty"
+    testRuntime "io.micronaut:micronaut-function-web"
+
     testCompile group: 'org.testcontainers', name: 'testcontainers', version: testcontainersVersion
     testCompile group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
     testCompile group: 'org.testcontainers', name: 'spock', version: testcontainersVersion
 
     // for java tests
     testCompile "org.mockito:mockito-core:2.23.4"
+
+    // message sender tests
+    testCompile group: 'com.stehno.ersatz', name: 'ersatz', version: '1.9.0'
+
+    // DynamoDB tests
+    testCompile "com.agorapulse:dru-client-dynamodb:${druVersion}"
+
 }
 
 apply from: '../gradle/bintray.gradle'

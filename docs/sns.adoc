@@ -13,7 +13,7 @@ No configuration is required but some of the configuration properties may be use
 [source,yaml,indent=0,options="nowrap"]
 .application.yml
 ----
-include::../micronaut-aws-sdk/src/test/resources/application-docs-sqs.yml[]
+include::../micronaut-aws-sdk/src/test/resources/application-docs-sns.yml[]
 ----
 <1> You can specify the default topic for https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/sns/SimpleNotificationService.html[SimpleNotificationService] and `@NotificationClient`
 <2> Amazon Resource Name for the iOS application mobile push
