@@ -87,6 +87,34 @@ public interface QueryBuilder<T> extends DetachedQuery<T> {
     QueryBuilder<T> filter(Consumer<RangeConditionCollector<T>> conditions);
 
     /**
+     * One or more range key filter conditions in disjunction.
+     * <p>
+     * These conditions are resolved on the result set before returning the values and therefore they don't require an existing index
+     * but they consume more resources as all the result set must be traversed.
+     *
+     * @param conditions consumer to build the conditions
+     * @return self
+     */
+    default QueryBuilder<T> or(Consumer<RangeConditionCollector<T>> conditions) {
+        filter(ConditionalOperator.OR);
+        return filter(conditions);
+    }
+
+    /**
+     * One or more range key filter conditions in conjunction.
+     * <p>
+     * These conditions are resolved on the result set before returning the values and therefore they don't require an existing index
+     * but they consume more resources as all the result set must be traversed.
+     *
+     * @param conditions consumer to build the conditions
+     * @return self
+     */
+    default QueryBuilder<T> and(Consumer<RangeConditionCollector<T>> conditions) {
+        filter(ConditionalOperator.AND);
+        return filter(conditions);
+    }
+
+    /**
      * One or more range key filter conditions.
      *
      * These conditions are resolved on the result set before returning the values and therefore they don't require an existing index
@@ -101,6 +129,40 @@ public interface QueryBuilder<T> extends DetachedQuery<T> {
             Closure<RangeConditionCollector<T>> conditions
     ) {
         return filter(ConsumerWithDelegate.create(conditions));
+    }
+
+    /**
+     * One or more range key filter conditions in disjunction.
+     *
+     * These conditions are resolved on the result set before returning the values and therefore they don't require an existing index
+     * but they consume more resources as all the result set must be traversed.
+     *
+     * @param conditions closure to build the conditions
+     * @return self
+     */
+    default QueryBuilder<T> or(
+        @DelegatesTo(type = "com.agorapulse.micronaut.aws.dynamodb.builder.RangeConditionCollector<T>", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.aws.dynamodb.builder.RangeConditionCollector<T>")
+            Closure<RangeConditionCollector<T>> conditions
+    ) {
+        return or(ConsumerWithDelegate.create(conditions));
+    }
+
+    /**
+     * One or more range key filter conditions in conjunction.
+     *
+     * These conditions are resolved on the result set before returning the values and therefore they don't require an existing index
+     * but they consume more resources as all the result set must be traversed.
+     *
+     * @param conditions closure to build the conditions
+     * @return self
+     */
+    default QueryBuilder<T> and(
+        @DelegatesTo(type = "com.agorapulse.micronaut.aws.dynamodb.builder.RangeConditionCollector<T>", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.aws.dynamodb.builder.RangeConditionCollector<T>")
+            Closure<RangeConditionCollector<T>> conditions
+    ) {
+        return or(ConsumerWithDelegate.create(conditions));
     }
 
     /**

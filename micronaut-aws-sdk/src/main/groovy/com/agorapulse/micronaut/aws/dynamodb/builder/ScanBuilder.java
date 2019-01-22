@@ -8,6 +8,7 @@ import groovy.transform.stc.ClosureParams;
 import groovy.transform.stc.FromString;
 import space.jasan.support.groovy.closure.ConsumerWithDelegate;
 
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 /**
@@ -46,6 +47,28 @@ public interface ScanBuilder<T> extends DetachedScan<T> {
     ScanBuilder<T> filter(Consumer<RangeConditionCollector<T>> conditions);
 
     /**
+     * One or more filter conditions in conjunction.
+     *
+     * @param conditions consumer to build the conditions
+     * @return self
+     */
+    default ScanBuilder<T> and(Consumer<RangeConditionCollector<T>> conditions) {
+        filter(ConditionalOperator.AND);
+        return filter(conditions);
+    }
+
+    /**
+     * One or more filter conditions in disjunction.
+     *
+     * @param conditions consumer to build the conditions
+     * @return self
+     */
+    default ScanBuilder<T> or(Consumer<RangeConditionCollector<T>> conditions) {
+        filter(ConditionalOperator.OR);
+        return filter(conditions);
+    }
+
+    /**
      * One or more filter conditions.
      *
      * @param conditions closure to build the conditions
@@ -57,6 +80,34 @@ public interface ScanBuilder<T> extends DetachedScan<T> {
             Closure<RangeConditionCollector<T>> conditions
     ) {
         return filter(ConsumerWithDelegate.create(conditions));
+    }
+
+    /**
+     * One or more filter conditions in disjunction.
+     *
+     * @param conditions closure to build the conditions
+     * @return self
+     */
+    default ScanBuilder<T> or(
+        @DelegatesTo(type = "com.agorapulse.micronaut.aws.dynamodb.builder.RangeConditionCollector<T>", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.aws.dynamodb.builder.RangeConditionCollector<T>")
+            Closure<RangeConditionCollector<T>> conditions
+    ) {
+        return or(ConsumerWithDelegate.create(conditions));
+    }
+
+    /**
+     * One or more filter conditions in conjunction.
+     *
+     * @param conditions closure to build the conditions
+     * @return self
+     */
+    default ScanBuilder<T> and(
+        @DelegatesTo(type = "com.agorapulse.micronaut.aws.dynamodb.builder.RangeConditionCollector<T>", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.aws.dynamodb.builder.RangeConditionCollector<T>")
+            Closure<RangeConditionCollector<T>> conditions
+    ) {
+        return and(ConsumerWithDelegate.create(conditions));
     }
 
     /**
@@ -122,6 +173,35 @@ public interface ScanBuilder<T> extends DetachedScan<T> {
             Closure<Object> configurer
     ) {
         return configure(ConsumerWithDelegate.create(configurer));
+    }
+
+    /**
+     * Limits which properties of the returned entities will be populated.
+     * @param propertyPaths property paths to be populated in the returned entities
+     * @return self
+     */
+    ScanBuilder<T> only(Iterable<String> propertyPaths);
+
+    /**
+     * Limits which properties of the returned entities will be populated.
+     * @param propertyPaths property paths to be populated in the returned entities
+     * @return self
+     */
+    default ScanBuilder<T> only(String... propertyPaths) {
+        return only(Arrays.asList(propertyPaths));
+    }
+
+    /**
+     * Limits which properties of the returned entities will be populated.
+     * @param collector closure to collect the property paths
+     * @return self
+     */
+    default ScanBuilder<T> only(
+        @DelegatesTo(type = "T", strategy = Closure.DELEGATE_ONLY)
+        @ClosureParams(value = FromString.class, options = "T")
+            Closure<Object> collector
+    ) {
+        return only(PathCollector.collectPaths(collector).getPropertyPaths());
     }
 
 }

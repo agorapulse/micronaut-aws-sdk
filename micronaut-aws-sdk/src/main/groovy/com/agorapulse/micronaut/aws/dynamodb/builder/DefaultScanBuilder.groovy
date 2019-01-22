@@ -106,6 +106,12 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
         throw new MissingPropertyException('No properties here!')
     }
 
+    @Override
+    ScanBuilder<T> only(Iterable<String> propertyPaths) {
+        expression.projectionExpression = propertyPaths.join(',')
+        return this
+    }
+
     private void applyConditions(
         DynamoDBMapperTableModel<T> model,
         List<Consumer<RangeConditionCollector<T>>> filterCollectorsConsumers,

@@ -1,5 +1,6 @@
 package com.agorapulse.micronaut.http.examples
 
+import io.micronaut.context.ApplicationContext
 import io.micronaut.runtime.Micronaut
 
 /**
@@ -7,8 +8,10 @@ import io.micronaut.runtime.Micronaut
  */
 class Application {
 
+    static ApplicationContext context
+
     static void main(String[] args) {
-        Micronaut.run(Application)
+        context = Micronaut.run(Application)
     }
 
 }

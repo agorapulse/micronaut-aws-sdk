@@ -3,10 +3,7 @@ package com.agorapulse.micronaut.aws.dynamodb.builder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperTableModel;
 import com.amazonaws.services.dynamodbv2.model.Condition;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public final class RangeConditionCollector<T> {
     public RangeConditionCollector(DynamoDBMapperTableModel<T> model) {
@@ -14,8 +11,7 @@ public final class RangeConditionCollector<T> {
     }
 
     public RangeConditionCollector<T> eq(Object value) {
-        conditions.put(model.rangeKey().name(), model.rangeKey().eq(value));
-        return this;
+        return eq(model.rangeKey().name(), value);
     }
 
     public RangeConditionCollector<T> eq(String attributeOrIndex, Object value) {
@@ -24,8 +20,7 @@ public final class RangeConditionCollector<T> {
     }
 
     public RangeConditionCollector<T> ne(Object value) {
-        conditions.put(model.rangeKey().name(), model.rangeKey().ne(value));
-        return this;
+        return ne(model.rangeKey().name(), value);
     }
 
     public RangeConditionCollector<T> ne(String attributeOrIndex, Object value) {
@@ -33,19 +28,16 @@ public final class RangeConditionCollector<T> {
         return this;
     }
 
-    public RangeConditionCollector<T> inList(Object... values) {
-        conditions.put(model.rangeKey().name(), model.rangeKey().in(values));
-        return this;
+    public RangeConditionCollector<T> inListOf(Object... values) {
+        return inList(model.rangeKey().name(), values);
     }
 
     public RangeConditionCollector<T> inList(String attributeOrIndex, Object... values) {
-        conditions.put(attributeOrIndex, model.field(attributeOrIndex).in(values));
-        return this;
+        return inList(attributeOrIndex, Arrays.asList(values));
     }
 
     public RangeConditionCollector<T> inList(Collection<Object> values) {
-        conditions.put(model.rangeKey().name(), model.rangeKey().in(values));
-        return this;
+        return inList(model.rangeKey().name(), values);
     }
 
     public RangeConditionCollector<T> inList(String attributeOrIndex, Collection<Object> values) {
@@ -54,8 +46,7 @@ public final class RangeConditionCollector<T> {
     }
 
     public RangeConditionCollector<T> le(Object value) {
-        conditions.put(model.rangeKey().name(), model.rangeKey().le(value));
-        return this;
+        return le(model.rangeKey().name(), value);
     }
 
     public RangeConditionCollector<T> le(String attributeOrIndex, Object value) {
@@ -64,8 +55,7 @@ public final class RangeConditionCollector<T> {
     }
 
     public RangeConditionCollector<T> lt(Object value) {
-        conditions.put(model.rangeKey().name(), model.rangeKey().lt(value));
-        return this;
+        return lt(model.rangeKey().name(), value);
     }
 
     public RangeConditionCollector<T> lt(String attributeOrIndex, Object value) {
@@ -74,8 +64,7 @@ public final class RangeConditionCollector<T> {
     }
 
     public RangeConditionCollector<T> ge(Object value) {
-        conditions.put(model.rangeKey().name(), model.rangeKey().ge(value));
-        return this;
+        return ge(model.rangeKey().name(), value);
     }
 
     public RangeConditionCollector<T> ge(String attributeOrIndex, Object value) {
@@ -84,8 +73,7 @@ public final class RangeConditionCollector<T> {
     }
 
     public RangeConditionCollector<T> gt(Object value) {
-        conditions.put(model.rangeKey().name(), model.rangeKey().gt(value));
-        return this;
+        return gt(model.rangeKey().name(), value);
     }
 
     public RangeConditionCollector<T> gt(String attributeOrIndex, Object value) {
@@ -94,8 +82,7 @@ public final class RangeConditionCollector<T> {
     }
 
     public RangeConditionCollector<T> between(Object lo, Object hi) {
-        conditions.put(model.rangeKey().name(), model.rangeKey().between(lo, hi));
-        return this;
+        return between(model.rangeKey().name(), lo, hi);
     }
 
     public RangeConditionCollector<T> between(String attributeOrIndex, Object lo, Object hi) {
@@ -104,8 +91,7 @@ public final class RangeConditionCollector<T> {
     }
 
     public RangeConditionCollector<T> isNotNull() {
-        conditions.put(model.rangeKey().name(), model.rangeKey().notNull());
-        return this;
+        return isNotNull(model.rangeKey().name());
     }
 
     public RangeConditionCollector<T> isNotNull(String attributeOrIndex) {
@@ -114,8 +100,7 @@ public final class RangeConditionCollector<T> {
     }
 
     public RangeConditionCollector<T> isNull() {
-        conditions.put(model.rangeKey().name(), model.rangeKey().isNull());
-        return this;
+        return isNull(model.rangeKey().name());
     }
 
     public RangeConditionCollector<T> isNull(String attributeOrIndex) {
@@ -124,8 +109,7 @@ public final class RangeConditionCollector<T> {
     }
 
     public RangeConditionCollector<T> contains(Object value) {
-        conditions.put(model.rangeKey().name(), model.rangeKey().contains(value));
-        return this;
+        return contains(model.rangeKey().name(), value);
     }
 
     public RangeConditionCollector<T> contains(String attributeOrIndex, Object value) {
@@ -134,8 +118,7 @@ public final class RangeConditionCollector<T> {
     }
 
     public RangeConditionCollector<T> notContains(Object value) {
-        conditions.put(model.rangeKey().name(), model.rangeKey().notContains(value));
-        return this;
+        return notContains(model.rangeKey().name(), value);
     }
 
     public RangeConditionCollector<T> notContains(String attributeOrIndex, Object value) {
@@ -144,8 +127,7 @@ public final class RangeConditionCollector<T> {
     }
 
     public RangeConditionCollector<T> beginsWith(Object value) {
-        conditions.put(model.rangeKey().name(), model.rangeKey().beginsWith(value));
-        return this;
+        return beginsWith(model.rangeKey().name(), value);
     }
 
     public RangeConditionCollector<T> beginsWith(String attributeOrIndex, Object value) {

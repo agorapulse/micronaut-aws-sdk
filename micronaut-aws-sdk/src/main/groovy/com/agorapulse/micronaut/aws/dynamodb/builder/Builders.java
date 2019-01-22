@@ -3,7 +3,6 @@ package com.agorapulse.micronaut.aws.dynamodb.builder;
 import com.agorapulse.micronaut.aws.dynamodb.DynamoDBService;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
-import com.amazonaws.services.dynamodbv2.model.ConditionalOperator;
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
 import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
@@ -34,9 +33,6 @@ public final class Builders {
     public static final Sort asc = Sort.ASC;
     public static final Sort desc = Sort.DESC;
     public static final Read read = Read.READ;
-
-    public static final ConditionalOperator or = ConditionalOperator.OR;
-    public static final ConditionalOperator and = ConditionalOperator.AND;
 
     public static final ReturnValue none = ReturnValue.NONE;
     public static final ReturnValue allOld = ReturnValue.ALL_OLD;

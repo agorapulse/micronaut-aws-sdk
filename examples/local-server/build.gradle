@@ -10,6 +10,7 @@ dependencies {
 
     compile "io.micronaut:micronaut-http-server-netty"
 
+    testCompile "com.agorapulse:gru-http:$gruVersion"
 }
 
 

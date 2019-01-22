@@ -1,0 +1,133 @@
+package com.agorapulse.micronaut.aws.dynamodb.builder
+
+import com.agorapulse.dru.Dru
+import com.agorapulse.dru.dynamodb.persistence.DynamoDB
+import com.agorapulse.micronaut.aws.dynamodb.DynamoDBEntity
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression
+import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
+import groovy.transform.CompileStatic
+import spock.lang.Specification
+
+import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*
+
+/**
+ * Tests for builders.
+ */
+@SuppressWarnings('NoJavaUtilDate')
+class BuildersSpec extends Specification {
+
+    IDynamoDBMapper mapper = DynamoDB.createMapper(Dru.steal(this))
+
+    void 'inconsistent desc query'() {
+        when:
+            DynamoDBQueryExpression<DynamoDBEntity> expression = createEntityQueryInconsistentDesc().resolveExpression(mapper)
+        then:
+            noExceptionThrown()
+
+            !expression.consistentRead
+            !expression.scanIndexForward
+            expression.hashKeyValues.parentId == 'abc'
+            expression.indexName == DynamoDBEntity.RANGE_INDEX
+            expression.queryFilter.size() == 2
+            expression.conditionalOperator == 'OR'
+            expression.projectionExpression == 'number,date'
+    }
+
+    void 'consistent desc query'() {
+        when:
+            DynamoDBQueryExpression<DynamoDBEntity> expression = createEntityQueryConsistentAsc().resolveExpression(mapper)
+        then:
+            noExceptionThrown()
+
+            expression.consistentRead
+            expression.scanIndexForward
+            expression.hashKeyValues.parentId == 'abc'
+            expression.indexName == DynamoDBEntity.RANGE_INDEX
+            expression.exclusiveStartKey
+            expression.limit == 100
+    }
+
+    void 'inconsistent desc scan'() {
+        when:
+            DynamoDBScanExpression expression = createEntityScanInconsistentDesc().resolveExpression(mapper)
+        then:
+            noExceptionThrown()
+
+            !expression.consistentRead
+            expression.indexName == DynamoDBEntity.RANGE_INDEX
+            expression.scanFilter.size() == 2
+            expression.conditionalOperator == 'OR'
+            expression.projectionExpression == 'number,date'
+    }
+
+    void 'consistent desc scan'() {
+        when:
+            DynamoDBScanExpression expression = createEntityScanConsistentAsc().resolveExpression(mapper)
+        then:
+            noExceptionThrown()
+
+            expression.consistentRead
+            expression.indexName == DynamoDBEntity.RANGE_INDEX
+            expression.exclusiveStartKey
+            expression.limit == 100
+    }
+
+    @CompileStatic
+    private static QueryBuilder<DynamoDBEntity> createEntityQueryInconsistentDesc() {
+        query(DynamoDBEntity) {
+            hash 'abc'
+            sort desc
+            inconsistent read
+            index DynamoDBEntity.RANGE_INDEX
+            range {
+                le(DynamoDBEntity.RANGE_INDEX, 'def')
+            }
+            or {
+                gt DynamoDBEntity.DATE_INDEX, new Date()
+                le 'number', 100
+            }
+            only 'number', 'date'
+        }
+    }
+
+    @CompileStatic
+    private static QueryBuilder<DynamoDBEntity> createEntityQueryConsistentAsc() {
+        query(DynamoDBEntity) {
+            hash new DynamoDBEntity(parentId: 'abc')
+            sort asc
+            consistent read
+            configure {
+                it.indexName = DynamoDBEntity.RANGE_INDEX
+            }
+            page 100
+            offset 'abc', 'def'
+        }
+    }
+
+    @CompileStatic
+    private static ScanBuilder<DynamoDBEntity> createEntityScanInconsistentDesc() {
+        scan(DynamoDBEntity) {
+            inconsistent read
+            index DynamoDBEntity.RANGE_INDEX
+            or {
+                gt DynamoDBEntity.DATE_INDEX, new Date()
+                le 'number', 100
+            }
+            only 'number', 'date'
+        }
+    }
+
+    @CompileStatic
+    private static ScanBuilder<DynamoDBEntity> createEntityScanConsistentAsc() {
+        scan(DynamoDBEntity) {
+            consistent read
+            configure {
+                it.indexName = DynamoDBEntity.RANGE_INDEX
+            }
+            page 100
+            offset 'abc', 'def'
+        }
+    }
+
+}
