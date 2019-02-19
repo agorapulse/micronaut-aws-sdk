@@ -23,6 +23,7 @@ public class DynamoDBFactory {
 
     @Bean
     @Singleton
+    @Requires(missingProperty = "aws.dax.endpoint")
     AmazonDynamoDB amazonDynamoDB(
         AWSClientConfiguration clientConfiguration,
         AWSCredentialsProvider credentialsProvider,
