@@ -430,7 +430,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.0.3.3" />
+<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.0.4.1" />
 <style>
 .hidden {
 	display: none;
@@ -521,6 +521,7 @@ $(addBlockSwitches);
 <ul class="sectlevel3">
 <li><a href="#_declarative_services_with_service">Declarative Services with <code>@Service</code></a></li>
 <li><a href="#_dynamodb_service">DynamoDB Service</a></li>
+<li><a href="#_dynamodb_accelerator_dax">DynamoDB Accelerator (DAX)</a></li>
 <li><a href="#_testing">Testing</a></li>
 </ul>
 </li>
@@ -1423,6 +1424,38 @@ assertEquals(1,
 </div>
 </div>
 <div class="sect3">
+<h4 id="_dynamodb_accelerator_dax">DynamoDB Accelerator (DAX)</h4>
+<div class="paragraph">
+<p>You can simply enable DynamoDB Accelerator by setting the DAX endpoint as <code>aws.dax.endpoint</code> property. Every operation
+performed using injected <code>AmazonDynamoDB</code>, <code>IDynamoDBMapper</code> or a data service will be performed against DAX instead of
+DynamoDB tables.</p>
+</div>
+<div class="paragraph">
+<p>Please, check <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.consistency.html">DAX and DynamoDB Consistency Models</a>
+article to understand the subsequence of using DAX instead of direct DynamoDB operations.</p>
+</div>
+<div class="paragraph">
+<p>Make sure you have set up proper policy to access the DAX cluster. See <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.access-control.html">DAX Access Control</a> for more information.
+Following policy allow every DAX operatin on any resource. In production, you should constraint the scope to single cluster.</p>
+</div>
+<div class="listingblock">
+<div class="title">DAX Access Policy</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "DaxAllowAll",
+            "Effect": "Allow",
+            "Action": "dax:*",
+            "Resource": "*"
+        }
+    ]
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
 <h4 id="_testing">Testing</h4>
 <div class="paragraph">
 <p>You can very easily mock any of the interfaces and declarative services but if you need close-to-production
@@ -1636,7 +1669,7 @@ You can obtain instances of declarative client from the context as well.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-01-11 12:21:32 +0100
+Last updated 2019-02-19 17:30:39 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">

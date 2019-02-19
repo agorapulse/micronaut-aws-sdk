@@ -430,7 +430,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.0.3.3" />
+<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.0.4.1" />
 <style>
 .hidden {
 	display: none;
@@ -525,6 +525,7 @@ $(addBlockSwitches);
 <ul class="sectlevel3">
 <li><a href="#_declarative_services_with_service">Declarative Services with <code>@Service</code></a></li>
 <li><a href="#_dynamodb_service">DynamoDB Service</a></li>
+<li><a href="#_dynamodb_accelerator_dax">DynamoDB Accelerator (DAX)</a></li>
 <li><a href="#_testing">Testing</a></li>
 </ul>
 </li>
@@ -750,26 +751,29 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk:1.0.3.3'
+<pre class="highlightjs highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk:1.0.4.1'
 
 // only required for DynamoDB and Kinesis integration
-compile group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: '1.11.470'
+compile group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: '1.11.500'
+
+// only required for DynamoDB Accelerator (DAX) integration
+compile group: 'com.amazonaws', name: 'amazon-dax-client', version: '1.0.202017.0'
 
 // only required for Kinesis integration
 compile group: 'com.amazonaws', name: 'amazon-kinesis-client', version: '1.9.3'
-compile group: 'com.amazonaws', name: 'aws-java-sdk-kinesis', version: '1.11.470'
+compile group: 'com.amazonaws', name: 'aws-java-sdk-kinesis', version: '1.11.500'
 
 // only required for S3 integration
-compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.470'
+compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.500'
 
 // only required for SES integration
-compile group: 'com.amazonaws', name: 'aws-java-sdk-ses', version: '1.11.470'
+compile group: 'com.amazonaws', name: 'aws-java-sdk-ses', version: '1.11.500'
 
 // only required for SNS integration
-compile group: 'com.amazonaws', name: 'aws-java-sdk-sns', version: '1.11.470'
+compile group: 'com.amazonaws', name: 'aws-java-sdk-sns', version: '1.11.500'
 
 // only required for SQS integration
-compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.470'</code></pre>
+compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.500'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -778,14 +782,21 @@ compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.470'</c
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk&lt;/artifactId&gt;
-    &lt;version&gt;1.0.3.3&lt;/version&gt;
+    &lt;version&gt;1.0.4.1&lt;/version&gt;
 &lt;/dependency&gt;
 
 &lt;!-- only required for DynamoDB and Kinesis integration --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.amazonaws&lt;/groupId&gt;
     &lt;artifactId&gt;aws-java-sdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;1.11.470&lt;/version&gt;
+    &lt;version&gt;1.11.500&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;!-- only required for DynamoDB Accelerator (DAX) integration --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.amazonaws&lt;/groupId&gt;
+    &lt;artifactId&gt;amazon-dax-client&lt;/artifactId&gt;
+    &lt;version&gt;1.0.202017.0&lt;/version&gt;
 &lt;/dependency&gt;
 
 &lt;!-- only required for Kinesis integration --&gt;
@@ -798,35 +809,35 @@ compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.470'</c
 &lt;dependency&gt;
     &lt;groupId&gt;com.amazonaws&lt;/groupId&gt;
     &lt;artifactId&gt;aws-java-sdk-kinesis&lt;/artifactId&gt;
-    &lt;version&gt;1.11.470&lt;/version&gt;
+    &lt;version&gt;1.11.500&lt;/version&gt;
 &lt;/dependency&gt;
 
 &lt;!-- only required for S3 integration --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.amazonaws&lt;/groupId&gt;
     &lt;artifactId&gt;aws-java-sdk-s3&lt;/artifactId&gt;
-    &lt;version&gt;1.11.470&lt;/version&gt;
+    &lt;version&gt;1.11.500&lt;/version&gt;
 &lt;/dependency&gt;
 
 &lt;!-- only required for SES integration --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.amazonaws&lt;/groupId&gt;
     &lt;artifactId&gt;aws-java-sdk-ses&lt;/artifactId&gt;
-    &lt;version&gt;1.11.470&lt;/version&gt;
+    &lt;version&gt;1.11.500&lt;/version&gt;
 &lt;/dependency&gt;
 
 &lt;!-- only required for SNS integration --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.amazonaws&lt;/groupId&gt;
     &lt;artifactId&gt;aws-java-sdk-sns&lt;/artifactId&gt;
-    &lt;version&gt;1.11.470&lt;/version&gt;
+    &lt;version&gt;1.11.500&lt;/version&gt;
 &lt;/dependency&gt;
 
 &lt;!-- only required for SQS integration --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.amazonaws&lt;/groupId&gt;
     &lt;artifactId&gt;aws-java-sdk-sqs&lt;/artifactId&gt;
-    &lt;version&gt;1.11.470&lt;/version&gt;
+    &lt;version&gt;1.11.500&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1723,6 +1734,38 @@ assertEquals(1,
 </div>
 <div class="paragraph">
 <p>Please see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/DynamoDBService.html">DynamoDBService</a> for full reference.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_dynamodb_accelerator_dax">DynamoDB Accelerator (DAX)</h4>
+<div class="paragraph">
+<p>You can simply enable DynamoDB Accelerator by setting the DAX endpoint as <code>aws.dax.endpoint</code> property. Every operation
+performed using injected <code>AmazonDynamoDB</code>, <code>IDynamoDBMapper</code> or a data service will be performed against DAX instead of
+DynamoDB tables.</p>
+</div>
+<div class="paragraph">
+<p>Please, check <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.consistency.html">DAX and DynamoDB Consistency Models</a>
+article to understand the subsequence of using DAX instead of direct DynamoDB operations.</p>
+</div>
+<div class="paragraph">
+<p>Make sure you have set up proper policy to access the DAX cluster. See <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.access-control.html">DAX Access Control</a> for more information.
+Following policy allow every DAX operatin on any resource. In production, you should constraint the scope to single cluster.</p>
+</div>
+<div class="listingblock">
+<div class="title">DAX Access Policy</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "DaxAllowAll",
+            "Effect": "Allow",
+            "Action": "dax:*",
+            "Resource": "*"
+        }
+    ]
+}</code></pre>
+</div>
 </div>
 </div>
 <div class="sect3">
@@ -4970,7 +5013,7 @@ Following configuration will enable subprojects with full Java and Groovy Micron
 
     dependencyManagement {
         imports {
-            mavenBom "io.micronaut:micronaut-bom:1.0.3.3"
+            mavenBom "io.micronaut:micronaut-bom:1.0.4.1"
         }
     }
 
@@ -5016,7 +5059,7 @@ Following configuration will enable subprojects with full Java and Groovy Micron
 }
 
 dependencies {
-    lambdaCompile "com.agorapulse:micronaut-function-aws-agp:1.0.3.3"                 <i class="conum" data-value="3"></i><b>(3)</b>
+    lambdaCompile "com.agorapulse:micronaut-function-aws-agp:1.0.4.1"                 <i class="conum" data-value="3"></i><b>(3)</b>
 
     compile "io.micronaut:micronaut-http-server"                                        <i class="conum" data-value="4"></i><b>(4)</b>
     compile "io.micronaut:micronaut-router"                                             <i class="conum" data-value="5"></i><b>(5)</b>
@@ -5357,7 +5400,7 @@ There are two additional features which cannot be found the official <a href="ht
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code>compileOnly 'com.agorapulse:micronaut-grails:1.0.3.3'</code></pre>
+<pre class="highlightjs highlight"><code>compileOnly 'com.agorapulse:micronaut-grails:1.0.4.1'</code></pre>
 </div>
 </div>
 <div class="admonitionblock tip">
