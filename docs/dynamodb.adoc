@@ -563,6 +563,26 @@ DynamoDB tables.
 Please, check https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.consistency.html[DAX and DynamoDB Consistency Models]
 article to understand the subsequence of using DAX instead of direct DynamoDB operations.
 
+Make sure you have set up proper policy to access the DAX cluster. See https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.access-control.html[DAX Access Control] for more information.
+Following policy allow every DAX operatin on any resource. In production, you should constraint the scope to single cluster.
+
+[source,json,indent=0]
+.DAX Access Policy
+----
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "DaxAllowAll",
+            "Effect": "Allow",
+            "Action": "dax:*",
+            "Resource": "*"
+        }
+    ]
+}
+----
+
+
 ==== Testing
 
 You can very easily mock any of the interfaces and declarative services but if you need close-to-production

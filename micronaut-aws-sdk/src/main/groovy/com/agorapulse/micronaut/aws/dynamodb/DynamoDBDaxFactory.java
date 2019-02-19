@@ -32,10 +32,14 @@ public class DynamoDBDaxFactory {
         AWSCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider
     ) {
+        ClientConfig clientConfig = migrateClientConfig(clientConfiguration.getClientConfiguration())
+            .withEndpoints(endpoint)
+            .withRegion(awsRegionProvider.getRegion())
+            .withCredentialsProvider(credentialsProvider);
         return AmazonDaxClientBuilder.standard()
             .withCredentials(credentialsProvider)
             .withRegion(awsRegionProvider.getRegion())
-            .withClientConfiguration(migrateClientConfig(clientConfiguration.getClientConfiguration()).withEndpoints(endpoint))
+            .withClientConfiguration(clientConfig)
             .build();
     }
 
