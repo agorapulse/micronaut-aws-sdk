@@ -554,6 +554,15 @@ include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynam
 
 Please see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/DynamoDBService.html[DynamoDBService] for full reference.
 
+==== DynamoDB Accelerator (DAX)
+
+You can simply enable DynamoDB Accelerator by setting the DAX endpoint as `aws.dax.endpoint` property. Every operation
+performed using injected `AmazonDynamoDB`, `IDynamoDBMapper` or a data service will be performed against DAX instead of
+DynamoDB tables.
+
+Please, check https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.consistency.html[DAX and DynamoDB Consistency Models]
+article to understand the subsequence of using DAX instead of direct DynamoDB operations.
+
 ==== Testing
 
 You can very easily mock any of the interfaces and declarative services but if you need close-to-production
