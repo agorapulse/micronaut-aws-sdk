@@ -1,6 +1,6 @@
 aws:
   sqs:
-
+    region: sa-east-1
     # related to service behaviour
     queueNamePrefix: 'vlad_'                                                            # <1>
     autoCreateQueue: false                                                              # <2>
