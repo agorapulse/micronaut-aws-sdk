@@ -1,5 +1,6 @@
 aws:
   kinesis:
+    region: sa-east-1
     stream: MyStream                                                                    # <1>
 
     streams:                                                                            # <2>

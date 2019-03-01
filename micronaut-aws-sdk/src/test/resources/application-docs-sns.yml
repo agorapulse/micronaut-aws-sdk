@@ -1,5 +1,6 @@
 aws:
   sns:
+    region: sa-east-1
     topic: MyTopic                                                                      # <1>
     ios:
       arn: 'arn:aws:sns:eu-west-1:123456789:app/APNS/my-ios-app'                        # <2>

@@ -1,5 +1,6 @@
 aws:
   s3:
+    region: sa-east-1
     bucket: MyBucket                                                                    # <1>
 
     buckets:                                                                            # <2>

@@ -7,6 +7,9 @@ import io.micronaut.configuration.aws.AWSClientConfiguration;
 import io.micronaut.context.annotation.EachBean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;
+import io.micronaut.context.annotation.Value;
+
+import java.util.Optional;
 
 @Factory
 @Requires(classes = KinesisClientLibConfiguration.class)
@@ -18,9 +21,14 @@ public class KinesisClientConfigurationFactory {
         AWSClientConfiguration clientConfiguration,
         AWSCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
-        KinesisClientConfiguration configuration
+        KinesisClientConfiguration configuration,
+        @Value("${aws.kinesis.region}") Optional<String> region
     ) {
-        return configuration.getKinesisClientLibConfiguration(clientConfiguration.getClientConfiguration(), credentialsProvider, awsRegionProvider.getRegion());
+        return configuration.getKinesisClientLibConfiguration(
+            clientConfiguration.getClientConfiguration(),
+            credentialsProvider,
+            region.orElseGet(awsRegionProvider::getRegion)
+        );
     }
 
 }

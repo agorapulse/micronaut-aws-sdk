@@ -7,7 +7,6 @@ import com.amazonaws.Request;
 import com.amazonaws.auth.AWS4Signer;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.http.*;
-import com.amazonaws.regions.AwsRegionProvider;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -24,13 +23,13 @@ public class DefaultMessageSender implements MessageSender {
 
     private final String connectionsUrl;
     private final AWSCredentialsProvider credentialsProvider;
-    private final AwsRegionProvider regionProvider;
+    private final String region;
     private final ObjectMapper mapper;
 
-    public DefaultMessageSender(String connectionsUrl, AWSCredentialsProvider credentialsProvider, AwsRegionProvider regionProvider, ObjectMapper mapper) {
+    public DefaultMessageSender(String connectionsUrl, AWSCredentialsProvider credentialsProvider, String region, ObjectMapper mapper) {
         this.connectionsUrl = connectionsUrl;
         this.credentialsProvider = credentialsProvider;
-        this.regionProvider = regionProvider;
+        this.region = region;
         this.mapper = mapper;
     }
 
@@ -53,7 +52,7 @@ public class DefaultMessageSender implements MessageSender {
         request.setContent(payload);
 
         AWS4Signer signer = new AWS4Signer();
-        signer.setRegionName(regionProvider.getRegion());
+        signer.setRegionName(region);
         signer.setServiceName(request.getServiceName());
         signer.sign(request, credentialsProvider.getCredentials());
 

@@ -14,6 +14,7 @@ import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.annotation.Value;
 
 import javax.inject.Singleton;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -30,15 +31,16 @@ public class DynamoDBDaxFactory {
         @Value("${aws.dax.endpoint}") String endpoint,
         AWSClientConfiguration clientConfiguration,
         AWSCredentialsProvider credentialsProvider,
-        AwsRegionProvider awsRegionProvider
+        AwsRegionProvider awsRegionProvider,
+        @Value("${aws.dax.region}") Optional<String> region
     ) {
         ClientConfig clientConfig = migrateClientConfig(clientConfiguration.getClientConfiguration())
             .withEndpoints(endpoint)
-            .withRegion(awsRegionProvider.getRegion())
+            .withRegion(region.orElseGet(awsRegionProvider::getRegion))
             .withCredentialsProvider(credentialsProvider);
         return AmazonDaxClientBuilder.standard()
             .withCredentials(credentialsProvider)
-            .withRegion(awsRegionProvider.getRegion())
+            .withRegion(region.orElseGet(awsRegionProvider::getRegion))
             .withClientConfiguration(clientConfig)
             .build();
     }

@@ -8,8 +8,10 @@ import io.micronaut.configuration.aws.AWSClientConfiguration;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;
+import io.micronaut.context.annotation.Value;
 
 import javax.inject.Singleton;
+import java.util.Optional;
 
 @Factory
 @Requires(classes = AmazonSimpleEmailService.class)
@@ -20,11 +22,12 @@ public class SimpleEmailServiceFactory {
     AmazonSimpleEmailService amazonSimpleEmailService(
         AWSClientConfiguration clientConfiguration,
         AWSCredentialsProvider credentialsProvider,
-        AwsRegionProvider awsRegionProvider
+        AwsRegionProvider awsRegionProvider,
+        @Value("${aws.ses.region}") Optional<String> region
     ) {
         return AmazonSimpleEmailServiceClientBuilder.standard()
             .withCredentials(credentialsProvider)
-            .withRegion(awsRegionProvider.getRegion())
+            .withRegion(region.orElseGet(awsRegionProvider::getRegion))
             .withClientConfiguration(clientConfiguration.getClientConfiguration())
             .build();
     }

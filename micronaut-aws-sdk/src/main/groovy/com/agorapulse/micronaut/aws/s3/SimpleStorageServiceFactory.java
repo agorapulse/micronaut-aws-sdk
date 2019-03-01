@@ -8,6 +8,7 @@ import io.micronaut.configuration.aws.AWSClientConfiguration;
 import io.micronaut.context.annotation.*;
 
 import javax.inject.Singleton;
+import java.util.Optional;
 
 @Factory
 @Requires(classes = AmazonS3.class)
@@ -18,11 +19,12 @@ public class SimpleStorageServiceFactory {
     AmazonS3 amazonS3(
         AWSClientConfiguration clientConfiguration,
         AWSCredentialsProvider credentialsProvider,
-        AwsRegionProvider awsRegionProvider
+        AwsRegionProvider awsRegionProvider,
+        @Value("${aws.s3.region}") Optional<String> region
     ) {
         return AmazonS3ClientBuilder.standard()
             .withCredentials(credentialsProvider)
-            .withRegion(awsRegionProvider.getRegion())
+            .withRegion(region.orElseGet(awsRegionProvider::getRegion))
             .withClientConfiguration(clientConfiguration.getClientConfiguration())
             .build();
     }

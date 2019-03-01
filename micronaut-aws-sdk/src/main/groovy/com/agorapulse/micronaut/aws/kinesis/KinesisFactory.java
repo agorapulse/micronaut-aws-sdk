@@ -6,12 +6,10 @@ import com.amazonaws.services.kinesis.AmazonKinesis;
 import com.amazonaws.services.kinesis.AmazonKinesisClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.configuration.aws.AWSClientConfiguration;
-import io.micronaut.context.annotation.Bean;
-import io.micronaut.context.annotation.EachBean;
-import io.micronaut.context.annotation.Factory;
-import io.micronaut.context.annotation.Requires;
+import io.micronaut.context.annotation.*;
 
 import javax.inject.Singleton;
+import java.util.Optional;
 
 @Factory
 @Requires(classes = AmazonKinesis.class)
@@ -22,11 +20,12 @@ public class KinesisFactory {
     AmazonKinesis kinesis(
         AWSClientConfiguration clientConfiguration,
         AWSCredentialsProvider credentialsProvider,
-        AwsRegionProvider awsRegionProvider
+        AwsRegionProvider awsRegionProvider,
+        @Value("${aws.kinesis.region}") Optional<String> region
     ) {
         return AmazonKinesisClientBuilder.standard()
             .withCredentials(credentialsProvider)
-            .withRegion(awsRegionProvider.getRegion())
+            .withRegion(region.orElseGet(awsRegionProvider::getRegion))
             .withClientConfiguration(clientConfiguration.getClientConfiguration())
             .build();
     }
