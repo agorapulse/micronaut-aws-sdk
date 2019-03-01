@@ -430,7 +430,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.0.4.1" />
+<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.0.4.2" />
 <style>
 .hidden {
 	display: none;
@@ -751,7 +751,7 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk:1.0.4.1'
+<pre class="highlightjs highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk:1.0.4.2'
 
 // only required for DynamoDB and Kinesis integration
 compile group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: '1.11.500'
@@ -782,7 +782,7 @@ compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.500'</c
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk&lt;/artifactId&gt;
-    &lt;version&gt;1.0.4.1&lt;/version&gt;
+    &lt;version&gt;1.0.4.2&lt;/version&gt;
 &lt;/dependency&gt;
 
 &lt;!-- only required for DynamoDB and Kinesis integration --&gt;
@@ -2015,6 +2015,7 @@ Otherwise you need no configuration at all but some of the configuration may be 
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-yaml hljs" data-lang="yaml">aws:
   kinesis:
+    region: sa-east-1
     stream: MyStream                                                                    <i class="conum" data-value="1"></i><b>(1)</b>
 
     streams:                                                                            <i class="conum" data-value="2"></i><b>(2)</b>
@@ -2729,6 +2730,7 @@ by providing 'aws.s3.buckets' configuration map.</p>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-yaml hljs" data-lang="yaml">aws:
   s3:
+    region: sa-east-1
     bucket: MyBucket                                                                    <i class="conum" data-value="1"></i><b>(1)</b>
 
     buckets:                                                                            <i class="conum" data-value="2"></i><b>(2)</b>
@@ -3364,6 +3366,7 @@ public class SendEmailTest {
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-yaml hljs" data-lang="yaml">aws:
   sns:
+    region: sa-east-1
     topic: MyTopic                                                                      <i class="conum" data-value="1"></i><b>(1)</b>
     ios:
       arn: 'arn:aws:sns:eu-west-1:123456789:app/APNS/my-ios-app'                        <i class="conum" data-value="2"></i><b>(2)</b>
@@ -3858,7 +3861,7 @@ class SimpleNotificationServiceSpec extends Specification {
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-yaml hljs" data-lang="yaml">aws:
   sqs:
-
+    region: sa-east-1
     # related to service behaviour
     queueNamePrefix: 'vlad_'                                                            <i class="conum" data-value="1"></i><b>(1)</b>
     autoCreateQueue: false                                                              <i class="conum" data-value="2"></i><b>(2)</b>
@@ -4366,6 +4369,7 @@ messages back to the clients</p>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-yaml hljs" data-lang="yaml">aws:
   websocket:
+    region: sa-east-1
     connections:
       url: https://abcefgh.execute-api.eu-west-1.amazonaws.com/test/@connections        <i class="conum" data-value="1"></i><b>(1)</b>
 
@@ -5013,7 +5017,7 @@ Following configuration will enable subprojects with full Java and Groovy Micron
 
     dependencyManagement {
         imports {
-            mavenBom "io.micronaut:micronaut-bom:1.0.4.1"
+            mavenBom "io.micronaut:micronaut-bom:1.0.4.2"
         }
     }
 
@@ -5059,7 +5063,7 @@ Following configuration will enable subprojects with full Java and Groovy Micron
 }
 
 dependencies {
-    lambdaCompile "com.agorapulse:micronaut-function-aws-agp:1.0.4.1"                 <i class="conum" data-value="3"></i><b>(3)</b>
+    lambdaCompile "com.agorapulse:micronaut-function-aws-agp:1.0.4.2"                 <i class="conum" data-value="3"></i><b>(3)</b>
 
     compile "io.micronaut:micronaut-http-server"                                        <i class="conum" data-value="4"></i><b>(4)</b>
     compile "io.micronaut:micronaut-router"                                             <i class="conum" data-value="5"></i><b>(5)</b>
@@ -5400,7 +5404,7 @@ There are two additional features which cannot be found the official <a href="ht
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code>compileOnly 'com.agorapulse:micronaut-grails:1.0.4.1'</code></pre>
+<pre class="highlightjs highlight"><code>compileOnly 'com.agorapulse:micronaut-grails:1.0.4.2'</code></pre>
 </div>
 </div>
 <div class="admonitionblock tip">
@@ -5524,7 +5528,7 @@ which will automatically load the configuration once the JAR is on classpath.</p
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-01-22 15:22:35 +0100
+Last updated 2019-01-30 08:21:57 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">

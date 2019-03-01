@@ -430,7 +430,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.0.4.1" />
+<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.0.4.2" />
 <style>
 .hidden {
 	display: none;
@@ -566,6 +566,7 @@ Otherwise you need no configuration at all but some of the configuration may be 
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-yaml hljs" data-lang="yaml">aws:
   kinesis:
+    region: sa-east-1
     stream: MyStream                                                                    <i class="conum" data-value="1"></i><b>(1)</b>
 
     streams:                                                                            <i class="conum" data-value="2"></i><b>(2)</b>
@@ -1260,7 +1261,7 @@ class KinesisAnnotationsSpec extends Specification {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-01-08 18:14:19 +0100
+Last updated 2019-01-30 08:21:57 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">
