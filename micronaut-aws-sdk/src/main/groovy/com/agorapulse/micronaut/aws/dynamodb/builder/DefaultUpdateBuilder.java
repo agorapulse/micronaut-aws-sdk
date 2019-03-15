@@ -81,7 +81,7 @@ class DefaultUpdateBuilder<T> implements UpdateBuilder<T> {
         UpdateItemResult result = client.updateItem(request);
         Map<String, AttributeValue> attributes = result.getAttributes();
 
-        if (attributes.isEmpty()) {
+        if (attributes == null || attributes.isEmpty()) {
             return null;
         }
 
