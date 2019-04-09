@@ -187,6 +187,16 @@ public interface QueryBuilder<T> extends DetachedQuery<T> {
      */
     QueryBuilder<T> page(int page);
 
+    /**
+     * Sets the maximum number of items to be returned from the queries.
+     *
+     * This is a shortcut for calling <code>{@link io.reactivex.Flowable#take(long)}</code> on the result Flowable.
+     *
+     * @param max the maximum number of items returned
+     * @return self
+     */
+    QueryBuilder<T> limit(int max);
+
 
     /**
      * Sets the query offset by defining the exclusive start hash and range key (hash and range key of the last entity returned).

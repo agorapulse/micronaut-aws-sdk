@@ -81,6 +81,12 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
         return this
     }
 
+    @Override
+    QueryBuilder<T> limit(int max) {
+        this.max = max
+        return this
+    }
+
     DefaultQueryBuilder<T> offset(Object exclusiveStartHashKeyValue, Object exclusiveRangeStartKey) {
         this.exclusiveHashStartKey = exclusiveStartHashKeyValue
         this.exclusiveRangeStartKey = exclusiveRangeStartKey
@@ -94,7 +100,11 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
 
     @Override
     Flowable<T> query(IDynamoDBMapper mapper) {
-        return FlowableQueryResultHelper.generate(metadata.itemClass, mapper, resolveExpression(mapper))
+        Flowable<T> results = FlowableQueryResultHelper.generate(metadata.itemClass, mapper, resolveExpression(mapper))
+        if (max < Integer.MAX_VALUE) {
+            return results.take(max)
+        }
+        return results
     }
 
     @Override
@@ -164,5 +174,6 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     private Object hashKey
     private Object exclusiveHashStartKey
     private Object exclusiveRangeStartKey
+    private int max = Integer.MAX_VALUE
     private Consumer<DynamoDBQueryExpression<T>> configurer = { } as Consumer<DynamoDBQueryExpression<T>>
 }

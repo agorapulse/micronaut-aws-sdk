@@ -248,9 +248,11 @@ class DefaultDynamoDBServiceSpec extends Specification {
             s.queryByRangeIndex('1', 'bar').blockingSingle().parentId == null // projection
             s.queryByRangeIndex('1', 'bar').blockingSingle().rangeIndex == 'bar' // projection
             s.queryByDates('1', REFERENCE_DATE.minusDays(1).toDate(), REFERENCE_DATE.plusDays(2).toDate()).count().blockingGet() == 2
+            s.queryByDatesWithLimit('1', REFERENCE_DATE.minusDays(1).toDate(), REFERENCE_DATE.plusDays(2).toDate(), 1).count().blockingGet() == 1
             s.queryByDates('3', REFERENCE_DATE.plusDays(9).toDate(), REFERENCE_DATE.plusDays(20).toDate()).count().blockingGet() == 1
 
             s.scanAllByRangeIndex('bar').count().blockingGet() == 4
+            s.scanAllByRangeIndexWithLimit('bar', 2).count().blockingGet() == 2
 
             s.increment('1001', '1')
             s.increment('1001', '1')
@@ -376,6 +378,15 @@ interface DynamoDBItemDBService {
     })
     Flowable<DynamoDBEntity> queryByDates(String hashKey, Date after, Date before)
 
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            range { between DynamoDBEntity.DATE_INDEX, after, before }
+            limit max
+        }
+    })
+    Flowable<DynamoDBEntity> queryByDatesWithLimit(String hashKey, Date after, Date before, int max)
+
     void delete(DynamoDBEntity entity)
     void delete(String hashKey, String rangeKey)
 
@@ -429,6 +440,16 @@ interface DynamoDBItemDBService {
     })
     Flowable<DynamoDBEntity> scanAllByRangeIndex(String foo)                            // <5>
     // end::sample-scan[]
+
+    @Scan({
+        scan(DynamoDBEntity) {
+            filter {
+                eq DynamoDBEntity.RANGE_INDEX, foo
+            }
+            limit max
+        }
+    })
+    Flowable<DynamoDBEntity> scanAllByRangeIndexWithLimit(String foo, int max)
 
 // tag::service-footer[]
 }

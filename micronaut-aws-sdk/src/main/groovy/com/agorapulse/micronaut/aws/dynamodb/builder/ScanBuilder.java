@@ -133,6 +133,16 @@ public interface ScanBuilder<T> extends DetachedScan<T> {
     ScanBuilder<T> page(int page);
 
     /**
+     * Sets the maximum number of items to be returned from the queries.
+     *
+     * This is a shortcut for calling <code>{@link io.reactivex.Flowable#take(long)}</code> on the result Flowable.
+     *
+     * @param max the maximum number of items returned
+     * @return self
+     */
+    ScanBuilder<T> limit(int max);
+
+    /**
      * Sets the scan offset by defining the exclusive start hash and range key (hash and range key of the last entity returned).
      * @param exclusiveStartKeyValue exclusive start key hash value
      * @param exclusiveRangeStartKey exclusive start key range value
