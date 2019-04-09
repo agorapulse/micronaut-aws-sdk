@@ -64,7 +64,7 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
 
     @Override
     ScanBuilder<T> limit(int max) {
-        this.limit = max;
+        this.max = max
         return this
     }
 
@@ -82,8 +82,8 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
     @Override
     Flowable<T> scan(IDynamoDBMapper mapper) {
         Flowable<T> results = FlowableQueryResultHelper.generate(metadata.itemClass, mapper, resolveExpression(mapper))
-        if (limit < Integer.MAX_VALUE) {
-            return results.take(limit);
+        if (max < Integer.MAX_VALUE) {
+            return results.take(max)
         }
         return results
     }
@@ -145,5 +145,5 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
     private Consumer<DynamoDBScanExpression> configurer = { } as Consumer<DynamoDBScanExpression>
     private Object exclusiveHashStartKey
     private Object exclusiveRangeStartKey
-    private int limit = Integer.MAX_VALUE
+    private int max = Integer.MAX_VALUE
 }

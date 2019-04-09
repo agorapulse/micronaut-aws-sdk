@@ -83,7 +83,7 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
 
     @Override
     QueryBuilder<T> limit(int max) {
-        this.limit = max;
+        this.max = max
         return this
     }
 
@@ -101,8 +101,8 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     @Override
     Flowable<T> query(IDynamoDBMapper mapper) {
         Flowable<T> results = FlowableQueryResultHelper.generate(metadata.itemClass, mapper, resolveExpression(mapper))
-        if (limit < Integer.MAX_VALUE) {
-            return results.take(limit);
+        if (max < Integer.MAX_VALUE) {
+            return results.take(max)
         }
         return results
     }
@@ -174,6 +174,6 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     private Object hashKey
     private Object exclusiveHashStartKey
     private Object exclusiveRangeStartKey
-    private int limit = Integer.MAX_VALUE
+    private int max = Integer.MAX_VALUE
     private Consumer<DynamoDBQueryExpression<T>> configurer = { } as Consumer<DynamoDBQueryExpression<T>>
 }
