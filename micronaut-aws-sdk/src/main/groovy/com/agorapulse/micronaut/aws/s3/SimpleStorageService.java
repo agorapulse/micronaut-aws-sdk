@@ -18,6 +18,13 @@ import java.util.List;
  */
 public interface SimpleStorageService {
 
+    static String getBucketFromUri(String aURI) {
+        return DefaultSimpleStorageService.getBucketFromUri(aURI);
+    }
+
+    static String getKeyFromUri(String aURI) {
+        return DefaultSimpleStorageService.getKeyFromUri(aURI);
+    }
 
     /**
      * @return default name of the bucket
@@ -406,5 +413,23 @@ public interface SimpleStorageService {
     default String storeMultipartFile(String path, PartData multipartFile, CannedAccessControlList cannedAcl, ObjectMetadata metadata) {
         return storeMultipartFile(getDefaultBucketName(), path, multipartFile, cannedAcl, metadata);
     }
+
+    /**
+     * Move S3 object to different location (key).
+     *
+     * Moving objects is useful in combination with <a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/how-to-set-lifecycle-configuration-intro.html">S3 Lifecycle Configurations</a> for prefixes.
+     *
+     * @param sourceBucketName      the name of the source bucket
+     * @param sourceKey             the key of the source object
+     * @param destinationBucketName the name of the destination bucket
+     * @param destinationKey        the key of the destination object
+     * @return the destination URL or <code>null</code> if the file wasn't moved
+     */
+    String moveObject(
+        String sourceBucketName,
+        String sourceKey,
+        String destinationBucketName,
+        String destinationKey
+    );
 
 }

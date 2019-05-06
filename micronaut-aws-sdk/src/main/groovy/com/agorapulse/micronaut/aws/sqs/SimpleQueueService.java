@@ -1,9 +1,16 @@
 package com.agorapulse.micronaut.aws.sqs;
 
 import com.amazonaws.services.sqs.model.Message;
+import com.amazonaws.services.sqs.model.SendMessageRequest;
+import groovy.lang.Closure;
+import groovy.lang.DelegatesTo;
+import groovy.transform.stc.ClosureParams;
+import groovy.transform.stc.FromString;
+import space.jasan.support.groovy.closure.ConsumerWithDelegate;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Amazon SQS services
@@ -250,4 +257,53 @@ public interface SimpleQueueService {
         return sendMessage(getDefaultQueueName(), messageBody, delaySeconds, null);
     }
 
+    /**
+     * Sends message with additional configuration into the default queue.
+     * @param messageBody message body
+     * @param messageConfiguration additional configuration
+     * @return message id
+     */
+    default  String sendMessage(String messageBody, Consumer<SendMessageRequest> messageConfiguration) {
+        return sendMessage(getDefaultQueueName(), messageBody, messageConfiguration);
+    }
+
+    /**
+     * Sends message with additional configuration into the default queue.
+     * @param messageBody message body
+     * @param messageConfiguration additional configuration
+     * @return message id
+     */
+    default  String sendMessage(String messageBody,
+       @DelegatesTo(value = SendMessageRequest.class, strategy = Closure.DELEGATE_FIRST)
+       @ClosureParams(value = FromString.class, options = "com.amazonaws.services.sqs.model.SendMessageRequest")
+       Closure messageConfiguration
+    ) {
+        return sendMessage(getDefaultQueueName(), messageBody, ConsumerWithDelegate.create(messageConfiguration));
+    }
+
+    /**
+     * Sends message with additional configuration into the given queue.
+     * @param queueName name of the queue
+     * @param messageBody message body
+     * @param messageConfiguration additional configuration
+     * @return message id
+     */
+    default String sendMessage(
+        String queueName,
+        String messageBody,
+        @DelegatesTo(value = SendMessageRequest.class, strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = FromString.class, options = "com.amazonaws.services.sqs.model.SendMessageRequest")
+        Closure messageConfiguration
+    ) {
+        return sendMessage(queueName, messageBody, ConsumerWithDelegate.create(messageConfiguration));
+    }
+
+    /**
+     * Sends message with additional configuration into the given queue.
+     * @param queueName name of the queue
+     * @param messageBody message body
+     * @param messageConfiguration additional configuration
+     * @return message id
+     */
+    String sendMessage(String queueName, String messageBody, Consumer<SendMessageRequest> messageConfiguration);
 }

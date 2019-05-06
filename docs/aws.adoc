@@ -11,6 +11,7 @@ Provided integrations:
 * <<Simple Email Service (SES)>>
 * <<Simple Notification Service (SNS)>>
 * <<Simple Queue Service (SQS)>>
+* <<Security Token Service (STS)>>
 * <<WebSockets for API Gateway>>
 
 NOTE: <<Micronaut for API Gateway Proxy>> is handled separately in its own library.
@@ -60,6 +61,9 @@ compile group: 'com.amazonaws', name: 'aws-java-sdk-sns', version: '1.11.500'
 
 // only required for SQS integration
 compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.500'
+
+// only required for STS integration
+compile group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: '1.11.500'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']
@@ -125,6 +129,13 @@ compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.500'
     <artifactId>aws-java-sdk-sqs</artifactId>
     <version>1.11.500</version>
 </dependency>
+
+<!-- only required for STS integration -->
+<dependency>
+    <groupId>com.amazonaws</groupId>
+    <artifactId>aws-java-sdk-sts</artifactId>
+    <version>1.11.500</version>
+</dependency>
 ----
 
 include::dynamodb.adoc[]
@@ -138,5 +149,7 @@ include::ses.adoc[]
 include::sns.adoc[]
 
 include::sqs.adoc[]
+
+include::sts.adoc[]
 
 include::websockets.adoc[]

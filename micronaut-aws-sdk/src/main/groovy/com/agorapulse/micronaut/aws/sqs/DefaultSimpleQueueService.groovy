@@ -8,6 +8,8 @@ import groovy.transform.CompileStatic
 import groovy.transform.Synchronized
 import groovy.util.logging.Slf4j
 
+import java.util.function.Consumer
+
 /**
  * Default simple queue service implementation.
  */
@@ -227,6 +229,25 @@ class DefaultSimpleQueueService implements SimpleQueueService {
         if (groupId) {
             request.messageGroupId = groupId
         }
+        String messageId = client.sendMessage(request).messageId
+        log.debug "Message sent (messageId=$messageId)"
+        messageId
+    }
+
+    /**
+     *
+     * @param queueName
+     * @param messageBody
+     * @param delaySeconds
+     * @return
+     */
+    String sendMessage(String queueName, String messageBody, Consumer<SendMessageRequest> messageConfiguration) {
+        String queueUrl = getQueueUrl(queueName)
+
+        SendMessageRequest request = new SendMessageRequest(queueUrl, messageBody)
+
+        messageConfiguration.accept(request)
+
         String messageId = client.sendMessage(request).messageId
         log.debug "Message sent (messageId=$messageId)"
         messageId

@@ -82,6 +82,45 @@ class DefaultSimpleStorageService implements SimpleStorageService {
         metadata
     }
 
+    @SuppressWarnings([
+        'DuplicateStringLiteral',
+        'UnnecessarySubstring',
+    ])
+    static String getBucketFromUri(String aURI) {
+        URI uri = new URI(aURI)
+        String path = uri.path.startsWith('/') ? uri.path.substring(1, uri.path.length()) : uri.path
+        if (uri.host) {
+            // direct bucket URI not using any CNAME
+            if (uri.host.endsWith('amazonaws.com')) {
+                if (uri.host.startsWith('s3')) {
+                    return path.substring(0, path.indexOf('/'))
+                }
+                return uri.host.substring(0, uri.host.indexOf('.s3.'))
+            }
+            return uri.host
+        }
+        // consider the bucket name is using CNAME of the same name as the bucket
+        return path.substring(0, path.indexOf('/'))
+    }
+
+    @SuppressWarnings([
+        'DuplicateStringLiteral',
+        'UnnecessarySubstring',
+    ])
+    static String getKeyFromUri(String aURI) {
+        URI uri = new URI(aURI)
+        String path = uri.path.startsWith('/') ? uri.path.substring(1, uri.path.length()) : uri.path
+        if (uri.host) {
+            // direct bucket URI not using any CNAME
+            if (uri.host.endsWith('amazonaws.com') && uri.host.startsWith('s3')) {
+                return path.substring(path.indexOf('/') + 1, path.length())
+            }
+            return path
+        }
+        // consider the bucket name is using CNAME of the same name as the bucket
+        return path.substring(path.indexOf('/') + 1, path.length())
+    }
+
     /**
      *
      * @param bucketName
@@ -153,6 +192,7 @@ class DefaultSimpleStorageService implements SimpleStorageService {
      * @param prefix
      * @return
      */
+    @SuppressWarnings('DuplicateStringLiteral')
     boolean deleteFiles(String bucketName, String prefix) {
         assert prefix.tokenize('/').size() >= 2, 'Multiple delete are only allowed in sub/sub directories'
 
@@ -311,6 +351,53 @@ class DefaultSimpleStorageService implements SimpleStorageService {
     String getDefaultBucketName() {
         assertDefaultBucketName()
         return defaultBucketName
+    }
+
+    /**
+     * Move S3 object to different location (key).
+     *
+     * Moving objects is useful in combination with
+     * <a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/how-to-set-lifecycle-configuration-intro.html">
+     *     S3 Lifecycle Configurations
+     * </a> for prefixes.
+     *
+     * @param sourceBucketName      the name of the source bucket
+     * @param sourceKey             the key of the source object
+     * @param destinationBucketName the name of the destination bucket
+     * @param destinationKey        the key of the destination object
+     * @return the destination URL or <code>null</code> if the file wasn't moved
+     */
+    String moveObject(
+        String sourceBucketName,
+        String sourceKey,
+        String destinationBucketName,
+        String destinationKey
+    ) {
+        try {
+            CopyObjectRequest request = new CopyObjectRequest(sourceBucketName, sourceKey, destinationBucketName, destinationKey)
+
+            S3Object object = client.getObject(sourceBucketName, sourceKey)
+
+            if (object.taggingCount) {
+                GetObjectTaggingRequest taggingRequest = new GetObjectTaggingRequest(sourceBucketName, sourceKey)
+                GetObjectTaggingResult taggingResult = client.getObjectTagging(taggingRequest)
+                request.withNewObjectTagging(new ObjectTagging(taggingResult.tagSet))
+            }
+
+            request.withNewObjectMetadata(object.objectMetadata)
+
+            AccessControlList acl = client.getObjectAcl(sourceBucketName, sourceKey)
+            AccessControlList newAcls = new AccessControlList()
+            newAcls.grantAllPermissions(acl.grantsAsList as Grant[])
+            request.withAccessControlList(newAcls)
+
+            client.copyObject(request)
+            client.deleteObject(sourceBucketName, sourceKey)
+            return client.getUrl(destinationBucketName, destinationKey)
+        } catch (AmazonClientException e) {
+            log.error("Exception moving object $sourceBucketName/$sourceKey to $destinationBucketName/$destinationKey", e)
+        }
+        return null
     }
 
     // PRIVATE
