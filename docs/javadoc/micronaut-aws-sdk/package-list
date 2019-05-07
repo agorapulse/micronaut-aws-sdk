@@ -14,3 +14,4 @@ com.agorapulse.micronaut.aws.sns
 com.agorapulse.micronaut.aws.sns.annotation
 com.agorapulse.micronaut.aws.sqs
 com.agorapulse.micronaut.aws.sqs.annotation
+com.agorapulse.micronaut.aws.sts

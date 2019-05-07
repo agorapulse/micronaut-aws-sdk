@@ -430,7 +430,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.0.4.4" />
+<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.1.0" />
 <style>
 .hidden {
 	display: none;
@@ -566,11 +566,17 @@ $(addBlockSwitches);
 <li><a href="#_testing_6">Testing</a></li>
 </ul>
 </li>
+<li><a href="#_security_token_service_sts">Security Token Service (STS)</a>
+<ul class="sectlevel3">
+<li><a href="#_security_token_service">Security Token Service</a></li>
+<li><a href="#_testing_7">Testing</a></li>
+</ul>
+</li>
 <li><a href="#_websockets_for_api_gateway">WebSockets for API Gateway</a>
 <ul class="sectlevel3">
 <li><a href="#_configuration_5">Configuration</a></li>
 <li><a href="#_usage">Usage</a></li>
-<li><a href="#_testing_7">Testing</a></li>
+<li><a href="#_testing_8">Testing</a></li>
 </ul>
 </li>
 </ul>
@@ -608,6 +614,9 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 </li>
 <li>
 <p><a href="#_simple_queue_service_sqs">Simple Queue Service (SQS)</a></p>
+</li>
+<li>
+<p><a href="#_security_token_service_sts">Security Token Service (STS)</a></p>
 </li>
 <li>
 <p><a href="#_websockets_for_api_gateway">WebSockets for API Gateway</a></p>
@@ -685,7 +694,7 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk:1.0.4.4'
+<pre class="highlightjs highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk:1.1.0'
 
 // only required for DynamoDB and Kinesis integration
 compile group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: '1.11.500'
@@ -707,7 +716,10 @@ compile group: 'com.amazonaws', name: 'aws-java-sdk-ses', version: '1.11.500'
 compile group: 'com.amazonaws', name: 'aws-java-sdk-sns', version: '1.11.500'
 
 // only required for SQS integration
-compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.500'</code></pre>
+compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.500'
+
+// only required for STS integration
+compile group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: '1.11.500'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -716,7 +728,7 @@ compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.500'</c
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk&lt;/artifactId&gt;
-    &lt;version&gt;1.0.4.4&lt;/version&gt;
+    &lt;version&gt;1.1.0&lt;/version&gt;
 &lt;/dependency&gt;
 
 &lt;!-- only required for DynamoDB and Kinesis integration --&gt;
@@ -771,6 +783,13 @@ compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.500'</c
 &lt;dependency&gt;
     &lt;groupId&gt;com.amazonaws&lt;/groupId&gt;
     &lt;artifactId&gt;aws-java-sdk-sqs&lt;/artifactId&gt;
+    &lt;version&gt;1.11.500&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;!-- only required for STS integration --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.amazonaws&lt;/groupId&gt;
+    &lt;artifactId&gt;aws-java-sdk-sts&lt;/artifactId&gt;
     &lt;version&gt;1.11.500&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
@@ -4281,6 +4300,46 @@ class SimpleQueueServiceSpec extends Specification {
 </div>
 </div>
 <div class="sect2">
+<h3 id="_security_token_service_sts">Security Token Service (STS)</h3>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>The AWS Security Token Service (STS) is a web service that enables you to request temporary, limited-privilege credentials for AWS Identity and Access Management (IAM) users or for users that you authenticate (federated users).</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>This library provides basic support for Amazon STS using <a href="#_security_token_service">Security Token Service</a></p>
+</div>
+<div class="sect3">
+<h4 id="_security_token_service">Security Token Service</h4>
+<div class="paragraph">
+<p><code>SecurityTokenService</code> provides only one method (with multiple variations) to create credentials
+which assumes usage of a certain IAM role.</p>
+</div>
+<div class="paragraph">
+<p>Following example shows how to create credentials for assumed role.</p>
+</div>
+<div class="listingblock primary">
+<div class="title">Assume Role</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-groovy hljs" data-lang="groovy">service.assumeRole('session', 'arn:::my-role', 360) {
+    externalId = '123456789'
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Please, see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/sts/SecurityTokenService.html">SecurityTokenService</a> for the full reference.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_testing_7">Testing</h4>
+<div class="paragraph">
+<p>It is recommended just to mock the <code>SecurityTokenService</code> in your tests as it only contains single abstract method.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
 <h3 id="_websockets_for_api_gateway">WebSockets for API Gateway</h3>
 <div class="quoteblock">
 <blockquote>
@@ -4673,7 +4732,7 @@ your Lambda function&#8217;s role must have following permissions (preferably co
 </div>
 </div>
 <div class="sect3">
-<h4 id="_testing_7">Testing</h4>
+<h4 id="_testing_8">Testing</h4>
 <div class="paragraph">
 <p>You can very easily mock any of the interfaces. Create request event manually and follow
 <a href="http://guides.micronaut.io/micronaut-function-aws-lambda/guide/index.html#functiontests">the guide to test functions with Micronaut</a>.</p>
@@ -4685,7 +4744,7 @@ your Lambda function&#8217;s role must have following permissions (preferably co
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-02-19 16:20:51 +0100
+Last updated 2019-05-07 11:10:40 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">
