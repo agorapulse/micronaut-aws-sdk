@@ -40,6 +40,7 @@ subprojects { Project subproject ->
                 entry 'aws-java-sdk-ses'
                 entry 'aws-java-sdk-sns'
                 entry 'aws-java-sdk-sqs'
+                entry 'aws-java-sdk-sts'
                 entry 'jmespath'
             }
             dependency group: 'com.amazonaws', name: 'amazon-dax-client', version: '1.0.202017.0'

@@ -11,6 +11,7 @@ dependencies {
     optional group: 'com.amazonaws', name: 'aws-java-sdk-ses'
     optional group: 'com.amazonaws', name: 'aws-java-sdk-sns'
     optional group: 'com.amazonaws', name: 'aws-java-sdk-sqs'
+    optional group: 'com.amazonaws', name: 'aws-java-sdk-sts'
 
 
     optional 'javax.mail:mail:1.4.4'

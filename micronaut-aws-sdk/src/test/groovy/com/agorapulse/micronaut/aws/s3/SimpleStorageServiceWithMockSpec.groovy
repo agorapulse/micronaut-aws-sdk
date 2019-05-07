@@ -2,14 +2,20 @@ package com.agorapulse.micronaut.aws.s3
 
 import com.amazonaws.AmazonClientException
 import com.amazonaws.services.s3.AmazonS3
+import com.amazonaws.services.s3.model.AccessControlList
 import com.amazonaws.services.s3.model.AmazonS3Exception
 import com.amazonaws.services.s3.model.Bucket
 import com.amazonaws.services.s3.model.CannedAccessControlList
+import com.amazonaws.services.s3.model.CopyObjectRequest
+import com.amazonaws.services.s3.model.CopyObjectResult
+import com.amazonaws.services.s3.model.GetObjectTaggingResult
 import com.amazonaws.services.s3.model.ObjectListing
 import com.amazonaws.services.s3.model.ObjectMetadata
 import com.amazonaws.services.s3.model.PutObjectResult
 import com.amazonaws.services.s3.model.Region
+import com.amazonaws.services.s3.model.S3Object
 import com.amazonaws.services.s3.model.S3ObjectSummary
+import com.amazonaws.services.s3.model.Tag
 import com.amazonaws.services.s3.transfer.Upload
 import com.amazonaws.services.s3.transfer.model.UploadResult
 import io.micronaut.http.MediaType
@@ -24,6 +30,7 @@ import java.nio.ByteBuffer
 /**
  * Tests for simple storage service.
  */
+@SuppressWarnings('MethodCount')
 class SimpleStorageServiceWithMockSpec extends Specification {
 
     private static final String BUCKET_NAME = 'bucket'
@@ -400,6 +407,39 @@ class SimpleStorageServiceWithMockSpec extends Specification {
             service.storeMultipartFile('stored.txt', file)
         then:
             1 * client.putObject(BUCKET_NAME, 'stored.txt', _, _)
+    }
+
+    void 'Moving object'() {
+        when:
+            String newUrl = service.moveObject(BUCKET_NAME, 'uploads/key', BUCKET_NAME.reverse(), 'files/key')
+        then:
+            newUrl == "https://s3-eu-west-1.amazonaws.com/${BUCKET_NAME}/files/key"
+
+            1 * client.copyObject({ CopyObjectRequest request ->
+                request.sourceBucketName == BUCKET_NAME &&
+                    request.sourceKey == 'uploads/key' &&
+                    request.destinationBucketName == BUCKET_NAME.reverse() &&
+                    request.destinationKey == 'files/key'
+            } as CopyObjectRequest) >> new CopyObjectResult()
+            1 * client.deleteObject(BUCKET_NAME, 'uploads/key')
+            1 * client.getUrl(BUCKET_NAME.reverse(), 'files/key') >> new URL("https://s3-eu-west-1.amazonaws.com/${BUCKET_NAME}/files/key")
+            1 * client.getObject(BUCKET_NAME, 'uploads/key') >> new S3Object(taggingCount: 1)
+            1 * client.getObjectAcl(BUCKET_NAME, 'uploads/key') >> new AccessControlList()
+            1 * client.getObjectTagging(_) >> new GetObjectTaggingResult([new Tag('key', 'value')])
+    }
+
+    @Unroll
+    void 'extract bucket name from uri #uri'() {
+        expect:
+            SimpleStorageService.getBucketFromUri(uri) == 'publishing.agorapulse.com'
+            SimpleStorageService.getKeyFromUri(uri) == 'publishingItemMedia/109098/f02f2a8c-1b80-50cb-f9ef-2d7850ed0525.png'
+        where:
+            uri << [
+                'https://s3.eu-west-1.amazonaws.com/publishing.agorapulse.com/publishingItemMedia/109098/f02f2a8c-1b80-50cb-f9ef-2d7850ed0525.png',
+                'publishing.agorapulse.com/publishingItemMedia/109098/f02f2a8c-1b80-50cb-f9ef-2d7850ed0525.png',
+                'https://publishing.agorapulse.com/publishingItemMedia/109098/f02f2a8c-1b80-50cb-f9ef-2d7850ed0525.png',
+                'http://publishing.agorapulse.com.s3.eu-west-1.amazonaws.com/publishingItemMedia/109098/f02f2a8c-1b80-50cb-f9ef-2d7850ed0525.png',
+            ]
     }
 
 }
