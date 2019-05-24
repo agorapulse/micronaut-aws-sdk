@@ -58,6 +58,20 @@ class MessageSenderSpec extends Specification {
         when:
             defaultSender.send(CONNECTION_ID, PAYLOAD)
         then:
+            thrown(WebSocketClientGoneException)
+    }
+
+    void 'test forbidden'() {
+        given:
+            prepareServerAndContext {
+                header('Authorization', Matchers.iterableWithSize(1))
+                called(1)
+                responds().code(403).body('Forbidden', ContentType.TEXT_PLAIN)
+            }
+            MessageSender defaultSender = ctx.getBean(MessageSender)
+        when:
+            defaultSender.send(CONNECTION_ID, PAYLOAD)
+        then:
             thrown(AmazonClientException)
     }
 

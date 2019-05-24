@@ -63,6 +63,9 @@ public class DefaultMessageSender implements MessageSender {
             .errorResponseHandler(new HttpResponseHandler<AmazonClientException>() {
                 @Override
                 public AmazonClientException handle(HttpResponse response) throws Exception {
+                    if (response.getStatusCode() == 410) {
+                        return new WebSocketClientGoneException("WebSocket client with id " + connectionId + " is already gone");
+                    }
                     return new AmazonClientException("Exception publishing messages to WS endpoint "
                         + " POST " + url + " "
                         + response.getStatusCode() + ": "
