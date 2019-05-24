@@ -58,7 +58,8 @@ class MessageSenderSpec extends Specification {
         when:
             defaultSender.send(CONNECTION_ID, PAYLOAD)
         then:
-            thrown(WebSocketClientGoneException)
+            WebSocketClientGoneException e = thrown(WebSocketClientGoneException)
+            e.connectionId == CONNECTION_ID
     }
 
     void 'test forbidden'() {
