@@ -1,13 +1,12 @@
 package com.agorapulse.micronaut.aws.cloudwatch;
 
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
-import com.amazonaws.services.cloudwatch.model.ListMetricsRequest;
-import com.amazonaws.services.cloudwatch.model.ListMetricsResult;
-import com.amazonaws.services.cloudwatch.model.Metric;
+import com.amazonaws.services.cloudwatch.model.*;
 import io.reactivex.Emitter;
 import io.reactivex.Flowable;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class DefaultCloudWatchService implements CloudWatchService {
 
@@ -43,5 +42,15 @@ public class DefaultCloudWatchService implements CloudWatchService {
                 emitter.onError(e);
             }
         }).flatMap(Flowable::fromIterable);
+    }
+
+    @Override
+    public void putMetrics(Consumer<MetricDatum> builder) {
+        MetricDatum datum = new MetricDatum();
+        builder.accept(datum);
+        PutMetricDataRequest request = new PutMetricDataRequest()
+            .withMetricData(datum)
+            .withNamespace(configuration.getNamespace());
+        client.putMetricData(request);
     }
 }

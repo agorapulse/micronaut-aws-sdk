@@ -1,0 +1,3 @@
+moduleName=micornaut-aws-sdk
+moduleVersion=1.0.4.4
+extensionClasses=com.agorapulse.micronaut.aws.cloudwatch.CloudWatchExtensions
