@@ -45,11 +45,11 @@ public class DefaultCloudWatchService implements CloudWatchService {
     }
 
     @Override
-    public void putMetrics(Consumer<MetricDatum> builder) {
-        MetricDatum datum = new MetricDatum();
-        builder.accept(datum);
+    public void putMetrics(Consumer<MetricData> builder) {
+        MetricData data = new MetricData();
+        builder.accept(data);
         PutMetricDataRequest request = new PutMetricDataRequest()
-            .withMetricData(datum)
+            .withMetricData(data.getData())
             .withNamespace(configuration.getNamespace());
         client.putMetricData(request);
     }

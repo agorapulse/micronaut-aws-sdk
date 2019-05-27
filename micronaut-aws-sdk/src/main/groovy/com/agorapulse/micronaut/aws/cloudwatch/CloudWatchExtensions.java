@@ -18,11 +18,20 @@ public class CloudWatchExtensions {
 
     public static void putMetrics(
         CloudWatchService service,
+        @DelegatesTo(value = MetricData.class, strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = SimpleType.class, options = "com.agorapulse.micronaut.aws.cloudwatch.MetricData")
+            Closure<MetricData> builder
+    ) {
+        service.putMetrics(ConsumerWithDelegate.create(builder));
+    }
+
+    public static MetricData metric(
+        MetricData data,
         @DelegatesTo(value = MetricDatum.class, strategy = Closure.DELEGATE_FIRST)
         @ClosureParams(value = SimpleType.class, options = "com.amazonaws.services.cloudwatch.model.MetricDatum")
             Closure<MetricDatum> builder
     ) {
-        service.putMetrics(ConsumerWithDelegate.create(builder));
+        return data.metric(ConsumerWithDelegate.create(builder));
     }
 
     public static MetricDatum name(MetricDatum datum, String metricName) {
@@ -62,13 +71,17 @@ public class CloudWatchExtensions {
         return datum.withStatisticValues(stats);
     }
 
-    public static MetricDatum values(MetricDatum datum, Double... values) {
+    public static MetricDatum values(MetricDatum datum, List<Double> values) {
         if (datum.getValues() == null) {
             datum.withValues(values);
         } else {
-            datum.getValues().addAll(Arrays.asList(values));
+            datum.getValues().addAll(values);
         }
         return datum;
+    }
+
+    public static MetricDatum values(MetricDatum datum, Double... values) {
+        return values(datum, Arrays.asList(values));
     }
 
     public static MetricDatum data(MetricDatum datum, Double value) {
@@ -82,6 +95,10 @@ public class CloudWatchExtensions {
     }
 
     public static MetricDatum counts(MetricDatum datum, Double... counts) {
+        return datum.withCounts(counts);
+    }
+
+    public static MetricDatum counts(MetricDatum datum, List<Double> counts) {
         return datum.withCounts(counts);
     }
 

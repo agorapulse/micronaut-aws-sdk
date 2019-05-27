@@ -44,15 +44,19 @@ class CloudWatchServiceSpec extends Specification {
     void 'put metrics'() {
         when:
             service.putMetrics {
-                name METRIC_NAME
+                metric {
+                    name METRIC_NAME
 
-                unit count
+                    unit count
 
-                labels 'DIM_NAME', 'DIM_VALUE'
+                    labels 'DIM_NAME', 'DIM_VALUE'
 
-                data 12, 2
-                data 34, 1
-                data 65, 4
+                    data 12, 2
+                    data 34, 1
+                    data 65, 4
+
+                    values()
+                }
             }
         then:
             noExceptionThrown()
