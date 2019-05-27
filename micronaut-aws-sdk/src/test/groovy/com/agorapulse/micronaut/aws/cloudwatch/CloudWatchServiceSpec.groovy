@@ -4,6 +4,7 @@ import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import com.amazonaws.services.cloudwatch.model.ListMetricsRequest
 import com.amazonaws.services.cloudwatch.model.ListMetricsResult
 import com.amazonaws.services.cloudwatch.model.Metric
+import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest
 import spock.lang.Specification
 
 class CloudWatchServiceSpec extends Specification {
@@ -59,7 +60,9 @@ class CloudWatchServiceSpec extends Specification {
                 }
             }
         then:
-            noExceptionThrown()
+            1 * client.putMetricData({ PutMetricDataRequest request ->
+                request.metricData?.size() == 1
+            })
     }
 
 }
