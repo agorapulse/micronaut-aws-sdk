@@ -5,10 +5,7 @@ import com.amazonaws.regions.AwsRegionProvider;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
 import io.micronaut.configuration.aws.AWSClientConfiguration;
-import io.micronaut.context.annotation.Bean;
-import io.micronaut.context.annotation.Factory;
-import io.micronaut.context.annotation.Requires;
-import io.micronaut.context.annotation.Value;
+import io.micronaut.context.annotation.*;
 
 import javax.inject.Singleton;
 import java.util.Optional;
@@ -35,6 +32,11 @@ public class CloudWatchFactory {
             .withRegion(region.orElseGet(awsRegionProvider::getRegion))
             .withClientConfiguration(clientConfiguration.getClientConfiguration())
             .build();
+    }
+
+    @EachBean(DefaultCloudWatchConfiguration.class)
+    CloudWatchService cloudWatchService(DefaultCloudWatchConfiguration configuration, AmazonCloudWatch client) {
+        return new DefaultCloudWatchService(configuration, client);
     }
 
 }
