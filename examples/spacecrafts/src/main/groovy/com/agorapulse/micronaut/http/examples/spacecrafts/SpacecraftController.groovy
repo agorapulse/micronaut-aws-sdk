@@ -52,9 +52,12 @@ class SpacecraftController {
         return planet
     }
 
-
     @Status(HttpStatus.NOT_FOUND)
     @Error(SpacecraftNotFoundException)
-    void spacecraftNotFound(SpacecraftNotFoundException ex) {}
+    @SuppressWarnings([
+        'EmptyMethod',
+        'UnusedMethodParameter',
+    ])
+    void spacecraftNotFound(SpacecraftNotFoundException ex) { }
 
 }

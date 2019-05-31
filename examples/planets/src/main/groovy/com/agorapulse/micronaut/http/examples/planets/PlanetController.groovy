@@ -50,6 +50,10 @@ class PlanetController {
 
     @Status(HttpStatus.NOT_FOUND)
     @Error(PlanetNotFoundException)
+    @SuppressWarnings([
+        'EmptyMethod',
+        'UnusedMethodParameter',
+    ])
     void planetNotFound(PlanetNotFoundException ex) { }
 
 }
