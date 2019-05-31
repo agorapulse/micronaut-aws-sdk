@@ -3,6 +3,7 @@ package com.agorapulse.micronaut.http.examples.spacecrafts
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Delete
+import io.micronaut.http.annotation.Error
 import io.micronaut.http.annotation.Get
 import io.micronaut.http.annotation.Post
 import io.micronaut.http.annotation.Status
@@ -26,21 +27,37 @@ class SpacecraftController {
 
     @Get('/{country}/{name}')
     Spacecraft show(String country, String name) {
-        return spacecraftDBService.get(country, name)
+        Spacecraft spacecraft = spacecraftDBService.get(country, name)
+
+        if (!spacecraft) {
+            throw new SpacecraftNotFoundException(name)
+        }
+
+        return spacecraft
     }
 
-    @Post('/{country}/{name}') @Status(HttpStatus.CREATED)
+    @Post('/{country}/{name}')
+    @Status(HttpStatus.CREATED)
     Spacecraft save(String country, String name) {
         Spacecraft planet = new Spacecraft(country: country, name: name)
         spacecraftDBService.save(planet)
         return planet
     }
 
-    @Delete('/{country}/{name}') @Status(HttpStatus.NO_CONTENT)
+    @Delete('/{country}/{name}')
+    @Status(HttpStatus.NO_CONTENT)
     Spacecraft delete(String country, String name) {
         Spacecraft planet = show(country, name)
         spacecraftDBService.delete(planet)
         return planet
     }
+
+    @Status(HttpStatus.NOT_FOUND)
+    @Error(SpacecraftNotFoundException)
+    @SuppressWarnings([
+        'EmptyMethod',
+        'UnusedMethodParameter',
+    ])
+    void spacecraftNotFound(SpacecraftNotFoundException ex) { }
 
 }

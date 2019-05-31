@@ -1,7 +1,0 @@
-dependencies {
-    testCompile project(':micronaut-http-server-tck')
-
-    // custom test
-    testCompile "com.agorapulse:gru-http:$gruVersion"
-    testCompile "io.micronaut:micronaut-http-server-netty"
-}

@@ -3,6 +3,7 @@ package com.agorapulse.micronaut.http.examples.planets
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Delete
+import io.micronaut.http.annotation.Error
 import io.micronaut.http.annotation.Get
 import io.micronaut.http.annotation.Post
 import io.micronaut.http.annotation.Status
@@ -26,7 +27,11 @@ class PlanetController {
 
     @Get('/{star}/{name}')
     Planet show(String star, String name) {
-        return planetDBService.get(star, name)
+        Planet planet = planetDBService.get(star, name)
+        if (!planet) {
+            throw new PlanetNotFoundException(name)
+        }
+        return planet
     }
 
     @Post('/{star}/{name}') @Status(HttpStatus.CREATED)
@@ -42,5 +47,13 @@ class PlanetController {
         planetDBService.delete(planet)
         return planet
     }
+
+    @Status(HttpStatus.NOT_FOUND)
+    @Error(PlanetNotFoundException)
+    @SuppressWarnings([
+        'EmptyMethod',
+        'UnusedMethodParameter',
+    ])
+    void planetNotFound(PlanetNotFoundException ex) { }
 
 }

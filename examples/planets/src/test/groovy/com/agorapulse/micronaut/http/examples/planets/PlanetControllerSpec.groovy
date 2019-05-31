@@ -4,7 +4,6 @@ import com.agorapulse.dru.Dru
 import com.agorapulse.dru.dynamodb.persistence.DynamoDB
 import com.agorapulse.gru.Gru
 import com.agorapulse.gru.agp.ApiGatewayProxy
-import com.agorapulse.micronaut.agp.ApiGatewayProxyHandler
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
 import io.micronaut.context.ApplicationContext
 import org.junit.Rule
@@ -16,28 +15,24 @@ import spock.lang.Specification
 class PlanetControllerSpec extends Specification {
 
     @Rule private final Gru gru = Gru.equip(ApiGatewayProxy.steal(this) {               // <1>
-        map '/planet/{star}' to ApiGatewayProxyHandler                                  // <2>
-        map '/planet/{star}/{name}' to ApiGatewayProxyHandler
+        map '/planet/{star}' to MicronautHandler                                        // <2>
+        map '/planet/{star}/{name}' to MicronautHandler
     })
 
     @Rule private final Dru dru = Dru.steal(this)
 
-    @SuppressWarnings('UnusedPrivateField')
-    private final ApiGatewayProxyHandler handler = new ApiGatewayProxyHandler() {
-        @Override
-        protected void doWithApplicationContext(ApplicationContext ctx) {               // <3>
-            ctx.registerSingleton(IDynamoDBMapper, DynamoDB.createMapper(dru))
-        }
-    }
-
     void setup() {
+        MicronautHandler.reset()                                                        // <3>
+        MicronautHandler.applicationContext.with { ApplicationContext ctx ->
+            ctx.registerSingleton(IDynamoDBMapper, DynamoDB.createMapper(dru))          // <4>
+        }
         dru.add(new Planet(star: 'sun', name: 'mercury'))
         dru.add(new Planet(star: 'sun', name: 'venus'))
         dru.add(new Planet(star: 'sun', name: 'earth'))
         dru.add(new Planet(star: 'sun', name: 'mars'))
     }
 
-    void 'get planet'() {                                                               // <4>
+    void 'get planet'() {                                                               // <5>
         expect:
             gru.test {
                 get('/planet/sun/earth')
