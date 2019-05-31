@@ -6,7 +6,6 @@ import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.context.ApplicationContextBuilder;
 import io.micronaut.function.aws.proxy.MicronautLambdaContainerHandler;
-import io.micronaut.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,8 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.function.Consumer;
-
-import static com.amazonaws.serverless.proxy.RequestReader.LAMBDA_CONTEXT_PROPERTY;
 
 public class MicronautHandler implements RequestStreamHandler {
 
