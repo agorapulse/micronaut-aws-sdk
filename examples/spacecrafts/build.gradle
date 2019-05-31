@@ -23,7 +23,7 @@ dependencies {
 
 task deployLambda(type: AWSLambdaMigrateFunctionTask, dependsOn: build, group: 'deploy')  {
     functionName = 'MicronautExampleSpacecrafts'
-    handler = 'com.agorapulse.micronaut.agp.ApiGatewayProxyHandler::handleRequest'
+    handler = 'com.agorapulse.micronaut.http.examples.spacecrafts.MicronautHandler::handleRequest'
     role = "arn:aws:iam::281741939716:role/service-role/MicronautExamples"
     runtime = Runtime.Java8
     zipFile = buildZip.archivePath

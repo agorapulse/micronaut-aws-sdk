@@ -4,7 +4,6 @@ import com.agorapulse.dru.Dru
 import com.agorapulse.dru.dynamodb.persistence.DynamoDB
 import com.agorapulse.gru.Gru
 import com.agorapulse.gru.agp.ApiGatewayProxy
-import com.agorapulse.micronaut.agp.ApiGatewayProxyHandler
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
 import io.micronaut.context.ApplicationContext
 import org.junit.Rule
@@ -16,21 +15,17 @@ import spock.lang.Specification
 class SpacecraftControllerSpec extends Specification {
 
     @Rule private final Gru gru = Gru.equip(ApiGatewayProxy.steal(this) {
-        map '/spacecraft/{country}' to ApiGatewayProxyHandler
-        map '/spacecraft/{country}/{name}' to ApiGatewayProxyHandler
+        map '/spacecraft/{country}' to MicronautHandler
+        map '/spacecraft/{country}/{name}' to MicronautHandler
     })
 
     @Rule private final Dru dru = Dru.steal(this)
 
-    @SuppressWarnings('UnusedPrivateField')
-    private final ApiGatewayProxyHandler handler = new ApiGatewayProxyHandler() {
-        @Override
-        protected void doWithApplicationContext(ApplicationContext ctx) {
+    void setup() {
+        MicronautHandler.reset()
+        MicronautHandler.applicationContext.with { ApplicationContext ctx ->
             ctx.registerSingleton(IDynamoDBMapper, DynamoDB.createMapper(dru))
         }
-    }
-
-    void setup() {
         dru.add(new Spacecraft(country: 'russia', name: 'vostok'))
         dru.add(new Spacecraft(country: 'usa', name: 'dragon'))
     }

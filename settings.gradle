@@ -1,11 +1,7 @@
 rootProject.name = 'micronaut-libraries'
 
 include 'micronaut-aws-sdk'
-include 'micronaut-function-aws-agp'
 include 'micronaut-grails'
-include 'micronaut-http-server-basic'
-include 'micronaut-http-server-tck'
-include 'micronaut-http-server-tck-netty-tests'
 
 // examples
 include 'examples/local-server'

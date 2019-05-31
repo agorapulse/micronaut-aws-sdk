@@ -4,10 +4,7 @@ configurations {
 }
 
 dependencies {
-    lambda project(':micronaut-function-aws-agp')
-
-    compile "io.micronaut:micronaut-http-server"
-    compile "io.micronaut:micronaut-router"
+    compile 'io.micronaut.aws:micronaut-function-aws-api-proxy'
 
     compile project(':micronaut-aws-sdk')
     compile "com.amazonaws:aws-java-sdk-dynamodb:$awsSdkVersion"
