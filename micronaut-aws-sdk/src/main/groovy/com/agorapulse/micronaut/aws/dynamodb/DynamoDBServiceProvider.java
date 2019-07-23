@@ -2,13 +2,9 @@ package com.agorapulse.micronaut.aws.dynamodb;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
-import io.micronaut.cache.Cache;
-import io.micronaut.context.BeanContext;
 import io.micronaut.context.annotation.Requires;
-import io.micronaut.inject.qualifiers.Qualifiers;
 
 import javax.inject.Singleton;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
