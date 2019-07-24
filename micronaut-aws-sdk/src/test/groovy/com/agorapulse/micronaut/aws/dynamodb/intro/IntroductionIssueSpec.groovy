@@ -10,6 +10,12 @@ import spock.lang.Specification
 
 import javax.inject.Singleton
 
+/**
+ * Tests that guarantees that more than one DynamoDB service can be injected into the service which was previously
+ * not working due the following bug.
+ *
+ * @see https://github.com/micronaut-projects/micronaut-core/issues/1851
+ */
 class IntroductionIssueSpec extends Specification {
 
     @AutoCleanup ApplicationContext context
@@ -17,7 +23,6 @@ class IntroductionIssueSpec extends Specification {
     @Rule Dru dru = Dru.steal(this)
 
     IDynamoDBMapper mapper = DynamoDB.createMapper(dru)
-
 
     void setup() {
         dru.add(new IntroProblemEntity(hashKey: 'hash1'))
@@ -27,8 +32,6 @@ class IntroductionIssueSpec extends Specification {
         context.registerSingleton(IDynamoDBMapper, mapper)
         context.start()
     }
-
-
 
     void 'can inject two data services'() {
         given:
