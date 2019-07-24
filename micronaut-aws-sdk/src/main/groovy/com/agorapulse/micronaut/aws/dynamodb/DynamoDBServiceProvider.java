@@ -2,12 +2,10 @@ package com.agorapulse.micronaut.aws.dynamodb;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
-import io.micronaut.context.BeanContext;
 import io.micronaut.context.annotation.Requires;
-import io.micronaut.inject.qualifiers.Qualifiers;
 
 import javax.inject.Singleton;
-import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Provider of {@link DynamoDBService} for particular DynamoDB entities.
@@ -16,14 +14,13 @@ import java.util.Optional;
 @Requires(classes = IDynamoDBMapper.class)
 public class DynamoDBServiceProvider {
 
+    private final ConcurrentHashMap<Class, DynamoDBService> serviceCache = new ConcurrentHashMap<>();
     private final AmazonDynamoDB client;
     private final IDynamoDBMapper mapper;
-    private final BeanContext context;
 
-    public DynamoDBServiceProvider(AmazonDynamoDB client, IDynamoDBMapper mapper, BeanContext context) {
+    public DynamoDBServiceProvider(AmazonDynamoDB client, IDynamoDBMapper mapper) {
         this.client = client;
         this.mapper = mapper;
-        this.context = context;
     }
 
     /**
@@ -34,17 +31,7 @@ public class DynamoDBServiceProvider {
      * @return {@link DynamoDBService} for given type
      */
     public <T> DynamoDBService<T> findOrCreate(Class<T> type) {
-        Optional<DynamoDBService> existingService = context.findBean(DynamoDBService.class, Qualifiers.byTypeArguments(type));
-
-        if (existingService.isPresent()) {
-            return (DynamoDBService<T>) existingService.get();
-        }
-
-        DynamoDBService<T> service = new DefaultDynamoDBService<>(client, mapper, type);
-
-        context.registerSingleton(DynamoDBService.class, service, Qualifiers.byTypeArguments(type));
-
-        return service;
+        return serviceCache.computeIfAbsent(type, (t) -> new DefaultDynamoDBService<T>(client, mapper, type));
     }
 
 }
