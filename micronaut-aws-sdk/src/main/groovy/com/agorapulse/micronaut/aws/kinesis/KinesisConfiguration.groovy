@@ -1,5 +1,6 @@
 package com.agorapulse.micronaut.aws.kinesis
 
+import com.agorapulse.micronaut.aws.DefaultRegionAndEndpointConfiguration
 import com.amazonaws.services.kinesis.AmazonKinesis
 import groovy.transform.CompileStatic
 import io.micronaut.context.annotation.ConfigurationProperties
@@ -15,7 +16,7 @@ import javax.validation.constraints.NotEmpty
 @CompileStatic
 @ConfigurationProperties('aws.kinesis')
 @Requires(classes = AmazonKinesis)
-class KinesisConfiguration {
+class KinesisConfiguration extends DefaultRegionAndEndpointConfiguration {
 
     @NotEmpty String stream = ''
 

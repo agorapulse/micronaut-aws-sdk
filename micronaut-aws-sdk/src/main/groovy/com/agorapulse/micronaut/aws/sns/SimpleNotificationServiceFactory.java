@@ -6,10 +6,12 @@ import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.AmazonSNSClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.configuration.aws.AWSClientConfiguration;
-import io.micronaut.context.annotation.*;
+import io.micronaut.context.annotation.Bean;
+import io.micronaut.context.annotation.EachBean;
+import io.micronaut.context.annotation.Factory;
+import io.micronaut.context.annotation.Requires;
 
 import javax.inject.Singleton;
-import java.util.Optional;
 
 @Factory
 @Requires(classes = AmazonSNS.class)
@@ -21,11 +23,10 @@ public class SimpleNotificationServiceFactory {
         AWSClientConfiguration clientConfiguration,
         AWSCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
-        @Value("${aws.sns.region}") Optional<String> region
+        SimpleNotificationServiceConfiguration configuration
     ) {
-        return AmazonSNSClientBuilder.standard()
+        return configuration.configure(AmazonSNSClientBuilder.standard(), awsRegionProvider)
             .withCredentials(credentialsProvider)
-            .withRegion(region.orElseGet(awsRegionProvider::getRegion))
             .withClientConfiguration(clientConfiguration.getClientConfiguration())
             .build();
     }

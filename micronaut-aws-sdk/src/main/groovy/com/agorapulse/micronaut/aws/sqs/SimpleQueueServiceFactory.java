@@ -20,11 +20,10 @@ public class SimpleQueueServiceFactory {
         AWSClientConfiguration clientConfiguration,
         AWSCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
-        @Value("${aws.sqs.region}") Optional<String> region
+        SimpleQueueServiceConfiguration configuration
     ) {
-        return AmazonSQSClientBuilder.standard()
+        return configuration.configure(AmazonSQSClientBuilder.standard(), awsRegionProvider)
             .withCredentials(credentialsProvider)
-            .withRegion(region.orElseGet(awsRegionProvider::getRegion))
             .withClientConfiguration(clientConfiguration.getClientConfiguration())
             .build();
     }

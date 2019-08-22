@@ -20,11 +20,10 @@ public class SimpleStorageServiceFactory {
         AWSClientConfiguration clientConfiguration,
         AWSCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
-        @Value("${aws.s3.region}") Optional<String> region
+        SimpleStorageServiceConfiguration configuration
     ) {
-        return AmazonS3ClientBuilder.standard()
+        return configuration.configure(AmazonS3ClientBuilder.standard(), awsRegionProvider)
             .withCredentials(credentialsProvider)
-            .withRegion(region.orElseGet(awsRegionProvider::getRegion))
             .withClientConfiguration(clientConfiguration.getClientConfiguration())
             .build();
     }
