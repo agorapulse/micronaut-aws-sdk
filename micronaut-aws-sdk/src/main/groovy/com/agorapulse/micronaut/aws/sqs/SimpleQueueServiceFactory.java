@@ -8,7 +8,6 @@ import io.micronaut.configuration.aws.AWSClientConfiguration;
 import io.micronaut.context.annotation.*;
 
 import javax.inject.Singleton;
-import java.util.Optional;
 
 @Factory
 @Requires(classes = AmazonSQS.class)

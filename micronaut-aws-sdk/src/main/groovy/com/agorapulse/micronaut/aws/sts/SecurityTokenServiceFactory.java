@@ -8,10 +8,8 @@ import io.micronaut.configuration.aws.AWSClientConfiguration;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;
-import io.micronaut.context.annotation.Value;
 
 import javax.inject.Singleton;
-import java.util.Optional;
 
 @Factory
 @Requires(classes = AWSSecurityTokenService.class)
