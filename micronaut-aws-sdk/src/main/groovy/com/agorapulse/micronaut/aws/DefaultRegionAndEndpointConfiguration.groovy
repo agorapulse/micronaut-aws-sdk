@@ -1,7 +1,5 @@
 package com.agorapulse.micronaut.aws
 
-import com.agorapulse.micronaut.aws.RegionAndEndpointConfiguration
-
 import javax.annotation.Nullable
 
 /**
