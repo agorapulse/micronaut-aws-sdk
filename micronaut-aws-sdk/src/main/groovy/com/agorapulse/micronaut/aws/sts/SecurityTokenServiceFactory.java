@@ -8,10 +8,8 @@ import io.micronaut.configuration.aws.AWSClientConfiguration;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;
-import io.micronaut.context.annotation.Value;
 
 import javax.inject.Singleton;
-import java.util.Optional;
 
 @Factory
 @Requires(classes = AWSSecurityTokenService.class)
@@ -23,11 +21,10 @@ public class SecurityTokenServiceFactory {
         AWSClientConfiguration clientConfiguration,
         AWSCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
-        @Value("${aws.sts.region}") Optional<String> region
+        SecurityTokenServiceConfiguration configuration
     ) {
-        return AWSSecurityTokenServiceClientBuilder.standard()
+        return configuration.configure(AWSSecurityTokenServiceClientBuilder.standard(), awsRegionProvider)
             .withCredentials(credentialsProvider)
-            .withRegion(region.orElseGet(awsRegionProvider::getRegion))
             .withClientConfiguration(clientConfiguration.getClientConfiguration())
             .build();
     }

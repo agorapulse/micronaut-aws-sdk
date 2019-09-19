@@ -15,7 +15,7 @@ import spock.lang.Specification
  */
 class SimpleQueueServiceWithMockSpec extends Specification {
 
-    SimpleQueueServiceConfiguration configuration = new SimpleQueueServiceConfiguration(cache: true)
+    SimpleQueueServiceConfiguration configuration = new DefaultSimpleQueueServiceConfiguration(cache: true)
     AmazonSQS amazonSQS = Mock(AmazonSQS)
     SimpleQueueService service = new DefaultSimpleQueueService(amazonSQS, configuration)
 

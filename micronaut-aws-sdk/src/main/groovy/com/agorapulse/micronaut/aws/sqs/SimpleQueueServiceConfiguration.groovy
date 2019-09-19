@@ -1,23 +1,22 @@
 package com.agorapulse.micronaut.aws.sqs
 
-import com.amazonaws.services.sqs.AmazonSQS
+import com.agorapulse.micronaut.aws.RegionAndEndpointConfiguration
 import groovy.transform.CompileStatic
-import io.micronaut.context.annotation.ConfigurationProperties
-import io.micronaut.context.annotation.Requires
 
-import javax.inject.Named
+import javax.annotation.Nullable
 
 /**
  * Default configuration for Simple Queue Service.
  */
-@Named('default')
 @CompileStatic
-@ConfigurationProperties('aws.sqs')
-@Requires(classes = AmazonSQS)
-class SimpleQueueServiceConfiguration extends QueueConfiguration {
+@SuppressWarnings('AbstractClassWithoutAbstractMethod')
+abstract class SimpleQueueServiceConfiguration extends QueueConfiguration implements RegionAndEndpointConfiguration {
 
     String queueNamePrefix = ''
     boolean autoCreateQueue = false
     boolean cache = false
+
+    @Nullable String region
+    @Nullable String endpoint
 
 }

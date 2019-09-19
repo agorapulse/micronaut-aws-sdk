@@ -11,10 +11,8 @@ import io.micronaut.configuration.aws.AWSClientConfiguration;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;
-import io.micronaut.context.annotation.Value;
 
 import javax.inject.Singleton;
-import java.util.Optional;
 
 /**
  * Factory class which provides the {@link AmazonDynamoDB} and {@link IDynamoDBMapper} into the application context.
@@ -30,11 +28,10 @@ public class DynamoDBFactory {
         AWSClientConfiguration clientConfiguration,
         AWSCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
-        @Value("${aws.dynamodb.region}") Optional<String> region
+        DynamoDBConfiguration configuration
     ) {
-        return AmazonDynamoDBClientBuilder.standard()
+        return configuration.configure(AmazonDynamoDBClientBuilder.standard(), awsRegionProvider)
             .withCredentials(credentialsProvider)
-            .withRegion(region.orElseGet(awsRegionProvider::getRegion))
             .withClientConfiguration(clientConfiguration.getClientConfiguration())
             .build();
     }

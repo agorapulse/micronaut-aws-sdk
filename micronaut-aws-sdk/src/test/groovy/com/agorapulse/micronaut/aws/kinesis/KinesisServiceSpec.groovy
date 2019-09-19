@@ -52,7 +52,7 @@ class KinesisServiceSpec extends Specification {
             .withCredentials(localstack.defaultCredentialsProvider)
             .build()
 
-        service = new DefaultKinesisService(kinesis, new KinesisConfiguration(stream: STREAM, consumerFilterKey: 'test_'), MAPPER)
+        service = new DefaultKinesisService(kinesis, new DefaultKinesisConfiguration(stream: STREAM, consumerFilterKey: 'test_'), MAPPER)
     }
 
     void 'new default stream'() {

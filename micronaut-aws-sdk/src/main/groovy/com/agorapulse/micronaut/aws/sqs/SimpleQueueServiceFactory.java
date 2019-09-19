@@ -8,27 +8,26 @@ import io.micronaut.configuration.aws.AWSClientConfiguration;
 import io.micronaut.context.annotation.*;
 
 import javax.inject.Singleton;
-import java.util.Optional;
 
 @Factory
 @Requires(classes = AmazonSQS.class)
 public class SimpleQueueServiceFactory {
 
-    @Bean
     @Singleton
+    @EachBean(SimpleQueueServiceConfiguration.class)
     AmazonSQS amazonSQS(
         AWSClientConfiguration clientConfiguration,
         AWSCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
-        @Value("${aws.sqs.region}") Optional<String> region
+        SimpleQueueServiceConfiguration configuration
     ) {
-        return AmazonSQSClientBuilder.standard()
+        return configuration.configure(AmazonSQSClientBuilder.standard(), awsRegionProvider)
             .withCredentials(credentialsProvider)
-            .withRegion(region.orElseGet(awsRegionProvider::getRegion))
             .withClientConfiguration(clientConfiguration.getClientConfiguration())
             .build();
     }
 
+    @Singleton
     @EachBean(SimpleQueueServiceConfiguration.class)
     SimpleQueueService simpleQueueService(AmazonSQS sqs, SimpleQueueServiceConfiguration configuration) {
         return new DefaultSimpleQueueService(sqs, configuration);

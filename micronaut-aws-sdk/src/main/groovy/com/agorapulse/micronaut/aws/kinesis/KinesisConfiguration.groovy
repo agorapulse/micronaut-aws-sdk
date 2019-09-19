@@ -1,21 +1,16 @@
 package com.agorapulse.micronaut.aws.kinesis
 
-import com.amazonaws.services.kinesis.AmazonKinesis
+import com.agorapulse.micronaut.aws.DefaultRegionAndEndpointConfiguration
 import groovy.transform.CompileStatic
-import io.micronaut.context.annotation.ConfigurationProperties
-import io.micronaut.context.annotation.Requires
 
-import javax.inject.Named
 import javax.validation.constraints.NotEmpty
 
 /**
  * Default Kinesis configuration, published with <code>default</code> named qualifier.
  */
-@Named('default')
 @CompileStatic
-@ConfigurationProperties('aws.kinesis')
-@Requires(classes = AmazonKinesis)
-class KinesisConfiguration {
+@SuppressWarnings('AbstractClassWithoutAbstractMethod')
+abstract class KinesisConfiguration extends DefaultRegionAndEndpointConfiguration {
 
     @NotEmpty String stream = ''
 
