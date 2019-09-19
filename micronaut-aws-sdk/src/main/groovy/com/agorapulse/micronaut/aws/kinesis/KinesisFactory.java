@@ -6,7 +6,6 @@ import com.amazonaws.services.kinesis.AmazonKinesis;
 import com.amazonaws.services.kinesis.AmazonKinesisClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.configuration.aws.AWSClientConfiguration;
-import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.EachBean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;
@@ -17,8 +16,8 @@ import javax.inject.Singleton;
 @Requires(classes = AmazonKinesis.class)
 public class KinesisFactory {
 
-    @Bean
     @Singleton
+    @EachBean(KinesisConfiguration.class)
     AmazonKinesis kinesis(
         AWSClientConfiguration clientConfiguration,
         AWSCredentialsProvider credentialsProvider,
@@ -31,8 +30,13 @@ public class KinesisFactory {
             .build();
     }
 
+    @Singleton
     @EachBean(KinesisConfiguration.class)
-    KinesisService simpleQueueService(AmazonKinesis kinesis, KinesisConfiguration configuration, ObjectMapper mapper) {
+    KinesisService simpleQueueService(
+        AmazonKinesis kinesis,
+        KinesisConfiguration configuration,
+        ObjectMapper mapper
+    ) {
         return new DefaultKinesisService(kinesis, configuration, mapper);
     }
 

@@ -7,11 +7,7 @@ import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibC
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.SimpleRecordsFetcherFactory
 import com.amazonaws.services.kinesis.metrics.interfaces.MetricsLevel
 import groovy.transform.CompileStatic
-import io.micronaut.context.annotation.ConfigurationProperties
-import io.micronaut.context.annotation.Requires
-import io.micronaut.context.annotation.Value
 
-import javax.inject.Named
 import javax.validation.constraints.Min
 import javax.validation.constraints.NotEmpty
 
@@ -21,11 +17,8 @@ import static com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisCli
  * Default configuration for Kinesis listener.
  */
 @CompileStatic
-@Named('default')
-@ConfigurationProperties('aws.kinesis.listener')
-@Requires(classes = KinesisClientLibConfiguration)
-@SuppressWarnings('NoWildcardImports')
-class KinesisClientConfiguration {
+@SuppressWarnings(['NoWildcardImports', 'AbstractClassWithoutAbstractMethod'])
+abstract class KinesisClientConfiguration {
 
     @NotEmpty
     String applicationName
@@ -77,10 +70,7 @@ class KinesisClientConfiguration {
     long listShardsBackoffTimeInMillis = DEFAULT_LIST_SHARDS_BACKOFF_TIME_IN_MILLIS
     int maxListShardsRetryAttempts = DEFAULT_MAX_LIST_SHARDS_RETRY_ATTEMPTS
 
-    KinesisClientConfiguration(
-        @Value('${aws.kinesis.application.name:}') String applicationName,
-        @Value('${aws.kinesis.worker.id:}') String workerId
-    ) {
+    protected KinesisClientConfiguration(String applicationName, String workerId) {
         this.applicationName = applicationName
         if (workerId) {
             this.workerId = workerId

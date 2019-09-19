@@ -13,8 +13,8 @@ import javax.inject.Singleton;
 @Requires(classes = AmazonSQS.class)
 public class SimpleQueueServiceFactory {
 
-    @Bean
     @Singleton
+    @EachBean(SimpleQueueServiceConfiguration.class)
     AmazonSQS amazonSQS(
         AWSClientConfiguration clientConfiguration,
         AWSCredentialsProvider credentialsProvider,
@@ -27,6 +27,7 @@ public class SimpleQueueServiceFactory {
             .build();
     }
 
+    @Singleton
     @EachBean(SimpleQueueServiceConfiguration.class)
     SimpleQueueService simpleQueueService(AmazonSQS sqs, SimpleQueueServiceConfiguration configuration) {
         return new DefaultSimpleQueueService(sqs, configuration);

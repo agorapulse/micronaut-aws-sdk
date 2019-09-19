@@ -6,7 +6,6 @@ import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.AmazonSNSClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.configuration.aws.AWSClientConfiguration;
-import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.EachBean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;
@@ -17,8 +16,8 @@ import javax.inject.Singleton;
 @Requires(classes = AmazonSNS.class)
 public class SimpleNotificationServiceFactory {
 
-    @Bean
     @Singleton
+    @EachBean(SimpleNotificationServiceConfiguration.class)
     AmazonSNS amazonSNS(
         AWSClientConfiguration clientConfiguration,
         AWSCredentialsProvider credentialsProvider,
@@ -31,6 +30,7 @@ public class SimpleNotificationServiceFactory {
             .build();
     }
 
+    @Singleton
     @EachBean(SimpleNotificationServiceConfiguration.class)
     SimpleNotificationService simpleQueueService(AmazonSNS sqs, SimpleNotificationServiceConfiguration configuration, ObjectMapper mapper) {
         return new DefaultSimpleNotificationService(sqs, configuration, mapper);
