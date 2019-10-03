@@ -21,7 +21,7 @@ TIP: If you plan to reuse same library for Micronaut and Grails, you can declare
 
 The integration is handle by bean processor which needs to be injected into Spring application context. The easiest
 thing is to create Spring configuration placed next to your Micronaut classes. The Spring configuration class will
-create the processor bean:
+create `MicronautBeanImporter` which will be later processed by the processor bean:
 
 [source,groovy,indent=0,options="nowrap"]
 ----
@@ -29,12 +29,11 @@ include::../micronaut-grails/src/test/groovy/com/agorapulse/micronaut/grails/Gra
 ----
 <1> Define class as Spring `@Configuration`
 <2> Declare method which returns bean processor `@Bean`
-<3> Use builder to add all exported beans to the Spring application context
-<4> The name of the Spring bean defaults to the _property name_ of the class, e.g. `widget`
-<5> You can provide different name
-<6> You can qualify using a stereotype (annotation)
-<7> You can qualify using the name of the bean which will be the same in the Spring application
-<8> You can combine any qualifiers possible to narrow the search to single bean which needs to be available from the Spring application context
+<3> The name of the Spring bean defaults to the _property name_ of the class, e.g. `widget`
+<4> You can provide different name
+<5> You can qualify using a stereotype (annotation)
+<6> You can qualify using the name of the bean which will be the same in the Spring application
+<7> You can combine any qualifiers possible to narrow the search to single bean which needs to be available from the Spring application context
 
 
 WARNING: If more then one bean qualifies the criteria then an exception will be thrown.

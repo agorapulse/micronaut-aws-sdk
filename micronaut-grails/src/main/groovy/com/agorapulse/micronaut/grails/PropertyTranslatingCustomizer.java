@@ -1,7 +1,9 @@
 package com.agorapulse.micronaut.grails;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Property translating customizer add an ability to re-use existing properties defined in Spring application context
@@ -55,6 +57,10 @@ public interface PropertyTranslatingCustomizer {
      */
     static PropertyTranslatingCustomizer.Builder grails() {
         return GrailsPropertyTranslatingCustomizer.standard();
+    }
+
+    static PropertyTranslatingCustomizer of(final Collection<PropertyTranslatingCustomizer> customizers) {
+        return name -> customizers.stream().flatMap(c -> c.getAlternativeNames(name).stream()).collect(Collectors.toSet());
     }
 
     /**
