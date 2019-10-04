@@ -430,7 +430,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.1.0" />
+<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.2.3.1" />
 <style>
 .hidden {
 	display: none;
@@ -549,7 +549,7 @@ There are two additional features which cannot be found the official <a href="ht
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code>compileOnly 'com.agorapulse:micronaut-grails:1.1.0'</code></pre>
+<pre class="highlightjs highlight"><code>compileOnly 'com.agorapulse:micronaut-grails:1.2.3.1'</code></pre>
 </div>
 </div>
 <div class="admonitionblock tip">
@@ -570,7 +570,7 @@ If you plan to reuse same library for Micronaut and Grails, you can declare the 
 <div class="paragraph">
 <p>The integration is handle by bean processor which needs to be injected into Spring application context. The easiest
 thing is to create Spring configuration placed next to your Micronaut classes. The Spring configuration class will
-create the processor bean:</p>
+create <code>MicronautBeanImporter</code> which will be later processed by the processor bean:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -579,21 +579,19 @@ create the processor bean:</p>
 class GrailsConfig {
 
     @Bean
-    GrailsMicronautBeanProcessor widgetProcessor() {                                    <i class="conum" data-value="2"></i><b>(2)</b>
-        GrailsMicronautBeanProcessor
-            .builder()                                                                  <i class="conum" data-value="3"></i><b>(3)</b>
-            .addByType(Widget)                                                          <i class="conum" data-value="4"></i><b>(4)</b>
-            .addByType('someInterface', SomeInterface)                                  <i class="conum" data-value="5"></i><b>(5)</b>
-            .addByStereotype('prototype', Prototype)                                    <i class="conum" data-value="6"></i><b>(6)</b>
-            .addByName('gadget')                                                        <i class="conum" data-value="7"></i><b>(7)</b>
+    MicronautBeanImporter myImporter() {                                                <i class="conum" data-value="2"></i><b>(2)</b>
+        MicronautBeanImporter.create()
+            .addByType(Widget)                                                          <i class="conum" data-value="3"></i><b>(3)</b>
+            .addByType('someInterface', SomeInterface)                                  <i class="conum" data-value="4"></i><b>(4)</b>
+            .addByStereotype('prototype', Prototype)                                    <i class="conum" data-value="5"></i><b>(5)</b>
+            .addByName('gadget')                                                        <i class="conum" data-value="6"></i><b>(6)</b>
             .addByName('one')
             .addByName('two')
-            .addByQualifiers(                                                           <i class="conum" data-value="8"></i><b>(8)</b>
+            .addByQualifiers(                                                           <i class="conum" data-value="7"></i><b>(7)</b>
                 'otherMinion',
                 Qualifiers.byName('other'),
                 Qualifiers.byType(Minion)
             )
-            .build()
     }
 
 }</code></pre>
@@ -611,26 +609,22 @@ class GrailsConfig {
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Use builder to add all exported beans to the Spring application context</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
 <td>The name of the Spring bean defaults to the <em>property name</em> of the class, e.g. <code>widget</code></td>
 </tr>
 <tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
 <td>You can provide different name</td>
 </tr>
 <tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
 <td>You can qualify using a stereotype (annotation)</td>
 </tr>
 <tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
 <td>You can qualify using the name of the bean which will be the same in the Spring application</td>
 </tr>
 <tr>
-<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
 <td>You can combine any qualifiers possible to narrow the search to single bean which needs to be available from the Spring application context</td>
 </tr>
 </table>
@@ -663,7 +657,7 @@ which will automatically load the configuration once the JAR is on classpath.</p
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-01-09 09:00:58 +0100
+Last updated 2019-10-04 08:57:37 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css">
