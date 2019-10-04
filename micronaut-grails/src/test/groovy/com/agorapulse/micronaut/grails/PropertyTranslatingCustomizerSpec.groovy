@@ -49,6 +49,8 @@ class PropertyTranslatingCustomizerSpec extends Specification {
             customizer.getAlternativeNames('redis.port') == ['grails.redis.port'] as Set<String>
             customizer.getAlternativeNames('micronaut.redis.port') == ['grails.redis.port', 'grails.micronaut.redis.port'] as Set<String>
             customizer.getAlternativeNames('micronaut.server.url') == ['grails.server.url', 'grails.micronaut.server.url'] as Set<String>
+            customizer.getAlternativeNames('micronaut.s-url') ==
+                ['grails.s-url', 'grails.micronaut.s-url', 'grails.sUrl', 'grails.micronaut.sUrl'] as Set<String>
     }
 
 }

@@ -1,7 +1,10 @@
 package com.agorapulse.micronaut.grails;
 
+import io.micronaut.core.naming.NameUtils;
+
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 class GrailsPropertyTranslatingCustomizer implements PropertyTranslatingCustomizer, PropertyTranslatingCustomizer.Builder {
 
@@ -80,7 +83,8 @@ class GrailsPropertyTranslatingCustomizer implements PropertyTranslatingCustomiz
 
     /**
      * Replace property name prefixes.
-     * @param original original prefix, can be empty
+     *
+     * @param original    original prefix, can be empty
      * @param replacement new prefix, can be empty
      * @return self
      */
@@ -92,6 +96,7 @@ class GrailsPropertyTranslatingCustomizer implements PropertyTranslatingCustomiz
 
     /**
      * Ignores exact match of the property name.
+     *
      * @param property the property to be ignored
      * @return self
      */
@@ -103,6 +108,7 @@ class GrailsPropertyTranslatingCustomizer implements PropertyTranslatingCustomiz
 
     /**
      * Ignores by regex match of the property pattern.
+     *
      * @param propertyPattern the pattern of properties being ignored
      * @return self
      */
@@ -137,7 +143,22 @@ class GrailsPropertyTranslatingCustomizer implements PropertyTranslatingCustomiz
                 }
             }
         });
+
+        keys.addAll(keys.stream().map(GrailsPropertyTranslatingCustomizer::dehyphenate).collect(Collectors.toSet()));
+
         return keys;
+    }
+
+    private static String dehyphenate(String key) {
+        return Arrays.stream(key.split("\\."))
+            .map(NameUtils::dehyphenate)
+            .map(name -> {
+                if (name.length() <= 1) {
+                    return name.toLowerCase();
+                }
+                return name.substring(0, 1).toLowerCase() + name.substring(1);
+            })
+            .collect(Collectors.joining("."));
     }
 
 }
