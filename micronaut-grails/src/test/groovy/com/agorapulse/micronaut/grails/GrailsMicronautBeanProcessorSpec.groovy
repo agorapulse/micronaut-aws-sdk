@@ -22,7 +22,7 @@ import javax.inject.Singleton
 /**
  * Tests for micronaut Spring bean processor.
  */
-@ContextConfiguration(classes = [GrailsConfig])
+@ContextConfiguration(classes = [GrailsConfig, MicronautGrailsConfiguration])
 @TestPropertySource('classpath:com/agorapulse/micronaut/grails/GrailsMicronautBeanProcessorSpec.properties')
 class GrailsMicronautBeanProcessorSpec extends Specification {
 
@@ -84,21 +84,19 @@ class GrailsMicronautBeanProcessorSpec extends Specification {
 class GrailsConfig {
 
     @Bean
-    GrailsMicronautBeanProcessor widgetProcessor() {                                    // <2>
-        GrailsMicronautBeanProcessor
-            .builder()                                                                  // <3>
-            .addByType(Widget)                                                          // <4>
-            .addByType('someInterface', SomeInterface)                                  // <5>
-            .addByStereotype('prototype', Prototype)                                    // <6>
-            .addByName('gadget')                                                        // <7>
+    MicronautBeanImporter myImporter() {                                                // <2>
+        MicronautBeanImporter.create()
+            .addByType(Widget)                                                          // <3>
+            .addByType('someInterface', SomeInterface)                                  // <4>
+            .addByStereotype('prototype', Prototype)                                    // <5>
+            .addByName('gadget')                                                        // <6>
             .addByName('one')
             .addByName('two')
-            .addByQualifiers(                                                           // <8>
+            .addByQualifiers(                                                           // <7>
                 'otherMinion',
                 Qualifiers.byName('other'),
                 Qualifiers.byType(Minion)
             )
-            .build()
     }
 
 }

@@ -14,6 +14,29 @@ class GrailsPropertyTranslatingCustomizer implements PropertyTranslatingCustomiz
             this.replacement = replacement;
         }
 
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            PrefixReplacement that = (PrefixReplacement) o;
+            return Objects.equals(original, that.original) && Objects.equals(replacement, that.replacement);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(original, replacement);
+        }
+
+        @Override
+        public String toString() {
+            return original + " -> " + replacement;
+        }
     }
 
     private static final String GRAILS_PREFIX = "grails.";
@@ -30,7 +53,25 @@ class GrailsPropertyTranslatingCustomizer implements PropertyTranslatingCustomiz
             .replacePrefix(EMPTY_STRING, GRAILS_PREFIX);
     }
 
-    private final List<PrefixReplacement> prefixPrefixReplacements = new ArrayList<>();
+    static List<PropertyTranslatingCustomizer> collapse(List<PropertyTranslatingCustomizer> customizers) {
+        List<PropertyTranslatingCustomizer> result = new ArrayList<>();
+        GrailsPropertyTranslatingCustomizer customizer = create();
+        result.add(customizer);
+
+        for (PropertyTranslatingCustomizer c : customizers) {
+            if (c instanceof GrailsPropertyTranslatingCustomizer) {
+                GrailsPropertyTranslatingCustomizer gc = (GrailsPropertyTranslatingCustomizer) c;
+                customizer.prefixPrefixReplacements.addAll(gc.prefixPrefixReplacements);
+                customizer.ignored.addAll(gc.ignored);
+            } else {
+                result.add(c);
+            }
+        }
+
+        return result;
+    }
+
+    private final Set<PrefixReplacement> prefixPrefixReplacements = new LinkedHashSet<>();
     private final Set<Pattern> ignored = new LinkedHashSet<>();
 
     private GrailsPropertyTranslatingCustomizer() {

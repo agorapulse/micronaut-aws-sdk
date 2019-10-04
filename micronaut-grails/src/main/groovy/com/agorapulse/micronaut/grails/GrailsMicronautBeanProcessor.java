@@ -18,9 +18,7 @@ package com.agorapulse.micronaut.grails;
 
 import io.micronaut.context.DefaultBeanContext;
 import io.micronaut.context.Qualifier;
-import io.micronaut.core.naming.NameUtils;
 import io.micronaut.inject.BeanDefinition;
-import io.micronaut.inject.qualifiers.Qualifiers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -32,9 +30,11 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 
-import java.lang.annotation.Annotation;
 import java.net.URLClassLoader;
 import java.util.*;
+
+import static com.agorapulse.micronaut.grails.GrailsPropertyTranslatingCustomizer.collapse;
+import static com.agorapulse.micronaut.grails.PropertyTranslatingCustomizer.*;
 
 /**
  * Adds Micronaut beans to a Grails' Spring application context.  This processor will
@@ -47,61 +47,36 @@ import java.util.*;
  */
 public class GrailsMicronautBeanProcessor implements BeanFactoryPostProcessor, DisposableBean, EnvironmentAware {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GrailsMicronautBeanProcessor.class);
+    static final Logger LOGGER = LoggerFactory.getLogger(GrailsMicronautBeanProcessor.class);
 
-    public static class Builder {
-        private final Map<String, Qualifier<?>> micronautBeanQualifiers = new LinkedHashMap<>();
-        private final PropertyTranslatingCustomizer customizer;
+    /**
+     * @deprecated please declare {@link MicronautBeanImporter} bean to avoid multiple Micronaut application context
+     * inside single application.
+     */
+    public static class Builder extends MicronautBeanImporter {
 
         Builder(PropertyTranslatingCustomizer customizer) {
-            this.customizer = customizer;
+            customize(customizer);
         }
 
-        public Builder addByType(Class<?> type) {
-            return addByQualifiers(NameUtils.decapitalize(type.getSimpleName()), Qualifiers.byType(type));
-        }
-
-        public Builder addByType(String grailsBeanName, Class<?>... types) {
-            micronautBeanQualifiers.put(grailsBeanName, Qualifiers.byType(types));
-            return this;
-        }
-
-        public Builder addByStereotype(String grailsBeanName, Class<? extends Annotation> type) {
-            return addByQualifiers(grailsBeanName, Qualifiers.byStereotype(type));
-        }
-
-        public Builder addByName(String name) {
-            return addByName(name, name);
-        }
-
-        public Builder addByName(String grailsBeanName, String micronautName) {
-            micronautBeanQualifiers.put(grailsBeanName, Qualifiers.byName(micronautName));
-            return this;
-        }
-
-        @SafeVarargs
-        public final <T> Builder addByQualifiers(String grailsBeanName, Qualifier<T>... qualifiers) {
-            micronautBeanQualifiers.put(grailsBeanName, Qualifiers.byQualifiers(qualifiers));
-            return this;
-        }
-
-        public GrailsMicronautBeanProcessor build() {
-            return new GrailsMicronautBeanProcessor(micronautBeanQualifiers, customizer);
-        }
     }
 
     /**
      * Starts creation of bean processor using default {@link PropertyTranslatingCustomizer#grails()} customizer.
      * @return bean processor builder using {@link PropertyTranslatingCustomizer#grails()}
+     * @deprecated please declare {@link MicronautBeanImporter} bean instead to avoid multiple Micronaut application context
+     * inside single application.
      */
     public static GrailsMicronautBeanProcessor.Builder builder() {
-        return builder(PropertyTranslatingCustomizer.grails());
+        return builder(grails());
     }
 
     /**
      * Starts creation of bean processor using given customizer.
      * @param customizerBuilder customizer being used
      * @return bean processor builder using given cusotomizer
+     * @deprecated please declare {@link MicronautBeanImporter} bean instead to avoid multiple Micronaut application context
+     * inside single application.
      */
     public static GrailsMicronautBeanProcessor.Builder builder(PropertyTranslatingCustomizer.Builder customizerBuilder) {
         return builder(customizerBuilder.build());
@@ -111,6 +86,8 @@ public class GrailsMicronautBeanProcessor implements BeanFactoryPostProcessor, D
      * Starts creation of bean processor using given customizer.
      * @param customizer customizer being used
      * @return bean processor builder using given cusotomizer
+     * @deprecated please declare {@link MicronautBeanImporter} bean instead to avoid multiple Micronaut application context
+     * inside single application.
      */
     public static GrailsMicronautBeanProcessor.Builder builder(PropertyTranslatingCustomizer customizer) {
         return new Builder(customizer);
@@ -123,16 +100,16 @@ public class GrailsMicronautBeanProcessor implements BeanFactoryPostProcessor, D
 
     private DefaultBeanContext micronautContext;
     private final Map<String, Qualifier<?>> micronautBeanQualifiers;
-    private final PropertyTranslatingCustomizer customizer;
+    private final List<PropertyTranslatingCustomizer> customizers;
     private Environment environment;
 
     /**
-     * @param customizer properties translation customizer
+     * @param customizers properties translation customizer
      * @param qualifiers the names and qualifiers of the Micronaut beans which should be added to the
      *                   Spring application context.
      */
-    private GrailsMicronautBeanProcessor(Map<String, Qualifier<?>> qualifiers, PropertyTranslatingCustomizer customizer) {
-        this.customizer = customizer;
+    GrailsMicronautBeanProcessor(Map<String, Qualifier<?>> qualifiers, List<PropertyTranslatingCustomizer> customizers) {
+        this.customizers = customizers;
         this.micronautBeanQualifiers = qualifiers;
     }
 
@@ -142,7 +119,7 @@ public class GrailsMicronautBeanProcessor implements BeanFactoryPostProcessor, D
             throw new IllegalStateException("Spring environment not set!");
         }
 
-        micronautContext = new GrailsPropertyTranslatingApplicationContext(environment, customizer);
+        micronautContext = new GrailsPropertyTranslatingApplicationContext(environment, of(collapse(customizers)));
 
         micronautContext.start();
 
