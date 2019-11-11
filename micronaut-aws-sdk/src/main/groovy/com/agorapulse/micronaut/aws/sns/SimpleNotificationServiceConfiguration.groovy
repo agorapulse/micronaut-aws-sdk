@@ -2,8 +2,7 @@ package com.agorapulse.micronaut.aws.sns
 
 import com.agorapulse.micronaut.aws.DefaultRegionAndEndpointConfiguration
 import groovy.transform.CompileStatic
-
-import javax.validation.constraints.NotEmpty
+import io.micronaut.context.annotation.ConfigurationProperties
 
 /**
  * Default simple queue service configuration.
@@ -13,13 +12,22 @@ import javax.validation.constraints.NotEmpty
 abstract class SimpleNotificationServiceConfiguration extends DefaultRegionAndEndpointConfiguration {
 
     static class Application {
-        @NotEmpty String arn
+        String arn
     }
+
+    @ConfigurationProperties('ios')
+    static class IosApplication extends Application { }
+
+    @ConfigurationProperties('android')
+    static class AndroidApplication extends Application { }
+
+    @ConfigurationProperties('amazon')
+    static class AmazonApplication extends Application { }
 
     String topic = ''
 
-    Application ios = new Application()
-    Application android = new Application()
-    Application amazon = new Application()
+    IosApplication ios = new IosApplication()
+    AndroidApplication android = new AndroidApplication()
+    AmazonApplication amazon = new AmazonApplication()
 
 }
