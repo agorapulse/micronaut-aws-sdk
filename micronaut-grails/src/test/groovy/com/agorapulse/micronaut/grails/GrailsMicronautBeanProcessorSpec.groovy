@@ -3,7 +3,6 @@ package com.agorapulse.micronaut.grails
 import groovy.transform.CompileStatic
 import io.micronaut.context.annotation.Factory
 import io.micronaut.context.annotation.Primary
-import io.micronaut.context.annotation.Prototype
 import io.micronaut.context.annotation.Requires
 import io.micronaut.context.annotation.Value
 import io.micronaut.inject.qualifiers.Qualifiers
@@ -17,7 +16,12 @@ import org.springframework.test.context.TestPropertySource
 import spock.lang.Specification
 
 import javax.inject.Named
+import javax.inject.Scope
 import javax.inject.Singleton
+import java.lang.annotation.Documented
+import java.lang.annotation.Retention
+
+import static java.lang.annotation.RetentionPolicy.RUNTIME
 
 /**
  * Tests for micronaut Spring bean processor.
@@ -39,7 +43,7 @@ class GrailsMicronautBeanProcessorSpec extends Specification {
     void 'test widget bean'() {
         expect:
             applicationContext.getBean('widget') instanceof Widget
-            applicationContext.getBean('prototype') instanceof PrototypeBean
+            applicationContext.getBean('custom') instanceof CustomBean
             applicationContext.getBean('someInterface') instanceof SomeInterface
             applicationContext.getBean('someInterface') instanceof SomeImplementation
             applicationContext.getBean('gadget') instanceof SomeGadget
@@ -52,11 +56,11 @@ class GrailsMicronautBeanProcessorSpec extends Specification {
 
             applicationContext.getBean('otherMinion') instanceof OtherMinion
         when:
-            PrototypeBean prototypeBean = applicationContext.getBean(PrototypeBean)
+            CustomBean customScopeBean = applicationContext.getBean(CustomBean)
         then:
-            prototypeBean.redisHost == REDIS_HOST
-            prototypeBean.redisPort == REDIS_PORT
-            prototypeBean.redisTimeout == REDIS_TIMEOUT
+            customScopeBean.redisHost == REDIS_HOST
+            customScopeBean.redisPort == REDIS_PORT
+            customScopeBean.redisTimeout == REDIS_TIMEOUT
     }
 
     void 'cannot preprocess without the environment'() {
@@ -88,7 +92,7 @@ class GrailsConfig {
         MicronautBeanImporter.create()
             .addByType(Widget)                                                          // <3>
             .addByType('someInterface', SomeInterface)                                  // <4>
-            .addByStereotype('prototype', Prototype)                                    // <5>
+            .addByStereotype('custom', SomeCustomScope)                                 // <5>
             .addByName('gadget')                                                        // <6>
             .addByName('one')
             .addByName('two')
@@ -144,14 +148,20 @@ class TestWidget extends Widget { }
 
 interface Minion { }
 
-@Prototype
-class PrototypeBean {
+@Documented
+@Retention(RUNTIME)
+@Scope
+@io.micronaut.context.annotation.Bean
+@interface SomeCustomScope { }
+
+@SomeCustomScope
+class CustomBean {
 
     final String redisHost
     final Integer redisPort
     final Integer redisTimeout
 
-    PrototypeBean(
+    CustomBean(
         @Value('${redis.host}') String redisHost,
         @Value('${redis.port}') Integer redisPort,
         @Value('${redis.timeout:10000}') Integer redisTimeout
