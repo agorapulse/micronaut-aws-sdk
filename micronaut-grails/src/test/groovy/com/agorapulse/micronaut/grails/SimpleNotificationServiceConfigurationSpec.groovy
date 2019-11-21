@@ -44,11 +44,10 @@ class GrailsSimpleNotificationServiceConfig {
         MicronautBeanImporter.create()
             .customize(PropertyTranslatingCustomizer
                 .builder()
-                .replacePrefix("aws.sns", "grails.plugin.awssdk.sns")
+                .replacePrefix('aws.sns', 'grails.plugin.awssdk.sns')
             )
             .addByType(SimpleNotificationService)
             .addByType(SimpleNotificationServiceConfiguration)
-
     }
 
 }
