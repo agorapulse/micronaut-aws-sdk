@@ -1,7 +1,6 @@
 package com.agorapulse.micronaut.grails
 
 import groovy.transform.CompileStatic
-import io.micronaut.context.annotation.Prototype
 import io.micronaut.inject.qualifiers.Qualifiers
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -32,7 +31,7 @@ class LegacyGrailsMicronautBeanProcessorSpec extends Specification {
     void 'test widget bean'() {
         expect:
             applicationContext.getBean('widget') instanceof Widget
-            applicationContext.getBean('prototype') instanceof PrototypeBean
+            applicationContext.getBean('custom') instanceof CustomBean
             applicationContext.getBean('someInterface') instanceof SomeInterface
             applicationContext.getBean('someInterface') instanceof SomeImplementation
             applicationContext.getBean('gadget') instanceof SomeGadget
@@ -45,7 +44,7 @@ class LegacyGrailsMicronautBeanProcessorSpec extends Specification {
 
             applicationContext.getBean('otherMinion') instanceof OtherMinion
         when:
-            PrototypeBean prototypeBean = applicationContext.getBean(PrototypeBean)
+            CustomBean prototypeBean = applicationContext.getBean(CustomBean)
         then:
             prototypeBean.redisHost == REDIS_HOST
             prototypeBean.redisPort == REDIS_PORT
@@ -55,20 +54,20 @@ class LegacyGrailsMicronautBeanProcessorSpec extends Specification {
 
 // tag::configuration[]
 @CompileStatic
-@Configuration                                                                          // <1>
+@Configuration
 class GrailsLegacyConfig {
 
     @Bean
-    GrailsMicronautBeanProcessor widgetProcessor() {                                    // <2>
+    GrailsMicronautBeanProcessor widgetProcessor() {
         GrailsMicronautBeanProcessor
-            .builder()                                                                  // <3>
-            .addByType(Widget)                                                          // <4>
-            .addByType('someInterface', SomeInterface)                                  // <5>
-            .addByStereotype('prototype', Prototype)                                    // <6>
-            .addByName('gadget')                                                        // <7>
+            .builder()
+            .addByType(Widget)
+            .addByType('someInterface', SomeInterface)
+            .addByStereotype('custom', SomeCustomScope)
+            .addByName('gadget')
             .addByName('one')
             .addByName('two')
-            .addByQualifiers(                                                           // <8>
+            .addByQualifiers(
                 'otherMinion',
                 Qualifiers.byName('other'),
                 Qualifiers.byType(Minion)

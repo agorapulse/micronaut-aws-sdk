@@ -2,7 +2,7 @@ package com.agorapulse.micronaut.aws.sns
 
 import com.agorapulse.micronaut.aws.DefaultRegionAndEndpointConfiguration
 import groovy.transform.CompileStatic
-import io.micronaut.context.annotation.ConfigurationProperties
+import io.micronaut.context.env.Environment
 
 /**
  * Default simple queue service configuration.
@@ -12,22 +12,33 @@ import io.micronaut.context.annotation.ConfigurationProperties
 abstract class SimpleNotificationServiceConfiguration extends DefaultRegionAndEndpointConfiguration {
 
     static class Application {
-        String arn
+        final String arn
+
+        Application(String arn) {
+            this.arn = arn
+        }
     }
 
-    @ConfigurationProperties('ios')
-    static class IosApplication extends Application { }
+    private final Environment environment
 
-    @ConfigurationProperties('android')
-    static class AndroidApplication extends Application { }
-
-    @ConfigurationProperties('amazon')
-    static class AmazonApplication extends Application { }
+    final Application ios
+    final Application android
+    final Application amazon
 
     String topic = ''
 
-    IosApplication ios = new IosApplication()
-    AndroidApplication android = new AndroidApplication()
-    AmazonApplication amazon = new AmazonApplication()
+    protected SimpleNotificationServiceConfiguration(String prefix, Environment environment) {
+        this.environment = environment
+        ios = forPlatform(prefix, 'ios', environment)
+        android = forPlatform(prefix, 'android', environment)
+        amazon = forPlatform(prefix, 'amazon', environment)
+    }
 
+    @SuppressWarnings('DuplicateStringLiteral')
+    private static Application forPlatform(String prefix, String platform, Environment environment) {
+        return new Application(
+            environment.get(prefix + '.' + platform + '.arn', String).orElseGet {
+                environment.get(prefix + '.' + platform + '.applicationArn', String).orElse(null)
+            })
+    }
 }
