@@ -5,6 +5,8 @@ dependencies {
     testCompile("org.spockframework:spock-spring:$spockVersion") {
         exclude group: "org.codehaus.groovy", module: "groovy-all"
     }
+    testCompile project(':micronaut-aws-sdk')
+    testCompile group: 'com.amazonaws', name: 'aws-java-sdk-sns'
 }
 
 apply from: '../gradle/bintray.gradle'

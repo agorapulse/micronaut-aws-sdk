@@ -5,6 +5,7 @@ import groovy.transform.CompileStatic
 import io.micronaut.context.annotation.EachProperty
 import io.micronaut.context.annotation.Parameter
 import io.micronaut.context.annotation.Requires
+import io.micronaut.context.env.Environment
 
 /**
  * Named simple queue service configuration for each property key.
@@ -16,7 +17,8 @@ class NamedSimpleQueueServiceConfiguration extends SimpleNotificationServiceConf
 
     final String name
 
-    NamedSimpleQueueServiceConfiguration(@Parameter String name) {
+    NamedSimpleQueueServiceConfiguration(@Parameter String name, Environment environment) {
+        super('aws.sns.topics.' + name, environment)
         this.name = name
     }
 }
