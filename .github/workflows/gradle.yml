@@ -7,6 +7,9 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    env:
+      GRADLE_OPTS: "-Xmx6g -Xms4g"
+
     steps:
     - uses: actions/checkout@v1
     - name: Set up JDK 1.8
@@ -20,13 +23,13 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
     - name: Build with Gradle
+      run: ./gradlew check jacocoFullReport
+    - name: Collect Test Reports on Failure
       run: ./gradlew testReport
-      env:
-        GRADLE_OPTS: "-Xmx6g -Xms4g"
-    - name: Show Failed Tests
+      if: failure()
+    - name: Publlish Test Reports on Failure
       uses: actions/upload-artifact@v1
       if: failure()
       with:
         name: all-tests
-        # path: build/reports/allTests
-        path: ./
+        path: ./build/reports/allTests

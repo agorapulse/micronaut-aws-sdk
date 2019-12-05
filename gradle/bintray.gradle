@@ -3,6 +3,22 @@ import com.google.common.base.CaseFormat
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
 
+
+// custom tasks for creating source/javadoc jars
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar, javadocJar
+}
+
 // publishing
 publishing {
     publications {
@@ -43,22 +59,6 @@ bintray {
     }
     // dryRun = true // whether to run this as dry-run, without deploying
 }
-
-// custom tasks for creating source/javadoc jars
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives sourcesJar, javadocJar
-}
-
 
 String getPropertyOrUseDefault(String propertyName, String defaultValue) {
     if (hasProperty(propertyName)) {

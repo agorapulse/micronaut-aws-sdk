@@ -234,5 +234,5 @@ task testReport(type: TestReport) {
     reportOn subprojects*.test
 }
 
-rootProject.getTasksByName('test', true).each { it.finalizedBy(testReport, jacocoFullReport) }
-rootProject.getTasksByName('check', true).each { it.finalizedBy(testReport, jacocoFullReport) }
+// rootProject.getTasksByName('test', true).each { it.finalizedBy(testReport, jacocoFullReport) }
+// rootProject.getTasksByName('check', true).each { it.finalizedBy(testReport, jacocoFullReport) }
