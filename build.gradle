@@ -228,10 +228,11 @@ tasks.coveralls {
     onlyIf { System.env.CI }
 }
 
-task testReport(type: TestReport, dependsOn: jacocoFullReport) {
+task testReport(type: TestReport) {
     destinationDir = file("$buildDir/reports/allTests")
     // Include the results from the `test` task in all subprojects
     reportOn subprojects*.test
 }
 
 rootProject.getTasksByName('test', true).each { it.finalizedBy(testReport) }
+rootProject.getTasksByName('test', true).each { it.finalizedBy(jacocoFullReport) }
