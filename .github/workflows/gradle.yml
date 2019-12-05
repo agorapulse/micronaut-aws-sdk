@@ -20,7 +20,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
     - name: Build with Gradle
-      run: ./gradlew check testReport jacocoFullReport
+      run: ./gradlew testReport
       env:
         GRADLE_OPTS: "-Xmx6g -Xms4g"
     - name: Show Failed Tests

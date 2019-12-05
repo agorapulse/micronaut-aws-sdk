@@ -228,7 +228,7 @@ tasks.coveralls {
     onlyIf { System.env.CI }
 }
 
-task testReport(type: TestReport) {
+task testReport(type: TestReport, dependsOn: jacocoFullReport) {
     destinationDir = file("$buildDir/reports/allTests")
     // Include the results from the `test` task in all subprojects
     reportOn subprojects*.test
