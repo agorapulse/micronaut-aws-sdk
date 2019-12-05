@@ -20,7 +20,12 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
     - name: Build with Gradle
-      run: ./gradlew check jacocoFullReport
+      run: ./gradlew check testReport jacocoFullReport
       env:
         GRADLE_OPTS: "-Xmx6g -Xms4g"
-      
+    - name: Show Failed Tests
+      uses: actions/upload-artifact@v1
+      if: failure()
+      with:
+        name: all-tests
+        path: build/reports/allTests
