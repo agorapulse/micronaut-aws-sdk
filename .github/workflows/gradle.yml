@@ -21,4 +21,6 @@ jobs:
           ${{ runner.os }}-gradle-
     - name: Build with Gradle
       run: ./gradlew check jacocoFullReport
+      env:
+        GRADLE_OPTS: "-Xmx6g -Xms4g"
       
