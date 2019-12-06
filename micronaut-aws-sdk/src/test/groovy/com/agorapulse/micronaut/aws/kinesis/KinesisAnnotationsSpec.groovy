@@ -46,6 +46,7 @@ class KinesisAnnotationsSpec extends Specification {
 
     void setup() {
         System.setProperty('com.amazonaws.sdk.disableCbor', 'true')                     // <5>
+        System.setProperty('aws.region', 'eu-west-1')
 
         AmazonDynamoDB dynamo = AmazonDynamoDBClient                                    // <6>
             .builder()
@@ -80,6 +81,11 @@ class KinesisAnnotationsSpec extends Specification {
         context.start()
     }
     // end::testcontainers-setup[]
+
+    void cleanup() {
+        System.clearProperty("com.amazonaws.sdk.disableCbor")
+        System.clearProperty("aws.region")
+    }
 
     // tag::testcontainers-test[]
     void 'kinesis listener is executed'() {
