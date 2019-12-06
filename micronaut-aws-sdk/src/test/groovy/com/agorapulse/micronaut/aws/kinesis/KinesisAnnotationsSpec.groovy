@@ -83,8 +83,8 @@ class KinesisAnnotationsSpec extends Specification {
     // end::testcontainers-setup[]
 
     void cleanup() {
-        System.clearProperty("com.amazonaws.sdk.disableCbor")
-        System.clearProperty("aws.region")
+        System.clearProperty('com.amazonaws.sdk.disableCbor')
+        System.clearProperty('aws.region')
     }
 
     // tag::testcontainers-test[]
