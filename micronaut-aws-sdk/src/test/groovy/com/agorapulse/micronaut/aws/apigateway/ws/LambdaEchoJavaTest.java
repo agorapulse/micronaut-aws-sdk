@@ -33,7 +33,7 @@ public class LambdaEchoJavaTest {
         sender = mock(MessageSender.class);
         publisher = mock(TestTopicPublisher.class);
 
-        factory = (url) -> sender;
+        factory = url -> sender;
 
         ctx = ApplicationContext.build().build();
 

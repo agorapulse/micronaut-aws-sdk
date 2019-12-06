@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 public interface SecurityTokenService {
 
     default AssumeRoleResult assumeRole(String sessionName, String roleArn, int durationInSeconds) {
-        return assumeRole(sessionName, roleArn, durationInSeconds, (p) -> { });
+        return assumeRole(sessionName, roleArn, durationInSeconds, p -> { });
     }
 
     default AssumeRoleResult assumeRole(

@@ -31,7 +31,7 @@ public class DynamoDBServiceProvider {
      * @return {@link DynamoDBService} for given type
      */
     public <T> DynamoDBService<T> findOrCreate(Class<T> type) {
-        return serviceCache.computeIfAbsent(type, (t) -> new DefaultDynamoDBService<T>(client, mapper, type));
+        return serviceCache.computeIfAbsent(type, t -> new DefaultDynamoDBService<T>(client, mapper, type));
     }
 
 }
