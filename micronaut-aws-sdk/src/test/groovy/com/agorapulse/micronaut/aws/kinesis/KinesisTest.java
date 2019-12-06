@@ -46,6 +46,7 @@ public class KinesisTest {
     @Before
     public void setup() {
         System.setProperty("com.amazonaws.sdk.disableCbor", "true");                    // <3>
+        System.setProperty("aws.region", "eu-west-1");
 
         AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClient                            // <4>
             .builder()
@@ -87,6 +88,7 @@ public class KinesisTest {
     @After
     public void cleanup() {
         System.clearProperty("com.amazonaws.sdk.disableCbor");                          // <8>
+        System.clearProperty("aws.region");
         if (context != null) {
             context.close();                                                            // <9>
         }
