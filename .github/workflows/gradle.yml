@@ -17,6 +17,7 @@ jobs:
         - 5.2.1
         - 5.1.1
         - 4.10.3
+        - '' # wrapper
 
     runs-on: ubuntu-latest
 
