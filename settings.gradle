@@ -4,6 +4,10 @@ include 'micronaut-aws-sdk'
 include 'micronaut-grails'
 
 // examples
-include 'examples/local-server'
-include 'examples/planets'
-include 'examples/spacecrafts'
+include 'examples_local-server'
+include 'examples_planets'
+include 'examples_spacecrafts'
+
+project(':examples_local-server').projectDir = file('./examples/local-server')
+project(':examples_planets').projectDir = file('./examples/planets')
+project(':examples_spacecrafts').projectDir = file('./examples/spacecrafts')

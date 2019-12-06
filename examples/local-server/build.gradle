@@ -2,8 +2,8 @@ apply plugin: "application"
 apply plugin: "com.github.johnrengelman.shadow"
 
 dependencies {
-    compile project(':examples/planets')
-    compile project(':examples/spacecrafts')
+    compile project(':examples_planets')
+    compile project(':examples_spacecrafts')
 
     compile "com.agorapulse:dru-client-dynamodb:${druVersion}"
     compile "com.agorapulse:gru-api-gateway:$gruVersion"
