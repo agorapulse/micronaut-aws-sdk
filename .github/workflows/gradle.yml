@@ -39,5 +39,5 @@ jobs:
           ${{ runner.os }}-gradle-
     - uses: eskatos/gradle-command-action@v1
       with:
-        arguments: check jacocoFullReport
+        arguments: check jacocoFullReport --stacktrace
         gradle-version: ${{ matrix.gradle }}
