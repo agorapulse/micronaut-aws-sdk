@@ -23,6 +23,7 @@ jobs:
 
     env:
       GRADLE_OPTS: "-Xmx6g -Xms4g"
+      CI: true
 
     steps:
     - uses: actions/checkout@v1
@@ -40,5 +41,5 @@ jobs:
           ${{ runner.os }}-gradle-
     - uses: eskatos/gradle-command-action@v1
       with:
-        arguments: check jacocoFullReport --stacktrace --scan
+        arguments: check jacocoFullReport --stacktrace
         gradle-version: ${{ matrix.gradle }}
