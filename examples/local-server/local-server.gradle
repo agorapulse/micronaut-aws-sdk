@@ -1,6 +1,11 @@
 apply plugin: "application"
 apply plugin: "com.github.johnrengelman.shadow"
 
+config {
+    publishing { enabled = false }
+    bintray { enabled = false }
+}
+
 dependencies {
     compile project(':planets')
     compile project(':spacecrafts')

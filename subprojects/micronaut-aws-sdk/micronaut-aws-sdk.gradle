@@ -39,5 +39,3 @@ dependencies {
     testCompile "com.agorapulse:dru-client-dynamodb:${druVersion}"
 
 }
-
-apply from: '../../gradle/bintray.gradle'

@@ -1,3 +1,50 @@
+plugins {
+    id 'org.kordamp.gradle.groovy-project'  version '0.30.4'
+    id 'org.kordamp.gradle.bintray'         version '0.30.4'
+}
+
+config {
+    release = (rootProject.findProperty('release') ?: false).toBoolean()
+
+    info {
+        name        = 'Micronaut Libraries'
+        vendor      = 'Agorapulse'
+        description = 'Set of useful libraries for Micronaut'
+
+        links {
+            website      = 'https://github.com/agorapulse/micronaut-libraries'
+            issueTracker = 'https://github.com/agorapulse/micronaut-libraries/issues'
+            scm          = 'https://github.com/agorapulse/micronaut-libraries.git'
+        }
+
+        people {
+            person {
+                id    = 'musketyr'
+                name  = 'Vladimir Orany'
+                roles = ['developer']
+            }
+        }
+    }
+
+    licensing {
+        licenses {
+            license {
+                id = 'Apache-2.0'
+            }
+        }
+    }
+
+    bintray {
+        credentials {
+            username = project.findProperty('bintrayUsername')
+            password = project.findProperty('bintrayApiKey')
+        }
+        userOrg    = 'agorapulse'
+        repo       = 'libs'
+        githubRepo = 'agorapulse/micronaut-libraries'
+    }
+}
+
 allprojects {
     group 'com.agorapulse'
     repositories {
@@ -95,52 +142,10 @@ subprojects { Project subproject ->
     compileTestJava.options.compilerArgs += '-parameters'
 
     test {
-        testLogging {
-            events "PASSED", "STARTED", "FAILED", "SKIPPED", "STANDARD_ERROR", "STANDARD_OUT"
-            showCauses = true
-            showExceptions = true
-            showStackTraces = true
-            showStandardStreams = false
-            exceptionFormat "full"
-        }
-
         environment 'AWS_CBOR_DISABLE', 'true'
-
         systemProperty 'TEST_RESOURCES_FOLDER', new File(subproject.projectDir, 'src/test/resources').canonicalPath
         systemProperty 'user.timezone', 'UTC'
         systemProperty 'user.language', 'en'
-
-        // see https://discuss.gradle.org/t/show-stderr-for-failed-tests/8463/7
-        List<String> out = []
-        List<String> err = []
-
-        beforeTest { TestDescriptor td ->
-            out.clear()
-            err.clear()
-        }
-
-        onOutput { TestDescriptor td, TestOutputEvent toe ->
-            String[] lines = toe.getMessage().split('(?m)$')
-            if (toe.destination == TestOutputEvent.Destination.StdErr) {
-                err.addAll(lines)
-            } else {
-                out.addAll(lines)
-            }
-        }
-
-        afterTest { TestDescriptor td, TestResult tr ->
-            if (tr.resultType == TestResult.ResultType.FAILURE && (out || err)) {
-                println("${td.className}.${td.name} failed!")
-                println()
-                println("\n=== OUT ===\n")
-                println()
-                out.each { print(it) }
-                println()
-                println("\n=== ERR ===\n")
-                println()
-                err.each { print(it) }
-            }
-        }
     }
 
     task cleanOut(type: Delete) {
@@ -210,4 +215,4 @@ gitPublish {
 gitPublishCopy.dependsOn subprojects*.javadoc
 gitPublishCopy.dependsOn asciidoctor
 
-// TODO: jacoco full report, coveralls
+// TODO: coveralls

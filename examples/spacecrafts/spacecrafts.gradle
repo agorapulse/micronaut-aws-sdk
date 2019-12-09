@@ -1,6 +1,11 @@
 import com.amazonaws.services.lambda.model.Runtime
 import jp.classmethod.aws.gradle.lambda.AWSLambdaMigrateFunctionTask
 
+config {
+    publishing { enabled = false }
+    bintray { enabled = false }
+}
+
 buildscript {
     repositories {
         maven {
