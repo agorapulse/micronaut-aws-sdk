@@ -13,7 +13,7 @@ No configuration is required but some of the configuration properties may be use
 [source,yaml,indent=0,options="nowrap"]
 .application.yml
 ----
-include::../micronaut-aws-sdk/src/test/resources/application-docs-sns.yml[]
+include::../subprojects/micronaut-aws-sdk/src/test/resources/application-docs-sns.yml[]
 ----
 <1> You can specify the default topic for https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/sns/SimpleNotificationService.html[SimpleNotificationService] and `@NotificationClient`
 <2> Amazon Resource Name for the iOS application mobile push
@@ -34,7 +34,7 @@ The following example shows many of available method signatures for publishing r
 [source,java,indent=0,options="nowrap"]
 .Publishing String Records
 ----
-include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/DefaultClient.java[]
+include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/DefaultClient.java[]
 ----
 <1> `@NotificationClient` annotation makes the interface a SNS client
 <2> You can specify to which topic is the message published using `@Topic` annotation
@@ -66,7 +66,7 @@ Following example shows some of the most common use cases for working with Amazo
 [source,java,indent=0,options="nowrap"]
 .Creating Topic
 ----
-include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=new-topic]
+include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=new-topic]
 ----
 <1> Create new topic of given name
 <2> The topic is present within the list of all topics' names
@@ -75,7 +75,7 @@ include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/S
 [source,java,indent=0,options="nowrap"]
 .Subscribe to Topic
 ----
-include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=subscription]
+include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=subscription]
 ----
 <1> Subscribe to the topic with an email (there are more variants of this method to subscribe to most common protocols such as HTTP(S) endpoints, SQS, ...)
 <2> Publish message to the topic
@@ -84,7 +84,7 @@ include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/S
 [source,java,indent=0,options="nowrap"]
 .Delete Topic
 ----
-include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=delete-topic]
+include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=delete-topic]
 ----
 <1> Delete the topic
 <2> The topic is no longer present within the list of all topics' names
@@ -94,7 +94,7 @@ include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/S
 [source,java,indent=0,options="nowrap"]
 .Working with Applications
 ----
-include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=applications]
+include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=applications]
 ----
 <1> Create new Android application (more platforms available)
 <2> Register Android device (more platforms available)
@@ -107,7 +107,7 @@ include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/S
 [source,java,indent=0,options="nowrap"]
 .Sending SMS
 ----
-include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=sms]
+include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=sms]
 ----
 <1> Send a message to the phone number
 
@@ -149,11 +149,11 @@ Then you can setup your tests like this:
 [source,groovy,indent=0,role="primary"]
 .Groovy
 ----
-include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-header]
+include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-header]
 
-include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-fields]
+include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-fields]
 
-include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-setup]
+include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-setup]
 
     // tests
 
@@ -171,7 +171,7 @@ include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/S
 ----
 class SimpleNotificationServiceTest {
 
-include::../micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=testcontainers-setup]
+include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=testcontainers-setup]
 
     // tests
 

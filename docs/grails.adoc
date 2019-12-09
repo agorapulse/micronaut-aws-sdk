@@ -25,7 +25,7 @@ create `MicronautBeanImporter` which will be later processed by the processor be
 
 [source,groovy,indent=0,options="nowrap"]
 ----
-include::../micronaut-grails/src/test/groovy/com/agorapulse/micronaut/grails/GrailsMicronautBeanProcessorSpec.groovy[tags=configuration]
+include::../subprojects/micronaut-grails/src/test/groovy/com/agorapulse/micronaut/grails/GrailsMicronautBeanProcessorSpec.groovy[tags=configuration]
 ----
 <1> Define class as Spring `@Configuration`
 <2> Declare method which returns bean processor `@Bean`

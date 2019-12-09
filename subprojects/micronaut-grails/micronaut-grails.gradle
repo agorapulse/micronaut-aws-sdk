@@ -9,4 +9,4 @@ dependencies {
     testCompile group: 'com.amazonaws', name: 'aws-java-sdk-sns'
 }
 
-apply from: '../gradle/bintray.gradle'
+apply from: '../../gradle/bintray.gradle'

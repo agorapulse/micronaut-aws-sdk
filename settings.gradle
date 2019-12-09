@@ -1,13 +1,16 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath 'org.kordamp.gradle:settings-gradle-plugin:0.30.4'
+    }
+}
+
+apply plugin: 'org.kordamp.gradle.settings'
+
+projects {
+    directories = ['subprojects', 'examples']
+}
+
 rootProject.name = 'micronaut-libraries'
-
-include 'micronaut-aws-sdk'
-include 'micronaut-grails'
-
-// examples
-include 'examples_local-server'
-include 'examples_planets'
-include 'examples_spacecrafts'
-
-project(':examples_local-server').projectDir = file('./examples/local-server')
-project(':examples_planets').projectDir = file('./examples/planets')
-project(':examples_spacecrafts').projectDir = file('./examples/spacecrafts')
