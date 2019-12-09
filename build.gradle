@@ -11,7 +11,6 @@ allprojects {
 subprojects { Project subproject ->
     apply plugin: 'io.spring.dependency-management'
     apply plugin: 'groovy'
-    apply plugin: 'jacoco'
     apply plugin: 'checkstyle'
     apply plugin: 'codenarc'
 
@@ -165,8 +164,6 @@ subprojects { Project subproject ->
 // docs
 apply plugin: 'org.ajoberstar.git-publish'
 apply plugin: 'org.asciidoctor.convert'
-apply plugin: 'com.palantir.jacoco-full-report'
-apply plugin: 'com.github.kt3k.coveralls'
 
 dependencies {
     // https://mvnrepository.com/artifact/io.spring.asciidoctor/spring-asciidoctor-extensions
@@ -213,19 +210,4 @@ gitPublish {
 gitPublishCopy.dependsOn subprojects*.javadoc
 gitPublishCopy.dependsOn asciidoctor
 
-tasks.jacocoFullReport.dependsOn subprojects.collect { it.tasks.check }
-
-gradle.taskGraph.whenReady {
-    coveralls {
-        sourceDirs = subprojects.sourceSets.main.allSource.srcDirs.flatten()
-        jacocoReportPath = "${buildDir}/reports/jacoco/jacocoFullReport/jacocoFullReport.xml"
-    }
-}
-
-tasks.coveralls {
-    group = 'Coverage reports'
-    description = 'Uploads the aggregated coverage report to Coveralls'
-
-    dependsOn jacocoFullReport
-    onlyIf { System.env.CI }
-}
+// TODO: jacoco full report, coveralls
