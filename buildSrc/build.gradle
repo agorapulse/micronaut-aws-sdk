@@ -10,12 +10,8 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
 
-    compile 'com.palantir:jacoco-coverage:0.4.0'
     compile 'io.spring.gradle:dependency-management-plugin:1.0.5.RELEASE'
     compile 'net.ltgt.gradle:gradle-apt-plugin:0.15'
-    compile 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
     compile 'com.github.jengelman.gradle.plugins:shadow:2.0.4'
     compile 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.1'
-    compile 'org.ajoberstar:gradle-git-publish:2.1.1'
-    compile 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.9.2'
 }

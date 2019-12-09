@@ -1,7 +1,7 @@
 = Agorapulse Micronaut Libaries
 
 [.ribbon]
-image::ribbon.png[link={projectUrl}]
+image::ribbon.png[link={project.url}]
 
 --
 image::https://api.bintray.com/packages/agorapulse/libs/micronaut-aws-sdk/images/download.svg[link="https://bintray.com/agorapulse/libs/micronaut-aws-sdk/_latestVersion",float="left"]

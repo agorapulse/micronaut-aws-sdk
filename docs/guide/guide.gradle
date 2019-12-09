@@ -1,0 +1,49 @@
+plugins {
+    id 'org.kordamp.gradle.guide' version '0.30.4'
+    id 'org.ajoberstar.git-publish' version '2.1.1'
+}
+
+configurations {
+    asciidoctorExtensions
+}
+
+dependencies {
+    asciidoctorExtensions group: 'io.spring.asciidoctor', name: 'spring-asciidoctor-extensions', version: '0.1.3.RELEASE'
+}
+
+// asciidoctor publishing
+asciidoctor {
+    configurations 'asciidoctorExtensions'
+
+    resources {
+        from(sourceDir) {
+            include 'css/**', 'images/**'
+        }
+    }
+
+    attributes(
+        docinfo1: ['version': project.version],
+        imagesdir: 'images',
+        'source-highlighter': 'highlight.js',
+        stylesdir: 'css',
+        icons: 'font',
+        toclevels: '3',
+        version: project.version
+    )
+}
+
+
+afterEvaluate {
+    project.tasks.findByName('createGuide')
+
+    gitPublish {
+        repoUri = rootProject.extensions.findByName('config').info.links.scm
+        branch = 'gh-pages'
+        contents {
+            from project.tasks.findByName('createGuide').outputs.files
+        }
+        commitMessage = "Publish guide for $version"
+    }
+
+    gitPublishCommit.dependsOn(project.tasks.findByName('createGuide'))
+}
