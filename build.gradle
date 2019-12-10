@@ -1,8 +1,28 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2019 Vladimir Orany.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 plugins {
-    id 'org.kordamp.gradle.groovy-project'  version '0.30.4'
-    id 'org.kordamp.gradle.bintray'         version '0.30.4'
-    id 'com.github.kt3k.coveralls'          version '2.8.4'
+    id 'org.kordamp.gradle.groovy-project'
+    id 'org.kordamp.gradle.bintray'
+    id 'com.github.kt3k.coveralls'
 }
+
+if (!project.hasProperty('bintrayUsername')) ext.bintrayUsername = '**UNDEFINED**'
+if (!project.hasProperty('bintrayApiKey'))   ext.bintrayApiKey   = '**UNDEFINED**'
 
 config {
     release = (rootProject.findProperty('release') ?: false).toBoolean()
@@ -25,6 +45,17 @@ config {
                 roles = ['developer']
             }
         }
+
+        repositories {
+            repository {
+                name = 'localRelease'
+                url  = "${project.rootProject.buildDir}/repos/local/release"
+            }
+            repository {
+                name = 'localSnapshot'
+                url  = "${project.rootProject.buildDir}/repos/local/snapshot"
+            }
+        }
     }
 
     licensing {
@@ -35,28 +66,40 @@ config {
         }
     }
 
+    publishing {
+        signing             = false
+        releasesRepository  = 'localRelease'
+        snapshotsRepository = 'localSnapshot'
+    }
+
     bintray {
         credentials {
-            username = project.findProperty('bintrayUsername')
-            password = project.findProperty('bintrayApiKey')
+            username = bintrayUsername
+            password = bintrayApiKey
         }
         userOrg    = 'agorapulse'
         repo       = 'libs'
-        githubRepo = 'agorapulse/micronaut-libraries'
+        name       = rootProject.name
     }
 }
 
 allprojects {
-    group 'com.agorapulse'
     repositories {
         jcenter()
         mavenCentral()
         maven { url  "https://dl.bintray.com/agorapulse/libs" }
         maven { url "https://repo.spring.io/release"  }
     }
+
+    license {
+        exclude '**/*.json'
+        exclude '***.yml'
+    }
 }
 
 subprojects { Project subproject ->
+    if (subproject.name == 'guide') return
+
     apply plugin: 'io.spring.dependency-management'
     apply plugin: 'groovy'
     apply plugin: 'checkstyle'
