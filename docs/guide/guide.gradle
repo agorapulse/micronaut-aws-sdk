@@ -30,6 +30,7 @@ dependencies {
 
 asciidoctor {
     configurations 'asciidoctorExtensions'
+    baseDirFollowsSourceDir()
     attributes = [
         'gradle-version': project.gradle.gradleVersion,
         'source-highlighter': 'prettify',
