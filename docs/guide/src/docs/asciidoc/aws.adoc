@@ -138,18 +138,18 @@ compile group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: '1.11.500'
 </dependency>
 ----
 
-include::dynamodb.adoc[]
+include::{includedir}/dynamodb.adoc[]
 
-include::kinesis.adoc[]
+include::{includedir}/kinesis.adoc[]
 
-include::s3.adoc[]
+include::{includedir}/s3.adoc[]
 
-include::ses.adoc[]
+include::{includedir}/ses.adoc[]
 
-include::sns.adoc[]
+include::{includedir}/sns.adoc[]
 
-include::sqs.adoc[]
+include::{includedir}/sqs.adoc[]
 
-include::sts.adoc[]
+include::{includedir}/sts.adoc[]
 
-include::websockets.adoc[]
+include::{includedir}/websockets.adoc[]

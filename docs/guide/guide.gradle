@@ -25,30 +25,17 @@ configurations {
 }
 
 dependencies {
-    asciidoctorExtensions group: 'io.spring.asciidoctor', name: 'spring-asciidoctor-extensions', version: '0.1.3.RELEASE'
+    asciidoctorExtensions 'com.bmuschko:asciidoctorj-tabbed-code-extension:0.2'
 }
 
-// asciidoctor publishing
 asciidoctor {
     configurations 'asciidoctorExtensions'
-
-    resources {
-        from(sourceDir) {
-            include 'css/**', 'images/**'
-        }
-    }
-
-    attributes(
-        docinfo1: ['version': project.version],
-        imagesdir: 'images',
-        'source-highlighter': 'highlight.js',
-        stylesdir: 'css',
-        icons: 'font',
-        toclevels: '3',
-        version: project.version
-    )
+    attributes = [
+        'gradle-version': project.gradle.gradleVersion,
+        'source-highlighter': 'prettify',
+        'root-dir': rootDir
+    ]
 }
-
 
 afterEvaluate {
     project.tasks.findByName('createGuide')

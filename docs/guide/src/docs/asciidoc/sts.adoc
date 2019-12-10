@@ -14,7 +14,7 @@ Following example shows how to create credentials for assumed role.
 [source,groovy,indent=0,options="nowrap",role="primary"]
 .Assume Role
 ----
-include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sts/SecurityTokenServiceSpec.groovy[tag=usage]
+include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sts/SecurityTokenServiceSpec.groovy[tag=usage]
 ----
 
 Please, see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/sts/SecurityTokenService.html[SecurityTokenService] for the full reference.

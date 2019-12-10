@@ -6,7 +6,7 @@ https://micronaut-projects.github.io/micronaut-aws/latest/guide/#apiProxy[Micron
 [source,groovy,indent=0,options="nowrap"]
 .Example `MicronautHandler`
 ----
-include::../examples/planets/src/main/groovy/com/agorapulse/micronaut/http/examples/planets/MicronautHandler.java[]
+include::{root-dir}/examples/planets/src/main/groovy/com/agorapulse/micronaut/http/examples/planets/MicronautHandler.java[]
 ----
 
 === Testing
@@ -16,7 +16,7 @@ You can still use the API Gateway Proxy integration is using https://agorapulse.
 [source,groovy,indent=0,options="nowrap"]
 .Controller Spec
 ----
-include::../examples/planets/src/test/groovy/com/agorapulse/micronaut/http/examples/planets/PlanetControllerSpec.groovy[]
+include::{root-dir}/examples/planets/src/test/groovy/com/agorapulse/micronaut/http/examples/planets/PlanetControllerSpec.groovy[]
 ----
 <1> Use `ApiGatewayProxy` client with https://agorapulse.github.io/gru[Gru]
 <2> Delegate to `MicronautHandler` (see above)

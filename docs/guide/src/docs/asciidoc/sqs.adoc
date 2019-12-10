@@ -13,7 +13,7 @@ No configuration is required but some of the configuration properties may be use
 [source,yaml,indent=0,options="nowrap"]
 .application.yml
 ----
-include::../subprojects/micronaut-aws-sdk/src/test/resources/application-docs-sqs.yml[]
+include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/resources/application-docs-sqs.yml[]
 ----
 <1> Queue prefix is prepended to every queue name (may be useful for local development)
 <2> Whether to create any missing queue automatically (default `false`)
@@ -38,7 +38,7 @@ The following example shows many of available method signatures for publishing r
 [source,java,indent=0,options="nowrap"]
 .Publishing String Records
 ----
-include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/DefaultClient.java[]
+include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/DefaultClient.java[]
 ----
 <1> `@QueueClient` annotation makes the interface a SQS client
 <2> You can specify to which queue is the message published using `@Queue` annotation, you can also specify the `group` for FIFO queues
@@ -69,7 +69,7 @@ Following example shows some of the most common use cases for working with Amazo
 [source,java,indent=0,options="nowrap"]
 .Creating Queue
 ----
-include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=new-queue]
+include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=new-queue]
 ----
 <1> Create new queue of given name
 <2> The queue URL is present within the list of all queues' URLs
@@ -77,7 +77,7 @@ include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/microna
 [source,java,indent=0,options="nowrap"]
 .Describing Queue Attributes
 ----
-include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=describe-queue]
+include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=describe-queue]
 ----
 <1> Fetch queue's attributes
 <2> You can read the queue's attributes from the map
@@ -85,7 +85,7 @@ include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/microna
 [source,java,indent=0,options="nowrap"]
 .Delete Queue
 ----
-include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=delete-queue]
+include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=delete-queue]
 ----
 <1> Delete queue
 <2> The queue URL is no longer present within the list of all queues' URLs
@@ -93,7 +93,7 @@ include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/microna
 [source,java,indent=0,options="nowrap"]
 .Working with Messages
 ----
-include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=messages]
+include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=messages]
 ----
 <1> Send a message
 <2> Receive messages from the queue (in another application)
@@ -141,11 +141,11 @@ Then you can setup your tests like this:
 [source,groovy,indent=0,role="primary"]
 .Groovy
 ----
-include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceSpec.groovy[tags=testcontainers-header]
+include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceSpec.groovy[tags=testcontainers-header]
 
-include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceSpec.groovy[tags=testcontainers-fields]
+include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceSpec.groovy[tags=testcontainers-fields]
 
-include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceSpec.groovy[tags=testcontainers-setup]
+include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceSpec.groovy[tags=testcontainers-setup]
 
     // tests
 
@@ -165,7 +165,7 @@ include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/microna
 ----
 class SimpleNotificationServiceTest {
 
-include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=testcontainers-setup]
+include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=testcontainers-setup]
 
     // tests
 

@@ -14,7 +14,7 @@ Following example shows how to send an email with attachment.
 [source,groovy,indent=0,options="nowrap",role="primary"]
 .Groovy
 ----
-include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/ses/SendEmailSpec.groovy[]
+include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/ses/SendEmailSpec.groovy[]
 ----
 <1> Start building an email
 <2> Define subject of the email
@@ -31,7 +31,7 @@ include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/microna
 [source,java,indent=0,options="nowrap",role="secondary"]
 .Java
 ----
-include::../subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/ses/SendEmailTest.java[]
+include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/ses/SendEmailTest.java[]
 ----
 <1> Start building an email
 <2> Define subject of the email

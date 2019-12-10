@@ -1,4 +1,10 @@
-= Agorapulse Micronaut Libaries
+= {project-title}
+:author: {project-author}
+:revnumber: {project-version}
+:toclevels: 4
+:docinfo1:
+
+:leveloffset: 1
 
 [.ribbon]
 image::ribbon.png[link={project.url}]
@@ -17,12 +23,14 @@ Set of useful libraries for http://micronaut.io[Micronaut]. All the libraries ar
  * <<Micronaut for API Gateway Proxy>> - develop API Gateway Proxy Lambda functions using Micronaut HTTP server capabilities
  * <<Micronaut Grails>> - publish your Micronaut beans into Spring application context
 
-include::aws.adoc[]
+include::{includedir}/aws.adoc[]
 
-include::api-proxy.adoc[]
+include::{includedir}/api-proxy.adoc[]
 
-include::grails.adoc[]
+include::{includedir}/grails.adoc[]
 
-== Maintained by
+= Links
 
-image::https://cloud.githubusercontent.com/assets/139017/17053391/4a44735a-5034-11e6-8e72-9f4b7139d7e0.png[link=https://www.agorapulse.com/]
+link:api/index.html[Javadoc, window="_blank"]
+
+link:api-html/index.html[Source, window="_blank"]
