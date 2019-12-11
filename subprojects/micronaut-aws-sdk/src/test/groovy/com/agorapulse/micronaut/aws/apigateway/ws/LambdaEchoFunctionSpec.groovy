@@ -58,8 +58,6 @@ class LambdaEchoFunctionSpec extends Specification {
     }
 
     void 'connect'() {
-        expect:
-            false
         given:
             WebSocketRequest request = new WebSocketRequest(
                 requestContext: new RequestContext(eventType: EventType.CONNECT, connectionId: CONNECTION_ID)
@@ -67,6 +65,8 @@ class LambdaEchoFunctionSpec extends Specification {
         when:
             WebSocketResponse response = client.lambdaEcho(request).blockingGet()
         then:
+            false
+        
             response.statusCode == 200
 
             0 * sender._
