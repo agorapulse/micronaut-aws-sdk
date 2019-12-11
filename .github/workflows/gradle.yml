@@ -38,7 +38,7 @@ jobs:
           ${{ runner.os }}-gradle-
     - uses: eskatos/gradle-command-action@v1
       with:
-        arguments: check aggregateTestReports jacocoRootReport --stacktrace
+        arguments: aggregateTestReports jacocoRootReport --stacktrace
         gradle-version: ${{ matrix.gradle }}
     - name: Show Reports
       uses: actions/upload-artifact@v1
