@@ -40,9 +40,9 @@ jobs:
       with:
         arguments: check --stacktrace
         gradle-version: ${{ matrix.gradle }}
-    - name: Show Failed Tests
+    - name: Show Reports
       uses: actions/upload-artifact@v1
-      if: failure() && hashFiles('build/reports/aggreagate-all-tests/index.html')
+      if: failure()
       with:
-         name: all-tests
-         path: build/reports/aggreagate-all-tests
+         name: reports
+         path: build/reports/
