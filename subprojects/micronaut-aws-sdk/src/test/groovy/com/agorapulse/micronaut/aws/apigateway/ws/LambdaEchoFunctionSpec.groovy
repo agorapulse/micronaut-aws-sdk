@@ -58,6 +58,8 @@ class LambdaEchoFunctionSpec extends Specification {
     }
 
     void 'connect'() {
+        expect:
+            false
         given:
             WebSocketRequest request = new WebSocketRequest(
                 requestContext: new RequestContext(eventType: EventType.CONNECT, connectionId: CONNECTION_ID)
