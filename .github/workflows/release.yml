@@ -25,7 +25,6 @@ jobs:
       env:
         STEPS_CONTEXT: ${{ toJson(steps.version.outputs) }}
       run: echo "$STEPS_CONTEXT"
-    - uses: eskatos/gradle-command-action@v1
-      if: ${{ false }}
-      with:
-        arguments: versionDisplay gitPublishPush bintrayUpload -PbintrayUsername=${{ secrets.BINTRAY_USER }} -PbintrayApiKey=${{ secrets.BINTRAY_KEY }} -Pversion=${GITHUB_REF:10} -Prelease=true
+#    - uses: eskatos/gradle-command-action@v1
+#      with:
+#        arguments: versionDisplay gitPublishPush bintrayUpload -PbintrayUsername=${{ secrets.BINTRAY_USER }} -PbintrayApiKey=${{ secrets.BINTRAY_KEY }} -Pversion=${GITHUB_REF:10} -Prelease=true
