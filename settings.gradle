@@ -24,7 +24,7 @@ pluginManagement {
         id 'org.kordamp.gradle.groovy-project' version kordampVersion
         id 'org.kordamp.gradle.bintray'        version kordampVersion
         id 'org.kordamp.gradle.guide'          version kordampVersion
-        id 'com.github.kt3k.coveralls'         version '2.8.4'
+        id 'com.github.kt3k.coveralls'         version '2.9.0'
         id 'org.ajoberstar.git-publish'        version '2.1.1'
     }
 }
@@ -35,6 +35,10 @@ buildscript {
     }
     dependencies {
         classpath "org.kordamp.gradle:settings-gradle-plugin:$kordampVersion"
+        // forces the version suitable for all currently used plugins
+        classpath 'org.eclipse.jgit:org.eclipse.jgit:4.11.9.201909030838-r', {
+            force = true
+        }
     }
 }
 

@@ -65,7 +65,6 @@ class LambdaEchoFunctionSpec extends Specification {
         when:
             WebSocketResponse response = client.lambdaEcho(request).blockingGet()
         then:
-            false
             response.statusCode == 200
 
             0 * sender._
