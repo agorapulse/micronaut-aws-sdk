@@ -20,7 +20,7 @@
     <module name="TreeWalker">
         <!-- Blocks -->
         <module name="EmptyBlock">
-            <property name="option" value="stmt"/>
+            <property name="option" value="statement"/>
             <property name="tokens" value="LITERAL_DO,LITERAL_ELSE,LITERAL_FINALLY,LITERAL_IF,LITERAL_FOR,LITERAL_TRY,LITERAL_WHILE,INSTANCE_INIT,STATIC_INIT"/>
         </module>
         <module name="EmptyBlock">
@@ -103,8 +103,8 @@
             <property name="format" value="^[A-Z]+$"/>
         </module>
 
-        <!-- to enable SuppressionCommentFilter -->
-        <module name="FileContentsHolder"/>
+        <!-- allows suppressing using the //CHECKSTYLE:ON //CHECKSTYLE:OFF -->
+        <module name="SuppressionCommentFilter"/>
     </module>
     <module name="FileTabCharacter"/>
     <module name="RegexpSingleline">
@@ -116,7 +116,4 @@
     <module name="RegexpSingleline">
         <property name="format" value="^\s*\*\s*@author"/>
     </module>
-
-    <!-- allows suppressing using the //CHECKSTYLE:ON //CHECKSTYLE:OFF -->
-    <module name="SuppressionCommentFilter"/>
 </module>

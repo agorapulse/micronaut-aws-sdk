@@ -1,0 +1,181 @@
+=== Simple Queue Service (SQS)
+
+> Amazon Simple Queue Service (SQS) is a fully managed message queuing service that enables you to decouple and scale microservices, distributed systems, and serverless applications. SQS eliminates the complexity and overhead associated with managing and operating message oriented middleware, and empowers developers to focus on differentiating work.
+
+This library provides two approaches to work with Simple Queue Service queues:
+
+1. High-level <<Publishing with `@QueueClient`>>
+2. Middle-level <<Simple Queue Service>>
+
+==== Configuration
+No configuration is required but some of the configuration properties may be useful for you.
+
+[source,yaml,indent=0,options="nowrap"]
+.application.yml
+----
+include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/resources/application-docs-sqs.yml[]
+----
+<1> Queue prefix is prepended to every queue name (may be useful for local development)
+<2> Whether to create any missing queue automatically (default `false`)
+<3> Whether to first fetch all queues and set up queue to url cache first time the service is prompted for the queue URL (default `false`)
+<4> You can specify the default topic for https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/sqs/SimpleQueueService.html[SimpleQueueService] and `@QueueClient`
+<5> Whether the newly created queues are supposed to be https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html[FIFO queues] (default `false`)
+<6> The length of time, in seconds, for which the delivery of all messages in the queue is delayed. Valid values: An integer from `0` to `900` (15 minutes). Default: `0`.
+<7> The length of time, in seconds, for which Amazon SQS retains a message. Valid values: An integer representing seconds, from `60` (1 minute) to `1,209,600` (14 days). Default: `345,600` (4 days).
+<8> The limit of how many bytes a message can contain before Amazon SQS rejects it. Valid values: An integer from `1,024` bytes (1 KiB) up to `262,144` bytes (256 KiB). Default: `262,144` (256 KiB).
+<9> The visibility timeout for the queue, in seconds. Valid values: an integer from `0` to `43,200` (12 hours). Default: `30`.
+<10> You can define multiple configurations
+<11> Each of the configuration can be access using `@Named('test') SimpleNotificationService` qualifier or you can define the configuration as `value` of `@NotificationClient('test')`
+
+==== Publishing with `@QueueClient`
+
+If you place `com.agorapulse.micronaut.aws.sqs.annotation.QueueClient` annotation on the interface then methods
+matching predefined pattern will be automatically implemented. Methods containing word `delete` will delete queue messages.
+Other methods of `QueueClient` will publish new records into the queue.
+
+The following example shows many of available method signatures for publishing records:
+
+[source,java,indent=0,options="nowrap"]
+.Publishing String Records
+----
+include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/DefaultClient.java[]
+----
+<1> `@QueueClient` annotation makes the interface a SQS client
+<2> You can specify to which queue is the message published using `@Queue` annotation, you can also specify the `group` for FIFO queues
+<3> You can publish any record object which can be converted into JSON.
+<4> You can publish a byte array record
+<5> You can publish a string record
+<6> You can publish a string with custom delay
+<7> You can publish a string with custom FIFO queue group
+<8> You can publish a string with custom delay and FIFO queue group
+<9> You can delete published message using the message ID if the
+
+NOTE: The return value of the publishing methods is message id returned by AWS.
+
+By default, `QueueClient` publishes recoreds into the default queue defined by `aws.sns.queue` property.
+You can switch to different configuration by changing the `value` of the annotation such as `@QueueClient("other")` or
+by setting the `queue` property of the annotation such as `@QueueClient(queue = "SomeQueue")`. You can change queue
+used by particular method using `@Queue` annotation as mentioned above.
+
+==== Simple Queue Service
+
+`SimpleQueuenService` provides middle-level API for creating, describing, and deleting queues. It allows to publish, receive and delete records.
+
+Instance of `SimpleQueueService` is created for the default SQS configuration and each queue configuration in `aws.sqs.queues` map.
+You should always use `@Named` qualifier when injecting `SimpleQueueService` if you have more than one topic configuration present, e.g. `@Named("other") SimpleQueueService otherService`.
+
+Following example shows some of the most common use cases for working with Amazon SQS.
+
+[source,java,indent=0,options="nowrap"]
+.Creating Queue
+----
+include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=new-queue]
+----
+<1> Create new queue of given name
+<2> The queue URL is present within the list of all queues' URLs
+
+[source,java,indent=0,options="nowrap"]
+.Describing Queue Attributes
+----
+include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=describe-queue]
+----
+<1> Fetch queue's attributes
+<2> You can read the queue's attributes from the map
+
+[source,java,indent=0,options="nowrap"]
+.Delete Queue
+----
+include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=delete-queue]
+----
+<1> Delete queue
+<2> The queue URL is no longer present within the list of all queues' URLs
+
+[source,java,indent=0,options="nowrap"]
+.Working with Messages
+----
+include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=messages]
+----
+<1> Send a message
+<2> Receive messages from the queue (in another application)
+<3> Read message body
+<4> Developers are responsible to delete the message from the queue themselves
+
+TIP: Try to use AWS Lambda functions triggered by SQS messages to handle incoming SQS messages instead of implementing
+complex message handling logic yourselves.
+
+Please, see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/sqs/SimpleQueueService.html[SimpleQueueService] for the full reference.
+
+==== Testing
+You can very easily mock any of the interfaces and declarative services but if you need close-to-production
+SQS integration works well with https://www.testcontainers.org/[Testcontainers] and https://localstack.cloud/[LocalStack].
+
+You need to add following dependencies into your build file:
+
+[source,indent=0,role="primary"]
+.Gradle
+----
+compile group: 'org.testcontainers', name: 'localstack', version: '1.10.2'
+compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'
+----
+
+[source,xml,indent=0,role="secondary"]
+.Maven
+----
+<dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>localstack</artifactId>
+    <version>1.10.2</version>
+    <scope>test</scope>
+</dependency>
+<dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>spock</artifactId>
+    <version>1.10.2</version>
+    <scope>test</scope>
+</dependency>
+
+----
+
+Then you can setup your tests like this:
+
+[source,groovy,indent=0,role="primary"]
+.Groovy
+----
+include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceSpec.groovy[tags=testcontainers-header]
+
+include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceSpec.groovy[tags=testcontainers-fields]
+
+include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceSpec.groovy[tags=testcontainers-setup]
+
+    // tests
+
+}
+----
+<1> Annotate the specification with `@Testcontainers` to let Spock manage the Testcontainers for you
+<2> `@RestoreSystemProperties` will guarantee that system properties will be restore after the test
+<3> Create an instance of `LocalStackContainer` with SQS support enabled
+<4> Prepare the reference to the `ApplicationContext`, `@AutoCleanup` guarantees closing the context after the tests
+<5> Disable CBOR protocol for SQS (not supported by the mock implementation)
+<6> Create `AmazonSQS` client using the LocalStack configuration
+<7> Prepare the application context with required properties and service using LocalStack
+<8> You can obtain instance of `SimpleQueueService` from the context
+
+[source,java,indent=0,role="secondary"]
+.Java
+----
+class SimpleNotificationServiceTest {
+
+include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=testcontainers-setup]
+
+    // tests
+
+}
+----
+<1> Prepare the reference to the `ApplicationContext`
+<2> Create an instance of `LocalStackContainer` with SQS support enabled
+<3> Disable CBOR protocol for SQS (not supported by the mock implementation)
+<4> Create `AmazonSQS` client using the LocalStack configuration
+<5> Prepare required properties
+<6> Prepare the application context with required properties and service LocalStack
+<7> Close the application context after the test
+

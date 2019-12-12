@@ -1,14 +1,14 @@
-name: Java CI
+name: Check
 
 on: [push, pull_request]
-
 jobs:
-  build:
-
+  check:
+    name: Check
     runs-on: ubuntu-latest
-
     env:
       GRADLE_OPTS: "-Xmx6g -Xms4g"
+      CI: true
+      COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
 
     steps:
     - uses: actions/checkout@v1
@@ -24,6 +24,12 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}-${{ hashFiles('**/gradle.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
-
-    - name: Build with Gradle
-      run: ./gradlew check jacocoFullReport
+    - uses: eskatos/gradle-command-action@v1
+      with:
+        arguments: check aggregateTestReports coveralls --stacktrace
+    - name: Show Reports
+      uses: actions/upload-artifact@v1
+      if: failure()
+      with:
+         name: reports
+         path: build/reports/

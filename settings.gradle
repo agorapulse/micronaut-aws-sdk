@@ -1,9 +1,51 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2019 Vladimir Orany.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+pluginManagement {
+    repositories {
+        jcenter()
+        gradlePluginPortal()
+    }
+    plugins {
+        id 'org.kordamp.gradle.groovy-project' version kordampVersion
+        id 'org.kordamp.gradle.bintray'        version kordampVersion
+        id 'org.kordamp.gradle.guide'          version kordampVersion
+        id 'com.github.kt3k.coveralls'         version '2.9.0'
+        id 'org.ajoberstar.git-publish'        version '2.1.1'
+    }
+}
+
+buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath "org.kordamp.gradle:settings-gradle-plugin:$kordampVersion"
+        // forces the version suitable for all currently used plugins
+        classpath 'org.eclipse.jgit:org.eclipse.jgit:4.11.9.201909030838-r', {
+            force = true
+        }
+    }
+}
+
+apply plugin: 'org.kordamp.gradle.settings'
+
+projects {
+    directories = ['subprojects', 'examples', 'docs']
+}
+
 rootProject.name = 'micronaut-libraries'
-
-include 'micronaut-aws-sdk'
-include 'micronaut-grails'
-
-// examples
-include 'examples/local-server'
-include 'examples/planets'
-include 'examples/spacecrafts'

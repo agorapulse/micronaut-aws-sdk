@@ -1,0 +1,28 @@
+== Micronaut for API Gateway Proxy
+
+API Gateway Lambda Proxy support for Micronaut has been replaced by an official suport
+https://micronaut-projects.github.io/micronaut-aws/latest/guide/#apiProxy[Micronaut AWS API Gateway Support]
+
+[source,groovy,indent=0,options="nowrap"]
+.Example `MicronautHandler`
+----
+include::{root-dir}/examples/planets/src/main/groovy/com/agorapulse/micronaut/http/examples/planets/MicronautHandler.java[]
+----
+
+=== Testing
+
+You can still use the API Gateway Proxy integration is using https://agorapulse.github.io/gru/#_aws_api_gateway[Gru for API Gateway]
+
+[source,groovy,indent=0,options="nowrap"]
+.Controller Spec
+----
+include::{root-dir}/examples/planets/src/test/groovy/com/agorapulse/micronaut/http/examples/planets/PlanetControllerSpec.groovy[]
+----
+<1> Use `ApiGatewayProxy` client with https://agorapulse.github.io/gru[Gru]
+<2> Delegate to `MicronautHandler` (see above)
+<3> Reset the application context
+<4> Make changes in the application context
+<5> Test method using https://agorapulse.github.io/gru[Gru]
+
+TIP: The advantage of using Gru is that you can reuse the existing test with the local server if required.
+Only thing which changes it the handler setup and the client being used (HTTP instead of API Gateway Proxy).

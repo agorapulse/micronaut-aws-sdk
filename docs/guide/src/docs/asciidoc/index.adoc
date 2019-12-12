@@ -1,0 +1,36 @@
+= {project-title}
+:author: {project-author}
+:revnumber: {project-version}
+:toclevels: 4
+:docinfo1:
+
+:leveloffset: 1
+
+[.ribbon]
+image::ribbon.png[link={project.url}]
+
+--
+image::https://api.bintray.com/packages/agorapulse/libs/micronaut-aws-sdk/images/download.svg[link="https://bintray.com/agorapulse/libs/micronaut-aws-sdk/_latestVersion",float="left"]
+image::https://travis-ci.org/agorapulse/micronaut-libraries.svg?branch=master["Build Status", link="https://travis-ci.org/agorapulse/micronaut-libraries"float="left"]
+image::https://coveralls.io/repos/github/agorapulse/micronaut-libraries/badge.svg?branch=master[link=https://coveralls.io/github/agorapulse/micronaut-libraries?branch=master",float="left"]
+--
+
+---
+
+Set of useful libraries for http://micronaut.io[Micronaut]. All the libraries are available in https://bintray.com/bintray/jcenter[JCenter Maven repository].
+
+ * <<AWS SDK for Micronaut>> - integration for <<DynamoDB>>, <<Kinesis>>, <<Simple Storage Service (S3)>>, <<Simple Email Service (SES)>>, <<Simple Notification Service (SNS)>>,  <<Simple Queue Service (SQS)>> and <<WebSockets for API Gateway>>
+ * <<Micronaut for API Gateway Proxy>> - develop API Gateway Proxy Lambda functions using Micronaut HTTP server capabilities
+ * <<Micronaut Grails>> - publish your Micronaut beans into Spring application context
+
+include::{includedir}/aws.adoc[]
+
+include::{includedir}/api-proxy.adoc[]
+
+include::{includedir}/grails.adoc[]
+
+= Links
+
+link:api/index.html[Javadoc, window="_blank"]
+
+link:api-html/index.html[Source, window="_blank"]
