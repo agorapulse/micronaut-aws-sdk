@@ -219,6 +219,5 @@ tasks.coveralls {
     description = 'Uploads the aggregated coverage report to Coveralls'
 
     dependsOn jacocoRootReport
-    onlyIf { System.env.CI }
+    onlyIf { System.env.CI || System.env.GITHUB_ACTIONS }
 }
-// TODO: coveralls
