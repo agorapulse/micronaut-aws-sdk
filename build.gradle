@@ -196,12 +196,10 @@ subprojects { Project subproject ->
     clean.dependsOn cleanOut
 
     checkstyle {
-        configFile = rootProject.file('config/checkstyle/checkstyle.xml')
         toolVersion = '8.27'
     }
 
     codenarc {
-        configFile = rootProject.file('config/codenarc.xml')
         toolVersion = '1.2.1'
     }
 }
