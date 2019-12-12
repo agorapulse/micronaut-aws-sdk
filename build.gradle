@@ -209,7 +209,7 @@ subprojects { Project subproject ->
 
 gradle.taskGraph.whenReady {
     coveralls {
-        sourceDirs = subprojects.sourceSets.main.allSource.srcDirs.flatten()
+        sourceDirs = subprojects.findAll { it.plugins.hasPlugin('java') } sourceSets.main.allSource.srcDirs.flatten()
         jacocoReportPath = "${buildDir}/reports/jacoco/root/jacocoTestReport.xml"
     }
 }
