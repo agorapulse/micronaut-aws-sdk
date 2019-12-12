@@ -202,6 +202,10 @@ subprojects { Project subproject ->
     codenarc {
         toolVersion = '1.2.1'
     }
+    
+    bintray {
+        publish = true
+    }
 }
 
 
