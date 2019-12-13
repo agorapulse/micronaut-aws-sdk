@@ -12,7 +12,7 @@ There are two additional features which cannot be found the official https://doc
 [source,indent=0,role="primary",subs='verbatim,attributes']
 .Gradle
 ----
-compileOnly 'com.agorapulse:micronaut-grails:{version}'
+compileOnly 'com.agorapulse:micronaut-grails:{project-version}'
 ----
 
 TIP: If you plan to reuse same library for Micronaut and Grails, you can declare the dependency as  `compileOnly`.

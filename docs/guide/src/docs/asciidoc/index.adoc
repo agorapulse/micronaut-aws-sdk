@@ -7,7 +7,7 @@
 :leveloffset: 1
 
 [.ribbon]
-image::ribbon.png[link={project.url}]
+image::ribbon.png[link={project-url}]
 
 --
 image::https://api.bintray.com/packages/agorapulse/libs/micronaut-libraries/images/download.svg[link="https://bintray.com/agorapulse/libs/micronaut-libraries/_latestVersion",float="left"]

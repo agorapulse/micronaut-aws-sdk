@@ -31,11 +31,17 @@ dependencies {
 asciidoctor {
     configurations 'asciidoctorExtensions'
     baseDirFollowsSourceDir()
+
+    println "AWS SDK VERSION: $awsSdkVersion"
+
     attributes = [
         'gradle-version': project.gradle.gradleVersion,
+        'aws-sdk-version': awsSdkVersion,
         'source-highlighter': 'prettify',
         'root-dir': rootDir
     ]
+
+    println "ATTRIBUTES: $attributes"
 }
 
 afterEvaluate {

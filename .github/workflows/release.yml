@@ -10,8 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GRADLE_OPTS: "-Xmx6g -Xms4g"
-      GRGIT_USER: ${{ github.actor }}
-      GRGIT_PASS: ${{ secrets.GITHUB_TOKEN }}
+      GRGIT_USER: musketyr
+      GRGIT_PASS: ${{ secrets.GITHUB_PERSONAL_TOKEN }}
     steps:
     - uses: actions/checkout@v1
     - name: Set up JDK 1.8
