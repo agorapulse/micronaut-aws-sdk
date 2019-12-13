@@ -21,7 +21,6 @@ Set of useful libraries for http://micronaut.io[Micronaut]. All the libraries ar
 
  * <<AWS SDK for Micronaut>> - integration for <<DynamoDB>>, <<Kinesis>>, <<Simple Storage Service (S3)>>, <<Simple Email Service (SES)>>, <<Simple Notification Service (SNS)>>,  <<Simple Queue Service (SQS)>> and <<WebSockets for API Gateway>>
  * <<Micronaut for API Gateway Proxy>> - develop API Gateway Proxy Lambda functions using Micronaut HTTP server capabilities
- * <<Micronaut Grails>> - publish your Micronaut beans into Spring application context
 
 include::{includedir}/aws.adoc[]
 
