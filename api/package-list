@@ -15,6 +15,5 @@ com.agorapulse.micronaut.aws.sns.annotation
 com.agorapulse.micronaut.aws.sqs
 com.agorapulse.micronaut.aws.sqs.annotation
 com.agorapulse.micronaut.aws.sts
-com.agorapulse.micronaut.grails
 com.agorapulse.micronaut.http.examples.planets
 com.agorapulse.micronaut.http.examples.spacecrafts
