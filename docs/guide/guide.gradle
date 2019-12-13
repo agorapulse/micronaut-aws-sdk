@@ -38,7 +38,8 @@ asciidoctor {
         'gradle-version': project.gradle.gradleVersion,
         'aws-sdk-version': awsSdkVersion,
         'source-highlighter': 'prettify',
-        'root-dir': rootDir
+        'root-dir': rootDir,
+        'project-slug': slug
     ]
 
     println "ATTRIBUTES: $attributes"

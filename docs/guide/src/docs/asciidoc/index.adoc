@@ -10,9 +10,9 @@
 image::ribbon.png[link={project-url}]
 
 --
-image::https://api.bintray.com/packages/agorapulse/libs/micronaut-libraries/images/download.svg[link="https://bintray.com/agorapulse/libs/micronaut-libraries/_latestVersion",float="left"]
-image::https://travis-ci.org/agorapulse/micronaut-libraries.svg?branch=master["Build Status", link="https://travis-ci.org/agorapulse/micronaut-libraries"float="left"]
-image::https://coveralls.io/repos/github/agorapulse/micronaut-libraries/badge.svg?branch=master[link=https://coveralls.io/github/agorapulse/micronaut-libraries?branch=master",float="left"]
+image::https://api.bintray.com/packages/agorapulse/libs/{project-name]/images/download.svg[link="https://bintray.com/agorapulse/libs/{project-name}/_latestVersion",float="left"]
+image::https://github.com/{project-slug}/workflows/Check/badge.svg["Build Status", link="https://github.com/{project-slug}/actions?query=workflow%3ACheck"float="left"]
+image::https://coveralls.io/repos/github/{project-slug}/badge.svg?branch=master[link=https://coveralls.io/github/{project-slug}?branch=master",float="left"]
 --
 
 ---

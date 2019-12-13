@@ -1,7 +1,7 @@
 = Agorapulse Micronaut Libraries
 
 --
-image::https://api.bintray.com/packages/agorapulse/libs/micronaut-librariesimages/download.svg[link="https://bintray.com/agorapulse/libs/micronaut-libraries/_latestVersion",float="left"]
+image::https://api.bintray.com/packages/agorapulse/libs/micronaut-libraries/images/download.svg[link="https://bintray.com/agorapulse/libs/micronaut-libraries/_latestVersion",float="left"]
 image::https://github.com/agorapulse/micronaut-libraries/workflows/Check/badge.svg["Build Status", link="https://github.com/agorapulse/micronaut-libraries/actions?query=workflow%3ACheck"float="left"]
 image::https://coveralls.io/repos/github/agorapulse/micronaut-libraries/badge.svg?branch=master[link=https://coveralls.io/github/agorapulse/micronaut-libraries?branch=master",float="left"]
 --

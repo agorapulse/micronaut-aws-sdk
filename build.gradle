@@ -33,9 +33,9 @@ config {
         description = 'Set of useful libraries for Micronaut'
 
         links {
-            website      = 'https://github.com/agorapulse/micronaut-libraries'
-            issueTracker = 'https://github.com/agorapulse/micronaut-libraries/issues'
-            scm          = 'https://github.com/agorapulse/micronaut-libraries.git'
+            website      = "https://github.com/${slug}"
+            issueTracker = "https://github.com/${slug}/issues"
+            scm          = "https://github.com/${slug}.git"
         }
 
         people {
@@ -202,7 +202,7 @@ subprojects { Project subproject ->
     codenarc {
         toolVersion = '1.2.1'
     }
-    
+
     bintray {
         publish = true
     }
