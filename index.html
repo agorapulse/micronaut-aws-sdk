@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/micronaut-libraries.css?v={version}" />
+<link rel="stylesheet" href="css/micronaut-libraries.css?v=1.2.7" />
 <style>
 .hidden {
     display: none;
@@ -331,32 +331,32 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk:{version}'
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk:1.2.7'
 
 // only required for DynamoDB and Kinesis integration
-compile group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: '1.11.500'
+compile group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: '{aws-sdk-version}'
 
 // only required for DynamoDB Accelerator (DAX) integration
 compile group: 'com.amazonaws', name: 'amazon-dax-client', version: '1.0.202017.0'
 
 // only required for Kinesis integration
 compile group: 'com.amazonaws', name: 'amazon-kinesis-client', version: '1.9.3'
-compile group: 'com.amazonaws', name: 'aws-java-sdk-kinesis', version: '1.11.500'
+compile group: 'com.amazonaws', name: 'aws-java-sdk-kinesis', version: '{aws-sdk-version}'
 
 // only required for S3 integration
-compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.500'
+compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '{aws-sdk-version}'
 
 // only required for SES integration
-compile group: 'com.amazonaws', name: 'aws-java-sdk-ses', version: '1.11.500'
+compile group: 'com.amazonaws', name: 'aws-java-sdk-ses', version: '{aws-sdk-version}'
 
 // only required for SNS integration
-compile group: 'com.amazonaws', name: 'aws-java-sdk-sns', version: '1.11.500'
+compile group: 'com.amazonaws', name: 'aws-java-sdk-sns', version: '{aws-sdk-version}'
 
 // only required for SQS integration
-compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.500'
+compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '{aws-sdk-version}'
 
 // only required for STS integration
-compile group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: '1.11.500'</code></pre>
+compile group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: '{aws-sdk-version}'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -365,14 +365,14 @@ compile group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: '1.11.500'</c
 <pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk&lt;/artifactId&gt;
-    &lt;version&gt;{version}&lt;/version&gt;
+    &lt;version&gt;1.2.7&lt;/version&gt;
 &lt;/dependency&gt;
 
 &lt;!-- only required for DynamoDB and Kinesis integration --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.amazonaws&lt;/groupId&gt;
     &lt;artifactId&gt;aws-java-sdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;1.11.500&lt;/version&gt;
+    &lt;version&gt;{aws-sdk-version}&lt;/version&gt;
 &lt;/dependency&gt;
 
 &lt;!-- only required for DynamoDB Accelerator (DAX) integration --&gt;
@@ -392,42 +392,42 @@ compile group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: '1.11.500'</c
 &lt;dependency&gt;
     &lt;groupId&gt;com.amazonaws&lt;/groupId&gt;
     &lt;artifactId&gt;aws-java-sdk-kinesis&lt;/artifactId&gt;
-    &lt;version&gt;1.11.500&lt;/version&gt;
+    &lt;version&gt;{aws-sdk-version}&lt;/version&gt;
 &lt;/dependency&gt;
 
 &lt;!-- only required for S3 integration --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.amazonaws&lt;/groupId&gt;
     &lt;artifactId&gt;aws-java-sdk-s3&lt;/artifactId&gt;
-    &lt;version&gt;1.11.500&lt;/version&gt;
+    &lt;version&gt;{aws-sdk-version}&lt;/version&gt;
 &lt;/dependency&gt;
 
 &lt;!-- only required for SES integration --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.amazonaws&lt;/groupId&gt;
     &lt;artifactId&gt;aws-java-sdk-ses&lt;/artifactId&gt;
-    &lt;version&gt;1.11.500&lt;/version&gt;
+    &lt;version&gt;{aws-sdk-version}&lt;/version&gt;
 &lt;/dependency&gt;
 
 &lt;!-- only required for SNS integration --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.amazonaws&lt;/groupId&gt;
     &lt;artifactId&gt;aws-java-sdk-sns&lt;/artifactId&gt;
-    &lt;version&gt;1.11.500&lt;/version&gt;
+    &lt;version&gt;{aws-sdk-version}&lt;/version&gt;
 &lt;/dependency&gt;
 
 &lt;!-- only required for SQS integration --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.amazonaws&lt;/groupId&gt;
     &lt;artifactId&gt;aws-java-sdk-sqs&lt;/artifactId&gt;
-    &lt;version&gt;1.11.500&lt;/version&gt;
+    &lt;version&gt;{aws-sdk-version}&lt;/version&gt;
 &lt;/dependency&gt;
 
 &lt;!-- only required for STS integration --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.amazonaws&lt;/groupId&gt;
     &lt;artifactId&gt;aws-java-sdk-sts&lt;/artifactId&gt;
-    &lt;version&gt;1.11.500&lt;/version&gt;
+    &lt;version&gt;{aws-sdk-version}&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4791,7 +4791,7 @@ There are two additional features which cannot be found the official <a href="ht
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compileOnly 'com.agorapulse:micronaut-grails:{version}'</code></pre>
+<pre class="prettyprint highlight"><code>compileOnly 'com.agorapulse:micronaut-grails:1.2.7'</code></pre>
 </div>
 </div>
 <div class="admonitionblock tip">
