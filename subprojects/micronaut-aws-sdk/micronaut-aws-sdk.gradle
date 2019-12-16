@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 config {
-    bintray { 
+    bintray {
         enabled = true
     }
 }
@@ -35,6 +35,16 @@ dependencies {
     optional group: 'com.amazonaws', name: 'aws-java-sdk-sns'
     optional group: 'com.amazonaws', name: 'aws-java-sdk-sqs'
     optional group: 'com.amazonaws', name: 'aws-java-sdk-sts'
+
+    optional group: 'software.amazon.awssdk', name: 'core'
+    optional group: 'software.amazon.awssdk', name: 'dynamodb'
+    optional group: 'software.amazon.awssdk', name: 'kms'
+    optional group: 'software.amazon.awssdk', name: 'kinesis'
+    optional group: 'software.amazon.awssdk', name: 's3'
+    optional group: 'software.amazon.awssdk', name: 'ses'
+    optional group: 'software.amazon.awssdk', name: 'sns'
+    optional group: 'software.amazon.awssdk', name: 'sqs'
+    optional group: 'software.amazon.awssdk', name: 'sts'
 
 
     optional 'javax.mail:mail:1.4.4'

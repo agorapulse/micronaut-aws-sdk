@@ -131,7 +131,7 @@ subprojects { Project subproject ->
                 entry 'jmespath'
             }
 
-            dependencySet(group: 'software.amazon.sdk', version: project.awsSdk2Version) {
+            dependencySet(group: 'software.amazon.awssdk', version: project.awsSdk2Version) {
                 entry 'core'
                 entry 'dynamodb'
                 entry 'kms'
@@ -143,9 +143,9 @@ subprojects { Project subproject ->
                 entry 'sts'
             }
 
-            dependency group: 'com.amazonaws', name: 'amazon-dax-client', version: '1.0.202017.0'
-            dependency group: 'com.amazonaws', name: 'amazon-kinesis-client', version: '1.9.3'
-            dependency group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '2.2.5'
+            dependency group: 'com.amazonaws', name: 'amazon-dax-client', version: '1.0.205044.0'
+            dependency group: 'com.amazonaws', name: 'amazon-kinesis-client', version: '1.13.0'
+            dependency group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '2.2.7'
             dependency group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-cbor', version: project['jackson.datatype.version']
         }
     }
