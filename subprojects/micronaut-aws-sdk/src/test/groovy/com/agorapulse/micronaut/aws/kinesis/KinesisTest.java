@@ -191,6 +191,36 @@ public class KinesisTest {
         }
 
         @Override
+        public DeleteAnomalyDetectorResult deleteAnomalyDetector(DeleteAnomalyDetectorRequest deleteAnomalyDetectorRequest) {
+            return null;
+        }
+
+        @Override
+        public DescribeAnomalyDetectorsResult describeAnomalyDetectors(DescribeAnomalyDetectorsRequest describeAnomalyDetectorsRequest) {
+            return null;
+        }
+
+        @Override
+        public ListTagsForResourceResult listTagsForResource(ListTagsForResourceRequest listTagsForResourceRequest) {
+            return null;
+        }
+
+        @Override
+        public PutAnomalyDetectorResult putAnomalyDetector(PutAnomalyDetectorRequest putAnomalyDetectorRequest) {
+            return null;
+        }
+
+        @Override
+        public TagResourceResult tagResource(TagResourceRequest tagResourceRequest) {
+            return null;
+        }
+
+        @Override
+        public UntagResourceResult untagResource(UntagResourceRequest untagResourceRequest) {
+            return null;
+        }
+
+        @Override
         public void setRegion(Region region) {
 
         }
