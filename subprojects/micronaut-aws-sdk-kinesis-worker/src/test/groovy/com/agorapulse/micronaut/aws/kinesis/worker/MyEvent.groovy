@@ -15,24 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-configurations {
-    lambda.extendsFrom runtime
-    testCompile.extendsFrom lambda
-}
+package com.agorapulse.micronaut.aws.kinesis.worker
 
-dependencies {
-    compile 'io.micronaut.aws:micronaut-function-aws-api-proxy'
+import com.agorapulse.micronaut.aws.kinesis.DefaultEvent
+/**
+ * Testing event.
+ */
+class MyEvent extends DefaultEvent {
 
-    // gru lambda incubation
-    testCompile "com.agorapulse:gru-api-gateway:$gruVersion"
-}
-
-task buildZip(type: Zip) {
-    from compileGroovy
-    from processResources
-    into('lib') {
-        from configurations.lambda
+    // java way
+    MyEvent(String value) {
+        this.value = value
     }
-}
 
-build.dependsOn buildZip
+    // groovy way
+    MyEvent() { }
+
+    String value
+}

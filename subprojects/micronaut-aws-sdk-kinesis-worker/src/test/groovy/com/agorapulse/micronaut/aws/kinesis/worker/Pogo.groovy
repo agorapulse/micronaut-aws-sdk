@@ -15,24 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-configurations {
-    lambda.extendsFrom runtime
-    testCompile.extendsFrom lambda
-}
+package com.agorapulse.micronaut.aws.kinesis.worker
 
-dependencies {
-    compile 'io.micronaut.aws:micronaut-function-aws-api-proxy'
+import groovy.transform.ToString
 
-    // gru lambda incubation
-    testCompile "com.agorapulse:gru-api-gateway:$gruVersion"
-}
+/**
+ * Plain old Groovy object for testing.
+ */
+@ToString
+class Pogo {
 
-task buildZip(type: Zip) {
-    from compileGroovy
-    from processResources
-    into('lib') {
-        from configurations.lambda
+    // java way
+    Pogo(String foo) {
+        this.foo = foo
     }
-}
 
-build.dependsOn buildZip
+    // groovy way
+    Pogo() { }
+
+    String foo
+}

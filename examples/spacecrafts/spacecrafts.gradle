@@ -38,7 +38,7 @@ apply from: '../gradle/lambda.gradle'
 apply plugin: 'jp.classmethod.aws.lambda'
 
 dependencies {
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb'
+    compile project(':micronaut-aws-sdk-dynamodb')
 
     testCompile group: 'com.agorapulse', name: 'dru-client-dynamodb', version: druVersion
 }

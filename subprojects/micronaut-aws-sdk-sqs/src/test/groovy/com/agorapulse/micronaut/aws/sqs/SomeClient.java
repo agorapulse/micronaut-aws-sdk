@@ -15,24 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-configurations {
-    lambda.extendsFrom runtime
-    testCompile.extendsFrom lambda
+package com.agorapulse.micronaut.aws.sqs;
+
+import com.agorapulse.micronaut.aws.sqs.annotation.QueueClient;
+
+@QueueClient(queue = "SomeQueue", delay = 10)
+public interface SomeClient {
+
+    String sendMessage(Pogo event);
+
+    String SOME_QUEUE = "SomeQueue";
 }
-
-dependencies {
-    compile 'io.micronaut.aws:micronaut-function-aws-api-proxy'
-
-    // gru lambda incubation
-    testCompile "com.agorapulse:gru-api-gateway:$gruVersion"
-}
-
-task buildZip(type: Zip) {
-    from compileGroovy
-    from processResources
-    into('lib') {
-        from configurations.lambda
-    }
-}
-
-build.dependsOn buildZip

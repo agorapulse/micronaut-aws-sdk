@@ -15,24 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-configurations {
-    lambda.extendsFrom runtime
-    testCompile.extendsFrom lambda
-}
-
-dependencies {
-    compile 'io.micronaut.aws:micronaut-function-aws-api-proxy'
-
-    // gru lambda incubation
-    testCompile "com.agorapulse:gru-api-gateway:$gruVersion"
-}
-
-task buildZip(type: Zip) {
-    from compileGroovy
-    from processResources
-    into('lib') {
-        from configurations.lambda
+config {
+    bintray {
+        enabled = true
     }
 }
 
-build.dependsOn buildZip
+dependencies {
+    compile project(':micronaut-aws-sdk-core')
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-sns'
+
+    testCompile group: 'org.testcontainers', name: 'testcontainers', version: testcontainersVersion
+    testCompile group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
+    testCompile group: 'org.testcontainers', name: 'spock', version: testcontainersVersion
+}

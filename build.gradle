@@ -119,6 +119,7 @@ subprojects { Project subproject ->
 
         dependencies {
             dependencySet(group: 'com.amazonaws', version: project.awsSdkVersion) {
+                entry 'aws-java-sdk-cloudwatch'
                 entry 'aws-java-sdk-core'
                 entry 'aws-java-sdk-dynamodb'
                 entry 'aws-java-sdk-kms'
@@ -132,6 +133,7 @@ subprojects { Project subproject ->
             }
 
             dependencySet(group: 'software.amazon.awssdk', version: project.awsSdk2Version) {
+                entry 'cloudwatch'
                 entry 'core'
                 entry 'dynamodb'
                 entry 'kms'
