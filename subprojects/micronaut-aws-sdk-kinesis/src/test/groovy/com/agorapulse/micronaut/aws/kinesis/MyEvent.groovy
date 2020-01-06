@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2019 Vladimir Orany.
+ * Copyright 2020 Vladimir Orany.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
  */
 package com.agorapulse.micronaut.aws.kinesis
 
-import com.agorapulse.micronaut.aws.kinesis.DefaultEvent
 /**
  * Testing event.
  */

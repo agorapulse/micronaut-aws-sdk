@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2019 Vladimir Orany.
+ * Copyright 2020 Vladimir Orany.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,42 +153,43 @@ class KinesisAnnotationsSpec extends Specification {
         }
     }
 
+    @SuppressWarnings('SystemErrPrint')
     private static boolean allTestEventsReceived(KinesisListenerTester tester) {
-        final int expected = 6
+        final int EXPECTED = 6
         int passedEvents = 0
         if (tester.executions.any { it?.startsWith('EXECUTED: listenStringRecord') }) {
-            System.err.println("Verfifed listenStringRecord OK")
+            System.err.println('Verfifed listenStringRecord OK')
             passedEvents++
         }
 
         if (tester.executions.any { it?.startsWith('EXECUTED: listenString') }) {
-            System.err.println("Verfifed listenString OK")
+            System.err.println('Verfifed listenString OK')
             passedEvents++
         }
 
         if (tester.executions.any { it?.startsWith('EXECUTED: listenRecord') }) {
-            System.err.println("Verfifed listenRecord OK")
+            System.err.println('Verfifed listenRecord OK')
             passedEvents++
         }
 
         if (tester.executions.any { it?.startsWith('EXECUTED: listenObject') }) {
-            System.err.println("Verfifed listenObject OK")
+            System.err.println('Verfifed listenObject OK')
             passedEvents++
         }
 
         if (tester.executions.any { it?.startsWith('EXECUTED: listenObjectRecord') }) {
-            System.err.println("Verfifed listenObjectRecord OK")
+            System.err.println('Verfifed listenObjectRecord OK')
             passedEvents++
         }
 
         if (tester.executions.any { it == 'EXECUTED: listenPogoRecord(com.agorapulse.micronaut.aws.kinesis.worker.Pogo(bar))' }) {
-            System.err.println("Verfifed listenPogoRecord OK")
+            System.err.println('Verfifed listenPogoRecord OK')
             passedEvents++
         }
 
-        System.err.println("Passed " + passedEvents + " event checks of " + expected)
+        System.err.println("Passed $passedEvents event checks of $EXPECTED")
 
-        return passedEvents == expected
+        return passedEvents == EXPECTED
     }
 
     @SuppressWarnings('SystemErrPrint')
