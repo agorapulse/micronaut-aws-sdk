@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2020 Vladimir Orany.
+ * Copyright 2018-2020 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,9 @@
 plugins {
     id 'org.kordamp.gradle.groovy-project'
     id 'org.kordamp.gradle.bintray'
-    id 'com.github.kt3k.coveralls'
+    id 'org.kordamp.gradle.checkstyle'
+    id 'org.kordamp.gradle.codenarc'
+    id 'org.kordamp.gradle.coveralls'
 }
 
 if (!project.hasProperty('bintrayUsername')) ext.bintrayUsername = '**UNDEFINED**'
@@ -80,7 +82,19 @@ config {
         userOrg    = 'agorapulse'
         repo       = 'libs'
         name       = rootProject.name
+        publish    = true
     }
+
+    quality {
+        checkstyle {
+            toolVersion = '8.27'
+        }
+
+        codenarc {
+            toolVersion = '1.5'
+        }
+    }
+
 }
 
 allprojects {
@@ -102,8 +116,6 @@ subprojects { Project subproject ->
 
     apply plugin: 'io.spring.dependency-management'
     apply plugin: 'groovy'
-    apply plugin: 'checkstyle'
-    apply plugin: 'codenarc'
 
     configurations {
         optional.extendsFrom compile
@@ -196,32 +208,4 @@ subprojects { Project subproject ->
     }
 
     clean.dependsOn cleanOut
-
-    checkstyle {
-        toolVersion = '8.27'
-    }
-
-    codenarc {
-        toolVersion = '1.2.1'
-    }
-
-    bintray {
-        publish = true
-    }
-}
-
-
-gradle.taskGraph.whenReady {
-    coveralls {
-        sourceDirs = subprojects.findAll { it.plugins.hasPlugin('java') } sourceSets.main.allSource.srcDirs.flatten()
-        jacocoReportPath = "${buildDir}/reports/jacoco/root/jacocoTestReport.xml"
-    }
-}
-
-tasks.coveralls {
-    group = 'Coverage reports'
-    description = 'Uploads the aggregated coverage report to Coveralls'
-
-    dependsOn jacocoRootReport
-    onlyIf { System.env.CI || System.env.GITHUB_ACTIONS }
 }

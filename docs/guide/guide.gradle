@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2020 Vladimir Orany.
+ * Copyright 2018-2020 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,16 @@ plugins {
     id 'org.ajoberstar.git-publish'
 }
 
+config {
+    docs {
+        guide {
+            publish {
+                enabled = true
+            }
+        }
+    }
+}
+
 configurations {
     asciidoctorExtensions
 }
@@ -32,8 +42,6 @@ asciidoctor {
     configurations 'asciidoctorExtensions'
     baseDirFollowsSourceDir()
 
-    println "AWS SDK VERSION: $awsSdkVersion"
-
     attributes = [
         'gradle-version': project.gradle.gradleVersion,
         'aws-sdk-version': awsSdkVersion,
@@ -42,20 +50,4 @@ asciidoctor {
         'project-slug': slug
     ]
 
-    println "ATTRIBUTES: $attributes"
-}
-
-afterEvaluate {
-    project.tasks.findByName('createGuide')
-
-    gitPublish {
-        repoUri = rootProject.extensions.findByName('config').info.links.scm
-        branch = 'gh-pages'
-        contents {
-            from project.tasks.findByName('createGuide').outputs.files
-        }
-        commitMessage = "Publish guide for $version"
-    }
-
-    gitPublishCommit.dependsOn(project.tasks.findByName('createGuide'))
 }
