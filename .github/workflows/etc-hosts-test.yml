@@ -1,0 +1,11 @@
+name: Update Hosts
+
+on: [push]
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo '127.0.0.1 manager.agorapulse.local' | sudo tee /etc/hosts
+          ping -c5 manager.agorapulse.local
