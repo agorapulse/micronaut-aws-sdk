@@ -24,7 +24,7 @@ pluginManagement {
         id 'org.kordamp.gradle.groovy-project' version kordampVersion
         id 'org.kordamp.gradle.bintray'        version kordampVersion
         id 'org.kordamp.gradle.checkstyle'     version kordampVersion
-        id 'org.kordamp.gradle.codenarc'     version kordampVersion
+        id 'org.kordamp.gradle.codenarc'       version kordampVersion
         id 'org.kordamp.gradle.guide'          version kordampVersion
         id 'org.kordamp.gradle.coveralls'      version kordampVersion
         id 'com.github.kt3k.coveralls'         version '2.9.0'
