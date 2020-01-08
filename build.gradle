@@ -165,3 +165,5 @@ subprojects { Project subproject ->
 
     clean.dependsOn cleanOut
 }
+
+check.dependsOn('aggregateCheckstyle', 'aggregateCodenarc', 'aggregateAllTestReports', 'coveralls')

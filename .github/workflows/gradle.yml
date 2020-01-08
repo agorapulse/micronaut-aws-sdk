@@ -26,7 +26,7 @@ jobs:
           ${{ runner.os }}-gradle-
     - uses: eskatos/gradle-command-action@v1
       with:
-        arguments: check aggregateTestReports coveralls --stacktrace
+        arguments: check coveralls --stacktrace
     - name: Show Reports
       uses: actions/upload-artifact@v1
       if: failure()
