@@ -1,0 +1,41 @@
+plugins {
+    id "java-platform"
+}
+
+javaPlatform {
+    allowDependencies()
+}
+
+dependencies {
+    api platform("io.micronaut:micronaut-bom:$micronautVersion")
+
+    constraints {
+        api "com.amazonaws:aws-java-sdk-cloudwatch:$project.awsSdkVersion"
+        api "com.amazonaws:aws-java-sdk-core:$project.awsSdkVersion"
+        api "com.amazonaws:aws-java-sdk-dynamodb:$project.awsSdkVersion"
+        api "com.amazonaws:aws-java-sdk-kms:$project.awsSdkVersion"
+        api "com.amazonaws:aws-java-sdk-kinesis:$project.awsSdkVersion"
+        api "com.amazonaws:aws-java-sdk-s3:$project.awsSdkVersion"
+        api "com.amazonaws:aws-java-sdk-ses:$project.awsSdkVersion"
+        api "com.amazonaws:aws-java-sdk-sns:$project.awsSdkVersion"
+        api "com.amazonaws:aws-java-sdk-sqs:$project.awsSdkVersion"
+        api "com.amazonaws:aws-java-sdk-sts:$project.awsSdkVersion"
+        api "com.amazonaws:jmespath:$project.awsSdkVersion"
+
+        api "software.amazon.awssdk:cloudwatch:$project.awsSdk2Version"
+        api "software.amazon.awssdk:core:$project.awsSdk2Version"
+        api "software.amazon.awssdk:dynamodb:$project.awsSdk2Version"
+        api "software.amazon.awssdk:kms:$project.awsSdk2Version"
+        api "software.amazon.awssdk:kinesis:$project.awsSdk2Version"
+        api "software.amazon.awssdk:s3:$project.awsSdk2Version"
+        api "software.amazon.awssdk:ses:$project.awsSdk2Version"
+        api "software.amazon.awssdk:sns:$project.awsSdk2Version"
+        api "software.amazon.awssdk:sqs:$project.awsSdk2Version"
+        api "software.amazon.awssdk:sts:$project.awsSdk2Version"
+
+        api group: "com.amazonaws", name: "amazon-dax-client", version: "1.0.205044.0"
+        api group: "com.amazonaws", name: "amazon-kinesis-client", version: "1.13.0"
+        api group: "com.amazonaws", name: "aws-lambda-java-events", version: "2.2.7"
+        api group: "com.fasterxml.jackson.dataformat", name: "jackson-dataformat-cbor", version: project["jackson.datatype.version"]
+    }
+}

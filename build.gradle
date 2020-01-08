@@ -112,59 +112,14 @@ allprojects {
 }
 
 subprojects { Project subproject ->
-    if (subproject.name == 'guide') return
+    if (subproject.name == 'guide' || subproject.name == 'micronaut-aws-sdk-dependencies') return
 
-    apply plugin: 'io.spring.dependency-management'
     apply plugin: 'groovy'
 
-    configurations {
-        optional.extendsFrom compile
-
-        compileOnly.extendsFrom optional
-        testCompile.extendsFrom optional
-    }
-
-    dependencyManagement {
-        imports {
-            mavenBom "io.micronaut:micronaut-bom:$micronautVersion"
-        }
-
-        dependencies {
-            dependencySet(group: 'com.amazonaws', version: project.awsSdkVersion) {
-                entry 'aws-java-sdk-cloudwatch'
-                entry 'aws-java-sdk-core'
-                entry 'aws-java-sdk-dynamodb'
-                entry 'aws-java-sdk-kms'
-                entry 'aws-java-sdk-kinesis'
-                entry 'aws-java-sdk-s3'
-                entry 'aws-java-sdk-ses'
-                entry 'aws-java-sdk-sns'
-                entry 'aws-java-sdk-sqs'
-                entry 'aws-java-sdk-sts'
-                entry 'jmespath'
-            }
-
-            dependencySet(group: 'software.amazon.awssdk', version: project.awsSdk2Version) {
-                entry 'cloudwatch'
-                entry 'core'
-                entry 'dynamodb'
-                entry 'kms'
-                entry 'kinesis'
-                entry 's3'
-                entry 'ses'
-                entry 'sns'
-                entry 'sqs'
-                entry 'sts'
-            }
-
-            dependency group: 'com.amazonaws', name: 'amazon-dax-client', version: '1.0.205044.0'
-            dependency group: 'com.amazonaws', name: 'amazon-kinesis-client', version: '1.13.0'
-            dependency group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '2.2.7'
-            dependency group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-cbor', version: project['jackson.datatype.version']
-        }
-    }
-
     dependencies {
+        annotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
+        compile platform(project(':micronaut-aws-sdk-dependencies'))
+
         annotationProcessor "io.micronaut:micronaut-inject-java"
 
         // Groovy
@@ -180,6 +135,7 @@ subprojects { Project subproject ->
 
         runtime "ch.qos.logback:logback-classic:1.2.3"
 
+        testAnnotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
         testAnnotationProcessor "io.micronaut:micronaut-inject-java"
 
         testCompile "io.micronaut:micronaut-inject-groovy"
