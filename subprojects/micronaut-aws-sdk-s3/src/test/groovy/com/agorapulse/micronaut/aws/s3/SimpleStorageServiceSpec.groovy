@@ -40,6 +40,7 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
 @Stepwise
 @Testcontainers                                                                         // <1>
 class SimpleStorageServiceSpec extends Specification {
+
 // end::header[]
 
     private static final String KEY = 'foo/bar.baz'

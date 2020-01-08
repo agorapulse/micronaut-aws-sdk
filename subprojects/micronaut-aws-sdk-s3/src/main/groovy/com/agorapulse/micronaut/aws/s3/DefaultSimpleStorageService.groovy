@@ -421,4 +421,5 @@ class DefaultSimpleStorageService implements SimpleStorageService {
     private void assertDefaultBucketName() {
         assert defaultBucketName, 'Default bucket must be defined'
     }
+
 }

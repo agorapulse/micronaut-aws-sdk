@@ -174,4 +174,5 @@ class QueueClientSpec extends Specification {
 
             1 * defaultService.sendMessage(SomeClient.SOME_QUEUE, marshalledPogo, DELAY, null) >> ID
     }
+
 }

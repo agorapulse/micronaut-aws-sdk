@@ -17,12 +17,14 @@
  */
 package com.agorapulse.micronaut.aws.sns
 
+import groovy.transform.CompileStatic
 import groovy.transform.ToString
 
 /**
  * Plain old Groovy object for testing.
  */
 @ToString
+@CompileStatic
 class Pogo {
 
     // java way
@@ -34,4 +36,5 @@ class Pogo {
     Pogo() { }
 
     String foo
+
 }

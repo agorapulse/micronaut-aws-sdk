@@ -64,4 +64,5 @@ class SendEmailSpec extends Specification {
                 return new SendRawEmailResult().withMessageId('foobar')
             }
     }
+
 }

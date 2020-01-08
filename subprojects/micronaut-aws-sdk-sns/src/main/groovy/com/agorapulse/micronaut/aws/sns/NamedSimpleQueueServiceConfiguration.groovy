@@ -38,4 +38,5 @@ class NamedSimpleQueueServiceConfiguration extends SimpleNotificationServiceConf
         super('aws.sns.topics.' + name, environment)
         this.name = name
     }
+
 }

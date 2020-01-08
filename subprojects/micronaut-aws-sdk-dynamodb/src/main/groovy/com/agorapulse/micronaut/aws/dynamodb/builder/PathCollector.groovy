@@ -67,4 +67,5 @@ class PathCollector {
 
         return Collections.singletonList(fullPath)
     }
+
 }

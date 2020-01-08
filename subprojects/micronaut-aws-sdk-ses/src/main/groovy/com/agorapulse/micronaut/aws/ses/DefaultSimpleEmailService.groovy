@@ -159,4 +159,5 @@ class DefaultSimpleEmailService implements SimpleEmailService {
             client.sendEmail(sendEmailRequest)
         }
     }
+
 }

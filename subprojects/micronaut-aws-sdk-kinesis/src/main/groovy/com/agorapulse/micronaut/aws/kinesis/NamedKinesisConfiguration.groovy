@@ -36,4 +36,5 @@ class NamedKinesisConfiguration extends KinesisConfiguration {
     NamedKinesisConfiguration(@Parameter String name) {
         this.name = name
     }
+
 }

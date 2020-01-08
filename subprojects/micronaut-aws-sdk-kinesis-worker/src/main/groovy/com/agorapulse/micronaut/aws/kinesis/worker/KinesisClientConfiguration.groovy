@@ -166,4 +166,5 @@ abstract class KinesisClientConfiguration {
 
         return configuration
     }
+
 }

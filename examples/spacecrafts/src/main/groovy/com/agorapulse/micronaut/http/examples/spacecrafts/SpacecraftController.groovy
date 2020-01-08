@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.http.examples.spacecrafts
 
+import groovy.transform.CompileStatic
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Delete
@@ -28,6 +29,7 @@ import io.micronaut.http.annotation.Status
 /**
  * Spacecraft controller.
  */
+@CompileStatic
 @Controller('/spacecraft')
 class SpacecraftController {
 

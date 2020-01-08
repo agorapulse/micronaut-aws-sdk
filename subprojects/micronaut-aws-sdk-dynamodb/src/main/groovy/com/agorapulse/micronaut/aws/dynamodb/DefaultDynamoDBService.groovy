@@ -40,6 +40,7 @@ import java.text.SimpleDateFormat
     'NoWildcardImports',
     'DuplicateStringLiteral', // Instanceof
 ])
+@CompileDynamic
 class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> {
 
     // Specific ranges ending with 'Index' are String concatenated indexes,
@@ -742,7 +743,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
             query.exclusiveStartKey = buildStartKey(settings.exclusiveStartKey + [(hashKeyName): hashKey])
         }
         if (settings.limit) {
-            assert settings.limit.toString().isNumber()
+            assert settings.limit.toString().number
             query.limit = settings.limit
         } else {
             query.limit = DEFAULT_QUERY_LIMIT

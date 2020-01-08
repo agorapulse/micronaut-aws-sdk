@@ -36,6 +36,7 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
 // tag::testcontainers-header[]
 @Testcontainers                                                                         // <1>
 class SimpleNotificationServiceSpec extends Specification {
+
 // end::testcontainers-header[]
 
     private static final String TEST_TOPIC = 'TestTopic'
@@ -139,4 +140,5 @@ class SimpleNotificationServiceSpec extends Specification {
         then:
             noExceptionThrown()
     }
+
 }

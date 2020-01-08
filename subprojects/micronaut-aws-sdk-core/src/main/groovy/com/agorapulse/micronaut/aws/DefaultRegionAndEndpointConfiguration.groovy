@@ -17,11 +17,14 @@
  */
 package com.agorapulse.micronaut.aws
 
+import groovy.transform.CompileStatic
+
 import javax.annotation.Nullable
 
 /**
  * Default region and endpoint configuration.
  */
+@CompileStatic
 class DefaultRegionAndEndpointConfiguration implements RegionAndEndpointConfiguration {
 
     @Nullable String region

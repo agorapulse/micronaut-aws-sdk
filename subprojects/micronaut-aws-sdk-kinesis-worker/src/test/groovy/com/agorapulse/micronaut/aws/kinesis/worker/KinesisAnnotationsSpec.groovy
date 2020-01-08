@@ -44,7 +44,10 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
 /**
  * Tests for Kinesis related annotations - client and listener.
  */
+
+@SuppressWarnings('ClassStartsWithBlankLine')
 @Requires({ System.getenv('CI') != 'true' })
+
 // tag::testcontainers-header[]
 @Testcontainers                                                                         // <1>
 @RestoreSystemProperties                                                                // <2>

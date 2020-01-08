@@ -63,6 +63,7 @@ class IntroductionIssueSpec extends Specification {
 
 @Singleton
 class Injected {
+
     final IntroProblemEntity2DBService introProblemEntity2DBService
     final IntroProblemEntityDBService introProblemEntityDBService
 

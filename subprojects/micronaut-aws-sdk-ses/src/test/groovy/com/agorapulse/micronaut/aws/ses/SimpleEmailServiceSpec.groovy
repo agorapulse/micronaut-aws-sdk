@@ -199,4 +199,5 @@ class SimpleEmailServiceSpec extends Specification {
                 return new SendRawEmailResult().withMessageId('foobar')
             }
     }
+
 }

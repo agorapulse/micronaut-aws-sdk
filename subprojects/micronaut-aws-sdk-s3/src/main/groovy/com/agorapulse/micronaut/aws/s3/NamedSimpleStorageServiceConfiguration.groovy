@@ -36,4 +36,5 @@ class NamedSimpleStorageServiceConfiguration extends SimpleStorageServiceConfigu
     NamedSimpleStorageServiceConfiguration(@Parameter String name) {
         this.name = name
     }
+
 }

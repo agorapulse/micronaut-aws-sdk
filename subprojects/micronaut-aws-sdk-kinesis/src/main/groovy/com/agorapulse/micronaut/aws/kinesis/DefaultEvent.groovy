@@ -17,9 +17,12 @@
  */
 package com.agorapulse.micronaut.aws.kinesis
 
+import groovy.transform.CompileStatic
+
 /**
  * Base for event classes.
  */
+@CompileStatic
 @SuppressWarnings('NoJavaUtilDate')
 class DefaultEvent implements Event {
 

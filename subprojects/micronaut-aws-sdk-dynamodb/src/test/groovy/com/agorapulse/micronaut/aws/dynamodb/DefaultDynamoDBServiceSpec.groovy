@@ -53,6 +53,7 @@ import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*          
 @Stepwise
 @Testcontainers                                                                         // <1>
 class DefaultDynamoDBServiceSpec extends Specification {
+
 // end::testcontainers-header[]
 
     private static final DateTime REFERENCE_DATE = new DateTime(1358487600000)
@@ -329,12 +330,14 @@ class DefaultDynamoDBServiceSpec extends Specification {
                 before: REFERENCE_DATE.plusDays(20).toDate(),
             ]) == 0
     }
+
 }
 
 // tag::service-all[]
 // tag::service-header[]
 @Service(DynamoDBEntity)                                                                // <2>
 interface DynamoDBItemDBService {
+
 // end::service-header[]
 
     DynamoDBEntity get(String hash, String rangeKey)
@@ -469,6 +472,7 @@ interface DynamoDBItemDBService {
     Flowable<DynamoDBEntity> scanAllByRangeIndexWithLimit(String foo, int max)
 
 // tag::service-footer[]
+
 }
 // end::service-footer[]
 // end::service-all[]

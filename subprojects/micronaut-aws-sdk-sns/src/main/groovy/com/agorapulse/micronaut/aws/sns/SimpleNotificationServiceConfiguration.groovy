@@ -29,11 +29,13 @@ import io.micronaut.context.env.Environment
 abstract class SimpleNotificationServiceConfiguration extends DefaultRegionAndEndpointConfiguration {
 
     static class Application {
+
         final String arn
 
         Application(String arn) {
             this.arn = arn
         }
+
     }
 
     private final Environment environment
@@ -58,4 +60,5 @@ abstract class SimpleNotificationServiceConfiguration extends DefaultRegionAndEn
                 environment.get(prefix + '.' + platform + '.applicationArn', String).orElse(null)
             })
     }
+
 }

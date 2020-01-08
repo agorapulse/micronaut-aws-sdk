@@ -124,7 +124,6 @@ Then you can setup your tests like this:
 .Groovy
 ----
 include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceSpec.groovy[tags=header]
-
 include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceSpec.groovy[tags=setup]
 
     // test methods

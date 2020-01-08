@@ -41,4 +41,5 @@ class DefaultKinesisClientConfiguration extends KinesisClientConfiguration {
     ) {
         super(applicationName, workerId)
     }
+
 }

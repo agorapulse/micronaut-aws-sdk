@@ -18,6 +18,7 @@
 package com.agorapulse.micronaut.aws.dynamodb
 
 import com.amazonaws.services.dynamodbv2.datamodeling.*
+import groovy.transform.CompileDynamic
 
 import java.lang.reflect.Field
 import java.lang.reflect.Method
@@ -27,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Collector of DynamoDB metadata.
  * @param <T> type of the DynamoDB entity
  */
+@CompileDynamic
 @SuppressWarnings('NoWildcardImports')
 class DynamoDBMetadata<T> {
 
@@ -107,4 +109,5 @@ class DynamoDBMetadata<T> {
 
         this.secondaryIndexes = secondaryIndexes.asImmutable()
     }
+
 }

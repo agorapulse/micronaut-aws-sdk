@@ -26,5 +26,7 @@ import groovy.transform.CompileStatic
 @CompileStatic
 @NotificationClient
 interface TestTopicPublisher {
+
     String publishMessage(String subject, String message)
+
 }

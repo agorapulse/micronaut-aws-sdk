@@ -294,11 +294,14 @@ class KinesisClientSpec extends Specification {
     private byte[] json(Object object) {
         context.getBean(ObjectMapper).writeValueAsBytes(object)
     }
+
 }
 
 @KinesisClient('test') interface TestClient {
+
     PutRecordResult putEvent(MyEvent event)
     void doWhatever(Object one, Object two, Object three, Object four)
+
 }
 
 @KinesisClient(stream = 'SomeStream') interface StreamClient {
@@ -306,5 +309,6 @@ class KinesisClientSpec extends Specification {
     public String SOME_STREAM = 'SomeStream'
 
     PutRecordResult putEvent(MyEvent event)
+
 }
 

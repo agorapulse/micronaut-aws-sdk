@@ -30,7 +30,10 @@ import spock.lang.Specification
 /**
  * Tests for creating conditions.
  */
-@SuppressWarnings('AbcMetric')
+@SuppressWarnings([
+    'AbcMetric',
+    'UnnecessaryGetter',
+])
 class RangeConditionCollectorSpec extends Specification {
 
     private static final String ARG_1 = 'foo'

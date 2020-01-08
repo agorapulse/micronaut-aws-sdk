@@ -34,4 +34,5 @@ class Pogo {
     Pogo() { }
 
     String foo
+
 }

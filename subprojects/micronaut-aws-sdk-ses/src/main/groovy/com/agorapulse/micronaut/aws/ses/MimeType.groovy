@@ -812,4 +812,5 @@ class MimeType {
     static List<MimeType> allMimeTypes() {
         ALL.collect { new  MimeType(suffixApplicable: it[0], mediaTypeSubtype: it[1]) }
     }
+
 }

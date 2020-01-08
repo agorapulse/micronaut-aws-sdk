@@ -17,12 +17,14 @@
  */
 package com.agorapulse.micronaut.http.examples
 
+import groovy.transform.CompileStatic
 import io.micronaut.context.ApplicationContext
 import io.micronaut.runtime.Micronaut
 
 /**
  * Entry point to the example application.
  */
+@CompileStatic
 class Application {
 
     static ApplicationContext context

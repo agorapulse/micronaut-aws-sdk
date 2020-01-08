@@ -299,4 +299,5 @@ class SimpleQueueServiceWithMockSpec extends Specification {
         cleanup:
             context.stop()
     }
+
 }

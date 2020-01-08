@@ -154,5 +154,6 @@ class NotificationClientSpec extends Specification {
 
             1 * defaultService.publishMessageToTopic(StreamClient.SOME_STREAM, null, POGO_AS_JSON) >> MESSAGE_ID
     }
+
 }
 

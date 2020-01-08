@@ -144,7 +144,7 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
         List<Consumer<RangeConditionCollector<T>>> filterCollectorsConsumers,
         BiConsumer<String, Condition> addFilterConsumer
     ) {
-        if (!filterCollectorsConsumers.isEmpty()) {
+        if (!filterCollectorsConsumers.empty) {
             RangeConditionCollector<T> filterCollector = new RangeConditionCollector<>(model)
 
             for (Consumer<RangeConditionCollector<T>> consumer : filterCollectorsConsumers) {
@@ -163,4 +163,5 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
     private Object exclusiveHashStartKey
     private Object exclusiveRangeStartKey
     private int max = Integer.MAX_VALUE
+
 }

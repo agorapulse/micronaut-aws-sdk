@@ -17,9 +17,12 @@
  */
 package com.agorapulse.micronaut.aws.kinesis
 
+import groovy.transform.CompileStatic
+
 /**
  * Testing event.
  */
+@CompileStatic
 class MyEvent extends DefaultEvent {
 
     // java way
@@ -31,4 +34,5 @@ class MyEvent extends DefaultEvent {
     MyEvent() { }
 
     String value
+
 }

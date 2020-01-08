@@ -227,10 +227,12 @@ class SimpleStorageServiceWithMockSpec extends Specification {
 
     InputStream mockInputStream() {
         new InputStream() {
+
             @Override
             int read() throws IOException {
                 return 0
             }
+
         }
     }
 
@@ -488,4 +490,5 @@ class MockPartData implements PartData {
     Optional<MediaType> getContentType() {
         return Optional.of(MediaType.TEXT_PLAIN_TYPE)
     }
+
 }

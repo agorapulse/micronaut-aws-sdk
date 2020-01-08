@@ -35,12 +35,15 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
 /**
  * Tests for simple queue service.
  */
+
 @Retry(count =  5)
 @Stepwise
+
 // tag::testcontainers-header[]
 @Testcontainers                                                                         // <1>
 @RestoreSystemProperties                                                                // <2>
 class SimpleQueueServiceSpec extends Specification {
+
 // end::testcontainers-header[]
 
     private static final String TEST_QUEUE = 'TestQueue'
@@ -103,4 +106,5 @@ class SimpleQueueServiceSpec extends Specification {
         then:
             !service.listQueueUrls().contains(queueUrl)
     }
+
 }

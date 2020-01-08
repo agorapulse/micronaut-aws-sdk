@@ -72,4 +72,5 @@ class SimpleQueueServiceConfigurationSpec extends Specification {
             context.getBean(SimpleQueueService, Qualifiers.byName('samplequeue'))
             context.getBean(SimpleQueueService, Qualifiers.byName('samplequeue')).defaultQueueName == 'SampleQueue'
     }
+
 }

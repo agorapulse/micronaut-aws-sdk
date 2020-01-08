@@ -172,7 +172,7 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
         List<Consumer<RangeConditionCollector<T>>> filterCollectorsConsumers,
         BiConsumer<String, Condition> addFilterConsumer
     ) {
-        if (!filterCollectorsConsumers.isEmpty()) {
+        if (!filterCollectorsConsumers.empty) {
             RangeConditionCollector<T> filterCollector = new RangeConditionCollector<>(model)
 
             for (Consumer<RangeConditionCollector<T>> consumer : filterCollectorsConsumers) {
@@ -193,4 +193,5 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     private Object exclusiveRangeStartKey
     private int max = Integer.MAX_VALUE
     private Consumer<DynamoDBQueryExpression<T>> configurer = { } as Consumer<DynamoDBQueryExpression<T>>
+
 }

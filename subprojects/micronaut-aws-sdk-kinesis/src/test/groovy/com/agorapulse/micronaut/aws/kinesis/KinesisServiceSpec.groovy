@@ -252,4 +252,5 @@ class TestEvent extends DefaultEvent {
     String getPartitionKey() {
         return value
     }
+
 }
