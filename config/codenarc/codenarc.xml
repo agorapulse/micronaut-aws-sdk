@@ -12,7 +12,13 @@
         </rule-config>
     </ruleset-ref>
     <ruleset-ref path="rulesets/concurrency.xml"/>
-    <ruleset-ref path="rulesets/convention.xml"/>
+    <ruleset-ref path="rulesets/convention.xml">
+        <rule-config name="CompileStatic">
+            <property name="doNotApplyToClassNames" value="*Function,*Spec"/>
+            <property name="doNotApplyToFileNames" value="*Function.groovy,*Spec.groovy"/>
+        </rule-config>
+        <exclude name="ImplicitClosureParameter"/>
+    </ruleset-ref>
     <ruleset-ref path="rulesets/design.xml"/>
     <ruleset-ref path="rulesets/dry.xml">
         <rule-config name="DuplicateStringLiteral">

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2019 Vladimir Orany.
+ * Copyright 2018-2020 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,10 @@ pluginManagement {
     plugins {
         id 'org.kordamp.gradle.groovy-project' version kordampVersion
         id 'org.kordamp.gradle.bintray'        version kordampVersion
+        id 'org.kordamp.gradle.checkstyle'     version kordampVersion
+        id 'org.kordamp.gradle.codenarc'       version kordampVersion
         id 'org.kordamp.gradle.guide'          version kordampVersion
+        id 'org.kordamp.gradle.coveralls'      version kordampVersion
         id 'com.github.kt3k.coveralls'         version '2.9.0'
         id 'org.ajoberstar.git-publish'        version '2.1.3'
     }

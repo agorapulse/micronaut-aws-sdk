@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2019 Vladimir Orany.
+ * Copyright 2018-2020 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,14 @@
  */
 package com.agorapulse.micronaut.http.examples
 
+import groovy.transform.CompileStatic
 import io.micronaut.context.ApplicationContext
 import io.micronaut.runtime.Micronaut
 
 /**
  * Entry point to the example application.
  */
+@CompileStatic
 class Application {
 
     static ApplicationContext context

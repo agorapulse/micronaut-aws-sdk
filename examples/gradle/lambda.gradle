@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2019 Vladimir Orany.
+ * Copyright 2018-2020 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,6 @@ configurations {
 
 dependencies {
     compile 'io.micronaut.aws:micronaut-function-aws-api-proxy'
-
-    compile project(':micronaut-aws-sdk')
-    compile "com.amazonaws:aws-java-sdk-dynamodb:$awsSdkVersion"
 
     // gru lambda incubation
     testCompile "com.agorapulse:gru-api-gateway:$gruVersion"

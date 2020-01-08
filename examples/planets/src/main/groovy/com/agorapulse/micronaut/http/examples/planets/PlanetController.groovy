@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2019 Vladimir Orany.
+ * Copyright 2018-2020 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.http.examples.planets
 
+import groovy.transform.CompileStatic
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Delete
@@ -28,6 +29,7 @@ import io.micronaut.http.annotation.Status
 /**
  * Planet controller.
  */
+@CompileStatic
 @Controller('/planet')
 class PlanetController {
 
