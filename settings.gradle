@@ -39,10 +39,10 @@ buildscript {
     dependencies {
         classpath "org.kordamp.gradle:settings-gradle-plugin:$kordampVersion"
         // forces the version suitable for all currently used plugins
-        classpath 'org.eclipse.jgit:org.eclipse.jgit:5.3.6.201910020505-r', {
+        classpath 'org.eclipse.jgit:org.eclipse.jgit:5.6.0.201912101111-r', {
             force = true
         }
-        classpath 'org.ajoberstar.grgit:grgit-core:4.0.0'
+        classpath 'org.ajoberstar.grgit:grgit-core:4.0.1'
     }
 }
 
