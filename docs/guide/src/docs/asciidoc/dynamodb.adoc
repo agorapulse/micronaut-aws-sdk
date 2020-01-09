@@ -7,6 +7,24 @@ This library provides two approaches to work with DynamoDB tables and entities:
 1. High-level <<Declarative Services with `@Service`>>
 2. Middle-level <<DynamoDB Service>>
 
+==== Installation
+
+[source,indent=0,role="primary",subs='verbatim,attributes']
+.Gradle
+----
+compile 'com.agorapulse:micronaut-aws-sdk-dynamodb:{project-version}'
+----
+
+[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
+.Maven
+----
+<dependency>
+    <groupId>com.agorapulse</groupId>
+    <artifactId>micronaut-aws-sdk-dynamodb</artifactId>
+    <version>{project-version}</version>
+</dependency>
+----
+
 ==== Declarative Services with `@Service`
 
 Declarative services are very similar to http://gorm.grails.org/6.1.x/hibernate/manual/#dataServices[Grails GORM Data Services].
@@ -352,10 +370,10 @@ Instead you can annotate any method with `@Query` annotation to make it
 [source,groovy,indent=0,options="nowrap",role="primary"]
 .Groovy
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=builders-import]
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-header]
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=sample-queries]
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-footer]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=builders-import]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-header]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=sample-queries]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-footer]
 ----
 <1> `Builders` class provides all necessary factory methods and keywords
 <2> Annotate an interface with `@Service` with the type of the entity as its `value`
@@ -370,11 +388,11 @@ include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse
 [source,java,indent=0,options="nowrap",role="secondary"]
 .Java
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=header]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=header]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-query-class]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-query-class]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-query]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-query]
 
 }
 ----
@@ -399,13 +417,13 @@ If you need to scan the table by unindexed attributes you can annotate any metho
 [source,groovy,indent=0,options="nowrap",role="primary"]
 .Groovy
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=builders-import]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=builders-import]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-header]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-header]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=sample-scan]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=sample-scan]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-footer]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-footer]
 ----
 <1> `Builders` class provides all necessary factory methods and keywords
 <2> Annotate an interface with `@Service` with the type of the entity as its `value`
@@ -417,11 +435,11 @@ include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse
 [source,java,indent=0,options="nowrap",role="secondary"]
 .Java
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=header]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=header]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-scan-class]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-scan-class]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-scan]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-scan]
 
 }
 ----
@@ -440,13 +458,13 @@ Declarative services allows you to execute fine-grained updates. Any method anno
 [source,groovy,indent=0,options="nowrap",role="primary"]
 .Groovy
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=builders-import]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=builders-import]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-header]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-header]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=sample-update]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=sample-update]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-footer]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-footer]
 ----
 <1> `Builders` class provides all necessary factory methods and keywords
 <2> Annotate an interface with `@Service` with the type of the entity as its `value`
@@ -461,11 +479,11 @@ include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse
 [source,java,indent=0,options="nowrap",role="secondary"]
 .Java
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=header]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=header]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-update-class]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-update-class]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-update]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-update]
 
 }
 ----
@@ -491,21 +509,21 @@ include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse
         DynamoDBServiceProvider provider = context.getBean(DynamoDBServiceProvider)
         DynamoDBService<DynamoDBEntity> s = provider.findOrCreate(DynamoDBEntity)       // <1>
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=create-table]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=create-table]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=save-entity]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=save-entity]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=load-entity]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=load-entity]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=query-by-range-index]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=query-by-range-index]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=query-by-dates]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=query-by-dates]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=increment]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=increment]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=delete]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=delete]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=delete-all]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=delete-all]
 
 ----
 <1> Obtain the instance of `DynamoDBService` from `DynamoDBServiceProvider` (provider can be injected)
@@ -521,23 +539,23 @@ include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse
 [source,java,indent=0,options="nowrap",role="secondary"]
 .Java
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=obtain-service]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=obtain-service]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=create-table]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=create-table]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=save-entity]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=save-entity]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=load-entity]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=load-entity]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=query-by-range-index]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=query-by-range-index]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=query-by-dates]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=query-by-dates]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=increment]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=increment]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=delete]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=delete]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=delete-all]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=delete-all]
 ----
 <1> Obtain the instance of `DynamoDBService` from `DynamoDBServiceProvider` (provider can be injected)
 <2> Create table for the entity
@@ -617,8 +635,8 @@ Then you can setup your tests like this:
 [source,groovy,indent=0,role="primary"]
 .Groovy
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=testcontainers-header]
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=testcontainers-setup]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=testcontainers-header]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=testcontainers-setup]
     // test methods
 
 }
@@ -635,8 +653,8 @@ include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse
 [source,java,indent=0,role="secondary"]
 .Java
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=header]
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=setup]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=header]
+include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=setup]
     @Test
     public void testSomething() {
         DynamoDBServiceProvider provider = ctx.getBean(DynamoDBServiceProvider.class);  // <7>

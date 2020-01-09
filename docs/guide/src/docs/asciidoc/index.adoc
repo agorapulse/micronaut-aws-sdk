@@ -20,7 +20,8 @@ image::https://coveralls.io/repos/github/{project-slug}/badge.svg?branch=master[
 Set of useful libraries for http://micronaut.io[Micronaut]. All the libraries are available in https://bintray.com/bintray/jcenter[JCenter Maven repository].
 
  * <<AWS SDK for Micronaut>> - integration for <<DynamoDB>>, <<Kinesis>>, <<Simple Storage Service (S3)>>, <<Simple Email Service (SES)>>, <<Simple Notification Service (SNS)>>,  <<Simple Queue Service (SQS)>> and <<WebSockets for API Gateway>>
- * <<Micronaut for API Gateway Proxy>> - develop API Gateway Proxy Lambda functions using Micronaut HTTP server capabilities
+ * <<Micronaut for API Gateway Proxy>> - develop API Gateway Proxy Lambda functions using Micronaut HTTP server capabilities (currently superseded by
+ the official library)
 
 include::{includedir}/aws.adoc[]
 

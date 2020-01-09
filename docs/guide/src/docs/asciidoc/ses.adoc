@@ -4,6 +4,24 @@
 
 This library provides basic support for Amazon SES using <<Simple Email Service>>
 
+==== Installation
+
+[source,indent=0,role="primary",subs='verbatim,attributes']
+.Gradle
+----
+compile 'com.agorapulse:micronaut-aws-sdk-ses:{project-version}'
+----
+
+[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
+.Maven
+----
+<dependency>
+    <groupId>com.agorapulse</groupId>
+    <artifactId>micronaut-aws-sdk-ses</artifactId>
+    <version>{project-version}</version>
+</dependency>
+----
+
 ==== Simple Email Service
 
 `SimpleEmailService` provides DSL for creating and sending simple emails with attachments. As the other services,
@@ -14,7 +32,7 @@ Following example shows how to send an email with attachment.
 [source,groovy,indent=0,options="nowrap",role="primary"]
 .Groovy
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/ses/SendEmailSpec.groovy[]
+include::{root-dir}/subprojects/micronaut-aws-sdk-ses/src/test/groovy/com/agorapulse/micronaut/aws/ses/SendEmailSpec.groovy[]
 ----
 <1> Start building an email
 <2> Define subject of the email
@@ -31,7 +49,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse
 [source,java,indent=0,options="nowrap",role="secondary"]
 .Java
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/ses/SendEmailTest.java[]
+include::{root-dir}/subprojects/micronaut-aws-sdk-ses/src/test/groovy/com/agorapulse/micronaut/aws/ses/SendEmailTest.java[]
 ----
 <1> Start building an email
 <2> Define subject of the email

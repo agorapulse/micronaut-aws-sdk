@@ -8,6 +8,34 @@ This library provides three approaches to work with Kinesis streams:
 2. High-level <<Listening with `@KinesisListener`>>
 3. Middle-level <<Kinesis Service>>
 
+==== Installation
+
+[source,indent=0,role="primary",subs='verbatim,attributes']
+.Gradle
+----
+// for Kinesis client
+compile 'com.agorapulse:micronaut-aws-sdk-kinesis:{project-version}'
+// for Kinesis worker
+compile 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:{project-version}'
+----
+
+[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
+.Maven
+----
+<!-- for Kinesis client -->
+<dependency>
+    <groupId>com.agorapulse</groupId>
+    <artifactId>micronaut-aws-sdk-kinesis</artifactId>
+    <version>{project-version}</version>
+</dependency>
+<!-- for Kinesis worker -->
+<dependency>
+    <groupId>com.agorapulse</groupId>
+    <artifactId>micronaut-aws-sdk-kinesis-worker</artifactId>
+    <version>{project-version}</version>
+</dependency>
+----
+
 ==== Configuration
 
 By default, only `aws.kinesis.application.name` and `aws.kinesis.listener.stream` are required if you decide to use `@KinesisListener`.
@@ -16,7 +44,7 @@ Otherwise you need no configuration at all but some of the configuration may be 
 [source,yaml,indent=0,options="nowrap"]
 .application.yml
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/resources/application-docs-kinesis.yml[]
+include::{root-dir}/subprojects/micronaut-aws-sdk-test/src/test/resources/application-docs-kinesis.yml[]
 ----
 <1> You can specify the default stream for https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/kinesis/KinesisService.html[KinesisService] and `@KinesisClient`
 <2> You can define multiple configurations
@@ -39,8 +67,8 @@ The following example shows many of available method signatures for publishing r
 [source,java,indent=0,options="nowrap"]
 .Publishing String Records
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=header]
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=string]
+include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=header]
+include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=string]
 }
 ----
 <1> `@KinesisClient` annotation makes the interface a Kinesis client
@@ -54,8 +82,8 @@ include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse
 [source,java,indent=0,options="nowrap"]
 .Publishing Byte Array Records
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=header]
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=bytes]
+include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=header]
+include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=bytes]
 }
 ----
 <1> `@KinesisClient` annotation makes the interface a Kinesis client
@@ -68,8 +96,8 @@ include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse
 [source,java,indent=0,options="nowrap"]
 .Publishing Plain Old Java Objects
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=header]
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=pogo]
+include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=header]
+include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=pogo]
 }
 ----
 <1> `@KinesisClient` annotation makes the interface a Kinesis client
@@ -81,8 +109,8 @@ include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse
 [source,java,indent=0,options="nowrap"]
 .Publishing Events
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=header]
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=events]
+include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=header]
+include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=events]
 }
 ----
 <1> `@KinesisClient` annotation makes the interface a Kinesis client
@@ -111,7 +139,7 @@ then the method will be triggered with the new records in the stream.
 source,java,indent=0,options="nowrap"]
 .Publishing Events
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisListenerTester.java[tags=all]
+include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisListenerTester.java[tags=all]
 ----
 <1> `@KinesisListener` method must be declared in a bean, e.g. `@Singleton`
 <2> You can listen to just plain string records
@@ -172,11 +200,11 @@ Then you can setup your tests like this:
 [source,groovy,indent=0,role="primary"]
 .Groovy
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisAnnotationsSpec.groovy[tags=testcontainers-header]
+include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisAnnotationsSpec.groovy[tags=testcontainers-header]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisAnnotationsSpec.groovy[tags=testcontainers-setup]
+include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisAnnotationsSpec.groovy[tags=testcontainers-setup]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisAnnotationsSpec.groovy[tags=testcontainers-test]
+include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisAnnotationsSpec.groovy[tags=testcontainers-test]
 
 }
 ----
@@ -195,11 +223,11 @@ include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse
 [source,java,indent=0,role="secondary"]
 .Java
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisTest.java[tags=testcontainers-header]
+include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisTest.java[tags=testcontainers-header]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisTest.java[tags=testcontainers-setup]
+include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisTest.java[tags=testcontainers-setup]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisTest.java[tags=testcontainers-test]
+include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisTest.java[tags=testcontainers-test]
 
 }
 ----

@@ -5,13 +5,31 @@
 This library provides components for easy handling of incoming WebSocket proxied events as well as for sending
 messages back to the clients
 
+==== Installation
+
+[source,indent=0,role="primary",subs='verbatim,attributes']
+.Gradle
+----
+compile 'com.agorapulse:micronaut-aws-sdk-ag-ws:{project-version}'
+----
+
+[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
+.Maven
+----
+<dependency>
+    <groupId>com.agorapulse</groupId>
+    <artifactId>micronaut-aws-sdk-ag-ws</artifactId>
+    <version>{project-version}</version>
+</dependency>
+----
+
 ==== Configuration
 No configuration is required but some of the configuration properties may be useful for you.
 
 [source,yaml,indent=0,options="nowrap"]
 .application.yml
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/resources/application-docs-websockets.yml[]
+include::{root-dir}/subprojects/micronaut-aws-sdk-test/src/test/resources/application-docs-websockets.yml[]
 ----
 <1> You can specify the default connections URL for https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html[MessageSender]
 <2> If you are creating Java functions don't forget to specify the function's name for deployments
@@ -36,7 +54,7 @@ publishes to SNS:
 [source,groovy,indent=0,role="primary"]
 .Groovy
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/apigateway/ws/LambdaEchoFunction.groovy[]
+include::{root-dir}/subprojects/micronaut-aws-sdk-ag-ws/src/test/groovy/com/agorapulse/micronaut/aws/apigateway/ws/LambdaEchoFunction.groovy[]
 ----
 <1> Factory to create `MessageSender` if we want to reply to the message immediately
 <2> Service to publish to SNS to forward the message
@@ -52,7 +70,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse
 [source,java,indent=0,role="secondary"]
 .Java
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/apigateway/ws/LambdaEchoJava.java[]
+include::{root-dir}/subprojects/micronaut-aws-sdk-ag-ws/src/test/groovy/com/agorapulse/micronaut/aws/apigateway/ws/LambdaEchoJava.java[]
 ----
 <1> Factory to create `MessageSender` if we want to reply to the message immediately
 <2> Service to publish to SNS to forward the message
@@ -81,7 +99,7 @@ NOTE: There is no support for routing at the moment, but you can get the matched
 [source,groovy,indent=0,role="primary"]
 .Groovy
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/apigateway/ws/NotificationFunction.groovy[]
+include::{root-dir}/subprojects/micronaut-aws-sdk-ag-ws/src/test/groovy/com/agorapulse/micronaut/aws/apigateway/ws/NotificationFunction.groovy[]
 ----
 <1> `MessageSender` can be injected if you specify `aws.websocket.connnections.url` configuration property
 <2> You can for example react on records published into Simple Notification Service
@@ -91,7 +109,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse
 [source,java,indent=0,role="secondary"]
 .Java
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/apigateway/ws/NotificationHandler.java[]
+include::{root-dir}/subprojects/micronaut-aws-sdk-ag-ws/src/test/groovy/com/agorapulse/micronaut/aws/apigateway/ws/NotificationHandler.java[]
 ----
 <1> `MessageSender` can be injected if you specify `aws.websocket.connnections.url` configuration property
 <2> You can for example react on records published into Simple Notification Service

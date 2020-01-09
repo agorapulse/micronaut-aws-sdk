@@ -4,6 +4,24 @@
 
 This library provides basic support for Amazon S3 using <<Simple Storage Service>>
 
+==== Installation
+
+[source,indent=0,role="primary",subs='verbatim,attributes']
+.Gradle
+----
+compile 'com.agorapulse:micronaut-aws-sdk-s3:{project-version}'
+----
+
+[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
+.Maven
+----
+<dependency>
+    <groupId>com.agorapulse</groupId>
+    <artifactId>micronaut-aws-sdk-s3</artifactId>
+    <version>{project-version}</version>
+</dependency>
+----
+
 ==== Configuration
 
 You can store the name of the bucket in the configuration using `aws.s3.bucket` property. You can create additional configurations
@@ -13,7 +31,7 @@ by providing 'aws.s3.buckets' configuration map.
 [source,yaml,indent=0,options="nowrap"]
 .application.yml
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/resources/application-docs-s3.yml[]
+include::{root-dir}/subprojects/micronaut-aws-sdk-test/src/test/resources/application-docs-s3.yml[]
 ----
 <1> You can define default bucket for the service
 <2> You can define multiple configurations
@@ -31,7 +49,7 @@ Following example shows some of the most common use cases for working with S3 bu
 [source,java,indent=0,options="nowrap"]
 .Creating Bucket
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=create-bucket]
+include::{root-dir}/subprojects/micronaut-aws-sdk-s3/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=create-bucket]
 ----
 <1> Create new bucket of given name
 <2> The bucket is present within the list of all bucket names
@@ -39,7 +57,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse
 [source,java,indent=0,options="nowrap"]
 .Upload File
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=store-file]
+include::{root-dir}/subprojects/micronaut-aws-sdk-s3/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=store-file]
 ----
 <1> Upload file
 <2> File is uploaded
@@ -48,7 +66,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse
 [source,java,indent=0,options="nowrap"]
 .Upload from `InputStream`
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=store-input-stream]
+include::{root-dir}/subprojects/micronaut-aws-sdk-s3/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=store-input-stream]
 ----
 <1> Upload data from stream
 <2> Stream is uploaded
@@ -56,7 +74,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse
 [source,java,indent=0,options="nowrap"]
 .Generate URL
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=generate-url]
+include::{root-dir}/subprojects/micronaut-aws-sdk-s3/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=generate-url]
 ----
 <1> Generate presigned URL
 <2> Downloaded content corresponds with the expected content
@@ -64,7 +82,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse
 [source,java,indent=0,options="nowrap"]
 .Download File
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=download-file]
+include::{root-dir}/subprojects/micronaut-aws-sdk-s3/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=download-file]
 ----
 <1> Prepare a destination file
 <2> Download the file locally
@@ -72,7 +90,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse
 [source,java,indent=0,options="nowrap"]
 .Delete File
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=delete-file]
+include::{root-dir}/subprojects/micronaut-aws-sdk-s3/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=delete-file]
 ----
 <1> Delete file
 <2> The file is no longer present
@@ -80,7 +98,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse
 [source,java,indent=0,options="nowrap"]
 .Delete Bucket
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=delete-bucket]
+include::{root-dir}/subprojects/micronaut-aws-sdk-s3/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=delete-bucket]
 ----
 <1> Delete bucket
 <2> The Bucket is no longer present
@@ -123,8 +141,8 @@ Then you can setup your tests like this:
 [source,groovy,indent=0,role="primary"]
 .Groovy
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceSpec.groovy[tags=header]
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceSpec.groovy[tags=setup]
+include::{root-dir}/subprojects/micronaut-aws-sdk-s3/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceSpec.groovy[tags=header]
+include::{root-dir}/subprojects/micronaut-aws-sdk-s3/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceSpec.groovy[tags=setup]
 
     // test methods
 
@@ -141,9 +159,9 @@ include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse
 [source,java,indent=0,role="secondary"]
 .Java
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=header]
+include::{root-dir}/subprojects/micronaut-aws-sdk-s3/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=header]
 
-include::{root-dir}/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=setup]
+include::{root-dir}/subprojects/micronaut-aws-sdk-s3/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=setup]
 
     // test methods
 
