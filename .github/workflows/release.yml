@@ -21,4 +21,4 @@ jobs:
       uses: ncipollo/semantic-version-action@v1
     - uses: eskatos/gradle-command-action@v1
       with:
-        arguments: gitPublishPush bintrayUpload -PbintrayUsername=${{ secrets.BINTRAY_USER }} -PbintrayApiKey=${{ secrets.BINTRAY_KEY }} -Pversion=${{ steps.version.outputs.tag }} -Prelease=true -Porg.ajoberstar.grgit.auth.username=${{ secrets.GITHUB_PERSONAL_TOKEN }} --stacktrace --debug
+        arguments: gitPublishPush bintrayUpload -PbintrayUsername=${{ secrets.BINTRAY_USER }} -PbintrayApiKey=${{ secrets.BINTRAY_KEY }} -Pversion=${{ steps.version.outputs.tag }} -Prelease=true -Porg.ajoberstar.grgit.auth.username=${{ secrets.GITHUB_PERSONAL_TOKEN }} --stacktrace
