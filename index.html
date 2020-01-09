@@ -731,10 +731,25 @@ Instead you can annotate any method with <code>@Query</code> annotation to make 
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-groovy" data-lang="groovy">Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=builders-import]
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-header]
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=sample-queries]
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-footer]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-groovy" data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
+
+@Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
+interface DynamoDBItemDBService {
+
+    @Query({                                                                            <i class="conum" data-value="3"></i><b>(3)</b>
+        query(DynamoDBEntity) {
+            hash hashKey                                                                <i class="conum" data-value="4"></i><b>(4)</b>
+            range {
+                eq DynamoDBEntity.RANGE_INDEX, rangeKey                                 <i class="conum" data-value="5"></i><b>(5)</b>
+            }
+            only {                                                                      <i class="conum" data-value="6"></i><b>(6)</b>
+                rangeIndex                                                              <i class="conum" data-value="7"></i><b>(7)</b>
+            }
+        }
+    })
+    Flowable&lt;DynamoDBEntity&gt; queryByRangeIndex(String hashKey, String rangeKey)         <i class="conum" data-value="8"></i><b>(8)</b>
+
+}</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -776,11 +791,22 @@ Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projec
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=header]
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">@Service(DynamoDBEntity.class)                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+public interface DynamoDBEntityService {
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-query-class]
+    class EqRangeProjection implements Function&lt;Map&lt;String, Object&gt;, DetachedQuery&gt; {   <i class="conum" data-value="2"></i><b>(2)</b>
+        public DetachedQuery apply(Map&lt;String, Object&gt; arguments) {
+            return Builders.query(DynamoDBEntity.class)                                 <i class="conum" data-value="3"></i><b>(3)</b>
+                .hash(arguments.get("hashKey"))                                         <i class="conum" data-value="4"></i><b>(4)</b>
+                .range(r -&gt;
+                    r.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("rangeKey"))         <i class="conum" data-value="5"></i><b>(5)</b>
+                )
+                .only(DynamoDBEntity.RANGE_INDEX);                                      <i class="conum" data-value="6"></i><b>(6)</b>
+        }
+    }
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-query]
+    @Query(EqRangeProjection.class)                                                     <i class="conum" data-value="7"></i><b>(7)</b>
+    Flowable&lt;DynamoDBEntity&gt; queryByRangeIndex(String hashKey, String rangeKey);        <i class="conum" data-value="8"></i><b>(8)</b>
 
 }</code></pre>
 </div>
@@ -841,13 +867,24 @@ If you need to scan the table by unindexed attributes you can annotate any metho
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-groovy" data-lang="groovy">Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=builders-import]
+<pre class="prettyprint highlight nowrap"><code class="language-groovy" data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-header]
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=sample-scan]
+@Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
+interface DynamoDBItemDBService {
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-footer]</code></pre>
+
+    @Scan({                                                                             <i class="conum" data-value="3"></i><b>(3)</b>
+        scan(DynamoDBEntity) {
+            filter {
+                eq DynamoDBEntity.RANGE_INDEX, foo                                      <i class="conum" data-value="4"></i><b>(4)</b>
+            }
+        }
+    })
+    Flowable&lt;DynamoDBEntity&gt; scanAllByRangeIndex(String foo)                            <i class="conum" data-value="5"></i><b>(5)</b>
+
+
+}</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -877,11 +914,18 @@ Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projec
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=header]
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">@Service(DynamoDBEntity.class)                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+public interface DynamoDBEntityService {
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-scan-class]
+    class EqRangeScan implements Function&lt;Map&lt;String, Object&gt;, DetachedScan&gt; {          <i class="conum" data-value="2"></i><b>(2)</b>
+        public DetachedScan apply(Map&lt;String, Object&gt; arguments) {
+            return Builders.scan(DynamoDBEntity.class)                                  <i class="conum" data-value="3"></i><b>(3)</b>
+                .filter(f -&gt; f.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("foo")));   <i class="conum" data-value="4"></i><b>(4)</b>
+        }
+    }
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-scan]
+    @Scan(EqRangeScan.class)                                                            <i class="conum" data-value="5"></i><b>(5)</b>
+    Flowable&lt;DynamoDBEntity&gt; scanAllByRangeIndex(String foo);                           <i class="conum" data-value="6"></i><b>(6)</b>
 
 }</code></pre>
 </div>
@@ -923,13 +967,25 @@ Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projec
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-groovy" data-lang="groovy">Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=builders-import]
+<pre class="prettyprint highlight nowrap"><code class="language-groovy" data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-header]
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=sample-update]
+@Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
+interface DynamoDBItemDBService {
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-footer]</code></pre>
+
+    @Update({                                                                           <i class="conum" data-value="3"></i><b>(3)</b>
+        update(DynamoDBEntity) {
+            hash hashKey                                                                <i class="conum" data-value="4"></i><b>(4)</b>
+            range rangeKey                                                              <i class="conum" data-value="5"></i><b>(5)</b>
+            add 'number', 1                                                             <i class="conum" data-value="6"></i><b>(6)</b>
+            returnUpdatedNew { number }                                                 <i class="conum" data-value="7"></i><b>(7)</b>
+        }
+    })
+    Number increment(String hashKey, String rangeKey)                                   <i class="conum" data-value="8"></i><b>(8)</b>
+
+
+}</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -971,11 +1027,21 @@ Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projec
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=header]
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">@Service(DynamoDBEntity.class)                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+public interface DynamoDBEntityService {
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-update-class]
+    class IncrementNumber implements Function&lt;Map&lt;String, Object&gt;, DetachedUpdate&gt; {    <i class="conum" data-value="2"></i><b>(2)</b>
+        public DetachedUpdate apply(Map&lt;String, Object&gt; arguments) {
+            return Builders.update(DynamoDBEntity.class)                                <i class="conum" data-value="3"></i><b>(3)</b>
+                .hash(arguments.get("hashKey"))                                         <i class="conum" data-value="4"></i><b>(4)</b>
+                .range(arguments.get("rangeKey"))                                       <i class="conum" data-value="5"></i><b>(5)</b>
+                .add("number", 1)                                                       <i class="conum" data-value="6"></i><b>(6)</b>
+                .returnUpdatedNew(DynamoDBEntity::getNumber);                           <i class="conum" data-value="7"></i><b>(7)</b>
+        }
+    }
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBEntityService.java[tags=sample-update]
+    @Update(IncrementNumber.class)                                                      <i class="conum" data-value="8"></i><b>(8)</b>
+    Number increment(String hashKey, String rangeKey);                                  <i class="conum" data-value="9"></i><b>(9)</b>
 
 }</code></pre>
 </div>
@@ -1031,24 +1097,32 @@ Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projec
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-groovy" data-lang="groovy">        DynamoDBServiceProvider provider = context.getBean(DynamoDBServiceProvider)
-        DynamoDBService&lt;DynamoDBEntity&gt; s = provider.findOrCreate(DynamoDBEntity)       <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code class="language-groovy" data-lang="groovy">DynamoDBServiceProvider provider = context.getBean(DynamoDBServiceProvider)
+DynamoDBService&lt;DynamoDBEntity&gt; s = provider.findOrCreate(DynamoDBEntity)       <i class="conum" data-value="1"></i><b>(1)</b>
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=create-table]
+s.createTable()                                                                 <i class="conum" data-value="2"></i><b>(2)</b>
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=save-entity]
+s.save(new DynamoDBEntity(                                                      <i class="conum" data-value="3"></i><b>(3)</b>
+    parentId: '1',
+    id: '1',
+    rangeIndex: 'foo',
+    date: REFERENCE_DATE.toDate()
+))
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=load-entity]
+s.get('1', '1')                                                                 <i class="conum" data-value="4"></i><b>(4)</b>
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=query-by-range-index]
+s.query('1', DynamoDBEntity.RANGE_INDEX, 'bar').count == 1                      <i class="conum" data-value="5"></i><b>(5)</b>
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=query-by-dates]
+s.queryByDates('3', DynamoDBEntity.DATE_INDEX, [                                <i class="conum" data-value="6"></i><b>(6)</b>
+    after: REFERENCE_DATE.plusDays(9).toDate(),
+    before: REFERENCE_DATE.plusDays(20).toDate(),
+]).count == 1
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=increment]
+s.increment('1', '1', 'number')                                                 <i class="conum" data-value="7"></i><b>(7)</b>
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=delete]
+s.delete(s.get('1', '1'))                                                       <i class="conum" data-value="8"></i><b>(8)</b>
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=delete-all]</code></pre>
+s.deleteAll('1', DynamoDBEntity.RANGE_INDEX, 'bar') == 1                        <i class="conum" data-value="9"></i><b>(9)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -1094,23 +1168,41 @@ Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projec
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=obtain-service]
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">DynamoDBServiceProvider provider = ctx.getBean(DynamoDBServiceProvider.class);
+DynamoDBService&lt;DynamoDBEntity&gt; s = provider.findOrCreate(DynamoDBEntity.class);<i class="conum" data-value="1"></i><b>(1)</b>
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=create-table]
+assertNotNull(
+    s.createTable(5L, 5L)                                                       <i class="conum" data-value="2"></i><b>(2)</b>
+);
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=save-entity]
+assertNotNull(
+    s.save(createEntity("1", "1", "foo", REFERENCE_DATE.toDate()))              <i class="conum" data-value="3"></i><b>(3)</b>
+);
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=load-entity]
+assertNotNull(
+    s.get("1", "1")                                                             <i class="conum" data-value="4"></i><b>(4)</b>
+);
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=query-by-range-index]
+assertEquals(1,
+    s.query("1", DynamoDBEntity.RANGE_INDEX, "bar").getCount().intValue()        <i class="conum" data-value="5"></i><b>(5)</b>
+);
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=query-by-dates]
+assertEquals(1,
+    s.queryByDates(                                                             <i class="conum" data-value="6"></i><b>(6)</b>
+        "3",
+        DynamoDBEntity.DATE_INDEX,
+        REFERENCE_DATE.plusDays(9).toDate(),
+        REFERENCE_DATE.plusDays(20).toDate()
+    ).getCount().intValue()
+);
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=increment]
+s.increment("1", "1", "number");                                                <i class="conum" data-value="7"></i><b>(7)</b>
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=delete]
+s.delete(s.get("1", "1"));                                                      <i class="conum" data-value="8"></i><b>(8)</b>
 
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=delete-all]</code></pre>
+assertEquals(1,
+    s.deleteAll("1", DynamoDBEntity.RANGE_INDEX, "bar")                         <i class="conum" data-value="9"></i><b>(9)</b>
+);</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -1228,8 +1320,41 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-groovy" data-lang="groovy">Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=testcontainers-header]
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=testcontainers-setup]
+<pre class="prettyprint highlight"><code class="language-groovy" data-lang="groovy">@Stepwise
+@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
+class DefaultDynamoDBServiceSpec extends Specification {
+
+    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="2"></i><b>(2)</b>
+
+    @Shared LocalStackContainer localstack = new LocalStackContainer()                  <i class="conum" data-value="3"></i><b>(3)</b>
+        .withServices(LocalStackContainer.Service.DYNAMODB)
+
+    DynamoDBService&lt;DynamoDBEntity&gt; s
+    AmazonDynamoDB amazonDynamoDB
+    IDynamoDBMapper mapper
+
+    void setup() {
+        amazonDynamoDB = AmazonDynamoDBClient                                           <i class="conum" data-value="4"></i><b>(4)</b>
+            .builder()
+            .withEndpointConfiguration(
+                localstack.getEndpointConfiguration(LocalStackContainer.Service.DYNAMODB)
+            )
+            .withCredentials(
+                localstack.defaultCredentialsProvider
+            )
+            .build()
+
+        mapper = new DynamoDBMapper(amazonDynamoDB)
+
+        context = ApplicationContext.build().build()
+        context.registerSingleton(AmazonDynamoDB, amazonDynamoDB)                       <i class="conum" data-value="5"></i><b>(5)</b>
+        context.registerSingleton(IDynamoDBMapper, mapper)                              <i class="conum" data-value="6"></i><b>(6)</b>
+        context.start()
+
+        DynamoDBServiceProvider provider = context.getBean(DynamoDBServiceProvider)     <i class="conum" data-value="7"></i><b>(7)</b>
+        s = provider.findOrCreate(DynamoDBEntity)                                       <i class="conum" data-value="8"></i><b>(8)</b>
+    }
+
     // test methods
 
 }</code></pre>
@@ -1274,8 +1399,40 @@ Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projec
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-java" data-lang="java">Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=header]
-Unresolved directive in dynamodb.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=setup]
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class DynamoDBServiceTest {
+    @Rule
+    public LocalStackContainer localstack = new LocalStackContainer()                   <i class="conum" data-value="1"></i><b>(1)</b>
+        .withServices(LocalStackContainer.Service.DYNAMODB);
+
+    public ApplicationContext ctx;                                                      <i class="conum" data-value="2"></i><b>(2)</b>
+
+    @Before
+    public void setup() {
+        AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClient                            <i class="conum" data-value="3"></i><b>(3)</b>
+            .builder()
+            .withEndpointConfiguration(
+                localstack.getEndpointConfiguration(LocalStackContainer.Service.DYNAMODB)
+            )
+            .withCredentials(
+                localstack.getDefaultCredentialsProvider()
+            )
+            .build();
+
+        IDynamoDBMapper mapper = new DynamoDBMapper(amazonDynamoDB);
+
+        ctx = ApplicationContext.build().build();
+        ctx.registerSingleton(AmazonDynamoDB.class, amazonDynamoDB);                    <i class="conum" data-value="4"></i><b>(4)</b>
+        ctx.registerSingleton(IDynamoDBMapper.class, mapper);                           <i class="conum" data-value="5"></i><b>(5)</b>
+        ctx.start();
+    }
+
+    @After
+    public void cleanup() {
+        if (ctx != null) {                                                              <i class="conum" data-value="6"></i><b>(6)</b>
+            ctx.close();
+        }
+    }
+
     @Test
     public void testSomething() {
         DynamoDBServiceProvider provider = ctx.getBean(DynamoDBServiceProvider.class);  <i class="conum" data-value="7"></i><b>(7)</b>
@@ -1399,7 +1556,25 @@ Otherwise you need no configuration at all but some of the configuration may be 
 <div class="listingblock">
 <div class="title">application.yml</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-yaml" data-lang="yaml">Unresolved directive in kinesis.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/resources/application-docs-kinesis.yml[]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-yaml" data-lang="yaml">aws:
+  kinesis:
+    region: sa-east-1
+    stream: MyStream                                                                    <i class="conum" data-value="1"></i><b>(1)</b>
+
+    streams:                                                                            <i class="conum" data-value="2"></i><b>(2)</b>
+      test:                                                                             <i class="conum" data-value="3"></i><b>(3)</b>
+        stream: TestStream
+
+    application:
+      name: MyKinesisApp                                                                <i class="conum" data-value="4"></i><b>(4)</b>
+    worker:
+      id: rubble                                                                        <i class="conum" data-value="5"></i><b>(5)</b>
+    listener:
+      stream: MyStreamToConsume                                                         <i class="conum" data-value="6"></i><b>(6)</b>
+
+    listeners:                                                                          <i class="conum" data-value="7"></i><b>(7)</b>
+      test:                                                                             <i class="conum" data-value="8"></i><b>(8)</b>
+        stream: TestStreamToConsume</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -1452,8 +1627,27 @@ the stream.</p>
 <div class="listingblock">
 <div class="title">Publishing String Records</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in kinesis.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=header]
-Unresolved directive in kinesis.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=string]
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+interface DefaultClient {
+    void putRecordString(String record);                                                <i class="conum" data-value="2"></i><b>(2)</b>
+
+    PutRecordResult putRecord(String partitionKey, String record);                      <i class="conum" data-value="3"></i><b>(3)</b>
+
+    void putRecordAnno(@PartitionKey String id, String record);                         <i class="conum" data-value="4"></i><b>(4)</b>
+
+    void putRecord(String partitionKey, String record, String sequenceNumber);          <i class="conum" data-value="5"></i><b>(5)</b>
+
+    void putRecordAnno(                                                                 <i class="conum" data-value="6"></i><b>(6)</b>
+                                                                                        @PartitionKey String id,
+                                                                                        String record,
+                                                                                        @SequenceNumber String sqn
+    );
+
+    void putRecordAnnoNumbers(                                                          <i class="conum" data-value="7"></i><b>(7)</b>
+                                                                                        @PartitionKey Long id,
+                                                                                        String record,
+                                                                                        @SequenceNumber int sequenceNumber
+    );
 }</code></pre>
 </div>
 </div>
@@ -1492,8 +1686,17 @@ Unresolved directive in kinesis.adoc - include::/Users/ladin/development/project
 <div class="listingblock">
 <div class="title">Publishing Byte Array Records</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in kinesis.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=header]
-Unresolved directive in kinesis.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=bytes]
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+interface DefaultClient {
+    void putRecordBytes(byte[] record);                                                 <i class="conum" data-value="2"></i><b>(2)</b>
+
+    void putRecordDataByteArray(@PartitionKey String id, byte[] value);                 <i class="conum" data-value="3"></i><b>(3)</b>
+
+    PutRecordsResult putRecords(Iterable&lt;PutRecordsRequestEntry&gt; entries);              <i class="conum" data-value="4"></i><b>(4)</b>
+
+    PutRecordsResult putRecords(PutRecordsRequestEntry... entries);                     <i class="conum" data-value="5"></i><b>(5)</b>
+
+    PutRecordsResult putRecord(PutRecordsRequestEntry entry);                           <i class="conum" data-value="6"></i><b>(6)</b>
 }</code></pre>
 </div>
 </div>
@@ -1528,8 +1731,15 @@ Unresolved directive in kinesis.adoc - include::/Users/ladin/development/project
 <div class="listingblock">
 <div class="title">Publishing Plain Old Java Objects</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in kinesis.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=header]
-Unresolved directive in kinesis.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=pogo]
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+interface DefaultClient {
+    void putRecordObject(Pogo pogo);                                                    <i class="conum" data-value="2"></i><b>(2)</b>
+
+    PutRecordsResult putRecordObjects(Pogo... pogo);                                    <i class="conum" data-value="3"></i><b>(3)</b>
+
+    PutRecordsResult putRecordObjects(Iterable&lt;Pogo&gt; pogo);                             <i class="conum" data-value="4"></i><b>(4)</b>
+
+    void putRecordDataObject(@PartitionKey String id, Pogo value);                      <i class="conum" data-value="5"></i><b>(5)</b>
 }</code></pre>
 </div>
 </div>
@@ -1560,8 +1770,15 @@ Unresolved directive in kinesis.adoc - include::/Users/ladin/development/project
 <div class="listingblock">
 <div class="title">Publishing Events</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in kinesis.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=header]
-Unresolved directive in kinesis.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/DefaultClient.java[tags=events]
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+interface DefaultClient {
+    PutRecordResult putEvent(MyEvent event);                                            <i class="conum" data-value="2"></i><b>(2)</b>
+
+    PutRecordsResult putEventsIterable(Iterable&lt;MyEvent&gt; events);                       <i class="conum" data-value="3"></i><b>(3)</b>
+
+    void putEventsArrayNoReturn(MyEvent... events);                                     <i class="conum" data-value="4"></i><b>(4)</b>
+
+    @Stream("OtherStream") PutRecordResult putEventToStream(MyEvent event);             <i class="conum" data-value="5"></i><b>(5)</b>
 }</code></pre>
 </div>
 </div>
@@ -1634,7 +1851,56 @@ then the method will be triggered with the new records in the stream.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>Unresolved directive in kinesis.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisListenerTester.java[tags=all]</pre>
+<pre>@Singleton                                                                              <i class="conum" data-value="1"></i><b>(1)</b>
+public class KinesisListenerTester {
+
+    @KinesisListener
+    public void listenString(String string) {                                           <i class="conum" data-value="2"></i><b>(2)</b>
+        String message = "EXECUTED: listenString(" + string + ")";
+        logExecution(message);
+    }
+
+    @KinesisListener
+    public void listenRecord(Record record) {                                           <i class="conum" data-value="3"></i><b>(3)</b>
+        logExecution("EXECUTED: listenRecord(" + record + ")");
+    }
+
+
+    @KinesisListener
+    public void listenStringRecord(String string, Record record) {                      <i class="conum" data-value="4"></i><b>(4)</b>
+        logExecution("EXECUTED: listenStringRecord(" + string + ", " + record + ")");
+    }
+
+    @KinesisListener
+    public void listenObject(MyEvent event) {                                           <i class="conum" data-value="5"></i><b>(5)</b>
+        logExecution("EXECUTED: listenObject(" + event + ")");
+    }
+
+    @KinesisListener
+    public void listenObjectRecord(MyEvent event, Record record) {                      <i class="conum" data-value="6"></i><b>(6)</b>
+        logExecution("EXECUTED: listenObjectRecord(" + event + ", " + record + ")");
+    }
+
+    @KinesisListener
+    public void listenPogoRecord(Pogo event) {                                          <i class="conum" data-value="7"></i><b>(7)</b>
+        logExecution("EXECUTED: listenPogoRecord(" + event + ")");
+    }
+
+    public List&lt;String&gt; getExecutions() {
+        return executions;
+    }
+
+    public void setExecutions(List&lt;String&gt; executions) {
+        this.executions = executions;
+    }
+
+    private void logExecution(String message) {
+        executions.add(message);
+        System.err.println(message);
+    }
+
+    private List&lt;String&gt; executions = new CopyOnWriteArrayList&lt;&gt;();
+}</pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -1730,11 +1996,74 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-groovy" data-lang="groovy">Unresolved directive in kinesis.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisAnnotationsSpec.groovy[tags=testcontainers-header]
+<pre class="prettyprint highlight"><code class="language-groovy" data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
+@RestoreSystemProperties                                                                <i class="conum" data-value="2"></i><b>(2)</b>
+class KinesisAnnotationsSpec extends Specification {
 
-Unresolved directive in kinesis.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisAnnotationsSpec.groovy[tags=testcontainers-setup]
+    private static final String TEST_STREAM = 'TestStream'
+    private static final String APP_NAME = 'AppName'
 
-Unresolved directive in kinesis.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisAnnotationsSpec.groovy[tags=testcontainers-test]
+    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.10')          <i class="conum" data-value="3"></i><b>(3)</b>
+        .withServices(KINESIS, DYNAMODB)
+
+    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="4"></i><b>(4)</b>
+
+    void setup() {
+        System.setProperty('com.amazonaws.sdk.disableCbor', 'true')                     <i class="conum" data-value="5"></i><b>(5)</b>
+        System.setProperty('aws.region', 'eu-west-1')
+
+        AmazonDynamoDB dynamo = AmazonDynamoDBClient                                    <i class="conum" data-value="6"></i><b>(6)</b>
+            .builder()
+            .withEndpointConfiguration(localstack.getEndpointConfiguration(DYNAMODB))
+            .withCredentials(localstack.defaultCredentialsProvider)
+            .build()
+
+        AmazonKinesis kinesis = AmazonKinesisClient                                     <i class="conum" data-value="7"></i><b>(7)</b>
+            .builder()
+            .withEndpointConfiguration(localstack.getEndpointConfiguration(KINESIS))
+            .withCredentials(localstack.defaultCredentialsProvider)
+            .build()
+
+        AmazonCloudWatch amazonCloudWatch = Mock(AmazonCloudWatch)
+
+        context = ApplicationContext.build().properties(                                <i class="conum" data-value="8"></i><b>(8)</b>
+            'aws.kinesis.application.name': APP_NAME,
+            'aws.kinesis.stream': TEST_STREAM,
+            'aws.kinesis.listener.stream': TEST_STREAM,
+            'aws.kinesis.listener.failoverTimeMillis': '1000',
+            'aws.kinesis.listener.shardSyncIntervalMillis': '1000',
+            'aws.kinesis.listener.idleTimeBetweenReadsInMillis': '1000',
+            'aws.kinesis.listener.parentShardPollIntervalMillis': '1000',
+            'aws.kinesis.listener.timeoutInSeconds': '1000',
+            'aws.kinesis.listener.retryGetRecordsInSeconds': '1000',
+            'aws.kinesis.listener.metricsLevel': 'NONE',
+        ).build()
+        context.registerSingleton(AmazonKinesis, kinesis)
+        context.registerSingleton(AmazonDynamoDB, dynamo)
+        context.registerSingleton(AmazonCloudWatch, amazonCloudWatch)
+        context.registerSingleton(AWSCredentialsProvider, localstack.defaultCredentialsProvider)
+        context.start()
+    }
+
+    void 'kinesis listener is executed'() {
+        when:
+            KinesisService service = context.getBean(KinesisService)                    <i class="conum" data-value="9"></i><b>(9)</b>
+            KinesisListenerTester tester = context.getBean(KinesisListenerTester)       <i class="conum" data-value="10"></i><b>(10)</b>
+            DefaultClient client = context.getBean(DefaultClient)                       <i class="conum" data-value="11"></i><b>(11)</b>
+
+            service.createStream()
+            service.waitForActive()
+
+            waitForWorkerReady(300, 100)
+
+            Disposable subscription = publishEventAsync(tester, client)
+
+            waitForReceivedMessages(tester, 300, 100)
+
+            subscription.dispose()
+        then:
+            allTestEventsReceived(tester)
+    }
 
 }</code></pre>
 </div>
@@ -1790,11 +2119,82 @@ Unresolved directive in kinesis.adoc - include::/Users/ladin/development/project
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-java" data-lang="java">Unresolved directive in kinesis.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisTest.java[tags=testcontainers-header]
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class KinesisTest {
 
-Unresolved directive in kinesis.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisTest.java[tags=testcontainers-setup]
+    public ApplicationContext context;                                                  <i class="conum" data-value="1"></i><b>(1)</b>
 
-Unresolved directive in kinesis.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisTest.java[tags=testcontainers-test]
+    @Rule
+    public LocalStackContainer localstack = new LocalStackContainer("0.8.10")           <i class="conum" data-value="2"></i><b>(2)</b>
+        .withServices(DYNAMODB, KINESIS);
+
+    @Before
+    public void setup() {
+        System.setProperty("com.amazonaws.sdk.disableCbor", "true");                    <i class="conum" data-value="3"></i><b>(3)</b>
+        System.setProperty("aws.region", "eu-west-1");
+
+        AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClient                            <i class="conum" data-value="4"></i><b>(4)</b>
+            .builder()
+            .withEndpointConfiguration(localstack.getEndpointConfiguration(DYNAMODB))
+            .withCredentials(localstack.getDefaultCredentialsProvider())
+            .build();
+
+        AmazonKinesis amazonKinesis = AmazonKinesisClient                               <i class="conum" data-value="5"></i><b>(5)</b>
+            .builder()
+            .withEndpointConfiguration(localstack.getEndpointConfiguration(KINESIS))
+            .withCredentials(localstack.getDefaultCredentialsProvider())
+            .build();
+
+        AmazonCloudWatch cloudWatch = new MockCloudWatch();
+
+        Map&lt;String, Object&gt; properties = new HashMap&lt;&gt;();                               <i class="conum" data-value="6"></i><b>(6)</b>
+        properties.put("aws.kinesis.application.name", "TestApp");
+        properties.put("aws.kinesis.stream", TEST_STREAM);
+        properties.put("aws.kinesis.listener.stream", TEST_STREAM);
+
+        // you can set other custom client configuration properties
+        properties.put("aws.kinesis.listener.failoverTimeMillis", "1000");
+        properties.put("aws.kinesis.listener.shardSyncIntervalMillis", "1000");
+        properties.put("aws.kinesis.listener.idleTimeBetweenReadsInMillis", "1000");
+        properties.put("aws.kinesis.listener.parentShardPollIntervalMillis", "1000");
+        properties.put("aws.kinesis.listener.timeoutInSeconds", "1000");
+        properties.put("aws.kinesis.listener.retryGetRecordsInSeconds", "1000");
+        properties.put("aws.kinesis.listener.metricsLevel", "NONE");
+
+
+        context = ApplicationContext.build(properties).build();                         <i class="conum" data-value="7"></i><b>(7)</b>
+        context.registerSingleton(AmazonKinesis.class, amazonKinesis);
+        context.registerSingleton(AmazonDynamoDB.class, amazonDynamoDB);
+        context.registerSingleton(AmazonCloudWatch.class, cloudWatch);
+        context.registerSingleton(AWSCredentialsProvider.class, localstack.getDefaultCredentialsProvider());
+        context.start();
+    }
+
+    @After
+    public void cleanup() {
+        System.clearProperty("com.amazonaws.sdk.disableCbor");                          <i class="conum" data-value="8"></i><b>(8)</b>
+        System.clearProperty("aws.region");
+        if (context != null) {
+            context.close();                                                            <i class="conum" data-value="9"></i><b>(9)</b>
+        }
+    }
+
+    @Test
+    public void testJavaService() throws InterruptedException {
+        KinesisService service = context.getBean(KinesisService.class);                 <i class="conum" data-value="10"></i><b>(10)</b>
+        KinesisListenerTester tester = context.getBean(KinesisListenerTester.class);    <i class="conum" data-value="11"></i><b>(11)</b>
+        DefaultClient client = context.getBean(DefaultClient.class);                    <i class="conum" data-value="12"></i><b>(12)</b>
+
+        service.createStream();
+        service.waitForActive();
+
+        waitForWorkerReady(300, 100);
+        Disposable subscription = publishEventsAsync(tester, client);
+        waitForRecievedMessages(tester, 300, 100);
+
+        subscription.dispose();
+
+        Assert.assertTrue(allTestEventsReceived(tester));
+    }
 
 }</code></pre>
 </div>
@@ -1893,7 +2293,14 @@ by providing 'aws.s3.buckets' configuration map.</p>
 <div class="listingblock">
 <div class="title">application.yml</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-yaml" data-lang="yaml">Unresolved directive in s3.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/resources/application-docs-s3.yml[]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-yaml" data-lang="yaml">aws:
+  s3:
+    region: sa-east-1
+    bucket: MyBucket                                                                    <i class="conum" data-value="1"></i><b>(1)</b>
+
+    buckets:                                                                            <i class="conum" data-value="2"></i><b>(2)</b>
+      test:                                                                             <i class="conum" data-value="3"></i><b>(3)</b>
+        bucket: TestBucket</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -1928,7 +2335,9 @@ You should always use <code>@Named</code> qualifier when injecting <code>SimpleS
 <div class="listingblock">
 <div class="title">Creating Bucket</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in s3.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=create-bucket]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">service.createBucket(MY_BUCKET);                                                <i class="conum" data-value="1"></i><b>(1)</b>
+
+assertTrue(service.listBucketNames().contains(MY_BUCKET));                      <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -1946,7 +2355,14 @@ You should always use <code>@Named</code> qualifier when injecting <code>SimpleS
 <div class="listingblock">
 <div class="title">Upload File</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in s3.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=store-file]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">File sampleContent = createFileWithSampleContent();
+
+service.storeFile(TEXT_FILE_PATH, sampleContent);                               <i class="conum" data-value="1"></i><b>(1)</b>
+
+assertTrue(service.exists(TEXT_FILE_PATH));                                     <i class="conum" data-value="2"></i><b>(2)</b>
+
+Flowable&lt;S3ObjectSummary&gt; summaries = service.listObjectSummaries("foo");       <i class="conum" data-value="3"></i><b>(3)</b>
+assertEquals(Long.valueOf(0L), summaries.count().blockingGet());</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -1968,7 +2384,14 @@ You should always use <code>@Named</code> qualifier when injecting <code>SimpleS
 <div class="listingblock">
 <div class="title">Upload from <code>InputStream</code></div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in s3.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=store-input-stream]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">service.storeInputStream(                                                       <i class="conum" data-value="1"></i><b>(1)</b>
+    KEY,
+    new ByteArrayInputStream(SAMPLE_CONTENT.getBytes()),
+    buildMetadata()
+);
+
+Flowable&lt;S3ObjectSummary&gt; fooSummaries = service.listObjectSummaries("foo");    <i class="conum" data-value="2"></i><b>(2)</b>
+assertEquals(KEY, fooSummaries.blockingFirst().getKey());</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -1986,7 +2409,9 @@ You should always use <code>@Named</code> qualifier when injecting <code>SimpleS
 <div class="listingblock">
 <div class="title">Generate URL</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in s3.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=generate-url]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">String url = service.generatePresignedUrl(KEY, TOMORROW);                       <i class="conum" data-value="1"></i><b>(1)</b>
+
+assertEquals(SAMPLE_CONTENT, download(url));                                    <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2004,7 +2429,13 @@ You should always use <code>@Named</code> qualifier when injecting <code>SimpleS
 <div class="listingblock">
 <div class="title">Download File</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in s3.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=download-file]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">File dir = tmp.newFolder();
+File file = new File(dir, "bar.baz");                                           <i class="conum" data-value="1"></i><b>(1)</b>
+
+service.getFile(KEY, file);                                                     <i class="conum" data-value="2"></i><b>(2)</b>
+assertTrue(file.exists());
+
+assertEquals(SAMPLE_CONTENT, new String(Files.readAllBytes(Paths.get(file.toURI()))));</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2022,7 +2453,8 @@ You should always use <code>@Named</code> qualifier when injecting <code>SimpleS
 <div class="listingblock">
 <div class="title">Delete File</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in s3.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=delete-file]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">service.deleteFile(TEXT_FILE_PATH);                                             <i class="conum" data-value="1"></i><b>(1)</b>
+assertFalse(service.exists(TEXT_FILE_PATH));                                    <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2040,7 +2472,8 @@ You should always use <code>@Named</code> qualifier when injecting <code>SimpleS
 <div class="listingblock">
 <div class="title">Delete Bucket</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in s3.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=delete-bucket]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">service.deleteBucket();                                                         <i class="conum" data-value="1"></i><b>(1)</b>
+assertFalse(service.listBucketNames().contains(MY_BUCKET));                     <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2098,8 +2531,35 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-groovy" data-lang="groovy">Unresolved directive in s3.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceSpec.groovy[tags=header]
-Unresolved directive in s3.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceSpec.groovy[tags=setup]
+<pre class="prettyprint highlight"><code class="language-groovy" data-lang="groovy">@Stepwise
+@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
+class SimpleStorageServiceSpec extends Specification {
+
+    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="2"></i><b>(2)</b>
+
+    @Shared LocalStackContainer localstack = new LocalStackContainer()                  <i class="conum" data-value="3"></i><b>(3)</b>
+        .withServices(S3)
+
+    @Rule TemporaryFolder tmp
+
+    AmazonS3 amazonS3
+    SimpleStorageService service
+
+    void setup() {
+        amazonS3 = AmazonS3Client                                                       <i class="conum" data-value="4"></i><b>(4)</b>
+            .builder()
+            .withEndpointConfiguration(localstack.getEndpointConfiguration(S3))
+            .withCredentials(localstack.defaultCredentialsProvider)
+            .build()
+
+        context = ApplicationContext
+            .build('aws.s3.bucket': MY_BUCKET)                                          <i class="conum" data-value="5"></i><b>(5)</b>
+            .build()
+        context.registerSingleton(AmazonS3, amazonS3)                                   <i class="conum" data-value="6"></i><b>(6)</b>
+        context.start()
+
+        service = context.getBean(SimpleStorageService)                                 <i class="conum" data-value="7"></i><b>(7)</b>
+    }
 
     // test methods
 
@@ -2141,9 +2601,38 @@ Unresolved directive in s3.adoc - include::/Users/ladin/development/projects/ago
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-java" data-lang="java">Unresolved directive in s3.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=header]
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class SimpleStorageServiceTest {
 
-Unresolved directive in s3.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=setup]
+    @Rule
+    public final LocalStackContainer localstack = new LocalStackContainer()            <i class="conum" data-value="1"></i><b>(1)</b>
+        .withServices(S3);
+
+    @Rule
+    public final TemporaryFolder tmp = new TemporaryFolder();
+
+    private ApplicationContext ctx;                                                     <i class="conum" data-value="2"></i><b>(2)</b>
+
+    @Before
+    public void setup() {
+        AmazonS3 amazonS3 = AmazonS3Client                                              <i class="conum" data-value="3"></i><b>(3)</b>
+            .builder()
+            .withEndpointConfiguration(localstack.getEndpointConfiguration(S3))
+            .withCredentials(localstack.getDefaultCredentialsProvider())
+            .build();
+
+        ctx = ApplicationContext
+            .build(Collections.singletonMap("aws.s3.bucket", MY_BUCKET))
+            .build();
+        ctx.registerSingleton(AmazonS3.class, amazonS3);                                <i class="conum" data-value="4"></i><b>(4)</b>
+        ctx.start();
+    }
+
+    @After
+    public void cleanup() {
+        if (ctx != null) {                                                              <i class="conum" data-value="5"></i><b>(5)</b>
+            ctx.close();
+        }
+    }
 
     // test methods
 
@@ -2219,7 +2708,74 @@ it uses default credentials chain to obtain the credentials.</p>
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-groovy" data-lang="groovy">Unresolved directive in ses.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/ses/SendEmailSpec.groovy[]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-groovy" data-lang="groovy">/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2018-2020 Agorapulse.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.agorapulse.micronaut.aws.ses
+
+import com.amazonaws.services.simpleemail.AmazonSimpleEmailService
+import com.amazonaws.services.simpleemail.model.SendRawEmailRequest
+import com.amazonaws.services.simpleemail.model.SendRawEmailResult
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
+import spock.lang.Subject
+
+/**
+ * Tests for sending emails with Groovy.
+ */
+class SendEmailSpec extends Specification {
+
+    AmazonSimpleEmailService simpleEmailService = Mock(AmazonSimpleEmailService)
+
+    @Rule
+    TemporaryFolder tmp = new TemporaryFolder()
+
+    @Subject
+    SimpleEmailService service = new DefaultSimpleEmailService(simpleEmailService)
+
+    void "send email"() {
+        given:
+            File file = tmp.newFile('test.pdf')
+            file.text = 'not a real PDF'
+            String thePath = file.canonicalPath
+        when:
+            EmailDeliveryStatus status = service.send {                                 <i class="conum" data-value="1"></i><b>(1)</b>
+                subject 'Hi Paul'                                                       <i class="conum" data-value="2"></i><b>(2)</b>
+                from 'subscribe@groovycalamari.com'                                     <i class="conum" data-value="3"></i><b>(3)</b>
+                to 'me@sergiodelamo.com'                                                <i class="conum" data-value="4"></i><b>(4)</b>
+                htmlBody '&lt;p&gt;This is an example body&lt;/p&gt;'                               <i class="conum" data-value="5"></i><b>(5)</b>
+                attachment {                                                            <i class="conum" data-value="6"></i><b>(6)</b>
+                    filepath thePath                                                    <i class="conum" data-value="7"></i><b>(7)</b>
+                    filename 'test.pdf'                                                 <i class="conum" data-value="8"></i><b>(8)</b>
+                    mimeType 'application/pdf'                                          <i class="conum" data-value="9"></i><b>(9)</b>
+                    description 'An example pdf'                                        <i class="conum" data-value="10"></i><b>(10)</b>
+                }
+            }
+
+        then:
+            status == EmailDeliveryStatus.STATUS_DELIVERED
+
+            simpleEmailService.sendRawEmail(_) &gt;&gt; { SendRawEmailRequest request -&gt;
+                return new SendRawEmailResult().withMessageId('foobar')
+            }
+    }
+
+}</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2269,7 +2825,77 @@ it uses default credentials chain to obtain the credentials.</p>
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in ses.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/ses/SendEmailTest.java[]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2018-2020 Agorapulse.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.agorapulse.micronaut.aws.ses;
+
+import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
+import com.amazonaws.services.simpleemail.model.SendRawEmailResult;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.mockito.Mockito;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Collections;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+/**
+ * Tests for sending emails with Java.
+ */
+public class SendEmailTest {
+
+    @Rule public TemporaryFolder tmp = new TemporaryFolder();
+
+    private AmazonSimpleEmailService simpleEmailService = mock(AmazonSimpleEmailService.class);
+
+    private SimpleEmailService service = new DefaultSimpleEmailService(simpleEmailService);
+
+    @Test
+    public void testSendEmail() throws IOException {
+        when(simpleEmailService.sendRawEmail(Mockito.any()))
+            .thenReturn(new SendRawEmailResult().withMessageId("foobar"));
+
+        File file = tmp.newFile("test.pdf");
+        Files.write(file.toPath(), Collections.singletonList("not a real PDF"));
+        String filepath = file.getCanonicalPath();
+
+        EmailDeliveryStatus status = service.send(e -&gt;                                  <i class="conum" data-value="1"></i><b>(1)</b>
+            e.subject("Hi Paul")                                                        <i class="conum" data-value="2"></i><b>(2)</b>
+                .from("subscribe@groovycalamari.com")                                   <i class="conum" data-value="3"></i><b>(3)</b>
+                .to("me@sergiodelamo.com")                                              <i class="conum" data-value="4"></i><b>(4)</b>
+                .htmlBody("&lt;p&gt;This is an example body&lt;/p&gt;")                             <i class="conum" data-value="5"></i><b>(5)</b>
+                .attachment(a -&gt;                                                        <i class="conum" data-value="6"></i><b>(6)</b>
+                    a.filepath(filepath)                                                <i class="conum" data-value="7"></i><b>(7)</b>
+                        .filename("test.pdf")                                           <i class="conum" data-value="8"></i><b>(8)</b>
+                        .mimeType("application/pdf")                                    <i class="conum" data-value="9"></i><b>(9)</b>
+                        .description("An example pdf")                                  <i class="conum" data-value="10"></i><b>(10)</b>
+                )
+        );
+
+        Assert.assertEquals(EmailDeliveryStatus.STATUS_DELIVERED, status);
+    }
+}</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2376,7 +3002,21 @@ it uses default credentials chain to obtain the credentials.</p>
 <div class="listingblock">
 <div class="title">application.yml</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-yaml" data-lang="yaml">Unresolved directive in sns.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/resources/application-docs-sns.yml[]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-yaml" data-lang="yaml">aws:
+  sns:
+    region: sa-east-1
+    topic: MyTopic                                                                      <i class="conum" data-value="1"></i><b>(1)</b>
+    ios:
+      arn: 'arn:aws:sns:eu-west-1:123456789:app/APNS/my-ios-app'                        <i class="conum" data-value="2"></i><b>(2)</b>
+    android:
+      arn: 'arn:aws:sns:eu-west-1:123456789:app/GCM/my-android-app'                     <i class="conum" data-value="3"></i><b>(3)</b>
+    amazon:
+      arn: 'arn:aws:sns:eu-west-1:123456789:app/ADM/my-amazon-app'                      <i class="conum" data-value="4"></i><b>(4)</b>
+
+
+    topics:                                                                             <i class="conum" data-value="5"></i><b>(5)</b>
+      test:                                                                             <i class="conum" data-value="6"></i><b>(6)</b>
+        topic: TestTopic</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2421,7 +3061,46 @@ Other methods of <code>NotificationClient</code> will publish new messages into 
 <div class="listingblock">
 <div class="title">Publishing String Records</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in sns.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/DefaultClient.java[]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2018-2020 Agorapulse.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.agorapulse.micronaut.aws.sns;
+
+import com.agorapulse.micronaut.aws.sns.annotation.NotificationClient;
+import com.agorapulse.micronaut.aws.sns.annotation.Topic;
+
+import java.util.Map;
+
+@NotificationClient                                                                     <i class="conum" data-value="1"></i><b>(1)</b>
+interface DefaultClient {
+
+    String OTHER_TOPIC = "OtherTopic";
+
+    @Topic("OtherTopic") String publishMessageToDifferentTopic(Pogo pogo);              <i class="conum" data-value="2"></i><b>(2)</b>
+
+    String publishMessage(Pogo message);                                                <i class="conum" data-value="3"></i><b>(3)</b>
+    String publishMessage(String subject, Pogo message);                                <i class="conum" data-value="4"></i><b>(4)</b>
+    String publishMessage(String message);                                              <i class="conum" data-value="5"></i><b>(5)</b>
+    String publishMessage(String subject, String message);
+
+    String sendSMS(String phoneNumber, String message);                                 <i class="conum" data-value="6"></i><b>(6)</b>
+    String sendSms(String phoneNumber, String message, Map attributes);                 <i class="conum" data-value="7"></i><b>(7)</b>
+
+}</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2493,7 +3172,11 @@ You should always use <code>@Named</code> qualifier when injecting <code>SimpleN
 <div class="listingblock">
 <div class="title">Creating Topic</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in sns.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=new-topic]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">String topicArn = service.createTopic(TEST_TOPIC);                              <i class="conum" data-value="1"></i><b>(1)</b>
+
+Topic found = service.listTopics().filter(t -&gt;                                  <i class="conum" data-value="2"></i><b>(2)</b>
+    t.getTopicArn().endsWith(TEST_TOPIC)
+).blockingFirst();</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2511,7 +3194,15 @@ You should always use <code>@Named</code> qualifier when injecting <code>SimpleN
 <div class="listingblock">
 <div class="title">Subscribe to Topic</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in sns.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=subscription]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">String subArn = service.subscribeTopicWithEmail(topicArn, EMAIL);               <i class="conum" data-value="1"></i><b>(1)</b>
+
+String messageId = service.publishMessageToTopic(                               <i class="conum" data-value="2"></i><b>(2)</b>
+    topicArn,
+    "Test Email",
+    "Hello World"
+);
+
+service.unsubscribeTopic(subArn);                                               <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2533,7 +3224,11 @@ You should always use <code>@Named</code> qualifier when injecting <code>SimpleN
 <div class="listingblock">
 <div class="title">Delete Topic</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in sns.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=delete-topic]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">service.deleteTopic(topicArn);                                                  <i class="conum" data-value="1"></i><b>(1)</b>
+
+Long zero = service.listTopics().filter(t -&gt;                                    <i class="conum" data-value="2"></i><b>(2)</b>
+    t.getTopicArn().endsWith(TEST_TOPIC)
+).count().blockingGet();</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2554,7 +3249,20 @@ You should always use <code>@Named</code> qualifier when injecting <code>SimpleN
 <div class="listingblock">
 <div class="title">Working with Applications</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in sns.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=applications]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">String appArn = service.createAndroidApplication("my-app", API_KEY);        <i class="conum" data-value="1"></i><b>(1)</b>
+
+String endpoint = service.registerAndroidDevice(appArn, DEVICE_TOKEN, DATA);    <i class="conum" data-value="2"></i><b>(2)</b>
+
+Map&lt;String, String&gt; notif = new LinkedHashMap&lt;&gt;();
+notif.put("badge", "9");
+notif.put("data", "{\"foo\": \"some bar\"}");
+notif.put("title", "Some Title");
+
+String msgId = service.sendAndroidAppNotification(endpoint, notif, "Welcome");  <i class="conum" data-value="3"></i><b>(3)</b>
+
+service.validateAndroidDevice(appArn, endpoint, DEVICE_TOKEN, DATA);            <i class="conum" data-value="4"></i><b>(4)</b>
+
+service.unregisterDevice(endpoint);                                             <i class="conum" data-value="5"></i><b>(5)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2587,7 +3295,8 @@ You should always use <code>@Named</code> qualifier when injecting <code>SimpleN
 <div class="listingblock">
 <div class="title">Sending SMS</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in sns.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=sms]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Map&lt;Object, Object&gt; attrs = Collections.emptyMap();
+String msgId = service.sendSMSMessage(PHONE_NUMBER, "Hello World", attrs);      <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2642,11 +3351,30 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-groovy" data-lang="groovy">Unresolved directive in sns.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-header]
+<pre class="prettyprint highlight"><code class="language-groovy" data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
+class SimpleNotificationServiceSpec extends Specification {
 
-Unresolved directive in sns.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-fields]
 
-Unresolved directive in sns.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-setup]
+    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.10')          <i class="conum" data-value="2"></i><b>(2)</b>
+        .withServices(SNS)
+
+    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="3"></i><b>(3)</b>
+
+    SimpleNotificationService service
+
+    void setup() {
+        AmazonSNS sns = AmazonSNSClient                                                 <i class="conum" data-value="4"></i><b>(4)</b>
+            .builder()
+            .withEndpointConfiguration(localstack.getEndpointConfiguration(SNS))
+            .withCredentials(localstack.defaultCredentialsProvider)
+            .build()
+
+        context = ApplicationContext.build('aws.sns.topic', TEST_TOPIC).build()         <i class="conum" data-value="5"></i><b>(5)</b>
+        context.registerSingleton(AmazonSNS, sns)
+        context.start()
+
+        service = context.getBean(SimpleNotificationService)                            <i class="conum" data-value="6"></i><b>(6)</b>
+    }
 
     // tests
 
@@ -2686,7 +3414,40 @@ Unresolved directive in sns.adoc - include::/Users/ladin/development/projects/ag
 <div class="content">
 <pre class="prettyprint highlight"><code class="language-java" data-lang="java">class SimpleNotificationServiceTest {
 
-Unresolved directive in sns.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=testcontainers-setup]
+    public ApplicationContext context;                                                  <i class="conum" data-value="1"></i><b>(1)</b>
+
+    public SimpleNotificationService service;
+
+    @Rule
+    public LocalStackContainer localstack = new LocalStackContainer("0.8.10")            <i class="conum" data-value="2"></i><b>(2)</b>
+        .withServices(SNS);
+
+    @Before
+    public void setup() {
+        AmazonSNS amazonSNS = AmazonSNSClient                                           <i class="conum" data-value="3"></i><b>(3)</b>
+            .builder()
+            .withEndpointConfiguration(localstack.getEndpointConfiguration(SNS))
+            .withCredentials(localstack.getDefaultCredentialsProvider())
+            .build();
+
+
+        Map&lt;String, Object&gt; properties = new HashMap&lt;&gt;();                               <i class="conum" data-value="4"></i><b>(4)</b>
+        properties.put("aws.sns.topic", TEST_TOPIC);
+
+
+        context = ApplicationContext.build(properties).build();                         <i class="conum" data-value="5"></i><b>(5)</b>
+        context.registerSingleton(AmazonSNS.class, amazonSNS);
+        context.start();
+
+        service = context.getBean(SimpleNotificationService.class);
+    }
+
+    @After
+    public void cleanup() {
+        if (context != null) {
+            context.close();                                                            <i class="conum" data-value="6"></i><b>(6)</b>
+        }
+    }
 
     // tests
 
@@ -2772,7 +3533,25 @@ Unresolved directive in sns.adoc - include::/Users/ladin/development/projects/ag
 <div class="listingblock">
 <div class="title">application.yml</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-yaml" data-lang="yaml">Unresolved directive in sqs.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/resources/application-docs-sqs.yml[]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-yaml" data-lang="yaml">aws:
+  sqs:
+    region: sa-east-1
+    # related to service behaviour
+    queueNamePrefix: 'vlad_'                                                            <i class="conum" data-value="1"></i><b>(1)</b>
+    autoCreateQueue: false                                                              <i class="conum" data-value="2"></i><b>(2)</b>
+    cache: false                                                                        <i class="conum" data-value="3"></i><b>(3)</b>
+
+    # related to default queue
+    queue: MyQueue                                                                      <i class="conum" data-value="4"></i><b>(4)</b>
+    fifo: true                                                                          <i class="conum" data-value="5"></i><b>(5)</b>
+    delaySeconds: 0                                                                     <i class="conum" data-value="6"></i><b>(6)</b>
+    messageRetentionPeriod: 345600                                                      <i class="conum" data-value="7"></i><b>(7)</b>
+    maximumMessageSize: 262144                                                          <i class="conum" data-value="8"></i><b>(8)</b>
+    visibilityTimeout: 30                                                               <i class="conum" data-value="9"></i><b>(9)</b>
+
+    queues:                                                                             <i class="conum" data-value="10"></i><b>(10)</b>
+      test:                                                                             <i class="conum" data-value="11"></i><b>(11)</b>
+        queue: TestQueue</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2837,7 +3616,50 @@ Other methods of <code>QueueClient</code> will publish new records into the queu
 <div class="listingblock">
 <div class="title">Publishing String Records</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in sqs.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/DefaultClient.java[]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2018-2020 Agorapulse.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.agorapulse.micronaut.aws.sqs;
+
+import com.agorapulse.micronaut.aws.sqs.annotation.Queue;
+import com.agorapulse.micronaut.aws.sqs.annotation.QueueClient;
+
+@QueueClient                                                                            <i class="conum" data-value="1"></i><b>(1)</b>
+interface DefaultClient {
+
+    @Queue(value = "OtherQueue", group = "SomeGroup")
+    String sendMessageToQueue(String message);                                          <i class="conum" data-value="2"></i><b>(2)</b>
+
+    String sendMessage(Pogo message);                                                   <i class="conum" data-value="3"></i><b>(3)</b>
+
+    String sendMessage(byte[] record);                                                  <i class="conum" data-value="4"></i><b>(4)</b>
+
+    String sendMessage(String record);                                                  <i class="conum" data-value="5"></i><b>(5)</b>
+
+    String sendMessage(String record, int delay);                                       <i class="conum" data-value="6"></i><b>(6)</b>
+
+    String sendMessage(String record, String group);                                    <i class="conum" data-value="7"></i><b>(7)</b>
+
+    String sendMessage(String record, int delay, String group);                         <i class="conum" data-value="8"></i><b>(8)</b>
+
+    void deleteMessage(String messageId);                                               <i class="conum" data-value="9"></i><b>(9)</b>
+
+    String OTHER_QUEUE = "OtherQueue";
+}</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2914,7 +3736,9 @@ You should always use <code>@Named</code> qualifier when injecting <code>SimpleQ
 <div class="listingblock">
 <div class="title">Creating Queue</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in sqs.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=new-queue]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">String queueUrl = service.createQueue(TEST_QUEUE);                              <i class="conum" data-value="1"></i><b>(1)</b>
+
+assertTrue(service.listQueueUrls().contains(queueUrl));                         <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2932,7 +3756,9 @@ You should always use <code>@Named</code> qualifier when injecting <code>SimpleQ
 <div class="listingblock">
 <div class="title">Describing Queue Attributes</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in sqs.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=describe-queue]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Map&lt;String, String&gt; queueAttributes = service.getQueueAttributes(TEST_QUEUE);   <i class="conum" data-value="1"></i><b>(1)</b>
+
+assertEquals("0", queueAttributes.get("DelaySeconds"));                         <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2950,7 +3776,9 @@ You should always use <code>@Named</code> qualifier when injecting <code>SimpleQ
 <div class="listingblock">
 <div class="title">Delete Queue</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in sqs.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=delete-queue]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">service.deleteQueue(TEST_QUEUE);                                                <i class="conum" data-value="1"></i><b>(1)</b>
+
+assertFalse(service.listQueueUrls().contains(queueUrl));                        <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2968,7 +3796,18 @@ You should always use <code>@Named</code> qualifier when injecting <code>SimpleQ
 <div class="listingblock">
 <div class="title">Working with Messages</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Unresolved directive in sqs.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=messages]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">String msgId = service.sendMessage(DATA);                                       <i class="conum" data-value="1"></i><b>(1)</b>
+
+assertNotNull(msgId);
+
+List&lt;Message&gt; messages = service.receiveMessages();                             <i class="conum" data-value="2"></i><b>(2)</b>
+Message first = messages.get(0);
+
+assertEquals(DATA, first.getBody());                                            <i class="conum" data-value="3"></i><b>(3)</b>
+assertEquals(msgId, first.getMessageId());
+assertEquals(1, messages.size());
+
+service.deleteMessage(msgId);                                                   <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -3047,11 +3886,32 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-groovy" data-lang="groovy">Unresolved directive in sqs.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceSpec.groovy[tags=testcontainers-header]
+<pre class="prettyprint highlight"><code class="language-groovy" data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
+@RestoreSystemProperties                                                                <i class="conum" data-value="2"></i><b>(2)</b>
+class SimpleQueueServiceSpec extends Specification {
 
-Unresolved directive in sqs.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceSpec.groovy[tags=testcontainers-fields]
 
-Unresolved directive in sqs.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceSpec.groovy[tags=testcontainers-setup]
+    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.10')          <i class="conum" data-value="3"></i><b>(3)</b>
+        .withServices(SQS)
+
+    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="4"></i><b>(4)</b>
+
+    SimpleQueueService service
+
+    void setup() {
+        System.setProperty('com.amazonaws.sdk.disableCbor', 'true')                     <i class="conum" data-value="5"></i><b>(5)</b>
+        AmazonSQS sqs = AmazonSQSClient                                                 <i class="conum" data-value="6"></i><b>(6)</b>
+            .builder()
+            .withEndpointConfiguration(localstack.getEndpointConfiguration(SQS))
+            .withCredentials(localstack.defaultCredentialsProvider)
+            .build()
+
+        context = ApplicationContext.build('aws.sqs.queue': TEST_QUEUE).build()         <i class="conum" data-value="7"></i><b>(7)</b>
+        context.registerSingleton(AmazonSQS, sqs)
+        context.start()
+
+        service = context.getBean(SimpleQueueService)                                   <i class="conum" data-value="8"></i><b>(8)</b>
+    }
 
     // tests
 
@@ -3099,7 +3959,44 @@ Unresolved directive in sqs.adoc - include::/Users/ladin/development/projects/ag
 <div class="content">
 <pre class="prettyprint highlight"><code class="language-java" data-lang="java">class SimpleNotificationServiceTest {
 
-Unresolved directive in sqs.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=testcontainers-setup]
+    public ApplicationContext context;                                                  <i class="conum" data-value="1"></i><b>(1)</b>
+
+    public SimpleQueueService service;
+
+    @Rule
+    public LocalStackContainer localstack = new LocalStackContainer("0.8.10")           <i class="conum" data-value="2"></i><b>(2)</b>
+        .withServices(SQS);
+
+    @Before
+    public void setup() {
+        System.setProperty("com.amazonaws.sdk.disableCbor", "true");                    <i class="conum" data-value="3"></i><b>(3)</b>
+
+        AmazonSQS amazonSQS = AmazonSQSClient                                           <i class="conum" data-value="4"></i><b>(4)</b>
+            .builder()
+            .withEndpointConfiguration(localstack.getEndpointConfiguration(SQS))
+            .withCredentials(localstack.getDefaultCredentialsProvider())
+            .build();
+
+
+        Map&lt;String, Object&gt; properties = new HashMap&lt;&gt;();                               <i class="conum" data-value="5"></i><b>(5)</b>
+        properties.put("aws.sqs.queue", TEST_QUEUE);
+
+
+        context = ApplicationContext.build(properties).build();                         <i class="conum" data-value="6"></i><b>(6)</b>
+        context.registerSingleton(AmazonSQS.class, amazonSQS);
+        context.start();
+
+        service = context.getBean(SimpleQueueService.class);
+    }
+
+    @After
+    public void cleanup() {
+        System.clearProperty("com.amazonaws.sdk.disableCbor");
+
+        if (context != null) {
+            context.close();                                                            <i class="conum" data-value="7"></i><b>(7)</b>
+        }
+    }
 
     // tests
 
@@ -3183,7 +4080,9 @@ which assumes usage of a certain IAM role.</p>
 <div class="listingblock primary">
 <div class="title">Assume Role</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-groovy" data-lang="groovy">Unresolved directive in sts.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/sts/SecurityTokenServiceSpec.groovy[tag=usage]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-groovy" data-lang="groovy">service.assumeRole('session', 'arn:::my-role', 360) {
+    externalId = '123456789'
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -3215,7 +4114,7 @@ messages back to the clients</p>
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ap-ws:1.2.8'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ag-ws:1.2.8'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3223,7 +4122,7 @@ messages back to the clients</p>
 <div class="content">
 <pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
-    &lt;artifactId&gt;micronaut-aws-sdk-ap-ws&lt;/artifactId&gt;
+    &lt;artifactId&gt;micronaut-aws-sdk-ag-ws&lt;/artifactId&gt;
     &lt;version&gt;1.2.8&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
@@ -3237,7 +4136,16 @@ messages back to the clients</p>
 <div class="listingblock">
 <div class="title">application.yml</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-yaml" data-lang="yaml">Unresolved directive in websockets.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/resources/application-docs-websockets.yml[]</code></pre>
+<pre class="prettyprint highlight nowrap"><code class="language-yaml" data-lang="yaml">aws:
+  websocket:
+    region: sa-east-1
+    connections:
+      url: https://abcefgh.execute-api.eu-west-1.amazonaws.com/test/@connections        <i class="conum" data-value="1"></i><b>(1)</b>
+
+# Java Only
+micronaut:
+  function:
+    name: lambda-echo-java                                                              <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -3286,7 +4194,55 @@ publishes to SNS:</p>
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-groovy" data-lang="groovy">Unresolved directive in websockets.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/apigateway/ws/LambdaEchoFunction.groovy[]</code></pre>
+<pre class="prettyprint highlight"><code class="language-groovy" data-lang="groovy">/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2018-2020 Agorapulse.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.agorapulse.micronaut.aws.apigateway.ws
+
+import com.agorapulse.micronaut.aws.apigateway.ws.event.EventType
+import com.agorapulse.micronaut.aws.apigateway.ws.event.WebSocketRequest
+import com.agorapulse.micronaut.aws.apigateway.ws.event.WebSocketResponse
+import groovy.transform.Field
+
+import javax.inject.Inject
+
+@Inject @Field MessageSenderFactory factory                                             <i class="conum" data-value="1"></i><b>(1)</b>
+@Inject @Field TestTopicPublisher publisher                                             <i class="conum" data-value="2"></i><b>(2)</b>
+
+WebSocketResponse lambdaEcho(WebSocketRequest event) {                                  <i class="conum" data-value="3"></i><b>(3)</b>
+    MessageSender sender = factory.create(event.requestContext)                         <i class="conum" data-value="4"></i><b>(4)</b>
+    String connectionId = event.requestContext.connectionId                             <i class="conum" data-value="5"></i><b>(5)</b>
+
+    switch (event.requestContext.eventType) {
+        case EventType.CONNECT:                                                         <i class="conum" data-value="6"></i><b>(6)</b>
+            // do nothing
+            break
+        case EventType.MESSAGE:                                                         <i class="conum" data-value="7"></i><b>(7)</b>
+            String message = "[$connectionId] ${event.body}"
+            sender.send(connectionId, message)
+            publisher.publishMessage(connectionId, message)
+            break
+        case EventType.DISCONNECT:                                                      <i class="conum" data-value="8"></i><b>(8)</b>
+            // do nothing
+            break
+    }
+
+    return WebSocketResponse.OK                                                         <i class="conum" data-value="9"></i><b>(9)</b>
+}</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -3332,7 +4288,65 @@ publishes to SNS:</p>
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-java" data-lang="java">Unresolved directive in websockets.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/apigateway/ws/LambdaEchoJava.java[]</code></pre>
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2018-2020 Agorapulse.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.agorapulse.micronaut.aws.apigateway.ws;
+
+import com.agorapulse.micronaut.aws.apigateway.ws.event.WebSocketRequest;
+import com.agorapulse.micronaut.aws.apigateway.ws.event.WebSocketResponse;
+import io.micronaut.function.FunctionBean;
+
+import java.util.function.Function;
+
+@FunctionBean("lambda-echo-java")
+public class LambdaEchoJava implements Function&lt;WebSocketRequest, WebSocketResponse&gt; {
+
+    private final MessageSenderFactory factory;                                         <i class="conum" data-value="1"></i><b>(1)</b>
+    private final TestTopicPublisher publisher;                                         <i class="conum" data-value="2"></i><b>(2)</b>
+
+    public LambdaEchoJava(MessageSenderFactory factory, TestTopicPublisher publisher) {
+        this.factory = factory;
+        this.publisher = publisher;
+    }
+
+    @Override
+    public WebSocketResponse apply(WebSocketRequest event) {                            <i class="conum" data-value="3"></i><b>(3)</b>
+        MessageSender sender = factory.create(event.getRequestContext());               <i class="conum" data-value="4"></i><b>(4)</b>
+        String connectionId = event.getRequestContext().getConnectionId();              <i class="conum" data-value="5"></i><b>(5)</b>
+
+        switch (event.getRequestContext().getEventType()) {
+            case CONNECT:                                                               <i class="conum" data-value="6"></i><b>(6)</b>
+                // do nothing
+                break;
+            case MESSAGE:                                                               <i class="conum" data-value="7"></i><b>(7)</b>
+                String message = "[" + connectionId + "] " + event.getBody();
+                sender.send(connectionId, message);
+                publisher.publishMessage(connectionId, message);
+                break;
+            case DISCONNECT:                                                            <i class="conum" data-value="8"></i><b>(8)</b>
+                // do nothing
+                break;
+        }
+
+        return WebSocketResponse.OK;                                                    <i class="conum" data-value="9"></i><b>(9)</b>
+    }
+
+}</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -3409,7 +4423,42 @@ There is no support for routing at the moment, but you can get the matched route
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-groovy" data-lang="groovy">Unresolved directive in websockets.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/apigateway/ws/NotificationFunction.groovy[]</code></pre>
+<pre class="prettyprint highlight"><code class="language-groovy" data-lang="groovy">/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2018-2020 Agorapulse.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.agorapulse.micronaut.aws.apigateway.ws
+
+import com.amazonaws.AmazonClientException
+import com.amazonaws.services.lambda.runtime.events.SNSEvent
+import groovy.transform.Field
+
+import javax.inject.Inject
+
+@Inject @Field MessageSender sender                                                     <i class="conum" data-value="1"></i><b>(1)</b>
+
+void notify(SNSEvent event) {                                                           <i class="conum" data-value="2"></i><b>(2)</b>
+    event.records.each {
+        try {
+            sender.send(it.SNS.subject, "[SNS] $it.SNS.message")                        <i class="conum" data-value="3"></i><b>(3)</b>
+        } catch (AmazonClientException ignored) {
+            // can be gone                                                              <i class="conum" data-value="4"></i><b>(4)</b>
+        }
+    }
+}</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -3435,7 +4484,54 @@ There is no support for routing at the moment, but you can get the matched route
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-java" data-lang="java">Unresolved directive in websockets.adoc - include::/Users/ladin/development/projects/agorapulse/micronaut-libraries/subprojects/micronaut-aws-sdk/src/test/groovy/com/agorapulse/micronaut/aws/apigateway/ws/NotificationHandler.java[]</code></pre>
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2018-2020 Agorapulse.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.agorapulse.micronaut.aws.apigateway.ws;
+
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.services.lambda.runtime.events.SNSEvent;
+import io.micronaut.function.FunctionBean;
+
+import java.util.function.Consumer;
+
+@FunctionBean("notification-handler")
+public class NotificationHandler implements Consumer&lt;SNSEvent&gt; {
+
+    private final MessageSender sender;                                                 <i class="conum" data-value="1"></i><b>(1)</b>
+
+    public NotificationHandler(MessageSender sender) {
+        this.sender = sender;
+    }
+
+    @Override
+    public void accept(SNSEvent event) {                                                <i class="conum" data-value="2"></i><b>(2)</b>
+        event.getRecords().forEach(it -&gt; {
+            try {
+                String connectionId = it.getSNS().getSubject();
+                String payload = "[SNS] " + it.getSNS().getMessage();
+                sender.send(connectionId, payload);                                     <i class="conum" data-value="3"></i><b>(3)</b>
+            } catch (AmazonClientException ignored) {
+                // can be gone                                                          <i class="conum" data-value="4"></i><b>(4)</b>
+            }
+        });
+    }
+
+}</code></pre>
 </div>
 </div>
 <div class="colist arabic">
