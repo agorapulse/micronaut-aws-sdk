@@ -82,7 +82,7 @@ config {
         userOrg    = 'agorapulse'
         repo       = 'libs'
         name       = rootProject.name
-        publish    = true
+        publish    = false // true
     }
 
     quality {
@@ -115,6 +115,12 @@ subprojects { Project subproject ->
     if (subproject.name == 'guide' || subproject.name == 'micronaut-aws-sdk-dependencies') return
 
     apply plugin: 'groovy'
+
+    config {
+        bintray {
+            name = subproject.name
+        }
+    }
 
     dependencies {
         annotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
