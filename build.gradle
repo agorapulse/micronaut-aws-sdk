@@ -82,7 +82,7 @@ config {
         userOrg    = 'agorapulse'
         repo       = 'libs'
         name       = rootProject.name
-        publish    = false // true
+        publish    = true
     }
 
     quality {
@@ -119,6 +119,7 @@ subprojects { Project subproject ->
     config {
         bintray {
             name = subproject.name
+            githubRepo = "agorapulse/$rootProject.name"
         }
     }
 
