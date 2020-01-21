@@ -229,6 +229,11 @@ public class KinesisTest {
         }
 
         @Override
+        public DescribeInsightRulesResult describeInsightRules(DescribeInsightRulesRequest describeInsightRulesRequest) {
+            return null;
+        }
+
+        @Override
         public ListTagsForResourceResult listTagsForResource(ListTagsForResourceRequest listTagsForResourceRequest) {
             return null;
         }
@@ -264,6 +269,11 @@ public class KinesisTest {
         }
 
         @Override
+        public DeleteInsightRulesResult deleteInsightRules(DeleteInsightRulesRequest deleteInsightRulesRequest) {
+            return null;
+        }
+
+        @Override
         public DescribeAlarmHistoryResult describeAlarmHistory(DescribeAlarmHistoryRequest describeAlarmHistoryRequest) {
             return null;
         }
@@ -294,12 +304,27 @@ public class KinesisTest {
         }
 
         @Override
+        public DisableInsightRulesResult disableInsightRules(DisableInsightRulesRequest disableInsightRulesRequest) {
+            return null;
+        }
+
+        @Override
         public EnableAlarmActionsResult enableAlarmActions(EnableAlarmActionsRequest enableAlarmActionsRequest) {
             return null;
         }
 
         @Override
+        public EnableInsightRulesResult enableInsightRules(EnableInsightRulesRequest enableInsightRulesRequest) {
+            return null;
+        }
+
+        @Override
         public GetDashboardResult getDashboard(GetDashboardRequest getDashboardRequest) {
+            return null;
+        }
+
+        @Override
+        public GetInsightRuleReportResult getInsightRuleReport(GetInsightRuleReportRequest getInsightRuleReportRequest) {
             return null;
         }
 
@@ -335,6 +360,11 @@ public class KinesisTest {
 
         @Override
         public PutDashboardResult putDashboard(PutDashboardRequest putDashboardRequest) {
+            return null;
+        }
+
+        @Override
+        public PutInsightRuleResult putInsightRule(PutInsightRuleRequest putInsightRuleRequest) {
             return null;
         }
 
