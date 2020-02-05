@@ -103,7 +103,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-s3/src/test/groovy/com/agorapu
 <1> Delete bucket
 <2> The Bucket is no longer present
 
-Please, see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/s3/SimpleStorageService.html[SimpleStorageService] for the full reference.
+Please, see https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/s3/SimpleStorageService.html[SimpleStorageService] for the full reference.
 
 ==== Testing
 You can very easily mock the `SimpleStorageService` but if you need close-to-production

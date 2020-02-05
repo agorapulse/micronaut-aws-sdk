@@ -46,7 +46,7 @@ Otherwise you need no configuration at all but some of the configuration may be 
 ----
 include::{root-dir}/subprojects/micronaut-aws-sdk-test/src/test/resources/application-docs-kinesis.yml[]
 ----
-<1> You can specify the default stream for https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/kinesis/KinesisService.html[KinesisService] and `@KinesisClient`
+<1> You can specify the default stream for https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/kinesis/KinesisService.html[KinesisService] and `@KinesisClient`
 <2> You can define multiple configurations
 <3> Each of the configuration can be access using `@Named('test') KinesisService` qualifier or you can define the configuration as `value` of `@KinesisClient('test')`
 <4> Application name is required for `@KinesisListner`
@@ -162,7 +162,7 @@ from particular shards.
 Instance of `KinesisService` is created for the default Kinesis configuration and each stream configuration in `aws.kinesis.streams` map.
 You should always use `@Named` qualifier when injecting `KinesisService` if you have more than one stream configuration present, e.g. `@Named("other") KinesisService otherService`.
 
-Please, see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/kinesis/KinesisService.html[KinesisService] for the full reference.
+Please, see https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/kinesis/KinesisService.html[KinesisService] for the full reference.
 
 ==== Testing
 You can very easily mock any of the interfaces and declarative services but if you need close-to-production

@@ -62,7 +62,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-ses/src/test/groovy/com/agorap
 <9> Define the mime type (usually optional - deduced from the file)
 <10> Define the description of the file (optional)
 
-Please, see https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/ses/SimpleEmailService.html[SimpleEmailService] for the full reference.
+Please, see https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/ses/SimpleEmailService.html[SimpleEmailService] for the full reference.
 
 ==== Testing
 It is recommended just to mock the `SimpleEmailService` in your tests as it only contains single abstract method.
