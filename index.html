@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/docs.css?v=1.2.10" />
+<link rel="stylesheet" href="css/docs.css?v=1.3.0" />
 <style>
 .hidden {
     display: none;
@@ -93,7 +93,7 @@ $(addBlockSwitches);
 <h1>Set of useful libraries for Micronaut</h1>
 <div class="details">
 <span id="author" class="author">Vladimir Orany</span><br>
-<span id="revnumber">version 1.2.10</span>
+<span id="revnumber">version 1.3.0</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -360,7 +360,7 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-dynamodb:1.2.10'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-dynamodb:1.3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -369,7 +369,7 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;1.2.10&lt;/version&gt;
+    &lt;version&gt;1.3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -764,7 +764,7 @@ interface DynamoDBItemDBService {
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td><code>@Query</code> annotation accepts a closure which returns a query builder (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/QueryBuilder.html">QueryBuilder</a> for full reference)</td>
+<td><code>@Query</code> annotation accepts a closure which returns a query builder (see <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/dynamodb/builder/QueryBuilder.html">QueryBuilder</a> for full reference)</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
@@ -772,7 +772,7 @@ interface DynamoDBItemDBService {
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Specify some range key criteria with the method&#8217;s <code>rangeKey</code> argument (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html">RangeConditionCollector</a> for full reference)</td>
+<td>Specify some range key criteria with the method&#8217;s <code>rangeKey</code> argument (see <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html">RangeConditionCollector</a> for full reference)</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="6"></i><b>6</b></td>
@@ -823,7 +823,7 @@ public interface DynamoDBEntityService {
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Use <code>Builders</code> class to create a query builder for given DynamoDB entity (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/QueryBuilder.html">QueryBuilder</a> for full reference)</td>
+<td>Use <code>Builders</code> class to create a query builder for given DynamoDB entity (see <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/dynamodb/builder/QueryBuilder.html">QueryBuilder</a> for full reference)</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
@@ -831,7 +831,7 @@ public interface DynamoDBEntityService {
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Specify some range key criteria with the method&#8217;s <code>rangeKey</code> argument (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html">RangeConditionCollector</a> for full reference)</td>
+<td>Specify some range key criteria with the method&#8217;s <code>rangeKey</code> argument (see <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html">RangeConditionCollector</a> for full reference)</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="6"></i><b>6</b></td>
@@ -899,11 +899,11 @@ interface DynamoDBItemDBService {
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td><code>@Scan</code> annotation accepts a closure which returns a scan builder (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/ScanBuilder.html">ScanBuilder</a> for full reference)</td>
+<td><code>@Scan</code> annotation accepts a closure which returns a scan builder (see <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/dynamodb/builder/ScanBuilder.html">ScanBuilder</a> for full reference)</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Specify some filter criteria with the method&#8217;s <code>foo</code> argument (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html">RangeConditionCollector</a> for full reference)</td>
+<td>Specify some filter criteria with the method&#8217;s <code>foo</code> argument (see <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html">RangeConditionCollector</a> for full reference)</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
@@ -942,11 +942,11 @@ public interface DynamoDBEntityService {
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Use <code>Builders</code> class to create a scan builder for given DynamoDB entity (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/ScanBuilder.html">ScanBuilder</a> for full reference)</td>
+<td>Use <code>Builders</code> class to create a scan builder for given DynamoDB entity (see <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/dynamodb/builder/ScanBuilder.html">ScanBuilder</a> for full reference)</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Specify some filter criteria with the method&#8217;s <code>foo</code> argument (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html">RangeConditionCollector</a> for full reference)</td>
+<td>Specify some filter criteria with the method&#8217;s <code>foo</code> argument (see <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html">RangeConditionCollector</a> for full reference)</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
@@ -1000,7 +1000,7 @@ interface DynamoDBItemDBService {
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td><code>@Update</code> annotation accepts a closure which returns an update builder (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference)</td>
+<td><code>@Update</code> annotation accepts a closure which returns an update builder (see <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference)</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
@@ -1012,11 +1012,11 @@ interface DynamoDBItemDBService {
 </tr>
 <tr>
 <td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Specify update operation - increment <code>number</code> attribute (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference). You may have multiple update operations.</td>
+<td>Specify update operation - increment <code>number</code> attribute (see <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference). You may have multiple update operations.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>Specify what should be returned from the method (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference).</td>
+<td>Specify what should be returned from the method (see <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference).</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="8"></i><b>8</b></td>
@@ -1058,7 +1058,7 @@ public interface DynamoDBEntityService {
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Use <code>Builders</code> class to create an update builder for given DynamoDB entity (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference)</td>
+<td>Use <code>Builders</code> class to create an update builder for given DynamoDB entity (see <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference)</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
@@ -1070,11 +1070,11 @@ public interface DynamoDBEntityService {
 </tr>
 <tr>
 <td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Specify update operation - increment <code>number</code> attribute (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference). You may have multiple update operations.</td>
+<td>Specify update operation - increment <code>number</code> attribute (see <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference). You may have multiple update operations.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>Specify what should be returned from the method (see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference).</td>
+<td>Specify what should be returned from the method (see <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference).</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="8"></i><b>8</b></td>
@@ -1246,7 +1246,7 @@ assertEquals(1,
 </table>
 </div>
 <div class="paragraph">
-<p>Please see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/dynamodb/DynamoDBService.html">DynamoDBService</a> for full reference.</p>
+<p>Please see <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/dynamodb/DynamoDBService.html">DynamoDBService</a> for full reference.</p>
 </div>
 </div>
 <div class="sect4">
@@ -1524,9 +1524,9 @@ You can obtain instances of declarative client from the context as well.
 <div class="title">Gradle</div>
 <div class="content">
 <pre class="prettyprint highlight"><code>// for Kinesis client
-compile 'com.agorapulse:micronaut-aws-sdk-kinesis:1.2.10'
+compile 'com.agorapulse:micronaut-aws-sdk-kinesis:1.3.0'
 // for Kinesis worker
-compile 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:1.2.10'</code></pre>
+compile 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:1.3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -1536,13 +1536,13 @@ compile 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:1.2.10'</code></pre>
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-kinesis&lt;/artifactId&gt;
-    &lt;version&gt;1.2.10&lt;/version&gt;
+    &lt;version&gt;1.3.0&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;!-- for Kinesis worker --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-kinesis-worker&lt;/artifactId&gt;
-    &lt;version&gt;1.2.10&lt;/version&gt;
+    &lt;version&gt;1.3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1581,7 +1581,7 @@ Otherwise you need no configuration at all but some of the configuration may be 
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>You can specify the default stream for <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/kinesis/KinesisService.html">KinesisService</a> and <code>@KinesisClient</code></td>
+<td>You can specify the default stream for <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/kinesis/KinesisService.html">KinesisService</a> and <code>@KinesisClient</code></td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
@@ -1954,7 +1954,7 @@ from particular shards.</p>
 You should always use <code>@Named</code> qualifier when injecting <code>KinesisService</code> if you have more than one stream configuration present, e.g. <code>@Named("other") KinesisService otherService</code>.</p>
 </div>
 <div class="paragraph">
-<p>Please, see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/kinesis/KinesisService.html">KinesisService</a> for the full reference.</p>
+<p>Please, see <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/kinesis/KinesisService.html">KinesisService</a> for the full reference.</p>
 </div>
 </div>
 <div class="sect4">
@@ -2270,7 +2270,7 @@ class KinesisAnnotationsSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-s3:1.2.10'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-s3:1.3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2279,7 +2279,7 @@ class KinesisAnnotationsSpec extends Specification {
 <pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-s3&lt;/artifactId&gt;
-    &lt;version&gt;1.2.10&lt;/version&gt;
+    &lt;version&gt;1.3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2489,7 +2489,7 @@ assertFalse(service.listBucketNames().contains(MY_BUCKET));                     
 </table>
 </div>
 <div class="paragraph">
-<p>Please, see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/s3/SimpleStorageService.html">SimpleStorageService</a> for the full reference.</p>
+<p>Please, see <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/s3/SimpleStorageService.html">SimpleStorageService</a> for the full reference.</p>
 </div>
 </div>
 <div class="sect4">
@@ -2682,7 +2682,7 @@ class SimpleStorageServiceSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ses:1.2.10'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ses:1.3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2691,7 +2691,7 @@ class SimpleStorageServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-ses&lt;/artifactId&gt;
-    &lt;version&gt;1.2.10&lt;/version&gt;
+    &lt;version&gt;1.3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2943,7 +2943,7 @@ public class SendEmailTest {
 </table>
 </div>
 <div class="paragraph">
-<p>Please, see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/ses/SimpleEmailService.html">SimpleEmailService</a> for the full reference.</p>
+<p>Please, see <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/ses/SimpleEmailService.html">SimpleEmailService</a> for the full reference.</p>
 </div>
 </div>
 <div class="sect4">
@@ -2980,7 +2980,7 @@ public class SendEmailTest {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sns:1.2.10'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sns:1.3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2989,7 +2989,7 @@ public class SendEmailTest {
 <pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sns&lt;/artifactId&gt;
-    &lt;version&gt;1.2.10&lt;/version&gt;
+    &lt;version&gt;1.3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3023,7 +3023,7 @@ public class SendEmailTest {
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>You can specify the default topic for <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/sns/SimpleNotificationService.html">SimpleNotificationService</a> and <code>@NotificationClient</code></td>
+<td>You can specify the default topic for <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/sns/SimpleNotificationService.html">SimpleNotificationService</a> and <code>@NotificationClient</code></td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
@@ -3308,7 +3308,7 @@ String msgId = service.sendSMSMessage(PHONE_NUMBER, "Hello World", attrs);      
 </table>
 </div>
 <div class="paragraph">
-<p>Please, see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/sns/SimpleNotificationService.html">SimpleNotificationService</a> for the full reference.</p>
+<p>Please, see <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/sns/SimpleNotificationService.html">SimpleNotificationService</a> for the full reference.</p>
 </div>
 </div>
 </div>
@@ -3511,7 +3511,7 @@ class SimpleNotificationServiceSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sqs:1.2.10'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sqs:1.3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3520,7 +3520,7 @@ class SimpleNotificationServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sqs&lt;/artifactId&gt;
-    &lt;version&gt;1.2.10&lt;/version&gt;
+    &lt;version&gt;1.3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3570,7 +3570,7 @@ class SimpleNotificationServiceSpec extends Specification {
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>You can specify the default topic for <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/sqs/SimpleQueueService.html">SimpleQueueService</a> and <code>@QueueClient</code></td>
+<td>You can specify the default topic for <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/sqs/SimpleQueueService.html">SimpleQueueService</a> and <code>@QueueClient</code></td>
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
@@ -3844,7 +3844,7 @@ complex message handling logic yourselves.
 </table>
 </div>
 <div class="paragraph">
-<p>Please, see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/sqs/SimpleQueueService.html">SimpleQueueService</a> for the full reference.</p>
+<p>Please, see <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/sqs/SimpleQueueService.html">SimpleQueueService</a> for the full reference.</p>
 </div>
 </div>
 <div class="sect4">
@@ -4054,7 +4054,7 @@ class SimpleQueueServiceSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sts:1.2.10'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sts:1.3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4063,7 +4063,7 @@ class SimpleQueueServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sts&lt;/artifactId&gt;
-    &lt;version&gt;1.2.10&lt;/version&gt;
+    &lt;version&gt;1.3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4086,7 +4086,7 @@ which assumes usage of a certain IAM role.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Please, see <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/sts/SecurityTokenService.html">SecurityTokenService</a> for the full reference.</p>
+<p>Please, see <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/sts/SecurityTokenService.html">SecurityTokenService</a> for the full reference.</p>
 </div>
 </div>
 <div class="sect4">
@@ -4114,7 +4114,7 @@ messages back to the clients</p>
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ag-ws:1.2.10'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ag-ws:1.3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4123,7 +4123,7 @@ messages back to the clients</p>
 <pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-ag-ws&lt;/artifactId&gt;
-    &lt;version&gt;1.2.10&lt;/version&gt;
+    &lt;version&gt;1.3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4152,7 +4152,7 @@ micronaut:
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>You can specify the default connections URL for <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html">MessageSender</a></td>
+<td>You can specify the default connections URL for <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html">MessageSender</a></td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
@@ -4167,9 +4167,9 @@ micronaut:
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-<a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html">MessageSender</a> bean
-is only present in the context if <code>aws.websocket.connectins.url</code> configuration property is present.Use <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/apigateway/ws/MessageSenderFactory.html">MessageSenderFactory</a>
-If you want to create <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html">MessageSender</a>
+<a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html">MessageSender</a> bean
+is only present in the context if <code>aws.websocket.connectins.url</code> configuration property is present.Use <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/apigateway/ws/MessageSenderFactory.html">MessageSenderFactory</a>
+If you want to create <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html">MessageSender</a>
 manually using URL which is not predefined.
 </td>
 </tr>
@@ -4180,8 +4180,8 @@ manually using URL which is not predefined.
 <h5 id="_usage"><a class="anchor" href="#_usage"></a>Usage</h5>
 <div class="paragraph">
 <p><a href="https://github.com/aws/aws-lambda-java-libs/tree/master/aws-lambda-java-events">AWS SDK Lambda Events library</a> does not contain the events dedicated to WebSocket API Gateway yet.
-You can use <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/apigateway/ws/WebSocketConnectionRequest.html">WebSocketConnectionRequest</a>
-as an argument to function handling connection and disconnection of the WebSocket and <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/apigateway/ws/WebSocketRequest.html">WebSocketRequest</a> for handling
+You can use <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/apigateway/ws/WebSocketConnectionRequest.html">WebSocketConnectionRequest</a>
+as an argument to function handling connection and disconnection of the WebSocket and <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/apigateway/ws/WebSocketRequest.html">WebSocketRequest</a> for handling
 incoming messages.</p>
 </div>
 <div class="paragraph">
@@ -4257,11 +4257,11 @@ WebSocketResponse lambdaEcho(WebSocketRequest event) {                          
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td><a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/apigateway/ws/WebSocketRequest.html">WebSocketRequest</a> can handle any incoming event</td>
+<td><a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/apigateway/ws/WebSocketRequest.html">WebSocketRequest</a> can handle any incoming event</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Create <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html">MessageSender</a> for current client</td>
+<td>Create <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html">MessageSender</a> for current client</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
@@ -4361,11 +4361,11 @@ public class LambdaEchoJava implements Function&lt;WebSocketRequest, WebSocketRe
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td><a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/apigateway/ws/WebSocketRequest.html">WebSocketRequest</a> can handle any incoming event</td>
+<td><a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/apigateway/ws/WebSocketRequest.html">WebSocketRequest</a> can handle any incoming event</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Create <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html">MessageSender</a> for current client</td>
+<td>Create <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html">MessageSender</a> for current client</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
@@ -4555,7 +4555,7 @@ public class NotificationHandler implements Consumer&lt;SNSEvent&gt; {
 </table>
 </div>
 <div class="paragraph">
-<p>If you want to publish to the WebSockets using <a href="https://agorapulse.github.io/micronaut-libraries/docs/javadoc/micronaut-aws-sdk/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html">MessageSender</a>
+<p>If you want to publish to the WebSockets using <a href="https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html">MessageSender</a>
 your Lambda function&#8217;s role must have following permissions (preferably constrained just your API resource):</p>
 </div>
 <div class="listingblock">
@@ -4858,8 +4858,8 @@ Only thing which changes it the handler setup and the client being used (HTTP in
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 1.2.10<br>
-Last updated 2020-02-04 15:35:25 UTC
+Version 1.3.0<br>
+Last updated 2020-02-05 14:55:28 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
