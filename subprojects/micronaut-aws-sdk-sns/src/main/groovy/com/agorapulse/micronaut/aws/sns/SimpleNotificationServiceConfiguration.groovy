@@ -50,7 +50,7 @@ abstract class SimpleNotificationServiceConfiguration extends DefaultRegionAndEn
     protected SimpleNotificationServiceConfiguration(String prefix, Environment environment) {
         this.environment = environment
         ios = forPlatform(prefix, 'ios', environment)
-        ios = forPlatform(prefix, 'iosSandbox', environment)
+        iosSandbox = forPlatform(prefix, 'iosSandbox', environment)
         android = forPlatform(prefix, 'android', environment)
         amazon = forPlatform(prefix, 'amazon', environment)
     }
