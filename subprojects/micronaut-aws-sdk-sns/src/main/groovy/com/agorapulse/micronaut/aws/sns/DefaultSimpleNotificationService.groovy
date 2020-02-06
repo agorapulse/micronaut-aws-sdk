@@ -65,7 +65,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
 
     @Override
     String getIosSandboxApplicationArn() {
-        return checkNotEmpty(configuration.iosSandbox.arn, 'Ios application arn must be defined in config')
+        return checkNotEmpty(configuration.iosSandbox.arn, 'Ios sandbox application arn must be defined in config')
     }
 
     @Override
@@ -220,7 +220,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
             if (result.attributes.get('Token') == deviceToken && result.attributes.get('Enabled').equalsIgnoreCase(Boolean.TRUE.toString())) {
                 setEndpointAttributes(endpointArn, [
                     CustomUserData: customUserData
-                ] as Map)
+                ])
                 return endpointArn
             }
         } catch (NotFoundException ignored) {
@@ -236,7 +236,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
             setEndpointAttributes(endpointArn, [
                 CustomUserData: customUserData,
                 Enabled: Boolean.TRUE.toString()
-            ]  as Map)
+            ])
             return endpointArn
         } catch (InvalidParameterException ignored) {
             deleteEndpoint(endpointArn)
