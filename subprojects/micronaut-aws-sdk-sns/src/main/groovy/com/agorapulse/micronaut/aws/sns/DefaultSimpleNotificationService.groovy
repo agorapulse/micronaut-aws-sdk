@@ -235,7 +235,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
         try {
             setEndpointAttributes(endpointArn, [
                 CustomUserData: customUserData,
-                Enabled: Boolean.TRUE.toString()
+                Enabled: Boolean.TRUE.toString(),
             ])
             return endpointArn
         } catch (InvalidParameterException ignored) {
