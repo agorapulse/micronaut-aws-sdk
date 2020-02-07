@@ -64,6 +64,11 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
     }
 
     @Override
+    String getIosSandboxApplicationArn() {
+        return checkNotEmpty(configuration.iosSandbox.arn, 'Ios sandbox application arn must be defined in config')
+    }
+
+    @Override
     String getDefaultTopicNameOrArn() {
         return checkNotEmpty(ensureTopicArn(configuration.topic), 'Default topic not set for the configuration')
     }
@@ -160,10 +165,10 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
     }
 
     @Override
-    String createPlatformApplication(String name, String platform, String principal, String credential) {
+    String createPlatformApplication(String name, String platformType, String principal, String credential) {
         CreatePlatformApplicationRequest request = new CreatePlatformApplicationRequest()
             .withName(name)
-            .withPlatform(platform)
+            .withPlatform(platformType)
 
         Map<String, String> attributes = [:]
 
@@ -207,12 +212,15 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
         }
     }
 
-    String validatePlatformDeviceToken(String platformApplicationArn, String platformType, String endpointArn, String deviceToken, String customUserData = '') {
+    String validateDeviceToken(String platformApplicationArn, String endpointArn, String deviceToken, String customUserData = '') {
         log.debug 'Retrieving platform endpoint data...'
         // Look up the platform endpoint and make sure the data in it is current, even if it was just created.
         try {
             GetEndpointAttributesResult result = client.getEndpointAttributes(new GetEndpointAttributesRequest().withEndpointArn(endpointArn))
             if (result.attributes.get('Token') == deviceToken && result.attributes.get('Enabled').equalsIgnoreCase(Boolean.TRUE.toString())) {
+                setEndpointAttributes(endpointArn, [
+                    CustomUserData: customUserData
+                ])
                 return endpointArn
             }
         } catch (NotFoundException ignored) {
@@ -222,22 +230,11 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
 
         log.debug 'Platform endpoint update required...'
 
-        if (
-        (platformType == MOBILE_PLATFORM_IOS && endpointArn.contains(PLATFORM_TYPE_ANDROID))
-            ||
-            (platformType == MOBILE_PLATFORM_ANDROID && endpointArn.contains(PLATFORM_TYPE_IOS))
-        ) {
-            log.debug 'Switching between IOS and ANDROID platforms...'
-            // Manager switched device between and android and an IOS device
-            deleteEndpoint(endpointArn)
-            return createPlatformEndpoint(platformApplicationArn, deviceToken, customUserData)
-        }
-
         // The platform endpoint is out of sync with the current data, update the token and enable it.
         log.debug("Updating platform endpoint $endpointArn")
         try {
             setEndpointAttributes(endpointArn, [
-                Token  : deviceToken,
+                CustomUserData: customUserData,
                 Enabled: Boolean.TRUE.toString(),
             ])
             return endpointArn
@@ -288,13 +285,12 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
         client.setEndpointAttributes(saeReq)
     }
 
-    private String publishToTarget(String endpointArn, String platform, String message) {
+    private String publishToTarget(String endpointArn, String platformType, String message) {
         PublishRequest request = new PublishRequest(
-            message: objectMapper.writeValueAsString([(platform): message]),
+            message: objectMapper.writeValueAsString([(platformType): message]),
             messageStructure: 'json',
             targetArn: endpointArn, // For direct publish to mobile end points, topicArn is not relevant.
         )
-
         client.publish(request).messageId
     }
 
