@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html><head>
-<title>com/agorapulse/micronaut/aws/sns/NamedSimpleQueueServiceConfiguration.groovy</title>
+<title>com/agorapulse/micronaut/aws/sns/NamedSimpleNotificationServiceConfiguration.groovy</title>
   <style type="text/css">
     <!--code { font-family: Courier New, Courier; font-size: 10pt; margin: 0px; }-->
   </style>
@@ -19,7 +19,7 @@
     <td colspan="2">
      <center><font size="+2">
       <code><b>
-NamedSimpleQueueServiceConfiguration.groovy
+NamedSimpleNotificationServiceConfiguration.groovy
       </b></code>
      </font></center>
     </td>
@@ -61,11 +61,11 @@ NamedSimpleQueueServiceConfiguration.groovy
 <a name="30"><font color="#808080">30</font>&nbsp;</a><font color="#646464">@CompileStatic</font><br />
 <a name="31"><font color="#808080">31</font>&nbsp;</a><font color="#646464">@EachProperty</font><font color="#000000">(</font><font color="#ff6100">'aw</font><font color="#000000">s.sns.topics</font><font color="#ff6100">')</font><br />
 <a name="32"><font color="#808080">32</font>&nbsp;</a><font color="#646464">@Requires</font><font color="#000000">(</font><font color="#000000">classes&nbsp;=&nbsp;AmazonSNS,&nbsp;property&nbsp;=&nbsp;&nbsp;</font><font color="#ff6100">'aw</font><font color="#000000">s.sns.topics</font><font color="#ff6100">')</font><br />
-<a name="33"><font color="#808080">33</font>&nbsp;</a><font color="#0000c0"><b>class&nbsp;</b></font><font color="#000000">NamedSimpleQueueServiceConfiguration&nbsp;</font><font color="#0000c0"><b>extends&nbsp;</b></font><font color="#000000">SimpleNotificationServiceConfiguration&nbsp;</font><font color="#000000">{</font><br />
+<a name="33"><font color="#808080">33</font>&nbsp;</a><font color="#0000c0"><b>class&nbsp;</b></font><font color="#000000">NamedSimpleNotificationServiceConfiguration&nbsp;</font><font color="#0000c0"><b>extends&nbsp;</b></font><font color="#000000">SimpleNotificationServiceConfiguration&nbsp;</font><font color="#000000">{</font><br />
 <a name="34"><font color="#808080">34</font>&nbsp;</a><font color="#ffffff"></font><br />
 <a name="35"><font color="#808080">35</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>final&nbsp;</b></font><font color="#000000">String&nbsp;name</font><br />
 <a name="36"><font color="#808080">36</font>&nbsp;</a><font color="#ffffff"></font><br />
-<a name="37"><font color="#808080">37</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">NamedSimpleQueueServiceConfiguration</font><font color="#000000">(</font><font color="#646464">@Parameter&nbsp;</font><font color="#000000">String&nbsp;name,&nbsp;Environment&nbsp;environment</font><font color="#000000">)&nbsp;{</font><br />
+<a name="37"><font color="#808080">37</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">NamedSimpleNotificationServiceConfiguration</font><font color="#000000">(</font><font color="#646464">@Parameter&nbsp;</font><font color="#000000">String&nbsp;name,&nbsp;Environment&nbsp;environment</font><font color="#000000">)&nbsp;{</font><br />
 <a name="38"><font color="#808080">38</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>super</b></font><font color="#000000">(</font><font color="#ff6100">'aw</font><font color="#000000">s.sns.topics.</font><font color="#ff6100">'&nbsp;+&nbsp;</font><font color="#000000">name,&nbsp;environment</font><font color="#000000">)</font><br />
 <a name="39"><font color="#808080">39</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>this</b></font><font color="#000000">.name&nbsp;=&nbsp;name</font><br />
 <a name="40"><font color="#808080">40</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
