@@ -33,7 +33,7 @@ No configuration is required but some of the configuration properties may be use
 ----
 include::{root-dir}/subprojects/micronaut-aws-sdk-test/src/test/resources/application-docs-sns.yml[]
 ----
-<1> You can specify the default topic for https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/sns/SimpleNotificationService.html[SimpleNotificationService] and `@NotificationClient`
+<1> You can specify the default topic for https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/sns/SimpleNotificationService.html[SimpleNotificationService] and `@NotificationClient`
 <2> Amazon Resource Name for the iOS application mobile push
 <3> Amazon Resource Name for the Android application mobile push
 <4> Amazon Resource Name for the Amazon application mobile push
@@ -52,7 +52,7 @@ The following example shows many of available method signatures for publishing r
 [source,java,indent=0,options="nowrap"]
 .Publishing String Records
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk-sns/src/test/groovy/com/agorapulse/micronaut/aws/sns/DefaultClient.java[]
+include::{root-dir}/subprojects/micronaut-aws-sdk-sns/src/test/groovy/com/agorapulse/micronaut/aws/sns/DefaultClient.java[lines=18..-1]
 ----
 <1> `@NotificationClient` annotation makes the interface a SNS client
 <2> You can specify to which topic is the message published using `@Topic` annotation
@@ -129,7 +129,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-sns/src/test/groovy/com/agorap
 ----
 <1> Send a message to the phone number
 
-Please, see https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/sns/SimpleNotificationService.html[SimpleNotificationService] for the full reference.
+Please, see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/sns/SimpleNotificationService.html[SimpleNotificationService] for the full reference.
 
 ==== Testing
 You can very easily mock any of the interfaces and declarative services but if you need close-to-production

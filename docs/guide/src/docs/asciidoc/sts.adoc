@@ -35,7 +35,7 @@ Following example shows how to create credentials for assumed role.
 include::{root-dir}/subprojects/micronaut-aws-sdk-sts/src/test/groovy/com/agorapulse/micronaut/aws/sts/SecurityTokenServiceSpec.groovy[tag=usage]
 ----
 
-Please, see https://agorapulse.github.io/micronaut-libraries/api/com/agorapulse/micronaut/aws/sts/SecurityTokenService.html[SecurityTokenService] for the full reference.
+Please, see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/sts/SecurityTokenService.html[SecurityTokenService] for the full reference.
 
 ==== Testing
 It is recommended just to mock the `SecurityTokenService` in your tests as it only contains single abstract method.

@@ -46,10 +46,10 @@ bintray {
         userOrg = 'agorapulse'
         repo = 'libs'
         licenses = ['Apache-2.0']
-        githubRepo = 'agorapulse/micronaut-libraries'
-        vcsUrl = 'https://github.com/agorapulse/micronaut-libraries.git'
-        websiteUrl = 'https://github.com/agorapulse/micronaut-libraries'
-        issueTrackerUrl = 'https://github.com/agorapulse/micronaut-libraries/issues'
+        githubRepo = 'agorapulse/micronaut-aws-sdk'
+        vcsUrl = 'https://github.com/agorapulse/micronaut-aws-sdk.git'
+        websiteUrl = 'https://github.com/agorapulse/micronaut-aws-sdk'
+        issueTrackerUrl = 'https://github.com/agorapulse/micronaut-aws-sdk/issues'
     }
 }
 

@@ -52,4 +52,4 @@ projects {
     directories = ['subprojects', 'examples', 'docs']
 }
 
-rootProject.name = 'micronaut-libraries'
+rootProject.name = 'micronaut-aws-sdk'

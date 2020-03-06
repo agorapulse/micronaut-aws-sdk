@@ -43,15 +43,15 @@ interface DefaultClient {
     void putRecord(String partitionKey, String record, String sequenceNumber);          // <5>
 
     void putRecordAnno(                                                                 // <6>
-                                                                                        @PartitionKey String id,
-                                                                                        String record,
-                                                                                        @SequenceNumber String sqn
+        @PartitionKey String id,
+        String record,
+        @SequenceNumber String sqn
     );
 
     void putRecordAnnoNumbers(                                                          // <7>
-                                                                                        @PartitionKey Long id,
-                                                                                        String record,
-                                                                                        @SequenceNumber int sequenceNumber
+        @PartitionKey Long id,
+        String record,
+        @SequenceNumber int sequenceNumber
     );
     // end::string[]
     //CHECKSTYLE:ON

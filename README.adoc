@@ -1,13 +1,13 @@
 = Agorapulse Micronaut Libraries
 
 --
-image::https://api.bintray.com/packages/agorapulse/libs/micronaut-libraries/images/download.svg[link="https://bintray.com/agorapulse/libs/micronaut-libraries/_latestVersion",float="left"]
-image::https://github.com/agorapulse/micronaut-libraries/workflows/Check/badge.svg["Build Status", link="https://github.com/agorapulse/micronaut-libraries/actions?query=workflow%3ACheck"float="left"]
-image::https://coveralls.io/repos/github/agorapulse/micronaut-libraries/badge.svg?branch=master[link=https://coveralls.io/github/agorapulse/micronaut-libraries?branch=master",float="left"]
+image::https://api.bintray.com/packages/agorapulse/libs/micronaut-aws-sdk-core/images/download.svg[link="https://bintray.com/agorapulse/libs/micronaut-aws-sdk-core/_latestVersion",float="left"]
+image::https://github.com/agorapulse/micronaut-aws-sdk/workflows/Check/badge.svg["Build Status", link="https://github.com/agorapulse/micronaut-aws-sdk/actions?query=workflow%3ACheck"float="left"]
+image::https://coveralls.io/repos/github/agorapulse/micronaut-aws-sdk/badge.svg?branch=master[link=https://coveralls.io/github/agorapulse/micronaut-aws-sdk?branch=master",float="left"]
 --
 
 ---
 
 Set of useful libraries for http://micronaut.io[Micronaut]. All of the libraries are available in https://bintray.com/bintray/jcenter[JCenter Maven repository].
 
-See https://agorapulse.github.io/micronaut-libraries[Full Documentation].
+See https://agorapulse.github.io/micronaut-aws-sdk[Full Documentation].
