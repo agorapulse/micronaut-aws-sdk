@@ -70,7 +70,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-sqs/src/test/groovy/com/agorap
 
 NOTE: The return value of the publishing methods is message id returned by AWS.
 
-By default, `QueueClient` publishes recoreds into the default queue defined by `aws.sns.queue` property.
+By default, `QueueClient` publishes recoreds into the default queue defined by `aws.sqs.queue` property.
 You can switch to different configuration by changing the `value` of the annotation such as `@QueueClient("other")` or
 by setting the `queue` property of the annotation such as `@QueueClient(queue = "SomeQueue")`. You can change queue
 used by particular method using `@Queue` annotation as mentioned above.
