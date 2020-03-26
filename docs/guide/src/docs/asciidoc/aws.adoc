@@ -52,3 +52,28 @@ include::{includedir}/sqs.adoc[]
 include::{includedir}/sts.adoc[]
 
 include::{includedir}/websockets.adoc[]
+
+=== Configuration
+
+See the configuration sections for particular services.
+
+Following services support configuring `region` and `endpoint`:
+
+ * CloudWatch
+ * DynamodDB
+ * Kinesis
+ * S3
+ * SES
+ * SNS
+ * SQS
+ * STS
+
+For example, to configure region for DynamoDB you can add following settings:
+
+```yaml
+aws:
+  dynamodb:
+    region: us-east-1
+    endpoint: http://localhost:8000
+```
+
