@@ -168,6 +168,7 @@ $(addBlockSwitches);
 <li><a href="#_testing_8">Testing</a></li>
 </ul>
 </li>
+<li><a href="#_configuration_6">1.10. Configuration</a></li>
 </ul>
 </li>
 <li><a href="#_micronaut_for_api_gateway_proxy">2. Micronaut for API Gateway Proxy</a></li>
@@ -4440,6 +4441,54 @@ your Lambda function&#8217;s role must have following permissions (preferably co
 <div class="paragraph">
 <p>You can very easily mock any of the interfaces. Create request event manually and follow
 <a href="http://guides.micronaut.io/micronaut-function-aws-lambda/guide/index.html#functiontests">the guide to test functions with Micronaut</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_configuration_6"><a class="anchor" href="#_configuration_6"></a>1.10. Configuration</h4>
+<div class="paragraph">
+<p>See the configuration sections for particular services.</p>
+</div>
+<div class="paragraph">
+<p>Following services support configuring <code>region</code> and <code>endpoint</code>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>CloudWatch</p>
+</li>
+<li>
+<p>DynamodDB</p>
+</li>
+<li>
+<p>Kinesis</p>
+</li>
+<li>
+<p>S3</p>
+</li>
+<li>
+<p>SES</p>
+</li>
+<li>
+<p>SNS</p>
+</li>
+<li>
+<p>SQS</p>
+</li>
+<li>
+<p>STS</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For example, to configure region for DynamoDB you can add following settings:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">aws:
+  dynamodb:
+    region: us-east-1
+    endpoint: http://localhost:8000</code></pre>
 </div>
 </div>
 </div>
