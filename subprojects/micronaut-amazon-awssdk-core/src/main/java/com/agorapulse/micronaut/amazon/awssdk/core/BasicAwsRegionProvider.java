@@ -15,17 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-config {
-    bintray {
-        enabled = true
+package com.agorapulse.micronaut.amazon.awssdk.core;
+
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.regions.providers.AwsRegionProvider;
+
+
+public class BasicAwsRegionProvider implements AwsRegionProvider {
+
+    private final Region region;
+
+    public BasicAwsRegionProvider(Region region) {
+        this.region = region;
     }
-}
 
-dependencies {
-    compile project(':micronaut-aws-sdk-core')
-    compile "space.jasan:groovy-closure-support:$closureSupportVersion"
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-ses'
-    compile 'javax.mail:mail:1.4.4'
-
-    testCompile "org.mockito:mockito-core:2.23.4"
+    @Override
+    public Region getRegion() {
+        return region;
+    }
 }

@@ -22,10 +22,5 @@ config {
 }
 
 dependencies {
-    compile project(':micronaut-aws-sdk-core')
-    compile "space.jasan:groovy-closure-support:$closureSupportVersion"
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-ses'
-    compile 'javax.mail:mail:1.4.4'
-
-    testCompile "org.mockito:mockito-core:2.23.4"
+    compile "software.amazon.awssdk:aws-core"
 }

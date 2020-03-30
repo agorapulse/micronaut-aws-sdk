@@ -22,30 +22,16 @@ config {
 }
 
 dependencies {
-    compile project(':micronaut-aws-sdk-core')
+    compile project(':micronaut-amazon-awssdk-core')
     compile "space.jasan:groovy-closure-support:$closureSupportVersion"
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-sns'
-//
-//    testCompile 'com.amazonaws:aws-lambda-java-events'
-//
-//    testCompile "io.micronaut:micronaut-function-groovy"
-//    testCompile "io.micronaut:micronaut-function-aws"
-//    testCompile "io.micronaut:micronaut-function-client"
-//    testRuntime "io.micronaut:micronaut-http-server-netty"
-//    testRuntime "io.micronaut:micronaut-function-web"
-//
+
+    compile "software.amazon.awssdk:dynamodb"
+    compile "software.amazon.awssdk:dynamodb-enhanced"
+
     testCompile group: 'org.testcontainers', name: 'testcontainers', version: testcontainersVersion
     testCompile group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
     testCompile group: 'org.testcontainers', name: 'spock', version: testcontainersVersion
-//
-//    // for java tests
-//    testCompile "org.mockito:mockito-core:2.23.4"
-//
-//    // message sender tests
-//    testCompile group: 'com.stehno.ersatz', name: 'ersatz', version: '1.9.0'
-//    testCompile group: 'io.undertow', name: 'undertow-core', version: '2.0.13.Final'
-//
-//    // DynamoDB tests
-//    testCompile "com.agorapulse:dru-client-dynamodb:${druVersion}"
+
+    // testCompile "com.agorapulse:dru-client-dynamodb:${druVersion}"
 
 }
