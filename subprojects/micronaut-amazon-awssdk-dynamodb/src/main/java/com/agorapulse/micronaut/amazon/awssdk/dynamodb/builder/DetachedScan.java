@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.Converter;
 import io.reactivex.Flowable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
@@ -32,20 +33,20 @@ public interface DetachedScan<T> {
      * @param mapper DynamoDB mapper
      * @return flowable of entities found for the current scan
      */
-    Flowable<T> scan(DynamoDbTable<T> mapper);
+    Flowable<T> scan(DynamoDbTable<T> mapper, Converter converter);
 
     /**
      * Counts entities satisfying given scan using provided mapper.
      * @param mapper DynamoDB mapper
      * @return count of entities satisfying  for the current scan
      */
-    int count(DynamoDbTable<T> mapper);
+    int count(DynamoDbTable<T> mapper, Converter converter);
 
     /**
      * Resolves the current scan into native scan expression using provided mapper.
      * @param mapper DynamoDB mapper
      * @return the current scan resolved into native scan expression
      */
-    ScanEnhancedRequest resolveRequest(DynamoDbTable<T> mapper);
+    ScanEnhancedRequest resolveRequest(DynamoDbTable<T> mapper, Converter converter);
 
 }

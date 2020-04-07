@@ -2,16 +2,16 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
 import io.micronaut.core.beans.BeanIntrospection;
 import io.micronaut.core.beans.BeanIntrospector;
+import io.micronaut.core.beans.BeanProperty;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import sun.font.AttributeValues;
 
 import javax.inject.Singleton;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Singleton
-public class BeanIntrospectionAttributeValueConverter implements AttributeValueConverter {
+public class BeanIntrospectionConverter implements Converter {
 
     @Override
     public <T> Map<String, AttributeValue> convert(DynamoDbTable<T> table, Map<String, Object> values) {
@@ -31,10 +31,16 @@ public class BeanIntrospectionAttributeValueConverter implements AttributeValueC
     }
 
     private <T> AttributeValue convert(BeanIntrospection<T> introspection, DynamoDbTable<T> table, T instance, String key, Object value) {
+        if (value == null) {
+            return null;
+        }
+
         if (value instanceof AttributeValue) {
             return (AttributeValue) value;
         }
-        introspection.getProperty(key).ifPresent(p -> p.set(instance, value));
+
+        BeanProperty<T, Object> p = introspection.getProperty(key).orElseThrow(() -> new IllegalArgumentException("Unknown property " + key + " for " + instance));
+        p.set(instance, value);
         return table.tableSchema().attributeValue(instance, key);
     }
 

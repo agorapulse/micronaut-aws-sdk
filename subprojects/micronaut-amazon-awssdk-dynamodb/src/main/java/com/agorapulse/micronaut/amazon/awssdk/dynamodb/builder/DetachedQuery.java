@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.Converter;
 import io.reactivex.Flowable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
@@ -32,21 +33,21 @@ public interface DetachedQuery<T> {
      * @param mapper DynamoDB mapper
      * @return flowable of entities found for the current query
      */
-    Flowable<T> query(DynamoDbTable<T> mapper);
+    Flowable<T> query(DynamoDbTable<T> mapper, Converter converter);
 
     /**
      * Counts entities satisfying given query using provided mapper.
      * @param mapper DynamoDB mapper
      * @return count of entities satisfying  for the current query
      */
-    int count(DynamoDbTable<T> mapper);
+    int count(DynamoDbTable<T> mapper, Converter converter);
 
     /**
      * Resolves the current query into native query expression using provided mapper.
      * @param mapper DynamoDB mapper
      * @return the current query resolved into native query expression
      */
-    QueryEnhancedRequest resolveRequest(DynamoDbTable<T> mapper);
+    QueryEnhancedRequest resolveRequest(DynamoDbTable<T> mapper, Converter converter);
 
     /**
      * Returns the index for this query or null if the query is executed the primary index.

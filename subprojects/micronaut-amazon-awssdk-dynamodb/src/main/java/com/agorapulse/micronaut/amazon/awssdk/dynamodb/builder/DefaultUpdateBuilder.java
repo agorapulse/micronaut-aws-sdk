@@ -17,9 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeValueConverter;
-import io.micronaut.core.beans.BeanIntrospection;
-import io.micronaut.core.beans.BeanIntrospector;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.Converter;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
@@ -46,16 +44,22 @@ class DefaultUpdateBuilder<T> implements UpdateBuilder<T> {
     }
 
     private final List<Update> updates = new ArrayList<>();
-    private final List<BiConsumer<Key.Builder, DynamoDbTable<T>>> keyDefinitions = new ArrayList<>();
-
     private ReturnValue returnValue = ReturnValue.NONE;
     private Function<T, ?> returnValueMapper = Function.identity();
+    private Object hash;
+    private Object range;
 
     private Consumer<UpdateItemRequest.Builder> configurer = u -> {};
 
     @Override
-    public UpdateBuilder<T> key(BiConsumer<Key.Builder, DynamoDbTable<T>> definition) {
-        keyDefinitions.add(definition);
+    public UpdateBuilder<T> hash(Object key) {
+        this.hash = key;
+        return this;
+    }
+
+    @Override
+    public UpdateBuilder<T> range(Object key) {
+        this.range = key;
         return this;
     }
 
@@ -92,7 +96,7 @@ class DefaultUpdateBuilder<T> implements UpdateBuilder<T> {
     }
 
     @Override
-    public Object update(DynamoDbTable<T> mapper, DynamoDbClient client, AttributeValueConverter converter) {
+    public Object update(DynamoDbTable<T> mapper, DynamoDbClient client, Converter converter) {
         UpdateItemRequest request = resolveExpression(mapper, converter);
         UpdateItemResponse result = client.updateItem(request);
         Map<String, AttributeValue> attributes = result.attributes();
@@ -109,18 +113,26 @@ class DefaultUpdateBuilder<T> implements UpdateBuilder<T> {
     }
 
     @Override
-    public UpdateItemRequest resolveExpression(DynamoDbTable<T> mapper, AttributeValueConverter converter) {
+    public UpdateItemRequest resolveExpression(DynamoDbTable<T> mapper, Converter converter) {
         UpdateItemRequest.Builder builder = UpdateItemRequest.builder();
         configurer.accept(builder);
 
         builder.tableName(mapper.tableName());
 
         Key.Builder key = Key.builder();
-        keyDefinitions.forEach(b -> b.accept(key, mapper));
+
+        if (range != null) {
+            String sortKey = mapper.tableSchema().tableMetadata().primarySortKey().orElseThrow(() -> new IllegalArgumentException("Range key defined for update but none present on entity " + mapper.tableSchema().itemType().rawClass()));
+            key.sortValue(converter.convert(mapper, sortKey, range));
+        }
+
+        if (hash != null) {
+            String partitionKey = mapper.tableSchema().tableMetadata().primaryPartitionKey();
+            key.partitionValue(converter.convert(mapper, partitionKey, hash));
+        }
+
         builder.key(key.build().primaryKeyMap(mapper.tableSchema()));
-
         builder.returnValues(returnValue);
-
 
         // TODO: switch to update expressions
         Map<String, AttributeValueUpdate> attributeUpdates = new HashMap<>();

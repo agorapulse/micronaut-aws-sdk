@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.Converter;
 import groovy.lang.MissingPropertyException;
 import io.reactivex.Flowable;
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
@@ -93,14 +94,14 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
     }
 
     @Override
-    public int count(DynamoDbTable<T> mapper) {
+    public int count(DynamoDbTable<T> mapper, Converter converter) {
         // TODO: use select
-        return scan(mapper).count().blockingGet().intValue();
+        return scan(mapper, converter).count().blockingGet().intValue();
     }
 
     @Override
-    public Flowable<T> scan(DynamoDbTable<T> mapper) {
-        ScanEnhancedRequest request = resolveRequest(mapper);
+    public Flowable<T> scan(DynamoDbTable<T> mapper, Converter converter) {
+        ScanEnhancedRequest request = resolveRequest(mapper, converter);
         SdkIterable<Page<T>> iterable = this.index == null ? mapper.scan(request) : mapper.index(index).scan(request);
         Flowable<T> results = fromIterable(iterable).flatMap(p -> fromIterable(p.items()));;
         if (max < Integer.MAX_VALUE) {
@@ -110,9 +111,9 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
     }
 
     @Override
-    public ScanEnhancedRequest resolveRequest(DynamoDbTable<T> mapper) {
+    public ScanEnhancedRequest resolveRequest(DynamoDbTable<T> mapper, Converter converter) {
         String currentIndex = index == null ? TableMetadata.primaryIndexName() : index;
-        applyConditions(mapper.tableSchema(), filterCollectorsConsumers, cond -> expression.filterExpression(cond.expression(mapper.tableSchema(), currentIndex)));
+        applyConditions(mapper, converter, filterCollectorsConsumers, cond -> expression.filterExpression(cond.expression(mapper.tableSchema(), currentIndex)));
 
         if (exclusiveHashStartKey != null || exclusiveRangeStartKey != null) {
             Map<String, AttributeValue> exclusiveKey = new HashMap<>();
@@ -153,12 +154,13 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
     }
 
     private void applyConditions(
-        TableSchema<T> model,
+        DynamoDbTable<T> table,
+        Converter converter,
         List<Consumer<ConditionCollector<T>>> filterCollectorsConsumers,
         Consumer<QueryConditional> addFilterConsumer
     ) {
         if (!filterCollectorsConsumers.isEmpty()) {
-            ConditionCollector<T> filterCollector = new ConditionCollector<>(model);
+            ConditionCollector<T> filterCollector = new ConditionCollector<>(table, converter);
 
             for (Consumer<ConditionCollector<T>> consumer : filterCollectorsConsumers) {
                 consumer.accept(filterCollector);

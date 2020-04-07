@@ -32,6 +32,4 @@ dependencies {
     testCompile group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
     testCompile group: 'org.testcontainers', name: 'spock', version: testcontainersVersion
 
-    // testCompile "com.agorapulse:dru-client-dynamodb:${druVersion}"
-
 }

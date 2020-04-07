@@ -70,50 +70,10 @@ public interface QueryBuilder<T> extends DetachedQuery<T> {
      *
      * This parameter is required for every query.
      *
-     * @param key the hash key of the query as an instance of the object
-     * @return self
-     */
-    QueryBuilder<T> hash(T key);
-
-    /**
-     * Sets the hash key value for the query.
-     *
-     * This parameter is required for every query.
-     *
      * @param key the hash key of the query
      * @return self
      */
-    QueryBuilder<T> hash(CharSequence key);
-
-    /**
-     * Sets the hash key value for the query.
-     *
-     * This parameter is required for every query.
-     *
-     * @param key the hash key of the query
-     * @return self
-     */
-    QueryBuilder<T> hash(Number key);
-
-    /**
-     * Sets the hash key value for the query.
-     *
-     * This parameter is required for every query.
-     *
-     * @param key the hash key of the query
-     * @return self
-     */
-    QueryBuilder<T> hash(SdkBytes key);
-
-    /**
-     * Sets the hash key value for the query.
-     *
-     * This parameter is required for every query.
-     *
-     * @param key the hash key of the query
-     * @return self
-     */
-    QueryBuilder<T> hash(AttributeValue key);
+    QueryBuilder<T> hash(Object key);
 
     /**
      * One or more range key conditions.
@@ -128,8 +88,8 @@ public interface QueryBuilder<T> extends DetachedQuery<T> {
      * @return self
      */
     default QueryBuilder<T> range(
-        @DelegatesTo(type = "com.agorapulse.micronaut.aws.dynamodb.builder.RangeConditionCollector<T>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.aws.dynamodb.builder.RangeConditionCollector<T>")
+        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ConditionCollector<T>", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = FromString.class, options = "ccom.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ConditionCollector<T>")
             Closure<ConditionCollector<T>> conditions
     ) {
         return range(ConsumerWithDelegate.create(conditions));
@@ -156,8 +116,8 @@ public interface QueryBuilder<T> extends DetachedQuery<T> {
      * @return self
      */
     default QueryBuilder<T> filter(
-        @DelegatesTo(type = "com.agorapulse.micronaut.aws.dynamodb.builder.RangeConditionCollector<T>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.aws.dynamodb.builder.RangeConditionCollector<T>")
+        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ConditionCollector<T>", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ConditionCollector<T>")
             Closure<ConditionCollector<T>> conditions
     ) {
         return filter(ConsumerWithDelegate.create(conditions));

@@ -17,9 +17,9 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.Converter;
 import groovy.lang.MissingPropertyException;
 import io.reactivex.Flowable;
-import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.TableMetadata;
@@ -79,38 +79,10 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     }
 
     @Override
-    public DefaultQueryBuilder<T> hash(T hash) {
+    public DefaultQueryBuilder<T> hash(Object hash) {
         return range(r -> {
-            r.eq(r.getPartitionKey(), r.getAttributeValue(hash, r.getPartitionKey()));
+            r.eq(r.getPartitionKey(), hash);
         });
-    }
-
-    @Override
-    public QueryBuilder<T> hash(CharSequence key) {
-        final String keyString = Objects.requireNonNull(key.toString());
-        return range(r -> {
-            r.eq(r.getPartitionKey(), keyString);
-        });
-
-    }
-
-    @Override
-    public QueryBuilder<T> hash(Number key) {
-        return range(r -> {
-            r.eq(r.getPartitionKey(), key);
-        });
-    }
-
-    @Override
-    public QueryBuilder<T> hash(SdkBytes key) {
-        return range(r -> {
-            r.eq(r.getPartitionKey(), key);
-        });
-    }
-
-    @Override
-    public QueryBuilder<T> hash(AttributeValue key) {
-        return null;
     }
 
     @Override
@@ -145,14 +117,14 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     }
 
     @Override
-    public int count(DynamoDbTable<T> mapper) {
+    public int count(DynamoDbTable<T> mapper, Converter converter) {
         // TODO: use select
-        return query(mapper).count().blockingGet().intValue();
+        return query(mapper, converter).count().blockingGet().intValue();
     }
 
     @Override
-    public Flowable<T> query(DynamoDbTable<T> mapper) {
-        QueryEnhancedRequest request = resolveRequest(mapper);
+    public Flowable<T> query(DynamoDbTable<T> mapper, Converter converter) {
+        QueryEnhancedRequest request = resolveRequest(mapper, converter);
         SdkIterable<Page<T>> iterable = this.index == null ? mapper.query(request) : mapper.index(index).query(request);
         Flowable<T> results = fromIterable(iterable).flatMap(p -> fromIterable(p.items()));;
         if (max < Integer.MAX_VALUE) {
@@ -162,10 +134,10 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     }
 
     @Override
-    public QueryEnhancedRequest resolveRequest(DynamoDbTable<T> mapper) {
-        applyConditions(mapper.tableSchema(), queryConditionals, expression::queryConditional);
+    public QueryEnhancedRequest resolveRequest(DynamoDbTable<T> mapper, Converter converter) {
+        applyConditions(mapper, converter, queryConditionals, expression::queryConditional);
         String currentIndex = index == null ? TableMetadata.primaryIndexName() : index;
-        applyConditions(mapper.tableSchema(), filterCollectorsConsumers, cond -> expression.filterExpression(cond.expression(mapper.tableSchema(), currentIndex)));
+        applyConditions(mapper, converter, filterCollectorsConsumers, cond -> expression.filterExpression(cond.expression(mapper.tableSchema(), currentIndex)));
 
         if (exclusiveHashStartKey != null || exclusiveRangeStartKey != null) {
             Map<String, AttributeValue> exclusiveKey = new HashMap<>();
@@ -211,12 +183,13 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     }
 
     private void applyConditions(
-        TableSchema<T> model,
+        DynamoDbTable<T> model,
+        Converter converter,
         List<Consumer<ConditionCollector<T>>> filterCollectorsConsumers,
         Consumer<QueryConditional> addFilterConsumer
     ) {
         if (!filterCollectorsConsumers.isEmpty()) {
-            ConditionCollector<T> filterCollector = new ConditionCollector<>(model);
+            ConditionCollector<T> filterCollector = new ConditionCollector<>(model, converter);
 
             for (Consumer<ConditionCollector<T>> consumer : filterCollectorsConsumers) {
                 consumer.accept(filterCollector);

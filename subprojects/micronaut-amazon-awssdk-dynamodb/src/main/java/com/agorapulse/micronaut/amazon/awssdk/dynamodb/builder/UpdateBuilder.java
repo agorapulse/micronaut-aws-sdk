@@ -21,16 +21,11 @@ import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
 import groovy.transform.stc.ClosureParams;
 import groovy.transform.stc.FromString;
-import software.amazon.awssdk.core.SdkBytes;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.Key;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.ReturnValue;
 import software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest;
 import space.jasan.support.groovy.closure.ConsumerWithDelegate;
 import space.jasan.support.groovy.closure.FunctionWithDelegate;
 
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -41,98 +36,18 @@ import java.util.function.Function;
 public interface UpdateBuilder<T> extends DetachedUpdate<T> {
 
     /**
-     * Defines the key for the update.
-     * @param definition the bi-consumer accepting the key builder and the table object
-     * @return self
-     */
-    UpdateBuilder<T> key(BiConsumer<Key.Builder, DynamoDbTable<T>> definition);
-
-    /**
      * Sets the hash key value of the updated entity.
-     * @param key the hash key of the query or an instance of the object with the hash key set
+     * @param key the hash key of the query
      * @return self
      */
-    default UpdateBuilder<T> key(T key) {
-        return key((b, t) -> {
-            Key theKey = t.keyFrom(key);
-            if (theKey.partitionKeyValue() != null) {
-                b.partitionValue(theKey.partitionKeyValue());
-            }
-            theKey.sortKeyValue().ifPresent(b::sortValue);
-        });
-    };
+    UpdateBuilder<T> hash(Object key);
 
     /**
      * Sets the hash key value of the updated entity.
      * @param key the hash key of the query
      * @return self
      */
-    default UpdateBuilder<T> hash(String key) {
-        return key((k, b) -> k.partitionValue(key));
-    }
-
-    /**
-     * Sets the hash key value of the updated entity.
-     * @param key the hash key of the query
-     * @return self
-     */
-    default UpdateBuilder<T> hash(Number key) {
-        return key((k, b) -> k.partitionValue(key));
-    }
-
-    /**
-     * Sets the hash key value of the updated entity.
-     * @param key the hash key of the query
-     * @return self
-     */
-    default UpdateBuilder<T> hash(SdkBytes key) {
-        return key((k, b) -> k.partitionValue(key));
-    }
-
-    /**
-     * Sets the hash key value of the updated entity.
-     * @param key the hash key of the query
-     * @return self
-     */
-    default UpdateBuilder<T> hash(AttributeValue key) {
-        return key((k, b) -> k.partitionValue(key));
-    }
-
-    /**
-     * Sets the hash key value of the updated entity.
-     * @param key the hash key of the query
-     * @return self
-     */
-    default UpdateBuilder<T> range(String key) {
-        return key((k, b) -> k.sortValue(key));
-    }
-
-    /**
-     * Sets the hash key value of the updated entity.
-     * @param key the hash key of the query
-     * @return self
-     */
-    default UpdateBuilder<T> range(Number key) {
-        return key((k, b) -> k.sortValue(key));
-    }
-
-    /**
-     * Sets the hash key value of the updated entity.
-     * @param key the hash key of the query
-     * @return self
-     */
-    default UpdateBuilder<T> range(SdkBytes key) {
-        return key((k, b) -> k.sortValue(key));
-    }
-
-    /**
-     * Sets the hash key value of the updated entity.
-     * @param key the hash key of the query
-     * @return self
-     */
-    default UpdateBuilder<T> range(AttributeValue key) {
-        return key((k, b) -> k.sortValue(key));
-    }
+    UpdateBuilder<T> range(Object key);
 
     /**
      * Add a difference to particular attribute of the entity.

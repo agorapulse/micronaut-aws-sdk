@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.Map;
 
 
-public interface AttributeValueConverter {
+public interface Converter {
 
     default <T> AttributeValue convert(DynamoDbTable<T> table, String key, Object value) {
         return convert(table, Collections.singletonMap(key, value)).get(key);

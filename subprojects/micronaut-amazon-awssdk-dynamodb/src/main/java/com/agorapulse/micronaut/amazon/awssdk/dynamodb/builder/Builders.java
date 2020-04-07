@@ -65,7 +65,7 @@ public final class Builders {
      * @param <T> type of DynamoDB entity
      * @return query builder for given DynamoDB entity
      */
-    public static <T> QueryBuilder<T> query() {
+    public static <T> QueryBuilder<T> query(Class<T> type) {
         return new DefaultQueryBuilder<>(QueryEnhancedRequest.builder().limit(DEFAULT_QUERY_LIMIT));
     }
 
@@ -78,7 +78,7 @@ public final class Builders {
      * @return query builder for given DynamoDB entity
      */
     public static <T> QueryBuilder<T> query(Class<T> type, Consumer<QueryBuilder<T>> definition) {
-        QueryBuilder<T> builder = query();
+        QueryBuilder<T> builder = query(type);
         definition.accept(builder);
         return builder;
     }
@@ -93,8 +93,8 @@ public final class Builders {
      */
     public static <T> QueryBuilder<T> query(
         Class<T> type,
-        @DelegatesTo(type = "com.agorapulse.micronaut.aws.dynamodb.builder.QueryBuilder<T>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = SimpleType.class, options = "com.agorapulse.micronaut.aws.dynamodb.builder.QueryBuilder<T>")
+        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.QueryBuilder<T>", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = SimpleType.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.QueryBuilder<T>")
             Closure<QueryBuilder<T>> definition
     ) {
         return query(type, ConsumerWithDelegate.create(definition));
@@ -135,8 +135,8 @@ public final class Builders {
      */
     public static <T> ScanBuilder<T> scan(
         Class<T> type,
-        @DelegatesTo(type = "com.agorapulse.micronaut.aws.dynamodb.builder.ScanBuilder<T>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = SimpleType.class, options = "com.agorapulse.micronaut.aws.dynamodb.builder.ScanBuilder<T>")
+        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ScanBuilder<T>", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = SimpleType.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ScanBuilder<T>")
             Closure<ScanBuilder<T>> definition
     ) {
         return scan(type, ConsumerWithDelegate.create(definition));
@@ -177,8 +177,8 @@ public final class Builders {
      */
     public static <T> UpdateBuilder<T> update(
         Class<T> type,
-        @DelegatesTo(type = "com.agorapulse.micronaut.aws.dynamodb.builder.UpdateBuilder<T>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = SimpleType.class, options = "com.agorapulse.micronaut.aws.dynamodb.builder.UpdateBuilder<T>")
+        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T>", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = SimpleType.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T>")
             Closure<UpdateBuilder<T>> definition
     ) {
         return update(type, ConsumerWithDelegate.create(definition));

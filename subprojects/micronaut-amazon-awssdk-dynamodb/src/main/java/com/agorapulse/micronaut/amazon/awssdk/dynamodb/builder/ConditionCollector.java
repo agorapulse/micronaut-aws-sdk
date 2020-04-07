@@ -17,109 +17,52 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.Converter;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.conditional.QueryConditionalFactory;
 import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
 import groovy.transform.stc.ClosureParams;
 import groovy.transform.stc.FromString;
 import software.amazon.awssdk.core.SdkBytes;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import space.jasan.support.groovy.closure.ConsumerWithDelegate;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public final class ConditionCollector<T> {
-    public ConditionCollector(TableSchema<T> model) {
-        this.model = model;
+
+    public ConditionCollector(DynamoDbTable<T> table, Converter converter) {
+        this.table = table;
+        this.converter = converter;
     }
 
-    public ConditionCollector<T> eq(String value) {
+    public ConditionCollector<T> eq(Object value) {
         return eq(getSortKey(), value);
     }
 
-    public ConditionCollector<T> eq(Number value) {
-        return eq(getSortKey(), value);
-    }
-
-    public ConditionCollector<T> eq(SdkBytes value) {
-        return eq(getSortKey(), value);
-    }
-
-    public ConditionCollector<T> eq(AttributeValue value) {
-        return eq(getSortKey(), value);
-    }
-
-    public ConditionCollector<T> eq(String attributeOrIndex, String value) {
-        conditions.add(QueryConditionalFactory.equalTo(attributeOrIndex, value));
+    public ConditionCollector<T> eq(String attributeOrIndex, Object value) {
+        conditions.add(QueryConditionalFactory.equalTo(attributeOrIndex, converter.convert(table, attributeOrIndex, value)));
         return this;
     }
 
-    public ConditionCollector<T> eq(String attributeOrIndex, Number value) {
-        conditions.add(QueryConditionalFactory.equalTo(attributeOrIndex, value));
-        return this;
-    }
-
-    public ConditionCollector<T> eq(String attributeOrIndex, SdkBytes value) {
-        conditions.add(QueryConditionalFactory.equalTo(attributeOrIndex, value));
-        return this;
-    }
-
-    public ConditionCollector<T> eq(String attributeOrIndex, AttributeValue value) {
-        conditions.add(QueryConditionalFactory.equalTo(attributeOrIndex, value));
-        return this;
-    }
-
-    public ConditionCollector<T> ne(String value) {
+    public ConditionCollector<T> ne(Object value) {
         return ne(getSortKey(), value);
     }
 
-    public ConditionCollector<T> ne(Number value) {
-        return ne(getSortKey(), value);
-    }
-
-    public ConditionCollector<T> ne(SdkBytes value) {
-        return ne(getSortKey(), value);
-    }
-
-    public ConditionCollector<T> ne(String attributeOrIndex, String value) {
-        conditions.add(QueryConditionalFactory.notEqualTo(attributeOrIndex, value));
+    public ConditionCollector<T> ne(String attributeOrIndex, Object value) {
+        conditions.add(QueryConditionalFactory.notEqualTo(attributeOrIndex, converter.convert(table, attributeOrIndex, value)));
         return this;
     }
 
-    public ConditionCollector<T> ne(String attributeOrIndex, Number value) {
-        conditions.add(QueryConditionalFactory.notEqualTo(attributeOrIndex, value));
-        return this;
-    }
-
-    public ConditionCollector<T> ne(String attributeOrIndex, SdkBytes value) {
-        conditions.add(QueryConditionalFactory.notEqualTo(attributeOrIndex, value));
-        return this;
-    }
-
-    public ConditionCollector<T> inList(String... values) {
+    public ConditionCollector<T> inList(Object... values) {
         return inList(getSortKey(), values);
     }
 
-    public ConditionCollector<T> inList(Number... values) {
-        return inList(getSortKey(), values);
-    }
-
-    public ConditionCollector<T> inList(SdkBytes... values) {
-        return inList(getSortKey(), values);
-    }
-
-    public ConditionCollector<T> inList(String attributeOrIndex, String... values) {
-        return inList(attributeOrIndex, Arrays.asList(values));
-    }
-
-    public ConditionCollector<T> inList(String attributeOrIndex, Number... values) {
-        return inList(attributeOrIndex, Arrays.asList(values));
-    }
-
-    public ConditionCollector<T> inList(String attributeOrIndex, SdkBytes... values) {
+    public ConditionCollector<T> inList(String attributeOrIndex, Object... values) {
         return inList(attributeOrIndex, Arrays.asList(values));
     }
 
@@ -128,142 +71,57 @@ public final class ConditionCollector<T> {
     }
 
     public ConditionCollector<T> inList(String attributeOrIndex, Collection<?> values) {
-        conditions.add(QueryConditionalFactory.inList(attributeOrIndex, values));
+        List<AttributeValue> valuesAttributes = values.stream().map(value -> converter.convert(table, attributeOrIndex, value)).collect(Collectors.toList());
+        conditions.add(QueryConditionalFactory.inList(attributeOrIndex, valuesAttributes));
         return this;
     }
 
-    public ConditionCollector<T> le(String value) {
+    public ConditionCollector<T> le(Object value) {
         return le(getSortKey(), value);
     }
 
-    public ConditionCollector<T> le(Number value) {
-        return le(getSortKey(), value);
-    }
-
-    public ConditionCollector<T> le(SdkBytes value) {
-        return le(getSortKey(), value);
-    }
-
-    public ConditionCollector<T> le(String attributeOrIndex, String value) {
-        conditions.add(QueryConditionalFactory.lessThanOrEqualTo(attributeOrIndex, value));
+    public ConditionCollector<T> le(String attributeOrIndex, Object value) {
+        conditions.add(QueryConditionalFactory.lessThanOrEqualTo(attributeOrIndex, converter.convert(table, attributeOrIndex, value)));
         return this;
     }
 
-    public ConditionCollector<T> le(String attributeOrIndex, Number value) {
-        conditions.add(QueryConditionalFactory.lessThanOrEqualTo(attributeOrIndex, value));
-        return this;
-    }
-
-    public ConditionCollector<T> le(String attributeOrIndex, SdkBytes value) {
-        conditions.add(QueryConditionalFactory.lessThanOrEqualTo(attributeOrIndex, value));
-        return this;
-    }
-
-    public ConditionCollector<T> lt(String value) {
+    public ConditionCollector<T> lt(Object value) {
         return lt(getSortKey(), value);
     }
 
-    public ConditionCollector<T> lt(Number value) {
-        return lt(getSortKey(), value);
-    }
-
-    public ConditionCollector<T> lt(SdkBytes value) {
-        return lt(getSortKey(), value);
-    }
-
-    public ConditionCollector<T> lt(String attributeOrIndex, String value) {
-        conditions.add(QueryConditionalFactory.lessThan(attributeOrIndex, value));
+    public ConditionCollector<T> lt(String attributeOrIndex, Object value) {
+        conditions.add(QueryConditionalFactory.lessThan(attributeOrIndex, converter.convert(table, attributeOrIndex, value)));
         return this;
     }
 
-    public ConditionCollector<T> lt(String attributeOrIndex, Number value) {
-        conditions.add(QueryConditionalFactory.lessThan(attributeOrIndex, value));
-        return this;
-    }
-
-    public ConditionCollector<T> lt(String attributeOrIndex, SdkBytes value) {
-        conditions.add(QueryConditionalFactory.lessThan(attributeOrIndex, value));
-        return this;
-    }
-
-    public ConditionCollector<T> ge(String value) {
+    public ConditionCollector<T> ge(Object value) {
         return ge(getSortKey(), value);
     }
 
-    public ConditionCollector<T> ge(Number value) {
-        return ge(getSortKey(), value);
-    }
-
-    public ConditionCollector<T> ge(SdkBytes value) {
-        return ge(getSortKey(), value);
-    }
-
-    public ConditionCollector<T> ge(String attributeOrIndex, String value) {
-        conditions.add(QueryConditionalFactory.greaterThanOrEqualTo(attributeOrIndex, value));
+    public ConditionCollector<T> ge(String attributeOrIndex, Object value) {
+        conditions.add(QueryConditionalFactory.greaterThanOrEqualTo(attributeOrIndex, converter.convert(table, attributeOrIndex, value)));
         return this;
     }
 
-    public ConditionCollector<T> ge(String attributeOrIndex, Number value) {
-        conditions.add(QueryConditionalFactory.greaterThanOrEqualTo(attributeOrIndex, value));
-        return this;
-    }
-
-    public ConditionCollector<T> ge(String attributeOrIndex, SdkBytes value) {
-        conditions.add(QueryConditionalFactory.greaterThanOrEqualTo(attributeOrIndex, value));
-        return this;
-    }
-
-    public ConditionCollector<T> gt(String value) {
+    public ConditionCollector<T> gt(Object value) {
         return gt(getSortKey(), value);
     }
 
-    public ConditionCollector<T> gt(Number value) {
-        return gt(getSortKey(), value);
-    }
-
-    public ConditionCollector<T> gt(SdkBytes value) {
-        return gt(getSortKey(), value);
-    }
-
-    public ConditionCollector<T> gt(String attributeOrIndex, String value) {
-        conditions.add(QueryConditionalFactory.greaterThan(attributeOrIndex, value));
+    public ConditionCollector<T> gt(String attributeOrIndex, Object value) {
+        conditions.add(QueryConditionalFactory.greaterThan(attributeOrIndex, converter.convert(table, attributeOrIndex, value)));
         return this;
     }
 
-    public ConditionCollector<T> gt(String attributeOrIndex, Number value) {
-        conditions.add(QueryConditionalFactory.greaterThan(attributeOrIndex, value));
-        return this;
-    }
-
-    public ConditionCollector<T> gt(String attributeOrIndex, SdkBytes value) {
-        conditions.add(QueryConditionalFactory.greaterThan(attributeOrIndex, value));
-        return this;
-    }
-
-    public ConditionCollector<T> between(String lo, String hi) {
+    public ConditionCollector<T> between(Object lo, Object hi) {
         return between(getSortKey(), lo, hi);
     }
 
-    public ConditionCollector<T> between(Number lo, Number hi) {
-        return between(getSortKey(), lo, hi);
-    }
-
-    public ConditionCollector<T> between(SdkBytes lo, SdkBytes hi) {
-        return between(getSortKey(), lo, hi);
-    }
-
-    public ConditionCollector<T> between(String attributeOrIndex, String lo, String hi) {
-        conditions.add(QueryConditionalFactory.between(attributeOrIndex, lo, hi));
-        return this;
-    }
-
-    public ConditionCollector<T> between(String attributeOrIndex, Number lo, Number hi) {
-        conditions.add(QueryConditionalFactory.between(attributeOrIndex, lo, hi));
-        return this;
-    }
-
-    public ConditionCollector<T> between(String attributeOrIndex, SdkBytes lo, SdkBytes hi) {
-        conditions.add(QueryConditionalFactory.between(attributeOrIndex, lo, hi));
+    public ConditionCollector<T> between(String attributeOrIndex, Object lo, Object hi) {
+        conditions.add(QueryConditionalFactory.between(
+            attributeOrIndex,
+            converter.convert(table, attributeOrIndex, lo),
+            converter.convert(table, attributeOrIndex, hi))
+        );
         return this;
     }
 
@@ -285,57 +143,21 @@ public final class ConditionCollector<T> {
         return this;
     }
 
-    public ConditionCollector<T> contains(String value) {
+    public ConditionCollector<T> contains(Object value) {
         return contains(getSortKey(), value);
     }
 
-    public ConditionCollector<T> contains(Number value) {
-        return contains(getSortKey(), value);
-    }
-
-    public ConditionCollector<T> contains(SdkBytes value) {
-        return contains(getSortKey(), value);
-    }
-
-    public ConditionCollector<T> contains(String attributeOrIndex, String value) {
-        conditions.add(QueryConditionalFactory.contains(attributeOrIndex, value));
+    public ConditionCollector<T> contains(String attributeOrIndex, Object value) {
+        conditions.add(QueryConditionalFactory.contains(attributeOrIndex, converter.convert(table, attributeOrIndex, value)));
         return this;
     }
 
-    public ConditionCollector<T> contains(String attributeOrIndex, Number value) {
-        conditions.add(QueryConditionalFactory.contains(attributeOrIndex, value));
-        return this;
-    }
-
-    public ConditionCollector<T> contains(String attributeOrIndex, SdkBytes value) {
-        conditions.add(QueryConditionalFactory.contains(attributeOrIndex, value));
-        return this;
-    }
-
-    public ConditionCollector<T> notContains(String value) {
+    public ConditionCollector<T> notContains(Object value) {
         return notContains(getSortKey(), value);
     }
 
-    public ConditionCollector<T> notContains(Number value) {
-        return notContains(getSortKey(), value);
-    }
-
-    public ConditionCollector<T> notContains(SdkBytes value) {
-        return notContains(getSortKey(), value);
-    }
-
-    public ConditionCollector<T> notContains(String attributeOrIndex, String value) {
-        conditions.add(QueryConditionalFactory.not(QueryConditionalFactory.contains(attributeOrIndex, value)));
-        return this;
-    }
-
-    public ConditionCollector<T> notContains(String attributeOrIndex, Number value) {
-        conditions.add(QueryConditionalFactory.not(QueryConditionalFactory.contains(attributeOrIndex, value)));
-        return this;
-    }
-
-    public ConditionCollector<T> notContains(String attributeOrIndex, SdkBytes value) {
-        conditions.add(QueryConditionalFactory.not(QueryConditionalFactory.contains(attributeOrIndex, value)));
+    public ConditionCollector<T> notContains(String attributeOrIndex, Object value) {
+        conditions.add(QueryConditionalFactory.not(QueryConditionalFactory.contains(attributeOrIndex, converter.convert(table, attributeOrIndex, value))));
         return this;
     }
 
@@ -369,7 +191,7 @@ public final class ConditionCollector<T> {
      * @return self
      */
     public ConditionCollector<T> group(Consumer<ConditionCollector<T>> conditions) {
-        ConditionCollector<T> nested = new ConditionCollector<>(model);
+        ConditionCollector<T> nested = new ConditionCollector<>(table, converter);
         conditions.accept(nested);
 
         this.conditions.add(QueryConditionalFactory.group(QueryConditionalFactory.and(nested.conditions)));
@@ -398,7 +220,7 @@ public final class ConditionCollector<T> {
      * @return self
      */
     public ConditionCollector<T> or(Consumer<ConditionCollector<T>> conditions) {
-        ConditionCollector<T> nested = new ConditionCollector<>(model);
+        ConditionCollector<T> nested = new ConditionCollector<>(table, converter);
         conditions.accept(nested);
 
         this.conditions.add(QueryConditionalFactory.or(nested.conditions));
@@ -427,7 +249,7 @@ public final class ConditionCollector<T> {
      * @return self
      */
     public ConditionCollector<T> and(Consumer<ConditionCollector<T>> conditions) {
-        ConditionCollector<T> nested = new ConditionCollector<>(model);
+        ConditionCollector<T> nested = new ConditionCollector<>(table, converter);
         conditions.accept(nested);
 
         this.conditions.add(QueryConditionalFactory.and(nested.conditions));
@@ -439,22 +261,23 @@ public final class ConditionCollector<T> {
         return QueryConditionalFactory.and(conditions);
     }
 
-    private final TableSchema<T> model;
+    private final DynamoDbTable<T> table;
+    private final Converter converter;
     private List<QueryConditional> conditions = new LinkedList<>();
 
     String getSortKey() {
-        Optional<String> sortKey = model.tableMetadata().primarySortKey();
+        Optional<String> sortKey = table.tableSchema().tableMetadata().primarySortKey();
         if (!sortKey.isPresent()) {
-            throw new IllegalStateException("Sort key not defined for " + model.itemType());
+            throw new IllegalStateException("Sort key not defined for " + table.tableSchema().itemType());
         }
         return sortKey.get();
     }
 
     String getPartitionKey() {
-        return model.tableMetadata().primaryPartitionKey();
+        return table.tableSchema().tableMetadata().primaryPartitionKey();
     }
 
     AttributeValue getAttributeValue(T object, String key) {
-        return model.attributeValue(object, key);
+        return table.tableSchema().attributeValue(object, key);
     }
 }

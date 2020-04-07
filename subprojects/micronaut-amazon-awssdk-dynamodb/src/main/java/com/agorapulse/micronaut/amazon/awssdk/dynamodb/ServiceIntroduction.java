@@ -66,19 +66,19 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             return partitionKey != null;
         }
 
-        AttributeValue getPartitionAttributeValue(Map<String, MutableArgumentValue<?>> params, DynamoDbTable<?> table, AttributeValueConverter converter) {
+        AttributeValue getPartitionAttributeValue(Map<String, MutableArgumentValue<?>> params, DynamoDbTable<?> table, Converter converter) {
             Object hashKeyRaw = params.get(partitionKey.getName()).getValue();
             String hashKeyName = table.tableSchema().tableMetadata().primaryPartitionKey();
             return converter.convert(table, hashKeyName, hashKeyRaw);
         }
 
-        AttributeValue getSortAttributeValue(Map<String, MutableArgumentValue<?>> params, DynamoDbTable<?> table, AttributeValueConverter converter) {
+        AttributeValue getSortAttributeValue(Map<String, MutableArgumentValue<?>> params, DynamoDbTable<?> table, Converter converter) {
             Object rangeKeyRaw = params.get(sortKey.getName()).getValue();
             String rangeKeyName = table.tableSchema().tableMetadata().primarySortKey().orElseThrow(() -> new IllegalArgumentException("Sort key not present for " + table.tableSchema().itemType()));
             return converter.convert(table, rangeKeyName, rangeKeyRaw);
         }
 
-        List<AttributeValue> getSortAttributeValues(Map<String, MutableArgumentValue<?>> params, DynamoDbTable<?> table, AttributeValueConverter converter) {
+        List<AttributeValue> getSortAttributeValues(Map<String, MutableArgumentValue<?>> params, DynamoDbTable<?> table, Converter converter) {
             final String key = table.tableSchema().tableMetadata().primarySortKey().orElseThrow(() -> new IllegalArgumentException("Sort key not present for " + table.tableSchema().itemType()));
             return toList(Object.class, sortKey, params).stream().map(o -> converter.convert(table, key, o)).collect(Collectors.toList());
         }
@@ -87,9 +87,9 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
 
     private final DynamoDbEnhancedClient enhancedClient;
     private final DynamoDbClient client;
-    private final AttributeValueConverter converter;
+    private final Converter converter;
 
-    public ServiceIntroduction(DynamoDbEnhancedClient enhancedClient, DynamoDbClient client, AttributeValueConverter converter) {
+    public ServiceIntroduction(DynamoDbEnhancedClient enhancedClient, DynamoDbClient client, Converter converter) {
         this.enhancedClient = enhancedClient;
         this.client = client;
         this.converter = converter;
@@ -170,19 +170,19 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             DetachedQuery<T> criteria = evaluateAnnotationType(context.getTargetMethod().getAnnotation(Query.class).value(), context);
 
             if (methodName.startsWith("count")) {
-                return criteria.count(table);
+                return criteria.count(table, converter);
             }
 
             if (methodName.startsWith("delete")) {
                 int counter = 0;
-                for (T t : table.query(criteria.resolveRequest(table)).items()) {
+                for (T t : table.query(criteria.resolveRequest(table, converter)).items()) {
                     table.deleteItem(t);
                     counter++;
                 }
                 return counter;
             }
 
-            return flowableOrList(criteria.query(table), context.getReturnType().getType());
+            return flowableOrList(criteria.query(table, converter), context.getReturnType().getType());
         }
 
         if (context.getTargetMethod().isAnnotationPresent(Update.class)) {
@@ -195,23 +195,23 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             DetachedScan<T> criteria = evaluateAnnotationType(context.getTargetMethod().getAnnotation(Scan.class).value(), context);
 
             if (methodName.startsWith("count")) {
-                return criteria.count(table);
+                return criteria.count(table, converter);
             }
 
             if (methodName.startsWith("delete")) {
                 int counter = 0;
-                for (T t : table.scan(criteria.resolveRequest(table)).items()) {
+                for (T t : table.scan(criteria.resolveRequest(table, converter)).items()) {
                     table.deleteItem(t);
                     counter++;
                 }
                 return counter;
             }
 
-            return flowableOrList(criteria.scan(table), context.getReturnType().getType());
+            return flowableOrList(criteria.scan(table, converter), context.getReturnType().getType());
         }
 
         if (methodName.startsWith("count")) {
-            return simpleHashAndRangeQuery(type, context, table).count(table);
+            return simpleHashAndRangeQuery(type, context, table).count(table, converter);
         }
 
         if (methodName.startsWith("delete")) {
@@ -219,7 +219,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         }
 
         if (methodName.startsWith("query") || methodName.startsWith("findAll") || methodName.startsWith("list")) {
-            return flowableOrList(simpleHashAndRangeQuery(type, context, table).query(table), context.getReturnType().getType());
+            return flowableOrList(simpleHashAndRangeQuery(type, context, table).query(table, converter), context.getReturnType().getType());
         }
 
         throw new UnsupportedOperationException("Cannot implement method " + context.getExecutableMethod());
