@@ -15,17 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builders;
+package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
 import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
 import groovy.transform.stc.ClosureParams;
 import groovy.transform.stc.FromString;
-import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest;
+import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.ReturnValue;
+import software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest;
 import space.jasan.support.groovy.closure.ConsumerWithDelegate;
 import space.jasan.support.groovy.closure.FunctionWithDelegate;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -36,18 +41,98 @@ import java.util.function.Function;
 public interface UpdateBuilder<T> extends DetachedUpdate<T> {
 
     /**
+     * Defines the key for the update.
+     * @param definition the bi-consumer accepting the key builder and the table object
+     * @return self
+     */
+    UpdateBuilder<T> key(BiConsumer<Key.Builder, DynamoDbTable<T>> definition);
+
+    /**
      * Sets the hash key value of the updated entity.
      * @param key the hash key of the query or an instance of the object with the hash key set
      * @return self
      */
-    UpdateBuilder<T> hash(Object key);
+    default UpdateBuilder<T> key(T key) {
+        return key((b, t) -> {
+            Key theKey = t.keyFrom(key);
+            if (theKey.partitionKeyValue() != null) {
+                b.partitionValue(theKey.partitionKeyValue());
+            }
+            theKey.sortKeyValue().ifPresent(b::sortValue);
+        });
+    };
 
     /**
-     * Sets the range key value of the updated entity.
-     * @param range the range key of the updated entity
+     * Sets the hash key value of the updated entity.
+     * @param key the hash key of the query
      * @return self
      */
-    UpdateBuilder<T> range(Object range);
+    default UpdateBuilder<T> hash(String key) {
+        return key((k, b) -> k.partitionValue(key));
+    }
+
+    /**
+     * Sets the hash key value of the updated entity.
+     * @param key the hash key of the query
+     * @return self
+     */
+    default UpdateBuilder<T> hash(Number key) {
+        return key((k, b) -> k.partitionValue(key));
+    }
+
+    /**
+     * Sets the hash key value of the updated entity.
+     * @param key the hash key of the query
+     * @return self
+     */
+    default UpdateBuilder<T> hash(SdkBytes key) {
+        return key((k, b) -> k.partitionValue(key));
+    }
+
+    /**
+     * Sets the hash key value of the updated entity.
+     * @param key the hash key of the query
+     * @return self
+     */
+    default UpdateBuilder<T> hash(AttributeValue key) {
+        return key((k, b) -> k.partitionValue(key));
+    }
+
+    /**
+     * Sets the hash key value of the updated entity.
+     * @param key the hash key of the query
+     * @return self
+     */
+    default UpdateBuilder<T> range(String key) {
+        return key((k, b) -> k.sortValue(key));
+    }
+
+    /**
+     * Sets the hash key value of the updated entity.
+     * @param key the hash key of the query
+     * @return self
+     */
+    default UpdateBuilder<T> range(Number key) {
+        return key((k, b) -> k.sortValue(key));
+    }
+
+    /**
+     * Sets the hash key value of the updated entity.
+     * @param key the hash key of the query
+     * @return self
+     */
+    default UpdateBuilder<T> range(SdkBytes key) {
+        return key((k, b) -> k.sortValue(key));
+    }
+
+    /**
+     * Sets the hash key value of the updated entity.
+     * @param key the hash key of the query
+     * @return self
+     */
+    default UpdateBuilder<T> range(AttributeValue key) {
+        return key((k, b) -> k.sortValue(key));
+    }
 
     /**
      * Add a difference to particular attribute of the entity.
@@ -208,7 +293,7 @@ public interface UpdateBuilder<T> extends DetachedUpdate<T> {
      * @param configurer consumer to configure the native update request
      * @return self
      */
-    UpdateBuilder<T> configure(Consumer<UpdateItemEnhancedRequest.Builder<T>> configurer);
+    UpdateBuilder<T> configure(Consumer<UpdateItemRequest.Builder> configurer);
 
     /**
      * Configures the native update request.
@@ -219,8 +304,8 @@ public interface UpdateBuilder<T> extends DetachedUpdate<T> {
      * @return self
      */
     default UpdateBuilder<T> configure(
-        @DelegatesTo(type = "software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest.Builder<T>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "ssoftware.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest.Builder<T>")
+        @DelegatesTo(type = "software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest.Builder", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest.Builder")
             Closure<Object> configurer
     ) {
         return configure(ConsumerWithDelegate.create(configurer));

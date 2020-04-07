@@ -22,7 +22,9 @@ import java.lang.annotation.*;
 /**
  * Annotates range key.
  *
- * This annotation is not required if the name of the argument contains word <code>range</code>.
+ * This annotation is not required if the name of the argument contains word <code>range</code> or <code>sort</code>.
+ *
+ * @deprecated use @{@link SortKey} instead
  */
 @Inherited
 @Documented

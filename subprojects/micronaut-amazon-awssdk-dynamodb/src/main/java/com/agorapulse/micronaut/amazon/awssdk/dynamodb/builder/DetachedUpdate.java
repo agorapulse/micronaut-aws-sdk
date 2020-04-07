@@ -15,9 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builders;
+package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeValueConverter;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest;
 
@@ -33,13 +34,13 @@ public interface DetachedUpdate<T> {
      * @param client low level AWS SDK client
      * @return the return value which depends on the configuration of the update request
      */
-    Object update(DynamoDbEnhancedClient mapper, DynamoDbClient client);
+    Object update(DynamoDbTable<T> mapper, DynamoDbClient client, AttributeValueConverter converter);
 
     /**
      * Resolves the current update into native update request using provided mapper.
      * @param mapper DynamoDB mapper
      * @return the current update resolved into native update request
      */
-    UpdateItemRequest resolveExpression(DynamoDbEnhancedClient mapper);
+    UpdateItemRequest resolveExpression(DynamoDbTable<T>  mapper, AttributeValueConverter converter);
 
 }

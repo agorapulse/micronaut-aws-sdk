@@ -2,15 +2,13 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb.conditional;
 
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.enhanced.dynamodb.AttributeConverterProvider;
+import software.amazon.awssdk.enhanced.dynamodb.AttributeValueType;
 import software.amazon.awssdk.enhanced.dynamodb.EnhancedType;
 import software.amazon.awssdk.enhanced.dynamodb.internal.AttributeValues;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -18,6 +16,8 @@ import static software.amazon.awssdk.enhanced.dynamodb.internal.AttributeValues.
 import static software.amazon.awssdk.enhanced.dynamodb.internal.EnhancedClientUtils.cleanAttributeName;
 
 public class QueryConditionalFactory {
+
+    // TODO: methods as parts of comparison
 
     public static QueryConditional attributeExists(String path) {
         return new ConditionalWithSingleStringArgument(ConditionalWithSingleStringArgument.ATTRIBUTE_EXISTS, path);
@@ -239,6 +239,10 @@ public class QueryConditionalFactory {
         return new ConditionalWithTwoArguments(ConditionalWithTwoArguments.BEGINS_WITH_TEMPLATE, property, just(value));
     }
 
+    public static QueryConditional attributeType(String property, AttributeValueType type) {
+        return new ConditionalWithTwoArguments(ConditionalWithTwoArguments.ATTRIBUTE_TYPE_TEMPLATE, property, just(stringValue(type.name())));
+    }
+
     public static QueryConditional attributeType(String property, String type) {
         if (ConditionalWithTwoArguments.TYPES.stream().noneMatch(t -> t.equals(type))) {
             throw new IllegalArgumentException("Unrecognized type: " + type);
@@ -298,23 +302,32 @@ public class QueryConditionalFactory {
     }
 
     public static QueryConditional group(QueryConditional statement) {
+        if (statement instanceof GroupConditional) {
+            return statement;
+        }
         return new GroupConditional(statement);
     }
 
-    public static QueryConditional and(Iterable<QueryConditional> statements) {
+    public static QueryConditional and(Collection<QueryConditional> statements) {
+        if (statements.size() == 1) {
+            return statements.iterator().next();
+        }
         return new LogicalConditional(LogicalConditional.AND_TOKEN, statements);
     }
 
     public static QueryConditional and(QueryConditional... statements) {
-        return new LogicalConditional(LogicalConditional.AND_TOKEN, Arrays.asList(statements));
+        return and(Arrays.asList(statements));
     }
 
-    public static QueryConditional or(Iterable<QueryConditional> statements) {
+    public static QueryConditional or(Collection<QueryConditional> statements) {
+        if (statements.size() == 1) {
+            return statements.iterator().next();
+        }
         return new LogicalConditional(LogicalConditional.OR_TOKEN, statements);
     }
 
     public static QueryConditional or(QueryConditional... statements) {
-        return new LogicalConditional(LogicalConditional.OR_TOKEN, Arrays.asList(statements));
+        return or(Arrays.asList(statements));
     }
 
     public static QueryConditional not(QueryConditional statement) {

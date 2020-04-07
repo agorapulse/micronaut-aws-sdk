@@ -15,11 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builders;
+package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
 import io.reactivex.Flowable;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.enhanced.dynamodb.internal.operations.ScanOperation;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
 
 /**
  * An interface for scans which can be executed using supplied mapper.
@@ -32,20 +32,20 @@ public interface DetachedScan<T> {
      * @param mapper DynamoDB mapper
      * @return flowable of entities found for the current scan
      */
-    Flowable<T> scan(DynamoDbEnhancedClient mapper);
+    Flowable<T> scan(DynamoDbTable<T> mapper);
 
     /**
      * Counts entities satisfying given scan using provided mapper.
      * @param mapper DynamoDB mapper
      * @return count of entities satisfying  for the current scan
      */
-    int count(DynamoDbEnhancedClient mapper);
+    int count(DynamoDbTable<T> mapper);
 
     /**
      * Resolves the current scan into native scan expression using provided mapper.
      * @param mapper DynamoDB mapper
      * @return the current scan resolved into native scan expression
      */
-    ScanOperation<T> resolveExpression(DynamoDbEnhancedClient mapper);
+    ScanEnhancedRequest resolveRequest(DynamoDbTable<T> mapper);
 
 }

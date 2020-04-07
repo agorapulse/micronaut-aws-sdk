@@ -17,7 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation;
 
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builders.DetachedQuery;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedQuery;
 
 import java.lang.annotation.*;
 import java.util.Map;

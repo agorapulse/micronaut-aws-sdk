@@ -15,12 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builders;
+package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
 import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
 import groovy.transform.stc.ClosureParams;
 import groovy.transform.stc.SimpleType;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.ReturnValue;
 import space.jasan.support.groovy.closure.ConsumerWithDelegate;
 
@@ -32,6 +34,8 @@ import java.util.function.Consumer;
  * This class is designed to be statically star-imported in the service interface.
  */
 public final class Builders {
+
+    private static final int DEFAULT_QUERY_LIMIT = 20;
 
     private Builders() {}
 
@@ -58,12 +62,11 @@ public final class Builders {
     /**
      * Creates query builder for given DynamoDB entity.
      *
-     * @param type DynamoDB entity type
      * @param <T> type of DynamoDB entity
      * @return query builder for given DynamoDB entity
      */
-    public static <T> QueryBuilder<T> query(Class<T> type) {
-        return new DefaultQueryBuilder<T>(type, new DynamoDBQueryExpression<T>().withLimit(DynamoDBService.DEFAULT_QUERY_LIMIT));
+    public static <T> QueryBuilder<T> query() {
+        return new DefaultQueryBuilder<>(QueryEnhancedRequest.builder().limit(DEFAULT_QUERY_LIMIT));
     }
 
     /**
@@ -75,7 +78,7 @@ public final class Builders {
      * @return query builder for given DynamoDB entity
      */
     public static <T> QueryBuilder<T> query(Class<T> type, Consumer<QueryBuilder<T>> definition) {
-        QueryBuilder<T> builder = query(type);
+        QueryBuilder<T> builder = query();
         definition.accept(builder);
         return builder;
     }
@@ -105,7 +108,7 @@ public final class Builders {
      * @return scan builder for given DynamoDB entity
      */
     public static <T> ScanBuilder<T> scan(Class<T> type) {
-        return new DefaultScanBuilder<T>(type, new DynamoDBScanExpression().withLimit(DynamoDBService.DEFAULT_QUERY_LIMIT));
+        return new DefaultScanBuilder<T>(ScanEnhancedRequest.builder().limit(DEFAULT_QUERY_LIMIT));
     }
 
     /**
@@ -147,7 +150,7 @@ public final class Builders {
      * @return update builder for given DynamoDB entity
      */
     public static <T> UpdateBuilder<T> update(Class<T> type) {
-        return new DefaultUpdateBuilder<>(type);
+        return new DefaultUpdateBuilder<>();
     }
 
     /**

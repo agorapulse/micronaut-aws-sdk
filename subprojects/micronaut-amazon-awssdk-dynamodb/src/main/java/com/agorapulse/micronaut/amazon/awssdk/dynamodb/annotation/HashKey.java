@@ -22,7 +22,9 @@ import java.lang.annotation.*;
 /**
  * Annotates hash key.
  *
- * This annotation is not required if the name of the argument contains word <code>hash</code>.
+ * This annotation is not required if the name of the argument contains word <code>hash</code> or <code>partition</code>.
+ *
+ * @deprecated use @{@link PartitionKey} instead
  */
 @Inherited
 @Documented

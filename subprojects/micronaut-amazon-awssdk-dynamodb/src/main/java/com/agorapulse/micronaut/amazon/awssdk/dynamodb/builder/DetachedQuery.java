@@ -15,11 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builders;
+package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
 import io.reactivex.Flowable;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.enhanced.dynamodb.internal.operations.QueryOperation;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
 
 /**
  * An interface for queries which can be executed using supplied mapper.
@@ -32,20 +32,26 @@ public interface DetachedQuery<T> {
      * @param mapper DynamoDB mapper
      * @return flowable of entities found for the current query
      */
-    Flowable<T> query(DynamoDbEnhancedClient mapper);
+    Flowable<T> query(DynamoDbTable<T> mapper);
 
     /**
      * Counts entities satisfying given query using provided mapper.
      * @param mapper DynamoDB mapper
      * @return count of entities satisfying  for the current query
      */
-    int count(DynamoDbEnhancedClient mapper);
+    int count(DynamoDbTable<T> mapper);
 
     /**
      * Resolves the current query into native query expression using provided mapper.
      * @param mapper DynamoDB mapper
      * @return the current query resolved into native query expression
      */
-    QueryOperation<T> resolveExpression(DynamoDbEnhancedClient mapper);
+    QueryEnhancedRequest resolveRequest(DynamoDbTable<T> mapper);
+
+    /**
+     * Returns the index for this query or null if the query is executed the primary index.
+     * @return the index for this query or null if the query is executed the primary index
+     */
+    String getIndex();
 
 }

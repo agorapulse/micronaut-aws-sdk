@@ -17,21 +17,16 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation;
 
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedUpdate;
-
 import java.lang.annotation.*;
-import java.util.Map;
-import java.util.function.Function;
 
 /**
- * Makes annotated method in the service interface a scan method.
+ * Annotates partition key.
+ *
+ * This annotation is not required if the name of the argument contains word <code>hash</code> or <code>partition</code>.
  */
+// TODO: annotation mapper
 @Inherited
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
-public @interface Update {
-
-    Class<? extends Function<Map<String, Object>, DetachedUpdate>> value();
-
-}
+@Target({ElementType.PARAMETER, ElementType.ANNOTATION_TYPE})
+public @interface PartitionKey { }

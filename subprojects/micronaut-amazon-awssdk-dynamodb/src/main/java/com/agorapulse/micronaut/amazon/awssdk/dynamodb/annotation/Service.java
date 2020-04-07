@@ -40,6 +40,11 @@ public @interface Service {
     /**
      * @return the class of the dynamodb items
      */
-    Class value();
+    Class<?> value();
+
+    /**
+     * @return table name - default to simple name of the class
+     */
+    String tableName() default "";
 
 }
