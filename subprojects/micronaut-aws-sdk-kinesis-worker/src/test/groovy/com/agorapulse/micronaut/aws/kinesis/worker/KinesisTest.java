@@ -219,6 +219,11 @@ public class KinesisTest {
         }
 
         @Override
+        public PutCompositeAlarmResult putCompositeAlarm(PutCompositeAlarmRequest putCompositeAlarmRequest) {
+            return null;
+        }
+
+        @Override
         public DeleteAnomalyDetectorResult deleteAnomalyDetector(DeleteAnomalyDetectorRequest deleteAnomalyDetectorRequest) {
             return null;
         }
