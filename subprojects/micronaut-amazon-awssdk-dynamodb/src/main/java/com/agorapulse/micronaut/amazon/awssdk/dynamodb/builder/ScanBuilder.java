@@ -21,10 +21,7 @@ import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
 import groovy.transform.stc.ClosureParams;
 import groovy.transform.stc.FromString;
-import software.amazon.awssdk.core.SdkBytes;
-import software.amazon.awssdk.enhanced.dynamodb.internal.AttributeValues;
 import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import space.jasan.support.groovy.closure.ConsumerWithDelegate;
 
 import java.util.Arrays;
@@ -103,138 +100,12 @@ public interface ScanBuilder<T> extends DetachedScan<T> {
     ScanBuilder<T> limit(int max);
 
     /**
-     * Sets the scan offset by defining the exclusive start hash and range key (hash and range key of the last entity returned).
-     * @param exclusiveStartKeyValue exclusive start key hash value
-     * @param exclusiveRangeStartKey exclusive start key range value
+     * Sets the scan offset by defining the exclusive start value.
+     * @param lastEvaluatedKey exclusive start value
      * @return self
      */
-    ScanBuilder<T> offset(AttributeValue exclusiveStartKeyValue, AttributeValue exclusiveRangeStartKey);
+    ScanBuilder<T> lastEvaluatedKey(Object lastEvaluatedKey);
 
-    /**
-     * Sets the scan offset by defining the exclusive start hash and range key (hash and range key of the last entity returned).
-     * @param exclusiveStartKeyValue exclusive start key hash value
-     * @param exclusiveRangeStartKey exclusive start key range value
-     * @return self
-     */
-    default ScanBuilder<T> offset(String exclusiveStartKeyValue, String exclusiveRangeStartKey) {
-        return offset(AttributeValues.stringValue(exclusiveStartKeyValue), AttributeValues.stringValue(exclusiveRangeStartKey));
-    }
-
-    /**
-     * Sets the scan offset by defining the exclusive start hash and range key (hash and range key of the last entity returned).
-     * @param exclusiveStartKeyValue exclusive start key hash value
-     * @param exclusiveRangeStartKey exclusive start key range value
-     * @return self
-     */
-    default ScanBuilder<T> offset(String exclusiveStartKeyValue, Number exclusiveRangeStartKey) {
-        return offset(AttributeValues.stringValue(exclusiveStartKeyValue), AttributeValues.numberValue(exclusiveRangeStartKey));
-    }
-
-    /**
-     * Sets the scan offset by defining the exclusive start hash and range key (hash and range key of the last entity returned).
-     * @param exclusiveStartKeyValue exclusive start key hash value
-     * @param exclusiveRangeStartKey exclusive start key range value
-     * @return self
-     */
-    default ScanBuilder<T> offset(String exclusiveStartKeyValue, SdkBytes exclusiveRangeStartKey) {
-        return offset(AttributeValues.stringValue(exclusiveStartKeyValue), AttributeValues.binaryValue(exclusiveRangeStartKey));
-    }
-
-    /**
-     * Sets the scan offset by defining the exclusive start hash and range key (hash and range key of the last entity returned).
-     * @param exclusiveStartKeyValue exclusive start key hash value
-     * @param exclusiveRangeStartKey exclusive start key range value
-     * @return self
-     */
-    default ScanBuilder<T> offset(Number exclusiveStartKeyValue, String exclusiveRangeStartKey) {
-        return offset(AttributeValues.numberValue(exclusiveStartKeyValue), AttributeValues.stringValue(exclusiveRangeStartKey));
-    }
-
-    /**
-     * Sets the scan offset by defining the exclusive start hash and range key (hash and range key of the last entity returned).
-     * @param exclusiveStartKeyValue exclusive start key hash value
-     * @param exclusiveRangeStartKey exclusive start key range value
-     * @return self
-     */
-    default ScanBuilder<T> offset(Number exclusiveStartKeyValue, Number exclusiveRangeStartKey) {
-        return offset(AttributeValues.numberValue(exclusiveStartKeyValue), AttributeValues.numberValue(exclusiveRangeStartKey));
-    }
-
-    /**
-     * Sets the scan offset by defining the exclusive start hash and range key (hash and range key of the last entity returned).
-     * @param exclusiveStartKeyValue exclusive start key hash value
-     * @param exclusiveRangeStartKey exclusive start key range value
-     * @return self
-     */
-    default ScanBuilder<T> offset(Number exclusiveStartKeyValue, SdkBytes exclusiveRangeStartKey) {
-        return offset(AttributeValues.numberValue(exclusiveStartKeyValue), AttributeValues.binaryValue(exclusiveRangeStartKey));
-    }
-
-    /**
-     * Sets the scan offset by defining the exclusive start hash and range key (hash and range key of the last entity returned).
-     * @param exclusiveStartKeyValue exclusive start key hash value
-     * @param exclusiveRangeStartKey exclusive start key range value
-     * @return self
-     */
-    default ScanBuilder<T> offset(SdkBytes exclusiveStartKeyValue, String exclusiveRangeStartKey) {
-        return offset(AttributeValues.binaryValue(exclusiveStartKeyValue), AttributeValues.stringValue(exclusiveRangeStartKey));
-    }
-
-    /**
-     * Sets the scan offset by defining the exclusive start hash and range key (hash and range key of the last entity returned).
-     * @param exclusiveStartKeyValue exclusive start key hash value
-     * @param exclusiveRangeStartKey exclusive start key range value
-     * @return self
-     */
-    default ScanBuilder<T> offset(SdkBytes exclusiveStartKeyValue, Number exclusiveRangeStartKey) {
-        return offset(AttributeValues.binaryValue(exclusiveStartKeyValue), AttributeValues.numberValue(exclusiveRangeStartKey));
-    }
-
-    /**
-     * Sets the scan offset by defining the exclusive start hash and range key (hash and range key of the last entity returned).
-     * @param exclusiveStartKeyValue exclusive start key hash value
-     * @param exclusiveRangeStartKey exclusive start key range value
-     * @return self
-     */
-    default ScanBuilder<T> offset(SdkBytes exclusiveStartKeyValue, SdkBytes exclusiveRangeStartKey) {
-        return offset(AttributeValues.binaryValue(exclusiveStartKeyValue), AttributeValues.binaryValue(exclusiveRangeStartKey));
-    }
-
-    /**
-     * Sets the scan offset by defining the exclusive start hash key (hash key of the last entity returned).
-     * @param exclusiveStartKeyValue exclusive start key hash value
-     * @return self
-     */
-    default ScanBuilder<T> offset(AttributeValue exclusiveStartKeyValue) {
-        return offset(exclusiveStartKeyValue, null);
-    }
-
-    /**
-     * Sets the scan offset by defining the exclusive start hash key (hash key of the last entity returned).
-     * @param exclusiveStartKeyValue exclusive start key hash value
-     * @return self
-     */
-    default ScanBuilder<T> offset(String exclusiveStartKeyValue) {
-        return offset(AttributeValues.stringValue(exclusiveStartKeyValue), null);
-    }
-
-    /**
-     * Sets the scan offset by defining the exclusive start hash key (hash key of the last entity returned).
-     * @param exclusiveStartKeyValue exclusive start key hash value
-     * @return self
-     */
-    default ScanBuilder<T> offset(Number exclusiveStartKeyValue) {
-        return offset(AttributeValues.numberValue(exclusiveStartKeyValue), null);
-    }
-
-    /**
-     * Sets the scan offset by defining the exclusive start hash key (hash key of the last entity returned).
-     * @param exclusiveStartKeyValue exclusive start key hash value
-     * @return self
-     */
-    default ScanBuilder<T> offset(SdkBytes exclusiveStartKeyValue) {
-        return offset(AttributeValues.binaryValue(exclusiveStartKeyValue), null);
-    }
     /**
      * Configures the native scan expression.
      *

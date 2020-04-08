@@ -38,69 +38,6 @@ import java.util.function.Function;
 public interface DynamoDBEntityService {
 // end::header[]
 
-    class EqRangeIndex implements Function<Map<String, Object>, DetachedQuery> {
-        public DetachedQuery apply(Map<String, Object> arguments) {
-            return Builders.query(DynamoDBEntity.class)
-                .hash(arguments.get("hashKey"))
-                .index(DynamoDBEntity.RANGE_INDEX)
-                .range(r -> r.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("rangeKey")));
-        }
-    }
-
-    // tag::sample-query-class[]
-    class EqRangeProjection implements Function<Map<String, Object>, DetachedQuery> {   // <2>
-        public DetachedQuery apply(Map<String, Object> arguments) {
-            return Builders.query(DynamoDBEntity.class)                                 // <3>
-                .hash(arguments.get("hashKey"))
-                .index(DynamoDBEntity.RANGE_INDEX)
-                .range(r ->
-                    r.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("rangeKey"))         // <5>
-                )
-                .only(DynamoDBEntity.RANGE_INDEX);                                      // <6>
-        }
-    }
-    // end::sample-query-class[]
-
-    // tag::sample-scan-class[]
-    class EqRangeScan implements Function<Map<String, Object>, DetachedScan> {          // <2>
-        public DetachedScan apply(Map<String, Object> arguments) {
-            return Builders.scan(DynamoDBEntity.class)                                  // <3>
-                .filter(f -> f.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("foo")));   // <4>
-        }
-    }
-    // end::sample-scan-class[]
-
-    class BetweenDateIndex implements Function<Map<String, Object>, DetachedQuery> {
-        public DetachedQuery apply(Map<String, Object> arguments) {
-            return Builders.query(DynamoDBEntity.class)
-                .index(DynamoDBEntity.DATE_INDEX)
-                .hash(arguments.get("hashKey"))
-                .range(r -> r.between(DynamoDBEntity.DATE_INDEX, arguments.get("after"), arguments.get("before")));
-        }
-    }
-
-    // tag::sample-update-class[]
-    class IncrementNumber implements Function<Map<String, Object>, DetachedUpdate> {    // <2>
-        public DetachedUpdate apply(Map<String, Object> arguments) {
-            return Builders.update(DynamoDBEntity.class)                                // <3>
-                .hash(arguments.get("hashKey"))                                         // <4>
-                .range(arguments.get("rangeKey"))                                       // <5>
-                .add("number", 1)                                                       // <6>
-                .returnUpdatedNew(DynamoDBEntity::getNumber);                           // <7>
-        }
-    }
-    // end::sample-update-class[]
-
-    class DecrementNumber implements Function<Map<String, Object>, DetachedUpdate> {
-        public DetachedUpdate apply(Map<String, Object> arguments) {
-            return Builders.update(DynamoDBEntity.class)
-                .hash(arguments.get("hashKey"))
-                .range(arguments.get("rangeKey"))
-                .add("number", -1)
-                .returnUpdatedNew(DynamoDBEntity::getNumber);
-        }
-    }
-
     DynamoDBEntity get(String hash, String rangeKey);
 
     DynamoDBEntity load(String hash, String rangeKey);
@@ -123,9 +60,27 @@ public interface DynamoDBEntityService {
 
     int count(String hashKey, String rangeKey);
 
+    class EqRangeIndex implements Function<Map<String, Object>, DetachedQuery> {
+        public DetachedQuery apply(Map<String, Object> arguments) {
+            return Builders.query(DynamoDBEntity.class)
+                .hash(arguments.get("hashKey"))
+                .index(DynamoDBEntity.RANGE_INDEX)
+                .range(r -> r.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("rangeKey")));
+        }
+    }
+
     @Query(EqRangeIndex.class)
     int countByRangeIndex(String hashKey, String rangeKey);
 
+    class BetweenDateIndex implements Function<Map<String, Object>, DetachedQuery> {
+        public DetachedQuery apply(Map<String, Object> arguments) {
+            return Builders.query(DynamoDBEntity.class)
+                .index(DynamoDBEntity.DATE_INDEX)
+                .hash(arguments.get("hashKey"))
+                .page(1)
+                .range(r -> r.between(DynamoDBEntity.DATE_INDEX, arguments.get("after"), arguments.get("before")));
+        }
+    }
     @Query(BetweenDateIndex.class)
     int countByDates(String hashKey, Date after, Date before);
 
@@ -133,6 +88,19 @@ public interface DynamoDBEntityService {
 
     Flowable<DynamoDBEntity> query(String hashKey, String rangeKey);
 
+    // tag::sample-query-class[]
+    class EqRangeProjection implements Function<Map<String, Object>, DetachedQuery> {   // <2>
+        public DetachedQuery apply(Map<String, Object> arguments) {
+            return Builders.query(DynamoDBEntity.class)                                 // <3>
+                .hash(arguments.get("hashKey"))
+                .index(DynamoDBEntity.RANGE_INDEX)
+                .range(r ->
+                    r.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("rangeKey"))         // <5>
+                )
+                .only(DynamoDBEntity.RANGE_INDEX);                                      // <6>
+        }
+    }
+    // end::sample-query-class[]
     // tag::sample-query[]
     @Query(EqRangeProjection.class)                                                     // <7>
     Flowable<DynamoDBEntity> queryByRangeIndex(String hashKey, String rangeKey);        // <8>
@@ -140,6 +108,18 @@ public interface DynamoDBEntityService {
 
     @Query(BetweenDateIndex.class)
     List<DynamoDBEntity> queryByDates(String hashKey, Date after, Date before);
+
+    class BetweenDateIndexScroll implements Function<Map<String, Object>, DetachedQuery> {
+        public DetachedQuery apply(Map<String, Object> arguments) {
+            return Builders.query(DynamoDBEntity.class)
+                .index(DynamoDBEntity.DATE_INDEX)
+                .hash(arguments.get("hashKey"))
+                .lastEvaluatedKey(arguments.get("lastEvaluatedKey"))
+                .range(r -> r.between(DynamoDBEntity.DATE_INDEX, arguments.get("after"), arguments.get("before")));
+        }
+    }
+    @Query(BetweenDateIndexScroll.class)
+    List<DynamoDBEntity> queryByDatesScroll(String hashKey, Date after, Date before, DynamoDBEntity lastEvaluatedKey);
 
     void delete(DynamoDBEntity entity);
 
@@ -151,14 +131,43 @@ public interface DynamoDBEntityService {
     @Query(BetweenDateIndex.class)
     int deleteByDates(String hashKey, Date after, Date before);
 
+    // tag::sample-update-class[]
+    class IncrementNumber implements Function<Map<String, Object>, DetachedUpdate> {    // <2>
+        public DetachedUpdate apply(Map<String, Object> arguments) {
+            return Builders.update(DynamoDBEntity.class)                                // <3>
+                .hash(arguments.get("hashKey"))                                         // <4>
+                .range(arguments.get("rangeKey"))                                       // <5>
+                .add("number", 1)                                                       // <6>
+                .returnUpdatedNew(DynamoDBEntity::getNumber);                           // <7>
+        }
+    }
+    // end::sample-update-class[]
     // tag::sample-update[]
     @Update(IncrementNumber.class)                                                      // <8>
     Number increment(String hashKey, String rangeKey);                                  // <9>
     // end::sample-update[]
 
+    class DecrementNumber implements Function<Map<String, Object>, DetachedUpdate> {
+        public DetachedUpdate apply(Map<String, Object> arguments) {
+            return Builders.update(DynamoDBEntity.class)
+                .hash(arguments.get("hashKey"))
+                .range(arguments.get("rangeKey"))
+                .add("number", -1)
+                .returnUpdatedNew(DynamoDBEntity::getNumber);
+        }
+    }
+
     @Update(DecrementNumber.class)
     Number decrement(String hashKey, String rangeKey);
 
+    // tag::sample-scan-class[]
+    class EqRangeScan implements Function<Map<String, Object>, DetachedScan> {          // <2>
+        public DetachedScan apply(Map<String, Object> arguments) {
+            return Builders.scan(DynamoDBEntity.class)                                  // <3>
+                .filter(f -> f.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("foo")));   // <4>
+        }
+    }
+    // end::sample-scan-class[]
     // tag::sample-scan[]
     @Scan(EqRangeScan.class)                                                            // <5>
     Flowable<DynamoDBEntity> scanAllByRangeIndex(String foo);                           // <6>

@@ -22,6 +22,7 @@ import io.reactivex.Flowable;
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.TableMetadata;
+import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.Page;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
@@ -29,6 +30,7 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static io.reactivex.Flowable.fromIterable;
 
@@ -108,9 +110,8 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     }
 
     @Override
-    public DefaultQueryBuilder<T> offset(AttributeValue exclusiveStartHashKeyValue, AttributeValue exclusiveRangeStartKey) {
-        this.__exclusiveHashStartKey = exclusiveStartHashKeyValue;
-        this.__exclusiveRangeStartKey = exclusiveRangeStartKey;
+    public QueryBuilder<T> lastEvaluatedKey(Object lastEvaluatedKey) {
+        this.__lastEvaluatedKey = lastEvaluatedKey;
         return this;
     }
 
@@ -136,21 +137,7 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
         applyConditions(mapper, attributeConversionHelper, __queryConditionals, __expression::queryConditional);
         String currentIndex = __index == null ? TableMetadata.primaryIndexName() : __index;
         applyConditions(mapper, attributeConversionHelper, __filterCollectorsConsumers, cond -> __expression.filterExpression(cond.expression(mapper.tableSchema(), currentIndex)));
-
-        if (__exclusiveHashStartKey != null || __exclusiveRangeStartKey != null) {
-            Map<String, AttributeValue> exclusiveKey = new HashMap<>();
-            final TableMetadata tableMetadata = mapper.tableSchema().tableMetadata();
-            if (__exclusiveHashStartKey != null) {
-                exclusiveKey.put(tableMetadata.primaryPartitionKey(), __exclusiveHashStartKey);
-            }
-            if (__exclusiveRangeStartKey != null) {
-                tableMetadata.primarySortKey().ifPresent(key -> {
-                    exclusiveKey.put(key, __exclusiveRangeStartKey);
-                });
-            }
-            __expression.exclusiveStartKey(exclusiveKey);
-        }
-
+        applyLastEvaluatedKey(__expression, mapper);
         __configurer.accept(__expression);
 
         return __expression.build();
@@ -190,6 +177,31 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
         }
     }
 
+    private void applyLastEvaluatedKey(QueryEnhancedRequest.Builder exp, DynamoDbTable<T> mapper) {
+        if (__lastEvaluatedKey == null) {
+            return;
+        }
+
+        Map<String, AttributeValue> key;
+        TableSchema<T> schema = mapper.tableSchema();
+
+        if (__lastEvaluatedKey instanceof Map) {
+            key = (Map<String, AttributeValue>) __lastEvaluatedKey;
+        } else {
+            key = schema.itemToMap((T) __lastEvaluatedKey, true);
+        }
+
+        Set<String> indexKeys = new HashSet<>(schema.tableMetadata().primaryKeys());
+
+        if (__index != null) {
+            indexKeys.addAll(schema.tableMetadata().indexKeys(__index));
+        }
+
+        key = key.entrySet().stream().filter(e -> indexKeys.contains(e.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        exp.exclusiveStartKey(key);
+    }
+
     // fields are prefixed with "__" to allow groovy evaluation of the arguments
     // otherwise if the argument has the same name (such as max) it will be ignored and field value will be used
     private final QueryEnhancedRequest.Builder __expression;
@@ -197,8 +209,7 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     private final List<Consumer<ConditionCollector<T>>> __queryConditionals = new LinkedList<>();
 
     private String __index;
-    private AttributeValue __exclusiveHashStartKey;
-    private AttributeValue __exclusiveRangeStartKey;
+    private Object __lastEvaluatedKey;
     private int __max = Integer.MAX_VALUE;
     private Consumer<QueryEnhancedRequest.Builder> __configurer = b -> {};
 

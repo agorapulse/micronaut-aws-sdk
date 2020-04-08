@@ -32,6 +32,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -106,7 +107,11 @@ public class DeclarativeServiceTest {
         assertEquals(1, s.queryByRangeIndex("1", "bar").count().blockingGet().intValue());
         assertNull(s.queryByRangeIndex("1", "bar").blockingSingle().getParentId());
         assertEquals("bar", s.queryByRangeIndex("1", "bar").blockingSingle().getRangeIndex());
-        assertEquals(2, s.queryByDates("1", Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS))).size());
+
+        List<DynamoDBEntity> byDates = s.queryByDates("1", Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS)));
+        assertEquals(2, byDates.size());
+        assertEquals(1, s.queryByDatesScroll("1", Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS)), byDates.iterator().next()).size());
+
         assertEquals(1, s.queryByDates("3", Date.from(REFERENCE_DATE.plus(9, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(20, ChronoUnit.DAYS))).size());
 
         assertEquals(2, s.scanAllByRangeIndex("bar").count().blockingGet().intValue());
