@@ -124,7 +124,7 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     public Flowable<T> query(DynamoDbTable<T> mapper, AttributeConversionHelper attributeConversionHelper) {
         QueryEnhancedRequest request = resolveRequest(mapper, attributeConversionHelper);
         SdkIterable<Page<T>> iterable = this.__index == null ? mapper.query(request) : mapper.index(__index).query(request);
-        Flowable<T> results = fromIterable(iterable).flatMap(p -> fromIterable(p.items()));;
+        Flowable<T> results = fromIterable(iterable).flatMap(p -> fromIterable(p.items()));
         if (__max < Integer.MAX_VALUE) {
             return results.take(__max);
         }

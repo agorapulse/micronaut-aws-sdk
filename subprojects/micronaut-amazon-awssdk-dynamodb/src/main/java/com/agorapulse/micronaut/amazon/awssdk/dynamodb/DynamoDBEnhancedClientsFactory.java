@@ -38,17 +38,13 @@ public class DynamoDBEnhancedClientsFactory {
 
     @Bean
     @Singleton
-    public DynamoDbEnhancedClient dynamoDbEnhancedClient (
-        DynamoDbClient dynamoDbClient
-    ) {
+    public DynamoDbEnhancedClient dynamoDbEnhancedClient(DynamoDbClient dynamoDbClient) {
         return DynamoDbEnhancedClient.builder().dynamoDbClient(dynamoDbClient).build();
     }
 
     @Bean
     @Singleton
-    public DynamoDbEnhancedAsyncClient dynamoDbEnhancedAsyncClient(
-        DynamoDbAsyncClient dynamoDbAsyncClient
-    ) {
+    public DynamoDbEnhancedAsyncClient dynamoDbEnhancedAsyncClient(DynamoDbAsyncClient dynamoDbAsyncClient) {
         return DynamoDbEnhancedAsyncClient.builder().dynamoDbClient(dynamoDbAsyncClient).build();
     }
 

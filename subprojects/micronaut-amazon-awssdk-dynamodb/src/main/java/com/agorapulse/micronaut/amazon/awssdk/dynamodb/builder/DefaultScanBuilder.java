@@ -18,7 +18,6 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeConversionHelper;
-import groovy.lang.MissingPropertyException;
 import io.reactivex.Flowable;
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
@@ -102,7 +101,7 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
     public Flowable<T> scan(DynamoDbTable<T> mapper, AttributeConversionHelper attributeConversionHelper) {
         ScanEnhancedRequest request = resolveRequest(mapper, attributeConversionHelper);
         SdkIterable<Page<T>> iterable = this.__index == null ? mapper.scan(request) : mapper.index(__index).scan(request);
-        Flowable<T> results = fromIterable(iterable).flatMap(p -> fromIterable(p.items()));;
+        Flowable<T> results = fromIterable(iterable).flatMap(p -> fromIterable(p.items()));
         if (__max < Integer.MAX_VALUE) {
             return results.take(__max);
         }
@@ -143,13 +142,6 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
     public ScanBuilder<T> configure(Consumer<ScanEnhancedRequest.Builder> configurer) {
         this.__configurer = configurer;
         return this;
-    }
-
-    // for proper groovy evaluation of closure in the annotation
-    @SuppressWarnings("UnusedMethodParameter")
-    Object getProperty(String name) {
-        // TODO: is this still required???
-        throw new MissingPropertyException("No properties here!");
     }
 
     private void applyConditions(
