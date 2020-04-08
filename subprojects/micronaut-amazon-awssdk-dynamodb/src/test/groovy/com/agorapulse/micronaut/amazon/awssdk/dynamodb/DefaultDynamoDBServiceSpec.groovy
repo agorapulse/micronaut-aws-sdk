@@ -67,14 +67,14 @@ class DefaultDynamoDBServiceSpec extends Specification {
         DynamoDbClient client = DynamoDbClient                                          // <4>
             .builder()
             .endpointOverride(localstack.getEndpointOverride(LocalStackV2Container.Service.DYNAMODB))
-            .credentialsProvider(localstack.getDefaultCredentialsProvider())
+            .credentialsProvider(localstack.defaultCredentialsProvider)
             .region(Region.EU_WEST_1)
-            .build();
+            .build()
 
         DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient
             .builder()
             .dynamoDbClient(client)
-            .build();
+            .build()
 
         context = ApplicationContext.build().build()
         context.registerSingleton(DynamoDbClient, client)                               // <5>
@@ -84,7 +84,10 @@ class DefaultDynamoDBServiceSpec extends Specification {
         service = context.getBean(DynamoDBItemDBService)                                      // <7>
     }
 
-    @SuppressWarnings('AbcMetric')
+    @SuppressWarnings([
+        'AbcMetric',
+        'UnnecessaryObjectReferences',
+    ])
     void 'service introduction works'() {
         expect:
             service.save(new DynamoDBEntity(                                                      // <3>
@@ -132,9 +135,25 @@ class DefaultDynamoDBServiceSpec extends Specification {
             service.queryByRangeIndex('1', 'bar').count().blockingGet() == 1
             service.queryByRangeIndex('1', 'bar').blockingSingle().parentId == null // projection
             service.queryByRangeIndex('1', 'bar').blockingSingle().rangeIndex == 'bar' // projection
-            service.queryByDates('1', Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS))).count().blockingGet() == 2
-            service.queryByDatesWithLimit('1', Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS)), 1).count().blockingGet() == 1
-            service.queryByDates('3', Date.from(REFERENCE_DATE.plus(9, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(20, ChronoUnit.DAYS))).count().blockingGet() == 1
+
+            service.queryByDates(
+                '1',
+                Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)),
+                Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS))
+            ).count().blockingGet() == 2
+
+            service.queryByDatesWithLimit(
+                '1',
+                Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)),
+                Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS)),
+                1
+            ).count().blockingGet() == 1
+
+            service.queryByDates(
+                '3',
+                Date.from(REFERENCE_DATE.plus(9, ChronoUnit.DAYS)),
+                Date.from(REFERENCE_DATE.plus(20, ChronoUnit.DAYS))
+            ).count().blockingGet() == 1
 
             service.scanAllByRangeIndex('bar').count().blockingGet() == 4
             service.scanAllByRangeIndexWithLimit('bar', 2).count().blockingGet() == 2
