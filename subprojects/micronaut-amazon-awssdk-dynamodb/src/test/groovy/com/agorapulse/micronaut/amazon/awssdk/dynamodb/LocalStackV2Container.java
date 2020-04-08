@@ -121,7 +121,7 @@ public class LocalStackV2Container extends GenericContainer<LocalStackV2Containe
             // resolve IP address and use that as the endpoint so that path-style access is automatically used for S3
             ipAddress = InetAddress.getByName(address).getHostAddress();
         } catch (UnknownHostException ignored) {
-
+            throw new IllegalStateException("Should not happen");
         }
 
         try {

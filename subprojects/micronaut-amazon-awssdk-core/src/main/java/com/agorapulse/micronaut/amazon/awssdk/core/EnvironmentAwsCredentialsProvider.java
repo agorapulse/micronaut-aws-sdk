@@ -27,9 +27,6 @@ import software.amazon.awssdk.utils.StringUtils;
 
 /**
  * A {@link AwsCredentialsProvider} that reads from the {@link Environment}.
- *
- * @author graemerocher
- * @since 1.0
  */
 public class EnvironmentAwsCredentialsProvider implements AwsCredentialsProvider {
 
@@ -83,15 +80,14 @@ public class EnvironmentAwsCredentialsProvider implements AwsCredentialsProvider
 
         if (StringUtils.isNotBlank(accessKey) || StringUtils.isNotBlank(secretKey)) {
             throw SdkClientException.create(
-                "Unable to load AWS credentials from environment " +
-                    "(" + ACCESS_KEY_ENV_VAR + " (or " + ALTERNATE_ACCESS_KEY_ENV_VAR + ") and " +
-                    SECRET_KEY_ENV_VAR + " (or " + ALTERNATE_SECRET_KEY_ENV_VAR + "))");
+                "Unable to load AWS credentials from environment "
+                    + "(" + ACCESS_KEY_ENV_VAR + " (or " + ALTERNATE_ACCESS_KEY_ENV_VAR + ") and "
+                    + SECRET_KEY_ENV_VAR + " (or " + ALTERNATE_SECRET_KEY_ENV_VAR + "))");
         }
 
-        return sessionToken == null ?
-            AwsBasicCredentials.create(accessKey, secretKey)
-            :
-            AwsSessionCredentials.create(accessKey, secretKey, sessionToken);
+        return sessionToken == null
+            ? AwsBasicCredentials.create(accessKey, secretKey)
+            : AwsSessionCredentials.create(accessKey, secretKey, sessionToken);
     }
 
     @Override
