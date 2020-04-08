@@ -17,14 +17,13 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.Converter;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeConversionHelper;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
 
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -43,61 +42,63 @@ class DefaultUpdateBuilder<T> implements UpdateBuilder<T> {
         }
     }
 
-    private final List<Update> updates = new ArrayList<>();
-    private ReturnValue returnValue = ReturnValue.NONE;
-    private Function<T, ?> returnValueMapper = Function.identity();
-    private Object hash;
-    private Object range;
+    // fields are prefixed with "__" to allow groovy evaluation of the arguments
+    // otherwise if the argument has the same name (such as max) it will be ignored and field value will be used
+    private final List<Update> __updates = new ArrayList<>();
+    private ReturnValue __returnValue = ReturnValue.NONE;
+    private Function<T, ?> __returnValueMapper = Function.identity();
+    private Object __hash;
+    private Object __range;
 
-    private Consumer<UpdateItemRequest.Builder> configurer = u -> {};
+    private Consumer<UpdateItemRequest.Builder> __configurer = u -> {};
 
     @Override
     public UpdateBuilder<T> hash(Object key) {
-        this.hash = key;
+        this.__hash = key;
         return this;
     }
 
     @Override
     public UpdateBuilder<T> range(Object key) {
-        this.range = key;
+        this.__range = key;
         return this;
     }
 
     @Override
     public UpdateBuilder<T> add(String attributeName, Object delta) {
-        updates.add(new Update(attributeName, AttributeAction.ADD, delta));
+        __updates.add(new Update(attributeName, AttributeAction.ADD, delta));
         return this;
     }
 
     @Override
     public UpdateBuilder<T> put(String attributeName, Object value) {
-        updates.add(new Update(attributeName, AttributeAction.PUT, value));
+        __updates.add(new Update(attributeName, AttributeAction.PUT, value));
         return this;
     }
 
     @Override
     public UpdateBuilder<T> delete(String attributeName) {
-        updates.add(new Update(attributeName, AttributeAction.DELETE, null));
+        __updates.add(new Update(attributeName, AttributeAction.DELETE, null));
         return this;
     }
 
     @Override
     public UpdateBuilder<T> configure(Consumer<UpdateItemRequest.Builder> configurer) {
-        this.configurer = configurer;
+        this.__configurer = configurer;
         return this;
     }
 
     @Override
     public UpdateBuilder<T> returns(ReturnValue returnValue, Function<T, ?> mapper) {
-        this.returnValue = returnValue;
-        this.returnValueMapper = mapper;
+        this.__returnValue = returnValue;
+        this.__returnValueMapper = mapper;
 
         return this;
     }
 
     @Override
-    public Object update(DynamoDbTable<T> mapper, DynamoDbClient client, Converter converter) {
-        UpdateItemRequest request = resolveExpression(mapper, converter);
+    public Object update(DynamoDbTable<T> mapper, DynamoDbClient client, AttributeConversionHelper attributeConversionHelper) {
+        UpdateItemRequest request = resolveExpression(mapper, attributeConversionHelper);
         UpdateItemResponse result = client.updateItem(request);
         Map<String, AttributeValue> attributes = result.attributes();
 
@@ -105,44 +106,44 @@ class DefaultUpdateBuilder<T> implements UpdateBuilder<T> {
             return null;
         }
 
-        if (ReturnValue.NONE.equals(returnValue)) {
+        if (ReturnValue.NONE.equals(__returnValue)) {
             return null;
         }
 
-        return returnValueMapper.apply(mapper.tableSchema().mapToItem(attributes));
+        return __returnValueMapper.apply(mapper.tableSchema().mapToItem(attributes));
     }
 
     @Override
-    public UpdateItemRequest resolveExpression(DynamoDbTable<T> mapper, Converter converter) {
+    public UpdateItemRequest resolveExpression(DynamoDbTable<T> mapper, AttributeConversionHelper attributeConversionHelper) {
         UpdateItemRequest.Builder builder = UpdateItemRequest.builder();
-        configurer.accept(builder);
+        __configurer.accept(builder);
 
         builder.tableName(mapper.tableName());
 
         Key.Builder key = Key.builder();
 
-        if (range != null) {
+        if (__range != null) {
             String sortKey = mapper.tableSchema().tableMetadata().primarySortKey().orElseThrow(() -> new IllegalArgumentException("Range key defined for update but none present on entity " + mapper.tableSchema().itemType().rawClass()));
-            key.sortValue(converter.convert(mapper, sortKey, range));
+            key.sortValue(attributeConversionHelper.convert(mapper, sortKey, __range));
         }
 
-        if (hash != null) {
+        if (__hash != null) {
             String partitionKey = mapper.tableSchema().tableMetadata().primaryPartitionKey();
-            key.partitionValue(converter.convert(mapper, partitionKey, hash));
+            key.partitionValue(attributeConversionHelper.convert(mapper, partitionKey, __hash));
         }
 
         builder.key(key.build().primaryKeyMap(mapper.tableSchema()));
-        builder.returnValues(returnValue);
+        builder.returnValues(__returnValue);
 
         // TODO: switch to update expressions
         Map<String, AttributeValueUpdate> attributeUpdates = new HashMap<>();
 
-        Map<String, AttributeValue> converted = converter.convert(mapper, updates.stream().collect(Collectors.toMap(
+        Map<String, AttributeValue> converted = attributeConversionHelper.convert(mapper, __updates.stream().collect(Collectors.toMap(
             u -> u.name,
             u -> u.value
         )));
 
-        for (Update u : updates) {
+        for (Update u : __updates) {
             attributeUpdates.put(
                 u.name,
                 AttributeValueUpdate.builder().action(u.action).value(converted.get(u.name)).build()
@@ -151,7 +152,7 @@ class DefaultUpdateBuilder<T> implements UpdateBuilder<T> {
 
         builder.attributeUpdates(attributeUpdates);
 
-        configurer.accept(builder);
+        __configurer.accept(builder);
 
         return builder.build();
     }

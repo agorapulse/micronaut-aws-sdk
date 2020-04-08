@@ -17,14 +17,14 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.Converter;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeConversionHelper;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.conditional.QueryConditionalFactory;
 import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
 import groovy.transform.stc.ClosureParams;
 import groovy.transform.stc.FromString;
-import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.TableMetadata;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import space.jasan.support.groovy.closure.ConsumerWithDelegate;
@@ -35,9 +35,9 @@ import java.util.stream.Collectors;
 
 public final class ConditionCollector<T> {
 
-    public ConditionCollector(DynamoDbTable<T> table, Converter converter) {
+    public ConditionCollector(DynamoDbTable<T> table, AttributeConversionHelper attributeConversionHelper) {
         this.table = table;
-        this.converter = converter;
+        this.attributeConversionHelper = attributeConversionHelper;
     }
 
     public ConditionCollector<T> eq(Object value) {
@@ -45,7 +45,7 @@ public final class ConditionCollector<T> {
     }
 
     public ConditionCollector<T> eq(String attributeOrIndex, Object value) {
-        conditions.add(QueryConditionalFactory.equalTo(attributeOrIndex, converter.convert(table, attributeOrIndex, value)));
+        conditions.add(QueryConditionalFactory.equalTo(attributeOrIndex, attributeConversionHelper.convert(table, attributeOrIndex, value)));
         return this;
     }
 
@@ -54,7 +54,7 @@ public final class ConditionCollector<T> {
     }
 
     public ConditionCollector<T> ne(String attributeOrIndex, Object value) {
-        conditions.add(QueryConditionalFactory.notEqualTo(attributeOrIndex, converter.convert(table, attributeOrIndex, value)));
+        conditions.add(QueryConditionalFactory.notEqualTo(attributeOrIndex, attributeConversionHelper.convert(table, attributeOrIndex, value)));
         return this;
     }
 
@@ -71,7 +71,7 @@ public final class ConditionCollector<T> {
     }
 
     public ConditionCollector<T> inList(String attributeOrIndex, Collection<?> values) {
-        List<AttributeValue> valuesAttributes = values.stream().map(value -> converter.convert(table, attributeOrIndex, value)).collect(Collectors.toList());
+        List<AttributeValue> valuesAttributes = values.stream().map(value -> attributeConversionHelper.convert(table, attributeOrIndex, value)).collect(Collectors.toList());
         conditions.add(QueryConditionalFactory.inList(attributeOrIndex, valuesAttributes));
         return this;
     }
@@ -81,7 +81,7 @@ public final class ConditionCollector<T> {
     }
 
     public ConditionCollector<T> le(String attributeOrIndex, Object value) {
-        conditions.add(QueryConditionalFactory.lessThanOrEqualTo(attributeOrIndex, converter.convert(table, attributeOrIndex, value)));
+        conditions.add(QueryConditionalFactory.lessThanOrEqualTo(attributeOrIndex, attributeConversionHelper.convert(table, attributeOrIndex, value)));
         return this;
     }
 
@@ -90,7 +90,7 @@ public final class ConditionCollector<T> {
     }
 
     public ConditionCollector<T> lt(String attributeOrIndex, Object value) {
-        conditions.add(QueryConditionalFactory.lessThan(attributeOrIndex, converter.convert(table, attributeOrIndex, value)));
+        conditions.add(QueryConditionalFactory.lessThan(attributeOrIndex, attributeConversionHelper.convert(table, attributeOrIndex, value)));
         return this;
     }
 
@@ -99,7 +99,7 @@ public final class ConditionCollector<T> {
     }
 
     public ConditionCollector<T> ge(String attributeOrIndex, Object value) {
-        conditions.add(QueryConditionalFactory.greaterThanOrEqualTo(attributeOrIndex, converter.convert(table, attributeOrIndex, value)));
+        conditions.add(QueryConditionalFactory.greaterThanOrEqualTo(attributeOrIndex, attributeConversionHelper.convert(table, attributeOrIndex, value)));
         return this;
     }
 
@@ -108,7 +108,7 @@ public final class ConditionCollector<T> {
     }
 
     public ConditionCollector<T> gt(String attributeOrIndex, Object value) {
-        conditions.add(QueryConditionalFactory.greaterThan(attributeOrIndex, converter.convert(table, attributeOrIndex, value)));
+        conditions.add(QueryConditionalFactory.greaterThan(attributeOrIndex, attributeConversionHelper.convert(table, attributeOrIndex, value)));
         return this;
     }
 
@@ -119,8 +119,8 @@ public final class ConditionCollector<T> {
     public ConditionCollector<T> between(String attributeOrIndex, Object lo, Object hi) {
         conditions.add(QueryConditionalFactory.between(
             attributeOrIndex,
-            converter.convert(table, attributeOrIndex, lo),
-            converter.convert(table, attributeOrIndex, hi))
+            attributeConversionHelper.convert(table, attributeOrIndex, lo),
+            attributeConversionHelper.convert(table, attributeOrIndex, hi))
         );
         return this;
     }
@@ -148,7 +148,7 @@ public final class ConditionCollector<T> {
     }
 
     public ConditionCollector<T> contains(String attributeOrIndex, Object value) {
-        conditions.add(QueryConditionalFactory.contains(attributeOrIndex, converter.convert(table, attributeOrIndex, value)));
+        conditions.add(QueryConditionalFactory.contains(attributeOrIndex, attributeConversionHelper.convert(table, attributeOrIndex, value)));
         return this;
     }
 
@@ -157,7 +157,7 @@ public final class ConditionCollector<T> {
     }
 
     public ConditionCollector<T> notContains(String attributeOrIndex, Object value) {
-        conditions.add(QueryConditionalFactory.not(QueryConditionalFactory.contains(attributeOrIndex, converter.convert(table, attributeOrIndex, value))));
+        conditions.add(QueryConditionalFactory.not(QueryConditionalFactory.contains(attributeOrIndex, attributeConversionHelper.convert(table, attributeOrIndex, value))));
         return this;
     }
 
@@ -191,7 +191,7 @@ public final class ConditionCollector<T> {
      * @return self
      */
     public ConditionCollector<T> group(Consumer<ConditionCollector<T>> conditions) {
-        ConditionCollector<T> nested = new ConditionCollector<>(table, converter);
+        ConditionCollector<T> nested = new ConditionCollector<>(table, attributeConversionHelper);
         conditions.accept(nested);
 
         this.conditions.add(QueryConditionalFactory.group(QueryConditionalFactory.and(nested.conditions)));
@@ -220,7 +220,7 @@ public final class ConditionCollector<T> {
      * @return self
      */
     public ConditionCollector<T> or(Consumer<ConditionCollector<T>> conditions) {
-        ConditionCollector<T> nested = new ConditionCollector<>(table, converter);
+        ConditionCollector<T> nested = new ConditionCollector<>(table, attributeConversionHelper);
         conditions.accept(nested);
 
         this.conditions.add(QueryConditionalFactory.or(nested.conditions));
@@ -249,7 +249,7 @@ public final class ConditionCollector<T> {
      * @return self
      */
     public ConditionCollector<T> and(Consumer<ConditionCollector<T>> conditions) {
-        ConditionCollector<T> nested = new ConditionCollector<>(table, converter);
+        ConditionCollector<T> nested = new ConditionCollector<>(table, attributeConversionHelper);
         conditions.accept(nested);
 
         this.conditions.add(QueryConditionalFactory.and(nested.conditions));
@@ -262,8 +262,9 @@ public final class ConditionCollector<T> {
     }
 
     private final DynamoDbTable<T> table;
-    private final Converter converter;
+    private final AttributeConversionHelper attributeConversionHelper;
     private List<QueryConditional> conditions = new LinkedList<>();
+    private String index = TableMetadata.primaryIndexName();
 
     String getSortKey() {
         Optional<String> sortKey = table.tableSchema().tableMetadata().primarySortKey();

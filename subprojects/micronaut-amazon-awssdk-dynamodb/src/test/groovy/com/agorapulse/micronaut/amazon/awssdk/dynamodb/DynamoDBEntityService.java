@@ -42,6 +42,7 @@ public interface DynamoDBEntityService {
         public DetachedQuery apply(Map<String, Object> arguments) {
             return Builders.query(DynamoDBEntity.class)
                 .hash(arguments.get("hashKey"))
+                .index(DynamoDBEntity.RANGE_INDEX)
                 .range(r -> r.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("rangeKey")));
         }
     }
@@ -50,7 +51,8 @@ public interface DynamoDBEntityService {
     class EqRangeProjection implements Function<Map<String, Object>, DetachedQuery> {   // <2>
         public DetachedQuery apply(Map<String, Object> arguments) {
             return Builders.query(DynamoDBEntity.class)                                 // <3>
-                .hash(arguments.get("hashKey"))                                         // <4>
+                .hash(arguments.get("hashKey"))
+                .index(DynamoDBEntity.RANGE_INDEX)
                 .range(r ->
                     r.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("rangeKey"))         // <5>
                 )
@@ -71,6 +73,7 @@ public interface DynamoDBEntityService {
     class BetweenDateIndex implements Function<Map<String, Object>, DetachedQuery> {
         public DetachedQuery apply(Map<String, Object> arguments) {
             return Builders.query(DynamoDBEntity.class)
+                .index(DynamoDBEntity.DATE_INDEX)
                 .hash(arguments.get("hashKey"))
                 .range(r -> r.between(DynamoDBEntity.DATE_INDEX, arguments.get("after"), arguments.get("before")));
         }

@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Singleton
-public class BeanIntrospectionConverter implements Converter {
+public class BeanIntrospectionAttributeConversionHelper implements AttributeConversionHelper {
 
     @Override
     public <T> Map<String, AttributeValue> convert(DynamoDbTable<T> table, Map<String, Object> values) {

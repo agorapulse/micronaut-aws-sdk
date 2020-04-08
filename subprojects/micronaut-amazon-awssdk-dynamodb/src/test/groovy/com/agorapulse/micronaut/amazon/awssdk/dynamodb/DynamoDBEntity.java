@@ -17,12 +17,15 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert.LegacyAttributeConverterProvider;
+import io.micronaut.core.annotation.Introspected;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 
 import java.util.Date;
 import java.util.Objects;
 
-@DynamoDbBean
+@Introspected
+@DynamoDbBean(converterProviders = LegacyAttributeConverterProvider.class)
 public class DynamoDBEntity {
 
     public static final String DATE_INDEX = "date";

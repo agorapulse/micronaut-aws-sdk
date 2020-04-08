@@ -18,6 +18,7 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.*;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Update;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.Builders;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedQuery;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedScan;
@@ -32,15 +33,20 @@ import io.micronaut.core.beans.BeanIntrospector;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.type.MutableArgumentValue;
 import io.reactivex.Flowable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.enhanced.dynamodb.*;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.BeanTableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticTableMetadata;
+import software.amazon.awssdk.enhanced.dynamodb.model.EnhancedGlobalSecondaryIndex;
+import software.amazon.awssdk.enhanced.dynamodb.model.EnhancedLocalSecondaryIndex;
 import software.amazon.awssdk.enhanced.dynamodb.model.ReadBatch;
 import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.dynamodb.model.*;
 
 import javax.inject.Singleton;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Function;
@@ -51,6 +57,8 @@ import java.util.stream.Collectors;
  */
 @Singleton
 public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceIntroduction.class);
 
     private static final String PARTITION = "partition";
     private static final String SORT = "sort";
@@ -66,33 +74,33 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             return partitionKey != null;
         }
 
-        AttributeValue getPartitionAttributeValue(Map<String, MutableArgumentValue<?>> params, DynamoDbTable<?> table, Converter converter) {
+        AttributeValue getPartitionAttributeValue(Map<String, MutableArgumentValue<?>> params, DynamoDbTable<?> table, AttributeConversionHelper attributeConversionHelper) {
             Object hashKeyRaw = params.get(partitionKey.getName()).getValue();
             String hashKeyName = table.tableSchema().tableMetadata().primaryPartitionKey();
-            return converter.convert(table, hashKeyName, hashKeyRaw);
+            return attributeConversionHelper.convert(table, hashKeyName, hashKeyRaw);
         }
 
-        AttributeValue getSortAttributeValue(Map<String, MutableArgumentValue<?>> params, DynamoDbTable<?> table, Converter converter) {
+        AttributeValue getSortAttributeValue(Map<String, MutableArgumentValue<?>> params, DynamoDbTable<?> table, AttributeConversionHelper attributeConversionHelper) {
             Object rangeKeyRaw = params.get(sortKey.getName()).getValue();
             String rangeKeyName = table.tableSchema().tableMetadata().primarySortKey().orElseThrow(() -> new IllegalArgumentException("Sort key not present for " + table.tableSchema().itemType()));
-            return converter.convert(table, rangeKeyName, rangeKeyRaw);
+            return attributeConversionHelper.convert(table, rangeKeyName, rangeKeyRaw);
         }
 
-        List<AttributeValue> getSortAttributeValues(Map<String, MutableArgumentValue<?>> params, DynamoDbTable<?> table, Converter converter) {
+        List<AttributeValue> getSortAttributeValues(Map<String, MutableArgumentValue<?>> params, DynamoDbTable<?> table, AttributeConversionHelper attributeConversionHelper) {
             final String key = table.tableSchema().tableMetadata().primarySortKey().orElseThrow(() -> new IllegalArgumentException("Sort key not present for " + table.tableSchema().itemType()));
-            return toList(Object.class, sortKey, params).stream().map(o -> converter.convert(table, key, o)).collect(Collectors.toList());
+            return toList(Object.class, sortKey, params).stream().map(o -> attributeConversionHelper.convert(table, key, o)).collect(Collectors.toList());
         }
 
     }
 
     private final DynamoDbEnhancedClient enhancedClient;
     private final DynamoDbClient client;
-    private final Converter converter;
+    private final AttributeConversionHelper attributeConversionHelper;
 
-    public ServiceIntroduction(DynamoDbEnhancedClient enhancedClient, DynamoDbClient client, Converter converter) {
+    public ServiceIntroduction(DynamoDbEnhancedClient enhancedClient, DynamoDbClient client, AttributeConversionHelper attributeConversionHelper) {
         this.enhancedClient = enhancedClient;
         this.client = client;
-        this.converter = converter;
+        this.attributeConversionHelper = attributeConversionHelper;
     }
 
     @Override
@@ -151,7 +159,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         try {
             return doIntercept(context, type, table);
         } catch (ResourceNotFoundException ignored) {
-            table.createTable();
+            createTable(table);
             return doIntercept(context, type, table);
         }
     }
@@ -170,48 +178,48 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             DetachedQuery<T> criteria = evaluateAnnotationType(context.getTargetMethod().getAnnotation(Query.class).value(), context);
 
             if (methodName.startsWith("count")) {
-                return criteria.count(table, converter);
+                return criteria.count(table, attributeConversionHelper);
             }
 
             if (methodName.startsWith("delete")) {
                 int counter = 0;
-                for (T t : table.query(criteria.resolveRequest(table, converter)).items()) {
+                for (T t : criteria.query(table, attributeConversionHelper).blockingIterable()) {
                     table.deleteItem(t);
                     counter++;
                 }
                 return counter;
             }
 
-            return flowableOrList(criteria.query(table, converter), context.getReturnType().getType());
+            return flowableOrList(criteria.query(table, attributeConversionHelper), context.getReturnType().getType());
         }
 
         if (context.getTargetMethod().isAnnotationPresent(Update.class)) {
             DetachedUpdate<T> criteria = evaluateAnnotationType(context.getTargetMethod().getAnnotation(Update.class).value(), context);
 
-            return criteria.update(table, client, converter);
+            return criteria.update(table, client, attributeConversionHelper);
         }
 
         if (context.getTargetMethod().isAnnotationPresent(Scan.class)) {
             DetachedScan<T> criteria = evaluateAnnotationType(context.getTargetMethod().getAnnotation(Scan.class).value(), context);
 
             if (methodName.startsWith("count")) {
-                return criteria.count(table, converter);
+                return criteria.count(table, attributeConversionHelper);
             }
 
             if (methodName.startsWith("delete")) {
                 int counter = 0;
-                for (T t : table.scan(criteria.resolveRequest(table, converter)).items()) {
+                for (T t : table.scan(criteria.resolveRequest(table, attributeConversionHelper)).items()) {
                     table.deleteItem(t);
                     counter++;
                 }
                 return counter;
             }
 
-            return flowableOrList(criteria.scan(table, converter), context.getReturnType().getType());
+            return flowableOrList(criteria.scan(table, attributeConversionHelper), context.getReturnType().getType());
         }
 
         if (methodName.startsWith("count")) {
-            return simpleHashAndRangeQuery(type, context, table).count(table, converter);
+            return simpleHashAndRangeQuery(type, context, table).count(table, attributeConversionHelper);
         }
 
         if (methodName.startsWith("delete")) {
@@ -219,7 +227,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         }
 
         if (methodName.startsWith("query") || methodName.startsWith("findAll") || methodName.startsWith("list")) {
-            return flowableOrList(simpleHashAndRangeQuery(type, context, table).query(table, converter), context.getReturnType().getType());
+            return flowableOrList(simpleHashAndRangeQuery(type, context, table).query(table, attributeConversionHelper), context.getReturnType().getType());
         }
 
         throw new UnsupportedOperationException("Cannot implement method " + context.getExecutableMethod());
@@ -301,14 +309,14 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         PartitionAndSort partitionAndSort = findHashAndRange(args);
 
         if (partitionAndSort.sortKey == null) {
-            service.deleteItem(Key.builder().partitionValue(partitionAndSort.getPartitionAttributeValue(params, service, converter)).build());
+            service.deleteItem(Key.builder().partitionValue(partitionAndSort.getPartitionAttributeValue(params, service, attributeConversionHelper)).build());
             return null;
         }
 
         service.deleteItem(
             Key.builder()
-                .partitionValue(partitionAndSort.getPartitionAttributeValue(params, service, converter))
-                .sortValue(partitionAndSort.getSortAttributeValue(params, service, converter))
+                .partitionValue(partitionAndSort.getPartitionAttributeValue(params, service, attributeConversionHelper))
+                .sortValue(partitionAndSort.getSortAttributeValue(params, service, attributeConversionHelper))
                 .build()
         );
 
@@ -324,17 +332,17 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         }
 
         PartitionAndSort partitionAndSort = findHashAndRange(args);
-        AttributeValue partitionValue = partitionAndSort.getPartitionAttributeValue(params, service, converter);
+        AttributeValue partitionValue = partitionAndSort.getPartitionAttributeValue(params, service, attributeConversionHelper);
 
         if (partitionAndSort.sortKey == null) {
             return service.getItem(Key.builder().partitionValue(partitionValue).build());
         }
 
         if (partitionAndSort.sortKey.getType().isArray() || Iterable.class.isAssignableFrom(partitionAndSort.sortKey.getType())) {
-            return getAll(service, partitionValue, partitionAndSort.getSortAttributeValues(params, service, converter));
+            return getAll(service, partitionValue, partitionAndSort.getSortAttributeValues(params, service, attributeConversionHelper));
         }
 
-        return service.getItem(Key.builder().partitionValue(partitionValue).sortValue(partitionAndSort.getSortAttributeValue(params, service, converter)).build());
+        return service.getItem(Key.builder().partitionValue(partitionValue).sortValue(partitionAndSort.getSortAttributeValue(params, service, attributeConversionHelper)).build());
     }
 
     private <T> DetachedQuery<T> simpleHashAndRangeQuery(
@@ -351,7 +359,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
 
         PartitionAndSort partitionAndSort = findHashAndRange(args);
 
-        AttributeValue partitionAttributeValue = partitionAndSort.getPartitionAttributeValue(params, table, converter);
+        AttributeValue partitionAttributeValue = partitionAndSort.getPartitionAttributeValue(params, table, attributeConversionHelper);
 
         if (partitionAndSort.sortKey == null) {
             return Builders.query(type, q -> {
@@ -359,7 +367,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             });
         }
 
-        AttributeValue sortAttributeValue = partitionAndSort.getSortAttributeValue(params, table, converter);
+        AttributeValue sortAttributeValue = partitionAndSort.getSortAttributeValue(params, table, attributeConversionHelper);
 
         return Builders.query(type, q -> q.hash(partitionAttributeValue).range(r -> r.eq(sortAttributeValue)));
     }
@@ -383,7 +391,9 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
 
     private <T> Object saveAll(DynamoDbTable<T> service, List<T> itemsToSave) {
         List<T> unprocessed = partition(itemsToSave, BATCH_SIZE).stream().map(batchItems -> enhancedClient.batchWriteItem(b -> {
-            b.writeBatches(batchItems.stream().map(i -> WriteBatch.builder(service.tableSchema().itemType().rawClass()).addPutItem(i).build()).collect(Collectors.toList()));
+            b.writeBatches(batchItems.stream().map(i ->
+                WriteBatch.builder(service.tableSchema().itemType().rawClass()).mappedTableResource(service).addPutItem(i).build()
+            ).collect(Collectors.toList()));
         })).flatMap(r -> r.unprocessedPutItemsForTable(service).stream()).collect(Collectors.toList());
 
         if (unprocessed.isEmpty()) {
@@ -396,7 +406,9 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
     private <T> void deleteAll(DynamoDbTable<T> service, List<T> itemsToDelete) {
         TableSchema<T> tableSchema = service.tableSchema();
         List<Key> unprocessed = partition(itemsToDelete, BATCH_SIZE).stream().map(batchItems -> enhancedClient.batchWriteItem(b -> {
-            b.writeBatches(batchItems.stream().map(i -> WriteBatch.builder(tableSchema.itemType().rawClass()).addDeleteItem(i).build()).collect(Collectors.toList()));
+            b.writeBatches(batchItems.stream().map(i ->
+                WriteBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(service).addDeleteItem(i).build()
+            ).collect(Collectors.toList()));
         })).flatMap(r -> r.unprocessedDeleteItemsForTable(service).stream()).collect(Collectors.toList());
 
         if (unprocessed.isEmpty()) {
@@ -411,7 +423,53 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
     private <T> List<T> getAll(DynamoDbTable<T> service, AttributeValue hashKey, List<AttributeValue> rangeKeys) {
         TableSchema<T> tableSchema = service.tableSchema();
         return partition(rangeKeys, BATCH_SIZE).stream().map(batchRangeKeys -> enhancedClient.batchGetItem(b -> {
-            b.readBatches(batchRangeKeys.stream().map(k -> ReadBatch.builder(tableSchema.itemType().rawClass()).addGetItem(Key.builder().partitionValue(hashKey).sortValue(k).build()).build()).collect(Collectors.toList()));
+            b.readBatches(batchRangeKeys.stream().map(k ->
+                ReadBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(service).addGetItem(Key.builder().partitionValue(hashKey).sortValue(k).build()).build()
+            ).collect(Collectors.toList()));
         })).flatMap(r -> r.resultsForTable(service).stream()).collect(Collectors.toList());
+    }
+
+    private <T> void createTable(DynamoDbTable<T> table) {
+        TableMetadata tableMetadata = table.tableSchema().tableMetadata();
+        tableMetadata.allKeys();
+        table.createTable(b -> {
+            List<EnhancedLocalSecondaryIndex> localSecondaryIndices = new ArrayList<>();
+            List<EnhancedGlobalSecondaryIndex> globalSecondaryIndices = new ArrayList<>();
+
+            getIndices(tableMetadata).forEach(i -> {
+                if (TableMetadata.primaryIndexName().equals(i)) {
+                    return;
+                }
+                if (tableMetadata.primaryPartitionKey().equals(tableMetadata.indexPartitionKey(i))) {
+                    localSecondaryIndices.add(EnhancedLocalSecondaryIndex.create(i, Projection.builder().projectionType(ProjectionType.KEYS_ONLY).build()));
+                } else {
+                    globalSecondaryIndices.add(EnhancedGlobalSecondaryIndex.builder().indexName(i).projection(Projection.builder().projectionType(ProjectionType.KEYS_ONLY).build()).build());
+                }
+            });
+
+            if (!localSecondaryIndices.isEmpty()) {
+                b.localSecondaryIndices(localSecondaryIndices);
+            }
+
+            if (!globalSecondaryIndices.isEmpty()) {
+                b.globalSecondaryIndices(globalSecondaryIndices);
+            }
+        });
+
+    }
+
+    private Set<String> getIndices(TableMetadata metadata) {
+        if (metadata instanceof StaticTableMetadata) {
+            try {
+                Field indexByNameMapField = StaticTableMetadata.class.getDeclaredField("indexByNameMap");
+                indexByNameMapField.setAccessible(true);
+                Map<String, ?> indexByNameMap = (Map<String, ?>) indexByNameMapField.get(metadata);
+                return indexByNameMap.keySet();
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                LOGGER.error("Exception reading indices", e);
+            }
+        }
+
+        return Collections.emptySet();
     }
 }

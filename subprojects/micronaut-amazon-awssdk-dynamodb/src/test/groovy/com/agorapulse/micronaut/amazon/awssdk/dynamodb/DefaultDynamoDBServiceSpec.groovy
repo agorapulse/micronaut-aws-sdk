@@ -33,6 +33,7 @@ import spock.lang.Specification
 import spock.lang.Stepwise
 
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 import static com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.Builders.*
 
@@ -86,6 +87,22 @@ class DefaultDynamoDBServiceSpec extends Specification {
     @SuppressWarnings('AbcMetric')
     void 'service introduction works'() {
         expect:
+            service.save(new DynamoDBEntity(                                                      // <3>
+                parentId: '1',
+                id: '1',
+                rangeIndex: 'foo',
+                date: Date.from(REFERENCE_DATE)
+            ))
+            service.save(new DynamoDBEntity(parentId: '1', id: '2', rangeIndex: 'bar', date: Date.from(REFERENCE_DATE.plus(1, ChronoUnit.DAYS))))
+            service.saveAll([
+                new DynamoDBEntity(parentId: '2', id: '1', rangeIndex: 'foo',  date: Date.from(REFERENCE_DATE.minus(5, ChronoUnit.DAYS))),
+                new DynamoDBEntity(parentId: '2', id: '2', rangeIndex: 'foo', date: Date.from(REFERENCE_DATE.minus(2, ChronoUnit.DAYS)))])
+
+            service.saveAll(
+                new DynamoDBEntity(parentId: '3', id: '1', rangeIndex: 'foo', date: Date.from(REFERENCE_DATE.plus(7, ChronoUnit.DAYS))),
+                new DynamoDBEntity(parentId: '3', id: '2', rangeIndex: 'bar', date: Date.from(REFERENCE_DATE.plus(14, ChronoUnit.DAYS)))
+            )
+
             service.get('1', '1')
             service.load('1', '1')
             service.getAll('1', ['2', '1']).size() == 2
@@ -93,31 +110,31 @@ class DefaultDynamoDBServiceSpec extends Specification {
             service.getAll('1', '2', '1').size() == 2
             service.loadAll('1', '3', '4').size() == 0
 
-            service.save(new DynamoDBEntity(parentId: '1001', id: '1', rangeIndex: 'foo', date: REFERENCE_DATE.toDate()))
-            service.save(new DynamoDBEntity(parentId: '1001', id: '2', rangeIndex: 'bar', date: REFERENCE_DATE.plusDays(1).toDate()))
+            service.save(new DynamoDBEntity(parentId: '1001', id: '1', rangeIndex: 'foo', date: Date.from(REFERENCE_DATE)))
+            service.save(new DynamoDBEntity(parentId: '1001', id: '2', rangeIndex: 'bar', date: Date.from(REFERENCE_DATE.plus(1, ChronoUnit.DAYS))))
             service.saveAll([
-                new DynamoDBEntity(parentId: '1002', id: '1', rangeIndex: 'foo',  date: REFERENCE_DATE.minusDays(5).toDate()),
-                new DynamoDBEntity(parentId: '1002', id: '2', rangeIndex: 'foo', date: REFERENCE_DATE.minusDays(2).toDate()),
+                new DynamoDBEntity(parentId: '1002', id: '1', rangeIndex: 'foo',  date: Date.from(REFERENCE_DATE.minus(5, ChronoUnit.DAYS))),
+                new DynamoDBEntity(parentId: '1002', id: '2', rangeIndex: 'foo', date: Date.from(REFERENCE_DATE.minus(2, ChronoUnit.DAYS))),
             ])
             service.saveAll(
-                new DynamoDBEntity(parentId: '1003', id: '1', rangeIndex: 'foo', date: REFERENCE_DATE.plusDays(7).toDate()),
-                new DynamoDBEntity(parentId: '1003', id: '2', rangeIndex: 'bar', date: REFERENCE_DATE.plusDays(14).toDate())
+                new DynamoDBEntity(parentId: '1003', id: '1', rangeIndex: 'foo', date: Date.from(REFERENCE_DATE.plus(7, ChronoUnit.DAYS))),
+                new DynamoDBEntity(parentId: '1003', id: '2', rangeIndex: 'bar', date: Date.from(REFERENCE_DATE.plus(14, ChronoUnit.DAYS)))
             )
 
             service.count('1') == 2
             service.count('1', '1') == 1
             service.countByRangeIndex('1', 'bar') == 1
-            service.countByDates('1', REFERENCE_DATE.minusDays(1).toDate(), REFERENCE_DATE.plusDays(2).toDate()) == 2
-            service.countByDates('3', REFERENCE_DATE.plusDays(9).toDate(), REFERENCE_DATE.plusDays(20).toDate()) == 1
+            service.countByDates('1', Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS))) == 2
+            service.countByDates('3', Date.from(REFERENCE_DATE.plus(9, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(20, ChronoUnit.DAYS))) == 1
 
             service.query('1').count().blockingGet() == 2
             service.query('1', '1').count().blockingGet() == 1
             service.queryByRangeIndex('1', 'bar').count().blockingGet() == 1
             service.queryByRangeIndex('1', 'bar').blockingSingle().parentId == null // projection
             service.queryByRangeIndex('1', 'bar').blockingSingle().rangeIndex == 'bar' // projection
-            service.queryByDates('1', REFERENCE_DATE.minusDays(1).toDate(), REFERENCE_DATE.plusDays(2).toDate()).count().blockingGet() == 2
-            service.queryByDatesWithLimit('1', REFERENCE_DATE.minusDays(1).toDate(), REFERENCE_DATE.plusDays(2).toDate(), 1).count().blockingGet() == 1
-            service.queryByDates('3', REFERENCE_DATE.plusDays(9).toDate(), REFERENCE_DATE.plusDays(20).toDate()).count().blockingGet() == 1
+            service.queryByDates('1', Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS))).count().blockingGet() == 2
+            service.queryByDatesWithLimit('1', Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS)), 1).count().blockingGet() == 1
+            service.queryByDates('3', Date.from(REFERENCE_DATE.plus(9, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(20, ChronoUnit.DAYS))).count().blockingGet() == 1
 
             service.scanAllByRangeIndex('bar').count().blockingGet() == 4
             service.scanAllByRangeIndexWithLimit('bar', 2).count().blockingGet() == 2
@@ -134,8 +151,8 @@ class DefaultDynamoDBServiceSpec extends Specification {
             service.count('1003', '1') == 0
             service.deleteByRangeIndex('1001', 'bar') == 1
             service.countByRangeIndex('1001', 'bar') == 0
-            service.deleteByDates('1002',  REFERENCE_DATE.minusDays(20).toDate(), REFERENCE_DATE.plusDays(20).toDate()) == 2
-            service.countByDates('1002', REFERENCE_DATE.minusDays(20).toDate(), REFERENCE_DATE.plusDays(20).toDate()) == 0
+            service.deleteByDates('1002',  Date.from(REFERENCE_DATE.minus(20, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(20, ChronoUnit.DAYS))) == 2
+            service.countByDates('1002', Date.from(REFERENCE_DATE.minus(20, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(20, ChronoUnit.DAYS))) == 0
     }
 
     void 'count many items'() {
@@ -172,6 +189,7 @@ interface DynamoDBItemDBService {
     @Query({
         query(DynamoDBEntity) {
             hash hashKey
+            index DynamoDBEntity.RANGE_INDEX
             range {
                 eq DynamoDBEntity.RANGE_INDEX, rangeKey
             }
@@ -182,6 +200,7 @@ interface DynamoDBItemDBService {
     @Query({
         query(DynamoDBEntity) {
             hash hashKey
+            index DynamoDBEntity.DATE_INDEX
             range { between DynamoDBEntity.DATE_INDEX, after, before }
         }
     })
@@ -194,6 +213,7 @@ interface DynamoDBItemDBService {
     @Query({                                                                            // <3>
         query(DynamoDBEntity) {
             hash hashKey                                                                // <4>
+            index DynamoDBEntity.RANGE_INDEX
             range {
                 eq DynamoDBEntity.RANGE_INDEX, rangeKey                                 // <5>
             }
@@ -208,6 +228,7 @@ interface DynamoDBItemDBService {
     @Query({
         query(DynamoDBEntity) {
             hash hashKey
+            index DynamoDBEntity.DATE_INDEX
             range { between DynamoDBEntity.DATE_INDEX, after, before }
         }
     })
@@ -216,6 +237,7 @@ interface DynamoDBItemDBService {
     @Query({
         query(DynamoDBEntity) {
             hash hashKey
+            index DynamoDBEntity.DATE_INDEX
             range { between DynamoDBEntity.DATE_INDEX, after, before }
             limit max
         }
@@ -228,6 +250,7 @@ interface DynamoDBItemDBService {
     @Query({
         query(DynamoDBEntity) {
             hash hashKey
+            index DynamoDBEntity.RANGE_INDEX
             range {
                 eq DynamoDBEntity.RANGE_INDEX, rangeKey
             }
@@ -238,6 +261,7 @@ interface DynamoDBItemDBService {
     @Query({
         query(DynamoDBEntity) {
             hash hashKey
+            index DynamoDBEntity.DATE_INDEX
             range { between DynamoDBEntity.DATE_INDEX, after, before }
         }
     })
