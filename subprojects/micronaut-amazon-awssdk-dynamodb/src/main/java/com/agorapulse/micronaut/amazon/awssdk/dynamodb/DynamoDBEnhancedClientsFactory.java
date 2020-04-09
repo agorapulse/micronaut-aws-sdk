@@ -19,7 +19,6 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
-import io.micronaut.context.annotation.Requires;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
@@ -33,7 +32,6 @@ import javax.inject.Singleton;
  * {@link software.amazon.awssdk.enhanced.dynamodb.internal.client.DefaultDynamoDbEnhancedAsyncClient} beans.
  */
 @Factory
-@Requires(classes = DynamoDbEnhancedClient.class)
 public class DynamoDBEnhancedClientsFactory {
 
     @Bean

@@ -138,10 +138,15 @@ class DefaultUpdateBuilder<T> implements UpdateBuilder<T> {
         // TODO: switch to update expressions
         Map<String, AttributeValueUpdate> attributeUpdates = new HashMap<>();
 
-        Map<String, AttributeValue> converted = attributeConversionHelper.convert(mapper, __updates.stream().collect(Collectors.toMap(
-            u -> u.name,
-            u -> u.value
-        )));
+        Map<String, AttributeValue> converted = attributeConversionHelper.convert(
+            mapper,
+            __updates.stream()
+                .filter(u -> u.value != null)
+                .collect(Collectors.toMap(
+                    u -> u.name,
+                    u -> u.value
+                ))
+        );
 
         for (Update u : __updates) {
             attributeUpdates.put(

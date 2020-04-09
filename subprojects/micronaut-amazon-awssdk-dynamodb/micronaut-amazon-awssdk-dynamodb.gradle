@@ -23,6 +23,7 @@ config {
 
 dependencies {
     compile project(':micronaut-amazon-awssdk-core')
+
     compile "space.jasan:groovy-closure-support:$closureSupportVersion"
 
     compile "software.amazon.awssdk:dynamodb"

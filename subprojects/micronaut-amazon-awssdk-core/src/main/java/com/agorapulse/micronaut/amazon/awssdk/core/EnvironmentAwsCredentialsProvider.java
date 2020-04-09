@@ -78,7 +78,7 @@ public class EnvironmentAwsCredentialsProvider implements AwsCredentialsProvider
         secretKey = StringUtils.trim(secretKey);
         String sessionToken = StringUtils.trim(environment.getProperty(AWS_SESSION_TOKEN_ENV_VAR, String.class, (String) null));
 
-        if (StringUtils.isNotBlank(accessKey) || StringUtils.isNotBlank(secretKey)) {
+        if (StringUtils.isBlank(accessKey) || StringUtils.isBlank(secretKey)) {
             throw SdkClientException.create(
                 "Unable to load AWS credentials from environment "
                     + "(" + ACCESS_KEY_ENV_VAR + " (or " + ALTERNATE_ACCESS_KEY_ENV_VAR + ") and "

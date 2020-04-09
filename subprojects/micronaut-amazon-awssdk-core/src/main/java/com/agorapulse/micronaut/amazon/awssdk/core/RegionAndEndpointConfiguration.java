@@ -32,16 +32,16 @@ public interface RegionAndEndpointConfiguration {
     String getEndpoint();
 
     default <C, B extends AwsClientBuilder<B, C>> B configure(B builder, AwsRegionProvider awsRegionProvider) {
-        Region region = Optional.ofNullable(getRegion()).map(Region::of).orElseGet(awsRegionProvider::getRegion);
+        builder.region(Optional.ofNullable(getRegion()).map(Region::of).orElseGet(awsRegionProvider::getRegion));
+
         if (getEndpoint() != null) {
             try {
                 builder.endpointOverride(new URI(getEndpoint()));
             } catch (URISyntaxException e) {
                 throw new IllegalArgumentException("Endpoint configured for " + getClass() + " is not a valid URI!", e);
             }
-        } else {
-            builder.region(region);
         }
+
         return builder;
     }
 

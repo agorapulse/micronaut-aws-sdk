@@ -375,9 +375,19 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
     private PartitionAndSort findHashAndRange(Argument<?>[] arguments) {
         PartitionAndSort names = new PartitionAndSort();
         for (Argument<?> argument : arguments) {
-            if (argument.isAnnotationPresent(SortKey.class) || argument.getName().toLowerCase().contains(SORT) || argument.getName().toLowerCase().contains(RANGE)) {
+            if (
+                argument.isAnnotationPresent(SortKey.class)
+                    || argument.isAnnotationPresent(RangeKey.class)
+                    || argument.getName().toLowerCase().contains(SORT)
+                    || argument.getName().toLowerCase().contains(RANGE)
+            ) {
                 names.sortKey = argument;
-            } else if (argument.isAnnotationPresent(PartitionKey.class) || argument.getName().toLowerCase().contains(PARTITION) || argument.getName().toLowerCase().contains(HASH)) {
+            } else if (
+                argument.isAnnotationPresent(PartitionKey.class)
+                    || argument.isAnnotationPresent(HashKey.class)
+                    || argument.getName().toLowerCase().contains(PARTITION)
+                    || argument.getName().toLowerCase().contains(HASH)
+            ) {
                 names.partitionKey = argument;
             }
         }

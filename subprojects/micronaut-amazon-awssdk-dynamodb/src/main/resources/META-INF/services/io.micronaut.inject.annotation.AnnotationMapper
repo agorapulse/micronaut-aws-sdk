@@ -1,3 +1,0 @@
-com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.mapper.DynamoDbBeanIntrospectedAnnotationMapper
-com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.mapper.HashKeyPartitionKeyAnnotationMapper
-com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.mapper.RangeKeySortKeyAnnotationMapper

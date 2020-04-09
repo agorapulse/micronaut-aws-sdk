@@ -43,7 +43,7 @@ public class BeanIntrospectionAttributeConversionHelper implements AttributeConv
     private <T> BeanIntrospection<T> getBeanIntrospection(DynamoDbTable<T> table) {
         return BeanIntrospector.SHARED.findIntrospection(table.tableSchema().itemType().rawClass())
             .orElseThrow(() -> new IllegalArgumentException("No introspection found for " + table.tableSchema().itemType().rawClass()
-                + "! Please, see https://docs.micronaut.io/latest/guide/index.html#introspection for more details")
+                + "! Please, annotate the class with @Introspected. See https://docs.micronaut.io/latest/guide/index.html#introspection for more details")
             );
     }
 

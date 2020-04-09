@@ -25,34 +25,6 @@ javaPlatform {
     allowDependencies()
 }
 
-publishing {
-    publications {
-        awsSdkPlatform(MavenPublication) {
-            from components.javaPlatform
-        }
-    }
-}
-
-if (!project.hasProperty('bintrayUsername')) ext.bintrayUsername = '**UNDEFINED**'
-if (!project.hasProperty('bintrayApiKey'))   ext.bintrayApiKey   = '**UNDEFINED**'
-
-bintray {
-    user = bintrayUsername
-    key = bintrayApiKey
-    publications = ['awsSdkPlatform']
-    publish = true
-    pkg {
-        name = project.name
-        userOrg = 'agorapulse'
-        repo = 'libs'
-        licenses = ['Apache-2.0']
-        githubRepo = 'agorapulse/micronaut-aws-sdk'
-        vcsUrl = 'https://github.com/agorapulse/micronaut-aws-sdk.git'
-        websiteUrl = 'https://github.com/agorapulse/micronaut-aws-sdk'
-        issueTrackerUrl = 'https://github.com/agorapulse/micronaut-aws-sdk/issues'
-    }
-}
-
 dependencies {
     api platform("io.micronaut:micronaut-bom:$micronautVersion")
 
