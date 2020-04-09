@@ -98,7 +98,7 @@ class DefaultUpdateBuilder<T> implements UpdateBuilder<T> {
 
     @Override
     public Object update(DynamoDbTable<T> mapper, DynamoDbClient client, AttributeConversionHelper attributeConversionHelper) {
-        UpdateItemRequest request = resolveExpression(mapper, attributeConversionHelper);
+        UpdateItemRequest request = resolveRequest(mapper, attributeConversionHelper);
         UpdateItemResponse result = client.updateItem(request);
         Map<String, AttributeValue> attributes = result.attributes();
 
@@ -114,7 +114,7 @@ class DefaultUpdateBuilder<T> implements UpdateBuilder<T> {
     }
 
     @Override
-    public UpdateItemRequest resolveExpression(DynamoDbTable<T> mapper, AttributeConversionHelper attributeConversionHelper) {
+    public UpdateItemRequest resolveRequest(DynamoDbTable<T> mapper, AttributeConversionHelper attributeConversionHelper) {
         UpdateItemRequest.Builder builder = UpdateItemRequest.builder();
         __configurer.accept(builder);
 

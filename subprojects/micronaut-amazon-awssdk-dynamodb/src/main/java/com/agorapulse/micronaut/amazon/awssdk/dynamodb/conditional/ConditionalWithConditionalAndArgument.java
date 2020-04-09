@@ -24,35 +24,36 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 import java.util.Collections;
 
-class ConditionalWithThreeArguments implements QueryConditional {
-
-    static final String BETWEEN_TEMPLATE = "%s BETWEEN %s AND %s";
+class ConditionalWithConditionalAndArgument implements QueryConditional {
 
     private final String template;
-    private final String property;
-    private final AttributeValue first;
-    private final AttributeValue second;
+    private final QueryConditional first;
+    private final AttributeValue value;
 
-    ConditionalWithThreeArguments(String template, String property, AttributeValue first, AttributeValue second) {
+    ConditionalWithConditionalAndArgument(String template, QueryConditional first, AttributeValue value) {
         this.template = template;
-        this.property = property;
         this.first = first;
-        this.second = second;
+        this.value = value;
     }
 
     @Override
     public Expression expression(TableSchema<?> tableSchema, String indexName) {
-        String propertyKeyToken = QueryConditionalFactory.expressionKey(property);
-        String firstValueToken = QueryConditionalFactory.expressionValue(property) + "_1";
-        String secondValueToken = QueryConditionalFactory.expressionValue(property) + "_2";
-        String queryExpression = String.format(template, propertyKeyToken, firstValueToken, secondValueToken);
+        Expression ex = first.expression(tableSchema, indexName);
+        String propertyValueToken = QueryConditionalFactory.expressionValue("VAL");
 
-        return Expression.builder()
-            .expression(queryExpression)
-            .expressionNames(Collections.singletonMap(propertyKeyToken, property))
-            .putExpressionValue(firstValueToken, first)
-            .putExpressionValue(secondValueToken, second)
-            .build();
+        Expression.Builder result = Expression.builder().expression(String.format(template, ex.expression(), propertyValueToken));
+
+        if (ex.expressionNames() != null) {
+            ex.expressionNames().forEach(result::putExpressionName);
+        }
+
+        if (ex.expressionValues() != null) {
+            ex.expressionValues().forEach(result::putExpressionValue);
+        }
+
+        result.putExpressionValue(propertyValueToken, value);
+
+        return result.build();
     }
 
 }

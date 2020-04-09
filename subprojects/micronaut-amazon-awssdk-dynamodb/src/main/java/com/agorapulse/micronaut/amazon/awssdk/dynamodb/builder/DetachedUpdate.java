@@ -41,6 +41,6 @@ public interface DetachedUpdate<T> {
      * @param mapper DynamoDB mapper
      * @return the current update resolved into native update request
      */
-    UpdateItemRequest resolveExpression(DynamoDbTable<T>  mapper, AttributeConversionHelper attributeConversionHelper);
+    UpdateItemRequest resolveRequest(DynamoDbTable<T>  mapper, AttributeConversionHelper attributeConversionHelper);
 
 }

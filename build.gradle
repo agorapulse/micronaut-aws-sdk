@@ -130,15 +130,19 @@ subprojects { Project subproject ->
         annotationProcessor "io.micronaut:micronaut-inject-java"
 
         // Groovy
-        compile "org.codehaus.groovy:groovy:$groovyVersion"
+        if (subproject.name.startsWith('micronaut-amazon-awssdk')) {
+            compileOnly "org.codehaus.groovy:groovy:$groovyVersion"
+            testCompile "org.codehaus.groovy:groovy:$groovyVersion"
+        } else {
+            compile "org.codehaus.groovy:groovy:$groovyVersion"
+            compile "io.micronaut:micronaut-runtime-groovy"
+            compileOnly "io.micronaut:micronaut-inject-groovy"
+        }
 
-        compile "io.micronaut:micronaut-runtime-groovy"
         compile "io.micronaut:micronaut-inject"
         compile "io.micronaut:micronaut-runtime"
 
-        compileOnly "io.micronaut:micronaut-inject-groovy"
         compileOnly "io.micronaut:micronaut-inject-java"
-
 
         runtime "ch.qos.logback:logback-classic:1.2.3"
 

@@ -35,7 +35,7 @@ import spock.lang.Stepwise
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-import static com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.Builders.*
+import static com.agorapulse.micronaut.amazon.awssdk.dynamodb.groovy.GroovyBuilders.*
 
 // tag::builders-import[]
 
@@ -155,6 +155,10 @@ class DefaultDynamoDBServiceSpec extends Specification {
                 Date.from(REFERENCE_DATE.plus(20, ChronoUnit.DAYS))
             ).count().blockingGet() == 1
 
+            service.queryByPrefix('1', 'b').toList().blockingGet().size() == 1
+            service.queryBySizeAndContains('1', 3, 'a').toList().blockingGet().size() == 1
+            service.queryInList('1', 'foo', 'bar').toList().blockingGet().size() == 2
+
             service.scanAllByRangeIndex('bar').count().blockingGet() == 4
             service.scanAllByRangeIndexWithLimit('bar', 2).count().blockingGet() == 2
 
@@ -252,6 +256,37 @@ interface DynamoDBItemDBService {
         }
     })
     Flowable<DynamoDBEntity> queryByDates(String hashKey, Date after, Date before)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            index DynamoDBEntity.RANGE_INDEX
+            range { beginsWith DynamoDBEntity.RANGE_INDEX, prefix }
+        }
+    })
+    Flowable<DynamoDBEntity> queryByPrefix(String hashKey, String prefix)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            filter { inList DynamoDBEntity.RANGE_INDEX, values }
+        }
+    })
+    Flowable<DynamoDBEntity> queryInList(String hashKey, String... values)
+
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            filter {
+                and {
+                    contains DynamoDBEntity.RANGE_INDEX, substring
+                    sizeEq DynamoDBEntity.RANGE_INDEX, size
+                }
+            }
+        }
+    })
+    Flowable<DynamoDBEntity> queryBySizeAndContains(String hashKey, int size, String substring)
 
     @Query({
         query(DynamoDBEntity) {

@@ -46,10 +46,14 @@ class LogicalConditional implements QueryConditional {
         List<Expression> expressions = StreamSupport.stream(statements.spliterator(), false)
             .map(s -> s.expression(tableSchema, indexName))
             .collect(Collectors.toList());
-        builder.expression(expressions.stream().map(Expression::expression).collect(joining(token)));
+        builder.expression(expressions.stream().map(Expression::expression).filter(e -> e != null && !e.isEmpty()).collect(joining(token)));
         expressions.forEach(ex -> {
-            ex.expressionNames().forEach(builder::putExpressionName);
-            ex.expressionValues().forEach(builder::putExpressionValue);
+            if (ex.expressionNames() != null) {
+                ex.expressionNames().forEach(builder::putExpressionName);
+            }
+            if (ex.expressionValues() != null) {
+                ex.expressionValues().forEach(builder::putExpressionValue);
+            }
         });
         return builder.build();
     }

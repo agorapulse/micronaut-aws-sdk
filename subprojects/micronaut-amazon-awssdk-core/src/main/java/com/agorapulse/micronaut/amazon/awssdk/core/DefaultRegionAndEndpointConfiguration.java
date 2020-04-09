@@ -42,4 +42,5 @@ public class DefaultRegionAndEndpointConfiguration implements RegionAndEndpointC
 
     @Nullable private String region;
     @Nullable private String endpoint;
+
 }

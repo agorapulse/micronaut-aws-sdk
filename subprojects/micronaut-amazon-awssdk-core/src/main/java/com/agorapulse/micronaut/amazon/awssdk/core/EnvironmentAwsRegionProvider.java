@@ -52,4 +52,5 @@ public class EnvironmentAwsRegionProvider implements AwsRegionProvider {
     public String toString() {
         return getClass().getSimpleName();
     }
+
 }

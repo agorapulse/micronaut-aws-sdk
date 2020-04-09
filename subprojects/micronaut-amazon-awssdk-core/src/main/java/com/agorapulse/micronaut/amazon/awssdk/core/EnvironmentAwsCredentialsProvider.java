@@ -94,4 +94,5 @@ public class EnvironmentAwsCredentialsProvider implements AwsCredentialsProvider
     public String toString() {
         return getClass().getSimpleName();
     }
+
 }

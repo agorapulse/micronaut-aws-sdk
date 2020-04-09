@@ -17,12 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
-import groovy.lang.Closure;
-import groovy.lang.DelegatesTo;
-import groovy.transform.stc.ClosureParams;
-import groovy.transform.stc.FromString;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
-import space.jasan.support.groovy.closure.ConsumerWithDelegate;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -80,19 +75,6 @@ public interface QueryBuilder<T> extends DetachedQuery<T> {
     QueryBuilder<T> range(Consumer<ConditionCollector<T>> conditions);
 
     /**
-     * One or more range key conditions.
-     * @param conditions closure to build the conditions
-     * @return self
-     */
-    default QueryBuilder<T> range(
-        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ConditionCollector<T>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "ccom.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ConditionCollector<T>")
-            Closure<ConditionCollector<T>> conditions
-    ) {
-        return range(ConsumerWithDelegate.create(conditions));
-    }
-
-    /**
      * One or more range key filter conditions.
      *
      * These conditions are resolved on the result set before returning the values and therefore they don't require an existing index
@@ -102,23 +84,6 @@ public interface QueryBuilder<T> extends DetachedQuery<T> {
      * @return self
      */
     QueryBuilder<T> filter(Consumer<ConditionCollector<T>> conditions);
-
-    /**
-     * One or more range key filter conditions.
-     *
-     * These conditions are resolved on the result set before returning the values and therefore they don't require an existing index
-     * but they consume more resources as all the result set must be traversed.
-     *
-     * @param conditions closure to build the conditions
-     * @return self
-     */
-    default QueryBuilder<T> filter(
-        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ConditionCollector<T>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ConditionCollector<T>")
-            Closure<ConditionCollector<T>> conditions
-    ) {
-        return filter(ConsumerWithDelegate.create(conditions));
-    }
 
     /**
      * Sets the desired pagination of the queries.
@@ -161,22 +126,6 @@ public interface QueryBuilder<T> extends DetachedQuery<T> {
     QueryBuilder<T> configure(Consumer<QueryEnhancedRequest.Builder> configurer);
 
     /**
-     * Configures the native query expression.
-     *
-     * This method is an extension point which allows to configure properties which are not provides by this builder.
-     *
-     * @param configurer closure to configure the native query expression
-     * @return self
-     */
-    default QueryBuilder<T> configure(
-        @DelegatesTo(type = "software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest.Builder", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest.Builder")
-            Closure<Object> configurer
-    ) {
-        return configure(ConsumerWithDelegate.create(configurer));
-    }
-
-    /**
      * Limits which properties of the returned entities will be populated.
      * @param propertyPaths property paths to be populated in the returned entities
      * @return self
@@ -190,19 +139,6 @@ public interface QueryBuilder<T> extends DetachedQuery<T> {
      */
     default QueryBuilder<T> only(String... propertyPaths) {
         return only(Arrays.asList(propertyPaths));
-    }
-
-    /**
-     * Limits which properties of the returned entities will be populated.
-     * @param collector closure to collect the property paths
-     * @return self
-     */
-    default QueryBuilder<T> only(
-        @DelegatesTo(type = "T", strategy = Closure.DELEGATE_ONLY)
-        @ClosureParams(value = FromString.class, options = "T")
-            Closure<Object> collector
-    ) {
-        return only(PathCollector.collectPaths(collector).getPropertyPaths());
     }
 
 }

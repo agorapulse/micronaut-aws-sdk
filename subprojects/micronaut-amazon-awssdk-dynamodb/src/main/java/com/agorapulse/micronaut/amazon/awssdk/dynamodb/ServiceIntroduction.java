@@ -23,13 +23,9 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.Builders;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedQuery;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedScan;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedUpdate;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.util.StrictMap;
-import groovy.lang.Closure;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.core.annotation.AnnotationValue;
-import io.micronaut.core.beans.BeanIntrospection;
-import io.micronaut.core.beans.BeanIntrospector;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.type.MutableArgumentValue;
 import io.reactivex.Flowable;
@@ -47,9 +43,12 @@ import software.amazon.awssdk.services.dynamodb.model.*;
 
 import javax.inject.Singleton;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -96,11 +95,18 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
     private final DynamoDbEnhancedClient enhancedClient;
     private final DynamoDbClient client;
     private final AttributeConversionHelper attributeConversionHelper;
+    private final FunctionEvaluator functionEvaluator;
 
-    public ServiceIntroduction(DynamoDbEnhancedClient enhancedClient, DynamoDbClient client, AttributeConversionHelper attributeConversionHelper) {
+    public ServiceIntroduction(
+        DynamoDbEnhancedClient enhancedClient,
+        DynamoDbClient client,
+        AttributeConversionHelper attributeConversionHelper,
+        FunctionEvaluator functionEvaluator
+    ) {
         this.enhancedClient = enhancedClient;
         this.client = client;
         this.attributeConversionHelper = attributeConversionHelper;
+        this.functionEvaluator = functionEvaluator;
     }
 
     @Override
@@ -175,7 +181,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         }
 
         if (context.getTargetMethod().isAnnotationPresent(Query.class)) {
-            DetachedQuery<T> criteria = evaluateAnnotationType(context.getTargetMethod().getAnnotation(Query.class).value(), context);
+            DetachedQuery<T> criteria = functionEvaluator.evaluateAnnotationType(context.getTargetMethod().getAnnotation(Query.class).value(), context);
 
             if (methodName.startsWith("count")) {
                 return criteria.count(table, attributeConversionHelper);
@@ -194,13 +200,13 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         }
 
         if (context.getTargetMethod().isAnnotationPresent(Update.class)) {
-            DetachedUpdate<T> criteria = evaluateAnnotationType(context.getTargetMethod().getAnnotation(Update.class).value(), context);
+            DetachedUpdate<T> criteria = functionEvaluator.evaluateAnnotationType(context.getTargetMethod().getAnnotation(Update.class).value(), context);
 
             return criteria.update(table, client, attributeConversionHelper);
         }
 
         if (context.getTargetMethod().isAnnotationPresent(Scan.class)) {
-            DetachedScan<T> criteria = evaluateAnnotationType(context.getTargetMethod().getAnnotation(Scan.class).value(), context);
+            DetachedScan<T> criteria = functionEvaluator.evaluateAnnotationType(context.getTargetMethod().getAnnotation(Scan.class).value(), context);
 
             if (methodName.startsWith("count")) {
                 return criteria.count(table, attributeConversionHelper);
@@ -238,31 +244,6 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             return result.toList().blockingGet();
         }
         return result;
-    }
-
-    private <T, F extends Function<Map<String, Object>, T>> T evaluateAnnotationType(Class<F> updateDefinitionType, MethodInvocationContext<Object, Object> context) {
-        Map<String, Object> parameterValueMap = new StrictMap<>(context.getParameterValueMap());
-
-        if (Closure.class.isAssignableFrom(updateDefinitionType)) {
-            try {
-                Closure<T> closure = (Closure<T>) updateDefinitionType.getConstructor(Object.class, Object.class).newInstance(parameterValueMap, parameterValueMap);
-                closure.setDelegate(parameterValueMap);
-                closure.setResolveStrategy(Closure.DELEGATE_FIRST);
-                return closure.call(parameterValueMap);
-            } catch (InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
-                throw new IllegalArgumentException("Cannot instantiate closure! Type: " + updateDefinitionType, e);
-            }
-        }
-
-        F function = BeanIntrospector.SHARED.findIntrospection(updateDefinitionType).map(BeanIntrospection::instantiate)
-            .orElseGet(() -> {
-                try {
-                    return updateDefinitionType.newInstance();
-                } catch (InstantiationException | IllegalAccessException e) {
-                    throw new IllegalArgumentException("Cannot instantiate function! Type: " + updateDefinitionType, e);
-                }
-            });
-        return function.apply(parameterValueMap);
     }
 
     private <T> Object handleSave(DynamoDbTable<T> service, MethodInvocationContext<Object, Object> context) {

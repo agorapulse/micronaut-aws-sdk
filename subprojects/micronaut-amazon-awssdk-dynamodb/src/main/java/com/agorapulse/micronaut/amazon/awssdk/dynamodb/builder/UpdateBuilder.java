@@ -17,14 +17,8 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
-import groovy.lang.Closure;
-import groovy.lang.DelegatesTo;
-import groovy.transform.stc.ClosureParams;
-import groovy.transform.stc.FromString;
 import software.amazon.awssdk.services.dynamodb.model.ReturnValue;
 import software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest;
-import space.jasan.support.groovy.closure.ConsumerWithDelegate;
-import space.jasan.support.groovy.closure.FunctionWithDelegate;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -90,21 +84,6 @@ public interface UpdateBuilder<T> extends DetachedUpdate<T> {
     }
 
     /**
-     * Declares a return value of the update operation.
-     * @param returnValue whether none (default), old or new, all or updated attributes should be returned
-     * @param mapper closure to map the returned entity to another value (e.g. value of the particular attribute)
-     * @return self
-     */
-    default UpdateBuilder<T> returns(
-        ReturnValue returnValue,
-        @DelegatesTo(type = "T", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "T")
-            Closure<Object> mapper
-    ) {
-        return returns(returnValue, FunctionWithDelegate.create(mapper));
-    }
-
-    /**
      * Declares that the update operation will not return any value.
      * @return self
      */
@@ -122,38 +101,12 @@ public interface UpdateBuilder<T> extends DetachedUpdate<T> {
     }
 
     /**
-     * Declares that the update operation will return all previous values.
-     * @param mapper closure to map the returned entity to another value (e.g. value of the particular attribute)
-     * @return self
-     */
-    default UpdateBuilder<T> returnAllOld(
-        @DelegatesTo(type = "T", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "T")
-            Closure<Object> mapper
-    ) {
-        return returns(ReturnValue.ALL_OLD, FunctionWithDelegate.create(mapper));
-    }
-
-    /**
      * Declares that the update operation will only return updated previous values.
      * @param mapper function to map the returned entity to another value (e.g. value of the particular attribute)
      * @return self
      */
     default UpdateBuilder<T> returnUpdatedOld(Function<T, ?> mapper) {
         return returns(ReturnValue.UPDATED_OLD, mapper);
-    }
-
-    /**
-     * Declares that the update operation will only return updated previous values.
-     * @param mapper closure to map the returned entity to another value (e.g. value of the particular attribute)
-     * @return self
-     */
-    default UpdateBuilder<T> returnUpdatedOld(
-        @DelegatesTo(type = "T", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "T")
-            Closure<Object> mapper
-    ) {
-        return returns(ReturnValue.UPDATED_OLD, FunctionWithDelegate.create(mapper));
     }
 
     /**
@@ -166,38 +119,12 @@ public interface UpdateBuilder<T> extends DetachedUpdate<T> {
     }
 
     /**
-     * Declares that the update operation will return all new values.
-     * @param mapper closure to map the returned entity to another value (e.g. value of the particular attribute)
-     * @return self
-     */
-    default UpdateBuilder<T> returnAllNew(
-        @DelegatesTo(type = "T", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "T")
-            Closure<Object> mapper
-    ) {
-        return returns(ReturnValue.ALL_NEW, FunctionWithDelegate.create(mapper));
-    }
-
-    /**
      * Declares that the update operation will only return updated new values.
      * @param mapper function to map the returned entity to another value (e.g. value of the particular attribute)
      * @return self
      */
     default UpdateBuilder<T> returnUpdatedNew(Function<T, ?> mapper) {
         return returns(ReturnValue.UPDATED_NEW, mapper);
-    }
-
-    /**
-     * Declares that the update operation will only return updated new values.
-     * @param mapper closure to map the returned entity to another value (e.g. value of the particular attribute)
-     * @return self
-     */
-    default UpdateBuilder<T> returnUpdatedNew(
-        @DelegatesTo(type = "T", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "T")
-            Closure<Object> mapper
-    ) {
-        return returns(ReturnValue.UPDATED_NEW, FunctionWithDelegate.create(mapper));
     }
 
     /**
@@ -209,21 +136,5 @@ public interface UpdateBuilder<T> extends DetachedUpdate<T> {
      * @return self
      */
     UpdateBuilder<T> configure(Consumer<UpdateItemRequest.Builder> configurer);
-
-    /**
-     * Configures the native update request.
-     *
-     * This method is an extension point which allows to configure properties which are not provides by this builder.
-     *
-     * @param configurer closure to configure the native update request
-     * @return self
-     */
-    default UpdateBuilder<T> configure(
-        @DelegatesTo(type = "software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest.Builder", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest.Builder")
-            Closure<Object> configurer
-    ) {
-        return configure(ConsumerWithDelegate.create(configurer));
-    }
 
 }

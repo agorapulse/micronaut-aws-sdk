@@ -17,13 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
-import groovy.lang.Closure;
-import groovy.lang.DelegatesTo;
-import groovy.transform.stc.ClosureParams;
-import groovy.transform.stc.FromString;
 import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
-import space.jasan.support.groovy.closure.ConsumerWithDelegate;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Consumer;
@@ -62,20 +56,6 @@ public interface ScanBuilder<T> extends DetachedScan<T> {
      * @return self
      */
     ScanBuilder<T> filter(Consumer<ConditionCollector<T>> conditions);
-
-    /**
-     * One or more filter conditions.
-     *
-     * @param conditions closure to build the conditions
-     * @return self
-     */
-    default ScanBuilder<T> filter(
-        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ConditionCollector<T>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ConditionCollector<T>")
-            Closure<ConditionCollector<T>> conditions
-    ) {
-        return filter(ConsumerWithDelegate.create(conditions));
-    }
 
     /**
      * Sets the desired pagination of the scans.
@@ -117,22 +97,6 @@ public interface ScanBuilder<T> extends DetachedScan<T> {
     ScanBuilder<T> configure(Consumer<ScanEnhancedRequest.Builder> configurer);
 
     /**
-     * Configures the native scan expression.
-     *
-     * This method is an extension point which allows to configure properties which are not provides by this builder.
-     *
-     * @param configurer closure to configure the native scan expression
-     * @return self
-     */
-    default ScanBuilder<T> configure(
-        @DelegatesTo(type = "software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest.Builder", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest.Builder")
-            Closure<Object> configurer
-    ) {
-        return configure(ConsumerWithDelegate.create(configurer));
-    }
-
-    /**
      * Limits which properties of the returned entities will be populated.
      * @param propertyPaths property paths to be populated in the returned entities
      * @return self
@@ -146,19 +110,6 @@ public interface ScanBuilder<T> extends DetachedScan<T> {
      */
     default ScanBuilder<T> only(String... propertyPaths) {
         return only(Arrays.asList(propertyPaths));
-    }
-
-    /**
-     * Limits which properties of the returned entities will be populated.
-     * @param collector closure to collect the property paths
-     * @return self
-     */
-    default ScanBuilder<T> only(
-        @DelegatesTo(type = "T", strategy = Closure.DELEGATE_ONLY)
-        @ClosureParams(value = FromString.class, options = "T")
-            Closure<Object> collector
-    ) {
-        return only(PathCollector.collectPaths(collector).getPropertyPaths());
     }
 
 }

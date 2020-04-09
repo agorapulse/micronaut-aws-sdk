@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
+package com.agorapulse.micronaut.amazon.awssdk.dynamodb.groovy;
 
 import groovy.lang.Closure;
 import groovy.lang.GroovyObject;

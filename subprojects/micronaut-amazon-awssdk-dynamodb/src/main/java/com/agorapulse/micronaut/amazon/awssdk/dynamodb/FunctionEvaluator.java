@@ -15,22 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.amazon.awssdk.core;
+package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.regions.providers.AwsRegionProvider;
+import io.micronaut.aop.MethodInvocationContext;
+import java.util.Map;
+import java.util.function.Function;
 
-public class BasicAwsRegionProvider implements AwsRegionProvider {
+public interface FunctionEvaluator {
 
-    private final Region region;
-
-    public BasicAwsRegionProvider(Region region) {
-        this.region = region;
-    }
-
-    @Override
-    public Region getRegion() {
-        return region;
-    }
+    <T, F extends Function<Map<String, Object>, T>> T evaluateAnnotationType(Class<F> updateDefinitionType, MethodInvocationContext<Object, Object> context);
 
 }

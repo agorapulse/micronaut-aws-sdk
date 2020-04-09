@@ -25,14 +25,13 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
 
 class InListConditional implements QueryConditional {
 
     private final String property;
-    private final List<Supplier<AttributeValue>> values;
+    private final List<AttributeValue> values;
 
-    InListConditional(String property, List<Supplier<AttributeValue>> values) {
+    InListConditional(String property, List<AttributeValue> values) {
         if (values.isEmpty()) {
             throw new IllegalArgumentException("Values cannot be empty");
         }
@@ -53,7 +52,7 @@ class InListConditional implements QueryConditional {
         for (int i = 0; i < values.size(); i++) {
             String valueName = valueTokenBase + "_" + i;
             valueNames.add(valueName);
-            builder.putExpressionValue(valueName, values.get(i).get());
+            builder.putExpressionValue(valueName, values.get(i));
         }
 
         builder.expression(propertyKeyToken + " IN  (" + String.join(", ", valueNames) + ")");

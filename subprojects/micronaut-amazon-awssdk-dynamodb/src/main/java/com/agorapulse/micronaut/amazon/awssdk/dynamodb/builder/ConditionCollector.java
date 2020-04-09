@@ -19,15 +19,11 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeConversionHelper;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.conditional.QueryConditionalFactory;
-import groovy.lang.Closure;
-import groovy.lang.DelegatesTo;
-import groovy.transform.stc.ClosureParams;
-import groovy.transform.stc.FromString;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.TableMetadata;
+import software.amazon.awssdk.enhanced.dynamodb.internal.AttributeValues;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import space.jasan.support.groovy.closure.ConsumerWithDelegate;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -38,24 +34,6 @@ public final class ConditionCollector<T> {
     public ConditionCollector(DynamoDbTable<T> table, AttributeConversionHelper attributeConversionHelper) {
         this.table = table;
         this.attributeConversionHelper = attributeConversionHelper;
-    }
-
-    public ConditionCollector<T> eq(Object value) {
-        return eq(getSortKey(), value);
-    }
-
-    public ConditionCollector<T> eq(String attributeOrIndex, Object value) {
-        conditions.add(QueryConditionalFactory.equalTo(attributeOrIndex, attributeConversionHelper.convert(table, attributeOrIndex, value)));
-        return this;
-    }
-
-    public ConditionCollector<T> ne(Object value) {
-        return ne(getSortKey(), value);
-    }
-
-    public ConditionCollector<T> ne(String attributeOrIndex, Object value) {
-        conditions.add(QueryConditionalFactory.notEqualTo(attributeOrIndex, attributeConversionHelper.convert(table, attributeOrIndex, value)));
-        return this;
     }
 
     public ConditionCollector<T> inList(Object... values) {
@@ -73,6 +51,24 @@ public final class ConditionCollector<T> {
     public ConditionCollector<T> inList(String attributeOrIndex, Collection<?> values) {
         List<AttributeValue> valuesAttributes = values.stream().map(value -> attributeConversionHelper.convert(table, attributeOrIndex, value)).collect(Collectors.toList());
         conditions.add(QueryConditionalFactory.inList(attributeOrIndex, valuesAttributes));
+        return this;
+    }
+
+    public ConditionCollector<T> eq(Object value) {
+        return eq(getSortKey(), value);
+    }
+
+    public ConditionCollector<T> eq(String attributeOrIndex, Object value) {
+        conditions.add(QueryConditionalFactory.equalTo(attributeOrIndex, attributeConversionHelper.convert(table, attributeOrIndex, value)));
+        return this;
+    }
+
+    public ConditionCollector<T> ne(Object value) {
+        return ne(getSortKey(), value);
+    }
+
+    public ConditionCollector<T> ne(String attributeOrIndex, Object value) {
+        conditions.add(QueryConditionalFactory.notEqualTo(attributeOrIndex, attributeConversionHelper.convert(table, attributeOrIndex, value)));
         return this;
     }
 
@@ -112,6 +108,60 @@ public final class ConditionCollector<T> {
         return this;
     }
 
+    public ConditionCollector<T> sizeEq(Object value) {
+        return sizeEq(getSortKey(), value);
+    }
+
+    public ConditionCollector<T> sizeEq(String attributeOrIndex, Object value) {
+        conditions.add(QueryConditionalFactory.sizeEqualTo(attributeOrIndex, AttributeValues.numberValue((Number) value)));
+        return this;
+    }
+
+    public ConditionCollector<T> sizeNe(Object value) {
+        return sizeNe(getSortKey(), value);
+    }
+
+    public ConditionCollector<T> sizeNe(String attributeOrIndex, Object value) {
+        conditions.add(QueryConditionalFactory.sizeNotEqualTo(attributeOrIndex, AttributeValues.numberValue((Number) value)));
+        return this;
+    }
+
+    public ConditionCollector<T> sizeLe(Object value) {
+        return sizeLe(getSortKey(), value);
+    }
+
+    public ConditionCollector<T> sizeLe(String attributeOrIndex, Object value) {
+        conditions.add(QueryConditionalFactory.sizeLessThanOrEqualTo(attributeOrIndex, AttributeValues.numberValue((Number) value)));
+        return this;
+    }
+
+    public ConditionCollector<T> sizeLt(Object value) {
+        return sizeLt(getSortKey(), value);
+    }
+
+    public ConditionCollector<T> sizeLt(String attributeOrIndex, Object value) {
+        conditions.add(QueryConditionalFactory.sizeLessThan(attributeOrIndex, AttributeValues.numberValue((Number) value)));
+        return this;
+    }
+
+    public ConditionCollector<T> sizeGe(Object value) {
+        return sizeGe(getSortKey(), value);
+    }
+
+    public ConditionCollector<T> sizeGe(String attributeOrIndex, Object value) {
+        conditions.add(QueryConditionalFactory.sizeGreaterThanOrEqualTo(attributeOrIndex, AttributeValues.numberValue((Number) value)));
+        return this;
+    }
+
+    public ConditionCollector<T> sizeGt(Object value) {
+        return sizeGt(getSortKey(), value);
+    }
+
+    public ConditionCollector<T> sizeGt(String attributeOrIndex, Object value) {
+        conditions.add(QueryConditionalFactory.sizeGreaterThan(attributeOrIndex, AttributeValues.numberValue((Number) value)));
+        return this;
+    }
+
     public ConditionCollector<T> between(Object lo, Object hi) {
         return between(getSortKey(), lo, hi);
     }
@@ -131,6 +181,15 @@ public final class ConditionCollector<T> {
 
     public ConditionCollector<T> isNotNull(String attributeOrIndex) {
         conditions.add(QueryConditionalFactory.attributeExists(attributeOrIndex));
+        return this;
+    }
+
+    public ConditionCollector<T> notExists() {
+        return isNotNull(getSortKey());
+    }
+
+    public ConditionCollector<T> notExists(String attributeOrIndex) {
+        conditions.add(QueryConditionalFactory.attributeNotExists(attributeOrIndex));
         return this;
     }
 
@@ -166,22 +225,8 @@ public final class ConditionCollector<T> {
     }
 
     public ConditionCollector<T> beginsWith(String attributeOrIndex, String value) {
-        conditions.add(QueryConditionalFactory.not(QueryConditionalFactory.beginsWith(attributeOrIndex, value)));
+        conditions.add(QueryConditionalFactory.beginsWith(attributeOrIndex, value));
         return this;
-    }
-
-    /**
-     * One or more filter conditions in disjunction.
-     *
-     * @param conditions closure to build the conditions
-     * @return self
-     */
-    public ConditionCollector<T> group(
-        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ConditionCollector<T>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ConditionCollector<T>")
-            Closure<ConditionCollector<T>> conditions
-    ) {
-        return group(ConsumerWithDelegate.create(conditions));
     }
 
     /**
@@ -200,20 +245,6 @@ public final class ConditionCollector<T> {
     }
 
     /**
-     * One or more filter conditions in disjunction.
-     *
-     * @param conditions closure to build the conditions
-     * @return self
-     */
-    public ConditionCollector<T> or(
-        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ConditionCollector<T>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ConditionCollector<T>")
-            Closure<ConditionCollector<T>> conditions
-    ) {
-        return or(ConsumerWithDelegate.create(conditions));
-    }
-
-    /**
      * One or more range key filter conditions in disjunction.
      *
      *  @param conditions consumer to build the conditions
@@ -226,20 +257,6 @@ public final class ConditionCollector<T> {
         this.conditions.add(QueryConditionalFactory.or(nested.conditions));
 
         return this;
-    }
-
-    /**
-     * One or more filter conditions in conjunction.
-     *
-     * @param conditions closure to build the conditions
-     * @return self
-     */
-    public ConditionCollector<T> and(
-        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ConditionCollector<T>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ConditionCollector<T>")
-            Closure<ConditionCollector<T>> conditions
-    ) {
-        return and(ConsumerWithDelegate.create(conditions));
     }
 
     /**
