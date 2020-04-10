@@ -49,10 +49,4 @@ public interface DetachedQuery<T> {
      */
     QueryEnhancedRequest resolveRequest(DynamoDbTable<T> mapper, AttributeConversionHelper attributeConversionHelper);
 
-    /**
-     * Returns the index for this query or null if the query is executed the primary index.
-     * @return the index for this query or null if the query is executed the primary index
-     */
-    String getIndex();
-
 }

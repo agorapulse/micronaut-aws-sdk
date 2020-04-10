@@ -18,6 +18,7 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeConversionHelper;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.conditional.QueryConditionalFactory;
 import io.reactivex.Flowable;
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
@@ -28,7 +29,12 @@ import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -80,19 +86,18 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
 
     @Override
     public DefaultQueryBuilder<T> hash(Object hash) {
-        return range(r -> {
-            r.eq(r.getPartitionKey(), hash);
-        });
+        this.__hash = hash;
+        return this;
     }
 
     @Override
-    public DefaultQueryBuilder<T> range(Consumer<ConditionCollector<T>> conditions) {
+    public DefaultQueryBuilder<T> range(Consumer<RangeConditionCollector<T>> conditions) {
         __queryConditionals.add(conditions);
         return this;
     }
 
     @Override
-    public DefaultQueryBuilder<T> filter(Consumer<ConditionCollector<T>> conditions) {
+    public DefaultQueryBuilder<T> filter(Consumer<FilterConditionCollector<T>> conditions) {
         __filterCollectorsConsumers.add(conditions);
         return this;
     }
@@ -134,9 +139,9 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
 
     @Override
     public QueryEnhancedRequest resolveRequest(DynamoDbTable<T> mapper, AttributeConversionHelper attributeConversionHelper) {
-        applyConditions(mapper, attributeConversionHelper, __queryConditionals, __expression::queryConditional);
+        applyRangeConditions(mapper, attributeConversionHelper, __expression::queryConditional);
         String currentIndex = __index == null ? TableMetadata.primaryIndexName() : __index;
-        applyConditions(mapper, attributeConversionHelper, __filterCollectorsConsumers, cond -> __expression.filterExpression(cond.expression(mapper.tableSchema(), currentIndex)));
+        applyFilterConditions(mapper, attributeConversionHelper, cond -> __expression.filterExpression(cond.expression(mapper.tableSchema(), currentIndex)));
         applyLastEvaluatedKey(__expression, mapper);
         __configurer.accept(__expression);
 
@@ -155,21 +160,36 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
         return this;
     }
 
-    @Override
-    public String getIndex() {
-        return __index;
-    }
-
-    private void applyConditions(
+    private void applyRangeConditions(
         DynamoDbTable<T> model,
         AttributeConversionHelper attributeConversionHelper,
-        List<Consumer<ConditionCollector<T>>> filterCollectorsConsumers,
         Consumer<QueryConditional> addFilterConsumer
     ) {
-        if (!filterCollectorsConsumers.isEmpty()) {
-            ConditionCollector<T> filterCollector = new ConditionCollector<>(model, attributeConversionHelper);
+        DefaultRangeConditionCollector<T> filterCollector = new DefaultRangeConditionCollector<>(model, attributeConversionHelper, __index);
 
-            for (Consumer<ConditionCollector<T>> consumer : filterCollectorsConsumers) {
+        if (!__queryConditionals.isEmpty()) {
+
+            for (Consumer<RangeConditionCollector<T>> consumer : __queryConditionals) {
+                consumer.accept(filterCollector);
+            }
+
+        }
+
+        String partitionKey = model.tableSchema().tableMetadata().indexPartitionKey(__index);
+        QueryConditional hashCondition = QueryConditionalFactory.equalTo(partitionKey, attributeConversionHelper.convert(model, partitionKey, __hash));
+
+        addFilterConsumer.accept(QueryConditionalFactory.and(hashCondition, filterCollector.getCondition()));
+    }
+
+    private void applyFilterConditions(
+        DynamoDbTable<T> model,
+        AttributeConversionHelper attributeConversionHelper,
+        Consumer<QueryConditional> addFilterConsumer
+    ) {
+        if (!__filterCollectorsConsumers.isEmpty()) {
+            DefaultFilterConditionCollector<T> filterCollector = new DefaultFilterConditionCollector<>(model, attributeConversionHelper);
+
+            for (Consumer<FilterConditionCollector<T>> consumer : __filterCollectorsConsumers) {
                 consumer.accept(filterCollector);
             }
 
@@ -205,10 +225,11 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     // fields are prefixed with "__" to allow groovy evaluation of the arguments
     // otherwise if the argument has the same name (such as max) it will be ignored and field value will be used
     private final QueryEnhancedRequest.Builder __expression;
-    private final List<Consumer<ConditionCollector<T>>> __filterCollectorsConsumers = new LinkedList<>();
-    private final List<Consumer<ConditionCollector<T>>> __queryConditionals = new LinkedList<>();
+    private final List<Consumer<FilterConditionCollector<T>>> __filterCollectorsConsumers = new LinkedList<>();
+    private final List<Consumer<RangeConditionCollector<T>>> __queryConditionals = new LinkedList<>();
 
-    private String __index;
+    private String __index = TableMetadata.primaryIndexName();
+    private Object __hash;
     private Object __lastEvaluatedKey;
     private int __max = Integer.MAX_VALUE;
     private Consumer<QueryEnhancedRequest.Builder> __configurer = b -> {};

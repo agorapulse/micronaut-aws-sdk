@@ -20,117 +20,110 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeConversionHelper;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.conditional.QueryConditionalFactory;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.TableMetadata;
 import software.amazon.awssdk.enhanced.dynamodb.internal.AttributeValues;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public final class ConditionCollector<T> {
+final class DefaultFilterConditionCollector<T> implements FilterConditionCollector<T> {
 
-    public ConditionCollector(DynamoDbTable<T> table, AttributeConversionHelper attributeConversionHelper) {
+    DefaultFilterConditionCollector(DynamoDbTable<T> table, AttributeConversionHelper attributeConversionHelper) {
         this.table = table;
         this.attributeConversionHelper = attributeConversionHelper;
     }
 
-    public ConditionCollector<T> inList(String attributeOrIndex, Object... values) {
+    @Override
+    public DefaultFilterConditionCollector<T> inList(String attributeOrIndex, Object... values) {
         return inList(attributeOrIndex, Arrays.asList(values));
     }
 
-    public ConditionCollector<T> inList(String attributeOrIndex, Collection<?> values) {
+    @Override
+    public DefaultFilterConditionCollector<T> inList(String attributeOrIndex, Collection<?> values) {
         List<AttributeValue> valuesAttributes = values.stream().map(value -> attributeConversionHelper.convert(table, attributeOrIndex, value)).collect(Collectors.toList());
         conditions.add(QueryConditionalFactory.inList(attributeOrIndex, valuesAttributes));
         return this;
     }
 
-    public ConditionCollector<T> eq(Object value) {
-        return eq(getSortKey(), value);
-    }
-
-    public ConditionCollector<T> eq(String attributeOrIndex, Object value) {
+    @Override
+    public DefaultFilterConditionCollector<T> eq(String attributeOrIndex, Object value) {
         conditions.add(QueryConditionalFactory.equalTo(attributeOrIndex, attributeConversionHelper.convert(table, attributeOrIndex, value)));
         return this;
     }
 
-    public ConditionCollector<T> ne(String attributeOrIndex, Object value) {
+    @Override
+    public DefaultFilterConditionCollector<T> ne(String attributeOrIndex, Object value) {
         conditions.add(QueryConditionalFactory.notEqualTo(attributeOrIndex, attributeConversionHelper.convert(table, attributeOrIndex, value)));
         return this;
     }
 
-    public ConditionCollector<T> le(Object value) {
-        return le(getSortKey(), value);
-    }
-
-    public ConditionCollector<T> le(String attributeOrIndex, Object value) {
+    @Override
+    public DefaultFilterConditionCollector<T> le(String attributeOrIndex, Object value) {
         conditions.add(QueryConditionalFactory.lessThanOrEqualTo(attributeOrIndex, attributeConversionHelper.convert(table, attributeOrIndex, value)));
         return this;
     }
 
-    public ConditionCollector<T> lt(Object value) {
-        return lt(getSortKey(), value);
-    }
-
-    public ConditionCollector<T> lt(String attributeOrIndex, Object value) {
+    @Override
+    public DefaultFilterConditionCollector<T> lt(String attributeOrIndex, Object value) {
         conditions.add(QueryConditionalFactory.lessThan(attributeOrIndex, attributeConversionHelper.convert(table, attributeOrIndex, value)));
         return this;
     }
 
-    public ConditionCollector<T> ge(Object value) {
-        return ge(getSortKey(), value);
-    }
-
-    public ConditionCollector<T> ge(String attributeOrIndex, Object value) {
+    @Override
+    public DefaultFilterConditionCollector<T> ge(String attributeOrIndex, Object value) {
         conditions.add(QueryConditionalFactory.greaterThanOrEqualTo(attributeOrIndex, attributeConversionHelper.convert(table, attributeOrIndex, value)));
         return this;
     }
 
-    public ConditionCollector<T> gt(Object value) {
-        return gt(getSortKey(), value);
-    }
-
-    public ConditionCollector<T> gt(String attributeOrIndex, Object value) {
+    @Override
+    public DefaultFilterConditionCollector<T> gt(String attributeOrIndex, Object value) {
         conditions.add(QueryConditionalFactory.greaterThan(attributeOrIndex, attributeConversionHelper.convert(table, attributeOrIndex, value)));
         return this;
     }
 
-    public ConditionCollector<T> sizeEq(String attributeOrIndex, Object value) {
+    @Override
+    public DefaultFilterConditionCollector<T> sizeEq(String attributeOrIndex, Object value) {
         conditions.add(QueryConditionalFactory.sizeEqualTo(attributeOrIndex, AttributeValues.numberValue((Number) value)));
         return this;
     }
 
-    public ConditionCollector<T> sizeNe(String attributeOrIndex, Object value) {
+    @Override
+    public DefaultFilterConditionCollector<T> sizeNe(String attributeOrIndex, Object value) {
         conditions.add(QueryConditionalFactory.sizeNotEqualTo(attributeOrIndex, AttributeValues.numberValue((Number) value)));
         return this;
     }
 
-    public ConditionCollector<T> sizeLe(String attributeOrIndex, Object value) {
+    @Override
+    public DefaultFilterConditionCollector<T> sizeLe(String attributeOrIndex, Object value) {
         conditions.add(QueryConditionalFactory.sizeLessThanOrEqualTo(attributeOrIndex, AttributeValues.numberValue((Number) value)));
         return this;
     }
 
-    public ConditionCollector<T> sizeLt(String attributeOrIndex, Object value) {
+    @Override
+    public DefaultFilterConditionCollector<T> sizeLt(String attributeOrIndex, Object value) {
         conditions.add(QueryConditionalFactory.sizeLessThan(attributeOrIndex, AttributeValues.numberValue((Number) value)));
         return this;
     }
 
-    public ConditionCollector<T> sizeGe(String attributeOrIndex, Object value) {
+    @Override
+    public DefaultFilterConditionCollector<T> sizeGe(String attributeOrIndex, Object value) {
         conditions.add(QueryConditionalFactory.sizeGreaterThanOrEqualTo(attributeOrIndex, AttributeValues.numberValue((Number) value)));
         return this;
     }
 
-    public ConditionCollector<T> sizeGt(String attributeOrIndex, Object value) {
+    @Override
+    public DefaultFilterConditionCollector<T> sizeGt(String attributeOrIndex, Object value) {
         conditions.add(QueryConditionalFactory.sizeGreaterThan(attributeOrIndex, AttributeValues.numberValue((Number) value)));
         return this;
     }
 
-    public ConditionCollector<T> between(Object lo, Object hi) {
-        return between(getSortKey(), lo, hi);
-    }
-
-    public ConditionCollector<T> between(String attributeOrIndex, Object lo, Object hi) {
+    @Override
+    public DefaultFilterConditionCollector<T> between(String attributeOrIndex, Object lo, Object hi) {
         conditions.add(QueryConditionalFactory.between(
             attributeOrIndex,
             attributeConversionHelper.convert(table, attributeOrIndex, lo),
@@ -139,31 +132,33 @@ public final class ConditionCollector<T> {
         return this;
     }
 
-    public ConditionCollector<T> notExists(String attributeOrIndex) {
+    @Override
+    public DefaultFilterConditionCollector<T> notExists(String attributeOrIndex) {
         conditions.add(QueryConditionalFactory.attributeNotExists(attributeOrIndex));
         return this;
     }
 
-    public ConditionCollector<T> isNull(String attributeOrIndex) {
+    @Override
+    public DefaultFilterConditionCollector<T> isNull(String attributeOrIndex) {
         conditions.add(QueryConditionalFactory.not(QueryConditionalFactory.attributeExists(attributeOrIndex)));
         return this;
     }
 
-    public ConditionCollector<T> contains(String attributeOrIndex, Object value) {
+    @Override
+    public DefaultFilterConditionCollector<T> contains(String attributeOrIndex, Object value) {
         conditions.add(QueryConditionalFactory.contains(attributeOrIndex, attributeConversionHelper.convert(table, attributeOrIndex, value)));
         return this;
     }
 
-    public ConditionCollector<T> notContains(String attributeOrIndex, Object value) {
+    @Override
+    public DefaultFilterConditionCollector<T> notContains(String attributeOrIndex, Object value) {
         conditions.add(QueryConditionalFactory.not(QueryConditionalFactory.contains(attributeOrIndex, attributeConversionHelper.convert(table, attributeOrIndex, value))));
         return this;
     }
 
-    public ConditionCollector<T> beginsWith(String value) {
-        return beginsWith(getSortKey(), value);
-    }
 
-    public ConditionCollector<T> beginsWith(String attributeOrIndex, String value) {
+    @Override
+    public DefaultFilterConditionCollector<T> beginsWith(String attributeOrIndex, String value) {
         conditions.add(QueryConditionalFactory.beginsWith(attributeOrIndex, value));
         return this;
     }
@@ -174,8 +169,9 @@ public final class ConditionCollector<T> {
      *  @param conditions consumer to build the conditions
      * @return self
      */
-    public ConditionCollector<T> group(Consumer<ConditionCollector<T>> conditions) {
-        ConditionCollector<T> nested = new ConditionCollector<>(table, attributeConversionHelper);
+    @Override
+    public DefaultFilterConditionCollector<T> group(Consumer<FilterConditionCollector<T>> conditions) {
+        DefaultFilterConditionCollector<T> nested = new DefaultFilterConditionCollector<>(table, attributeConversionHelper);
         conditions.accept(nested);
 
         this.conditions.add(QueryConditionalFactory.group(QueryConditionalFactory.and(nested.conditions)));
@@ -189,8 +185,9 @@ public final class ConditionCollector<T> {
      *  @param conditions consumer to build the conditions
      * @return self
      */
-    public ConditionCollector<T> or(Consumer<ConditionCollector<T>> conditions) {
-        ConditionCollector<T> nested = new ConditionCollector<>(table, attributeConversionHelper);
+    @Override
+    public DefaultFilterConditionCollector<T> or(Consumer<FilterConditionCollector<T>> conditions) {
+        DefaultFilterConditionCollector<T> nested = new DefaultFilterConditionCollector<>(table, attributeConversionHelper);
         conditions.accept(nested);
 
         this.conditions.add(QueryConditionalFactory.or(nested.conditions));
@@ -204,8 +201,9 @@ public final class ConditionCollector<T> {
      * @param conditions consumer to build the conditions
      * @return self
      */
-    public ConditionCollector<T> and(Consumer<ConditionCollector<T>> conditions) {
-        ConditionCollector<T> nested = new ConditionCollector<>(table, attributeConversionHelper);
+    @Override
+    public DefaultFilterConditionCollector<T> and(Consumer<FilterConditionCollector<T>> conditions) {
+        DefaultFilterConditionCollector<T> nested = new DefaultFilterConditionCollector<>(table, attributeConversionHelper);
         conditions.accept(nested);
 
         this.conditions.add(QueryConditionalFactory.and(nested.conditions));
@@ -220,17 +218,4 @@ public final class ConditionCollector<T> {
     private final DynamoDbTable<T> table;
     private final AttributeConversionHelper attributeConversionHelper;
     private List<QueryConditional> conditions = new LinkedList<>();
-    private String index = TableMetadata.primaryIndexName();
-
-    String getSortKey() {
-        Optional<String> sortKey = table.tableSchema().tableMetadata().primarySortKey();
-        if (!sortKey.isPresent()) {
-            throw new IllegalStateException("Sort key not defined for " + table.tableSchema().itemType());
-        }
-        return sortKey.get();
-    }
-
-    String getPartitionKey() {
-        return table.tableSchema().tableMetadata().primaryPartitionKey();
-    }
 }

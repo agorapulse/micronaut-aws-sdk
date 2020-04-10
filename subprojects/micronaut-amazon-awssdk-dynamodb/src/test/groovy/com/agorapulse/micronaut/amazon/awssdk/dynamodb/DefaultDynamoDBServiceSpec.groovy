@@ -234,7 +234,7 @@ interface DynamoDBItemDBService {
             hash hashKey
             index DynamoDBEntity.RANGE_INDEX
             range {
-                eq DynamoDBEntity.RANGE_INDEX, rangeKey
+                eq rangeKey
             }
         }
     })
@@ -244,7 +244,7 @@ interface DynamoDBItemDBService {
         query(DynamoDBEntity) {
             hash hashKey
             index DynamoDBEntity.DATE_INDEX
-            range { between DynamoDBEntity.DATE_INDEX, after, before }
+            range { between after, before }
         }
     })
     int countByDates(String hashKey, Date after, Date before)
@@ -258,7 +258,7 @@ interface DynamoDBItemDBService {
             hash hashKey                                                                // <4>
             index DynamoDBEntity.RANGE_INDEX
             range {
-                eq DynamoDBEntity.RANGE_INDEX, rangeKey                                 // <5>
+                eq rangeKey                                                             // <5>
             }
             only {                                                                      // <6>
                 rangeIndex                                                              // <7>
@@ -272,7 +272,7 @@ interface DynamoDBItemDBService {
         query(DynamoDBEntity) {
             hash hashKey
             index DynamoDBEntity.DATE_INDEX
-            range { between DynamoDBEntity.DATE_INDEX, after, before }
+            range { between after, before }
         }
     })
     Flowable<DynamoDBEntity> queryByDates(String hashKey, Date after, Date before)
@@ -281,7 +281,7 @@ interface DynamoDBItemDBService {
         query(DynamoDBEntity) {
             hash hashKey
             index DynamoDBEntity.RANGE_INDEX
-            range { beginsWith DynamoDBEntity.RANGE_INDEX, prefix }
+            range { beginsWith prefix }
         }
     })
     Flowable<DynamoDBEntity> queryByPrefix(String hashKey, String prefix)
@@ -475,7 +475,7 @@ interface DynamoDBItemDBService {
         query(DynamoDBEntity) {
             hash hashKey
             index DynamoDBEntity.DATE_INDEX
-            range { between DynamoDBEntity.DATE_INDEX, after, before }
+            range { between after, before }
             limit max
         }
     })
@@ -489,7 +489,7 @@ interface DynamoDBItemDBService {
             hash hashKey
             index DynamoDBEntity.RANGE_INDEX
             range {
-                eq DynamoDBEntity.RANGE_INDEX, rangeKey
+                eq rangeKey
             }
         }
     })
@@ -499,7 +499,7 @@ interface DynamoDBItemDBService {
         query(DynamoDBEntity) {
             hash hashKey
             index DynamoDBEntity.DATE_INDEX
-            range { between DynamoDBEntity.DATE_INDEX, after, before }
+            range { between after, before }
         }
     })
     int deleteByDates(String hashKey, Date after, Date before)

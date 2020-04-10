@@ -55,7 +55,7 @@ public interface ScanBuilder<T> extends DetachedScan<T> {
      * @param conditions consumer to build the conditions
      * @return self
      */
-    ScanBuilder<T> filter(Consumer<ConditionCollector<T>> conditions);
+    ScanBuilder<T> filter(Consumer<FilterConditionCollector<T>> conditions);
 
     /**
      * Sets the desired pagination of the scans.

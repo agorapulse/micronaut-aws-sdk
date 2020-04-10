@@ -72,7 +72,7 @@ public interface QueryBuilder<T> extends DetachedQuery<T> {
      * @param conditions consumer to build the conditions
      * @return self
      */
-    QueryBuilder<T> range(Consumer<ConditionCollector<T>> conditions);
+    QueryBuilder<T> range(Consumer<RangeConditionCollector<T>> conditions);
 
     /**
      * One or more range key filter conditions.
@@ -83,7 +83,7 @@ public interface QueryBuilder<T> extends DetachedQuery<T> {
      * @param conditions consumer to build the conditions
      * @return self
      */
-    QueryBuilder<T> filter(Consumer<ConditionCollector<T>> conditions);
+    QueryBuilder<T> filter(Consumer<FilterConditionCollector<T>> conditions);
 
     /**
      * Sets the desired pagination of the queries.

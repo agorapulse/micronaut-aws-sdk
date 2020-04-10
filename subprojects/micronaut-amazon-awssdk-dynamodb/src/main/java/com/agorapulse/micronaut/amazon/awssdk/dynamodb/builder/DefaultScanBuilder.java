@@ -28,7 +28,12 @@ import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -69,7 +74,7 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
     }
 
     @Override
-    public DefaultScanBuilder<T> filter(Consumer<ConditionCollector<T>> conditions) {
+    public DefaultScanBuilder<T> filter(Consumer<FilterConditionCollector<T>> conditions) {
         __filterCollectorsConsumers.add(conditions);
         return this;
     }
@@ -135,13 +140,13 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
     private void applyConditions(
         DynamoDbTable<T> table,
         AttributeConversionHelper attributeConversionHelper,
-        List<Consumer<ConditionCollector<T>>> filterCollectorsConsumers,
+        List<Consumer<FilterConditionCollector<T>>> filterCollectorsConsumers,
         Consumer<QueryConditional> addFilterConsumer
     ) {
         if (!filterCollectorsConsumers.isEmpty()) {
-            ConditionCollector<T> filterCollector = new ConditionCollector<>(table, attributeConversionHelper);
+            DefaultFilterConditionCollector<T> filterCollector = new DefaultFilterConditionCollector<>(table, attributeConversionHelper);
 
-            for (Consumer<ConditionCollector<T>> consumer : filterCollectorsConsumers) {
+            for (Consumer<FilterConditionCollector<T>> consumer : filterCollectorsConsumers) {
                 consumer.accept(filterCollector);
             }
 
@@ -177,9 +182,9 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
     // fields are prefixed with "__" to allow groovy evaluation of the arguments
     // otherwise if the argument has the same name (such as max) it will be ignored and field value will be used
     private final ScanEnhancedRequest.Builder __expression;
-    private final List<Consumer<ConditionCollector<T>>> __filterCollectorsConsumers = new LinkedList<>();
+    private final List<Consumer<FilterConditionCollector<T>>> __filterCollectorsConsumers = new LinkedList<>();
 
-    private String __index;
+    private String __index = TableMetadata.primaryIndexName();
     private Object __lastEvaluatedKey;
     private int __max = Integer.MAX_VALUE;
     private Consumer<ScanEnhancedRequest.Builder> __configurer = b -> {};

@@ -65,7 +65,7 @@ public interface DynamoDBEntityService {
             return Builders.query(DynamoDBEntity.class)
                 .hash(arguments.get("hashKey"))
                 .index(DynamoDBEntity.RANGE_INDEX)
-                .range(r -> r.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("rangeKey")));
+                .range(r -> r.eq(arguments.get("rangeKey")));
         }
     }
 
@@ -78,7 +78,7 @@ public interface DynamoDBEntityService {
                 .index(DynamoDBEntity.DATE_INDEX)
                 .hash(arguments.get("hashKey"))
                 .page(1)
-                .range(r -> r.between(DynamoDBEntity.DATE_INDEX, arguments.get("after"), arguments.get("before")));
+                .range(r -> r.between(arguments.get("after"), arguments.get("before")));
         }
     }
     @Query(BetweenDateIndex.class)
@@ -95,7 +95,7 @@ public interface DynamoDBEntityService {
                 .hash(arguments.get("hashKey"))
                 .index(DynamoDBEntity.RANGE_INDEX)
                 .range(r ->
-                    r.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("rangeKey"))         // <5>
+                    r.eq(arguments.get("rangeKey"))         // <5>
                 )
                 .only(DynamoDBEntity.RANGE_INDEX);                                      // <6>
         }
@@ -115,7 +115,7 @@ public interface DynamoDBEntityService {
                 .index(DynamoDBEntity.DATE_INDEX)
                 .hash(arguments.get("hashKey"))
                 .lastEvaluatedKey(arguments.get("lastEvaluatedKey"))
-                .range(r -> r.between(DynamoDBEntity.DATE_INDEX, arguments.get("after"), arguments.get("before")));
+                .range(r -> r.between(arguments.get("after"), arguments.get("before")));
         }
     }
     @Query(BetweenDateIndexScroll.class)
