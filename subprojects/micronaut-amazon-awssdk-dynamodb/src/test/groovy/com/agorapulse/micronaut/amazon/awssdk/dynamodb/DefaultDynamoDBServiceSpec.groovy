@@ -37,7 +37,11 @@ import java.time.temporal.ChronoUnit
 
 import static com.agorapulse.micronaut.amazon.awssdk.dynamodb.groovy.GroovyBuilders.*
 
-@SuppressWarnings('AbcMetric')
+@SuppressWarnings([
+    'AbcMetric',
+    'MethodCount',
+    'MethodSize',
+])
 /**
  * Specification for testing DefaultDynamoDBService using entity with range key.
  */
@@ -122,6 +126,9 @@ class DefaultDynamoDBServiceSpec extends Specification {
             service.count('1') == 2
             service.count('1', '1') == 1
             service.countByRangeIndex('1', 'bar') == 1
+            service.countByRangeNotContains('1', 'a') == 1
+            service.countByRangeNotExists('1') == 0
+            service.countByRangeIsNull('1') == 0
             service.countByDates('1', Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS))) == 2
             service.countByDates('3', Date.from(REFERENCE_DATE.plus(9, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(20, ChronoUnit.DAYS))) == 1
 
@@ -152,7 +159,20 @@ class DefaultDynamoDBServiceSpec extends Specification {
 
             service.queryByPrefix('1', 'b').toList().blockingGet().size() == 1
             service.queryBySizeAndContains('1', 3, 'a').toList().blockingGet().size() == 1
+            service.queryBySizeLe('1', 3).toList().blockingGet().size() == 2
+            service.queryBySizeLt('1', 3).toList().blockingGet().size() == 0
+            service.queryBySizeGe('1', 3).toList().blockingGet().size() == 2
+            service.queryBySizeGt('1', 3).toList().blockingGet().size() == 0
+            service.queryBySizeNe('1', 3).toList().blockingGet().size() == 0
+            service.queryByLe('1', '1').toList().blockingGet().size() == 1
+            service.queryByLt('1', '1').toList().blockingGet().size() == 0
+            service.queryByGe('1', '1').toList().blockingGet().size() == 2
+            service.queryByGt('1', '1').toList().blockingGet().size() == 1
+            service.queryByBetween('1', '0', '5').toList().blockingGet().size() == 2
+            service.queryByIdPrefix('1', '1').toList().blockingGet().size() == 1
+            service.queryByNe('1', 'foo').toList().blockingGet().size() == 1
             service.queryInList('1', 'foo', 'bar').toList().blockingGet().size() == 2
+            // service.queryByNe('1', '1').toList().blockingGet().size() == 1
 
             service.scanAllByRangeIndex('bar').count().blockingGet() == 4
             service.scanAllByRangeIndexWithLimit('bar', 2).count().blockingGet() == 2
@@ -183,6 +203,11 @@ class DefaultDynamoDBServiceSpec extends Specification {
 
 }
 
+@SuppressWarnings([
+    'AbcMetric',
+    'MethodCount',
+    'MethodSize',
+])
 // tag::service-all[]
 // tag::service-header[]
 @Service(DynamoDBEntity)                                                                // <2>
@@ -281,6 +306,170 @@ interface DynamoDBItemDBService {
         }
     })
     Flowable<DynamoDBEntity> queryBySizeAndContains(String hashKey, int size, String substring)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            filter {
+                isNull DynamoDBEntity.RANGE_INDEX
+            }
+        }
+    })
+    int countByRangeIsNull(String hashKey)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            filter {
+                notExists DynamoDBEntity.RANGE_INDEX
+            }
+        }
+    })
+    int countByRangeNotExists(String hashKey)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            filter {
+                notContains DynamoDBEntity.RANGE_INDEX, value
+            }
+        }
+    })
+    int countByRangeNotContains(String hashKey, String value)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            filter {
+                and {
+                    sizeNe DynamoDBEntity.RANGE_INDEX, size
+                }
+            }
+        }
+    })
+    Flowable<DynamoDBEntity> queryBySizeNe(String hashKey, int size)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            filter {
+                and {
+                    sizeLe DynamoDBEntity.RANGE_INDEX, size
+                }
+            }
+        }
+    })
+    Flowable<DynamoDBEntity> queryBySizeLe(String hashKey, int size)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            filter {
+                and {
+                    sizeLt DynamoDBEntity.RANGE_INDEX, size
+                }
+            }
+        }
+    })
+    Flowable<DynamoDBEntity> queryBySizeLt(String hashKey, int size)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            filter {
+                and {
+                    sizeGe DynamoDBEntity.RANGE_INDEX, size
+                }
+            }
+        }
+    })
+    Flowable<DynamoDBEntity> queryBySizeGe(String hashKey, int size)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            filter {
+                and {
+                    sizeGt DynamoDBEntity.RANGE_INDEX, size
+                }
+            }
+        }
+    })
+    Flowable<DynamoDBEntity> queryBySizeGt(String hashKey, int size)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            filter {
+                group {
+                    ne DynamoDBEntity.RANGE_INDEX, value
+                }
+            }
+        }
+    })
+    Flowable<DynamoDBEntity> queryByNe(String hashKey, String value)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            range {
+                le value
+            }
+        }
+    })
+    Flowable<DynamoDBEntity> queryByLe(String hashKey, String value)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            range {
+                lt value
+            }
+        }
+    })
+    Flowable<DynamoDBEntity> queryByLt(String hashKey, String value)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            range {
+                ge value
+            }
+        }
+    })
+    Flowable<DynamoDBEntity> queryByGe(String hashKey, String value)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            range {
+                gt value
+            }
+        }
+    })
+    Flowable<DynamoDBEntity> queryByGt(String hashKey, String value)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            range {
+                between lo, hi
+            }
+        }
+    })
+    Flowable<DynamoDBEntity> queryByBetween(String hashKey, String lo, String hi)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            range {
+                or {
+                    beginsWith prefix
+                }
+            }
+        }
+    })
+    Flowable<DynamoDBEntity> queryByIdPrefix(String hashKey, String prefix)
 
     @Query({
         query(DynamoDBEntity) {

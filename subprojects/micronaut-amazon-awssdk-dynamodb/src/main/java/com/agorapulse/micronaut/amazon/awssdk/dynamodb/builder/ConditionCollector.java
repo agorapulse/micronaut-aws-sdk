@@ -36,16 +36,8 @@ public final class ConditionCollector<T> {
         this.attributeConversionHelper = attributeConversionHelper;
     }
 
-    public ConditionCollector<T> inList(Object... values) {
-        return inList(getSortKey(), values);
-    }
-
     public ConditionCollector<T> inList(String attributeOrIndex, Object... values) {
         return inList(attributeOrIndex, Arrays.asList(values));
-    }
-
-    public ConditionCollector<T> inList(Collection<?> values) {
-        return inList(getSortKey(), values);
     }
 
     public ConditionCollector<T> inList(String attributeOrIndex, Collection<?> values) {
@@ -61,10 +53,6 @@ public final class ConditionCollector<T> {
     public ConditionCollector<T> eq(String attributeOrIndex, Object value) {
         conditions.add(QueryConditionalFactory.equalTo(attributeOrIndex, attributeConversionHelper.convert(table, attributeOrIndex, value)));
         return this;
-    }
-
-    public ConditionCollector<T> ne(Object value) {
-        return ne(getSortKey(), value);
     }
 
     public ConditionCollector<T> ne(String attributeOrIndex, Object value) {
@@ -108,17 +96,9 @@ public final class ConditionCollector<T> {
         return this;
     }
 
-    public ConditionCollector<T> sizeEq(Object value) {
-        return sizeEq(getSortKey(), value);
-    }
-
     public ConditionCollector<T> sizeEq(String attributeOrIndex, Object value) {
         conditions.add(QueryConditionalFactory.sizeEqualTo(attributeOrIndex, AttributeValues.numberValue((Number) value)));
         return this;
-    }
-
-    public ConditionCollector<T> sizeNe(Object value) {
-        return sizeNe(getSortKey(), value);
     }
 
     public ConditionCollector<T> sizeNe(String attributeOrIndex, Object value) {
@@ -126,17 +106,9 @@ public final class ConditionCollector<T> {
         return this;
     }
 
-    public ConditionCollector<T> sizeLe(Object value) {
-        return sizeLe(getSortKey(), value);
-    }
-
     public ConditionCollector<T> sizeLe(String attributeOrIndex, Object value) {
         conditions.add(QueryConditionalFactory.sizeLessThanOrEqualTo(attributeOrIndex, AttributeValues.numberValue((Number) value)));
         return this;
-    }
-
-    public ConditionCollector<T> sizeLt(Object value) {
-        return sizeLt(getSortKey(), value);
     }
 
     public ConditionCollector<T> sizeLt(String attributeOrIndex, Object value) {
@@ -144,17 +116,9 @@ public final class ConditionCollector<T> {
         return this;
     }
 
-    public ConditionCollector<T> sizeGe(Object value) {
-        return sizeGe(getSortKey(), value);
-    }
-
     public ConditionCollector<T> sizeGe(String attributeOrIndex, Object value) {
         conditions.add(QueryConditionalFactory.sizeGreaterThanOrEqualTo(attributeOrIndex, AttributeValues.numberValue((Number) value)));
         return this;
-    }
-
-    public ConditionCollector<T> sizeGt(Object value) {
-        return sizeGt(getSortKey(), value);
     }
 
     public ConditionCollector<T> sizeGt(String attributeOrIndex, Object value) {
@@ -175,26 +139,9 @@ public final class ConditionCollector<T> {
         return this;
     }
 
-    public ConditionCollector<T> isNotNull() {
-        return isNotNull(getSortKey());
-    }
-
-    public ConditionCollector<T> isNotNull(String attributeOrIndex) {
-        conditions.add(QueryConditionalFactory.attributeExists(attributeOrIndex));
-        return this;
-    }
-
-    public ConditionCollector<T> notExists() {
-        return isNotNull(getSortKey());
-    }
-
     public ConditionCollector<T> notExists(String attributeOrIndex) {
         conditions.add(QueryConditionalFactory.attributeNotExists(attributeOrIndex));
         return this;
-    }
-
-    public ConditionCollector<T> isNull() {
-        return isNull(getSortKey());
     }
 
     public ConditionCollector<T> isNull(String attributeOrIndex) {
@@ -202,17 +149,9 @@ public final class ConditionCollector<T> {
         return this;
     }
 
-    public ConditionCollector<T> contains(Object value) {
-        return contains(getSortKey(), value);
-    }
-
     public ConditionCollector<T> contains(String attributeOrIndex, Object value) {
         conditions.add(QueryConditionalFactory.contains(attributeOrIndex, attributeConversionHelper.convert(table, attributeOrIndex, value)));
         return this;
-    }
-
-    public ConditionCollector<T> notContains(Object value) {
-        return notContains(getSortKey(), value);
     }
 
     public ConditionCollector<T> notContains(String attributeOrIndex, Object value) {
@@ -293,9 +232,5 @@ public final class ConditionCollector<T> {
 
     String getPartitionKey() {
         return table.tableSchema().tableMetadata().primaryPartitionKey();
-    }
-
-    AttributeValue getAttributeValue(T object, String key) {
-        return table.tableSchema().attributeValue(object, key);
     }
 }
