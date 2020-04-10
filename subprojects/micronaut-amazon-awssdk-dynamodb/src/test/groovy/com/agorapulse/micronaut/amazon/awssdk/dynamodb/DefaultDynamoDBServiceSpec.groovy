@@ -37,12 +37,7 @@ import java.time.temporal.ChronoUnit
 
 import static com.agorapulse.micronaut.amazon.awssdk.dynamodb.groovy.GroovyBuilders.*
 
-// tag::builders-import[]
-
-// <1>
-
-// end::builders-import[]
-
+@SuppressWarnings('AbcMetric')
 /**
  * Specification for testing DefaultDynamoDBService using entity with range key.
  */
@@ -273,7 +268,6 @@ interface DynamoDBItemDBService {
         }
     })
     Flowable<DynamoDBEntity> queryInList(String hashKey, String... values)
-
 
     @Query({
         query(DynamoDBEntity) {

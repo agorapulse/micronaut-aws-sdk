@@ -22,8 +22,6 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
-import java.util.Collections;
-
 class ConditionalWithConditionalAndArgument implements QueryConditional {
 
     private final String template;
