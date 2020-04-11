@@ -68,11 +68,11 @@ public interface QueryBuilder<T> extends DetachedQuery<T> {
     QueryBuilder<T> hash(Object key);
 
     /**
-     * One or more range key conditions.
+     * Creates a range condition.
      * @param conditions consumer to build the conditions
      * @return self
      */
-    QueryBuilder<T> range(Consumer<RangeConditionCollector<T>> conditions);
+    QueryBuilder<T> range(Consumer<KeyConditionCollector<T>> conditions);
 
     /**
      * One or more range key filter conditions.

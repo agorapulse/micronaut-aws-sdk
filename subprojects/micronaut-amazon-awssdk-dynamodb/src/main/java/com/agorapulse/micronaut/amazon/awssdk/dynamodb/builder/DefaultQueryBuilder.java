@@ -91,7 +91,7 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     }
 
     @Override
-    public DefaultQueryBuilder<T> range(Consumer<RangeConditionCollector<T>> conditions) {
+    public DefaultQueryBuilder<T> range(Consumer<KeyConditionCollector<T>> conditions) {
         __queryConditionals.add(conditions);
         return this;
     }
@@ -165,12 +165,13 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
         AttributeConversionHelper attributeConversionHelper,
         Consumer<QueryConditional> addFilterConsumer
     ) {
-        DefaultRangeConditionCollector<T> filterCollector = new DefaultRangeConditionCollector<>(model, attributeConversionHelper, __index);
+
+        DefaultKeyConditionCollector<T> rangeCollector = new DefaultKeyConditionCollector<>(model, attributeConversionHelper, __index);
 
         if (!__queryConditionals.isEmpty()) {
 
-            for (Consumer<RangeConditionCollector<T>> consumer : __queryConditionals) {
-                consumer.accept(filterCollector);
+            for (Consumer<KeyConditionCollector<T>> consumer : __queryConditionals) {
+                consumer.accept(rangeCollector);
             }
 
         }
@@ -178,7 +179,7 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
         String partitionKey = model.tableSchema().tableMetadata().indexPartitionKey(__index);
         QueryConditional hashCondition = QueryConditionalFactory.equalTo(partitionKey, attributeConversionHelper.convert(model, partitionKey, __hash));
 
-        addFilterConsumer.accept(QueryConditionalFactory.and(hashCondition, filterCollector.getCondition()));
+        addFilterConsumer.accept(QueryConditionalFactory.and(hashCondition, rangeCollector.getCondition()));
     }
 
     private void applyFilterConditions(
@@ -226,7 +227,7 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     // otherwise if the argument has the same name (such as max) it will be ignored and field value will be used
     private final QueryEnhancedRequest.Builder __expression;
     private final List<Consumer<FilterConditionCollector<T>>> __filterCollectorsConsumers = new LinkedList<>();
-    private final List<Consumer<RangeConditionCollector<T>>> __queryConditionals = new LinkedList<>();
+    private final List<Consumer<KeyConditionCollector<T>>> __queryConditionals = new LinkedList<>();
 
     private String __index = TableMetadata.primaryIndexName();
     private Object __hash;

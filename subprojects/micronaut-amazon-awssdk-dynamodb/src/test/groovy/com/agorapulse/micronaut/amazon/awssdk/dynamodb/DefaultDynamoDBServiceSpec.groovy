@@ -127,6 +127,8 @@ class DefaultDynamoDBServiceSpec extends Specification {
             service.count('1', '1') == 1
             service.countByRangeIndex('1', 'bar') == 1
             service.countByRangeNotContains('1', 'a') == 1
+            service.countByRangeOfType('1', String) == 2
+            service.countByRangeOfType('1', Number) == 0
             service.countByRangeNotExists('1') == 0
             service.countByRangeIsNull('1') == 0
             service.countByDates('1', Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS))) == 2
@@ -175,8 +177,23 @@ class DefaultDynamoDBServiceSpec extends Specification {
             // service.queryByNe('1', '1').toList().blockingGet().size() == 1
 
             service.scanAllByRangeIndex('bar').count().blockingGet() == 4
-            service.scanAllByRangeIndexWithLimit('bar', 2).count().blockingGet() == 2
+            service.scanAllByRangeIndex('foo').count().blockingGet() == 8
+            service.countAllByRangeIndexNotEqual('bar') == 8
+            service.countComplex('bar') == 4
+            service.countBetween('a', 'z') == 12
 
+        when:
+            List<DynamoDBEntity> scannedPage = service.scanAllByRangeIndexWithLimit('bar', 2, null)
+        then:
+            scannedPage.size() == 2
+
+        when:
+            List<DynamoDBEntity> nextPage = service.scanAllByRangeIndexWithLimit('bar', 2, scannedPage.last())
+        then:
+            nextPage.size() == 2
+            scannedPage != nextPage
+
+        and:
             service.increment('1001', '1')
             service.increment('1001', '1')
             service.increment('1001', '1')
@@ -191,6 +208,8 @@ class DefaultDynamoDBServiceSpec extends Specification {
             service.countByRangeIndex('1001', 'bar') == 0
             service.deleteByDates('1002',  Date.from(REFERENCE_DATE.minus(20, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(20, ChronoUnit.DAYS))) == 2
             service.countByDates('1002', Date.from(REFERENCE_DATE.minus(20, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(20, ChronoUnit.DAYS))) == 0
+            service.deleteAll(nextPage)
+            service.deleteAllByRangeIndexNotEqual('bar')
     }
 
     void 'count many items'() {
@@ -341,6 +360,16 @@ interface DynamoDBItemDBService {
         query(DynamoDBEntity) {
             hash hashKey
             filter {
+                typeOf DynamoDBEntity.RANGE_INDEX, type
+            }
+        }
+    })
+    int countByRangeOfType(String hashKey, Class<?> type)
+
+    @Query({
+        query(DynamoDBEntity) {
+            hash hashKey
+            filter {
                 and {
                     sizeNe DynamoDBEntity.RANGE_INDEX, size
                 }
@@ -431,6 +460,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
+            sort asc
             hash hashKey
             range {
                 ge value
@@ -441,6 +471,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
+            sort desc
             hash hashKey
             range {
                 gt value
@@ -451,6 +482,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
+            inconsistent read
             hash hashKey
             range {
                 between lo, hi
@@ -461,11 +493,10 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
+            consistent read
             hash hashKey
             range {
-                or {
                     beginsWith prefix
-                }
             }
         }
     })
@@ -504,6 +535,8 @@ interface DynamoDBItemDBService {
     })
     int deleteByDates(String hashKey, Date after, Date before)
 
+    void deleteAll(Collection<DynamoDBEntity> entities)
+
     // tag::sample-update[]
     @Update({                                                                           // <3>
         update(DynamoDBEntity) {
@@ -532,6 +565,7 @@ interface DynamoDBItemDBService {
             filter {
                 eq DynamoDBEntity.RANGE_INDEX, foo                                      // <4>
             }
+            only DynamoDBEntity.RANGE_INDEX
         }
     })
     Flowable<DynamoDBEntity> scanAllByRangeIndex(String foo)                            // <5>
@@ -542,10 +576,63 @@ interface DynamoDBItemDBService {
             filter {
                 eq DynamoDBEntity.RANGE_INDEX, foo
             }
+            inconsistent read
+            page 1
             limit max
+            lastEvaluatedKey lastInPreviousList
         }
     })
-    Flowable<DynamoDBEntity> scanAllByRangeIndexWithLimit(String foo, int max)
+    List<DynamoDBEntity> scanAllByRangeIndexWithLimit(String foo, int max, DynamoDBEntity lastInPreviousList)
+
+    @Scan({
+        scan(DynamoDBEntity) {
+            index DynamoDBEntity.DATE_INDEX
+            filter {
+                ne DynamoDBEntity.RANGE_INDEX, foo
+            }
+            consistent read
+        }
+    })
+    int countAllByRangeIndexNotEqual(String foo)
+
+    @Scan({
+        scan(DynamoDBEntity) {
+            filter {
+                or {
+                    group {
+                        le DynamoDBEntity.RANGE_INDEX, foo
+                        ge DynamoDBEntity.RANGE_INDEX, foo
+                    }
+                    group {
+                        gt DynamoDBEntity.RANGE_INDEX, foo
+                        lt DynamoDBEntity.RANGE_INDEX, foo
+                    }
+                }
+            }
+        }
+    })
+    int countComplex(String foo)
+
+    @Scan({
+        scan(DynamoDBEntity) {
+            filter {
+                between DynamoDBEntity.RANGE_INDEX, lo, hi
+            }
+        }
+    })
+    int countBetween(String lo, String hi)
+
+    @Scan({
+        scan(DynamoDBEntity) {
+            filter {
+                ne DynamoDBEntity.RANGE_INDEX, foo
+            }
+            configure {
+                attributesToProject 'parentId', 'id'
+            }
+        }
+    })
+    int deleteAllByRangeIndexNotEqual(String foo)
 
 // tag::service-footer[]
 

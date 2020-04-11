@@ -273,13 +273,12 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             List<T> items = toList(service.tableSchema().itemType().rawClass(), itemArgument, params);
 
             if (itemArgument.getType().isArray() || Iterable.class.isAssignableFrom(itemArgument.getType())) {
-                deleteAll(service, items);
-                return null;
+                return deleteAll(service, items);
             }
 
             if (type.isAssignableFrom(itemArgument.getType())) {
                 service.deleteItem(service.keyFrom(items.get(0)));
-                return null;
+                return items.get(0);
             }
         }
 
@@ -291,7 +290,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
 
         if (partitionAndSort.sortKey == null) {
             service.deleteItem(Key.builder().partitionValue(partitionAndSort.getPartitionAttributeValue(params, service, attributeConversionHelper)).build());
-            return null;
+            return 1;
         }
 
         service.deleteItem(
@@ -301,7 +300,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
                 .build()
         );
 
-        return null;
+        return 1;
     }
 
     private <T> Object handleGet(DynamoDbTable<T> service, MethodInvocationContext<Object, Object> context) {
@@ -394,7 +393,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         throw new IllegalArgumentException("Following items couldn't be saved:" + unprocessed.stream().map(Object::toString).collect(Collectors.joining(", ")));
     }
 
-    private <T> void deleteAll(DynamoDbTable<T> service, List<T> itemsToDelete) {
+    private <T> int deleteAll(DynamoDbTable<T> service, List<T> itemsToDelete) {
         TableSchema<T> tableSchema = service.tableSchema();
         List<Key> unprocessed = partition(itemsToDelete, BATCH_SIZE).stream().map(batchItems -> enhancedClient.batchWriteItem(b -> {
             b.writeBatches(batchItems.stream().map(i ->
@@ -403,7 +402,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         })).flatMap(r -> r.unprocessedDeleteItemsForTable(service).stream()).collect(Collectors.toList());
 
         if (unprocessed.isEmpty()) {
-            return;
+            return itemsToDelete.size();
         }
 
         throw new IllegalArgumentException("Following items couldn't be deleted:" + unprocessed.stream()

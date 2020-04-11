@@ -156,6 +156,11 @@ final class DefaultFilterConditionCollector<T> implements FilterConditionCollect
         return this;
     }
 
+    @Override
+    public FilterConditionCollector<T> typeOf(String attributeOrIndex, Class<?> type) {
+        conditions.add(QueryConditionalFactory.attributeType(attributeOrIndex, type));
+        return this;
+    }
 
     @Override
     public DefaultFilterConditionCollector<T> beginsWith(String attributeOrIndex, String value) {

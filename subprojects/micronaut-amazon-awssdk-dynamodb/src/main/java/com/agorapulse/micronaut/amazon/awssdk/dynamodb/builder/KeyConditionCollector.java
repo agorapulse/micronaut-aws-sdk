@@ -17,28 +17,20 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
-import java.util.function.Consumer;
+public interface KeyConditionCollector<T> {
 
-public interface RangeConditionCollector<T> {
+    KeyConditionCollector<T> eq(Object value);
 
-    RangeConditionCollector<T> eq(Object value);
+    KeyConditionCollector<T> le(Object value);
 
-    RangeConditionCollector<T> le(Object value);
+    KeyConditionCollector<T> lt(Object value);
 
-    RangeConditionCollector<T> lt(Object value);
+    KeyConditionCollector<T> ge(Object value);
 
-    RangeConditionCollector<T> ge(Object value);
+    KeyConditionCollector<T> gt(Object value);
 
-    RangeConditionCollector<T> gt(Object value);
+    KeyConditionCollector<T> between(Object lo, Object hi);
 
-    RangeConditionCollector<T> between(Object lo, Object hi);
-
-    RangeConditionCollector<T> beginsWith(String value);
-
-    RangeConditionCollector<T> group(Consumer<RangeConditionCollector<T>> conditions);
-
-    RangeConditionCollector<T> or(Consumer<RangeConditionCollector<T>> conditions);
-
-    RangeConditionCollector<T> and(Consumer<RangeConditionCollector<T>> conditions);
+    KeyConditionCollector<T> beginsWith(String value);
 
 }

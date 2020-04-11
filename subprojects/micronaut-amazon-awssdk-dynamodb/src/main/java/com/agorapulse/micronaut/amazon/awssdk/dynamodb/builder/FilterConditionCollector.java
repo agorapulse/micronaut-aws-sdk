@@ -60,6 +60,8 @@ public interface FilterConditionCollector<T> {
 
     FilterConditionCollector<T> notContains(String attributeOrIndex, Object value);
 
+    FilterConditionCollector<T> typeOf(String attributeOrIndex, Class<?> type);
+
     FilterConditionCollector<T> beginsWith(String attributeOrIndex, String value);
 
     FilterConditionCollector<T> group(Consumer<FilterConditionCollector<T>> conditions);

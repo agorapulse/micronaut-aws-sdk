@@ -34,51 +34,6 @@ public class MicronautDynamoDbExtensions {
      * @param conditions closure to build the conditions
      * @return self
      */
-    public static <T> RangeConditionCollector<T> group(
-        RangeConditionCollector<T> self,
-        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.RangeConditionCollector<T>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.RangeConditionCollector<T>")
-            Closure<RangeConditionCollector<T>> conditions
-    ) {
-        return self.group(ConsumerWithDelegate.create(conditions));
-    }
-
-    /**
-     * One or more filter conditions in disjunction.
-     *
-     * @param conditions closure to build the conditions
-     * @return self
-     */
-    public static <T> RangeConditionCollector<T> or(
-        RangeConditionCollector<T> self,
-        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.RangeConditionCollector<T>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.RangeConditionCollectorr<T>")
-            Closure<RangeConditionCollector<T>> conditions
-    ) {
-        return self.or(ConsumerWithDelegate.create(conditions));
-    }
-
-    /**
-     * One or more filter conditions in conjunction.
-     *
-     * @param conditions closure to build the conditions
-     * @return self
-     */
-    public <T> RangeConditionCollector<T> and(
-        RangeConditionCollector<T> self,
-        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.RangeConditionCollector<T>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.RangeConditionCollector<T>")
-            Closure<RangeConditionCollector<T>> conditions
-    ) {
-        return self.and(ConsumerWithDelegate.create(conditions));
-    }
-
-    /**
-     * One or more filter conditions in disjunction.
-     *
-     * @param conditions closure to build the conditions
-     * @return self
-     */
     public static <T> FilterConditionCollector<T> group(
         FilterConditionCollector<T> self,
         @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.FilterConditionCollector<T>", strategy = Closure.DELEGATE_FIRST)
@@ -125,9 +80,9 @@ public class MicronautDynamoDbExtensions {
      */
     public static <T> QueryBuilder<T> range(
         QueryBuilder<T> self,
-        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.RangeConditionCollector<T>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.RangeConditionCollector<T>")
-            Closure<RangeConditionCollector<T>> conditions
+        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.KeyConditionCollector<T>", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.KeyConditionCollector<T>")
+            Closure<KeyConditionCollector<T>> conditions
     ) {
         return self.range(ConsumerWithDelegate.create(conditions));
     }
