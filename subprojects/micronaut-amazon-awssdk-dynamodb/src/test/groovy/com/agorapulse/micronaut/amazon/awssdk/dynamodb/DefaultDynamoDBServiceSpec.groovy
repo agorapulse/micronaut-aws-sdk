@@ -86,7 +86,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
     @SuppressWarnings([
         'AbcMetric',
         'UnnecessaryObjectReferences',
-        'UnnecessaryBooleanExpression'
+        'UnnecessaryBooleanExpression',
     ])
     void 'service introduction works'() {
         expect:
