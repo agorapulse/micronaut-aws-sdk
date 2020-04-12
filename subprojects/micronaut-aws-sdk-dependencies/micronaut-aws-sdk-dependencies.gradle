@@ -17,8 +17,13 @@
  */
 plugins {
     id "java-platform"
-    id 'maven-publish'
-    id 'com.jfrog.bintray'
+}
+
+config {
+    bintray {
+        name = 'micronaut-aws-sdk-dependencies'
+        enabled = true
+    }
 }
 
 javaPlatform {
