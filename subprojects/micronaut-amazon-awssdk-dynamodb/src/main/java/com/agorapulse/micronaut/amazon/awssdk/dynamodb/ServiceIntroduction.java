@@ -150,10 +150,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             return toList((Iterable<T>) item);
         }
 
-        if (type.isAssignableFrom(itemArgument.getType())) {
-            return Collections.singletonList((T) item);
-        }
-        throw new IllegalArgumentException("Argument " + itemArgument + " cannot be cast to list of " + type);
+        return Collections.singletonList((T) item);
     }
 
     private <T> Object doIntercept(MethodInvocationContext<Object, Object> context, AnnotationValue<Service> serviceAnnotationValue) {
