@@ -2,98 +2,22 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 1.5.8">
+<meta name="generator" content="Asciidoctor 2.0.10">
 <meta name="author" content="Vladimir Orany">
 <title>Set of useful libraries for Micronaut</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/docs.css?v=1.3.2" />
-<style>
-.hidden {
-    display: none;
-}
-
-.switch {
-    border-width: 1px 1px 0 1px;
-    border-style: solid;
-    border-color: #7a2518;
-    display: inline-block;
-}
-
-.switch--item {
-    padding: 10px;
-    background-color: #ffffff;
-    color: #7a2518;
-    display: inline-block;
-    cursor: pointer;
-}
-
-.switch--item.selected {
-    background-color: #7a2519;
-    color: #ffffff;
-}
-
-</style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/zepto/1.2.0/zepto.min.js"></script>
-<script type="text/javascript">
-function addBlockSwitches() {
-    $('.primary').each(function() {
-        primary = $(this);
-        createSwitchItem(primary, createBlockSwitch(primary)).item.addClass("selected");
-        primary.children('.title').remove();
-    });
-    $('.secondary').each(function(idx, node) {
-        secondary = $(node);
-        primary = findPrimary(secondary);
-        switchItem = createSwitchItem(secondary, primary.children('.switch'));
-        switchItem.content.addClass('hidden');
-        findPrimary(secondary).append(switchItem.content);
-        secondary.remove();
-    });
-}
-
-function createBlockSwitch(primary) {
-    blockSwitch = $('<div class="switch"></div>');
-    primary.prepend(blockSwitch);
-    return blockSwitch;
-}
-
-function findPrimary(secondary) {
-    candidate = secondary.prev();
-    while (!candidate.is('.primary')) {
-        candidate = candidate.prev();
-    }
-    return candidate;
-}
-
-function createSwitchItem(block, blockSwitch) {
-    blockName = block.children('.title').text();
-    content = block.children('.content').first().append(block.next('.colist'));
-    item = $('<div class="switch--item">' + blockName + '</div>');
-    item.on('click', '', content, function(e) {
-        $(this).addClass('selected');
-        $(this).siblings().removeClass('selected');
-        e.data.siblings('.content').addClass('hidden');
-        e.data.removeClass('hidden');
-    });
-    blockSwitch.append(item);
-    return {'item': item, 'content': content};
-}
-
-$(addBlockSwitches);
-
-</script>
-
+<link rel="stylesheet" href="css/docs.css?v=1.3.4" />
 </head>
 <body class="book toc2 toc-left">
 <div id="header">
 <h1>Set of useful libraries for Micronaut</h1>
 <div class="details">
 <span id="author" class="author">Vladimir Orany</span><br>
-<span id="revnumber">version 1.3.2</span>
+<span id="revnumber">version 1.3.4</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -357,16 +281,16 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-dynamodb:1.3.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-dynamodb:1.3.4'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Maven</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;1.3.2&lt;/version&gt;
+    &lt;version&gt;1.3.4&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -386,7 +310,7 @@ matching predefined pattern will be automatically implemented.</p>
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-groovy" data-lang="groovy">@Service(DynamoDBEntity)
+<pre class="prettyprint highlight nowrap"><code data-lang="groovy">@Service(DynamoDBEntity)
 interface DynamoDBItemDBService {
 
     DynamoDBEntity get(String hash, String rangeKey)
@@ -501,7 +425,7 @@ interface DynamoDBItemDBService {
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">@Service(DynamoDBEntity.class)
+<pre class="prettyprint highlight nowrap"><code data-lang="java">@Service(DynamoDBEntity.class)
 public interface DynamoDBEntityService {
 
     class EqRangeIndex implements Function&lt;Map&lt;String, Object&gt;, DetachedQuery&gt; {
@@ -728,7 +652,7 @@ Instead you can annotate any method with <code>@Query</code> annotation to make 
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-groovy" data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
 
 @Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
 interface DynamoDBItemDBService {
@@ -788,7 +712,7 @@ interface DynamoDBItemDBService {
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">@Service(DynamoDBEntity.class)                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">@Service(DynamoDBEntity.class)                                                          <i class="conum" data-value="1"></i><b>(1)</b>
 public interface DynamoDBEntityService {
 
     class EqRangeProjection implements Function&lt;Map&lt;String, Object&gt;, DetachedQuery&gt; {   <i class="conum" data-value="2"></i><b>(2)</b>
@@ -864,7 +788,7 @@ If you need to scan the table by unindexed attributes you can annotate any metho
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-groovy" data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
 
 
 @Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
@@ -911,7 +835,7 @@ interface DynamoDBItemDBService {
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">@Service(DynamoDBEntity.class)                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">@Service(DynamoDBEntity.class)                                                          <i class="conum" data-value="1"></i><b>(1)</b>
 public interface DynamoDBEntityService {
 
     class EqRangeScan implements Function&lt;Map&lt;String, Object&gt;, DetachedScan&gt; {          <i class="conum" data-value="2"></i><b>(2)</b>
@@ -964,7 +888,7 @@ public interface DynamoDBEntityService {
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-groovy" data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
 
 
 @Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
@@ -1024,7 +948,7 @@ interface DynamoDBItemDBService {
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">@Service(DynamoDBEntity.class)                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">@Service(DynamoDBEntity.class)                                                          <i class="conum" data-value="1"></i><b>(1)</b>
 public interface DynamoDBEntityService {
 
     class IncrementNumber implements Function&lt;Map&lt;String, Object&gt;, DetachedUpdate&gt; {    <i class="conum" data-value="2"></i><b>(2)</b>
@@ -1094,7 +1018,7 @@ public interface DynamoDBEntityService {
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-groovy" data-lang="groovy">DynamoDBServiceProvider provider = context.getBean(DynamoDBServiceProvider)
+<pre class="prettyprint highlight nowrap"><code data-lang="groovy">DynamoDBServiceProvider provider = context.getBean(DynamoDBServiceProvider)
 DynamoDBService&lt;DynamoDBEntity&gt; s = provider.findOrCreate(DynamoDBEntity)       <i class="conum" data-value="1"></i><b>(1)</b>
 
 s.createTable()                                                                 <i class="conum" data-value="2"></i><b>(2)</b>
@@ -1165,7 +1089,7 @@ s.deleteAll('1', DynamoDBEntity.RANGE_INDEX, 'bar') == 1                        
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">DynamoDBServiceProvider provider = ctx.getBean(DynamoDBServiceProvider.class);
+<pre class="prettyprint highlight nowrap"><code data-lang="java">DynamoDBServiceProvider provider = ctx.getBean(DynamoDBServiceProvider.class);
 DynamoDBService&lt;DynamoDBEntity&gt; s = provider.findOrCreate(DynamoDBEntity.class);<i class="conum" data-value="1"></i><b>(1)</b>
 
 assertNotNull(
@@ -1264,7 +1188,7 @@ Following policy allow every DAX operatin on any resource. In production, you sh
 <div class="listingblock">
 <div class="title">DAX Access Policy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-json" data-lang="json">{
+<pre class="prettyprint highlight"><code data-lang="json">{
     "Version": "2012-10-17",
     "Statement": [
         {
@@ -1297,7 +1221,7 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <div class="listingblock secondary">
 <div class="title">Maven</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
     &lt;artifactId&gt;localstack&lt;/artifactId&gt;
     &lt;version&gt;1.10.2&lt;/version&gt;
@@ -1317,7 +1241,7 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-groovy" data-lang="groovy">@Stepwise
+<pre class="prettyprint highlight"><code data-lang="groovy">@Stepwise
 @Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
 class DefaultDynamoDBServiceSpec extends Specification {
 
@@ -1396,7 +1320,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class DynamoDBServiceTest {
+<pre class="prettyprint highlight"><code data-lang="java">public class DynamoDBServiceTest {
     @Rule
     public LocalStackContainer localstack = new LocalStackContainer()                   <i class="conum" data-value="1"></i><b>(1)</b>
         .withServices(LocalStackContainer.Service.DYNAMODB);
@@ -1521,25 +1445,25 @@ You can obtain instances of declarative client from the context as well.
 <div class="title">Gradle</div>
 <div class="content">
 <pre class="prettyprint highlight"><code>// for Kinesis client
-compile 'com.agorapulse:micronaut-aws-sdk-kinesis:1.3.2'
+compile 'com.agorapulse:micronaut-aws-sdk-kinesis:1.3.4'
 // for Kinesis worker
-compile 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:1.3.2'</code></pre>
+compile 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:1.3.4'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Maven</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;!-- for Kinesis client --&gt;
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;!-- for Kinesis client --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-kinesis&lt;/artifactId&gt;
-    &lt;version&gt;1.3.2&lt;/version&gt;
+    &lt;version&gt;1.3.4&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;!-- for Kinesis worker --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-kinesis-worker&lt;/artifactId&gt;
-    &lt;version&gt;1.3.2&lt;/version&gt;
+    &lt;version&gt;1.3.4&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1553,7 +1477,7 @@ Otherwise you need no configuration at all but some of the configuration may be 
 <div class="listingblock">
 <div class="title">application.yml</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-yaml" data-lang="yaml">aws:
+<pre class="prettyprint highlight nowrap"><code data-lang="yaml">aws:
   kinesis:
     region: sa-east-1
     stream: MyStream                                                                    <i class="conum" data-value="1"></i><b>(1)</b>
@@ -1624,7 +1548,7 @@ the stream.</p>
 <div class="listingblock">
 <div class="title">Publishing String Records</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
 interface DefaultClient {
     void putRecordString(String record);                                                <i class="conum" data-value="2"></i><b>(2)</b>
 
@@ -1683,7 +1607,7 @@ interface DefaultClient {
 <div class="listingblock">
 <div class="title">Publishing Byte Array Records</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
 interface DefaultClient {
     void putRecordBytes(byte[] record);                                                 <i class="conum" data-value="2"></i><b>(2)</b>
 
@@ -1728,7 +1652,7 @@ interface DefaultClient {
 <div class="listingblock">
 <div class="title">Publishing Plain Old Java Objects</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
 interface DefaultClient {
     void putRecordObject(Pogo pogo);                                                    <i class="conum" data-value="2"></i><b>(2)</b>
 
@@ -1767,7 +1691,7 @@ interface DefaultClient {
 <div class="listingblock">
 <div class="title">Publishing Events</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
 interface DefaultClient {
     PutRecordResult putEvent(MyEvent event);                                            <i class="conum" data-value="2"></i><b>(2)</b>
 
@@ -1973,7 +1897,7 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <div class="listingblock secondary">
 <div class="title">Maven</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
     &lt;artifactId&gt;localstack&lt;/artifactId&gt;
     &lt;version&gt;1.10.2&lt;/version&gt;
@@ -1993,7 +1917,7 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-groovy" data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
 @RestoreSystemProperties                                                                <i class="conum" data-value="2"></i><b>(2)</b>
 class KinesisAnnotationsSpec extends Specification {
 
@@ -2116,7 +2040,7 @@ class KinesisAnnotationsSpec extends Specification {
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class KinesisTest {
+<pre class="prettyprint highlight"><code data-lang="java">public class KinesisTest {
 
     public ApplicationContext context;                                                  <i class="conum" data-value="1"></i><b>(1)</b>
 
@@ -2267,16 +2191,16 @@ class KinesisAnnotationsSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-s3:1.3.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-s3:1.3.4'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Maven</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-s3&lt;/artifactId&gt;
-    &lt;version&gt;1.3.2&lt;/version&gt;
+    &lt;version&gt;1.3.4&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2290,7 +2214,7 @@ by providing 'aws.s3.buckets' configuration map.</p>
 <div class="listingblock">
 <div class="title">application.yml</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-yaml" data-lang="yaml">aws:
+<pre class="prettyprint highlight nowrap"><code data-lang="yaml">aws:
   s3:
     region: sa-east-1
     bucket: MyBucket                                                                    <i class="conum" data-value="1"></i><b>(1)</b>
@@ -2332,7 +2256,7 @@ You should always use <code>@Named</code> qualifier when injecting <code>SimpleS
 <div class="listingblock">
 <div class="title">Creating Bucket</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">service.createBucket(MY_BUCKET);                                                <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">service.createBucket(MY_BUCKET);                                                <i class="conum" data-value="1"></i><b>(1)</b>
 
 assertTrue(service.listBucketNames().contains(MY_BUCKET));                      <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
@@ -2352,7 +2276,7 @@ assertTrue(service.listBucketNames().contains(MY_BUCKET));                      
 <div class="listingblock">
 <div class="title">Upload File</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">File sampleContent = createFileWithSampleContent();
+<pre class="prettyprint highlight nowrap"><code data-lang="java">File sampleContent = createFileWithSampleContent();
 
 service.storeFile(TEXT_FILE_PATH, sampleContent);                               <i class="conum" data-value="1"></i><b>(1)</b>
 
@@ -2381,7 +2305,7 @@ assertEquals(Long.valueOf(0L), summaries.count().blockingGet());</code></pre>
 <div class="listingblock">
 <div class="title">Upload from <code>InputStream</code></div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">service.storeInputStream(                                                       <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">service.storeInputStream(                                                       <i class="conum" data-value="1"></i><b>(1)</b>
     KEY,
     new ByteArrayInputStream(SAMPLE_CONTENT.getBytes()),
     buildMetadata()
@@ -2406,7 +2330,7 @@ assertEquals(KEY, fooSummaries.blockingFirst().getKey());</code></pre>
 <div class="listingblock">
 <div class="title">Generate URL</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">String url = service.generatePresignedUrl(KEY, TOMORROW);                       <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">String url = service.generatePresignedUrl(KEY, TOMORROW);                       <i class="conum" data-value="1"></i><b>(1)</b>
 
 assertEquals(SAMPLE_CONTENT, download(url));                                    <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
@@ -2426,7 +2350,7 @@ assertEquals(SAMPLE_CONTENT, download(url));                                    
 <div class="listingblock">
 <div class="title">Download File</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">File dir = tmp.newFolder();
+<pre class="prettyprint highlight nowrap"><code data-lang="java">File dir = tmp.newFolder();
 File file = new File(dir, "bar.baz");                                           <i class="conum" data-value="1"></i><b>(1)</b>
 
 service.getFile(KEY, file);                                                     <i class="conum" data-value="2"></i><b>(2)</b>
@@ -2450,7 +2374,7 @@ assertEquals(SAMPLE_CONTENT, new String(Files.readAllBytes(Paths.get(file.toURI(
 <div class="listingblock">
 <div class="title">Delete File</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">service.deleteFile(TEXT_FILE_PATH);                                             <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">service.deleteFile(TEXT_FILE_PATH);                                             <i class="conum" data-value="1"></i><b>(1)</b>
 assertFalse(service.exists(TEXT_FILE_PATH));                                    <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
 </div>
@@ -2469,7 +2393,7 @@ assertFalse(service.exists(TEXT_FILE_PATH));                                    
 <div class="listingblock">
 <div class="title">Delete Bucket</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">service.deleteBucket();                                                         <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">service.deleteBucket();                                                         <i class="conum" data-value="1"></i><b>(1)</b>
 assertFalse(service.listBucketNames().contains(MY_BUCKET));                     <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
 </div>
@@ -2508,7 +2432,7 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <div class="listingblock secondary">
 <div class="title">Maven</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
     &lt;artifactId&gt;localstack&lt;/artifactId&gt;
     &lt;version&gt;1.10.2&lt;/version&gt;
@@ -2528,7 +2452,7 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-groovy" data-lang="groovy">@Stepwise
+<pre class="prettyprint highlight"><code data-lang="groovy">@Stepwise
 @Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
 class SimpleStorageServiceSpec extends Specification {
 
@@ -2598,7 +2522,7 @@ class SimpleStorageServiceSpec extends Specification {
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class SimpleStorageServiceTest {
+<pre class="prettyprint highlight"><code data-lang="java">public class SimpleStorageServiceTest {
 
     @Rule
     public final LocalStackContainer localstack = new LocalStackContainer()            <i class="conum" data-value="1"></i><b>(1)</b>
@@ -2679,16 +2603,16 @@ class SimpleStorageServiceSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ses:1.3.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ses:1.3.4'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Maven</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-ses&lt;/artifactId&gt;
-    &lt;version&gt;1.3.2&lt;/version&gt;
+    &lt;version&gt;1.3.4&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2705,7 +2629,7 @@ it uses default credentials chain to obtain the credentials.</p>
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-groovy" data-lang="groovy">package com.agorapulse.micronaut.aws.ses
+<pre class="prettyprint highlight nowrap"><code data-lang="groovy">package com.agorapulse.micronaut.aws.ses
 
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService
 import com.amazonaws.services.simpleemail.model.SendRawEmailRequest
@@ -2805,7 +2729,7 @@ class SendEmailSpec extends Specification {
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">package com.agorapulse.micronaut.aws.ses;
+<pre class="prettyprint highlight nowrap"><code data-lang="java">package com.agorapulse.micronaut.aws.ses;
 
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.amazonaws.services.simpleemail.model.SendRawEmailResult;
@@ -2943,16 +2867,16 @@ public class SendEmailTest {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sns:1.3.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sns:1.3.4'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Maven</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sns&lt;/artifactId&gt;
-    &lt;version&gt;1.3.2&lt;/version&gt;
+    &lt;version&gt;1.3.4&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2965,7 +2889,7 @@ public class SendEmailTest {
 <div class="listingblock">
 <div class="title">application.yml</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-yaml" data-lang="yaml">aws:
+<pre class="prettyprint highlight nowrap"><code data-lang="yaml">aws:
   sns:
     region: sa-east-1
     topic: MyTopic                                                                      <i class="conum" data-value="1"></i><b>(1)</b>
@@ -3024,7 +2948,7 @@ Other methods of <code>NotificationClient</code> will publish new messages into 
 <div class="listingblock">
 <div class="title">Publishing String Records</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">package com.agorapulse.micronaut.aws.sns;
+<pre class="prettyprint highlight nowrap"><code data-lang="java">package com.agorapulse.micronaut.aws.sns;
 
 import com.agorapulse.micronaut.aws.sns.annotation.NotificationClient;
 import com.agorapulse.micronaut.aws.sns.annotation.Topic;
@@ -3118,7 +3042,7 @@ You should always use <code>@Named</code> qualifier when injecting <code>SimpleN
 <div class="listingblock">
 <div class="title">Creating Topic</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">String topicArn = service.createTopic(TEST_TOPIC);                              <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">String topicArn = service.createTopic(TEST_TOPIC);                              <i class="conum" data-value="1"></i><b>(1)</b>
 
 Topic found = service.listTopics().filter(t -&gt;                                  <i class="conum" data-value="2"></i><b>(2)</b>
     t.getTopicArn().endsWith(TEST_TOPIC)
@@ -3140,7 +3064,7 @@ Topic found = service.listTopics().filter(t -&gt;                               
 <div class="listingblock">
 <div class="title">Subscribe to Topic</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">String subArn = service.subscribeTopicWithEmail(topicArn, EMAIL);               <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">String subArn = service.subscribeTopicWithEmail(topicArn, EMAIL);               <i class="conum" data-value="1"></i><b>(1)</b>
 
 String messageId = service.publishMessageToTopic(                               <i class="conum" data-value="2"></i><b>(2)</b>
     topicArn,
@@ -3170,7 +3094,7 @@ service.unsubscribeTopic(subArn);                                               
 <div class="listingblock">
 <div class="title">Delete Topic</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">service.deleteTopic(topicArn);                                                  <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">service.deleteTopic(topicArn);                                                  <i class="conum" data-value="1"></i><b>(1)</b>
 
 Long zero = service.listTopics().filter(t -&gt;                                    <i class="conum" data-value="2"></i><b>(2)</b>
     t.getTopicArn().endsWith(TEST_TOPIC)
@@ -3195,7 +3119,7 @@ Long zero = service.listTopics().filter(t -&gt;                                 
 <div class="listingblock">
 <div class="title">Working with Applications</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">String appArn = service.createAndroidApplication("my-app", API_KEY);        <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">String appArn = service.createAndroidApplication("my-app", API_KEY);        <i class="conum" data-value="1"></i><b>(1)</b>
 
 String endpoint = service.registerAndroidDevice(appArn, DEVICE_TOKEN, DATA);    <i class="conum" data-value="2"></i><b>(2)</b>
 
@@ -3241,7 +3165,7 @@ service.unregisterDevice(endpoint);                                             
 <div class="listingblock">
 <div class="title">Sending SMS</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Map&lt;Object, Object&gt; attrs = Collections.emptyMap();
+<pre class="prettyprint highlight nowrap"><code data-lang="java">Map&lt;Object, Object&gt; attrs = Collections.emptyMap();
 String msgId = service.sendSMSMessage(PHONE_NUMBER, "Hello World", attrs);      <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
 </div>
 </div>
@@ -3277,7 +3201,7 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <div class="listingblock secondary">
 <div class="title">Maven</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
     &lt;artifactId&gt;localstack&lt;/artifactId&gt;
     &lt;version&gt;1.10.2&lt;/version&gt;
@@ -3297,7 +3221,7 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-groovy" data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
 class SimpleNotificationServiceSpec extends Specification {
 
 
@@ -3358,7 +3282,7 @@ class SimpleNotificationServiceSpec extends Specification {
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-java" data-lang="java">class SimpleNotificationServiceTest {
+<pre class="prettyprint highlight"><code data-lang="java">class SimpleNotificationServiceTest {
 
     public ApplicationContext context;                                                  <i class="conum" data-value="1"></i><b>(1)</b>
 
@@ -3457,16 +3381,16 @@ class SimpleNotificationServiceSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sqs:1.3.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sqs:1.3.4'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Maven</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sqs&lt;/artifactId&gt;
-    &lt;version&gt;1.3.2&lt;/version&gt;
+    &lt;version&gt;1.3.4&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3479,7 +3403,7 @@ class SimpleNotificationServiceSpec extends Specification {
 <div class="listingblock">
 <div class="title">application.yml</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-yaml" data-lang="yaml">aws:
+<pre class="prettyprint highlight nowrap"><code data-lang="yaml">aws:
   sqs:
     region: sa-east-1
     # related to service behaviour
@@ -3562,7 +3486,7 @@ Other methods of <code>QueueClient</code> will publish new records into the queu
 <div class="listingblock">
 <div class="title">Publishing String Records</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">package com.agorapulse.micronaut.aws.sqs;
+<pre class="prettyprint highlight nowrap"><code data-lang="java">package com.agorapulse.micronaut.aws.sqs;
 
 import com.agorapulse.micronaut.aws.sqs.annotation.Queue;
 import com.agorapulse.micronaut.aws.sqs.annotation.QueueClient;
@@ -3665,7 +3589,7 @@ You should always use <code>@Named</code> qualifier when injecting <code>SimpleQ
 <div class="listingblock">
 <div class="title">Creating Queue</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">String queueUrl = service.createQueue(TEST_QUEUE);                              <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">String queueUrl = service.createQueue(TEST_QUEUE);                              <i class="conum" data-value="1"></i><b>(1)</b>
 
 assertTrue(service.listQueueUrls().contains(queueUrl));                         <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
@@ -3685,7 +3609,7 @@ assertTrue(service.listQueueUrls().contains(queueUrl));                         
 <div class="listingblock">
 <div class="title">Describing Queue Attributes</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">Map&lt;String, String&gt; queueAttributes = service.getQueueAttributes(TEST_QUEUE);   <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">Map&lt;String, String&gt; queueAttributes = service.getQueueAttributes(TEST_QUEUE);   <i class="conum" data-value="1"></i><b>(1)</b>
 
 assertEquals("0", queueAttributes.get("DelaySeconds"));                         <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
@@ -3705,7 +3629,7 @@ assertEquals("0", queueAttributes.get("DelaySeconds"));                         
 <div class="listingblock">
 <div class="title">Delete Queue</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">service.deleteQueue(TEST_QUEUE);                                                <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">service.deleteQueue(TEST_QUEUE);                                                <i class="conum" data-value="1"></i><b>(1)</b>
 
 assertFalse(service.listQueueUrls().contains(queueUrl));                        <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
@@ -3725,7 +3649,7 @@ assertFalse(service.listQueueUrls().contains(queueUrl));                        
 <div class="listingblock">
 <div class="title">Working with Messages</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-java" data-lang="java">String msgId = service.sendMessage(DATA);                                       <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">String msgId = service.sendMessage(DATA);                                       <i class="conum" data-value="1"></i><b>(1)</b>
 
 assertNotNull(msgId);
 
@@ -3795,7 +3719,7 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <div class="listingblock secondary">
 <div class="title">Maven</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
     &lt;artifactId&gt;localstack&lt;/artifactId&gt;
     &lt;version&gt;1.10.2&lt;/version&gt;
@@ -3815,7 +3739,7 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-groovy" data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
 @RestoreSystemProperties                                                                <i class="conum" data-value="2"></i><b>(2)</b>
 class SimpleQueueServiceSpec extends Specification {
 
@@ -3886,7 +3810,7 @@ class SimpleQueueServiceSpec extends Specification {
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-java" data-lang="java">class SimpleNotificationServiceTest {
+<pre class="prettyprint highlight"><code data-lang="java">class SimpleNotificationServiceTest {
 
     public ApplicationContext context;                                                  <i class="conum" data-value="1"></i><b>(1)</b>
 
@@ -3983,16 +3907,16 @@ class SimpleQueueServiceSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sts:1.3.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sts:1.3.4'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Maven</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sts&lt;/artifactId&gt;
-    &lt;version&gt;1.3.2&lt;/version&gt;
+    &lt;version&gt;1.3.4&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4009,7 +3933,7 @@ which assumes usage of a certain IAM role.</p>
 <div class="listingblock primary">
 <div class="title">Assume Role</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-groovy" data-lang="groovy">service.assumeRole('session', 'arn:::my-role', 360) {
+<pre class="prettyprint highlight nowrap"><code data-lang="groovy">service.assumeRole('session', 'arn:::my-role', 360) {
     externalId = '123456789'
 }</code></pre>
 </div>
@@ -4043,16 +3967,16 @@ messages back to the clients</p>
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ag-ws:1.3.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ag-ws:1.3.4'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Maven</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-ag-ws&lt;/artifactId&gt;
-    &lt;version&gt;1.3.2&lt;/version&gt;
+    &lt;version&gt;1.3.4&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4065,7 +3989,7 @@ messages back to the clients</p>
 <div class="listingblock">
 <div class="title">application.yml</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code class="language-yaml" data-lang="yaml">aws:
+<pre class="prettyprint highlight nowrap"><code data-lang="yaml">aws:
   websocket:
     region: sa-east-1
     connections:
@@ -4123,7 +4047,7 @@ publishes to SNS:</p>
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-groovy" data-lang="groovy">package com.agorapulse.micronaut.aws.apigateway.ws
+<pre class="prettyprint highlight"><code data-lang="groovy">package com.agorapulse.micronaut.aws.apigateway.ws
 
 import com.agorapulse.micronaut.aws.apigateway.ws.event.EventType
 import com.agorapulse.micronaut.aws.apigateway.ws.event.WebSocketRequest
@@ -4200,7 +4124,7 @@ WebSocketResponse lambdaEcho(WebSocketRequest event) {                          
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-java" data-lang="java">package com.agorapulse.micronaut.aws.apigateway.ws;
+<pre class="prettyprint highlight"><code data-lang="java">package com.agorapulse.micronaut.aws.apigateway.ws;
 
 import com.agorapulse.micronaut.aws.apigateway.ws.event.WebSocketRequest;
 import com.agorapulse.micronaut.aws.apigateway.ws.event.WebSocketResponse;
@@ -4318,7 +4242,7 @@ There is no support for routing at the moment, but you can get the matched route
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-groovy" data-lang="groovy">package com.agorapulse.micronaut.aws.apigateway.ws
+<pre class="prettyprint highlight"><code data-lang="groovy">package com.agorapulse.micronaut.aws.apigateway.ws
 
 import com.amazonaws.AmazonClientException
 import com.amazonaws.services.lambda.runtime.events.SNSEvent
@@ -4362,7 +4286,7 @@ void notify(SNSEvent event) {                                                   
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-java" data-lang="java">package com.agorapulse.micronaut.aws.apigateway.ws;
+<pre class="prettyprint highlight"><code data-lang="java">package com.agorapulse.micronaut.aws.apigateway.ws;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.lambda.runtime.events.SNSEvent;
@@ -4422,7 +4346,7 @@ your Lambda function&#8217;s role must have following permissions (preferably co
 <div class="listingblock">
 <div class="title">ExecuteApiFullAccess Policy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-JSON" data-lang="JSON">{
+<pre class="prettyprint highlight"><code data-lang="JSON">{
     "Version": "2012-10-17",
     "Statement": [
         {
@@ -4485,7 +4409,7 @@ your Lambda function&#8217;s role must have following permissions (preferably co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">aws:
+<pre class="prettyprint highlight"><code data-lang="yaml">aws:
   dynamodb:
     region: us-east-1
     endpoint: http://localhost:8000</code></pre>
@@ -4520,12 +4444,11 @@ your Lambda function&#8217;s role must have following permissions (preferably co
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 1.3.2<br>
-Last updated 2020-01-10 08:45:36 +0100
+Version 1.3.4<br>
+Last updated 2020-03-30 04:00:33 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
-<script>prettyPrint()</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/run_prettify.min.js"></script>
 </body>
 </html>

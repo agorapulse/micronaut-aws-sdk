@@ -187,7 +187,7 @@
 <a class="jxr_linenumber" name="L179" href="#L179">179</a>         @ClosureParams(value = FromString.<strong class="jxr_keyword">class</strong>, options = <span class="jxr_string">"com.agorapulse.micronaut.aws.dynamodb.builder.RangeConditionCollector&lt;T&gt;"</span>)
 <a class="jxr_linenumber" name="L180" href="#L180">180</a>             Closure&lt;RangeConditionCollector&lt;T&gt;&gt; conditions
 <a class="jxr_linenumber" name="L181" href="#L181">181</a>     ) {
-<a class="jxr_linenumber" name="L182" href="#L182">182</a>         <strong class="jxr_keyword">return</strong> or(ConsumerWithDelegate.create(conditions));
+<a class="jxr_linenumber" name="L182" href="#L182">182</a>         <strong class="jxr_keyword">return</strong> and(ConsumerWithDelegate.create(conditions));
 <a class="jxr_linenumber" name="L183" href="#L183">183</a>     }
 <a class="jxr_linenumber" name="L184" href="#L184">184</a> 
 <a class="jxr_linenumber" name="L185" href="#L185">185</a>     <em class="jxr_javadoccomment">/**</em>
