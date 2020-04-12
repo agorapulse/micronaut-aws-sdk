@@ -23,7 +23,7 @@ config {
 
 dependencies {
     compile project(':micronaut-aws-sdk-core')
-    compile 'space.jasan:groovy-closure-support:0.5.0'
+    compile "space.jasan:groovy-closure-support:$closureSupportVersion"
     compile group: 'com.amazonaws', name: 'aws-java-sdk-sns'
 //
 //    testCompile 'com.amazonaws:aws-lambda-java-events'

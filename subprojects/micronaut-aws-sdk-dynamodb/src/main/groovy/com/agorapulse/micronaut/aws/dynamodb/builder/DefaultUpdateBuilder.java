@@ -35,7 +35,7 @@ import java.util.function.Function;
 @PackageScope
 class DefaultUpdateBuilder<T> implements UpdateBuilder<T> {
 
-    private class Update {
+    private static class Update {
         final String name;
         final AttributeAction action;
         final Object value;

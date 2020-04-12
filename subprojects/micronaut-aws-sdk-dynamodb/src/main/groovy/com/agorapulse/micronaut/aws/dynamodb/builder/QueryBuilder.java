@@ -179,7 +179,7 @@ public interface QueryBuilder<T> extends DetachedQuery<T> {
         @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.aws.dynamodb.builder.RangeConditionCollector<T>")
             Closure<RangeConditionCollector<T>> conditions
     ) {
-        return or(ConsumerWithDelegate.create(conditions));
+        return and(ConsumerWithDelegate.create(conditions));
     }
 
     /**

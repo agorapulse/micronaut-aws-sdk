@@ -25,34 +25,6 @@ javaPlatform {
     allowDependencies()
 }
 
-publishing {
-    publications {
-        awsSdkPlatform(MavenPublication) {
-            from components.javaPlatform
-        }
-    }
-}
-
-if (!project.hasProperty('bintrayUsername')) ext.bintrayUsername = '**UNDEFINED**'
-if (!project.hasProperty('bintrayApiKey'))   ext.bintrayApiKey   = '**UNDEFINED**'
-
-bintray {
-    user = bintrayUsername
-    key = bintrayApiKey
-    publications = ['awsSdkPlatform']
-    publish = true
-    pkg {
-        name = project.name
-        userOrg = 'agorapulse'
-        repo = 'libs'
-        licenses = ['Apache-2.0']
-        githubRepo = 'agorapulse/micronaut-aws-sdk'
-        vcsUrl = 'https://github.com/agorapulse/micronaut-aws-sdk.git'
-        websiteUrl = 'https://github.com/agorapulse/micronaut-aws-sdk'
-        issueTrackerUrl = 'https://github.com/agorapulse/micronaut-aws-sdk/issues'
-    }
-}
-
 dependencies {
     api platform("io.micronaut:micronaut-bom:$micronautVersion")
 
@@ -69,9 +41,11 @@ dependencies {
         api "com.amazonaws:aws-java-sdk-sts:$project.awsSdkVersion"
         api "com.amazonaws:jmespath:$project.awsSdkVersion"
 
-        api "software.amazon.awssdk:cloudwatch:$project.awsSdk2Version"
         api "software.amazon.awssdk:core:$project.awsSdk2Version"
+        api "software.amazon.awssdk:aws-core:$project.awsSdk2Version"
+        api "software.amazon.awssdk:cloudwatch:$project.awsSdk2Version"
         api "software.amazon.awssdk:dynamodb:$project.awsSdk2Version"
+        api "software.amazon.awssdk:dynamodb-enhanced:$project.awsSdk2Version-PREVIEW"
         api "software.amazon.awssdk:kms:$project.awsSdk2Version"
         api "software.amazon.awssdk:kinesis:$project.awsSdk2Version"
         api "software.amazon.awssdk:s3:$project.awsSdk2Version"
