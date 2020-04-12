@@ -91,6 +91,8 @@ class DefaultDynamoDBServiceNoRangeSpec extends Specification {
             service.count('1') == 0
             service.deleteByHash('3')
             service.count('3') == 0
+            service.deleteByPartition('2')
+            service.count('1') == 0
     }
 
 }

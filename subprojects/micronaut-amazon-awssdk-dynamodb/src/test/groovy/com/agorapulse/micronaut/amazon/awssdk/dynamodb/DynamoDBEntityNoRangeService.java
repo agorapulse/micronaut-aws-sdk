@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.PartitionKey;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Query;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Service;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Update;
@@ -31,7 +32,7 @@ import java.util.function.Function;
 @Service(DynamoDBEntityNoRange.class)
 public interface DynamoDBEntityNoRangeService {
 
-    DynamoDBEntityNoRange get(String hash);
+    DynamoDBEntityNoRange get(@PartitionKey String parentId);
     DynamoDBEntityNoRange save(DynamoDBEntityNoRange entity);
     List<DynamoDBEntityNoRange> saveAll(DynamoDBEntityNoRange... entities);
     List<DynamoDBEntityNoRange> saveAll(Iterable<DynamoDBEntityNoRange> entities);
@@ -41,6 +42,8 @@ public interface DynamoDBEntityNoRangeService {
     List<DynamoDBEntityNoRange> query(String hashKey);
 
     void delete(DynamoDBEntityNoRange entity);
+
+    void deleteByPartition(@PartitionKey String partitionKey);
 
     class ByHash implements Function<Map<String, Object>, DetachedQuery> {
         public DetachedQuery apply(Map<String, Object> arguments) {

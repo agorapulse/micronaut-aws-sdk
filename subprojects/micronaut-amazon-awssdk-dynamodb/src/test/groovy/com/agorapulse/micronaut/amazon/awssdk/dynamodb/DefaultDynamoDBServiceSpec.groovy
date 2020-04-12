@@ -86,6 +86,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
     @SuppressWarnings([
         'AbcMetric',
         'UnnecessaryObjectReferences',
+        'UnnecessaryBooleanExpression'
     ])
     void 'service introduction works'() {
         expect:
@@ -107,7 +108,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
 
             service.get('1', '1')
             service.load('1', '1')
-            service.getAll('1', ['2', '1']).size() == 2
+            service.getAll('1', ['2', '1'] as LinkedHashSet).size() == 2
             service.loadAll('1', ['2', '1']).size() == 2
             service.getAll('1', '2', '1').size() == 2
             service.loadAll('1', '3', '4').size() == 0
@@ -199,6 +200,14 @@ class DefaultDynamoDBServiceSpec extends Specification {
             service.increment('1001', '1')
             service.decrement('1001', '1') == 2
             service.get('1001', '1').number == 2
+            service.minus3AndReturnOriginal('1001', '1') == 2
+            service.get('1001', '1').number == -1
+            service.minus5AndReturnAllOld('1001', '1') == -1
+            service.get('1001', '1').number == -6
+            service.minus7AndReturnAllNew('1001', '1') == -13
+            service.get('1001', '1').number == -13
+            service.minus13AndIgnore('1001', '1') || true
+            service.get('1001', '1').number == -26
 
             service.delete(service.get('1001', '1'))
             service.count('1001', '1') == 0
@@ -236,7 +245,7 @@ interface DynamoDBItemDBService {
 
     DynamoDBEntity get(String hash, String rangeKey)
     DynamoDBEntity load(String hash, String rangeKey)
-    List<DynamoDBEntity> getAll(String hash, List<String> rangeKeys)
+    List<DynamoDBEntity> getAll(String hash, Iterable<String> rangeKeys)
     List<DynamoDBEntity> getAll(String hash, String... rangeKeys)
     List<DynamoDBEntity> loadAll(String hash, List<String> rangeKeys)
     List<DynamoDBEntity> loadAll(String hash, String... rangeKeys)
@@ -559,13 +568,55 @@ interface DynamoDBItemDBService {
     })
     Number decrement(String hashKey, String rangeKey)
 
+    @Update({
+        update(DynamoDBEntity) {
+            hash hashKey
+            range rangeKey
+            add 'number', -3
+            returnUpdatedOld { number }
+        }
+    })
+    Number minus3AndReturnOriginal(String hashKey, String rangeKey)
+
+    @Update({
+        update(DynamoDBEntity) {
+            hash hashKey
+            range rangeKey
+            add 'number', -5
+            returnAllOld { number }
+        }
+    })
+    Number minus5AndReturnAllOld(String hashKey, String rangeKey)
+
+    @Update({
+        update(DynamoDBEntity) {
+            hash hashKey
+            range rangeKey
+            add 'number', -7
+            returnAllNew { number }
+        }
+    })
+    Number minus7AndReturnAllNew(String hashKey, String rangeKey)
+
+    @Update({
+        update(DynamoDBEntity) {
+            hash hashKey
+            range rangeKey
+            add 'number', -13
+            returnNone()
+        }
+    })
+    void minus13AndIgnore(String hashKey, String rangeKey)
+
     // tag::sample-scan[]
     @Scan({                                                                             // <3>
         scan(DynamoDBEntity) {
             filter {
                 eq DynamoDBEntity.RANGE_INDEX, foo                                      // <4>
             }
-            only DynamoDBEntity.RANGE_INDEX
+            only {
+                rangeIndex
+            }
         }
     })
     Flowable<DynamoDBEntity> scanAllByRangeIndex(String foo)                            // <5>
@@ -618,6 +669,9 @@ interface DynamoDBItemDBService {
             filter {
                 between DynamoDBEntity.RANGE_INDEX, lo, hi
             }
+            configure {
+                addAttributeToProject DynamoDBEntity.RANGE_INDEX
+            }
         }
     })
     int countBetween(String lo, String hi)
@@ -625,7 +679,9 @@ interface DynamoDBItemDBService {
     @Scan({
         scan(DynamoDBEntity) {
             filter {
-                ne DynamoDBEntity.RANGE_INDEX, foo
+                and {
+                    ne DynamoDBEntity.RANGE_INDEX, foo
+                }
             }
             configure {
                 attributesToProject 'parentId', 'id'

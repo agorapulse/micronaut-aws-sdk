@@ -17,10 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Query;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Scan;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Service;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Update;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.*;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.Builders;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedQuery;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedScan;
@@ -38,9 +35,9 @@ import java.util.function.Function;
 public interface DynamoDBEntityService {
 // end::header[]
 
-    DynamoDBEntity get(String hash, String rangeKey);
+    DynamoDBEntity get(@PartitionKey String parentId, @SortKey String id);
 
-    DynamoDBEntity load(String hash, String rangeKey);
+    DynamoDBEntity load(@HashKey String parentId, @RangeKey String id);
 
     List<DynamoDBEntity> getAll(String hash, List<String> rangeKeys);
 
