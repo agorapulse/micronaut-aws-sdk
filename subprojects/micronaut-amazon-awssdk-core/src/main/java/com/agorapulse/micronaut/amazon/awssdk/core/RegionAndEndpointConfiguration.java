@@ -18,6 +18,7 @@
 package com.agorapulse.micronaut.amazon.awssdk.core;
 
 import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder;
+import software.amazon.awssdk.awscore.presigner.SdkPresigner;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
 
@@ -44,5 +45,20 @@ public interface RegionAndEndpointConfiguration {
 
         return builder;
     }
+
+    default <B extends SdkPresigner.Builder> B configure(B builder, AwsRegionProvider awsRegionProvider) {
+        builder.region(Optional.ofNullable(getRegion()).map(Region::of).orElseGet(awsRegionProvider::getRegion));
+
+        if (getEndpoint() != null) {
+            try {
+                builder.endpointOverride(new URI(getEndpoint()));
+            } catch (URISyntaxException e) {
+                throw new IllegalArgumentException("Endpoint configured for " + getClass() + " is not a valid URI!", e);
+            }
+        }
+
+        return builder;
+    }
+
 
 }

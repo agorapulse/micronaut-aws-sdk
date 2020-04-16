@@ -15,21 +15,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-config {
-    bintray {
-        enabled = true
+package com.agorapulse.micronaut.amazon.awssdk.s3;
+
+import io.micronaut.context.annotation.EachProperty;
+import io.micronaut.context.annotation.Parameter;
+
+/**
+ * Simple storage service configuration for each configuration key.
+ */
+@EachProperty("aws.s3.buckets")
+public class NamedSimpleStorageServiceConfiguration extends SimpleStorageServiceConfiguration {
+
+    public NamedSimpleStorageServiceConfiguration(@Parameter String name) {
+        this.name = name;
     }
-}
 
-dependencies {
-    compile project(':micronaut-amazon-awssdk-core')
+    public String getName() {
+        return name;
+    }
 
-    compile "space.jasan:groovy-closure-support:$closureSupportVersion"
-
-    compile "software.amazon.awssdk:dynamodb"
-    compile "software.amazon.awssdk:dynamodb-enhanced"
-
-    testCompile group: 'org.testcontainers', name: 'testcontainers', version: testcontainersVersion
-    testCompile group: 'org.testcontainers', name: 'spock', version: testcontainersVersion
+    private String name;
 
 }
