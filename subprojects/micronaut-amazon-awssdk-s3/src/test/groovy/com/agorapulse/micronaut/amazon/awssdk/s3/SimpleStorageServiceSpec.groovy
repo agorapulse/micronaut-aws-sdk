@@ -17,7 +17,6 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.s3
 
-import groovy.json.JsonOutput
 import io.micronaut.context.ApplicationContext
 import io.reactivex.Flowable
 import org.junit.Rule
@@ -71,18 +70,18 @@ class SimpleStorageServiceSpec extends Specification {
             .builder()
             .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.S3))
             .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.getDefaultAccessKey(), localstack.getDefaultSecretKey()
+                localstack.defaultAccessKey, localstack.defaultSecretKey
             )))
-            .region(Region.of(localstack.getDefaultRegion()))
+            .region(Region.of(localstack.defaultRegion))
             .build()
 
         presigner = S3Presigner
             .builder()
             .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.S3))
             .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.getDefaultAccessKey(), localstack.getDefaultSecretKey()
+                localstack.defaultAccessKey, localstack.defaultSecretKey
             )))
-            .region(Region.of(localstack.getDefaultRegion()))
+            .region(Region.of(localstack.defaultRegion))
             .build()
         context = ApplicationContext
             .build(
@@ -134,7 +133,7 @@ class SimpleStorageServiceSpec extends Specification {
 
     void 'upload multipart'() {
         when:
-            service.storeMultipartFile('mix/multi', new MockPartData("Hello"))
+            service.storeMultipartFile('mix/multi', new MockPartData('Hello'))
             S3Object object = service.listObjectSummaries('mix').blockingFirst()
         then:
             object
@@ -146,13 +145,13 @@ class SimpleStorageServiceSpec extends Specification {
         when:
             String newKey = 'mix/moved-' + acl
             String oldKey = 'mix/to-be-moved-' + acl
-            service.storeMultipartFile(oldKey, new MockPartData("Public"), acl) {
+            service.storeMultipartFile(oldKey, new MockPartData('Public'), acl) {
                 tagging(Tagging.builder().tagSet(Tag.builder().key('foo').value('bar').build()).build())
-                contentDisposition "attachment"
-                contentLanguage "en"
+                contentDisposition 'attachment'
+                contentLanguage 'en'
                 metadata meta: 'test'
             }
-            GetObjectAclResponse oldAcls = amazonS3.getObjectAcl() { it.bucket(MY_BUCKET).key(oldKey) }
+            GetObjectAclResponse oldAcls = amazonS3.getObjectAcl { it.bucket(MY_BUCKET).key(oldKey) }
         and:
             service.moveObject(oldKey, MY_BUCKET, newKey)
         and:
@@ -166,12 +165,12 @@ class SimpleStorageServiceSpec extends Specification {
 
             amazonS3.getObjectTagging { it.bucket(MY_BUCKET).key(newKey) }
                 .tagSet()
-                .any { it.key() == 'foo' && it.value() == 'bar'}
+                .any { it.key() == 'foo' && it.value() == 'bar' }
 
             !service.exists(oldKey)
 
         when:
-            GetObjectAclResponse newAcls = amazonS3.getObjectAcl() { it.bucket(MY_BUCKET).key(newKey) }
+            GetObjectAclResponse newAcls = amazonS3.getObjectAcl { it.bucket(MY_BUCKET).key(newKey) }
         then:
             newAcls.toString() == oldAcls.toString()
         and:
@@ -237,7 +236,9 @@ class SimpleStorageServiceSpec extends Specification {
     void 'delete bucket'() {
         expect:
             service.listObjectSummaries().count().blockingGet() == 0
-            service.listObjects().flatMap{r -> Flowable.fromIterable(r.contents()) }.count().blockingGet() == 0
+            service.listObjects().flatMap { r ->
+                Flowable.fromIterable(r.contents())
+            }.count().blockingGet() == 0
         when:
             service.deleteBucket()
         then:
@@ -247,9 +248,8 @@ class SimpleStorageServiceSpec extends Specification {
     void 'error handling'() {
         expect:
             !service.exists(MY_BUCKET, KEY)
-            !service.storeInputStream(MY_BUCKET, KEY, new ByteArrayInputStream("Hello".bytes))
-            !service.storeMultipartFile(MY_BUCKET, KEY, new MockPartData("Foo"))
-
+            !service.storeInputStream(MY_BUCKET, KEY, new ByteArrayInputStream('Hello'.bytes))
+            !service.storeMultipartFile(MY_BUCKET, KEY, new MockPartData('Foo'))
     }
 
 }

@@ -125,10 +125,10 @@ public class LocalStackContainer extends GenericContainer<LocalStackContainer> {
             String ipAddress = address;
             // resolve IP address and use that as the endpoint so that path-style access is automatically used for S3
             ipAddress = InetAddress.getByName(address).getHostAddress();
-            return new URI("http://" +
-                ipAddress +
-                ":" +
-                getMappedPort(service.getPort()));
+            return new URI("http://"
+                + ipAddress
+                + ":"
+                + getMappedPort(service.getPort()));
         } catch (UnknownHostException | URISyntaxException e) {
             throw new IllegalStateException("Cannot obtain endpoint URL", e);
         }

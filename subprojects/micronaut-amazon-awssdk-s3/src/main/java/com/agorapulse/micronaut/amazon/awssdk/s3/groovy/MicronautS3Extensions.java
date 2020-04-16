@@ -12,10 +12,8 @@ import space.jasan.support.groovy.closure.ConsumerWithDelegate;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.function.Consumer;
 
 public class MicronautS3Extensions {
-
 
     /**
      * Uploads data from the input stream to desired path on S3.
@@ -52,7 +50,7 @@ public class MicronautS3Extensions {
         @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.s3.model.PutObjectRequest.Builder")
         Closure<PutObjectRequest.Builder> metadataDefinition
     ) {
-        return self.storeInputStream(path, input, ConsumerWithDelegate.create(metadataDefinition));
+        return storeInputStream(self, self.getDefaultBucketName(), path, input, metadataDefinition);
     }
 
 
@@ -97,7 +95,7 @@ public class MicronautS3Extensions {
         @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.s3.model.PutObjectRequest.Builder")
         Closure<PutObjectRequest.Builder> metadataDefinition
     ) throws IOException {
-        return self.storeMultipartFile(path, multipartFile, cannedAcl, ConsumerWithDelegate.create(metadataDefinition));
+        return storeMultipartFile(self, self.getDefaultBucketName(), path, multipartFile, cannedAcl, metadataDefinition);
     }
 
 }
