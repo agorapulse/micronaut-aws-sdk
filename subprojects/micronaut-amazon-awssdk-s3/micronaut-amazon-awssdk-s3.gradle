@@ -26,10 +26,9 @@ dependencies {
 
     compile "space.jasan:groovy-closure-support:$closureSupportVersion"
 
-    compile "software.amazon.awssdk:dynamodb"
-    compile "software.amazon.awssdk:dynamodb-enhanced"
+    compile "software.amazon.awssdk:s3"
 
     testCompile group: 'org.testcontainers', name: 'testcontainers', version: testcontainersVersion
     testCompile group: 'org.testcontainers', name: 'spock', version: testcontainersVersion
-
+    testCompile 'io.micronaut.configuration:micronaut-aws-common'
 }
