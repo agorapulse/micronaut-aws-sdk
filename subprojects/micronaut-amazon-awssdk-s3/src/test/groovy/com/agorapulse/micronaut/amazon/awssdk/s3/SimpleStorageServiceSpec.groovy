@@ -49,6 +49,7 @@ class SimpleStorageServiceSpec extends Specification {
 
     private static final String KEY = 'foo/bar.baz'
     private static final String MY_BUCKET = 'testbucket'
+    private static final String OTHER_BUCKET = 'otherbucket'
     private static final String SAMPLE_CONTENT = 'hello world!'
     private static final Date TOMORROW = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000)
     private static final String NO_SUCH_BUCKET = 'no-such-bucket'
@@ -99,7 +100,8 @@ class SimpleStorageServiceSpec extends Specification {
 
     void 'new bucket'() {
         when:
-            service.createBucket(MY_BUCKET)
+            service.createBucket()
+            service.createBucket(OTHER_BUCKET)
         then:
             service.listBucketNames().contains(MY_BUCKET)
     }
@@ -110,11 +112,25 @@ class SimpleStorageServiceSpec extends Specification {
             file.createNewFile()
             file.text = SAMPLE_CONTENT
 
-            service.storeFile('bar/foo.txt', file)
+            service.storeFile('bar/foo.txt', file) {
+                acl ObjectCannedACL.PUBLIC_READ
+            }
         then:
             service.exists('bar/foo.txt')
         and:
             !service.storeFile(NO_SUCH_BUCKET, 'bar/foo.txt', file)
+
+        when:
+            service.storeFile(OTHER_BUCKET, 'bar/other-foo.txt', file) {
+                acl ObjectCannedACL.PUBLIC_READ
+            }
+        then:
+            service.exists(OTHER_BUCKET, 'bar/other-foo.txt')
+
+        when:
+            service.storeFile('bar/second.txt', file)
+        then:
+            service.exists('bar/second.txt')
     }
 
     void 'upload content'() {
@@ -129,23 +145,47 @@ class SimpleStorageServiceSpec extends Specification {
 
         then:
             service.listObjectSummaries('foo').blockingFirst().key() == KEY
+
+        when:
+            service.storeInputStream(OTHER_BUCKET, KEY, new ByteArrayInputStream(SAMPLE_CONTENT.bytes)) {
+                contentLength SAMPLE_CONTENT.size()
+                contentType 'text/plain'
+                contentDisposition 'bar.baz'
+            }
+
+        then:
+            service.listObjectSummaries(OTHER_BUCKET, 'foo').blockingFirst().key() == KEY
     }
 
     void 'upload multipart'() {
         when:
-            service.storeMultipartFile('mix/multi', new MockPartData('Hello'))
+            service.storeMultipartFile('mix/multi', new MockPartData('Hello')) {
+                acl ObjectCannedACL.PUBLIC_READ
+            }
             S3Object object = service.listObjectSummaries('mix').blockingFirst()
         then:
             object
             object.size() == 5
     }
 
-    @Unroll
-    void 'move object created with canned acl #acl'() {
+    void 'upload multipart - other'() {
         when:
-            String newKey = 'mix/moved-' + acl
-            String oldKey = 'mix/to-be-moved-' + acl
-            service.storeMultipartFile(oldKey, new MockPartData('Public'), acl) {
+            service.storeMultipartFile(OTHER_BUCKET, 'mix/multi', new MockPartData('Hello')) {
+                acl ObjectCannedACL.PUBLIC_READ
+            }
+            S3Object object = service.listObjectSummaries(OTHER_BUCKET, 'mix').blockingFirst()
+        then:
+            object
+            object.size() == 5
+    }
+
+    @Unroll
+    void 'move object created with canned acl #desiredAcl'() {
+        when:
+            String newKey = 'mix/moved-' + desiredAcl
+            String oldKey = 'mix/to-be-moved-' + desiredAcl
+            service.storeMultipartFile(oldKey, new MockPartData('Public')) {
+                acl desiredAcl
                 tagging(Tagging.builder().tagSet(Tag.builder().key('foo').value('bar').build()).build())
                 contentDisposition 'attachment'
                 contentLanguage 'en'
@@ -176,7 +216,7 @@ class SimpleStorageServiceSpec extends Specification {
         and:
             !service.moveObject(oldKey, MY_BUCKET, newKey)
         where:
-            acl << [
+            desiredAcl << [
                 ObjectCannedACL.PRIVATE,
                 ObjectCannedACL.PUBLIC_READ,
                 ObjectCannedACL.PUBLIC_READ_WRITE,
@@ -196,14 +236,21 @@ class SimpleStorageServiceSpec extends Specification {
     }
 
     void 'download file'() {
-        when:
+        given:
             File dir = tmp.newFolder()
+        when:
             File file = new File(dir, 'bar.baz')
-
             service.getFile(KEY, file)
         then:
             file.exists()
             file.text == SAMPLE_CONTENT
+
+        when:
+            File file2 = new File(dir, 'bar2.baz')
+            service.getFile(KEY, file2.canonicalPath)
+        then:
+            file2.exists()
+            file2.text == SAMPLE_CONTENT
     }
 
     void 'delete file'() {
@@ -224,7 +271,7 @@ class SimpleStorageServiceSpec extends Specification {
     void 'delete files'() {
         expect:
             !service.deleteFiles(NO_SUCH_BUCKET, 'mix')
-            service.listObjectSummaries('mix').count().blockingGet() > 0
+            service.getObjectSummary('mix')
             service.deleteFiles('mix')
             service.listObjectSummaries('mix').count().blockingGet() == 0
         when:
@@ -234,6 +281,8 @@ class SimpleStorageServiceSpec extends Specification {
     }
 
     void 'delete bucket'() {
+        given:
+            service.deleteFiles('')
         expect:
             service.listObjectSummaries().count().blockingGet() == 0
             service.listObjects().flatMap { r ->
@@ -248,8 +297,8 @@ class SimpleStorageServiceSpec extends Specification {
     void 'error handling'() {
         expect:
             !service.exists(MY_BUCKET, KEY)
-            !service.storeInputStream(MY_BUCKET, KEY, new ByteArrayInputStream('Hello'.bytes))
-            !service.storeMultipartFile(MY_BUCKET, KEY, new MockPartData('Foo'))
+            !service.storeInputStream(KEY, new ByteArrayInputStream('Hello'.bytes))
+            !service.storeMultipartFile(KEY, new MockPartData('Foo'))
     }
 
 }

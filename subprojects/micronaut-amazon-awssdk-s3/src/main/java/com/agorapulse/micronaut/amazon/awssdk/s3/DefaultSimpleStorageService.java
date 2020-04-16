@@ -1,3 +1,20 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2018-2020 Agorapulse.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.agorapulse.micronaut.amazon.awssdk.s3;
 
 import io.micronaut.http.multipart.PartData;
@@ -90,7 +107,7 @@ public class DefaultSimpleStorageService implements SimpleStorageService {
             return false;
         }
         try {
-            return listObjectSummaries(bucketName, key).count().blockingGet() == 1;
+            return getObject(bucketName, key) != null;
         } catch (AwsServiceException | SdkClientException e) {
             LOGGER.warn(String.format("Exception obtaining object existence %s/%s", bucketName, key), e);
             return false;
@@ -143,10 +160,13 @@ public class DefaultSimpleStorageService implements SimpleStorageService {
     }
 
     @Override
-    public String storeFile(String bucketName, String path, File file, ObjectCannedACL cannedAcl) {
+    public String storeFile(String bucketName, String path, File file, Consumer<PutObjectRequest.Builder> additionalConfig) {
         try {
             s3.putObject(
-                b -> b.bucket(bucketName).key(path).acl(cannedAcl),
+                b -> {
+                    b.bucket(bucketName).key(path);
+                    additionalConfig.accept(b);
+                },
                 RequestBody.fromFile(file)
             );
             return s3.utilities().getUrl(b -> b.bucket(bucketName).key(path)).toExternalForm();
@@ -156,12 +176,12 @@ public class DefaultSimpleStorageService implements SimpleStorageService {
     }
 
     @Override
-    public String storeMultipartFile(String bucketName, String path, PartData partData, ObjectCannedACL cannedAcl, Consumer<PutObjectRequest.Builder> additionalConfig) throws IOException {
+    public String storeMultipartFile(String bucketName, String path, PartData partData, Consumer<PutObjectRequest.Builder> additionalConfig) throws IOException {
         byte[] bytes = partData.getBytes();
         return storeInputStream(bucketName, path, partData.getInputStream(), b -> {
-            b.acl(cannedAcl).contentLength(Integer.valueOf(bytes.length).longValue());
-            partData.getContentType().ifPresent(t -> b.contentType(t.getName()));
+            b.contentLength(Integer.valueOf(bytes.length).longValue());
             b.contentMD5(Md5Utils.md5AsBase64(bytes));
+            partData.getContentType().ifPresent(t -> b.contentType(t.getName()));
             additionalConfig.accept(b);
         });
     }

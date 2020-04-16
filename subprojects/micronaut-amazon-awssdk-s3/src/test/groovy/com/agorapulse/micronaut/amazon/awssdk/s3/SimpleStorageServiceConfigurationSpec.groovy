@@ -53,6 +53,8 @@ class SimpleStorageServiceConfigurationSpec extends Specification {
             context.getBeanDefinitions(SimpleStorageService).size() == 1
             context.getBean(SimpleStorageServiceConfiguration).bucket == 'bucket.example.com'
             context.getBean(SimpleStorageService)
+            context.getBean(S3AsyncClient)
+            context.getBean(S3Presigner)
     }
 
     void 'configure single named service'() {
@@ -77,6 +79,8 @@ class SimpleStorageServiceConfigurationSpec extends Specification {
             context.getBeanDefinitions(SimpleStorageService).size() == 2
             context.getBean(SimpleStorageService, Qualifiers.byName('default'))
             context.getBean(SimpleStorageService, Qualifiers.byName('samplebucket'))
+            context.getBean(SimpleStorageServiceConfiguration, Qualifiers.byName('samplebucket')) instanceof NamedSimpleStorageServiceConfiguration
+            context.getBean(SimpleStorageServiceConfiguration, Qualifiers.byName('samplebucket')).name == 'samplebucket'
     }
 
 }

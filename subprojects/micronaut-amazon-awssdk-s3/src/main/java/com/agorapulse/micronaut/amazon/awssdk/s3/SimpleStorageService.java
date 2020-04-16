@@ -306,6 +306,17 @@ public interface SimpleStorageService {
 
     /**
      * Uploads data from the input stream to desired path on S3.
+     * @param path the destination path (key) on S3
+     * @param input the input data as stream
+     * @param metadataDefinition the object metadata definition
+     * @return the URL to newly created object
+     */
+    default String storeInputStream(String path, InputStream input, Consumer<PutObjectRequest.Builder> metadataDefinition) {
+        return storeInputStream(getDefaultBucketName(), path, input, metadataDefinition);
+    }
+
+    /**
+     * Uploads data from the input stream to desired path on S3.
      * @param bucketName the name of the bucket
      * @param path the destination path (key) on S3
      * @param input the input data as stream
@@ -319,21 +330,10 @@ public interface SimpleStorageService {
      * Uploads data from the input stream to desired path on S3.
      * @param path the destination path (key) on S3
      * @param input the input data as stream
-     * @param metadataDefinition the object metadata definition
-     * @return the URL to newly created object
-     */
-    default String storeInputStream(String path, InputStream input, Consumer<PutObjectRequest.Builder> metadataDefinition) {
-        return storeInputStream(getDefaultBucketName(), path, input, metadataDefinition);
-    }
-
-    /**
-     * Uploads data from the input stream to desired path on S3.
-     * @param path the destination path (key) on S3
-     * @param input the input data as stream
      * @return the URL to newly created object
      */
     default String storeInputStream(String path, InputStream input) {
-        return storeInputStream(getDefaultBucketName(), path, input, b -> {});
+        return storeInputStream(getDefaultBucketName(), path, input);
     }
 
     /**
@@ -341,41 +341,45 @@ public interface SimpleStorageService {
      * @param bucketName the name of the bucket
      * @param path the destination path (key) on S3
      * @param file the input file
-     * @param cannedAcl ACLs
      * @return the URL to newly created object
      */
-    String storeFile(String bucketName, String path, File file, ObjectCannedACL cannedAcl);
+    String storeFile(String bucketName, String path, File file, Consumer<PutObjectRequest.Builder> metadataDefinition);
 
     /**
      * Uploads data from the file to desired path on S3.
+     * @param path the destination path (key) on S3
+     * @param file the input file
+     * @return the URL to newly created object
+     */
+    default String storeFile(String path, File file, Consumer<PutObjectRequest.Builder> metadataDefinition) {
+        return storeFile(getDefaultBucketName(), path, file, metadataDefinition);
+    }
+
+    /**
+     * Uploads data from the file to desired path on S3.
+     *
+     * WARNING: this method does not set the ACL to public write as the v1 version.
+     *
      * @param bucketName the name of the bucket
      * @param path the destination path (key) on S3
      * @param file the input file
      * @return the URL to newly created object
      */
     default String storeFile(String bucketName, String path, File file) {
-        return storeFile(bucketName, path, file, ObjectCannedACL.PUBLIC_READ);
+        return storeFile(bucketName, path, file, b -> {});
     }
 
     /**
      * Uploads data from the file to desired path on S3.
-     * @param path the destination path (key) on S3
-     * @param file the input file
-     * @param cannedAcl ACLs
-     * @return the URL to newly created object
-     */
-    default String storeFile(String path, File file, ObjectCannedACL cannedAcl) {
-        return storeFile(getDefaultBucketName(), path, file, cannedAcl);
-    }
-
-    /**
-     * Uploads data from the file to desired path on S3.
+     *
+     * WARNING: this method does not set the ACL to public write as the v1 version.
+     *
      * @param path the destination path (key) on S3
      * @param file the input file
      * @return the URL to newly created object
      */
     default String storeFile(String path, File file) {
-        return storeFile(getDefaultBucketName(), path, file, ObjectCannedACL.PUBLIC_READ);
+        return storeFile(getDefaultBucketName(), path, file);
     }
 
     /**
@@ -384,24 +388,10 @@ public interface SimpleStorageService {
      * @param bucketName the name of the bucket
      * @param path the destination path (key) on S3
      * @param partData the input data
-     * @param cannedAcl ACLs
      * @param metadataDefinition the object metadata definition
      * @return the URL to newly created object
      */
-    String storeMultipartFile(String bucketName, String path, PartData partData, ObjectCannedACL cannedAcl, Consumer<PutObjectRequest.Builder> metadataDefinition) throws IOException;
-
-    /**
-     * Uploads data from the multipart file to desired path on S3.
-     *
-     * @param bucketName the name of the bucket
-     * @param path the destination path (key) on S3
-     * @param partData the input data
-     * @param cannedAcl ACLs
-     * @return the URL to newly created object
-     */
-    default String storeMultipartFile(String bucketName, String path, PartData partData, ObjectCannedACL cannedAcl) throws IOException {
-        return storeMultipartFile(bucketName, path, partData, cannedAcl, b -> {});
-    }
+    String storeMultipartFile(String bucketName, String path, PartData partData, Consumer<PutObjectRequest.Builder> metadataDefinition) throws IOException;
 
     /**
      * Uploads data from the multipart file to desired path on S3.
@@ -412,29 +402,17 @@ public interface SimpleStorageService {
      * @return the URL to newly created object
      */
     default String storeMultipartFile(String bucketName, String path, PartData partData) throws IOException {
-        return storeMultipartFile(bucketName, path, partData, ObjectCannedACL.PUBLIC_READ);
+        return storeMultipartFile(bucketName, path, partData, b -> {});
     }
 
     /**
      * Uploads data from the multipart file to desired path on S3.
      *
      * @param path the destination path (key) on S3
-     * @param cannedAcl ACLs
-     * @return the URL to newly created object
-     */
-    default String storeMultipartFile(String path, PartData multipartFile, ObjectCannedACL cannedAcl) throws IOException {
-        return storeMultipartFile(path, multipartFile, cannedAcl, b -> {});
-    }
-
-    /**
-     * Uploads data from the multipart file to desired path on S3.
-     *
-     * @param path the destination path (key) on S3
-     * @param multipartFile the input data
      * @return the URL to newly created object
      */
     default String storeMultipartFile(String path, PartData multipartFile) throws IOException {
-        return storeMultipartFile(path, multipartFile, ObjectCannedACL.PUBLIC_READ);
+        return storeMultipartFile(getDefaultBucketName(), path, multipartFile);
     }
 
     /**
@@ -442,12 +420,11 @@ public interface SimpleStorageService {
      *
      * @param path the destination path (key) on S3
      * @param multipartFile the input data
-     * @param cannedAcl ACLs
      * @param metadataDefinition the object metadata definition
      * @return the URL to newly created object
      */
-    default String storeMultipartFile(String path, PartData multipartFile, ObjectCannedACL cannedAcl, Consumer<PutObjectRequest.Builder> metadataDefinition) throws IOException {
-        return storeMultipartFile(getDefaultBucketName(), path, multipartFile, cannedAcl, metadataDefinition);
+    default String storeMultipartFile(String path, PartData multipartFile, Consumer<PutObjectRequest.Builder> metadataDefinition) throws IOException {
+        return storeMultipartFile(getDefaultBucketName(), path, multipartFile, metadataDefinition);
     }
 
     /**
