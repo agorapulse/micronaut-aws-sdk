@@ -1,0 +1,4 @@
+moduleName=micronaut-amazon-awssdk-ses
+moduleVersion=1.3.4
+extensionClasses=com.agorapulse.micronaut.amazon.awssdk.ses.groovy.MicronautSesExtensions
+staticExtensionClasses=com.agorapulse.micronaut.amazon.awssdk.ses.groovy.MicronautSesStaticExtensions
