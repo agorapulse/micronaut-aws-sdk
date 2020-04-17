@@ -20,7 +20,7 @@ package com.agorapulse.micronaut.amazon.awssdk.ses;
 import java.util.function.Consumer;
 
 /**
- * Service for sending
+ * Service for sending emails via AWS Simple Email Service.
  */
 public interface SimpleEmailService {
 
@@ -41,10 +41,20 @@ public interface SimpleEmailService {
         return email;
     }
 
+    /**
+     * Builds and sends an email.
+     * @param composer email definition
+     * @return delivery status
+     */
     default EmailDeliveryStatus send(Consumer<TransactionalEmail> composer) {
         return send(email(composer));
     }
 
+    /**
+     * Sends an email.
+     * @param email email to be sent
+     * @return delivery status
+     */
     EmailDeliveryStatus send(TransactionalEmail email);
 
 }
