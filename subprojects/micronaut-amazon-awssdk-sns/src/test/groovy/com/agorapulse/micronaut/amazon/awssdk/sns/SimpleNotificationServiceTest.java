@@ -1,0 +1,163 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2018-2020 Agorapulse.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.agorapulse.micronaut.amazon.awssdk.sns;
+
+import io.micronaut.context.ApplicationContext;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.model.MessageAttributeValue;
+import software.amazon.awssdk.services.sns.model.Topic;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+public class SimpleNotificationServiceTest {
+
+    private static final String TEST_TOPIC = "TestTopic";
+    private static final String EMAIL = "vlad@agorapulse.com";
+    private static final String DEVICE_TOKEN = "DEVICE-TOKEN";
+    private static final String API_KEY = "API-KEY";
+    private static final String DATA = "Vlad";
+    private static final String PHONE_NUMBER = "+420999888777";
+
+    // tag::testcontainers-setup[]
+    public ApplicationContext context;                                                  // <1>
+
+    public SimpleNotificationService service;
+
+    @Rule
+    public LocalStackContainer localstack = new LocalStackContainer("0.8.10")            // <2>
+        .withServices(LocalStackContainer.Service.SNS);
+
+    @Before
+    public void setup() {
+        SnsClient amazonSNS = SnsClient                                           // <3>
+            .builder()
+            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.SNS))
+            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
+                localstack.getDefaultAccessKey(), localstack.getDefaultSecretKey()
+            )))
+            .region(Region.of(localstack.getDefaultRegion()))
+            .build();
+
+
+        Map<String, Object> properties = new HashMap<>();                               // <4>
+        properties.put("aws.sns.topic", TEST_TOPIC);
+
+
+        context = ApplicationContext.build(properties).build();                         // <5>
+        context.registerSingleton(SnsClient.class, amazonSNS);
+        context.start();
+
+        service = context.getBean(SimpleNotificationService.class);
+    }
+
+    @After
+    public void cleanup() {
+        if (context != null) {
+            context.close();                                                            // <6>
+        }
+    }
+    // end::testcontainers-setup[]
+
+    @Test
+    public void testWorkingWithTopics() {
+        // tag::new-topic[]
+        String topicArn = service.createTopic(TEST_TOPIC);                              // <1>
+
+        Topic found = service.listTopics().filter(t ->                                  // <2>
+            t.topicArn().endsWith(TEST_TOPIC)
+        ).blockingFirst();
+        // end::new-topic[]
+
+        assertNotNull(found);
+
+        // CHECKSTYLE:OFF
+        // tag::subscription[]
+        String subArn = service.subscribeTopicWithEmail(topicArn, EMAIL);               // <1>
+
+        String messageId = service.publishMessageToTopic(                               // <2>
+            topicArn,
+            "Test Email",
+            "Hello World"
+        );
+
+        service.unsubscribeTopic(subArn);                                               // <3>
+        // end::subscription[]
+        // CHECKSTYLE:ON
+
+        assertNotNull(subArn);
+        assertNotNull(messageId);
+
+        // tag::delete-topic[]
+        service.deleteTopic(topicArn);                                                  // <1>
+
+        Long zero = service.listTopics().filter(t ->                                    // <2>
+            t.topicArn().endsWith(TEST_TOPIC)
+        ).count().blockingGet();
+        // end::delete-topic[]
+
+        assertEquals(Long.valueOf(0), zero);
+    }
+
+    @Test
+    public void testPlatformApplications() {
+        // tag::applications[]
+        String appArn = service.createAndroidApplication("my-app", API_KEY);        // <1>
+
+        String endpoint = service.registerAndroidDevice(appArn, DEVICE_TOKEN, DATA);    // <2>
+
+        Map<String, Object> notif = new LinkedHashMap<>();
+        notif.put("badge", "9");
+        notif.put("data", "{\"foo\": \"some bar\"}");
+        notif.put("title", "Some Title");
+
+        String msgId = service.sendAndroidAppNotification(endpoint, notif, "Welcome");  // <3>
+
+        service.validateAndroidDevice(appArn, endpoint, DEVICE_TOKEN, DATA);            // <4>
+
+        service.unregisterDevice(endpoint);                                             // <5>
+        // end::applications[]
+
+        assertNotNull(appArn);
+        assertNotNull(endpoint);
+        assertNotNull(msgId);
+    }
+
+    @Test
+    public void sendSMS() {
+        // tag::sms[]
+        Map<String, MessageAttributeValue> attrs = Collections.emptyMap();
+        String msgId = service.sendSMSMessage(PHONE_NUMBER, "Hello World", attrs);      // <1>
+        // end::sms[]
+
+        assertNotNull(msgId);
+    }
+
+}
