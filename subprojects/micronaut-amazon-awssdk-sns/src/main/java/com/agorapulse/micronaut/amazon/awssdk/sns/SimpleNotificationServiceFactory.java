@@ -18,7 +18,6 @@
 package com.agorapulse.micronaut.amazon.awssdk.sns;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.EachBean;
 import io.micronaut.context.annotation.Factory;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;

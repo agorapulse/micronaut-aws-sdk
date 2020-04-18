@@ -273,7 +273,7 @@ public class DefaultSimpleNotificationService implements SimpleNotificationServi
             try {
                 r.targetArn(endpointArn).messageStructure("json").message(objectMapper.writeValueAsString(Collections.singletonMap(platformType, message)));
             } catch (JsonProcessingException e) {
-                throw new IllegalArgumentException("Cannot write json for platform " + platformType + " and message " + message , e);
+                throw new IllegalArgumentException("Cannot write json for platform " + platformType + " and message " + message, e);
             }
         }).messageId();
     }

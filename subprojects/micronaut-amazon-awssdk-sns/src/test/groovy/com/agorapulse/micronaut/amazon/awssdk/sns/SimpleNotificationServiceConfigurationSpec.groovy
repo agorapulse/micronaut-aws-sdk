@@ -57,7 +57,6 @@ class SimpleNotificationServiceConfigurationSpec extends Specification {
         context.getBean(SimpleNotificationService, Qualifiers.byName('default'))
         context.getBean(SimpleNotificationService, Qualifiers.byName('mytopic'))
         context.getBean(NamedSimpleNotificationServiceConfiguration).name == 'mytopic'
-
     }
 
     void 'configure default and named service'() {

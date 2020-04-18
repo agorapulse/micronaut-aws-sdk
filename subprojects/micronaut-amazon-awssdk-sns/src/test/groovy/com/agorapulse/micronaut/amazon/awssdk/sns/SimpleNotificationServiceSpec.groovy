@@ -201,7 +201,7 @@ class SimpleNotificationServiceSpec extends Specification {
     void 'publish direct'() {
         expect:
             service.sendAndroidAppNotification(androidEndpointArn, [message: 'Hello'], 'key')
-            service.sendIosAppNotification(iosEndpointArn, [message: "Hello"])
+            service.sendIosAppNotification(iosEndpointArn, [message: 'Hello'])
     }
 
     void 'unregister device'() {
