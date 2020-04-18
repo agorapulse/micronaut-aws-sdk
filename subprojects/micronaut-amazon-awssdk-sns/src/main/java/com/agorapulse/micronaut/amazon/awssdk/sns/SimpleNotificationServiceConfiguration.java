@@ -11,7 +11,7 @@ public abstract class SimpleNotificationServiceConfiguration extends DefaultRegi
 
     protected SimpleNotificationServiceConfiguration(String prefix, Environment environment) {
         ios = forPlatform(prefix, "ios", environment);
-        iosSandbox = forPlatform(prefix, "iosSandbox", environment);
+        iosSandbox = forPlatform(prefix, "ios-sandbox", environment);
         android = forPlatform(prefix, "android", environment);
         amazon = forPlatform(prefix, "amazon", environment);
     }

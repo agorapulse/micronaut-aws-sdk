@@ -67,6 +67,7 @@ class SimpleStorageServiceConfigurationSpec extends Specification {
             context.getBean(SimpleStorageService)
             context.getBean(SimpleStorageService, Qualifiers.byName('default'))
             context.getBean(SimpleStorageService, Qualifiers.byName('samplebucket'))
+            context.getBean(NamedSimpleStorageServiceConfiguration).name == 'samplebucket'
     }
 
     void 'configure default and named service'() {

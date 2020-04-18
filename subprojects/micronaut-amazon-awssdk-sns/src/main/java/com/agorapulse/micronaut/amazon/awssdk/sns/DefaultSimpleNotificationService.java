@@ -8,9 +8,22 @@ import io.reactivex.functions.BiFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.sns.SnsClient;
-import software.amazon.awssdk.services.sns.model.*;
+import software.amazon.awssdk.services.sns.model.CreatePlatformEndpointRequest;
+import software.amazon.awssdk.services.sns.model.DeleteEndpointResponse;
+import software.amazon.awssdk.services.sns.model.GetEndpointAttributesResponse;
+import software.amazon.awssdk.services.sns.model.InvalidParameterException;
+import software.amazon.awssdk.services.sns.model.ListTopicsResponse;
+import software.amazon.awssdk.services.sns.model.MessageAttributeValue;
+import software.amazon.awssdk.services.sns.model.NotFoundException;
+import software.amazon.awssdk.services.sns.model.SetEndpointAttributesResponse;
+import software.amazon.awssdk.services.sns.model.Topic;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -124,7 +137,7 @@ public class DefaultSimpleNotificationService implements SimpleNotificationServi
     @Override
     public String createPlatformEndpoint(String platformApplicationArn, String deviceToken, String customUserData) {
         try {
-            LOGGER.debug("Creating platform endpoint with token $deviceToken");
+            LOGGER.debug("Creating platform endpoint with token " + deviceToken);
             CreatePlatformEndpointRequest.Builder request = CreatePlatformEndpointRequest.builder()
                 .platformApplicationArn(platformApplicationArn)
                 .token(deviceToken);
