@@ -20,6 +20,7 @@ package com.agorapulse.micronaut.amazon.awssdk.sns
 import groovy.json.JsonOutput
 import io.micronaut.context.ApplicationContext
 import io.micronaut.inject.qualifiers.Qualifiers
+import software.amazon.awssdk.services.sns.model.NotFoundException
 import spock.lang.AutoCleanup
 import spock.lang.Specification
 
@@ -75,6 +76,21 @@ class NotificationClientSpec extends Specification {
         then:
             messageId == MESSAGE_ID
 
+            1 * defaultService.publishMessageToTopic(DEFAULT_TOPIC, null, POGO_AS_JSON) >> MESSAGE_ID
+    }
+
+    void 'topic is created automatically'() {
+        given:
+            DefaultClient client = context.getBean(DefaultClient)
+        when:
+            String messageId = client.publishMessage(POGO)
+        then:
+            messageId == MESSAGE_ID
+
+            1 * defaultService.publishMessageToTopic(DEFAULT_TOPIC, null, POGO_AS_JSON) >> {
+                throw NotFoundException.builder().message("Not found").build()
+            }
+            1 * defaultService.createTopic(DEFAULT_TOPIC)
             1 * defaultService.publishMessageToTopic(DEFAULT_TOPIC, null, POGO_AS_JSON) >> MESSAGE_ID
     }
 
