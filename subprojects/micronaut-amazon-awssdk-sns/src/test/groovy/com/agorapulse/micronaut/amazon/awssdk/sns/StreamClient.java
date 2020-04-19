@@ -25,4 +25,9 @@ import com.agorapulse.micronaut.amazon.awssdk.sns.annotation.NotificationClient;
 
     String publishMessage(Pogo message);
 
+    // invalid
+    String sendSMS(String number);
+    String doSomething(String one, String two, String three);
+    String sendMessage(String subject);
+
 }

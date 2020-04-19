@@ -155,5 +155,32 @@ class NotificationClientSpec extends Specification {
             1 * defaultService.publishMessageToTopic(StreamClient.SOME_STREAM, null, POGO_AS_JSON) >> MESSAGE_ID
     }
 
+    void 'wrong sms method format'() {
+        given:
+            StreamClient client = context.getBean(StreamClient)
+        when:
+            client.sendSMS('+420555666777')
+        then:
+            thrown(UnsupportedOperationException)
+    }
+
+    void 'wrong publish method format'() {
+        given:
+            StreamClient client = context.getBean(StreamClient)
+        when:
+            client.sendMessage('Hello')
+        then:
+            thrown(UnsupportedOperationException)
+    }
+
+    void 'wrong method format'() {
+        given:
+            StreamClient client = context.getBean(StreamClient)
+        when:
+            client.doSomething('one', 'two', 'three')
+        then:
+            thrown(UnsupportedOperationException)
+    }
+
 }
 

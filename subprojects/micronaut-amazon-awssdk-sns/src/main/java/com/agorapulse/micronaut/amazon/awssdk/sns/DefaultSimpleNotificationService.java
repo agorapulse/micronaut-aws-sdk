@@ -270,28 +270,16 @@ public class DefaultSimpleNotificationService implements SimpleNotificationServi
         value.put("delay_while_idle", delayWhileIdle);
         value.put("time_to_live", timeToLive);
         value.put("dry_run", dryRun);
-        try {
-            return objectMapper.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Cannot write android message " + value, e);
-        }
+        return toJson(value);
     }
 
     private String buildIosMessage(Map<String, Object> data) {
-        try {
-            return objectMapper.writeValueAsString(Collections.singletonMap("aps", data));
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Cannot write iOS message with data" + data, e);
-        }
+        return toJson(Collections.singletonMap("aps", data));
     }
 
     private String publishToTarget(String endpointArn, String platformType, String message) {
         return client.publish(r -> {
-            try {
-                r.targetArn(endpointArn).messageStructure("json").message(objectMapper.writeValueAsString(Collections.singletonMap(platformType, message)));
-            } catch (JsonProcessingException e) {
-                throw new IllegalArgumentException("Cannot write json for platform " + platformType + " and message " + message, e);
-            }
+            r.targetArn(endpointArn).messageStructure("json").message(toJson(Collections.singletonMap(platformType, message)));
         }).messageId();
     }
 
@@ -302,5 +290,13 @@ public class DefaultSimpleNotificationService implements SimpleNotificationServi
 
     private DeleteEndpointResponse deleteEndpoint(String endpointArn) {
         return client.deleteEndpoint(r -> r.endpointArn(endpointArn));
+    }
+
+    private String toJson(Map<String, Object> message) {
+        try {
+            return objectMapper.writeValueAsString(message);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Cannot write json for message " + message, e);
+        }
     }
 }
