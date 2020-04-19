@@ -94,9 +94,11 @@ class SimpleNotificationServiceSpec extends Specification {
 
     void 'new topic'() {
         when:
-            topicArn = service.createTopic('TOPIC')
+            String testTopic = 'TOPIC'
+            String created = service.createTopic(testTopic)
+            topicArn = testTopic
         then:
-            topicArn
+            created.endsWith(testTopic)
     }
 
     void 'subscribe to the topic'() {
