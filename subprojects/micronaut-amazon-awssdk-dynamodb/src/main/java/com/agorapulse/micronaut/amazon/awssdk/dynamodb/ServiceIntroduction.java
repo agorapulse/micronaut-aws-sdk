@@ -17,7 +17,13 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.*;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.HashKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.PartitionKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Query;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.RangeKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Scan;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Service;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SortKey;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Update;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.Builders;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedQuery;
@@ -26,14 +32,21 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedUpdate;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.core.annotation.AnnotationValue;
+import io.micronaut.core.beans.BeanIntrospection;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.type.MutableArgumentValue;
 import io.reactivex.Flowable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.enhanced.dynamodb.*;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
+import software.amazon.awssdk.enhanced.dynamodb.TableMetadata;
+import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.BeanTableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticTableMetadata;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondarySortKey;
 import software.amazon.awssdk.enhanced.dynamodb.model.EnhancedGlobalSecondaryIndex;
 import software.amazon.awssdk.enhanced.dynamodb.model.EnhancedLocalSecondaryIndex;
 import software.amazon.awssdk.enhanced.dynamodb.model.ReadBatch;
@@ -43,12 +56,7 @@ import software.amazon.awssdk.services.dynamodb.model.*;
 
 import javax.inject.Singleton;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -417,6 +425,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
     }
 
     private <T> void createTable(DynamoDbTable<T> table) {
+        Map<String, ProjectionType> types = getProjectionTypes(table);
         TableMetadata tableMetadata = table.tableSchema().tableMetadata();
         tableMetadata.allKeys();
         table.createTable(b -> {
@@ -427,10 +436,11 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
                 if (TableMetadata.primaryIndexName().equals(i)) {
                     return;
                 }
+                ProjectionType type = types.getOrDefault(i, ProjectionType.KEYS_ONLY);
                 if (tableMetadata.primaryPartitionKey().equals(tableMetadata.indexPartitionKey(i))) {
-                    localSecondaryIndices.add(EnhancedLocalSecondaryIndex.create(i, Projection.builder().projectionType(ProjectionType.KEYS_ONLY).build()));
+                    localSecondaryIndices.add(EnhancedLocalSecondaryIndex.create(i, Projection.builder().projectionType(type).build()));
                 } else {
-                    globalSecondaryIndices.add(EnhancedGlobalSecondaryIndex.builder().indexName(i).projection(Projection.builder().projectionType(ProjectionType.KEYS_ONLY).build()).build());
+                    globalSecondaryIndices.add(EnhancedGlobalSecondaryIndex.builder().indexName(i).projection(Projection.builder().projectionType(type).build()).build());
                 }
             });
 
@@ -443,6 +453,41 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             }
         });
 
+    }
+
+    private <T> Map<String, ProjectionType> getProjectionTypes(DynamoDbTable<T> table) {
+        Map<String, ProjectionType> types = new HashMap<>();
+
+        BeanIntrospection<T> introspection = EntityIntrospection.getBeanIntrospection(table);
+        introspection.getBeanProperties().forEach(p -> {
+            AnnotationValue<com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Projection> projectionAnnotation = p.getAnnotation(com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Projection.class);
+
+            if (projectionAnnotation == null) {
+                return;
+            }
+
+            AnnotationValue<DynamoDbSecondarySortKey> secondaryIndex = p.getAnnotation(DynamoDbSecondarySortKey.class);
+            Collection<String> indexNames = new ArrayList<>();
+            if (secondaryIndex != null) {
+                indexNames.addAll(Arrays.asList(secondaryIndex.stringValues("indexNames")));
+            }
+
+            AnnotationValue<DynamoDbSecondaryPartitionKey> secondaryGlobalIndex = p.getAnnotation(DynamoDbSecondaryPartitionKey.class);
+            if (secondaryGlobalIndex != null) {
+                indexNames.addAll(Arrays.asList(secondaryGlobalIndex.stringValues("indexNames")));
+            }
+
+            if (indexNames.isEmpty()) {
+                return;
+            }
+
+            ProjectionType type = projectionAnnotation.enumValue(ProjectionType.class).orElse(ProjectionType.KEYS_ONLY);
+            for(String name : indexNames) {
+                types.put(name, type);
+            }
+        });
+
+        return types;
     }
 
     private Set<String> getIndices(TableMetadata metadata) {

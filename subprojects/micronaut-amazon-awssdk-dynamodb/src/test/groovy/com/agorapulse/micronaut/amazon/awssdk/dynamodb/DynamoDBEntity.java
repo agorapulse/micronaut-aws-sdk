@@ -17,9 +17,11 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Projection;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert.LegacyAttributeConverterProvider;
 import io.micronaut.core.annotation.Introspected;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
+import software.amazon.awssdk.services.dynamodb.model.ProjectionType;
 
 import java.util.Date;
 import java.util.Objects;
@@ -65,6 +67,7 @@ public class DynamoDBEntity {
         this.rangeIndex = rangeIndex;
     }
 
+    @Projection(ProjectionType.ALL)
     @DynamoDbSecondarySortKey(indexNames = DATE_INDEX)
     public Date getDate() {
         return date;
@@ -82,6 +85,7 @@ public class DynamoDBEntity {
         this.number = number;
     }
 
+    @Projection(ProjectionType.ALL)
     @DynamoDbSecondaryPartitionKey(indexNames = GLOBAL_INDEX)
     public String getGlobalIndex() {
         return parentId + ":" + id;

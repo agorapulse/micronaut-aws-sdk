@@ -18,7 +18,6 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
 import io.micronaut.core.beans.BeanIntrospection;
-import io.micronaut.core.beans.BeanIntrospector;
 import io.micronaut.core.beans.BeanProperty;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
@@ -32,19 +31,12 @@ public class BeanIntrospectionAttributeConversionHelper implements AttributeConv
 
     @Override
     public <T> Map<String, AttributeValue> convert(DynamoDbTable<T> table, Map<String, Object> values) {
-        BeanIntrospection<T> introspection = getBeanIntrospection(table);
+        BeanIntrospection<T> introspection = EntityIntrospection.getBeanIntrospection(table);
         T instance = introspection.instantiate();
         return values.entrySet().stream().collect(Collectors.toMap(
             Map.Entry::getKey,
             e -> convert(introspection, table, instance, e.getKey(), e.getValue())
         ));
-    }
-
-    private <T> BeanIntrospection<T> getBeanIntrospection(DynamoDbTable<T> table) {
-        return BeanIntrospector.SHARED.findIntrospection(table.tableSchema().itemType().rawClass())
-            .orElseThrow(() -> new IllegalArgumentException("No introspection found for " + table.tableSchema().itemType().rawClass()
-                + "! Please, annotate the class with @Introspected. See https://docs.micronaut.io/latest/guide/index.html#introspection for more details")
-            );
     }
 
     private <T> AttributeValue convert(BeanIntrospection<T> introspection, DynamoDbTable<T> table, T instance, String key, Object value) {

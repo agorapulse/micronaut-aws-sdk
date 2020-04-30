@@ -87,6 +87,8 @@ class DefaultDynamoDBServiceSpec extends Specification {
         'AbcMetric',
         'UnnecessaryObjectReferences',
         'UnnecessaryBooleanExpression',
+        'DuplicateStringLiteral',
+        'DuplicateNumberLiteral',
     ])
     void 'service introduction works'() {
         expect:
@@ -94,16 +96,17 @@ class DefaultDynamoDBServiceSpec extends Specification {
                 parentId: '1',
                 id: '1',
                 rangeIndex: 'foo',
+                number: 1,
                 date: Date.from(REFERENCE_DATE)
             ))
-            service.save(new DynamoDBEntity(parentId: '1', id: '2', rangeIndex: 'bar', date: Date.from(REFERENCE_DATE.plus(1, ChronoUnit.DAYS))))
+            service.save(new DynamoDBEntity(parentId: '1', id: '2', rangeIndex: 'bar', number: 2, date: Date.from(REFERENCE_DATE.plus(1, ChronoUnit.DAYS))))
             service.saveAll([
-                new DynamoDBEntity(parentId: '2', id: '1', rangeIndex: 'foo',  date: Date.from(REFERENCE_DATE.minus(5, ChronoUnit.DAYS))),
-                new DynamoDBEntity(parentId: '2', id: '2', rangeIndex: 'foo', date: Date.from(REFERENCE_DATE.minus(2, ChronoUnit.DAYS)))])
+                new DynamoDBEntity(parentId: '2', id: '1', rangeIndex: 'foo',  number: 3, date: Date.from(REFERENCE_DATE.minus(5, ChronoUnit.DAYS))),
+                new DynamoDBEntity(parentId: '2', id: '2', rangeIndex: 'foo', number: 4, date: Date.from(REFERENCE_DATE.minus(2, ChronoUnit.DAYS)))])
 
             service.saveAll(
-                new DynamoDBEntity(parentId: '3', id: '1', rangeIndex: 'foo', date: Date.from(REFERENCE_DATE.plus(7, ChronoUnit.DAYS))),
-                new DynamoDBEntity(parentId: '3', id: '2', rangeIndex: 'bar', date: Date.from(REFERENCE_DATE.plus(14, ChronoUnit.DAYS)))
+                new DynamoDBEntity(parentId: '3', id: '1', rangeIndex: 'foo', number: 5, date: Date.from(REFERENCE_DATE.plus(7, ChronoUnit.DAYS))),
+                new DynamoDBEntity(parentId: '3', id: '2', rangeIndex: 'bar', number: 6, date: Date.from(REFERENCE_DATE.plus(14, ChronoUnit.DAYS)))
             )
 
             service.get('1', '1')
@@ -113,15 +116,15 @@ class DefaultDynamoDBServiceSpec extends Specification {
             service.getAll('1', '2', '1').size() == 2
             service.loadAll('1', '3', '4').size() == 0
 
-            service.save(new DynamoDBEntity(parentId: '1001', id: '1', rangeIndex: 'foo', date: Date.from(REFERENCE_DATE)))
-            service.save(new DynamoDBEntity(parentId: '1001', id: '2', rangeIndex: 'bar', date: Date.from(REFERENCE_DATE.plus(1, ChronoUnit.DAYS))))
+            service.save(new DynamoDBEntity(parentId: '1001', id: '1', rangeIndex: 'foo', number: 7, date: Date.from(REFERENCE_DATE)))
+            service.save(new DynamoDBEntity(parentId: '1001', id: '2', rangeIndex: 'bar', number: 8, date: Date.from(REFERENCE_DATE.plus(1, ChronoUnit.DAYS))))
             service.saveAll([
-                new DynamoDBEntity(parentId: '1002', id: '1', rangeIndex: 'foo',  date: Date.from(REFERENCE_DATE.minus(5, ChronoUnit.DAYS))),
-                new DynamoDBEntity(parentId: '1002', id: '2', rangeIndex: 'foo', date: Date.from(REFERENCE_DATE.minus(2, ChronoUnit.DAYS))),
+                new DynamoDBEntity(parentId: '1002', id: '1', rangeIndex: 'foo',  number: 9, date: Date.from(REFERENCE_DATE.minus(5, ChronoUnit.DAYS))),
+                new DynamoDBEntity(parentId: '1002', id: '2', rangeIndex: 'foo', number: 10, date: Date.from(REFERENCE_DATE.minus(2, ChronoUnit.DAYS))),
             ])
             service.saveAll(
-                new DynamoDBEntity(parentId: '1003', id: '1', rangeIndex: 'foo', date: Date.from(REFERENCE_DATE.plus(7, ChronoUnit.DAYS))),
-                new DynamoDBEntity(parentId: '1003', id: '2', rangeIndex: 'bar', date: Date.from(REFERENCE_DATE.plus(14, ChronoUnit.DAYS)))
+                new DynamoDBEntity(parentId: '1003', id: '1', rangeIndex: 'foo', number: 11, date: Date.from(REFERENCE_DATE.plus(7, ChronoUnit.DAYS))),
+                new DynamoDBEntity(parentId: '1003', id: '2', rangeIndex: 'bar', number: 12, date: Date.from(REFERENCE_DATE.plus(14, ChronoUnit.DAYS)))
             )
 
             service.count('1') == 2
@@ -140,6 +143,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
             service.queryByRangeIndex('1', 'bar').count().blockingGet() == 1
             service.queryByRangeIndex('1', 'bar').blockingSingle().parentId == null // projection
             service.queryByRangeIndex('1', 'bar').blockingSingle().rangeIndex == 'bar' // projection
+            !service.queryByRangeIndex('1', 'bar').blockingSingle().number
 
             service.queryByDates(
                 '1',
@@ -159,6 +163,12 @@ class DefaultDynamoDBServiceSpec extends Specification {
                 Date.from(REFERENCE_DATE.plus(9, ChronoUnit.DAYS)),
                 Date.from(REFERENCE_DATE.plus(20, ChronoUnit.DAYS))
             ).count().blockingGet() == 1
+
+            service.queryByDates(
+                '3',
+                Date.from(REFERENCE_DATE.plus(9, ChronoUnit.DAYS)),
+                Date.from(REFERENCE_DATE.plus(20, ChronoUnit.DAYS))
+            ).blockingFirst().number
 
             service.queryByPrefix('1', 'b').toList().blockingGet().size() == 1
             service.queryBySizeAndContains('1', 3, 'a').toList().blockingGet().size() == 1
@@ -198,16 +208,16 @@ class DefaultDynamoDBServiceSpec extends Specification {
             service.increment('1001', '1')
             service.increment('1001', '1')
             service.increment('1001', '1')
-            service.decrement('1001', '1') == 2
-            service.get('1001', '1').number == 2
-            service.minus3AndReturnOriginal('1001', '1') == 2
-            service.get('1001', '1').number == -1
-            service.minus5AndReturnAllOld('1001', '1') == -1
+            service.decrement('1001', '1') == 9
+            service.get('1001', '1').number == 9
+            service.minus3AndReturnOriginal('1001', '1') == 9
+            service.get('1001', '1').number == 6
+            service.minus5AndReturnAllOld('1001', '1') == 6
+            service.get('1001', '1').number == 1
+            service.minus7AndReturnAllNew('1001', '1') == -6
             service.get('1001', '1').number == -6
-            service.minus7AndReturnAllNew('1001', '1') == -13
-            service.get('1001', '1').number == -13
             service.minus13AndIgnore('1001', '1') || true
-            service.get('1001', '1').number == -26
+            service.get('1001', '1').number == -19
 
             service.delete(service.get('1001', '1'))
             service.count('1001', '1') == 0
