@@ -19,7 +19,7 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeConversionHelper;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.conditional.QueryConditionalFactory;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.MappedTableResource;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 
 import java.util.LinkedList;
@@ -28,7 +28,7 @@ import java.util.Optional;
 
 final class DefaultKeyConditionCollector<T> implements KeyConditionCollector<T> {
 
-    public DefaultKeyConditionCollector(DynamoDbTable<T> table, AttributeConversionHelper attributeConversionHelper, String index) {
+    public DefaultKeyConditionCollector(MappedTableResource<T> table, AttributeConversionHelper attributeConversionHelper, String index) {
         this.table = table;
         this.attributeConversionHelper = attributeConversionHelper;
         this.index = index;
@@ -84,7 +84,7 @@ final class DefaultKeyConditionCollector<T> implements KeyConditionCollector<T> 
         return QueryConditionalFactory.and(conditions);
     }
 
-    private final DynamoDbTable<T> table;
+    private final MappedTableResource<T> table;
     private final AttributeConversionHelper attributeConversionHelper;
     private final String index;
 

@@ -20,6 +20,7 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeConversionHelper;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
+import software.amazon.awssdk.enhanced.dynamodb.MappedTableResource;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
 
@@ -117,7 +118,7 @@ class DefaultUpdateBuilder<T> implements UpdateBuilder<T> {
     }
 
     @Override
-    public UpdateItemRequest resolveRequest(DynamoDbTable<T> mapper, AttributeConversionHelper attributeConversionHelper) {
+    public UpdateItemRequest resolveRequest(MappedTableResource<T> mapper, AttributeConversionHelper attributeConversionHelper) {
         UpdateItemRequest.Builder builder = UpdateItemRequest.builder();
         __configurer.accept(builder);
 

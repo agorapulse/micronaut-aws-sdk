@@ -19,7 +19,7 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
 import io.micronaut.core.beans.BeanIntrospection;
 import io.micronaut.core.beans.BeanProperty;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.MappedTableResource;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 import javax.inject.Singleton;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 public class BeanIntrospectionAttributeConversionHelper implements AttributeConversionHelper {
 
     @Override
-    public <T> Map<String, AttributeValue> convert(DynamoDbTable<T> table, Map<String, Object> values) {
+    public <T> Map<String, AttributeValue> convert(MappedTableResource<T> table, Map<String, Object> values) {
         BeanIntrospection<T> introspection = EntityIntrospection.getBeanIntrospection(table);
         T instance = introspection.instantiate();
         return values.entrySet().stream().collect(Collectors.toMap(
@@ -39,7 +39,7 @@ public class BeanIntrospectionAttributeConversionHelper implements AttributeConv
         ));
     }
 
-    private <T> AttributeValue convert(BeanIntrospection<T> introspection, DynamoDbTable<T> table, T instance, String key, Object value) {
+    private <T> AttributeValue convert(BeanIntrospection<T> introspection, MappedTableResource<T> table, T instance, String key, Object value) {
         if (value == null) {
             return null;
         }

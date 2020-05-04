@@ -21,6 +21,7 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeConversionHelper
 import io.reactivex.Flowable;
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.MappedTableResource;
 import software.amazon.awssdk.enhanced.dynamodb.TableMetadata;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.Page;
@@ -115,7 +116,7 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
     }
 
     @Override
-    public ScanEnhancedRequest resolveRequest(DynamoDbTable<T> mapper, AttributeConversionHelper attributeConversionHelper) {
+    public ScanEnhancedRequest resolveRequest(MappedTableResource<T> mapper, AttributeConversionHelper attributeConversionHelper) {
         String currentIndex = __index == null ? TableMetadata.primaryIndexName() : __index;
         applyConditions(mapper, attributeConversionHelper, __filterCollectorsConsumers, cond -> __expression.filterExpression(cond.expression(mapper.tableSchema(), currentIndex)));
         applyLastEvaluatedKey(__expression, mapper);
@@ -138,7 +139,7 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
     }
 
     private void applyConditions(
-        DynamoDbTable<T> table,
+        MappedTableResource<T> table,
         AttributeConversionHelper attributeConversionHelper,
         List<Consumer<FilterConditionCollector<T>>> filterCollectorsConsumers,
         Consumer<QueryConditional> addFilterConsumer
@@ -154,7 +155,7 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
         }
     }
 
-    private void applyLastEvaluatedKey(ScanEnhancedRequest.Builder exp, DynamoDbTable<T> mapper) {
+    private void applyLastEvaluatedKey(ScanEnhancedRequest.Builder exp, MappedTableResource<T> mapper) {
         if (__lastEvaluatedKey == null) {
             return;
         }
