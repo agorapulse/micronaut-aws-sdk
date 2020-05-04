@@ -27,7 +27,7 @@
 <a class="jxr_linenumber" name="L19" href="#L19">19</a>  
 <a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeConversionHelper;
 <a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> com.agorapulse.micronaut.amazon.awssdk.dynamodb.conditional.QueryConditionalFactory;
-<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> software.amazon.awssdk.enhanced.dynamodb.MappedTableResource;
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> software.amazon.awssdk.enhanced.dynamodb.internal.AttributeValues;
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 <a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> software.amazon.awssdk.services.dynamodb.model.AttributeValue;
@@ -41,7 +41,7 @@
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> DefaultFilterConditionCollector&lt;T&gt; <strong class="jxr_keyword">implements</strong> FilterConditionCollector&lt;T&gt; {
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>      <a name="DefaultFilterConditionCollector" href="../../../../../../../com/agorapulse/micronaut/amazon/awssdk/dynamodb/builder/DefaultFilterConditionCollector.html#DefaultFilterConditionCollector">DefaultFilterConditionCollector</a>(DynamoDbTable&lt;T&gt; table, <a name="AttributeConversionHelper" href="../../../../../../../com/agorapulse/micronaut/amazon/awssdk/dynamodb/AttributeConversionHelper.html#AttributeConversionHelper">AttributeConversionHelper</a> attributeConversionHelper) {
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>      <a name="DefaultFilterConditionCollector" href="../../../../../../../com/agorapulse/micronaut/amazon/awssdk/dynamodb/builder/DefaultFilterConditionCollector.html#DefaultFilterConditionCollector">DefaultFilterConditionCollector</a>(MappedTableResource&lt;T&gt; table, <a name="AttributeConversionHelper" href="../../../../../../../com/agorapulse/micronaut/amazon/awssdk/dynamodb/AttributeConversionHelper.html#AttributeConversionHelper">AttributeConversionHelper</a> attributeConversionHelper) {
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>          <strong class="jxr_keyword">this</strong>.table = table;
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>          <strong class="jxr_keyword">this</strong>.attributeConversionHelper = attributeConversionHelper;
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>      }
@@ -228,7 +228,7 @@
 <a class="jxr_linenumber" name="L220" href="#L220">220</a>         <strong class="jxr_keyword">return</strong> QueryConditionalFactory.and(conditions);
 <a class="jxr_linenumber" name="L221" href="#L221">221</a>     }
 <a class="jxr_linenumber" name="L222" href="#L222">222</a> 
-<a class="jxr_linenumber" name="L223" href="#L223">223</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> DynamoDbTable&lt;T&gt; table;
+<a class="jxr_linenumber" name="L223" href="#L223">223</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> MappedTableResource&lt;T&gt; table;
 <a class="jxr_linenumber" name="L224" href="#L224">224</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <a name="AttributeConversionHelper" href="../../../../../../../com/agorapulse/micronaut/amazon/awssdk/dynamodb/AttributeConversionHelper.html#AttributeConversionHelper">AttributeConversionHelper</a> attributeConversionHelper;
 <a class="jxr_linenumber" name="L225" href="#L225">225</a>     <strong class="jxr_keyword">private</strong> List&lt;QueryConditional&gt; conditions = <strong class="jxr_keyword">new</strong> LinkedList&lt;&gt;();
 <a class="jxr_linenumber" name="L226" href="#L226">226</a> }

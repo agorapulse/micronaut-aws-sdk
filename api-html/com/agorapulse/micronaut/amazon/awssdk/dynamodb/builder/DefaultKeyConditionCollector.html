@@ -50,7 +50,7 @@ DefaultKeyConditionCollector.java
 <a name="19"><font color="#808080">019</font>&nbsp;</a><font color="#ffffff"></font><br />
 <a name="20"><font color="#808080">020</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeConversionHelper;</font><br />
 <a name="21"><font color="#808080">021</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">com.agorapulse.micronaut.amazon.awssdk.dynamodb.conditional.QueryConditionalFactory;</font><br />
-<a name="22"><font color="#808080">022</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;</font><br />
+<a name="22"><font color="#808080">022</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">software.amazon.awssdk.enhanced.dynamodb.MappedTableResource;</font><br />
 <a name="23"><font color="#808080">023</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;</font><br />
 <a name="24"><font color="#808080">024</font>&nbsp;</a><font color="#ffffff"></font><br />
 <a name="25"><font color="#808080">025</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">java.util.LinkedList;</font><br />
@@ -59,7 +59,7 @@ DefaultKeyConditionCollector.java
 <a name="28"><font color="#808080">028</font>&nbsp;</a><font color="#ffffff"></font><br />
 <a name="29"><font color="#808080">029</font>&nbsp;</a><font color="#0000c0"><b>final&nbsp;class&nbsp;</b></font><font color="#000000">DefaultKeyConditionCollector&lt;T&gt;&nbsp;</font><font color="#0000c0"><b>implements&nbsp;</b></font><font color="#000000">KeyConditionCollector&lt;T&gt;&nbsp;</font><font color="#000000">{</font><br />
 <a name="30"><font color="#808080">030</font>&nbsp;</a><font color="#ffffff"></font><br />
-<a name="31"><font color="#808080">031</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>public&nbsp;</b></font><font color="#000000">DefaultKeyConditionCollector</font><font color="#000000">(</font><font color="#000000">DynamoDbTable&lt;T&gt;&nbsp;table,&nbsp;AttributeConversionHelper&nbsp;attributeConversionHelper,&nbsp;String&nbsp;index</font><font color="#000000">)&nbsp;{</font><br />
+<a name="31"><font color="#808080">031</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>public&nbsp;</b></font><font color="#000000">DefaultKeyConditionCollector</font><font color="#000000">(</font><font color="#000000">MappedTableResource&lt;T&gt;&nbsp;table,&nbsp;AttributeConversionHelper&nbsp;attributeConversionHelper,&nbsp;String&nbsp;index</font><font color="#000000">)&nbsp;{</font><br />
 <a name="32"><font color="#808080">032</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>this</b></font><font color="#000000">.table&nbsp;=&nbsp;table;</font><br />
 <a name="33"><font color="#808080">033</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>this</b></font><font color="#000000">.attributeConversionHelper&nbsp;=&nbsp;attributeConversionHelper;</font><br />
 <a name="34"><font color="#808080">034</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>this</b></font><font color="#000000">.index&nbsp;=&nbsp;index;</font><br />
@@ -115,7 +115,7 @@ DefaultKeyConditionCollector.java
 <a name="84"><font color="#808080">084</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>return&nbsp;</b></font><font color="#000000">QueryConditionalFactory.and</font><font color="#000000">(</font><font color="#000000">conditions</font><font color="#000000">)</font><font color="#000000">;</font><br />
 <a name="85"><font color="#808080">085</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
 <a name="86"><font color="#808080">086</font>&nbsp;</a><font color="#ffffff"></font><br />
-<a name="87"><font color="#808080">087</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>private&nbsp;final&nbsp;</b></font><font color="#000000">DynamoDbTable&lt;T&gt;&nbsp;table;</font><br />
+<a name="87"><font color="#808080">087</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>private&nbsp;final&nbsp;</b></font><font color="#000000">MappedTableResource&lt;T&gt;&nbsp;table;</font><br />
 <a name="88"><font color="#808080">088</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>private&nbsp;final&nbsp;</b></font><font color="#000000">AttributeConversionHelper&nbsp;attributeConversionHelper;</font><br />
 <a name="89"><font color="#808080">089</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>private&nbsp;final&nbsp;</b></font><font color="#000000">String&nbsp;index;</font><br />
 <a name="90"><font color="#808080">090</font>&nbsp;</a><font color="#ffffff"></font><br />

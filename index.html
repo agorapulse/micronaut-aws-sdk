@@ -10,14 +10,14 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/docs.css?v=1.3.4.2" />
+<link rel="stylesheet" href="css/docs.css?v=1.3.4.3" />
 </head>
 <body class="book toc2 toc-left">
 <div id="header">
 <h1>Set of useful libraries for Micronaut</h1>
 <div class="details">
 <span id="author" class="author">Vladimir Orany</span><br>
-<span id="revnumber">version 1.3.4.2</span>
+<span id="revnumber">version 1.3.4.3</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -281,7 +281,7 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-dynamodb:1.3.4.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-dynamodb:1.3.4.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -290,7 +290,7 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;1.3.4.2&lt;/version&gt;
+    &lt;version&gt;1.3.4.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -740,30 +740,26 @@ public interface DynamoDBEntityService {
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Define class which implements <code>Function&lt;Map&lt;String, Object&gt;, DetachedQuery&gt;</code></td>
+<td>Define class which implements <code>QueryFunction</code></td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Use <code>Builders</code> class to create a query builder for given DynamoDB entity (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/QueryBuilder.html">QueryBuilder</a> for full reference)</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
 <td>Specify a hash key with <code>hash</code> method and method&#8217;s <code>hashKey</code> argument</td>
 </tr>
 <tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
 <td>Specify some range key criteria with the method&#8217;s <code>rangeKey</code> argument (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html">RangeConditionCollector</a> for full reference)</td>
 </tr>
 <tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
 <td>Only <code>rangeIndex</code> property will be populated in the entities returned</td>
 </tr>
 <tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
 <td><code>@Query</code> annotation accepts a class which implements <code>Function&lt;Map&lt;String, Object&gt;, DetachedQuery&gt;</code></td>
 </tr>
 <tr>
-<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
 <td>The arguments have no special meaning but you can use them in the query using <code>arguments</code> map. The method must return either <code>Flowable</code> or <code>List</code> of entities.</td>
 </tr>
 </table>
@@ -859,22 +855,18 @@ public interface DynamoDBEntityService {
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Define class which implements <code>Function&lt;Map&lt;String, Object&gt;, DetachedScan&gt;</code></td>
+<td>Define class which implements <code>ScanFunction</code></td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Use <code>Builders</code> class to create a scan builder for given DynamoDB entity (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/ScanBuilder.html">ScanBuilder</a> for full reference)</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
 <td>Specify some filter criteria with the method&#8217;s <code>foo</code> argument (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html">RangeConditionCollector</a> for full reference)</td>
 </tr>
 <tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
 <td><code>@Scan</code> annotation accepts a class which implements <code>Function&lt;Map&lt;String, Object&gt;, DetachedScan&gt;</code></td>
 </tr>
 <tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
 <td>The arguments have no special meaning but you can use them in the scan definition. The method must return either <code>Flowable</code> or <code>List</code> of entities.</td>
 </tr>
 </table>
@@ -979,30 +971,26 @@ public interface DynamoDBEntityService {
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Use <code>Builders</code> class to create an update builder for given DynamoDB entity (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference)</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
 <td>Specify a hash key with <code>hash</code> method and method&#8217;s <code>hashKey</code> argument</td>
 </tr>
 <tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
 <td>Specify a range key with <code>range</code> method and method&#8217;s <code>rangeKey</code> argument</td>
 </tr>
 <tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
 <td>Specify update operation - increment <code>number</code> attribute (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference). You may have multiple update operations.</td>
 </tr>
 <tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
 <td>Specify what should be returned from the method (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference).</td>
 </tr>
 <tr>
-<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
 <td><code>@Update</code> annotation accepts a class which implements <code>Function&lt;Map&lt;String, Object&gt;, DetachedUpdate&gt;</code></td>
 </tr>
 <tr>
-<td><i class="conum" data-value="9"></i><b>9</b></td>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
 <td>The arguments have no special meaning but you can use them in the scan definition. The method&#8217;s return value depends on the value returned from <code>returnUpdatedNew</code> mapper.</td>
 </tr>
 </table>
@@ -1445,9 +1433,9 @@ You can obtain instances of declarative client from the context as well.
 <div class="title">Gradle</div>
 <div class="content">
 <pre class="prettyprint highlight"><code>// for Kinesis client
-compile 'com.agorapulse:micronaut-aws-sdk-kinesis:1.3.4.2'
+compile 'com.agorapulse:micronaut-aws-sdk-kinesis:1.3.4.3'
 // for Kinesis worker
-compile 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:1.3.4.2'</code></pre>
+compile 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:1.3.4.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -1457,13 +1445,13 @@ compile 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:1.3.4.2'</code></pre>
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-kinesis&lt;/artifactId&gt;
-    &lt;version&gt;1.3.4.2&lt;/version&gt;
+    &lt;version&gt;1.3.4.3&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;!-- for Kinesis worker --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-kinesis-worker&lt;/artifactId&gt;
-    &lt;version&gt;1.3.4.2&lt;/version&gt;
+    &lt;version&gt;1.3.4.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2191,7 +2179,7 @@ class KinesisAnnotationsSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-s3:1.3.4.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-s3:1.3.4.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2200,7 +2188,7 @@ class KinesisAnnotationsSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-s3&lt;/artifactId&gt;
-    &lt;version&gt;1.3.4.2&lt;/version&gt;
+    &lt;version&gt;1.3.4.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2603,7 +2591,7 @@ class SimpleStorageServiceSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ses:1.3.4.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ses:1.3.4.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2612,7 +2600,7 @@ class SimpleStorageServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-ses&lt;/artifactId&gt;
-    &lt;version&gt;1.3.4.2&lt;/version&gt;
+    &lt;version&gt;1.3.4.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2867,7 +2855,7 @@ public class SendEmailTest {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sns:1.3.4.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sns:1.3.4.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2876,7 +2864,7 @@ public class SendEmailTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sns&lt;/artifactId&gt;
-    &lt;version&gt;1.3.4.2&lt;/version&gt;
+    &lt;version&gt;1.3.4.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3381,7 +3369,7 @@ class SimpleNotificationServiceSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sqs:1.3.4.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sqs:1.3.4.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3390,7 +3378,7 @@ class SimpleNotificationServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sqs&lt;/artifactId&gt;
-    &lt;version&gt;1.3.4.2&lt;/version&gt;
+    &lt;version&gt;1.3.4.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3907,7 +3895,7 @@ class SimpleQueueServiceSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sts:1.3.4.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sts:1.3.4.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3916,7 +3904,7 @@ class SimpleQueueServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sts&lt;/artifactId&gt;
-    &lt;version&gt;1.3.4.2&lt;/version&gt;
+    &lt;version&gt;1.3.4.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3967,7 +3955,7 @@ messages back to the clients</p>
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ag-ws:1.3.4.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ag-ws:1.3.4.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3976,7 +3964,7 @@ messages back to the clients</p>
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-ag-ws&lt;/artifactId&gt;
-    &lt;version&gt;1.3.4.2&lt;/version&gt;
+    &lt;version&gt;1.3.4.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4444,8 +4432,8 @@ your Lambda function&#8217;s role must have following permissions (preferably co
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 1.3.4.2<br>
-Last updated 2020-04-30 09:55:41 UTC
+Version 1.3.4.3<br>
+Last updated 2020-05-04 17:50:30 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">

@@ -25,7 +25,7 @@
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> */</em>
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>  <strong class="jxr_keyword">package</strong> com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 <a class="jxr_linenumber" name="L19" href="#L19">19</a>  
-<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> software.amazon.awssdk.enhanced.dynamodb.MappedTableResource;
 <a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>  
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> java.util.Collections;
@@ -34,11 +34,11 @@
 <a class="jxr_linenumber" name="L26" href="#L26">26</a>  
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a name="AttributeConversionHelper" href="../../../../../../com/agorapulse/micronaut/amazon/awssdk/dynamodb/AttributeConversionHelper.html#AttributeConversionHelper">AttributeConversionHelper</a> {
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  
-<a class="jxr_linenumber" name="L29" href="#L29">29</a>      <strong class="jxr_keyword">default</strong> &lt;T&gt; AttributeValue convert(DynamoDbTable&lt;T&gt; table, String key, Object value) {
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>      <strong class="jxr_keyword">default</strong> &lt;T&gt; AttributeValue convert(MappedTableResource&lt;T&gt; table, String key, Object value) {
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>          <strong class="jxr_keyword">return</strong> convert(table, Collections.singletonMap(key, value)).get(key);
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>      }
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>      &lt;T&gt; Map&lt;String, AttributeValue&gt; convert(DynamoDbTable&lt;T&gt; table, Map&lt;String, Object&gt; values);
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>      &lt;T&gt; Map&lt;String, AttributeValue&gt; convert(MappedTableResource&lt;T&gt; table, Map&lt;String, Object&gt; values);
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  }
 </pre>

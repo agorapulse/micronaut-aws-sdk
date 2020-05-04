@@ -51,7 +51,7 @@
 <a class="jxr_linenumber" name="L43" href="#L43">43</a>          @ClosureParams(value = SimpleType.<strong class="jxr_keyword">class</strong>, options = <span class="jxr_string">"com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.QueryBuilder&lt;T&gt;"</span>)
 <a class="jxr_linenumber" name="L44" href="#L44">44</a>              Closure&lt;QueryBuilder&lt;T&gt;&gt; definition
 <a class="jxr_linenumber" name="L45" href="#L45">45</a>      ) {
-<a class="jxr_linenumber" name="L46" href="#L46">46</a>          <strong class="jxr_keyword">return</strong> Builders.query(type, ConsumerWithDelegate.create(definition));
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>          <strong class="jxr_keyword">return</strong> Builders.query(ConsumerWithDelegate.create(definition));
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>      }
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>  
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>      <em class="jxr_javadoccomment">/**</em>
@@ -68,7 +68,7 @@
 <a class="jxr_linenumber" name="L60" href="#L60">60</a>          @ClosureParams(value = SimpleType.<strong class="jxr_keyword">class</strong>, options = <span class="jxr_string">"com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ScanBuilder&lt;T&gt;"</span>)
 <a class="jxr_linenumber" name="L61" href="#L61">61</a>              Closure&lt;ScanBuilder&lt;T&gt;&gt; definition
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>      ) {
-<a class="jxr_linenumber" name="L63" href="#L63">63</a>          <strong class="jxr_keyword">return</strong> Builders.scan(type, ConsumerWithDelegate.create(definition));
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>          <strong class="jxr_keyword">return</strong> Builders.scan(ConsumerWithDelegate.create(definition));
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>      }
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>  
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>      <em class="jxr_javadoccomment">/**</em>
@@ -85,7 +85,7 @@
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>          @ClosureParams(value = SimpleType.<strong class="jxr_keyword">class</strong>, options = <span class="jxr_string">"com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder&lt;T&gt;"</span>)
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>              Closure&lt;UpdateBuilder&lt;T&gt;&gt; definition
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>      ) {
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>          <strong class="jxr_keyword">return</strong> Builders.update(type, ConsumerWithDelegate.create(definition));
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>          <strong class="jxr_keyword">return</strong> Builders.update(ConsumerWithDelegate.create(definition));
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>      }
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>  }
