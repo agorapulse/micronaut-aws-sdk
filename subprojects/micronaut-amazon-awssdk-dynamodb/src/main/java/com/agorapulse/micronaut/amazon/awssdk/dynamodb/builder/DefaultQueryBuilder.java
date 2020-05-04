@@ -51,7 +51,7 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     }
 
     @Override
-    public DefaultQueryBuilder<T> sort(Builders.Sort sort) {
+    public DefaultQueryBuilder<T> order(Builders.Sort sort) {
         if (sort == Builders.Sort.ASC) {
             __expression.scanIndexForward(true);
         } else if (sort == Builders.Sort.DESC) {
@@ -85,13 +85,13 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     }
 
     @Override
-    public DefaultQueryBuilder<T> hash(Object hash) {
+    public DefaultQueryBuilder<T> partitionKey(Object hash) {
         this.__hash = hash;
         return this;
     }
 
     @Override
-    public DefaultQueryBuilder<T> range(Consumer<KeyConditionCollector<T>> conditions) {
+    public DefaultQueryBuilder<T> sortKey(Consumer<KeyConditionCollector<T>> conditions) {
         __queryConditionals.add(conditions);
         return this;
     }

@@ -56,13 +56,13 @@ class DefaultUpdateBuilder<T> implements UpdateBuilder<T> {
     private Consumer<UpdateItemRequest.Builder> __configurer = u -> {};
 
     @Override
-    public UpdateBuilder<T> hash(Object key) {
+    public UpdateBuilder<T> partitionKey(Object key) {
         this.__hash = key;
         return this;
     }
 
     @Override
-    public UpdateBuilder<T> range(Object key) {
+    public UpdateBuilder<T> sortKey(Object key) {
         this.__range = key;
         return this;
     }

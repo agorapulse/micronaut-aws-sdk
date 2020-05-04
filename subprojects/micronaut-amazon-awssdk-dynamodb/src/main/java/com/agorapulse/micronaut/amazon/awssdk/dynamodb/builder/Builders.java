@@ -57,8 +57,20 @@ public class Builders {
      *
      * @param <T> type of DynamoDB entity
      * @return query builder for given DynamoDB entity
+     * @deprecated use {@link #query()} instead
      */
+    @Deprecated
     public static <T> QueryBuilder<T> query(Class<T> type) {
+        return query();
+    }
+
+    /**
+     * Creates query builder for given DynamoDB entity.
+     *
+     * @param <T> type of DynamoDB entity
+     * @return query builder for given DynamoDB entity
+     */
+    public static <T> QueryBuilder<T> query() {
         return new DefaultQueryBuilder<>(QueryEnhancedRequest.builder().limit(DEFAULT_QUERY_LIMIT));
     }
 
@@ -69,9 +81,22 @@ public class Builders {
      * @param definition definition of the query
      * @param <T> type of DynamoDB entity
      * @return query builder for given DynamoDB entity
+     * @deprecated use {@link #query(Consumer)} instead
      */
+    @Deprecated
     public static <T> QueryBuilder<T> query(Class<T> type, Consumer<QueryBuilder<T>> definition) {
-        QueryBuilder<T> builder = query(type);
+        return query(definition);
+    }
+
+    /**
+     * Creates query builder for given DynamoDB entity.
+     *
+     * @param definition definition of the query
+     * @param <T> type of DynamoDB entity
+     * @return query builder for given DynamoDB entity
+     */
+    public static <T> QueryBuilder<T> query(Consumer<QueryBuilder<T>> definition) {
+        QueryBuilder<T> builder = query();
         definition.accept(builder);
         return builder;
     }
@@ -82,8 +107,20 @@ public class Builders {
      * @param type DynamoDB entity type
      * @param <T> type of DynamoDB entity
      * @return scan builder for given DynamoDB entity
+     * @deprecated use {@link #scan()} instead
      */
+    @Deprecated
     public static <T> ScanBuilder<T> scan(Class<T> type) {
+        return scan();
+    }
+
+    /**
+     * Creates scan builder for given DynamoDB entity.
+     *
+     * @param <T> type of DynamoDB entity
+     * @return scan builder for given DynamoDB entity
+     */
+    public static <T> ScanBuilder<T> scan() {
         return new DefaultScanBuilder<T>(ScanEnhancedRequest.builder().limit(DEFAULT_QUERY_LIMIT));
     }
 
@@ -94,9 +131,22 @@ public class Builders {
      * @param definition definition of the query
      * @param <T> type of DynamoDB entity
      * @return scan builder for given DynamoDB entity
+     * @deprecated use {@link #scan(Consumer)} instead
      */
+    @Deprecated
     public static <T> ScanBuilder<T> scan(Class<T> type, Consumer<ScanBuilder<T>> definition) {
-        ScanBuilder<T> builder = scan(type);
+        return scan(definition);
+    }
+
+    /**
+     * Creates scan builder for given DynamoDB entity.
+     *
+     * @param definition definition of the query
+     * @param <T> type of DynamoDB entity
+     * @return scan builder for given DynamoDB entity
+     */
+    public static <T> ScanBuilder<T> scan(Consumer<ScanBuilder<T>> definition) {
+        ScanBuilder<T> builder = scan();
         definition.accept(builder);
         return builder;
     }
@@ -107,8 +157,20 @@ public class Builders {
      * @param type DynamoDB entity type
      * @param <T> type of DynamoDB entity
      * @return update builder for given DynamoDB entity
+     * @deprecated use {@link #update()} instead
      */
+    @Deprecated
     public static <T> UpdateBuilder<T> update(Class<T> type) {
+        return update();
+    }
+
+    /**
+     * Creates update builder for given DynamoDB entity.
+     *
+     * @param <T> type of DynamoDB entity
+     * @return update builder for given DynamoDB entity
+     */
+    public static <T> UpdateBuilder<T> update() {
         return new DefaultUpdateBuilder<>();
     }
 
@@ -119,9 +181,22 @@ public class Builders {
      * @param definition definition of the query
      * @param <T> type of DynamoDB entity
      * @return update builder for given DynamoDB entity
+     * @deprecated use {@link #update(Consumer)} instead
      */
+    @Deprecated
     public static <T> UpdateBuilder<T> update(Class<T> type, Consumer<UpdateBuilder<T>> definition) {
-        UpdateBuilder<T> builder = update(type);
+        return update(definition);
+    }
+
+    /**
+     * Creates update builder for given DynamoDB entity.
+     *
+     * @param definition definition of the query
+     * @param <T> type of DynamoDB entity
+     * @return update builder for given DynamoDB entity
+     */
+    public static <T> UpdateBuilder<T> update(Consumer<UpdateBuilder<T>> definition) {
+        UpdateBuilder<T> builder = update();
         definition.accept(builder);
         return builder;
     }

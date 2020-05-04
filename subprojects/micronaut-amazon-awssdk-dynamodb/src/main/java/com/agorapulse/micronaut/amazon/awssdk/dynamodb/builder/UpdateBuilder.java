@@ -30,18 +30,40 @@ import java.util.function.Function;
 public interface UpdateBuilder<T> extends DetachedUpdate<T> {
 
     /**
-     * Sets the hash key value of the updated entity.
-     * @param key the hash key of the query
+     * Sets the partition key value of the updated entity.
+     * @param key the partition key of the query
      * @return self
      */
-    UpdateBuilder<T> hash(Object key);
+    UpdateBuilder<T> partitionKey(Object key);
 
     /**
-     * Sets the hash key value of the updated entity.
-     * @param key the hash key of the query
+     * Sets the partition key value of the updated entity.
+     * @param key the partition key of the query
+     * @return self
+     * @deprecated use {@link #partitionKey(Object)} instead
+     */
+    @Deprecated
+    default UpdateBuilder<T> hash(Object key) {
+        return partitionKey(key);
+    }
+
+    /**
+     * Sets the sort key value of the updated entity.
+     * @param key the sort key of the updated entity
      * @return self
      */
-    UpdateBuilder<T> range(Object key);
+    UpdateBuilder<T> sortKey(Object key);
+
+    /**
+     * Sets the sort key value of the updated entity.
+     * @param key the sort key of the updated entity
+     * @return self
+     * @deprecated use {@link #sortKey(Object)} instead
+     */
+    @Deprecated
+    default UpdateBuilder<T> range(Object key) {
+        return sortKey(key);
+    }
 
     /**
      * Add a difference to particular attribute of the entity.

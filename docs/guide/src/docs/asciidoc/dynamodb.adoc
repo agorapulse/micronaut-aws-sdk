@@ -397,13 +397,12 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/a
 }
 ----
 <1> Annotate an interface with `@Service` with the type of the entity as its `value`
-<2> Define class which implements `Function<Map<String, Object>, DetachedQuery>`
-<3> Use `Builders` class to create a query builder for given DynamoDB entity (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/QueryBuilder.html[QueryBuilder] for full reference)
-<4> Specify a hash key with `hash` method and method's `hashKey` argument
-<5> Specify some range key criteria with the method's `rangeKey` argument (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
-<6> Only `rangeIndex` property will be populated in the entities returned
-<7> `@Query` annotation accepts a class which implements `Function<Map<String, Object>, DetachedQuery>`
-<8> The arguments have no special meaning but you can use them in the query using `arguments` map. The method must return either `Flowable` or `List` of entities.
+<2> Define class which implements `QueryFunction`
+<3> Specify a hash key with `hash` method and method's `hashKey` argument
+<4> Specify some range key criteria with the method's `rangeKey` argument (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
+<5> Only `rangeIndex` property will be populated in the entities returned
+<6> `@Query` annotation accepts a class which implements `Function<Map<String, Object>, DetachedQuery>`
+<7> The arguments have no special meaning but you can use them in the query using `arguments` map. The method must return either `Flowable` or `List` of entities.
 
 
 ===== Scanning
@@ -444,11 +443,10 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/a
 }
 ----
 <1> Annotate an interface with `@Service` with the type of the entity as its `value`
-<2> Define class which implements `Function<Map<String, Object>, DetachedScan>`
-<3> Use `Builders` class to create a scan builder for given DynamoDB entity (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/ScanBuilder.html[ScanBuilder] for full reference)
-<4> Specify some filter criteria with the method's `foo` argument (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
-<5> `@Scan` annotation accepts a class which implements `Function<Map<String, Object>, DetachedScan>`
-<6> The arguments have no special meaning but you can use them in the scan definition. The method must return either `Flowable` or `List` of entities.
+<2> Define class which implements `ScanFunction`
+<3> Specify some filter criteria with the method's `foo` argument (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
+<4> `@Scan` annotation accepts a class which implements `Function<Map<String, Object>, DetachedScan>`
+<5> The arguments have no special meaning but you can use them in the scan definition. The method must return either `Flowable` or `List` of entities.
 
 
 
@@ -489,13 +487,12 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/a
 ----
 <1> Annotate an interface with `@Service` with the type of the entity as its `value`
 <2> Define class which implements `Function<Map<String, Object>, DetachedUpdate>`
-<3> Use `Builders` class to create an update builder for given DynamoDB entity (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html[UpdateBuilder] for full reference)
-<4> Specify a hash key with `hash` method and method's `hashKey` argument
-<5> Specify a range key with `range` method and method's `rangeKey` argument
-<6> Specify update operation - increment `number` attribute (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html[UpdateBuilder] for full reference). You may have multiple update operations.
-<7> Specify what should be returned from the method (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html[UpdateBuilder] for full reference).
-<8> `@Update` annotation accepts a class which implements `Function<Map<String, Object>, DetachedUpdate>`
-<9> The arguments have no special meaning but you can use them in the scan definition. The method's return value depends on the value returned from `returnUpdatedNew` mapper.
+<3> Specify a hash key with `hash` method and method's `hashKey` argument
+<4> Specify a range key with `range` method and method's `rangeKey` argument
+<5> Specify update operation - increment `number` attribute (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html[UpdateBuilder] for full reference). You may have multiple update operations.
+<6> Specify what should be returned from the method (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html[UpdateBuilder] for full reference).
+<7> `@Update` annotation accepts a class which implements `Function<Map<String, Object>, DetachedUpdate>`
+<8> The arguments have no special meaning but you can use them in the scan definition. The method's return value depends on the value returned from `returnUpdatedNew` mapper.
 
 ==== DynamoDB Service
 

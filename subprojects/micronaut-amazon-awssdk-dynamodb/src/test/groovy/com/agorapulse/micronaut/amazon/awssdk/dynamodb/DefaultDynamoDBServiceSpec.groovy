@@ -41,6 +41,8 @@ import static com.agorapulse.micronaut.amazon.awssdk.dynamodb.groovy.GroovyBuild
     'AbcMetric',
     'MethodCount',
     'MethodSize',
+    'DuplicateNumberLiteral',
+    'DuplicateStringLiteral',
 ])
 /**
  * Specification for testing DefaultDynamoDBService using entity with range key.
@@ -218,6 +220,11 @@ class DefaultDynamoDBServiceSpec extends Specification {
             service.get('1001', '1').number == -6
             service.minus13AndIgnore('1001', '1') || true
             service.get('1001', '1').number == -19
+            service.resetAll('1001')
+            service.get('1001', '1').number == 0
+
+            service.setWhereNumberIsZero('1001', 123)
+            service.get('1001', '1').number == 123
 
             service.delete(service.get('1001', '1'))
             service.count('1001', '1') == 0
@@ -245,6 +252,8 @@ class DefaultDynamoDBServiceSpec extends Specification {
     'AbcMetric',
     'MethodCount',
     'MethodSize',
+    'DuplicateNumberLiteral',
+    'DuplicateStringLiteral',
 ])
 // tag::service-all[]
 // tag::service-header[]
@@ -479,7 +488,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            sort asc
+            order asc
             hash hashKey
             range {
                 ge value
@@ -490,7 +499,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            sort desc
+            order desc
             hash hashKey
             range {
                 gt value
@@ -617,6 +626,32 @@ interface DynamoDBItemDBService {
         }
     })
     void minus13AndIgnore(String hashKey, String rangeKey)
+
+    @Query({
+        query(DynamoDBEntity) {
+            partitionKey hashKey
+        }
+    })
+    @Update({
+        update(DynamoDBEntity) {
+            put 'number', 0
+        }
+    })
+    int resetAll(String hashKey)
+
+    @Scan({
+        scan(DynamoDBEntity) {
+            filter {
+                eq 'number', 0
+            }
+        }
+    })
+    @Update({
+        update(DynamoDBEntity) {
+            put 'number', value
+        }
+    })
+    int setWhereNumberIsZero(String hashKey, int value)
 
     // tag::sample-scan[]
     @Scan({                                                                             // <3>

@@ -25,10 +25,7 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Scan;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Service;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SortKey;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Update;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.Builders;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedQuery;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedScan;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedUpdate;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.*;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.core.annotation.AnnotationValue;
@@ -57,6 +54,7 @@ import software.amazon.awssdk.services.dynamodb.model.*;
 import javax.inject.Singleton;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -193,21 +191,39 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             }
 
             if (methodName.startsWith("delete")) {
-                int counter = 0;
-                for (T t : criteria.query(table, attributeConversionHelper).blockingIterable()) {
+                // TODO: try implement batch delete
+                AtomicInteger counter = new AtomicInteger();
+
+                criteria.query(table, attributeConversionHelper).subscribe(t -> {
                     table.deleteItem(t);
-                    counter++;
-                }
-                return counter;
+                    counter.incrementAndGet();
+                });
+
+                return counter.get();
+            }
+
+            if (context.getTargetMethod().isAnnotationPresent(Update.class)) {
+                // TODO: try implement batch update
+                BeanIntrospection<T> introspection = EntityIntrospection.getBeanIntrospection(table);
+                TableMetadata tableMetadata = table.tableSchema().tableMetadata();
+
+                UpdateBuilder<T> update = (UpdateBuilder<T>) functionEvaluator.evaluateAnnotationType(context.getTargetMethod().getAnnotation(Update.class).value(), context);
+
+                AtomicInteger counter = new AtomicInteger();
+
+                criteria.query(table, attributeConversionHelper).subscribe(entity -> {
+                    introspection.getProperty(tableMetadata.primaryPartitionKey()).ifPresent(p -> update.partitionKey(p.get(entity)));
+                    tableMetadata.primarySortKey().flatMap(introspection::getProperty).ifPresent(p -> update.sortKey(p.get(entity)));
+
+                    update.update(table, client, attributeConversionHelper);
+
+                    counter.incrementAndGet();
+                });
+
+                return counter.get();
             }
 
             return flowableOrList(criteria.query(table, attributeConversionHelper), context.getReturnType().getType());
-        }
-
-        if (context.getTargetMethod().isAnnotationPresent(Update.class)) {
-            DetachedUpdate<T> criteria = functionEvaluator.evaluateAnnotationType(context.getTargetMethod().getAnnotation(Update.class).value(), context);
-
-            return criteria.update(table, client, attributeConversionHelper);
         }
 
         if (context.getTargetMethod().isAnnotationPresent(Scan.class)) {
@@ -218,15 +234,45 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             }
 
             if (methodName.startsWith("delete")) {
-                int counter = 0;
-                for (T t : table.scan(criteria.resolveRequest(table, attributeConversionHelper)).items()) {
+                // TODO: try implement batch delete
+                AtomicInteger counter = new AtomicInteger();
+
+                criteria.scan(table, attributeConversionHelper).subscribe(t -> {
                     table.deleteItem(t);
-                    counter++;
-                }
-                return counter;
+                    counter.incrementAndGet();
+                });
+
+                return counter.get();
+            }
+
+            if (context.getTargetMethod().isAnnotationPresent(Update.class)) {
+                // TODO: try implement batch update
+                BeanIntrospection<T> introspection = EntityIntrospection.getBeanIntrospection(table);
+                TableMetadata tableMetadata = table.tableSchema().tableMetadata();
+
+                UpdateBuilder<T> update = (UpdateBuilder<T>) functionEvaluator.evaluateAnnotationType(context.getTargetMethod().getAnnotation(Update.class).value(), context);
+
+                AtomicInteger counter = new AtomicInteger();
+
+                criteria.scan(table, attributeConversionHelper).subscribe(entity -> {
+                    introspection.getProperty(tableMetadata.primaryPartitionKey()).ifPresent(p -> update.partitionKey(p.get(entity)));
+                    tableMetadata.primarySortKey().flatMap(introspection::getProperty).ifPresent(p -> update.sortKey(p.get(entity)));
+
+                    update.update(table, client, attributeConversionHelper);
+
+                    counter.incrementAndGet();
+                });
+
+                return counter.get();
             }
 
             return flowableOrList(criteria.scan(table, attributeConversionHelper), context.getReturnType().getType());
+        }
+
+        if (context.getTargetMethod().isAnnotationPresent(Update.class)) {
+            DetachedUpdate<T> criteria = functionEvaluator.evaluateAnnotationType(context.getTargetMethod().getAnnotation(Update.class).value(), context);
+
+            return criteria.update(table, client, attributeConversionHelper);
         }
 
         if (methodName.startsWith("count")) {
@@ -291,7 +337,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             throw new UnsupportedOperationException("Method expects at most 2 parameters - hash key and range key, an item, iterable of items or an array of items");
         }
 
-        PartitionAndSort partitionAndSort = findHashAndRange(args);
+        PartitionAndSort partitionAndSort = findHashAndRange(args, service);
 
         if (partitionAndSort.sortKey == null) {
             service.deleteItem(Key.builder().partitionValue(partitionAndSort.getPartitionAttributeValue(params, service, attributeConversionHelper)).build());
@@ -316,7 +362,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             throw new UnsupportedOperationException("Method expects at most 2 parameters - hash key and range key");
         }
 
-        PartitionAndSort partitionAndSort = findHashAndRange(args);
+        PartitionAndSort partitionAndSort = findHashAndRange(args, service);
         AttributeValue partitionValue = partitionAndSort.getPartitionAttributeValue(params, service, attributeConversionHelper);
 
         if (partitionAndSort.sortKey == null) {
@@ -342,22 +388,22 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             throw new UnsupportedOperationException("Method expects at most 2 parameters - hash key and optional range key");
         }
 
-        PartitionAndSort partitionAndSort = findHashAndRange(args);
+        PartitionAndSort partitionAndSort = findHashAndRange(args, table);
 
         AttributeValue partitionAttributeValue = partitionAndSort.getPartitionAttributeValue(params, table, attributeConversionHelper);
 
         if (partitionAndSort.sortKey == null) {
             return Builders.query(type, q -> {
-                q.hash(partitionAttributeValue);
+                q.partitionKey(partitionAttributeValue);
             });
         }
 
         AttributeValue sortAttributeValue = partitionAndSort.getSortAttributeValue(params, table, attributeConversionHelper);
 
-        return Builders.query(type, q -> q.hash(partitionAttributeValue).range(r -> r.eq(sortAttributeValue)));
+        return Builders.query(q -> q.partitionKey(partitionAttributeValue).sortKey(r -> r.eq(sortAttributeValue)));
     }
 
-    private PartitionAndSort findHashAndRange(Argument<?>[] arguments) {
+    private PartitionAndSort findHashAndRange(Argument<?>[] arguments, DynamoDbTable<?> table) {
         PartitionAndSort names = new PartitionAndSort();
         for (Argument<?> argument : arguments) {
             if (
@@ -365,6 +411,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
                     || argument.isAnnotationPresent(RangeKey.class)
                     || argument.getName().toLowerCase().contains(SORT)
                     || argument.getName().toLowerCase().contains(RANGE)
+                    || argument.getName().equals(table.tableSchema().tableMetadata().primarySortKey().orElse(SORT))
             ) {
                 names.sortKey = argument;
             } else if (
@@ -372,6 +419,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
                     || argument.isAnnotationPresent(HashKey.class)
                     || argument.getName().toLowerCase().contains(PARTITION)
                     || argument.getName().toLowerCase().contains(HASH)
+                    || argument.getName().equals(table.tableSchema().tableMetadata().primaryPartitionKey())
             ) {
                 names.partitionKey = argument;
             }
