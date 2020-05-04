@@ -20,6 +20,7 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeConversionHelper;
 import io.reactivex.Flowable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.MappedTableResource;
 import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
 
 /**
@@ -47,6 +48,6 @@ public interface DetachedScan<T> {
      * @param mapper DynamoDB mapper
      * @return the current scan resolved into native scan expression
      */
-    ScanEnhancedRequest resolveRequest(DynamoDbTable<T> mapper, AttributeConversionHelper attributeConversionHelper);
+    ScanEnhancedRequest resolveRequest(MappedTableResource<T> mapper, AttributeConversionHelper attributeConversionHelper);
 
 }

@@ -19,6 +19,7 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeConversionHelper;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.MappedTableResource;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest;
 
@@ -41,6 +42,6 @@ public interface DetachedUpdate<T> {
      * @param mapper DynamoDB mapper
      * @return the current update resolved into native update request
      */
-    UpdateItemRequest resolveRequest(DynamoDbTable<T>  mapper, AttributeConversionHelper attributeConversionHelper);
+    UpdateItemRequest resolveRequest(MappedTableResource<T> mapper, AttributeConversionHelper attributeConversionHelper);
 
 }

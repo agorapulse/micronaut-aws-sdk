@@ -48,7 +48,7 @@ public interface DynamoDBEntityNoRangeService {
     class ByHash implements Function<Map<String, Object>, DetachedQuery> {
         public DetachedQuery apply(Map<String, Object> arguments) {
             return Builders.query(DynamoDBEntityNoRange.class)
-                .hash(arguments.get("hashKey"));
+                .partitionKey(arguments.get("hashKey"));
         }
     }
     @Query(ByHash.class)
@@ -57,7 +57,7 @@ public interface DynamoDBEntityNoRangeService {
     class IncrementNumber implements Function<Map<String, Object>, DetachedUpdate> {
         public DetachedUpdate apply(Map<String, Object> arguments) {
             return Builders.update(DynamoDBEntityNoRange.class)
-                .hash(arguments.get("hashKey"))
+                .partitionKey(arguments.get("hashKey"))
                 .add("number", 1)
                 .returnUpdatedNew(DynamoDBEntityNoRange::getNumber);
         }
@@ -68,7 +68,7 @@ public interface DynamoDBEntityNoRangeService {
     class DecrementNumber implements Function<Map<String, Object>, DetachedUpdate> {
         public DetachedUpdate apply(Map<String, Object> arguments) {
             return Builders.update(DynamoDBEntityNoRange.class)
-                .hash(arguments.get("hashKey"))
+                .partitionKey(arguments.get("hashKey"))
                 .add("number", -1)
                 .returnUpdatedNew(DynamoDBEntityNoRange::getNumber);
         }
@@ -79,7 +79,7 @@ public interface DynamoDBEntityNoRangeService {
     class DeleteNumber implements Function<Map<String, Object>, DetachedUpdate> {
         public DetachedUpdate apply(Map<String, Object> arguments) {
             return Builders.update(DynamoDBEntityNoRange.class)
-                .hash(arguments.get("hashKey"))
+                .partitionKey(arguments.get("hashKey"))
                 .delete("number");
         }
     }

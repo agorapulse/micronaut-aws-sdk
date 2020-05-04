@@ -15,21 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
+package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
-import software.amazon.awssdk.enhanced.dynamodb.MappedTableResource;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-
-import java.util.Collections;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
+@SuppressWarnings("rawtypes")
+public interface UpdateFunction<T> extends Function<Map<String, Object>, DetachedUpdate> {
 
-public interface AttributeConversionHelper {
+    Consumer<UpdateBuilder<T>> update(Map<String, Object> args);
 
-    default <T> AttributeValue convert(MappedTableResource<T> table, String key, Object value) {
-        return convert(table, Collections.singletonMap(key, value)).get(key);
+    @Override
+    default DetachedUpdate apply(Map<String, Object> stringObjectMap) {
+        return Builders.update(update(stringObjectMap));
     }
-
-    <T> Map<String, AttributeValue> convert(MappedTableResource<T> table, Map<String, Object> values);
 
 }

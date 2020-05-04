@@ -22,6 +22,7 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.conditional.QueryConditio
 import io.reactivex.Flowable;
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.MappedTableResource;
 import software.amazon.awssdk.enhanced.dynamodb.TableMetadata;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.Page;
@@ -51,7 +52,7 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     }
 
     @Override
-    public DefaultQueryBuilder<T> sort(Builders.Sort sort) {
+    public DefaultQueryBuilder<T> order(Builders.Sort sort) {
         if (sort == Builders.Sort.ASC) {
             __expression.scanIndexForward(true);
         } else if (sort == Builders.Sort.DESC) {
@@ -85,13 +86,13 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     }
 
     @Override
-    public DefaultQueryBuilder<T> hash(Object hash) {
+    public DefaultQueryBuilder<T> partitionKey(Object hash) {
         this.__hash = hash;
         return this;
     }
 
     @Override
-    public DefaultQueryBuilder<T> range(Consumer<KeyConditionCollector<T>> conditions) {
+    public DefaultQueryBuilder<T> sortKey(Consumer<KeyConditionCollector<T>> conditions) {
         __queryConditionals.add(conditions);
         return this;
     }
@@ -138,7 +139,7 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     }
 
     @Override
-    public QueryEnhancedRequest resolveRequest(DynamoDbTable<T> mapper, AttributeConversionHelper attributeConversionHelper) {
+    public QueryEnhancedRequest resolveRequest(MappedTableResource<T> mapper, AttributeConversionHelper attributeConversionHelper) {
         applyRangeConditions(mapper, attributeConversionHelper, __expression::queryConditional);
         String currentIndex = __index == null ? TableMetadata.primaryIndexName() : __index;
         applyFilterConditions(mapper, attributeConversionHelper, cond -> __expression.filterExpression(cond.expression(mapper.tableSchema(), currentIndex)));
@@ -161,7 +162,7 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     }
 
     private void applyRangeConditions(
-        DynamoDbTable<T> model,
+        MappedTableResource<T> model,
         AttributeConversionHelper attributeConversionHelper,
         Consumer<QueryConditional> addFilterConsumer
     ) {
@@ -183,7 +184,7 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     }
 
     private void applyFilterConditions(
-        DynamoDbTable<T> model,
+        MappedTableResource<T> model,
         AttributeConversionHelper attributeConversionHelper,
         Consumer<QueryConditional> addFilterConsumer
     ) {
@@ -198,7 +199,7 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
         }
     }
 
-    private void applyLastEvaluatedKey(QueryEnhancedRequest.Builder exp, DynamoDbTable<T> mapper) {
+    private void applyLastEvaluatedKey(QueryEnhancedRequest.Builder exp, MappedTableResource<T> mapper) {
         if (__lastEvaluatedKey == null) {
             return;
         }

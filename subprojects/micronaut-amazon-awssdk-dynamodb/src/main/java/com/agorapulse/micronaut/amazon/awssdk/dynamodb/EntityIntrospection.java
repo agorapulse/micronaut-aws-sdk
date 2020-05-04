@@ -19,11 +19,11 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
 import io.micronaut.core.beans.BeanIntrospection;
 import io.micronaut.core.beans.BeanIntrospector;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.MappedTableResource;
 
 class EntityIntrospection {
 
-    static <T> BeanIntrospection<T> getBeanIntrospection(DynamoDbTable<T> table) {
+    static <T> BeanIntrospection<T> getBeanIntrospection(MappedTableResource<T> table) {
         return BeanIntrospector.SHARED.findIntrospection(table.tableSchema().itemType().rawClass())
             .orElseThrow(() -> new IllegalArgumentException("No introspection found for " + table.tableSchema().itemType().rawClass()
                 + "! Please, annotate the class with @Introspected. See https://docs.micronaut.io/latest/guide/index.html#introspection for more details")

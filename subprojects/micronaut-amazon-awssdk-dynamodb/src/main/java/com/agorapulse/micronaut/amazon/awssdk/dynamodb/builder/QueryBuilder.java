@@ -30,11 +30,22 @@ import java.util.function.Consumer;
 public interface QueryBuilder<T> extends DetachedQuery<T> {
 
     /**
-     * Sort the results by the range index
+     * Sort the results by the sort key
      * @param sort the sort keyword
      * @return self
+     * @deprecated use {@link #order(Builders.Sort)} instead
      */
-    QueryBuilder<T> sort(Builders.Sort sort);
+    @Deprecated
+    default QueryBuilder<T> sort(Builders.Sort sort) {
+        return order(sort);
+    }
+
+    /**
+     * Orders the results by the sort key
+     * @param sort the order keyword
+     * @return self
+     */
+    QueryBuilder<T> order(Builders.Sort sort);
 
     /**
      * Demand consistent reads.
@@ -58,24 +69,49 @@ public interface QueryBuilder<T> extends DetachedQuery<T> {
     QueryBuilder<T> index(String name);
 
     /**
-     * Sets the hash key value for the query.
+     * Sets the partition key value for the query.
      *
      * This parameter is required for every query.
      *
-     * @param key the hash key of the query
+     * @param key the partition key of the query
      * @return self
+     * @deprecated use {@link #partitionKey(Object)} instead
      */
-    QueryBuilder<T> hash(Object key);
+    @Deprecated
+    default QueryBuilder<T> hash(Object key) {
+        return partitionKey(key);
+    }
 
     /**
-     * Creates a range condition.
+     * Sets the partition key value for the query.
+     *
+     * This parameter is required for every query.
+     *
+     * @param key the partition key of the query
+     * @return self
+     */
+    QueryBuilder<T> partitionKey(Object key);
+
+    /**
+     * Creates a sort key condition.
      * @param conditions consumer to build the conditions
      * @return self
      */
-    QueryBuilder<T> range(Consumer<KeyConditionCollector<T>> conditions);
+    QueryBuilder<T> sortKey(Consumer<KeyConditionCollector<T>> conditions);
 
     /**
-     * One or more range key filter conditions.
+     * Creates a sort key condition.
+     * @param conditions consumer to build the conditions
+     * @return self
+     * @deprecated use {@link #sortKey(Consumer)} instead
+     */
+    @Deprecated
+    default QueryBuilder<T> range(Consumer<KeyConditionCollector<T>> conditions) {
+        return sortKey(conditions);
+    }
+
+    /**
+     * One or more filter conditions.
      *
      * These conditions are resolved on the result set before returning the values and therefore they don't require an existing index
      * but they consume more resources as all the result set must be traversed.

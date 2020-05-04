@@ -43,7 +43,7 @@ public class GroovyBuilders extends Builders {
         @ClosureParams(value = SimpleType.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.QueryBuilder<T>")
             Closure<QueryBuilder<T>> definition
     ) {
-        return Builders.query(type, ConsumerWithDelegate.create(definition));
+        return Builders.query(ConsumerWithDelegate.create(definition));
     }
 
     /**
@@ -60,7 +60,7 @@ public class GroovyBuilders extends Builders {
         @ClosureParams(value = SimpleType.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ScanBuilder<T>")
             Closure<ScanBuilder<T>> definition
     ) {
-        return Builders.scan(type, ConsumerWithDelegate.create(definition));
+        return Builders.scan(ConsumerWithDelegate.create(definition));
     }
 
     /**
@@ -77,7 +77,7 @@ public class GroovyBuilders extends Builders {
         @ClosureParams(value = SimpleType.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T>")
             Closure<UpdateBuilder<T>> definition
     ) {
-        return Builders.update(type, ConsumerWithDelegate.create(definition));
+        return Builders.update(ConsumerWithDelegate.create(definition));
     }
 
 }
