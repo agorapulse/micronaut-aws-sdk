@@ -44,10 +44,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.BeanTableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticTableMetadata;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondarySortKey;
-import software.amazon.awssdk.enhanced.dynamodb.model.EnhancedGlobalSecondaryIndex;
-import software.amazon.awssdk.enhanced.dynamodb.model.EnhancedLocalSecondaryIndex;
-import software.amazon.awssdk.enhanced.dynamodb.model.ReadBatch;
-import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch;
+import software.amazon.awssdk.enhanced.dynamodb.model.*;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
 
@@ -91,9 +88,9 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             return attributeConversionHelper.convert(table, rangeKeyName, rangeKeyRaw);
         }
 
-        List<AttributeValue> getSortAttributeValues(Map<String, MutableArgumentValue<?>> params, DynamoDbTable<?> table, AttributeConversionHelper attributeConversionHelper) {
+        Flowable<AttributeValue> getSortAttributeValues(Map<String, MutableArgumentValue<?>> params, DynamoDbTable<?> table, AttributeConversionHelper attributeConversionHelper) {
             final String key = table.tableSchema().tableMetadata().primarySortKey().orElseThrow(() -> new IllegalArgumentException("Sort key not present for " + table.tableSchema().itemType()));
-            return toList(Object.class, sortKey, params).stream().map(o -> attributeConversionHelper.convert(table, key, o)).collect(Collectors.toList());
+            return toFlowable(Object.class, sortKey, params).map(o -> attributeConversionHelper.convert(table, key, o));
         }
 
     }
@@ -126,37 +123,22 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         return doIntercept(context, serviceAnnotationValue);
     }
 
-    private static <T> List<T> toList(Iterable<T> iterable) {
-        if (iterable instanceof List) {
-            return (List<T>) iterable;
-        }
-
-        List<T> ret = new ArrayList<>();
-        iterable.forEach(ret::add);
-        return ret;
-    }
-
-    private static <T> List<List<T>> partition(List<T> collection, int chunkSize) {
-        List<List<T>> lists = new ArrayList<>();
-        for (int i = 0; i < collection.size(); i += chunkSize) {
-            int end = Math.min(collection.size(), i + chunkSize);
-            lists.add(collection.subList(i, end));
-        }
-        return lists;
-    }
-
-    private static <T> List<T> toList(Class<T> type, Argument<?> itemArgument, Map<String, MutableArgumentValue<?>> params) {
+    private static <T> Flowable<T> toFlowable(Class<T> type, Argument<?> itemArgument, Map<String, MutableArgumentValue<?>> params) {
         Object item = params.get(itemArgument.getName()).getValue();
 
         if (itemArgument.getType().isArray() && type.isAssignableFrom(itemArgument.getType().getComponentType())) {
-            return Arrays.asList((T[])item);
+            return Flowable.fromArray((T[])item);
         }
 
         if (Iterable.class.isAssignableFrom(itemArgument.getType()) && type.isAssignableFrom(itemArgument.getTypeParameters()[0].getType())) {
-            return toList((Iterable<T>) item);
+            return Flowable.fromIterable((Iterable<T>) item);
         }
 
-        return Collections.singletonList((T) item);
+        if (Flowable.class.isAssignableFrom(itemArgument.getType()) && type.isAssignableFrom(itemArgument.getTypeParameters()[0].getType())) {
+            return Flowable.fromIterable((Iterable<T>) item);
+        }
+
+        return Flowable.just((T) item);
     }
 
     private <T> Object doIntercept(MethodInvocationContext<Object, Object> context, AnnotationValue<Service> serviceAnnotationValue) {
@@ -190,40 +172,17 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
                 return criteria.count(table, attributeConversionHelper);
             }
 
+            Flowable<T> queryResult = criteria.query(table, attributeConversionHelper);
             if (methodName.startsWith("delete")) {
-                // TODO: try implement batch delete
-                AtomicInteger counter = new AtomicInteger();
-
-                criteria.query(table, attributeConversionHelper).subscribe(t -> {
-                    table.deleteItem(t);
-                    counter.incrementAndGet();
-                });
-
-                return counter.get();
+                return deleteAll(table, queryResult);
             }
 
             if (context.getTargetMethod().isAnnotationPresent(Update.class)) {
-                // TODO: try implement batch update
-                BeanIntrospection<T> introspection = EntityIntrospection.getBeanIntrospection(table);
-                TableMetadata tableMetadata = table.tableSchema().tableMetadata();
-
                 UpdateBuilder<T> update = (UpdateBuilder<T>) functionEvaluator.evaluateAnnotationType(context.getTargetMethod().getAnnotation(Update.class).value(), context);
-
-                AtomicInteger counter = new AtomicInteger();
-
-                criteria.query(table, attributeConversionHelper).subscribe(entity -> {
-                    introspection.getProperty(tableMetadata.primaryPartitionKey()).ifPresent(p -> update.partitionKey(p.get(entity)));
-                    tableMetadata.primarySortKey().flatMap(introspection::getProperty).ifPresent(p -> update.sortKey(p.get(entity)));
-
-                    update.update(table, client, attributeConversionHelper);
-
-                    counter.incrementAndGet();
-                });
-
-                return counter.get();
+                return updateAll(table, queryResult, update);
             }
 
-            return flowableOrList(criteria.query(table, attributeConversionHelper), context.getReturnType().getType());
+            return flowableOrList(queryResult, context.getReturnType().getType());
         }
 
         if (context.getTargetMethod().isAnnotationPresent(Scan.class)) {
@@ -233,40 +192,18 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
                 return criteria.count(table, attributeConversionHelper);
             }
 
+            Flowable<T> scanResult = criteria.scan(table, attributeConversionHelper);
+
             if (methodName.startsWith("delete")) {
-                // TODO: try implement batch delete
-                AtomicInteger counter = new AtomicInteger();
-
-                criteria.scan(table, attributeConversionHelper).subscribe(t -> {
-                    table.deleteItem(t);
-                    counter.incrementAndGet();
-                });
-
-                return counter.get();
+                return deleteAll(table, scanResult);
             }
 
             if (context.getTargetMethod().isAnnotationPresent(Update.class)) {
-                // TODO: try implement batch update
-                BeanIntrospection<T> introspection = EntityIntrospection.getBeanIntrospection(table);
-                TableMetadata tableMetadata = table.tableSchema().tableMetadata();
-
                 UpdateBuilder<T> update = (UpdateBuilder<T>) functionEvaluator.evaluateAnnotationType(context.getTargetMethod().getAnnotation(Update.class).value(), context);
-
-                AtomicInteger counter = new AtomicInteger();
-
-                criteria.scan(table, attributeConversionHelper).subscribe(entity -> {
-                    introspection.getProperty(tableMetadata.primaryPartitionKey()).ifPresent(p -> update.partitionKey(p.get(entity)));
-                    tableMetadata.primarySortKey().flatMap(introspection::getProperty).ifPresent(p -> update.sortKey(p.get(entity)));
-
-                    update.update(table, client, attributeConversionHelper);
-
-                    counter.incrementAndGet();
-                });
-
-                return counter.get();
+                return updateAll(table, scanResult, update);
             }
 
-            return flowableOrList(criteria.scan(table, attributeConversionHelper), context.getReturnType().getType());
+            return flowableOrList(scanResult, context.getReturnType().getType());
         }
 
         if (context.getTargetMethod().isAnnotationPresent(Update.class)) {
@@ -290,6 +227,27 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         throw new UnsupportedOperationException("Cannot implement method " + context.getExecutableMethod());
     }
 
+    private <T> int updateAll(DynamoDbTable<T> table, Flowable<T> queryResult, UpdateBuilder<T> update) {
+        // there is no batch update API, we can do batch updates in transaction but in that case it would cause
+        // doubling the writes
+
+        BeanIntrospection<T> introspection = EntityIntrospection.getBeanIntrospection(table);
+        TableMetadata tableMetadata = table.tableSchema().tableMetadata();
+
+        AtomicInteger counter = new AtomicInteger();
+
+        queryResult.subscribe(entity -> {
+            introspection.getProperty(tableMetadata.primaryPartitionKey()).ifPresent(p -> update.partitionKey(p.get(entity)));
+            tableMetadata.primarySortKey().flatMap(introspection::getProperty).ifPresent(p -> update.sortKey(p.get(entity)));
+
+            update.update(table, client, attributeConversionHelper);
+
+            counter.incrementAndGet();
+        });
+
+        return counter.get();
+    }
+
     private Object flowableOrList(Flowable<?> result, Class<?> type) {
         if (List.class.isAssignableFrom(type)) {
             return result.toList().blockingGet();
@@ -306,13 +264,13 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         }
 
         Argument<?> itemArgument = args[0];
-        List<T> items = toList(service.tableSchema().itemType().rawClass(), itemArgument, params);
+        Flowable<T> items = toFlowable(service.tableSchema().itemType().rawClass(), itemArgument, params);
 
-        if (itemArgument.getType().isArray() || Iterable.class.isAssignableFrom(itemArgument.getType())) {
-            return saveAll(service, items);
+        if (itemArgument.getType().isArray() || Iterable.class.isAssignableFrom(itemArgument.getType()) || Flowable.class.isAssignableFrom(itemArgument.getType())) {
+            return flowableOrList(saveAll(service, items), context.getReturnType().getType());
         }
 
-        return service.updateItem(items.get(0));
+        return service.updateItem(items.blockingFirst());
     }
 
     private <T> Object handleDelete(Class<T> type, DynamoDbTable<T> service, MethodInvocationContext<Object, Object> context) {
@@ -321,15 +279,15 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
 
         if (args.length == 1) {
             Argument<?> itemArgument = args[0];
-            List<T> items = toList(service.tableSchema().itemType().rawClass(), itemArgument, params);
+            Flowable<T> items = toFlowable(service.tableSchema().itemType().rawClass(), itemArgument, params);
 
-            if (itemArgument.getType().isArray() || Iterable.class.isAssignableFrom(itemArgument.getType())) {
+            if (itemArgument.getType().isArray() || Iterable.class.isAssignableFrom(itemArgument.getType()) || Flowable.class.isAssignableFrom(itemArgument.getType())) {
                 return deleteAll(service, items);
             }
 
             if (type.isAssignableFrom(itemArgument.getType())) {
-                service.deleteItem(service.keyFrom(items.get(0)));
-                return items.get(0);
+                service.deleteItem(service.keyFrom(items.blockingFirst()));
+                return items.blockingFirst();
             }
         }
 
@@ -369,8 +327,12 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             return service.getItem(Key.builder().partitionValue(partitionValue).build());
         }
 
-        if (partitionAndSort.sortKey.getType().isArray() || Iterable.class.isAssignableFrom(partitionAndSort.sortKey.getType())) {
-            return getAll(service, partitionValue, partitionAndSort.getSortAttributeValues(params, service, attributeConversionHelper));
+        if (
+            partitionAndSort.sortKey.getType().isArray()
+                || Iterable.class.isAssignableFrom(partitionAndSort.sortKey.getType())
+                || Flowable.class.isAssignableFrom(partitionAndSort.sortKey.getType())
+        ) {
+            return flowableOrList(getAll(service, partitionValue, partitionAndSort.getSortAttributeValues(params, service, attributeConversionHelper)), context.getReturnType().getType());
         }
 
         return service.getItem(Key.builder().partitionValue(partitionValue).sortValue(partitionAndSort.getSortAttributeValue(params, service, attributeConversionHelper)).build());
@@ -432,12 +394,12 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         return names;
     }
 
-    private <T> Object saveAll(DynamoDbTable<T> service, List<T> itemsToSave) {
-        List<T> unprocessed = partition(itemsToSave, BATCH_SIZE).stream().map(batchItems -> enhancedClient.batchWriteItem(b -> {
+    private <T> Flowable<T> saveAll(DynamoDbTable<T> service, Flowable<T> itemsToSave) {
+        List<T> unprocessed = itemsToSave.buffer(BATCH_SIZE).map(batchItems -> enhancedClient.batchWriteItem(b -> {
             b.writeBatches(batchItems.stream().map(i ->
                 WriteBatch.builder(service.tableSchema().itemType().rawClass()).mappedTableResource(service).addPutItem(i).build()
             ).collect(Collectors.toList()));
-        })).flatMap(r -> r.unprocessedPutItemsForTable(service).stream()).collect(Collectors.toList());
+        })).flatMap(r -> Flowable.fromIterable(r.unprocessedPutItemsForTable(service))).toList().blockingGet();
 
         if (unprocessed.isEmpty()) {
             return itemsToSave;
@@ -446,16 +408,18 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         throw new IllegalArgumentException("Following items couldn't be saved:" + unprocessed.stream().map(Object::toString).collect(Collectors.joining(", ")));
     }
 
-    private <T> int deleteAll(DynamoDbTable<T> service, List<T> itemsToDelete) {
-        TableSchema<T> tableSchema = service.tableSchema();
-        List<Key> unprocessed = partition(itemsToDelete, BATCH_SIZE).stream().map(batchItems -> enhancedClient.batchWriteItem(b -> {
+    private <T> int deleteAll(DynamoDbTable<T> table, Flowable<T> items) {
+        TableSchema<T> tableSchema = table.tableSchema();
+        AtomicInteger counter = new AtomicInteger();
+        List<Key> unprocessed = items.buffer(BATCH_SIZE).map(batchItems -> enhancedClient.batchWriteItem(b -> {
+            counter.addAndGet(batchItems.size());
             b.writeBatches(batchItems.stream().map(i ->
-                WriteBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(service).addDeleteItem(i).build()
+                WriteBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(table).addDeleteItem(i).build()
             ).collect(Collectors.toList()));
-        })).flatMap(r -> r.unprocessedDeleteItemsForTable(service).stream()).collect(Collectors.toList());
+        })).flatMap(r -> Flowable.fromIterable(r.unprocessedDeleteItemsForTable(table))).toList().blockingGet();
 
         if (unprocessed.isEmpty()) {
-            return itemsToDelete.size();
+            return counter.get();
         }
 
         throw new IllegalArgumentException("Following items couldn't be deleted:" + unprocessed.stream()
@@ -463,13 +427,13 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             .collect(Collectors.joining(", ")));
     }
 
-    private <T> List<T> getAll(DynamoDbTable<T> service, AttributeValue hashKey, List<AttributeValue> rangeKeys) {
+    private <T> Flowable<T> getAll(DynamoDbTable<T> service, AttributeValue hashKey, Flowable<AttributeValue> rangeKeys) {
         TableSchema<T> tableSchema = service.tableSchema();
-        return partition(rangeKeys, BATCH_SIZE).stream().map(batchRangeKeys -> enhancedClient.batchGetItem(b -> {
+        return rangeKeys.buffer(BATCH_SIZE).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> {
             b.readBatches(batchRangeKeys.stream().map(k ->
                 ReadBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(service).addGetItem(Key.builder().partitionValue(hashKey).sortValue(k).build()).build()
             ).collect(Collectors.toList()));
-        })).flatMap(r -> r.resultsForTable(service).stream()).collect(Collectors.toList());
+        })).flatMap(r -> Flowable.fromIterable(r.resultsForTable(service)));
     }
 
     private <T> void createTable(DynamoDbTable<T> table) {
