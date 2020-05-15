@@ -18,6 +18,7 @@
 package com.agorapulse.micronaut.aws.cloudwatch
 
 import com.agorapulse.micronaut.aws.DefaultRegionAndEndpointConfiguration
+import com.agorapulse.micronaut.aws.util.ConfigurationUtil
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import groovy.transform.CompileStatic
 import io.micronaut.context.annotation.ConfigurationProperties
@@ -30,7 +31,7 @@ import javax.inject.Named
  * Default simple storage service configuration.
  */
 @Primary
-@Named('default')
+@Named(ConfigurationUtil.DEFAULT_CONFIGURATION_NAME)
 @CompileStatic
 @ConfigurationProperties('aws.cloudwatch')
 @Requires(classes = AmazonCloudWatch)

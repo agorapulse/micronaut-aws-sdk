@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.sns;
 
+import com.agorapulse.micronaut.amazon.awssdk.core.util.ConfigurationUtil;
 import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.context.annotation.Primary;
 import io.micronaut.context.env.Environment;
@@ -27,7 +28,7 @@ import javax.inject.Named;
  * Default simple queue service configuration.
  */
 @Primary
-@Named("default")
+@Named(ConfigurationUtil.DEFAULT_CONFIGURATION_NAME)
 @ConfigurationProperties("aws.sns")
 public class DefaultSimpleNotificationServiceConfiguration extends SimpleNotificationServiceConfiguration {
 

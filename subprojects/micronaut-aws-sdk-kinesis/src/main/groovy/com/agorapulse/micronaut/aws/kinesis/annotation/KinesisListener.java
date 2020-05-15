@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.aws.kinesis.annotation;
 
+import com.agorapulse.micronaut.aws.util.ConfigurationUtil;
 import io.micronaut.context.annotation.Executable;
 import io.micronaut.context.annotation.Parallel;
 
@@ -40,6 +41,6 @@ public @interface KinesisListener {
     /**
      * @return the name of the client configuration
      */
-    String value() default "default";
+    String value() default ConfigurationUtil.DEFAULT_CONFIGURATION_NAME;
 
 }

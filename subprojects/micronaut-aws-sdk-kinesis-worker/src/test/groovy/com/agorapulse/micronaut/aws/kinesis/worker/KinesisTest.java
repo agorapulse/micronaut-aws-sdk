@@ -56,7 +56,7 @@ public class KinesisTest {
     public ApplicationContext context;                                                  // <1>
 
     @Rule
-    public LocalStackContainer localstack = new LocalStackContainer("0.8.10")           // <2>
+    public LocalStackContainer localstack = new LocalStackContainer()                   // <2>
         .withServices(DYNAMODB, KINESIS);
 
     @Before
@@ -143,6 +143,7 @@ public class KinesisTest {
         WorkerStateListener listener = context.getBean(WorkerStateListener.class);
         for (int i = 0; i < retries; i++) {
             if (!listener.isReady(TEST_STREAM)) {
+                System.err.println("Worker not ready yet after " + retries * waitMillis + " milliseconds");
                 Thread.sleep(waitMillis);
             }
         }

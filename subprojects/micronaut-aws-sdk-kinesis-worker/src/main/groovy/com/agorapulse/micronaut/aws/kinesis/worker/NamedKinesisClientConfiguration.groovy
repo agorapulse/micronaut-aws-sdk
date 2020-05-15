@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.aws.kinesis.worker
 
+import com.agorapulse.micronaut.aws.util.ConfigurationUtil
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration
 import groovy.transform.CompileStatic
 import io.micronaut.context.annotation.EachProperty
@@ -28,7 +29,7 @@ import io.micronaut.context.annotation.Value
  * Kinesis listener configuration for given configuration key.
  */
 @CompileStatic
-@EachProperty(value = 'aws.kinesis.listeners', primary = 'default')
+@EachProperty(value = 'aws.kinesis.listeners', primary = ConfigurationUtil.DEFAULT_CONFIGURATION_NAME)
 @Requires(classes = KinesisClientLibConfiguration)
 class NamedKinesisClientConfiguration extends KinesisClientConfiguration {
 

@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.aws.kinesis.worker
 
+import com.agorapulse.micronaut.aws.util.ConfigurationUtil
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration
 import groovy.transform.CompileStatic
 import io.micronaut.context.annotation.ConfigurationProperties
@@ -31,7 +32,7 @@ import javax.inject.Named
  */
 @CompileStatic
 @Primary
-@Named('default')
+@Named(ConfigurationUtil.DEFAULT_CONFIGURATION_NAME)
 @ConfigurationProperties('aws.kinesis.listener')
 @Requires(classes = KinesisClientLibConfiguration)
 @SuppressWarnings('NoWildcardImports')

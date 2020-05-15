@@ -73,6 +73,7 @@ public class DefaultKinesisWorkerFactory implements KinesisWorkerFactory {
     @Override
     public KinesisWorker create(KinesisClientLibConfiguration kinesisConfiguration) {
         if (kinesisConfiguration == null) {
+            LOGGER.error("Cannot setup listener Kinesis listener, configuration is missing");
             return NOOP;
         }
 

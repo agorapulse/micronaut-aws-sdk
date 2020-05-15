@@ -17,13 +17,14 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.s3;
 
+import com.agorapulse.micronaut.amazon.awssdk.core.util.ConfigurationUtil;
 import io.micronaut.context.annotation.EachProperty;
 import io.micronaut.context.annotation.Parameter;
 
 /**
  * Simple storage service configuration for each configuration key.
  */
-@EachProperty(value = "aws.s3.buckets", primary = "default")
+@EachProperty(value = "aws.s3.buckets", primary = ConfigurationUtil.DEFAULT_CONFIGURATION_NAME)
 public class NamedSimpleStorageServiceConfiguration extends SimpleStorageServiceConfiguration {
 
     public NamedSimpleStorageServiceConfiguration(@Parameter String name) {

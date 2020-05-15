@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.aws.sqs
 
+import com.agorapulse.micronaut.aws.util.ConfigurationUtil
 import com.amazonaws.services.sqs.AmazonSQS
 import groovy.transform.CompileStatic
 import io.micronaut.context.annotation.EachProperty
@@ -27,7 +28,7 @@ import io.micronaut.context.annotation.Requires
  * Named configuration for simple queue service created for each key in the configuration.
  */
 @CompileStatic
-@EachProperty(value = 'aws.sqs.queues', primary = 'default')
+@EachProperty(value = 'aws.sqs.queues', primary = ConfigurationUtil.DEFAULT_CONFIGURATION_NAME)
 @Requires(classes = AmazonSQS, property =  'aws.sqs.queues')
 class NamedSimpleQueueServiceConfiguration extends SimpleQueueServiceConfiguration {
 

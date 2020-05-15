@@ -18,6 +18,7 @@
 package com.agorapulse.micronaut.aws.kinesis.worker;
 
 import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisListener;
+import com.agorapulse.micronaut.aws.util.ConfigurationUtil;
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
 import com.amazonaws.services.kinesis.model.Record;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -181,7 +182,7 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
 
         BiConsumer<String, Record> consumer = createConsumer(method, bean);
 
-        String configurationName = method.getValue(KinesisListener.class, String.class).get();
+        String configurationName = method.getValue(KinesisListener.class, String.class).orElse(null);
 
         KinesisWorker worker = workers.computeIfAbsent(
             configurationName, key -> {
@@ -207,7 +208,7 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
 
     private KinesisClientLibConfiguration getKinesisConfiguration(String key) {
         try {
-            return beanContext.getBean(KinesisClientLibConfiguration.class, Qualifiers.byName(key));
+            return beanContext.getBean(KinesisClientLibConfiguration.class, ConfigurationUtil.isDefaultConfigurationName(key) ? null : Qualifiers.byName(key));
         } catch (NoSuchBeanException ignored) {
             LOGGER.error("Cannot setup listener Kinesis listener, application name is missing. Configuration for Kinesis client with name '{}' is missing", key);
             return null;

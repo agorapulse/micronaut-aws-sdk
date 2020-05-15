@@ -19,6 +19,7 @@ package com.agorapulse.micronaut.aws.sqs;
 
 import com.agorapulse.micronaut.aws.sqs.annotation.Queue;
 import com.agorapulse.micronaut.aws.sqs.annotation.QueueClient;
+import com.agorapulse.micronaut.aws.util.ConfigurationUtil;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.QueueDoesNotExistException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -74,10 +75,10 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
             throw new IllegalStateException("Invocation beanContext is missing required annotation QueueClient");
         }
 
-        Optional<String> configurationName = clientAnnotationValue.getValue(String.class);
+        String configurationName = clientAnnotationValue.getValue(String.class).orElse(ConfigurationUtil.DEFAULT_CONFIGURATION_NAME);
         SimpleQueueService service = beanContext.getBean(
             SimpleQueueService.class,
-            configurationName.map(Qualifiers::<SimpleQueueService>byName).orElse(null)
+            ConfigurationUtil.isDefaultConfigurationName(configurationName) ? null : Qualifiers.byName(configurationName)
         );
 
         String queueName = clientAnnotationValue.get(QueueClient.Constants.QUEUE, String.class).flatMap(EMPTY_IF_UNDEFINED).orElse(null);

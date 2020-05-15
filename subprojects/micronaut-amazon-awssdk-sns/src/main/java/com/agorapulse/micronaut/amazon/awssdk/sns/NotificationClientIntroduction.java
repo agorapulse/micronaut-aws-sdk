@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.sns;
 
+import com.agorapulse.micronaut.amazon.awssdk.core.util.ConfigurationUtil;
 import com.agorapulse.micronaut.amazon.awssdk.sns.annotation.NotificationClient;
 import com.agorapulse.micronaut.amazon.awssdk.sns.annotation.Topic;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -79,10 +80,10 @@ public class NotificationClientIntroduction implements MethodInterceptor<Object,
             throw new IllegalStateException("Invocation beanContext is missing required annotation NotificationClient");
         }
 
-        Optional<String> configurationName = clientAnnotationValue.getValue(String.class);
+        String configurationName = clientAnnotationValue.getValue(String.class).orElse(ConfigurationUtil.DEFAULT_CONFIGURATION_NAME);
         SimpleNotificationService service = beanContext.getBean(
             SimpleNotificationService.class,
-            configurationName.map(Qualifiers::<SimpleNotificationService>byName).orElse(null)
+            ConfigurationUtil.isDefaultConfigurationName(configurationName) ? null : Qualifiers.byName(configurationName)
         );
 
         String topicName = clientAnnotationValue.get(NotificationClient.Constants.TOPIC, String.class).flatMap(EMPTY_IF_UNDEFINED).orElse(null);

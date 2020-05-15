@@ -15,20 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.amazon.awssdk.s3;
+package com.agorapulse.micronaut.aws.util;
 
-import com.agorapulse.micronaut.amazon.awssdk.core.util.ConfigurationUtil;
-import io.micronaut.context.annotation.ConfigurationProperties;
-import io.micronaut.context.annotation.Primary;
+public class ConfigurationUtil {
 
-import javax.inject.Named;
+    public static final String DEFAULT_CONFIGURATION_NAME = "default";
 
-/**
- * Default simple storage service configuration.
- */
-@Primary
-@Named(ConfigurationUtil.DEFAULT_CONFIGURATION_NAME)
-@ConfigurationProperties("aws.s3")
-public class DefaultSimpleStorageServiceConfiguration extends SimpleStorageServiceConfiguration {
+    private ConfigurationUtil() {
+        // utility class
+    }
+
+    public static final boolean isDefaultConfigurationName(String configurationName) {
+        return configurationName == null || DEFAULT_CONFIGURATION_NAME.equals(configurationName);
+    }
+
 
 }

@@ -19,6 +19,7 @@ package com.agorapulse.micronaut.aws.sqs.annotation;
 
 
 import com.agorapulse.micronaut.aws.sqs.QueueClientIntroduction;
+import com.agorapulse.micronaut.aws.util.ConfigurationUtil;
 import groovy.transform.Undefined;
 import io.micronaut.aop.Introduction;
 import io.micronaut.context.annotation.Type;
@@ -39,7 +40,7 @@ public @interface QueueClient {
     /**
      * @return the name of the configuration to use.
      */
-    String value() default "default";
+    String value() default ConfigurationUtil.DEFAULT_CONFIGURATION_NAME;
 
     /**
      * @return the default name of the queue overriding the one from the configuration
