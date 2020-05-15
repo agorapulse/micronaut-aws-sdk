@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Singleton;
-import java.util.Optional;
 import java.util.function.BiConsumer;
 
 @Singleton
@@ -59,11 +58,11 @@ public class DefaultKinesisWorkerFactory implements KinesisWorkerFactory {
     };
 
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final Optional<AmazonDynamoDB> amazonDynamoDB;
-    private final Optional<AmazonKinesis> kinesis;
-    private final Optional<AmazonCloudWatch> cloudWatch;
+    private final AmazonDynamoDB amazonDynamoDB;
+    private final AmazonKinesis kinesis;
+    private final AmazonCloudWatch cloudWatch;
 
-    public DefaultKinesisWorkerFactory(ApplicationEventPublisher applicationEventPublisher, Optional<AmazonDynamoDB> amazonDynamoDB, Optional<AmazonKinesis> kinesis, Optional<AmazonCloudWatch> cloudWatch) {
+    public DefaultKinesisWorkerFactory(ApplicationEventPublisher applicationEventPublisher, AmazonDynamoDB amazonDynamoDB, AmazonKinesis kinesis, AmazonCloudWatch cloudWatch) {
         this.applicationEventPublisher = applicationEventPublisher;
         this.amazonDynamoDB = amazonDynamoDB;
         this.kinesis = kinesis;

@@ -98,8 +98,7 @@ abstract class KinesisClientConfiguration {
 
     KinesisClientLibConfiguration getKinesisClientLibConfiguration(
         ClientConfiguration awsClientConfiguration,
-        AWSCredentialsProvider credentialsProvider,
-        String region
+        AWSCredentialsProvider awsCredentialsProvider
     ) {
         KinesisClientLibConfiguration configuration = new KinesisClientLibConfiguration(
             applicationName,
@@ -107,9 +106,9 @@ abstract class KinesisClientConfiguration {
             kinesisEndpoint,
             dynamoDBEndpoint,
             initialPositionInStream,
-            credentialsProvider,
-            credentialsProvider,
-            credentialsProvider,
+            awsCredentialsProvider,
+            awsCredentialsProvider,
+            awsCredentialsProvider,
             failoverTimeMillis,
             workerId,
             maxRecords,
@@ -125,7 +124,7 @@ abstract class KinesisClientConfiguration {
             metricsBufferTimeMillis,
             metricsMaxQueueSize,
             validateSequenceNumberBeforeCheckpointing,
-            region,
+            null,
             new SimpleRecordsFetcherFactory()
         )
 

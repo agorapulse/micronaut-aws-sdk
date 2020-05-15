@@ -24,6 +24,8 @@ config {
 dependencies {
     compile project(':micronaut-aws-sdk-core')
     compile project(':micronaut-aws-sdk-kinesis')
+    compile project(':micronaut-aws-sdk-dynamodb')
+    compile project(':micronaut-aws-sdk-cloudwatch')
 
     compile group: 'com.amazonaws', name: 'amazon-kinesis-client'
 

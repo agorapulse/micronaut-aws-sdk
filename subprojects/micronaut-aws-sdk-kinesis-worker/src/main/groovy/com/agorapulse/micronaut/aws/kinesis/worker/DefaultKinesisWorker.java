@@ -25,12 +25,10 @@ import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibC
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.Worker;
 import com.amazonaws.services.kinesis.model.Record;
 import io.micronaut.context.event.ApplicationEventPublisher;
-import io.micronaut.core.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -43,9 +41,9 @@ class DefaultKinesisWorker implements KinesisWorker {
     DefaultKinesisWorker(
         KinesisClientLibConfiguration configuration,
         ApplicationEventPublisher applicationEventPublisher,
-        Optional<AmazonDynamoDB> amazonDynamoDB,
-        Optional<AmazonKinesis> amazonKinesis,
-        Optional<AmazonCloudWatch> amazonCloudWatch
+        AmazonDynamoDB amazonDynamoDB,
+        AmazonKinesis amazonKinesis,
+        AmazonCloudWatch amazonCloudWatch
     ) {
         this.configuration = configuration;
         this.applicationEventPublisher = applicationEventPublisher;
@@ -56,17 +54,11 @@ class DefaultKinesisWorker implements KinesisWorker {
 
     @Override
     public void start() {
-        Worker.Builder builder = new Worker.Builder().config(configuration);
-
-        if (StringUtils.isEmpty(configuration.getDynamoDBEndpoint())) {
-            amazonDynamoDB.ifPresent(builder::dynamoDBClient);
-        }
-
-        if (StringUtils.isEmpty(configuration.getKinesisEndpoint())) {
-            amazonKinesis.ifPresent(builder::kinesisClient);
-        }
-
-        amazonCloudWatch.ifPresent(builder::cloudWatchClient);
+        Worker.Builder builder = new Worker.Builder()
+            .config(configuration)
+            .cloudWatchClient(amazonCloudWatch)
+            .dynamoDBClient(amazonDynamoDB)
+            .kinesisClient(amazonKinesis);
 
         builder.recordProcessorFactory(DefaultRecordProcessorFactory.create((string, record) ->
             consumers.forEach(c -> {
@@ -113,9 +105,9 @@ class DefaultKinesisWorker implements KinesisWorker {
     private final KinesisClientLibConfiguration configuration;
     private final ExecutorService executorService = Executors.newCachedThreadPool();
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final Optional<AmazonDynamoDB> amazonDynamoDB;
-    private final Optional<AmazonKinesis> amazonKinesis;
-    private final Optional<AmazonCloudWatch> amazonCloudWatch;
+    private final AmazonDynamoDB amazonDynamoDB;
+    private final AmazonKinesis amazonKinesis;
+    private final AmazonCloudWatch amazonCloudWatch;
     private final List<BiConsumer<String, Record>> consumers = new CopyOnWriteArrayList<>();
     private Worker worker;
 }
