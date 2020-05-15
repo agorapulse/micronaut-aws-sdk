@@ -28,7 +28,7 @@ import io.micronaut.context.env.Environment
  * Named simple queue service configuration for each property key.
  */
 @CompileStatic
-@EachProperty('aws.sns.topics')
+@EachProperty(value = 'aws.sns.topics', primary = 'default')
 @Requires(classes = AmazonSNS, property =  'aws.sns.topics')
 class NamedSimpleNotificationServiceConfiguration extends SimpleNotificationServiceConfiguration {
 

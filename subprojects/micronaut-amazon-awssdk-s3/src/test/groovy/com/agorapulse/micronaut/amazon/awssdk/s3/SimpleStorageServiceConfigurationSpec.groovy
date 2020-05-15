@@ -65,7 +65,6 @@ class SimpleStorageServiceConfigurationSpec extends Specification {
         then:
             context.getBeanDefinitions(SimpleStorageService).size() == 2
             context.getBean(SimpleStorageService)
-            context.getBean(SimpleStorageService, Qualifiers.byName('default'))
             context.getBean(SimpleStorageService, Qualifiers.byName('samplebucket'))
             context.getBean(NamedSimpleStorageServiceConfiguration).name == 'samplebucket'
     }
@@ -78,8 +77,9 @@ class SimpleStorageServiceConfigurationSpec extends Specification {
             )
         then:
             context.getBeanDefinitions(SimpleStorageService).size() == 2
-            context.getBean(SimpleStorageService, Qualifiers.byName('default'))
+            context.getBean(SimpleStorageService)
             context.getBean(SimpleStorageService, Qualifiers.byName('samplebucket'))
+            context.getBean(SimpleStorageServiceConfiguration) instanceof DefaultSimpleStorageServiceConfiguration
             context.getBean(SimpleStorageServiceConfiguration, Qualifiers.byName('samplebucket')) instanceof NamedSimpleStorageServiceConfiguration
             context.getBean(SimpleStorageServiceConfiguration, Qualifiers.byName('samplebucket')).name == 'samplebucket'
     }

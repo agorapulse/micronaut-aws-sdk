@@ -74,8 +74,11 @@ public class KinesisClientIntroduction implements MethodInterceptor<Object, Obje
             throw new IllegalStateException("Invocation beanContext is missing required annotation KinesisClient");
         }
 
-        String configurationName = clientAnnotationValue.getValue(String.class).orElse("default");
-        KinesisService service = beanContext.getBean(KinesisService.class, Qualifiers.byName(configurationName));
+        Optional<String> configurationName = clientAnnotationValue.getValue(String.class);
+        KinesisService service = beanContext.getBean(
+            KinesisService.class,
+            configurationName.map(Qualifiers::<KinesisService>byName).orElse(null)
+        );
 
         String streamName = clientAnnotationValue.get(KinesisClient.Constants.STREAM, String.class).orElse(null);
 

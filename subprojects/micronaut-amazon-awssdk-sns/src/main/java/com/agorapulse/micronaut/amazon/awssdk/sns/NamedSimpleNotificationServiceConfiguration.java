@@ -24,7 +24,7 @@ import io.micronaut.context.env.Environment;
 /**
  * Named simple queue service configuration for each property key.
  */
-@EachProperty("aws.sns.topics")
+@EachProperty(value = "aws.sns.topics", primary = "default")
 public class NamedSimpleNotificationServiceConfiguration extends SimpleNotificationServiceConfiguration {
     public NamedSimpleNotificationServiceConfiguration(@Parameter String name, Environment environment) {
         super("aws.sns.topics." + name, environment);

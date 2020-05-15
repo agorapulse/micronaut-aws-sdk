@@ -74,8 +74,11 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
             throw new IllegalStateException("Invocation beanContext is missing required annotation QueueClient");
         }
 
-        String configurationName = clientAnnotationValue.getValue(String.class).orElse("default");
-        SimpleQueueService service = beanContext.getBean(SimpleQueueService.class, Qualifiers.byName(configurationName));
+        Optional<String> configurationName = clientAnnotationValue.getValue(String.class);
+        SimpleQueueService service = beanContext.getBean(
+            SimpleQueueService.class,
+            configurationName.map(Qualifiers::<SimpleQueueService>byName).orElse(null)
+        );
 
         String queueName = clientAnnotationValue.get(QueueClient.Constants.QUEUE, String.class).flatMap(EMPTY_IF_UNDEFINED).orElse(null);
         String group = clientAnnotationValue.get(QueueClient.Constants.GROUP, String.class).flatMap(EMPTY_IF_UNDEFINED).orElse(null);

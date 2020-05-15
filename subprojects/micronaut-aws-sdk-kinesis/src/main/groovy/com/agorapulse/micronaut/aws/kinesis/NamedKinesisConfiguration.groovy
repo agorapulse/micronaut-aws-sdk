@@ -27,7 +27,7 @@ import io.micronaut.context.annotation.Requires
  * Named Kinesis configuration, published with named qualifier of the same name as is the key of this configuration.
  */
 @CompileStatic
-@EachProperty('aws.kinesis.streams')
+@EachProperty(value = 'aws.kinesis.streams', primary = 'default')
 @Requires(classes = AmazonKinesis)
 class NamedKinesisConfiguration extends KinesisConfiguration {
 

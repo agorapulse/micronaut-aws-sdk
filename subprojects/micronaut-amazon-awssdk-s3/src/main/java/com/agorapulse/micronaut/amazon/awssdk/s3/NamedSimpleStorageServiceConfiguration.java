@@ -23,7 +23,7 @@ import io.micronaut.context.annotation.Parameter;
 /**
  * Simple storage service configuration for each configuration key.
  */
-@EachProperty("aws.s3.buckets")
+@EachProperty(value = "aws.s3.buckets", primary = "default")
 public class NamedSimpleStorageServiceConfiguration extends SimpleStorageServiceConfiguration {
 
     public NamedSimpleStorageServiceConfiguration(@Parameter String name) {

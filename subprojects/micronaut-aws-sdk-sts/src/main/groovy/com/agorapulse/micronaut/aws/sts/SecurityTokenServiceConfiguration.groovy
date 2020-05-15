@@ -21,6 +21,7 @@ import com.agorapulse.micronaut.aws.DefaultRegionAndEndpointConfiguration
 import com.amazonaws.services.securitytoken.AWSSecurityTokenService
 import groovy.transform.CompileStatic
 import io.micronaut.context.annotation.ConfigurationProperties
+import io.micronaut.context.annotation.Primary
 import io.micronaut.context.annotation.Requires
 
 import javax.inject.Named
@@ -28,6 +29,7 @@ import javax.inject.Named
 /**
  * Default simple storage service configuration.
  */
+@Primary
 @Named('default')
 @CompileStatic
 @ConfigurationProperties('aws.sts')

@@ -79,8 +79,11 @@ public class NotificationClientIntroduction implements MethodInterceptor<Object,
             throw new IllegalStateException("Invocation beanContext is missing required annotation NotificationClient");
         }
 
-        String configurationName = clientAnnotationValue.getValue(String.class).orElse("default");
-        SimpleNotificationService service = beanContext.getBean(SimpleNotificationService.class, Qualifiers.byName(configurationName));
+        Optional<String> configurationName = clientAnnotationValue.getValue(String.class);
+        SimpleNotificationService service = beanContext.getBean(
+            SimpleNotificationService.class,
+            configurationName.map(Qualifiers::<SimpleNotificationService>byName).orElse(null)
+        );
 
         String topicName = clientAnnotationValue.get(NotificationClient.Constants.TOPIC, String.class).flatMap(EMPTY_IF_UNDEFINED).orElse(null);
 

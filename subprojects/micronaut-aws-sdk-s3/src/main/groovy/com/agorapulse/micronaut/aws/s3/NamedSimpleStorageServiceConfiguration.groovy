@@ -27,7 +27,7 @@ import io.micronaut.context.annotation.Requires
  * Simple storage service configuration for each configuration key.
  */
 @CompileStatic
-@EachProperty('aws.s3.buckets')
+@EachProperty(value = 'aws.s3.buckets', primary = 'default')
 @Requires(classes = AmazonS3)
 class NamedSimpleStorageServiceConfiguration extends SimpleStorageServiceConfiguration {
 

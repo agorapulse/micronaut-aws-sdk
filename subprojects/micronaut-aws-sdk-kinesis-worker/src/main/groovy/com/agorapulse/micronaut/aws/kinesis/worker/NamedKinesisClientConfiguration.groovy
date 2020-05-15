@@ -28,7 +28,7 @@ import io.micronaut.context.annotation.Value
  * Kinesis listener configuration for given configuration key.
  */
 @CompileStatic
-@EachProperty('aws.kinesis.listeners')
+@EachProperty(value = 'aws.kinesis.listeners', primary = 'default')
 @Requires(classes = KinesisClientLibConfiguration)
 class NamedKinesisClientConfiguration extends KinesisClientConfiguration {
 

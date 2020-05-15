@@ -27,7 +27,7 @@ import io.micronaut.context.annotation.Requires
  * Named configuration for simple queue service created for each key in the configuration.
  */
 @CompileStatic
-@EachProperty('aws.sqs.queues')
+@EachProperty(value = 'aws.sqs.queues', primary = 'default')
 @Requires(classes = AmazonSQS, property =  'aws.sqs.queues')
 class NamedSimpleQueueServiceConfiguration extends SimpleQueueServiceConfiguration {
 

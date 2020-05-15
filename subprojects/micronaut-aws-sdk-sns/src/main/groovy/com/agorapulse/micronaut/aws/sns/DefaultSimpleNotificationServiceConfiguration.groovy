@@ -20,6 +20,7 @@ package com.agorapulse.micronaut.aws.sns
 import com.amazonaws.services.sns.AmazonSNS
 import groovy.transform.CompileStatic
 import io.micronaut.context.annotation.ConfigurationProperties
+import io.micronaut.context.annotation.Primary
 import io.micronaut.context.annotation.Requires
 import io.micronaut.context.env.Environment
 
@@ -28,6 +29,7 @@ import javax.inject.Named
 /**
  * Default simple queue service configuration.
  */
+@Primary
 @Named('default')
 @CompileStatic
 @ConfigurationProperties('aws.sns')
