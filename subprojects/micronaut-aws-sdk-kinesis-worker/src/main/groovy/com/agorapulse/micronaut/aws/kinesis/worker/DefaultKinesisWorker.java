@@ -77,7 +77,7 @@ class DefaultKinesisWorker implements KinesisWorker {
             worker = builder.build();
             executorService.execute(worker);
         } catch (Exception t) {
-            LOGGER.error("Caught throwable while processing Kinesis data.", t);
+            throw new IllegalStateException("Exception while starting a worker", t);
         }
     }
 

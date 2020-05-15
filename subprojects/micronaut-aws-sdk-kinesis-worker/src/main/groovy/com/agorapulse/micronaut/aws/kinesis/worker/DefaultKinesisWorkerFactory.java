@@ -17,20 +17,15 @@
  */
 package com.agorapulse.micronaut.aws.kinesis.worker;
 
-import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisListener;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.kinesis.AmazonKinesis;
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
-import com.amazonaws.services.kinesis.model.Record;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.ApplicationEventPublisher;
 import io.micronaut.core.util.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Singleton;
-import java.util.function.BiConsumer;
 
 @Singleton
 @Requires(
@@ -38,24 +33,6 @@ import java.util.function.BiConsumer;
     property = "aws.kinesis"
 )
 public class DefaultKinesisWorkerFactory implements KinesisWorkerFactory {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(KinesisListener.class);
-    private static final KinesisWorker NOOP = new KinesisWorker() {
-        @Override
-        public void start() {
-            // do nothing
-        }
-
-        @Override
-        public void shutdown() {
-            // do nothing
-        }
-
-        @Override
-        public void addConsumer(BiConsumer<String, Record> next) {
-            // do nothing
-        }
-    };
 
     private final ApplicationEventPublisher applicationEventPublisher;
     private final AmazonDynamoDB amazonDynamoDB;
@@ -72,13 +49,11 @@ public class DefaultKinesisWorkerFactory implements KinesisWorkerFactory {
     @Override
     public KinesisWorker create(KinesisClientLibConfiguration kinesisConfiguration) {
         if (kinesisConfiguration == null) {
-            LOGGER.error("Cannot setup listener Kinesis listener, configuration is missing");
-            return NOOP;
+            throw new IllegalStateException("Cannot setup listener Kinesis listener, configuration is missing");
         }
 
         if (StringUtils.isEmpty(kinesisConfiguration.getApplicationName())) {
-            LOGGER.error("Cannot setup listener Kinesis listener, application name is missing. Please, set 'aws.kinesis.application.name' property");
-            return NOOP;
+            throw new IllegalStateException("Cannot setup listener Kinesis listener, application name is missing. Please, set 'aws.kinesis.application.name' property");
         }
 
         return new DefaultKinesisWorker(kinesisConfiguration, applicationEventPublisher, amazonDynamoDB, kinesis, cloudWatch);
