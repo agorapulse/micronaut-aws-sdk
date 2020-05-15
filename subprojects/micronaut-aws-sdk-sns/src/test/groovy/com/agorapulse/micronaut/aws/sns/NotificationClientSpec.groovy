@@ -50,7 +50,7 @@ class NotificationClientSpec extends Specification {
     void setup() {
         context = ApplicationContext.build().build()
 
-        context.registerSingleton(SimpleNotificationService, defaultService, Qualifiers.byName('default'))
+        context.registerSingleton(SimpleNotificationService, defaultService)
         context.registerSingleton(SimpleNotificationService, testService, Qualifiers.byName('test'))
 
         context.start()

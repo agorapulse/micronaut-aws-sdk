@@ -58,7 +58,7 @@ class KinesisClientSpec extends Specification {
     void setup() {
         context = ApplicationContext.build().build()
 
-        context.registerSingleton(KinesisService, defaultService, Qualifiers.byName('default'))
+        context.registerSingleton(KinesisService, defaultService)
         context.registerSingleton(KinesisService, testService, Qualifiers.byName('test'))
 
         context.start()

@@ -50,7 +50,7 @@ class QueueClientSpec extends Specification {
     void setup() {
         context = ApplicationContext.build().build()
 
-        context.registerSingleton(SimpleQueueService, defaultService, Qualifiers.byName('default'))
+        context.registerSingleton(SimpleQueueService, defaultService)
         context.registerSingleton(SimpleQueueService, testService, Qualifiers.byName('test'))
 
         context.start()
