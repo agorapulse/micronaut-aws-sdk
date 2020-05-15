@@ -78,7 +78,7 @@ public class KinesisClientIntroduction implements MethodInterceptor<Object, Obje
         String configurationName = clientAnnotationValue.getValue(String.class).orElse(ConfigurationUtil.DEFAULT_CONFIGURATION_NAME);
         KinesisService service = beanContext.getBean(
             KinesisService.class,
-            ConfigurationUtil.isDefaultConfigurationName(configurationName) ? null : Qualifiers.byName(ConfigurationUtil.DEFAULT_CONFIGURATION_NAME)
+            ConfigurationUtil.isDefaultConfigurationName(configurationName) ? null : Qualifiers.byName(configurationName)
         );
 
         String streamName = clientAnnotationValue.get(KinesisClient.Constants.STREAM, String.class).orElse(null);
