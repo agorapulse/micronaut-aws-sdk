@@ -50,7 +50,7 @@ dependencies {
         api "software.amazon.awssdk:aws-core:$project.awsSdk2Version"
         api "software.amazon.awssdk:cloudwatch:$project.awsSdk2Version"
         api "software.amazon.awssdk:dynamodb:$project.awsSdk2Version"
-        api "software.amazon.awssdk:dynamodb-enhanced:$project.awsSdk2Version-PREVIEW"
+        api "software.amazon.awssdk:dynamodb-enhanced:$project.awsSdk2Version"
         api "software.amazon.awssdk:kms:$project.awsSdk2Version"
         api "software.amazon.awssdk:kinesis:$project.awsSdk2Version"
         api "software.amazon.awssdk:s3:$project.awsSdk2Version"
