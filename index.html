@@ -10,14 +10,14 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/docs.css?v=1.3.4.3" />
+<link rel="stylesheet" href="css/docs.css?v=1.3.5" />
 </head>
 <body class="book toc2 toc-left">
 <div id="header">
 <h1>Set of useful libraries for Micronaut</h1>
 <div class="details">
 <span id="author" class="author">Vladimir Orany</span><br>
-<span id="revnumber">version 1.3.4.3</span>
+<span id="revnumber">version 1.3.5</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -253,6 +253,22 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <div class="paragraph">
 <p>Since  <code>1.2.8</code> see the particular subprojects for installation instruction.</p>
 </div>
+<div class="paragraph">
+<p>Micronaut AWS SDK comes in the three compatibility versions:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>1.3.5-micronaut-1.2</code> - for usage with Micronaut <code>1.2.x</code> and Grails <code>4.0.x</code> (Micronaut <code>1.0.x</code> and Micronaut <code>1.1.x</code> should also work well with these releases)</p>
+</li>
+<li>
+<p><code>1.3.5</code> - for usage with the latest Micronaut  <code>1.3.x</code></p>
+</li>
+<li>
+<p><code>1.3.5-micronaut-2.0</code> - for usage with upcoming Micronaut <code>2.0.x</code> version</p>
+</li>
+</ul>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_dynamodb"><a class="anchor" href="#_dynamodb"></a>1.2. DynamoDB</h4>
@@ -281,7 +297,7 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-dynamodb:1.3.4.3'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-dynamodb:1.3.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -290,7 +306,7 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;1.3.4.3&lt;/version&gt;
+    &lt;version&gt;1.3.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1433,9 +1449,7 @@ You can obtain instances of declarative client from the context as well.
 <div class="title">Gradle</div>
 <div class="content">
 <pre class="prettyprint highlight"><code>// for Kinesis client
-compile 'com.agorapulse:micronaut-aws-sdk-kinesis:1.3.4.3'
-// for Kinesis worker
-compile 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:1.3.4.3'</code></pre>
+compile 'com.agorapulse:micronaut-aws-sdk-kinesis:1.3.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -1445,13 +1459,7 @@ compile 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:1.3.4.3'</code></pre>
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-kinesis&lt;/artifactId&gt;
-    &lt;version&gt;1.3.4.3&lt;/version&gt;
-&lt;/dependency&gt;
-&lt;!-- for Kinesis worker --&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
-    &lt;artifactId&gt;micronaut-aws-sdk-kinesis-worker&lt;/artifactId&gt;
-    &lt;version&gt;1.3.4.3&lt;/version&gt;
+    &lt;version&gt;1.3.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1737,119 +1745,17 @@ used by particular method using <code>@Stream</code> annotation as mentioned abo
 </div>
 <div class="sect4">
 <h5 id="_listening_with_kinesislistener"><a class="anchor" href="#_listening_with_kinesislistener"></a>Listening with <code>@KinesisListener</code></h5>
-<div class="admonitionblock tip">
+<div class="admonitionblock note">
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
+<i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Before you start implementing your service with <code>@KinesisListener</code> you may consider implementing a Lambda function
-instead.
+Kinesis Worker support has been discontinued. Consume Kinesis events with Lambda instead.
 </td>
 </tr>
 </table>
-</div>
-<div class="paragraph">
-<p>If you place <code>com.agorapulse.micronaut.aws.kinesis.annotation.KinesisListener</code> annotation on the method in the bean
-then the method will be triggered with the new records in the stream.</p>
-</div>
-<div class="paragraph">
-<p>source,java,indent=0,options="nowrap"]
-.Publishing Events</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>@Singleton                                                                              <i class="conum" data-value="1"></i><b>(1)</b>
-public class KinesisListenerTester {
-
-    @KinesisListener
-    public void listenString(String string) {                                           <i class="conum" data-value="2"></i><b>(2)</b>
-        String message = "EXECUTED: listenString(" + string + ")";
-        logExecution(message);
-    }
-
-    @KinesisListener
-    public void listenRecord(Record record) {                                           <i class="conum" data-value="3"></i><b>(3)</b>
-        logExecution("EXECUTED: listenRecord(" + record + ")");
-    }
-
-
-    @KinesisListener
-    public void listenStringRecord(String string, Record record) {                      <i class="conum" data-value="4"></i><b>(4)</b>
-        logExecution("EXECUTED: listenStringRecord(" + string + ", " + record + ")");
-    }
-
-    @KinesisListener
-    public void listenObject(MyEvent event) {                                           <i class="conum" data-value="5"></i><b>(5)</b>
-        logExecution("EXECUTED: listenObject(" + event + ")");
-    }
-
-    @KinesisListener
-    public void listenObjectRecord(MyEvent event, Record record) {                      <i class="conum" data-value="6"></i><b>(6)</b>
-        logExecution("EXECUTED: listenObjectRecord(" + event + ", " + record + ")");
-    }
-
-    @KinesisListener
-    public void listenPogoRecord(Pogo event) {                                          <i class="conum" data-value="7"></i><b>(7)</b>
-        logExecution("EXECUTED: listenPogoRecord(" + event + ")");
-    }
-
-    public List&lt;String&gt; getExecutions() {
-        return executions;
-    }
-
-    public void setExecutions(List&lt;String&gt; executions) {
-        this.executions = executions;
-    }
-
-    private void logExecution(String message) {
-        executions.add(message);
-        System.err.println(message);
-    }
-
-    private List&lt;String&gt; executions = new CopyOnWriteArrayList&lt;&gt;();
-}</pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td><code>@KinesisListener</code> method must be declared in a bean, e.g. <code>@Singleton</code></td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>You can listen to just plain string records</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>You can listen to <code>Record</code> objects</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>You can listen to both string and <code>Record</code> objects</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>You can listen to objects implementing <code>Event</code> interface</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>You can listen to both <code>Event</code> and <code>Record</code> objects</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>You can listen to any object as long as it can be unmarshalled from the record payload</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>You can listen to different than default configuration by changing the <code>value</code> of the annotation such as <code>@KinesisListener("other")</code>.</p>
-</div>
-<div class="paragraph">
-<p>Multiple methods in a single application can listen to the same configuration (stream). In that case, every method will be executed with the
-incoming payload.</p>
 </div>
 </div>
 <div class="sect4">
@@ -1905,74 +1811,11 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
-@RestoreSystemProperties                                                                <i class="conum" data-value="2"></i><b>(2)</b>
-class KinesisAnnotationsSpec extends Specification {
+<pre class="prettyprint highlight"><code data-lang="groovy">Unresolved directive in kinesis.adoc - include::/home/runner/work/micronaut-aws-sdk/micronaut-aws-sdk/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisAnnotationsSpec.groovy[tags=testcontainers-header]
 
-    private static final String TEST_STREAM = 'TestStream'
-    private static final String APP_NAME = 'AppName'
+Unresolved directive in kinesis.adoc - include::/home/runner/work/micronaut-aws-sdk/micronaut-aws-sdk/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisAnnotationsSpec.groovy[tags=testcontainers-setup]
 
-    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.10')          <i class="conum" data-value="3"></i><b>(3)</b>
-        .withServices(KINESIS, DYNAMODB)
-
-    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="4"></i><b>(4)</b>
-
-    void setup() {
-        System.setProperty('com.amazonaws.sdk.disableCbor', 'true')                     <i class="conum" data-value="5"></i><b>(5)</b>
-        System.setProperty('aws.region', 'eu-west-1')
-
-        AmazonDynamoDB dynamo = AmazonDynamoDBClient                                    <i class="conum" data-value="6"></i><b>(6)</b>
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(DYNAMODB))
-            .withCredentials(localstack.defaultCredentialsProvider)
-            .build()
-
-        AmazonKinesis kinesis = AmazonKinesisClient                                     <i class="conum" data-value="7"></i><b>(7)</b>
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(KINESIS))
-            .withCredentials(localstack.defaultCredentialsProvider)
-            .build()
-
-        AmazonCloudWatch amazonCloudWatch = Mock(AmazonCloudWatch)
-
-        context = ApplicationContext.build().properties(                                <i class="conum" data-value="8"></i><b>(8)</b>
-            'aws.kinesis.application.name': APP_NAME,
-            'aws.kinesis.stream': TEST_STREAM,
-            'aws.kinesis.listener.stream': TEST_STREAM,
-            'aws.kinesis.listener.failoverTimeMillis': '1000',
-            'aws.kinesis.listener.shardSyncIntervalMillis': '1000',
-            'aws.kinesis.listener.idleTimeBetweenReadsInMillis': '1000',
-            'aws.kinesis.listener.parentShardPollIntervalMillis': '1000',
-            'aws.kinesis.listener.timeoutInSeconds': '1000',
-            'aws.kinesis.listener.retryGetRecordsInSeconds': '1000',
-            'aws.kinesis.listener.metricsLevel': 'NONE',
-        ).build()
-        context.registerSingleton(AmazonKinesis, kinesis)
-        context.registerSingleton(AmazonDynamoDB, dynamo)
-        context.registerSingleton(AmazonCloudWatch, amazonCloudWatch)
-        context.registerSingleton(AWSCredentialsProvider, localstack.defaultCredentialsProvider)
-        context.start()
-    }
-
-    void 'kinesis listener is executed'() {
-        when:
-            KinesisService service = context.getBean(KinesisService)                    <i class="conum" data-value="9"></i><b>(9)</b>
-            KinesisListenerTester tester = context.getBean(KinesisListenerTester)       <i class="conum" data-value="10"></i><b>(10)</b>
-            DefaultClient client = context.getBean(DefaultClient)                       <i class="conum" data-value="11"></i><b>(11)</b>
-
-            service.createStream()
-            service.waitForActive()
-
-            waitForWorkerReady(300, 100)
-
-            Disposable subscription = publishEventAsync(tester, client)
-
-            waitForReceivedMessages(tester, 300, 100)
-
-            subscription.dispose()
-        then:
-            allTestEventsReceived(tester)
-    }
+Unresolved directive in kinesis.adoc - include::/home/runner/work/micronaut-aws-sdk/micronaut-aws-sdk/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisAnnotationsSpec.groovy[tags=testcontainers-test]
 
 }</code></pre>
 </div>
@@ -2028,82 +1871,11 @@ class KinesisAnnotationsSpec extends Specification {
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="java">public class KinesisTest {
+<pre class="prettyprint highlight"><code data-lang="java">Unresolved directive in kinesis.adoc - include::/home/runner/work/micronaut-aws-sdk/micronaut-aws-sdk/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisTest.java[tags=testcontainers-header]
 
-    public ApplicationContext context;                                                  <i class="conum" data-value="1"></i><b>(1)</b>
+Unresolved directive in kinesis.adoc - include::/home/runner/work/micronaut-aws-sdk/micronaut-aws-sdk/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisTest.java[tags=testcontainers-setup]
 
-    @Rule
-    public LocalStackContainer localstack = new LocalStackContainer("0.8.10")           <i class="conum" data-value="2"></i><b>(2)</b>
-        .withServices(DYNAMODB, KINESIS);
-
-    @Before
-    public void setup() {
-        System.setProperty("com.amazonaws.sdk.disableCbor", "true");                    <i class="conum" data-value="3"></i><b>(3)</b>
-        System.setProperty("aws.region", "eu-west-1");
-
-        AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClient                            <i class="conum" data-value="4"></i><b>(4)</b>
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(DYNAMODB))
-            .withCredentials(localstack.getDefaultCredentialsProvider())
-            .build();
-
-        AmazonKinesis amazonKinesis = AmazonKinesisClient                               <i class="conum" data-value="5"></i><b>(5)</b>
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(KINESIS))
-            .withCredentials(localstack.getDefaultCredentialsProvider())
-            .build();
-
-        AmazonCloudWatch cloudWatch = new MockCloudWatch();
-
-        Map&lt;String, Object&gt; properties = new HashMap&lt;&gt;();                               <i class="conum" data-value="6"></i><b>(6)</b>
-        properties.put("aws.kinesis.application.name", "TestApp");
-        properties.put("aws.kinesis.stream", TEST_STREAM);
-        properties.put("aws.kinesis.listener.stream", TEST_STREAM);
-
-        // you can set other custom client configuration properties
-        properties.put("aws.kinesis.listener.failoverTimeMillis", "1000");
-        properties.put("aws.kinesis.listener.shardSyncIntervalMillis", "1000");
-        properties.put("aws.kinesis.listener.idleTimeBetweenReadsInMillis", "1000");
-        properties.put("aws.kinesis.listener.parentShardPollIntervalMillis", "1000");
-        properties.put("aws.kinesis.listener.timeoutInSeconds", "1000");
-        properties.put("aws.kinesis.listener.retryGetRecordsInSeconds", "1000");
-        properties.put("aws.kinesis.listener.metricsLevel", "NONE");
-
-
-        context = ApplicationContext.build(properties).build();                         <i class="conum" data-value="7"></i><b>(7)</b>
-        context.registerSingleton(AmazonKinesis.class, amazonKinesis);
-        context.registerSingleton(AmazonDynamoDB.class, amazonDynamoDB);
-        context.registerSingleton(AmazonCloudWatch.class, cloudWatch);
-        context.registerSingleton(AWSCredentialsProvider.class, localstack.getDefaultCredentialsProvider());
-        context.start();
-    }
-
-    @After
-    public void cleanup() {
-        System.clearProperty("com.amazonaws.sdk.disableCbor");                          <i class="conum" data-value="8"></i><b>(8)</b>
-        System.clearProperty("aws.region");
-        if (context != null) {
-            context.close();                                                            <i class="conum" data-value="9"></i><b>(9)</b>
-        }
-    }
-
-    @Test
-    public void testJavaService() throws InterruptedException {
-        KinesisService service = context.getBean(KinesisService.class);                 <i class="conum" data-value="10"></i><b>(10)</b>
-        KinesisListenerTester tester = context.getBean(KinesisListenerTester.class);    <i class="conum" data-value="11"></i><b>(11)</b>
-        DefaultClient client = context.getBean(DefaultClient.class);                    <i class="conum" data-value="12"></i><b>(12)</b>
-
-        service.createStream();
-        service.waitForActive();
-
-        waitForWorkerReady(300, 100);
-        Disposable subscription = publishEventsAsync(tester, client);
-        waitForRecievedMessages(tester, 300, 100);
-
-        subscription.dispose();
-
-        Assert.assertTrue(allTestEventsReceived(tester));
-    }
+Unresolved directive in kinesis.adoc - include::/home/runner/work/micronaut-aws-sdk/micronaut-aws-sdk/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisTest.java[tags=testcontainers-test]
 
 }</code></pre>
 </div>
@@ -2179,7 +1951,7 @@ class KinesisAnnotationsSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-s3:1.3.4.3'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-s3:1.3.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2188,7 +1960,7 @@ class KinesisAnnotationsSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-s3&lt;/artifactId&gt;
-    &lt;version&gt;1.3.4.3&lt;/version&gt;
+    &lt;version&gt;1.3.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2591,7 +2363,7 @@ class SimpleStorageServiceSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ses:1.3.4.3'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ses:1.3.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2600,7 +2372,7 @@ class SimpleStorageServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-ses&lt;/artifactId&gt;
-    &lt;version&gt;1.3.4.3&lt;/version&gt;
+    &lt;version&gt;1.3.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2855,7 +2627,7 @@ public class SendEmailTest {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sns:1.3.4.3'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sns:1.3.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2864,7 +2636,7 @@ public class SendEmailTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sns&lt;/artifactId&gt;
-    &lt;version&gt;1.3.4.3&lt;/version&gt;
+    &lt;version&gt;1.3.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3369,7 +3141,7 @@ class SimpleNotificationServiceSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sqs:1.3.4.3'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sqs:1.3.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3378,7 +3150,7 @@ class SimpleNotificationServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sqs&lt;/artifactId&gt;
-    &lt;version&gt;1.3.4.3&lt;/version&gt;
+    &lt;version&gt;1.3.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3895,7 +3667,7 @@ class SimpleQueueServiceSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sts:1.3.4.3'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sts:1.3.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3904,7 +3676,7 @@ class SimpleQueueServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sts&lt;/artifactId&gt;
-    &lt;version&gt;1.3.4.3&lt;/version&gt;
+    &lt;version&gt;1.3.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3955,7 +3727,7 @@ messages back to the clients</p>
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ag-ws:1.3.4.3'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ag-ws:1.3.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3964,7 +3736,7 @@ messages back to the clients</p>
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-ag-ws&lt;/artifactId&gt;
-    &lt;version&gt;1.3.4.3&lt;/version&gt;
+    &lt;version&gt;1.3.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4432,8 +4204,8 @@ your Lambda function&#8217;s role must have following permissions (preferably co
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 1.3.4.3<br>
-Last updated 2020-05-04 17:50:30 UTC
+Version 1.3.5<br>
+Last updated 2020-05-18 07:33:05 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">

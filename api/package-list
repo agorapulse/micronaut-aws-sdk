@@ -1,4 +1,5 @@
 com.agorapulse.micronaut.amazon.awssdk.core
+com.agorapulse.micronaut.amazon.awssdk.core.util
 com.agorapulse.micronaut.amazon.awssdk.dynamodb
 com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation
 com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder
@@ -21,7 +22,6 @@ com.agorapulse.micronaut.aws.dynamodb.annotation
 com.agorapulse.micronaut.aws.dynamodb.builder
 com.agorapulse.micronaut.aws.kinesis
 com.agorapulse.micronaut.aws.kinesis.annotation
-com.agorapulse.micronaut.aws.kinesis.worker
 com.agorapulse.micronaut.aws.s3
 com.agorapulse.micronaut.aws.ses
 com.agorapulse.micronaut.aws.sns
@@ -29,5 +29,6 @@ com.agorapulse.micronaut.aws.sns.annotation
 com.agorapulse.micronaut.aws.sqs
 com.agorapulse.micronaut.aws.sqs.annotation
 com.agorapulse.micronaut.aws.sts
+com.agorapulse.micronaut.aws.util
 com.agorapulse.micronaut.http.examples.planets
 com.agorapulse.micronaut.http.examples.spacecrafts
