@@ -37,6 +37,12 @@ In this documentation, the high-level approaches will be discussed first before 
 
 Since  `1.2.8` see the particular subprojects for installation instruction.
 
+Micronaut AWS SDK comes in the three compatibility versions:
+
+* `{project-version}-micronaut-1.2` - for usage with Micronaut `1.2.x` and Grails `4.0.x` (Micronaut `1.0.x` and Micronaut `1.1.x` should also work well with these releases)
+* `{project-version}` - for usage with the latest Micronaut  `1.3.x`
+* `{project-version}-micronaut-2.0` - for usage with upcoming Micronaut `2.0.x` version
+
 include::{includedir}/dynamodb.adoc[]
 
 include::{includedir}/kinesis.adoc[]
