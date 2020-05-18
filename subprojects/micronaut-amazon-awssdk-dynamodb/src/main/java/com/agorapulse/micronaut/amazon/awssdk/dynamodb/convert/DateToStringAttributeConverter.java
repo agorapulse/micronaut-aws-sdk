@@ -20,8 +20,7 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert;
 import software.amazon.awssdk.enhanced.dynamodb.AttributeConverter;
 import software.amazon.awssdk.enhanced.dynamodb.AttributeValueType;
 import software.amazon.awssdk.enhanced.dynamodb.EnhancedType;
-import software.amazon.awssdk.enhanced.dynamodb.internal.converter.TimeConversion;
-import software.amazon.awssdk.enhanced.dynamodb.internal.converter.attribute.EnhancedAttributeValue;
+import software.amazon.awssdk.enhanced.dynamodb.internal.converter.attribute.InstantAsStringAttributeConverter;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 import java.util.Date;
@@ -33,6 +32,8 @@ import java.util.Date;
  * which is supported out of the box.
  */
 public class DateToStringAttributeConverter implements AttributeConverter<Date> {
+
+    private static final InstantAsStringAttributeConverter INSTANT_CONVERTER = InstantAsStringAttributeConverter.create();
 
     @Override
     public EnhancedType<Date> type() {
@@ -46,12 +47,12 @@ public class DateToStringAttributeConverter implements AttributeConverter<Date> 
 
     @Override
     public AttributeValue transformFrom(Date input) {
-        return TimeConversion.toStringAttributeValue(input.toInstant());
+        return INSTANT_CONVERTER.transformFrom(input.toInstant());
     }
 
     @Override
     public Date transformTo(AttributeValue input) {
-        return Date.from(TimeConversion.instantFromAttributeValue(EnhancedAttributeValue.fromAttributeValue(input)));
+        return Date.from(INSTANT_CONVERTER.transformTo(input));
     }
 
 }
