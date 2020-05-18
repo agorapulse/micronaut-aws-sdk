@@ -15,26 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.aws.kinesis.worker
+package com.agorapulse.micronaut.aws.util;
 
-import groovy.transform.CompileStatic
-import groovy.transform.ToString
+public class ConfigurationUtil {
 
-/**
- * Plain old Groovy object for testing.
- */
-@ToString
-@CompileStatic
-class Pogo {
+    public static final String DEFAULT_CONFIGURATION_NAME = "default";
 
-    // java way
-    Pogo(String foo) {
-        this.foo = foo
+    private ConfigurationUtil() {
+        // utility class
     }
 
-    // groovy way
-    Pogo() { }
+    public static final boolean isDefaultConfigurationName(String configurationName) {
+        return configurationName == null || DEFAULT_CONFIGURATION_NAME.equals(configurationName);
+    }
 
-    String foo
 
 }

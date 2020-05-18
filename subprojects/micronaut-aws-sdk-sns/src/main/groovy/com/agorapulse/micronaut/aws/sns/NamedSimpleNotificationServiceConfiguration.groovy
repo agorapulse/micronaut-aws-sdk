@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.aws.sns
 
+import com.agorapulse.micronaut.aws.util.ConfigurationUtil
 import com.amazonaws.services.sns.AmazonSNS
 import groovy.transform.CompileStatic
 import io.micronaut.context.annotation.EachProperty
@@ -28,7 +29,7 @@ import io.micronaut.context.env.Environment
  * Named simple queue service configuration for each property key.
  */
 @CompileStatic
-@EachProperty('aws.sns.topics')
+@EachProperty(value = 'aws.sns.topics', primary = ConfigurationUtil.DEFAULT_CONFIGURATION_NAME)
 @Requires(classes = AmazonSNS, property =  'aws.sns.topics')
 class NamedSimpleNotificationServiceConfiguration extends SimpleNotificationServiceConfiguration {
 

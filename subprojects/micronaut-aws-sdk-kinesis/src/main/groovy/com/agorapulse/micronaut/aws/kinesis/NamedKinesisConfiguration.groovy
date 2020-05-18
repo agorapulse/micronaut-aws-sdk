@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.aws.kinesis
 
+import com.agorapulse.micronaut.aws.util.ConfigurationUtil
 import com.amazonaws.services.kinesis.AmazonKinesis
 import groovy.transform.CompileStatic
 import io.micronaut.context.annotation.EachProperty
@@ -27,7 +28,7 @@ import io.micronaut.context.annotation.Requires
  * Named Kinesis configuration, published with named qualifier of the same name as is the key of this configuration.
  */
 @CompileStatic
-@EachProperty('aws.kinesis.streams')
+@EachProperty(value = 'aws.kinesis.streams', primary = ConfigurationUtil.DEFAULT_CONFIGURATION_NAME)
 @Requires(classes = AmazonKinesis)
 class NamedKinesisConfiguration extends KinesisConfiguration {
 

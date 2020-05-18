@@ -17,9 +17,11 @@
  */
 package com.agorapulse.micronaut.aws.sqs
 
+import com.agorapulse.micronaut.aws.util.ConfigurationUtil
 import com.amazonaws.services.sqs.AmazonSQS
 import groovy.transform.CompileStatic
 import io.micronaut.context.annotation.ConfigurationProperties
+import io.micronaut.context.annotation.Primary
 import io.micronaut.context.annotation.Requires
 
 import javax.inject.Named
@@ -27,7 +29,8 @@ import javax.inject.Named
 /**
  * Default configuration for Simple Queue Service.
  */
-@Named('default')
+@Primary
+@Named(ConfigurationUtil.DEFAULT_CONFIGURATION_NAME)
 @CompileStatic
 @ConfigurationProperties('aws.sqs')
 @Requires(classes = AmazonSQS)

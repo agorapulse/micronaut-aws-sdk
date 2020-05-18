@@ -24,4 +24,7 @@ jobs:
         arguments: bintrayUpload -PbintrayUsername=${{ secrets.BINTRAY_USER }} -PbintrayApiKey=${{ secrets.BINTRAY_KEY }} -Pversion=${{ steps.version.outputs.tag }}-micronaut-1.2 -PmicronautVersion=1.2.11 -Prelease=true --stacktrace
     - uses: eskatos/gradle-command-action@v1
       with:
-        arguments: gitPublishPush bintrayUpload -PbintrayUsername=${{ secrets.BINTRAY_USER }} -PbintrayApiKey=${{ secrets.BINTRAY_KEY }} -Pversion=${{ steps.version.outputs.tag }} -Prelease=true -Dorg.ajoberstar.grgit.auth.username=${{ secrets.GITHUB_PERSONAL_TOKEN }} --stacktrace
+        arguments: bintrayUpload -PbintrayUsername=${{ secrets.BINTRAY_USER }} -PbintrayApiKey=${{ secrets.BINTRAY_KEY }} -Pversion=${{ steps.version.outputs.tag }}-micronaut-2.0 -PmicronautVersion=2.0.0.M3 -Prelease=true --stacktrace
+    - uses: eskatos/gradle-command-action@v1
+      with:
+        arguments: gitPublishPush bintrayUpload -PbintrayUsername=${{ secrets.BINTRAY_USER }} -PbintrayApiKey=${{ secrets.BINTRAY_KEY }} -Pversion=${{ steps.version.outputs.tag }} -PmicronautVersion=1.3.5 -Prelease=true -Dorg.ajoberstar.grgit.auth.username=${{ secrets.GITHUB_PERSONAL_TOKEN }} --stacktrace

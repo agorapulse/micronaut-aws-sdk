@@ -23,6 +23,8 @@ plugins {
     id 'org.kordamp.gradle.coveralls'
 }
 
+logger.lifecycle "Using Micronaut $micronautVersion"
+
 if (!project.hasProperty('bintrayUsername')) ext.bintrayUsername = '**UNDEFINED**'
 if (!project.hasProperty('bintrayApiKey'))   ext.bintrayApiKey   = '**UNDEFINED**'
 

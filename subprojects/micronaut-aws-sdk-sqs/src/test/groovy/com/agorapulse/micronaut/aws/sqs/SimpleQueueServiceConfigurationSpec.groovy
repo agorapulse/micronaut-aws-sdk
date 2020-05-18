@@ -67,8 +67,8 @@ class SimpleQueueServiceConfigurationSpec extends Specification {
             )
         then:
             context.getBeanDefinitions(SimpleQueueService).size() == 2
-            context.getBean(SimpleQueueService, Qualifiers.byName('default'))
-            context.getBean(SimpleQueueService, Qualifiers.byName('default')).defaultQueueName == 'DefaultQueue'
+            context.getBean(SimpleQueueService)
+            context.getBean(SimpleQueueService).defaultQueueName == 'DefaultQueue'
             context.getBean(SimpleQueueService, Qualifiers.byName('samplequeue'))
             context.getBean(SimpleQueueService, Qualifiers.byName('samplequeue')).defaultQueueName == 'SampleQueue'
     }

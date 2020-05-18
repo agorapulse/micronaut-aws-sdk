@@ -56,7 +56,6 @@ class SimpleStorageServiceConfigurationSpec extends Specification {
         then:
             context.getBeanDefinitions(SimpleStorageService).size() == 2
             context.getBean(SimpleStorageService)
-            context.getBean(SimpleStorageService, Qualifiers.byName('default'))
             context.getBean(SimpleStorageService, Qualifiers.byName('samplebucket'))
     }
 
@@ -68,7 +67,7 @@ class SimpleStorageServiceConfigurationSpec extends Specification {
             )
         then:
             context.getBeanDefinitions(SimpleStorageService).size() == 2
-            context.getBean(SimpleStorageService, Qualifiers.byName('default'))
+            context.getBean(SimpleStorageService)
             context.getBean(SimpleStorageService, Qualifiers.byName('samplebucket'))
     }
 

@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.aws.s3
 
+import com.agorapulse.micronaut.aws.util.ConfigurationUtil
 import com.amazonaws.services.s3.AmazonS3
 import groovy.transform.CompileStatic
 import io.micronaut.context.annotation.EachProperty
@@ -27,7 +28,7 @@ import io.micronaut.context.annotation.Requires
  * Simple storage service configuration for each configuration key.
  */
 @CompileStatic
-@EachProperty('aws.s3.buckets')
+@EachProperty(value = 'aws.s3.buckets', primary = ConfigurationUtil.DEFAULT_CONFIGURATION_NAME)
 @Requires(classes = AmazonS3)
 class NamedSimpleStorageServiceConfiguration extends SimpleStorageServiceConfiguration {
 

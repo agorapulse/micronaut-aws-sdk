@@ -71,7 +71,6 @@ class SimpleNotificationServiceConfigurationSpec extends Specification {
         then:
         context.getBeanDefinitions(SimpleNotificationService).size() == 2
         context.getBean(SimpleNotificationService)
-        context.getBean(SimpleNotificationService, Qualifiers.byName('default'))
         context.getBean(SimpleNotificationService, Qualifiers.byName('mytopic'))
         context.getBean(NamedSimpleNotificationServiceConfiguration).name == 'mytopic'
     }
@@ -84,8 +83,9 @@ class SimpleNotificationServiceConfigurationSpec extends Specification {
         )
         then:
         context.getBeanDefinitions(SimpleNotificationService).size() == 2
-        context.getBean(SimpleNotificationService, Qualifiers.byName('default'))
+        context.getBean(SimpleNotificationService)
         context.getBean(SimpleNotificationService, Qualifiers.byName('mytopic'))
+        context.getBean(SimpleNotificationServiceConfiguration) instanceof DefaultSimpleNotificationServiceConfiguration
         context.getBean(SimpleNotificationServiceConfiguration, Qualifiers.byName('mytopic')) instanceof NamedSimpleNotificationServiceConfiguration
         context.getBean(SimpleNotificationServiceConfiguration, Qualifiers.byName('mytopic')).topic == 'mycustomtopic'
     }

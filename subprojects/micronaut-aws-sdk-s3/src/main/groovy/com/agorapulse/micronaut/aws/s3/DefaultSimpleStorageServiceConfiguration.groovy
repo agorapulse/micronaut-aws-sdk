@@ -17,9 +17,11 @@
  */
 package com.agorapulse.micronaut.aws.s3
 
+import com.agorapulse.micronaut.aws.util.ConfigurationUtil
 import com.amazonaws.services.s3.AmazonS3
 import groovy.transform.CompileStatic
 import io.micronaut.context.annotation.ConfigurationProperties
+import io.micronaut.context.annotation.Primary
 import io.micronaut.context.annotation.Requires
 
 import javax.inject.Named
@@ -27,7 +29,8 @@ import javax.inject.Named
 /**
  * Default simple storage service configuration.
  */
-@Named('default')
+@Primary
+@Named(ConfigurationUtil.DEFAULT_CONFIGURATION_NAME)
 @CompileStatic
 @ConfigurationProperties('aws.s3')
 @Requires(classes = AmazonS3)

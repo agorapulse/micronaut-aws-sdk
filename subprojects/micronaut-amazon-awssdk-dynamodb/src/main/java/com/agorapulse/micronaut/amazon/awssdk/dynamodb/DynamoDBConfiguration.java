@@ -18,7 +18,9 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
 import com.agorapulse.micronaut.amazon.awssdk.core.DefaultRegionAndEndpointConfiguration;
+import com.agorapulse.micronaut.amazon.awssdk.core.util.ConfigurationUtil;
 import io.micronaut.context.annotation.ConfigurationProperties;
+import io.micronaut.context.annotation.Primary;
 import io.micronaut.context.annotation.Requires;
 
 import javax.inject.Named;
@@ -26,7 +28,8 @@ import javax.inject.Named;
 /**
  * Default DynamoDB configuration.
  */
-@Named("default")
+@Primary
+@Named(ConfigurationUtil.DEFAULT_CONFIGURATION_NAME)
 @ConfigurationProperties("aws.dynamodb")
 @Requires(classes = software.amazon.awssdk.services.dynamodb.DynamoDbClient.class)
 public class DynamoDBConfiguration extends DefaultRegionAndEndpointConfiguration {

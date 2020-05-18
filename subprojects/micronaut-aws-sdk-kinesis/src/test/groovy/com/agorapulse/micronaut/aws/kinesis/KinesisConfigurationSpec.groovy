@@ -56,7 +56,6 @@ class KinesisConfigurationSpec extends Specification {
         then:
             context.getBeanDefinitions(KinesisService).size() == 2
             context.getBean(KinesisService)
-            context.getBean(KinesisService, Qualifiers.byName('default'))
             context.getBean(KinesisService, Qualifiers.byName('sample'))
     }
 
@@ -68,7 +67,7 @@ class KinesisConfigurationSpec extends Specification {
             )
         then:
             context.getBeanDefinitions(KinesisService).size() == 2
-            context.getBean(KinesisService, Qualifiers.byName('default'))
+            context.getBean(KinesisService)
             context.getBean(KinesisService, Qualifiers.byName('sample'))
     }
 

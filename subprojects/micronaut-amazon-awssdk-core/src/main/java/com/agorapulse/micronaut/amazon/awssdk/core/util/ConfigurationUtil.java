@@ -15,25 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.aws.kinesis.worker
+package com.agorapulse.micronaut.amazon.awssdk.core.util;
 
-import com.agorapulse.micronaut.aws.kinesis.DefaultEvent
-import groovy.transform.CompileStatic
+public class ConfigurationUtil {
 
-/**
- * Testing event.
- */
-@CompileStatic
-class MyEvent extends DefaultEvent {
+    public static final String DEFAULT_CONFIGURATION_NAME = "default";
 
-    // java way
-    MyEvent(String value) {
-        this.value = value
+    private ConfigurationUtil() {
+        // utility class
     }
 
-    // groovy way
-    MyEvent() { }
+    public static final boolean isDefaultConfigurationName(String configurationName) {
+        return configurationName == null || DEFAULT_CONFIGURATION_NAME.equals(configurationName);
+    }
 
-    String value
 
 }

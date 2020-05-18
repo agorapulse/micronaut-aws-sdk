@@ -17,14 +17,17 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.s3;
 
+import com.agorapulse.micronaut.amazon.awssdk.core.util.ConfigurationUtil;
 import io.micronaut.context.annotation.ConfigurationProperties;
+import io.micronaut.context.annotation.Primary;
 
 import javax.inject.Named;
 
 /**
  * Default simple storage service configuration.
  */
-@Named("default")
+@Primary
+@Named(ConfigurationUtil.DEFAULT_CONFIGURATION_NAME)
 @ConfigurationProperties("aws.s3")
 public class DefaultSimpleStorageServiceConfiguration extends SimpleStorageServiceConfiguration {
 

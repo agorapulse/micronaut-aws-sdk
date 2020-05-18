@@ -21,6 +21,7 @@ import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisClient;
 import com.agorapulse.micronaut.aws.kinesis.annotation.PartitionKey;
 import com.agorapulse.micronaut.aws.kinesis.annotation.SequenceNumber;
 import com.agorapulse.micronaut.aws.kinesis.annotation.Stream;
+import com.agorapulse.micronaut.aws.util.ConfigurationUtil;
 import com.amazonaws.services.kinesis.AmazonKinesis;
 import com.amazonaws.services.kinesis.model.PutRecordResult;
 import com.amazonaws.services.kinesis.model.PutRecordsRequestEntry;
@@ -74,8 +75,11 @@ public class KinesisClientIntroduction implements MethodInterceptor<Object, Obje
             throw new IllegalStateException("Invocation beanContext is missing required annotation KinesisClient");
         }
 
-        String configurationName = clientAnnotationValue.getValue(String.class).orElse("default");
-        KinesisService service = beanContext.getBean(KinesisService.class, Qualifiers.byName(configurationName));
+        String configurationName = clientAnnotationValue.getValue(String.class).orElse(ConfigurationUtil.DEFAULT_CONFIGURATION_NAME);
+        KinesisService service = beanContext.getBean(
+            KinesisService.class,
+            ConfigurationUtil.isDefaultConfigurationName(configurationName) ? null : Qualifiers.byName(configurationName)
+        );
 
         String streamName = clientAnnotationValue.get(KinesisClient.Constants.STREAM, String.class).orElse(null);
 
