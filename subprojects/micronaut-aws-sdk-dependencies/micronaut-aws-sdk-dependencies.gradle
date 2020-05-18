@@ -60,7 +60,6 @@ dependencies {
         api "software.amazon.awssdk:sts:$project.awsSdk2Version"
 
         api group: "com.amazonaws", name: "amazon-dax-client", version: "1.0.205044.0"
-        api group: "com.amazonaws", name: "amazon-kinesis-client", version: "1.13.0"
         api group: "com.amazonaws", name: "aws-lambda-java-events", version: "2.2.7"
         api group: "com.fasterxml.jackson.dataformat", name: "jackson-dataformat-cbor", version: project["jackson.datatype.version"]
     }

@@ -15,8 +15,6 @@ This library provides three approaches to work with Kinesis streams:
 ----
 // for Kinesis client
 compile 'com.agorapulse:micronaut-aws-sdk-kinesis:{project-version}'
-// for Kinesis worker
-compile 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:{project-version}'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']
@@ -26,12 +24,6 @@ compile 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:{project-version}'
 <dependency>
     <groupId>com.agorapulse</groupId>
     <artifactId>micronaut-aws-sdk-kinesis</artifactId>
-    <version>{project-version}</version>
-</dependency>
-<!-- for Kinesis worker -->
-<dependency>
-    <groupId>com.agorapulse</groupId>
-    <artifactId>micronaut-aws-sdk-kinesis-worker</artifactId>
     <version>{project-version}</version>
 </dependency>
 ----
@@ -130,29 +122,7 @@ used by particular method using `@Stream` annotation as mentioned above.
 
 ==== Listening with `@KinesisListener`
 
-TIP: Before you start implementing your service with `@KinesisListener` you may consider implementing a Lambda function
-instead.
-
-If you place `com.agorapulse.micronaut.aws.kinesis.annotation.KinesisListener` annotation on the method in the bean
-then the method will be triggered with the new records in the stream.
-
-source,java,indent=0,options="nowrap"]
-.Publishing Events
-----
-include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisListenerTester.java[tags=all]
-----
-<1> `@KinesisListener` method must be declared in a bean, e.g. `@Singleton`
-<2> You can listen to just plain string records
-<3> You can listen to `Record` objects
-<4> You can listen to both string and `Record` objects
-<5> You can listen to objects implementing `Event` interface
-<6> You can listen to both `Event` and `Record` objects
-<7> You can listen to any object as long as it can be unmarshalled from the record payload
-
-You can listen to different than default configuration by changing the `value` of the annotation such as `@KinesisListener("other")`.
-
-Multiple methods in a single application can listen to the same configuration (stream). In that case, every method will be executed with the
-incoming payload.
+NOTE: Kinesis Worker support has been discontinued. Consume Kinesis events with Lambda instead.
 
 ==== Kinesis Service
 
