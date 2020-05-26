@@ -21,16 +21,7 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Query
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Scan
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Service
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Update
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbEvent
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbPostLoadEvent
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbPostPersistEvent
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbPostRemoveEvent
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbPostUpdateEvent
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbPrePersistEvent
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbPreRemoveEvent
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbPreUpdateEvent
 import io.micronaut.context.ApplicationContext
-import io.micronaut.runtime.event.annotation.EventListener
 import io.reactivex.Flowable
 import org.testcontainers.spock.Testcontainers
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient
@@ -41,7 +32,6 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
 
-import javax.inject.Singleton
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
