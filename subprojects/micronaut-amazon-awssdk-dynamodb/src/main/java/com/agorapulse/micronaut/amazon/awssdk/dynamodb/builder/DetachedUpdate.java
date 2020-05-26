@@ -18,6 +18,7 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeConversionHelper;
+import io.micronaut.context.event.ApplicationEventPublisher;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.MappedTableResource;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
@@ -33,9 +34,10 @@ public interface DetachedUpdate<T> {
      * Executes an update using provided mapper.
      * @param mapper DynamoDB mapper
      * @param client low level AWS SDK client
+     * @param publisher
      * @return the return value which depends on the configuration of the update request
      */
-    Object update(DynamoDbTable<T> mapper, DynamoDbClient client, AttributeConversionHelper attributeConversionHelper);
+    Object update(DynamoDbTable<T> mapper, DynamoDbClient client, AttributeConversionHelper attributeConversionHelper, ApplicationEventPublisher publisher);
 
     /**
      * Resolves the current update into native update request using provided mapper.

@@ -17,17 +17,12 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.HashKey;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.PartitionKey;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Query;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.RangeKey;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Scan;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Service;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SortKey;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Update;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.*;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.*;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbEvent;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
+import io.micronaut.context.event.ApplicationEventPublisher;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.beans.BeanIntrospection;
 import io.micronaut.core.type.Argument;
@@ -35,18 +30,20 @@ import io.micronaut.core.type.MutableArgumentValue;
 import io.reactivex.Flowable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.Key;
-import software.amazon.awssdk.enhanced.dynamodb.TableMetadata;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.*;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.BeanTableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticTableMetadata;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondarySortKey;
-import software.amazon.awssdk.enhanced.dynamodb.model.*;
+import software.amazon.awssdk.enhanced.dynamodb.model.EnhancedGlobalSecondaryIndex;
+import software.amazon.awssdk.enhanced.dynamodb.model.EnhancedLocalSecondaryIndex;
+import software.amazon.awssdk.enhanced.dynamodb.model.ReadBatch;
+import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.*;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.Projection;
+import software.amazon.awssdk.services.dynamodb.model.ProjectionType;
+import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 
 import javax.inject.Singleton;
 import java.lang.reflect.Field;
@@ -99,17 +96,20 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
     private final DynamoDbClient client;
     private final AttributeConversionHelper attributeConversionHelper;
     private final FunctionEvaluator functionEvaluator;
+    private final ApplicationEventPublisher publisher;
 
     public ServiceIntroduction(
         DynamoDbEnhancedClient enhancedClient,
         DynamoDbClient client,
         AttributeConversionHelper attributeConversionHelper,
-        FunctionEvaluator functionEvaluator
+        FunctionEvaluator functionEvaluator,
+        ApplicationEventPublisher publisher
     ) {
         this.enhancedClient = enhancedClient;
         this.client = client;
         this.attributeConversionHelper = attributeConversionHelper;
         this.functionEvaluator = functionEvaluator;
+        this.publisher = publisher;
     }
 
     @Override
@@ -203,13 +203,13 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
                 return updateAll(table, scanResult, update);
             }
 
-            return flowableOrList(scanResult, context.getReturnType().getType());
+            return flowableOrList(scanResult.map(this::postLoad), context.getReturnType().getType());
         }
 
         if (context.getTargetMethod().isAnnotationPresent(Update.class)) {
             DetachedUpdate<T> criteria = functionEvaluator.evaluateAnnotationType(context.getTargetMethod().getAnnotation(Update.class).value(), context);
 
-            return criteria.update(table, client, attributeConversionHelper);
+            return criteria.update(table, client, attributeConversionHelper, publisher);
         }
 
         if (methodName.startsWith("count")) {
@@ -221,7 +221,10 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         }
 
         if (methodName.startsWith("query") || methodName.startsWith("findAll") || methodName.startsWith("list")) {
-            return flowableOrList(simpleHashAndRangeQuery(type, context, table).query(table, attributeConversionHelper), context.getReturnType().getType());
+            return flowableOrList(
+                simpleHashAndRangeQuery(type, context, table).query(table, attributeConversionHelper).map(this::postLoad),
+                context.getReturnType().getType()
+            );
         }
 
         throw new UnsupportedOperationException("Cannot implement method " + context.getExecutableMethod());
@@ -236,11 +239,11 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
 
         AtomicInteger counter = new AtomicInteger();
 
-        queryResult.subscribe(entity -> {
+        queryResult.map(this::postLoad).subscribe(entity -> {
             introspection.getProperty(tableMetadata.primaryPartitionKey()).ifPresent(p -> update.partitionKey(p.get(entity)));
             tableMetadata.primarySortKey().flatMap(introspection::getProperty).ifPresent(p -> update.sortKey(p.get(entity)));
 
-            update.update(table, client, attributeConversionHelper);
+            update.update(table, client, attributeConversionHelper, publisher);
 
             counter.incrementAndGet();
         });
@@ -270,7 +273,11 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             return flowableOrList(saveAll(service, items), context.getReturnType().getType());
         }
 
-        return service.updateItem(items.blockingFirst());
+        T entity = items.blockingFirst();
+        publisher.publishEvent(DynamoDbEvent.prePersist(entity));
+        T updated = service.updateItem(entity);
+        publisher.publishEvent(DynamoDbEvent.postPersist(updated));
+        return updated;
     }
 
     private <T> Object handleDelete(Class<T> type, DynamoDbTable<T> service, MethodInvocationContext<Object, Object> context) {
@@ -286,8 +293,11 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             }
 
             if (type.isAssignableFrom(itemArgument.getType())) {
-                service.deleteItem(service.keyFrom(items.blockingFirst()));
-                return items.blockingFirst();
+                T item = items.blockingFirst();
+                publisher.publishEvent(DynamoDbEvent.preRemove(item));
+                service.deleteItem(service.keyFrom(item));
+                publisher.publishEvent(DynamoDbEvent.postRemove(item));
+                return item;
             }
         }
 
@@ -297,18 +307,18 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
 
         PartitionAndSort partitionAndSort = findHashAndRange(args, service);
 
-        if (partitionAndSort.sortKey == null) {
-            service.deleteItem(Key.builder().partitionValue(partitionAndSort.getPartitionAttributeValue(params, service, attributeConversionHelper)).build());
-            return 1;
-        }
-
-        service.deleteItem(
-            Key.builder()
+        Key key = partitionAndSort.sortKey == null
+            ? Key.builder()
+                .partitionValue(partitionAndSort.getPartitionAttributeValue(params, service, attributeConversionHelper)).build()
+            : Key.builder()
                 .partitionValue(partitionAndSort.getPartitionAttributeValue(params, service, attributeConversionHelper))
                 .sortValue(partitionAndSort.getSortAttributeValue(params, service, attributeConversionHelper))
-                .build()
-        );
+                .build();
 
+        T item = service.tableSchema().mapToItem(key.primaryKeyMap(service.tableSchema()));
+        publisher.publishEvent(DynamoDbEvent.preRemove(item));
+        service.deleteItem(key);
+        publisher.publishEvent(DynamoDbEvent.postRemove(item));
         return 1;
     }
 
@@ -324,7 +334,9 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         AttributeValue partitionValue = partitionAndSort.getPartitionAttributeValue(params, service, attributeConversionHelper);
 
         if (partitionAndSort.sortKey == null) {
-            return service.getItem(Key.builder().partitionValue(partitionValue).build());
+            T item = service.getItem(Key.builder().partitionValue(partitionValue).build());
+            publisher.publishEvent(DynamoDbEvent.postLoad(item));
+            return item;
         }
 
         if (
@@ -332,10 +344,13 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
                 || Iterable.class.isAssignableFrom(partitionAndSort.sortKey.getType())
                 || Flowable.class.isAssignableFrom(partitionAndSort.sortKey.getType())
         ) {
-            return flowableOrList(getAll(service, partitionValue, partitionAndSort.getSortAttributeValues(params, service, attributeConversionHelper)), context.getReturnType().getType());
+            Flowable<T> all = getAll(service, partitionValue, partitionAndSort.getSortAttributeValues(params, service, attributeConversionHelper));
+            return flowableOrList(all.map(this::postLoad), context.getReturnType().getType());
         }
 
-        return service.getItem(Key.builder().partitionValue(partitionValue).sortValue(partitionAndSort.getSortAttributeValue(params, service, attributeConversionHelper)).build());
+        T item = service.getItem(Key.builder().partitionValue(partitionValue).sortValue(partitionAndSort.getSortAttributeValue(params, service, attributeConversionHelper)).build());
+        publisher.publishEvent(DynamoDbEvent.postLoad(item));
+        return item;
     }
 
     private <T> DetachedQuery<T> simpleHashAndRangeQuery(
@@ -395,13 +410,17 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
     }
 
     private <T> Flowable<T> saveAll(DynamoDbTable<T> service, Flowable<T> itemsToSave) {
+        List<T> saved = new ArrayList<>();
         List<T> unprocessed = itemsToSave.buffer(BATCH_SIZE).map(batchItems -> enhancedClient.batchWriteItem(b -> {
-            b.writeBatches(batchItems.stream().map(i ->
-                WriteBatch.builder(service.tableSchema().itemType().rawClass()).mappedTableResource(service).addPutItem(i).build()
-            ).collect(Collectors.toList()));
+            b.writeBatches(batchItems.stream().map(i -> {
+                publisher.publishEvent(DynamoDbEvent.prePersist(i));
+                saved.add(i);
+                return WriteBatch.builder(service.tableSchema().itemType().rawClass()).mappedTableResource(service).addPutItem(i).build();
+            }).collect(Collectors.toList()));
         })).flatMap(r -> Flowable.fromIterable(r.unprocessedPutItemsForTable(service))).toList().blockingGet();
 
         if (unprocessed.isEmpty()) {
+            saved.forEach(i -> publisher.publishEvent(DynamoDbEvent.postPersist(i)));
             return itemsToSave;
         }
 
@@ -411,14 +430,19 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
     private <T> int deleteAll(DynamoDbTable<T> table, Flowable<T> items) {
         TableSchema<T> tableSchema = table.tableSchema();
         AtomicInteger counter = new AtomicInteger();
+        List<T> deleted = new ArrayList<>();
         List<Key> unprocessed = items.buffer(BATCH_SIZE).map(batchItems -> enhancedClient.batchWriteItem(b -> {
             counter.addAndGet(batchItems.size());
-            b.writeBatches(batchItems.stream().map(i ->
-                WriteBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(table).addDeleteItem(i).build()
+            b.writeBatches(batchItems.stream().map(i -> {
+                    publisher.publishEvent(DynamoDbEvent.preRemove(i));
+                    deleted.add(i);
+                    return WriteBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(table).addDeleteItem(i).build();
+                }
             ).collect(Collectors.toList()));
         })).flatMap(r -> Flowable.fromIterable(r.unprocessedDeleteItemsForTable(table))).toList().blockingGet();
 
         if (unprocessed.isEmpty()) {
+            deleted.forEach(i -> publisher.publishEvent(DynamoDbEvent.postRemove(i)));
             return counter.get();
         }
 
@@ -515,5 +539,10 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         }
 
         return Collections.emptySet();
+    }
+
+    private <T> T postLoad(T i) {
+        publisher.publishEvent(DynamoDbEvent.postLoad(i));
+        return i;
     }
 }

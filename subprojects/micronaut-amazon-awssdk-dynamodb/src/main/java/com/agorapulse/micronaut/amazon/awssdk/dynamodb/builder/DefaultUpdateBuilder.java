@@ -18,6 +18,8 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeConversionHelper;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbEvent;
+import io.micronaut.context.event.ApplicationEventPublisher;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.MappedTableResource;
@@ -101,8 +103,11 @@ class DefaultUpdateBuilder<T> implements UpdateBuilder<T> {
     }
 
     @Override
-    public Object update(DynamoDbTable<T> mapper, DynamoDbClient client, AttributeConversionHelper attributeConversionHelper) {
+    public Object update(DynamoDbTable<T> mapper, DynamoDbClient client, AttributeConversionHelper attributeConversionHelper, ApplicationEventPublisher publisher) {
         UpdateItemRequest request = resolveRequest(mapper, attributeConversionHelper);
+        T keyItem = mapper.tableSchema().mapToItem(request.key());
+        publisher.publishEvent(DynamoDbEvent.preUpdate(keyItem));
+
         UpdateItemResponse result = client.updateItem(request);
         Map<String, AttributeValue> attributes = result.attributes();
 
@@ -114,7 +119,9 @@ class DefaultUpdateBuilder<T> implements UpdateBuilder<T> {
             return null;
         }
 
-        return __returnValueMapper.apply(mapper.tableSchema().mapToItem(attributes));
+        T item = mapper.tableSchema().mapToItem(attributes);
+        publisher.publishEvent(DynamoDbEvent.postUpdate(item));
+        return __returnValueMapper.apply(item);
     }
 
     @Override

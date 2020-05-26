@@ -21,7 +21,16 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Query
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Scan
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Service
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Update
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbEvent
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbPostLoadEvent
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbPostPersistEvent
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbPostRemoveEvent
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbPostUpdateEvent
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbPrePersistEvent
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbPreRemoveEvent
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbPreUpdateEvent
 import io.micronaut.context.ApplicationContext
+import io.micronaut.runtime.event.annotation.EventListener
 import io.reactivex.Flowable
 import org.testcontainers.spock.Testcontainers
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient
@@ -32,6 +41,7 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
 
+import javax.inject.Singleton
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -41,6 +51,7 @@ import static com.agorapulse.micronaut.amazon.awssdk.dynamodb.groovy.GroovyBuild
     'AbcMetric',
     'MethodCount',
     'MethodSize',
+    'DuplicateListLiteral',
     'DuplicateNumberLiteral',
     'DuplicateStringLiteral',
 ])
@@ -63,6 +74,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
         .withServices(LocalStackV2Container.Service.DYNAMODB)
 
     DynamoDBItemDBService service
+    Playbook playbook
 
     void setup() {
         DynamoDbClient client = DynamoDbClient                                          // <4>
@@ -83,6 +95,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
         context.start()
 
         service = context.getBean(DynamoDBItemDBService)                                      // <7>
+        playbook = context.getBean(Playbook)
     }
 
     @SuppressWarnings([
@@ -93,7 +106,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
         'DuplicateNumberLiteral',
     ])
     void 'service introduction works'() {
-        expect:
+        when:
             service.save(new DynamoDBEntity(                                                      // <3>
                 parentId: '1',
                 id: '1',
@@ -110,14 +123,67 @@ class DefaultDynamoDBServiceSpec extends Specification {
                 new DynamoDBEntity(parentId: '3', id: '1', rangeIndex: 'foo', number: 5, date: Date.from(REFERENCE_DATE.plus(7, ChronoUnit.DAYS))),
                 new DynamoDBEntity(parentId: '3', id: '2', rangeIndex: 'bar', number: 6, date: Date.from(REFERENCE_DATE.plus(14, ChronoUnit.DAYS)))
             )
+        then:
+            playbook.verifyAndForget(
+                'PRE_PERSIST:1:1:foo:1',
+                'PRE_PERSIST:1:1:foo:1',
+                'POST_PERSIST:1:1:foo:1',
+                'PRE_PERSIST:1:2:bar:2',
+                'POST_PERSIST:1:2:bar:2',
+                'PRE_PERSIST:2:1:foo:3',
+                'PRE_PERSIST:2:2:foo:4',
+                'POST_PERSIST:2:1:foo:3',
+                'POST_PERSIST:2:2:foo:4',
+                'PRE_PERSIST:3:1:foo:5',
+                'PRE_PERSIST:3:2:bar:6',
+                'POST_PERSIST:3:1:foo:5',
+                'POST_PERSIST:3:2:bar:6'
+            )
 
+        when:
             service.get('1', '1')
-            service.load('1', '1')
-            service.getAll('1', ['2', '1'] as LinkedHashSet).size() == 2
-            service.loadAll('1', ['2', '1']).size() == 2
-            service.getAll('1', '2', '1').size() == 2
-            service.loadAll('1', '3', '4').size() == 0
+        then:
+            playbook.verifyAndForget(
+                'POST_LOAD:1:1:foo:1'
+            )
 
+        when:
+            service.load('1', '1')
+        then:
+            playbook.verifyAndForget(
+                'POST_LOAD:1:1:foo:1'
+            )
+
+        when:
+            service.getAll('1', ['2', '1'] as LinkedHashSet).size() == 2
+        then:
+            playbook.verifyAndForget(
+                'POST_LOAD:1:2:bar:2',
+                'POST_LOAD:1:1:foo:1'
+            )
+
+        when:
+            service.loadAll('1', ['2', '1']).size() == 2
+        then:
+            playbook.verifyAndForget(
+                'POST_LOAD:1:2:bar:2',
+                'POST_LOAD:1:1:foo:1'
+            )
+
+        when:
+            service.getAll('1', '2', '1').size() == 2
+        then:
+            playbook.verifyAndForget(
+                'POST_LOAD:1:2:bar:2',
+                'POST_LOAD:1:1:foo:1'
+            )
+
+        when:
+            service.loadAll('1', '3', '4').size() == 0
+        then:
+            playbook.verifyAndForget()
+
+        expect:
             service.save(new DynamoDBEntity(parentId: '1001', id: '1', rangeIndex: 'foo', number: 7, date: Date.from(REFERENCE_DATE)))
             service.save(new DynamoDBEntity(parentId: '1001', id: '2', rangeIndex: 'bar', number: 8, date: Date.from(REFERENCE_DATE.plus(1, ChronoUnit.DAYS))))
             service.saveAll([
@@ -129,6 +195,8 @@ class DefaultDynamoDBServiceSpec extends Specification {
                 new DynamoDBEntity(parentId: '1003', id: '2', rangeIndex: 'bar', number: 12, date: Date.from(REFERENCE_DATE.plus(14, ChronoUnit.DAYS)))
             )
 
+        when:
+            playbook.forget()
             service.count('1') == 2
             service.count('1', '1') == 1
             service.countByRangeIndex('1', 'bar') == 1
@@ -139,8 +207,18 @@ class DefaultDynamoDBServiceSpec extends Specification {
             service.countByRangeIsNull('1') == 0
             service.countByDates('1', Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS))) == 2
             service.countByDates('3', Date.from(REFERENCE_DATE.plus(9, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(20, ChronoUnit.DAYS))) == 1
+        then:
+            playbook.verifyAndForget()
 
+        when:
             service.query('1').count().blockingGet() == 2
+        then:
+            playbook.verifyAndForget(
+                'POST_LOAD:1:1:foo:1',
+                'POST_LOAD:1:2:bar:2'
+            )
+
+        expect:
             service.query('1', '1').count().blockingGet() == 1
             service.queryByRangeIndex('1', 'bar').count().blockingGet() == 1
             service.queryByRangeIndex('1', 'bar').blockingSingle().parentId == null // projection
@@ -189,7 +267,18 @@ class DefaultDynamoDBServiceSpec extends Specification {
             service.queryInList('1', 'foo', 'bar').toList().blockingGet().size() == 2
             // service.queryByNe('1', '1').toList().blockingGet().size() == 1
 
+        when:
+            playbook.forget()
             service.scanAllByRangeIndex('bar').count().blockingGet() == 4
+        then:
+            playbook.verifyAndForget(
+                'POST_LOAD:null:null:bar:0',
+                'POST_LOAD:null:null:bar:0',
+                'POST_LOAD:null:null:bar:0',
+                'POST_LOAD:null:null:bar:0'
+            )
+
+        expect:
             service.scanAllByRangeIndex('foo').count().blockingGet() == 8
             service.countAllByRangeIndexNotEqual('bar') == 8
             service.countComplex('bar') == 4
@@ -206,8 +295,16 @@ class DefaultDynamoDBServiceSpec extends Specification {
             nextPage.size() == 2
             scannedPage != nextPage
 
-        and:
+        when:
+            playbook.forget()
             service.increment('1001', '1')
+        then:
+            playbook.verifyAndForget(
+                'PRE_UPDATE:1001:1:null:0',
+                'POST_UPDATE:null:null:null:8'
+            )
+
+        and:
             service.increment('1001', '1')
             service.increment('1001', '1')
             service.decrement('1001', '1') == 9
@@ -226,15 +323,52 @@ class DefaultDynamoDBServiceSpec extends Specification {
             service.setWhereNumberIsZero('1001', 123)
             service.get('1001', '1').number == 123
 
+        when:
+            playbook.forget()
             service.delete(service.get('1001', '1'))
+        then:
+            playbook.verifyAndForget(
+                'POST_LOAD:1001:1:foo:123',
+                'PRE_REMOVE:1001:1:foo:123',
+                'POST_REMOVE:1001:1:foo:123'
+            )
             service.count('1001', '1') == 0
+
+        when:
+            playbook.forget()
             service.delete('1003', '1')
+        then:
+            playbook.verifyAndForget(
+                'PRE_REMOVE:1003:1:null:0',
+                'POST_REMOVE:1003:1:null:0'
+            )
             service.count('1003', '1') == 0
+
+        when:
+            playbook.forget()
             service.deleteByRangeIndex('1001', 'bar') == 1
+        then:
+
+            playbook.verifyAndForget(
+                'PRE_REMOVE:1001:2:bar:0',
+                'POST_REMOVE:1001:2:bar:0'
+            )
             service.countByRangeIndex('1001', 'bar') == 0
+
+        and:
             service.deleteByDates('1002',  Date.from(REFERENCE_DATE.minus(20, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(20, ChronoUnit.DAYS))) == 2
             service.countByDates('1002', Date.from(REFERENCE_DATE.minus(20, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(20, ChronoUnit.DAYS))) == 0
+        when:
+            playbook.forget()
             service.deleteAll(nextPage)
+        then:
+            playbook.verifyAndForget(
+                'PRE_REMOVE:3:2:bar:6',
+                'PRE_REMOVE:1001:2:bar:8',
+                'POST_REMOVE:3:2:bar:6',
+                'POST_REMOVE:1001:2:bar:8',
+            )
+        and:
             service.deleteAllByRangeIndexNotEqual('bar')
     }
 
@@ -278,7 +412,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
+            partitionKey hashKey
             index DynamoDBEntity.RANGE_INDEX
             range {
                 eq rangeKey
@@ -289,7 +423,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
+            partitionKey hashKey
             index DynamoDBEntity.DATE_INDEX
             range { between after, before }
         }
@@ -302,7 +436,7 @@ interface DynamoDBItemDBService {
     // tag::sample-queries[]
     @Query({                                                                            // <3>
         query(DynamoDBEntity) {
-            hash hashKey                                                                // <4>
+            partitionKey hashKey                                                        // <4>
             index DynamoDBEntity.RANGE_INDEX
             range {
                 eq rangeKey                                                             // <5>
@@ -317,7 +451,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
+            partitionKey hashKey
             index DynamoDBEntity.DATE_INDEX
             range { between after, before }
         }
@@ -326,7 +460,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
+            partitionKey hashKey
             index DynamoDBEntity.RANGE_INDEX
             range { beginsWith prefix }
         }
@@ -335,7 +469,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
+            partitionKey hashKey
             filter { inList DynamoDBEntity.RANGE_INDEX, values }
         }
     })
@@ -343,7 +477,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
+            partitionKey hashKey
             filter {
                 and {
                     contains DynamoDBEntity.RANGE_INDEX, substring
@@ -356,7 +490,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
+            partitionKey hashKey
             filter {
                 isNull DynamoDBEntity.RANGE_INDEX
             }
@@ -366,7 +500,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
+            partitionKey hashKey
             filter {
                 notExists DynamoDBEntity.RANGE_INDEX
             }
@@ -376,7 +510,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
+            partitionKey hashKey
             filter {
                 notContains DynamoDBEntity.RANGE_INDEX, value
             }
@@ -386,7 +520,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
+            partitionKey hashKey
             filter {
                 typeOf DynamoDBEntity.RANGE_INDEX, type
             }
@@ -396,7 +530,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
+            partitionKey hashKey
             filter {
                 and {
                     sizeNe DynamoDBEntity.RANGE_INDEX, size
@@ -408,7 +542,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
+            partitionKey hashKey
             filter {
                 and {
                     sizeLe DynamoDBEntity.RANGE_INDEX, size
@@ -420,7 +554,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
+            partitionKey hashKey
             filter {
                 and {
                     sizeLt DynamoDBEntity.RANGE_INDEX, size
@@ -432,7 +566,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
+            partitionKey hashKey
             filter {
                 and {
                     sizeGe DynamoDBEntity.RANGE_INDEX, size
@@ -444,7 +578,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
+            partitionKey hashKey
             filter {
                 and {
                     sizeGt DynamoDBEntity.RANGE_INDEX, size
@@ -456,7 +590,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
+            partitionKey hashKey
             filter {
                 group {
                     ne DynamoDBEntity.RANGE_INDEX, value
@@ -468,7 +602,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
+            partitionKey hashKey
             range {
                 le value
             }
@@ -478,7 +612,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
+            partitionKey hashKey
             range {
                 lt value
             }
@@ -489,7 +623,7 @@ interface DynamoDBItemDBService {
     @Query({
         query(DynamoDBEntity) {
             order asc
-            hash hashKey
+            partitionKey hashKey
             range {
                 ge value
             }
@@ -500,7 +634,7 @@ interface DynamoDBItemDBService {
     @Query({
         query(DynamoDBEntity) {
             order desc
-            hash hashKey
+            partitionKey hashKey
             range {
                 gt value
             }
@@ -511,7 +645,7 @@ interface DynamoDBItemDBService {
     @Query({
         query(DynamoDBEntity) {
             inconsistent read
-            hash hashKey
+            partitionKey hashKey
             range {
                 between lo, hi
             }
@@ -522,7 +656,7 @@ interface DynamoDBItemDBService {
     @Query({
         query(DynamoDBEntity) {
             consistent read
-            hash hashKey
+            partitionKey hashKey
             range {
                     beginsWith prefix
             }
@@ -532,7 +666,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
+            partitionKey hashKey
             index DynamoDBEntity.DATE_INDEX
             range { between after, before }
             limit max
@@ -545,7 +679,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
+            partitionKey hashKey
             index DynamoDBEntity.RANGE_INDEX
             range {
                 eq rangeKey
@@ -556,7 +690,7 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
+            partitionKey hashKey
             index DynamoDBEntity.DATE_INDEX
             range { between after, before }
         }
@@ -568,8 +702,8 @@ interface DynamoDBItemDBService {
     // tag::sample-update[]
     @Update({                                                                           // <3>
         update(DynamoDBEntity) {
-            hash hashKey                                                                // <4>
-            range rangeKey                                                              // <5>
+            partitionKey hashKey                                                        // <4>
+            sortKey rangeKey                                                            // <5>
             add 'number', 1                                                             // <6>
             returnUpdatedNew { number }                                                 // <7>
         }
@@ -579,8 +713,8 @@ interface DynamoDBItemDBService {
 
     @Update({
         update(DynamoDBEntity) {
-            hash hashKey
-            range rangeKey
+            partitionKey hashKey
+            sortKey rangeKey
             add 'number', -1
             returnUpdatedNew { number }
         }
@@ -589,8 +723,8 @@ interface DynamoDBItemDBService {
 
     @Update({
         update(DynamoDBEntity) {
-            hash hashKey
-            range rangeKey
+            partitionKey hashKey
+            sortKey rangeKey
             add 'number', -3
             returnUpdatedOld { number }
         }
@@ -599,8 +733,8 @@ interface DynamoDBItemDBService {
 
     @Update({
         update(DynamoDBEntity) {
-            hash hashKey
-            range rangeKey
+            partitionKey hashKey
+            sortKey rangeKey
             add 'number', -5
             returnAllOld { number }
         }
@@ -609,8 +743,8 @@ interface DynamoDBItemDBService {
 
     @Update({
         update(DynamoDBEntity) {
-            hash hashKey
-            range rangeKey
+            partitionKey hashKey
+            sortKey rangeKey
             add 'number', -7
             returnAllNew { number }
         }
@@ -619,8 +753,8 @@ interface DynamoDBItemDBService {
 
     @Update({
         update(DynamoDBEntity) {
-            hash hashKey
-            range rangeKey
+            partitionKey hashKey
+            sortKey rangeKey
             add 'number', -13
             returnNone()
         }

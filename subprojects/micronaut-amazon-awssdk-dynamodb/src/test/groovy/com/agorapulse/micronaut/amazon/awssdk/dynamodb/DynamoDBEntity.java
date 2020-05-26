@@ -28,7 +28,7 @@ import java.util.Objects;
 
 @Introspected
 @DynamoDbBean(converterProviders = LegacyAttributeConverterProvider.class)
-public class DynamoDBEntity {
+public class DynamoDBEntity implements PlaybookAware {
 
     public static final String DATE_INDEX = "date";
     public static final String RANGE_INDEX = "rangeIndex";
