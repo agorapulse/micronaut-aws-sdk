@@ -952,8 +952,8 @@ interface DynamoDBItemDBService {
 @Service(DynamoDBEntity)                                                                // <2>
 interface UnknownMethodsService {
 
-    void doSomething();
-    void save();
+    void doSomething()
+    void save()
     void delete(String parentId, String id, String somethingElse)
     void get(String parentId, String id, String somethingElse)
     void findAll(String somethingElse, String anotherArgument)
