@@ -43,7 +43,7 @@
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  @Factory
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="DynamoDBClientsFactory" href="../../../../../../com/agorapulse/micronaut/amazon/awssdk/dynamodb/DynamoDBClientsFactory.html#DynamoDBClientsFactory">DynamoDBClientsFactory</a> {
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>  
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>      @Bean
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>      @Bean(preDestroy = <span class="jxr_string">"close"</span>)
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>      @Singleton
 <a class="jxr_linenumber" name="L40" href="#L40">40</a>      <strong class="jxr_keyword">public</strong> DynamoDbClient dynamoDbClient(
 <a class="jxr_linenumber" name="L41" href="#L41">41</a>          <a name="DynamoDBConfiguration" href="../../../../../../com/agorapulse/micronaut/amazon/awssdk/dynamodb/DynamoDBConfiguration.html#DynamoDBConfiguration">DynamoDBConfiguration</a> configuration,
@@ -55,7 +55,7 @@
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>          <strong class="jxr_keyword">return</strong> builder.build();
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>      }
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>  
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>      @Bean
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>      @Bean(preDestroy = <span class="jxr_string">"close"</span>)
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>      @Singleton
 <a class="jxr_linenumber" name="L52" href="#L52">52</a>      <strong class="jxr_keyword">public</strong> DynamoDbAsyncClient dynamoDbAsyncClient(
 <a class="jxr_linenumber" name="L53" href="#L53">53</a>          <a name="DynamoDBConfiguration" href="../../../../../../com/agorapulse/micronaut/amazon/awssdk/dynamodb/DynamoDBConfiguration.html#DynamoDBConfiguration">DynamoDBConfiguration</a> configuration,
