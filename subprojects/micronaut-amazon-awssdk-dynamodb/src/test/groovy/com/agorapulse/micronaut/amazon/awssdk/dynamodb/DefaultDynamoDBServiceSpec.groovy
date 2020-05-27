@@ -64,7 +64,9 @@ class DefaultDynamoDBServiceSpec extends Specification {
         .withServices(LocalStackV2Container.Service.DYNAMODB)
 
     DynamoDBItemDBService service
+    UnknownMethodsService unknownMethodsService
     Playbook playbook
+    DynamoDbService<DynamoDBEntity> dynamoDbService
 
     void setup() {
         DynamoDbClient client = DynamoDbClient                                          // <4>
@@ -85,7 +87,41 @@ class DefaultDynamoDBServiceSpec extends Specification {
         context.start()
 
         service = context.getBean(DynamoDBItemDBService)                                      // <7>
+        unknownMethodsService = context.getBean(UnknownMethodsService)
         playbook = context.getBean(Playbook)
+        dynamoDbService = context.getBean(DynamoDBServiceProvider).findOrCreate(DynamoDBEntity)
+    }
+
+    void 'unsupported methods throws meaningful messages'() {
+        when:
+        unknownMethodsService.doSomething()
+        then:
+        UnsupportedOperationException e1 = thrown(UnsupportedOperationException)
+        e1.message == 'Cannot implement method void doSomething()'
+
+        when:
+        unknownMethodsService.save()
+        then:
+        UnsupportedOperationException e2 = thrown(UnsupportedOperationException)
+        e2.message == 'Method expects 1 parameter - item, iterable of items or array of items'
+
+        when:
+        unknownMethodsService.delete('1', '1', '1')
+        then:
+        UnsupportedOperationException e3 = thrown(UnsupportedOperationException)
+        e3.message == 'Method expects at most 2 parameters - partition key and sort key, an item or items'
+
+        when:
+        unknownMethodsService.get('1', '1', '1')
+        then:
+        UnsupportedOperationException e4 = thrown(UnsupportedOperationException)
+        e4.message == 'Method expects at most 2 parameters - partition key and sort key or sort keys'
+
+        when:
+        unknownMethodsService.findAll('1', '1')
+        then:
+        UnsupportedOperationException e5 = thrown(UnsupportedOperationException)
+        e5.message == 'Method needs to have at least one argument annotated with @PartitionKey or with called \'partition\''
     }
 
     @SuppressWarnings([
@@ -113,6 +149,10 @@ class DefaultDynamoDBServiceSpec extends Specification {
                 new DynamoDBEntity(parentId: '3', id: '1', rangeIndex: 'foo', number: 5, date: Date.from(REFERENCE_DATE.plus(7, ChronoUnit.DAYS))),
                 new DynamoDBEntity(parentId: '3', id: '2', rangeIndex: 'bar', number: 6, date: Date.from(REFERENCE_DATE.plus(14, ChronoUnit.DAYS)))
             )
+            service.saveAll(Flowable.fromArray(
+                new DynamoDBEntity(parentId: '4', id: '1', rangeIndex: 'boo', number: 5, date: Date.from(REFERENCE_DATE.plus(7, ChronoUnit.DAYS))),
+                new DynamoDBEntity(parentId: '4', id: '2', rangeIndex: 'far', number: 6, date: Date.from(REFERENCE_DATE.plus(14, ChronoUnit.DAYS)))
+            ))
         then:
             playbook.verifyAndForget(
                 'PRE_PERSIST:1:1:foo:1',
@@ -127,7 +167,11 @@ class DefaultDynamoDBServiceSpec extends Specification {
                 'PRE_PERSIST:3:1:foo:5',
                 'PRE_PERSIST:3:2:bar:6',
                 'POST_PERSIST:3:1:foo:5',
-                'POST_PERSIST:3:2:bar:6'
+                'POST_PERSIST:3:2:bar:6',
+                'PRE_PERSIST:4:1:boo:5',
+                'PRE_PERSIST:4:2:far:6',
+                'POST_PERSIST:4:1:boo:5',
+                'POST_PERSIST:4:2:far:6'
             )
 
         when:
@@ -197,6 +241,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
             service.countByRangeIsNull('1') == 0
             service.countByDates('1', Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS))) == 2
             service.countByDates('3', Date.from(REFERENCE_DATE.plus(9, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(20, ChronoUnit.DAYS))) == 1
+
         then:
             playbook.verifyAndForget()
 
@@ -255,7 +300,17 @@ class DefaultDynamoDBServiceSpec extends Specification {
             service.queryByIdPrefix('1', '1').toList().blockingGet().size() == 1
             service.queryByNe('1', 'foo').toList().blockingGet().size() == 1
             service.queryInList('1', 'foo', 'bar').toList().blockingGet().size() == 2
-            // service.queryByNe('1', '1').toList().blockingGet().size() == 1
+
+            dynamoDbService.countUsingQuery {
+                partitionKey '1'
+                index DynamoDBEntity.DATE_INDEX
+                range { between Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS)) }
+            } == 2
+            dynamoDbService.query {
+                partitionKey '1'
+                index DynamoDBEntity.DATE_INDEX
+                range { between Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS)) }
+            }.toList().blockingGet().size() == 2
 
         when:
             playbook.forget()
@@ -270,9 +325,25 @@ class DefaultDynamoDBServiceSpec extends Specification {
 
         expect:
             service.scanAllByRangeIndex('foo').count().blockingGet() == 8
-            service.countAllByRangeIndexNotEqual('bar') == 8
+            service.countAllByRangeIndexNotEqual('bar') == 10
             service.countComplex('bar') == 4
-            service.countBetween('a', 'z') == 12
+            service.countBetween('a', 'z') == 14
+
+            dynamoDbService.countUsingScan {
+                index DynamoDBEntity.DATE_INDEX
+                filter {
+                    ne DynamoDBEntity.RANGE_INDEX, 'bar'
+                }
+            } == 10
+
+            dynamoDbService.scan {
+                filter {
+                    eq DynamoDBEntity.RANGE_INDEX, 'foo'
+                }
+                only {
+                    rangeIndex
+                }
+            }.toList().blockingGet().size() == 8
 
         when:
             List<DynamoDBEntity> scannedPage = service.scanAllByRangeIndexWithLimit('bar', 2, null)
@@ -313,14 +384,27 @@ class DefaultDynamoDBServiceSpec extends Specification {
             service.setWhereNumberIsZero('1001', 123)
             service.get('1001', '1').number == 123
 
+        and:
+            dynamoDbService.update {
+                partitionKey '1001'
+                sortKey '1'
+                add 'number', 13
+                returns allNew
+            }.number == 136
+
+            dynamoDbService.updateAll(dynamoDbService.findAll('1001', '1')) {
+                add 'number', 1
+                returns none
+            }
+
         when:
             playbook.forget()
             service.delete(service.get('1001', '1'))
         then:
             playbook.verifyAndForget(
-                'POST_LOAD:1001:1:foo:123',
-                'PRE_REMOVE:1001:1:foo:123',
-                'POST_REMOVE:1001:1:foo:123'
+                'POST_LOAD:1001:1:foo:137',
+                'PRE_REMOVE:1001:1:foo:137',
+                'POST_REMOVE:1001:1:foo:137'
             )
             service.count('1001', '1') == 0
 
@@ -338,8 +422,8 @@ class DefaultDynamoDBServiceSpec extends Specification {
             playbook.forget()
             service.deleteByRangeIndex('1001', 'bar') == 1
         then:
-
             playbook.verifyAndForget(
+                'POST_LOAD:1001:2:bar:0',
                 'PRE_REMOVE:1001:2:bar:0',
                 'POST_REMOVE:1001:2:bar:0'
             )
@@ -396,6 +480,7 @@ interface DynamoDBItemDBService {
     DynamoDBEntity save(DynamoDBEntity entity)
     List<DynamoDBEntity> saveAll(DynamoDBEntity... entities)
     List<DynamoDBEntity> saveAll(Iterable<DynamoDBEntity> entities)
+    List<DynamoDBEntity> saveAll(Flowable<DynamoDBEntity> entities)
 
     int count(String hashKey)
     int count(String hashKey, String rangeKey)
@@ -863,4 +948,16 @@ interface DynamoDBItemDBService {
 
 }
 // end::service-footer[]
+
+@Service(DynamoDBEntity)                                                                // <2>
+interface UnknownMethodsService {
+
+    void doSomething();
+    void save();
+    void delete(String parentId, String id, String somethingElse)
+    void get(String parentId, String id, String somethingElse)
+    void findAll(String somethingElse, String anotherArgument)
+
+}
+
 // end::service-all[]

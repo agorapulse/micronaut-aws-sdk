@@ -17,11 +17,14 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.groovy;
 
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.DynamoDbService;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.*;
 import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
 import groovy.transform.stc.ClosureParams;
 import groovy.transform.stc.FromString;
+import groovy.transform.stc.SimpleType;
+import io.reactivex.Flowable;
 import software.amazon.awssdk.services.dynamodb.model.ReturnValue;
 import space.jasan.support.groovy.closure.ConsumerWithDelegate;
 import space.jasan.support.groovy.closure.FunctionWithDelegate;
@@ -269,6 +272,61 @@ public class MicronautDynamoDbExtensions {
             Closure<Object> configurer
     ) {
         return self.configure(ConsumerWithDelegate.create(configurer));
+    }
+
+    public static <T> Flowable<T> query(
+        DynamoDbService<T> service,
+        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.QueryBuilder<T>", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = SimpleType.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.QueryBuilder<T>")
+        Closure<QueryBuilder<T>> query
+    ) {
+        return service.query(ConsumerWithDelegate.create(query));
+    }
+
+    public static <T> Flowable<T> scan(
+        DynamoDbService<T> service,
+        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ScanBuilder<T>", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = SimpleType.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ScanBuilder<T>")
+            Closure<ScanBuilder<T>> scan
+    ) {
+        return service.scan(ConsumerWithDelegate.create(scan));
+    }
+
+    public static <T> Object update(
+        DynamoDbService<T> service,
+        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T>", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = SimpleType.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T>")
+            Closure<UpdateBuilder<T>> update
+    ) {
+        return service.update(ConsumerWithDelegate.create(update));
+    }
+
+    public static <T> int updateAll(
+        DynamoDbService<T> service,
+        Flowable<T> items,
+        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T>", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = SimpleType.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T>")
+            Closure<UpdateBuilder<T>> update
+    ) {
+        return service.updateAll(items, ConsumerWithDelegate.create(update));
+    }
+
+    public static <T> int countUsingQuery(
+        DynamoDbService<T> service,
+        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.QueryBuilder<T>", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = SimpleType.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.QueryBuilder<T>")
+            Closure<QueryBuilder<T>> query
+    ) {
+        return service.countUsingQuery(ConsumerWithDelegate.create(query));
+    }
+
+    public static <T> int countUsingScan(
+        DynamoDbService<T> service,
+        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ScanBuilder<T>", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = SimpleType.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ScanBuilder<T>")
+            Closure<ScanBuilder<T>> scan
+    ) {
+        return service.countUsingScan(ConsumerWithDelegate.create(scan));
     }
 
 }
