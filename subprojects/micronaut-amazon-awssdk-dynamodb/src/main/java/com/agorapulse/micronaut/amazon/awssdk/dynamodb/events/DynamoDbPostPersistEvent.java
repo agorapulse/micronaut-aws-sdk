@@ -15,23 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
+package com.agorapulse.micronaut.amazon.awssdk.dynamodb.events;
 
-import java.util.Map;
-import java.util.function.Function;
+/**
+ * Event triggered after an entity has been saved or updated.
+ *
+ * @param <T> the type of the entity
+ */
+public class DynamoDbPostPersistEvent<T> extends DynamoDbEvent<T> {
 
-@SuppressWarnings("rawtypes")
-public interface UpdateFunction<T, R> extends Function<Map<String, Object>, DetachedUpdate> {
-
-    UpdateBuilder<T, R> update(Map<String, Object> args);
-
-    @Override
-    default DetachedUpdate apply(Map<String, Object> stringObjectMap) {
-        return update(stringObjectMap);
-    }
-
-    default UpdateBuilder<T, T> builder() {
-        return Builders.update();
+    DynamoDbPostPersistEvent(T entity) {
+        super(DynamoDbEventType.POST_PERSIST, entity);
     }
 
 }

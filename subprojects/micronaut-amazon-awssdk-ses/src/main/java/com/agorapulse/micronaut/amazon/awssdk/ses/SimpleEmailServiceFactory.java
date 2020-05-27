@@ -29,7 +29,7 @@ import javax.inject.Singleton;
 @Factory
 public class SimpleEmailServiceFactory {
 
-    @Bean
+    @Bean(preDestroy = "close")
     @Singleton
     public SesClient sesClient(
         AwsCredentialsProvider credentialsProvider,
@@ -41,7 +41,7 @@ public class SimpleEmailServiceFactory {
             .build();
     }
 
-    @Bean
+    @Bean(preDestroy = "close")
     @Singleton
     public SesAsyncClient sesAsyncClient(
         AwsCredentialsProvider credentialsProvider,

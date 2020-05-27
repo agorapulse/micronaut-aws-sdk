@@ -24,8 +24,9 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder;
 import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
 import groovy.transform.stc.ClosureParams;
-import groovy.transform.stc.SimpleType;
+import groovy.transform.stc.FromString;
 import space.jasan.support.groovy.closure.ConsumerWithDelegate;
+import space.jasan.support.groovy.closure.FunctionWithDelegate;
 
 public class GroovyBuilders extends Builders {
 
@@ -40,7 +41,7 @@ public class GroovyBuilders extends Builders {
     public static <T> QueryBuilder<T> query(
         Class<T> type,
         @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.QueryBuilder<T>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = SimpleType.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.QueryBuilder<T>")
+        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.QueryBuilder<T>")
             Closure<QueryBuilder<T>> definition
     ) {
         return Builders.query(ConsumerWithDelegate.create(definition));
@@ -57,7 +58,7 @@ public class GroovyBuilders extends Builders {
     public static <T> ScanBuilder<T> scan(
         Class<T> type,
         @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ScanBuilder<T>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = SimpleType.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ScanBuilder<T>")
+        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ScanBuilder<T>")
             Closure<ScanBuilder<T>> definition
     ) {
         return Builders.scan(ConsumerWithDelegate.create(definition));
@@ -71,13 +72,13 @@ public class GroovyBuilders extends Builders {
      * @param <T> type of DynamoDB entity
      * @return update builder for given DynamoDB entity
      */
-    public static <T> UpdateBuilder<T> update(
+    public static <T, R> UpdateBuilder<T, R> update(
         Class<T> type,
-        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = SimpleType.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T>")
-            Closure<UpdateBuilder<T>> definition
+        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T, T>", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T, T>")
+            Closure<UpdateBuilder<T, R>> definition
     ) {
-        return Builders.update(ConsumerWithDelegate.create(definition));
+        return Builders.update(FunctionWithDelegate.create(definition));
     }
 
 }

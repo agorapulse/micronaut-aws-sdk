@@ -15,23 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
+package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
-import java.util.Map;
-import java.util.function.Function;
-
-@SuppressWarnings("rawtypes")
-public interface UpdateFunction<T, R> extends Function<Map<String, Object>, DetachedUpdate> {
-
-    UpdateBuilder<T, R> update(Map<String, Object> args);
-
-    @Override
-    default DetachedUpdate apply(Map<String, Object> stringObjectMap) {
-        return update(stringObjectMap);
-    }
-
-    default UpdateBuilder<T, T> builder() {
-        return Builders.update();
-    }
-
-}
+public interface PlaybookAware { }

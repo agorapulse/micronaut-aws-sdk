@@ -25,34 +25,21 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Scan;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Service;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SortKey;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Update;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.*;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedQuery;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedScan;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedUpdate;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.core.annotation.AnnotationValue;
-import io.micronaut.core.beans.BeanIntrospection;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.type.MutableArgumentValue;
 import io.reactivex.Flowable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.Key;
-import software.amazon.awssdk.enhanced.dynamodb.TableMetadata;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.BeanTableSchema;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticTableMetadata;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondarySortKey;
-import software.amazon.awssdk.enhanced.dynamodb.model.*;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.*;
+import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 
 import javax.inject.Singleton;
-import java.lang.reflect.Field;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Introduction for {@link com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Service} annotation.
@@ -60,13 +47,10 @@ import java.util.stream.Collectors;
 @Singleton
 public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceIntroduction.class);
-
     private static final String PARTITION = "partition";
     private static final String SORT = "sort";
     private static final String HASH = "hash";
     private static final String RANGE = "range";
-    private static final int BATCH_SIZE = 25;
 
     private static class PartitionAndSort {
         Argument<?> partitionKey;
@@ -76,40 +60,29 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             return partitionKey != null;
         }
 
-        AttributeValue getPartitionAttributeValue(Map<String, MutableArgumentValue<?>> params, DynamoDbTable<?> table, AttributeConversionHelper attributeConversionHelper) {
-            Object hashKeyRaw = params.get(partitionKey.getName()).getValue();
-            String hashKeyName = table.tableSchema().tableMetadata().primaryPartitionKey();
-            return attributeConversionHelper.convert(table, hashKeyName, hashKeyRaw);
+        Object getPartitionValue(Map<String, MutableArgumentValue<?>> params) {
+            return params.get(partitionKey.getName()).getValue();
         }
 
-        AttributeValue getSortAttributeValue(Map<String, MutableArgumentValue<?>> params, DynamoDbTable<?> table, AttributeConversionHelper attributeConversionHelper) {
-            Object rangeKeyRaw = params.get(sortKey.getName()).getValue();
-            String rangeKeyName = table.tableSchema().tableMetadata().primarySortKey().orElseThrow(() -> new IllegalArgumentException("Sort key not present for " + table.tableSchema().itemType()));
-            return attributeConversionHelper.convert(table, rangeKeyName, rangeKeyRaw);
+        Object getSortValue(Map<String, MutableArgumentValue<?>> params) {
+            return sortKey == null ? null : params.get(sortKey.getName()).getValue();
         }
 
-        Flowable<AttributeValue> getSortAttributeValues(Map<String, MutableArgumentValue<?>> params, DynamoDbTable<?> table, AttributeConversionHelper attributeConversionHelper) {
-            final String key = table.tableSchema().tableMetadata().primarySortKey().orElseThrow(() -> new IllegalArgumentException("Sort key not present for " + table.tableSchema().itemType()));
-            return toFlowable(Object.class, sortKey, params).map(o -> attributeConversionHelper.convert(table, key, o));
+        Flowable<?> getSortAttributeValues(Map<String, MutableArgumentValue<?>> params) {
+            return sortKey == null ? Flowable.empty() : toFlowable(Object.class, sortKey, params);
         }
 
     }
 
-    private final DynamoDbEnhancedClient enhancedClient;
-    private final DynamoDbClient client;
-    private final AttributeConversionHelper attributeConversionHelper;
     private final FunctionEvaluator functionEvaluator;
+    private final DynamoDBServiceProvider provider;
 
     public ServiceIntroduction(
-        DynamoDbEnhancedClient enhancedClient,
-        DynamoDbClient client,
-        AttributeConversionHelper attributeConversionHelper,
-        FunctionEvaluator functionEvaluator
+        FunctionEvaluator functionEvaluator,
+        DynamoDBServiceProvider provider
     ) {
-        this.enhancedClient = enhancedClient;
-        this.client = client;
-        this.attributeConversionHelper = attributeConversionHelper;
         this.functionEvaluator = functionEvaluator;
+        this.provider = provider;
     }
 
     @Override
@@ -123,6 +96,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         return doIntercept(context, serviceAnnotationValue);
     }
 
+    @SuppressWarnings("unchecked")
     private static <T> Flowable<T> toFlowable(Class<T> type, Argument<?> itemArgument, Map<String, MutableArgumentValue<?>> params) {
         Object item = params.get(itemArgument.getName()).getValue();
 
@@ -135,51 +109,52 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         }
 
         if (Flowable.class.isAssignableFrom(itemArgument.getType()) && type.isAssignableFrom(itemArgument.getTypeParameters()[0].getType())) {
-            return Flowable.fromIterable((Iterable<T>) item);
+            return (Flowable<T>) item;
         }
 
         return Flowable.just((T) item);
     }
 
+    @SuppressWarnings("unchecked")
     private <T> Object doIntercept(MethodInvocationContext<Object, Object> context, AnnotationValue<Service> serviceAnnotationValue) {
         Class<T> type = (Class<T>) serviceAnnotationValue.classValue().orElseThrow(() -> new IllegalArgumentException("Annotation is missing the type value!"));
         String tableName = serviceAnnotationValue.stringValue("tableName").orElseGet(type::getSimpleName);
-        // TODO: bean table schema using introspection
-        DynamoDbTable<T> table = enhancedClient.table(tableName, BeanTableSchema.create(type));
+
+        DynamoDbService<T> service = provider.findOrCreate(tableName, type);
 
         try {
-            return doIntercept(context, type, table);
+            return doIntercept(context, service);
         } catch (ResourceNotFoundException ignored) {
-            createTable(table);
-            return doIntercept(context, type, table);
+            service.createTable();
+            return doIntercept(context, service);
         }
     }
 
-    private <T> Object doIntercept(MethodInvocationContext<Object, Object> context, Class<T> type, DynamoDbTable<T> table) {
+    private <T> Object doIntercept(MethodInvocationContext<Object, Object> context, DynamoDbService<T> service) {
         String methodName = context.getMethodName();
         if (methodName.startsWith("save")) {
-            return handleSave(table, context);
+            return handleSave(service, context);
         }
 
         if (methodName.startsWith("get") || methodName.startsWith("load")) {
-            return handleGet(table, context);
+            return handleGet(service, context);
         }
 
         if (context.getTargetMethod().isAnnotationPresent(Query.class)) {
             DetachedQuery<T> criteria = functionEvaluator.evaluateAnnotationType(context.getTargetMethod().getAnnotation(Query.class).value(), context);
 
             if (methodName.startsWith("count")) {
-                return criteria.count(table, attributeConversionHelper);
+                return service.count(criteria);
             }
 
-            Flowable<T> queryResult = criteria.query(table, attributeConversionHelper);
+            Flowable<T> queryResult = service.query(criteria);
             if (methodName.startsWith("delete")) {
-                return deleteAll(table, queryResult);
+                return service.deleteAll(queryResult);
             }
 
             if (context.getTargetMethod().isAnnotationPresent(Update.class)) {
-                UpdateBuilder<T> update = (UpdateBuilder<T>) functionEvaluator.evaluateAnnotationType(context.getTargetMethod().getAnnotation(Update.class).value(), context);
-                return updateAll(table, queryResult, update);
+                UpdateBuilder<T, ?> update = (UpdateBuilder<T, ?>) functionEvaluator.evaluateAnnotationType(context.getTargetMethod().getAnnotation(Update.class).value(), context);
+                return service.updateAll(queryResult, update);
             }
 
             return flowableOrList(queryResult, context.getReturnType().getType());
@@ -189,63 +164,45 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             DetachedScan<T> criteria = functionEvaluator.evaluateAnnotationType(context.getTargetMethod().getAnnotation(Scan.class).value(), context);
 
             if (methodName.startsWith("count")) {
-                return criteria.count(table, attributeConversionHelper);
+                return service.count(criteria);
             }
 
-            Flowable<T> scanResult = criteria.scan(table, attributeConversionHelper);
+            Flowable<T> scanResult = service.scan(criteria);
 
             if (methodName.startsWith("delete")) {
-                return deleteAll(table, scanResult);
+                return service.deleteAll(scanResult);
             }
 
             if (context.getTargetMethod().isAnnotationPresent(Update.class)) {
-                UpdateBuilder<T> update = (UpdateBuilder<T>) functionEvaluator.evaluateAnnotationType(context.getTargetMethod().getAnnotation(Update.class).value(), context);
-                return updateAll(table, scanResult, update);
+                UpdateBuilder<T, ?> update = (UpdateBuilder<T, ?>) functionEvaluator.evaluateAnnotationType(context.getTargetMethod().getAnnotation(Update.class).value(), context);
+                return service.updateAll(scanResult, update);
             }
 
             return flowableOrList(scanResult, context.getReturnType().getType());
         }
 
         if (context.getTargetMethod().isAnnotationPresent(Update.class)) {
-            DetachedUpdate<T> criteria = functionEvaluator.evaluateAnnotationType(context.getTargetMethod().getAnnotation(Update.class).value(), context);
+            DetachedUpdate<T, ?> criteria = functionEvaluator.evaluateAnnotationType(context.getTargetMethod().getAnnotation(Update.class).value(), context);
 
-            return criteria.update(table, client, attributeConversionHelper);
-        }
-
-        if (methodName.startsWith("count")) {
-            return simpleHashAndRangeQuery(type, context, table).count(table, attributeConversionHelper);
+            return service.update(criteria);
         }
 
         if (methodName.startsWith("delete")) {
-            return handleDelete(type, table, context);
+            return handleDelete(service, context);
         }
 
-        if (methodName.startsWith("query") || methodName.startsWith("findAll") || methodName.startsWith("list")) {
-            return flowableOrList(simpleHashAndRangeQuery(type, context, table).query(table, attributeConversionHelper), context.getReturnType().getType());
+        if (methodName.startsWith("query") || methodName.startsWith("findAll") || methodName.startsWith("list") || methodName.startsWith("count")) {
+            PartitionAndSort partitionAndSort = findHashAndRange(context.getArguments(), service);
+            if (methodName.startsWith("count")) {
+                return service.count(partitionAndSort.getPartitionValue(context.getParameters()), partitionAndSort.getSortValue(context.getParameters()));
+            }
+            return flowableOrList(
+                service.findAll(partitionAndSort.getPartitionValue(context.getParameters()), partitionAndSort.getSortValue(context.getParameters())),
+                context.getReturnType().getType()
+            );
         }
 
         throw new UnsupportedOperationException("Cannot implement method " + context.getExecutableMethod());
-    }
-
-    private <T> int updateAll(DynamoDbTable<T> table, Flowable<T> queryResult, UpdateBuilder<T> update) {
-        // there is no batch update API, we can do batch updates in transaction but in that case it would cause
-        // doubling the writes
-
-        BeanIntrospection<T> introspection = EntityIntrospection.getBeanIntrospection(table);
-        TableMetadata tableMetadata = table.tableSchema().tableMetadata();
-
-        AtomicInteger counter = new AtomicInteger();
-
-        queryResult.subscribe(entity -> {
-            introspection.getProperty(tableMetadata.primaryPartitionKey()).ifPresent(p -> update.partitionKey(p.get(entity)));
-            tableMetadata.primarySortKey().flatMap(introspection::getProperty).ifPresent(p -> update.sortKey(p.get(entity)));
-
-            update.update(table, client, attributeConversionHelper);
-
-            counter.incrementAndGet();
-        });
-
-        return counter.get();
     }
 
     private Object flowableOrList(Flowable<?> result, Class<?> type) {
@@ -255,76 +212,63 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         return result;
     }
 
-    private <T> Object handleSave(DynamoDbTable<T> service, MethodInvocationContext<Object, Object> context) {
+    private <T> Object handleSave(DynamoDbService<T> service, MethodInvocationContext<Object, Object> context) {
         Map<String, MutableArgumentValue<?>> params = context.getParameters();
         Argument<?>[] args = context.getArguments();
 
-        if (args.length > 1) {
-            throw new UnsupportedOperationException("Method expects at most 1 parameters - item, iterable of items or array of items");
+        if (args.length != 1) {
+            throw new UnsupportedOperationException("Method expects 1 parameter - item, iterable of items or array of items");
         }
 
         Argument<?> itemArgument = args[0];
-        Flowable<T> items = toFlowable(service.tableSchema().itemType().rawClass(), itemArgument, params);
+        Flowable<T> items = toFlowable(service.getItemType(), itemArgument, params);
 
         if (itemArgument.getType().isArray() || Iterable.class.isAssignableFrom(itemArgument.getType()) || Flowable.class.isAssignableFrom(itemArgument.getType())) {
-            return flowableOrList(saveAll(service, items), context.getReturnType().getType());
+            return flowableOrList(service.saveAll(items), context.getReturnType().getType());
         }
 
-        return service.updateItem(items.blockingFirst());
+        return service.save(items.blockingFirst());
     }
 
-    private <T> Object handleDelete(Class<T> type, DynamoDbTable<T> service, MethodInvocationContext<Object, Object> context) {
+    private <T> Object handleDelete(DynamoDbService<T> service, MethodInvocationContext<Object, Object> context) {
         Map<String, MutableArgumentValue<?>> params = context.getParameters();
         Argument<?>[] args = context.getArguments();
 
         if (args.length == 1) {
             Argument<?> itemArgument = args[0];
-            Flowable<T> items = toFlowable(service.tableSchema().itemType().rawClass(), itemArgument, params);
+            Flowable<T> items = toFlowable(service.getItemType(), itemArgument, params);
 
             if (itemArgument.getType().isArray() || Iterable.class.isAssignableFrom(itemArgument.getType()) || Flowable.class.isAssignableFrom(itemArgument.getType())) {
-                return deleteAll(service, items);
+                return service.deleteAll(items);
             }
 
-            if (type.isAssignableFrom(itemArgument.getType())) {
-                service.deleteItem(service.keyFrom(items.blockingFirst()));
-                return items.blockingFirst();
+            if (service.getItemType().isAssignableFrom(itemArgument.getType())) {
+                return service.delete(items.blockingFirst());
             }
         }
 
         if (args.length > 2) {
-            throw new UnsupportedOperationException("Method expects at most 2 parameters - hash key and range key, an item, iterable of items or an array of items");
+            throw new UnsupportedOperationException("Method expects at most 2 parameters - partition key and sort key, an item or items");
         }
 
         PartitionAndSort partitionAndSort = findHashAndRange(args, service);
-
-        if (partitionAndSort.sortKey == null) {
-            service.deleteItem(Key.builder().partitionValue(partitionAndSort.getPartitionAttributeValue(params, service, attributeConversionHelper)).build());
-            return 1;
-        }
-
-        service.deleteItem(
-            Key.builder()
-                .partitionValue(partitionAndSort.getPartitionAttributeValue(params, service, attributeConversionHelper))
-                .sortValue(partitionAndSort.getSortAttributeValue(params, service, attributeConversionHelper))
-                .build()
-        );
-
+        service.delete(partitionAndSort.getPartitionValue(params), partitionAndSort.getSortValue(params));
         return 1;
     }
 
-    private <T> Object handleGet(DynamoDbTable<T> service, MethodInvocationContext<Object, Object> context) {
+    private <T> Object handleGet(DynamoDbService<T> service, MethodInvocationContext<Object, Object> context) {
         Map<String, MutableArgumentValue<?>> params = context.getParameters();
         Argument<?>[] args = context.getArguments();
 
         if (args.length > 2) {
-            throw new UnsupportedOperationException("Method expects at most 2 parameters - hash key and range key");
+            throw new UnsupportedOperationException("Method expects at most 2 parameters - partition key and sort key or sort keys");
         }
 
         PartitionAndSort partitionAndSort = findHashAndRange(args, service);
-        AttributeValue partitionValue = partitionAndSort.getPartitionAttributeValue(params, service, attributeConversionHelper);
+        Object partitionValue = partitionAndSort.getPartitionValue(params);
 
         if (partitionAndSort.sortKey == null) {
-            return service.getItem(Key.builder().partitionValue(partitionValue).build());
+            return service.get(partitionValue, null);
         }
 
         if (
@@ -332,40 +276,14 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
                 || Iterable.class.isAssignableFrom(partitionAndSort.sortKey.getType())
                 || Flowable.class.isAssignableFrom(partitionAndSort.sortKey.getType())
         ) {
-            return flowableOrList(getAll(service, partitionValue, partitionAndSort.getSortAttributeValues(params, service, attributeConversionHelper)), context.getReturnType().getType());
+            Flowable<T> all = service.getAll(partitionValue, partitionAndSort.getSortAttributeValues(params));
+            return flowableOrList(all, context.getReturnType().getType());
         }
 
-        return service.getItem(Key.builder().partitionValue(partitionValue).sortValue(partitionAndSort.getSortAttributeValue(params, service, attributeConversionHelper)).build());
+        return service.get(partitionValue, partitionAndSort.getSortValue(params));
     }
 
-    private <T> DetachedQuery<T> simpleHashAndRangeQuery(
-        Class<T> type,
-        MethodInvocationContext<Object, Object> context,
-        DynamoDbTable<T> table
-    ) {
-        Map<String, MutableArgumentValue<?>> params = context.getParameters();
-        Argument<?>[] args = context.getArguments();
-
-        if (args.length > 2) {
-            throw new UnsupportedOperationException("Method expects at most 2 parameters - hash key and optional range key");
-        }
-
-        PartitionAndSort partitionAndSort = findHashAndRange(args, table);
-
-        AttributeValue partitionAttributeValue = partitionAndSort.getPartitionAttributeValue(params, table, attributeConversionHelper);
-
-        if (partitionAndSort.sortKey == null) {
-            return Builders.query(type, q -> {
-                q.partitionKey(partitionAttributeValue);
-            });
-        }
-
-        AttributeValue sortAttributeValue = partitionAndSort.getSortAttributeValue(params, table, attributeConversionHelper);
-
-        return Builders.query(q -> q.partitionKey(partitionAttributeValue).sortKey(r -> r.eq(sortAttributeValue)));
-    }
-
-    private PartitionAndSort findHashAndRange(Argument<?>[] arguments, DynamoDbTable<?> table) {
+    private PartitionAndSort findHashAndRange(Argument<?>[] arguments, DynamoDbService<?> table) {
         PartitionAndSort names = new PartitionAndSort();
         for (Argument<?> argument : arguments) {
             if (
@@ -373,7 +291,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
                     || argument.isAnnotationPresent(RangeKey.class)
                     || argument.getName().toLowerCase().contains(SORT)
                     || argument.getName().toLowerCase().contains(RANGE)
-                    || argument.getName().equals(table.tableSchema().tableMetadata().primarySortKey().orElse(SORT))
+                    || argument.getName().equals(table.getTable().tableSchema().tableMetadata().primarySortKey().orElse(SORT))
             ) {
                 names.sortKey = argument;
             } else if (
@@ -381,139 +299,17 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
                     || argument.isAnnotationPresent(HashKey.class)
                     || argument.getName().toLowerCase().contains(PARTITION)
                     || argument.getName().toLowerCase().contains(HASH)
-                    || argument.getName().equals(table.tableSchema().tableMetadata().primaryPartitionKey())
+                    || argument.getName().equals(table.getTable().tableSchema().tableMetadata().primaryPartitionKey())
             ) {
                 names.partitionKey = argument;
             }
         }
 
         if (!names.isValid()) {
-            throw new UnsupportedOperationException("Method needs to have at least one argument annotated with @HashKey or with called 'hash'");
+            throw new UnsupportedOperationException("Method needs to have at least one argument annotated with @PartitionKey or with called 'partition'");
         }
 
         return names;
     }
 
-    private <T> Flowable<T> saveAll(DynamoDbTable<T> service, Flowable<T> itemsToSave) {
-        List<T> unprocessed = itemsToSave.buffer(BATCH_SIZE).map(batchItems -> enhancedClient.batchWriteItem(b -> {
-            b.writeBatches(batchItems.stream().map(i ->
-                WriteBatch.builder(service.tableSchema().itemType().rawClass()).mappedTableResource(service).addPutItem(i).build()
-            ).collect(Collectors.toList()));
-        })).flatMap(r -> Flowable.fromIterable(r.unprocessedPutItemsForTable(service))).toList().blockingGet();
-
-        if (unprocessed.isEmpty()) {
-            return itemsToSave;
-        }
-
-        throw new IllegalArgumentException("Following items couldn't be saved:" + unprocessed.stream().map(Object::toString).collect(Collectors.joining(", ")));
-    }
-
-    private <T> int deleteAll(DynamoDbTable<T> table, Flowable<T> items) {
-        TableSchema<T> tableSchema = table.tableSchema();
-        AtomicInteger counter = new AtomicInteger();
-        List<Key> unprocessed = items.buffer(BATCH_SIZE).map(batchItems -> enhancedClient.batchWriteItem(b -> {
-            counter.addAndGet(batchItems.size());
-            b.writeBatches(batchItems.stream().map(i ->
-                WriteBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(table).addDeleteItem(i).build()
-            ).collect(Collectors.toList()));
-        })).flatMap(r -> Flowable.fromIterable(r.unprocessedDeleteItemsForTable(table))).toList().blockingGet();
-
-        if (unprocessed.isEmpty()) {
-            return counter.get();
-        }
-
-        throw new IllegalArgumentException("Following items couldn't be deleted:" + unprocessed.stream()
-            .map(k -> tableSchema.mapToItem(k.keyMap(tableSchema, TableMetadata.primaryIndexName()))).map(Object::toString)
-            .collect(Collectors.joining(", ")));
-    }
-
-    private <T> Flowable<T> getAll(DynamoDbTable<T> service, AttributeValue hashKey, Flowable<AttributeValue> rangeKeys) {
-        TableSchema<T> tableSchema = service.tableSchema();
-        return rangeKeys.buffer(BATCH_SIZE).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> {
-            b.readBatches(batchRangeKeys.stream().map(k ->
-                ReadBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(service).addGetItem(Key.builder().partitionValue(hashKey).sortValue(k).build()).build()
-            ).collect(Collectors.toList()));
-        })).flatMap(r -> Flowable.fromIterable(r.resultsForTable(service)));
-    }
-
-    private <T> void createTable(DynamoDbTable<T> table) {
-        Map<String, ProjectionType> types = getProjectionTypes(table);
-        TableMetadata tableMetadata = table.tableSchema().tableMetadata();
-        tableMetadata.allKeys();
-        table.createTable(b -> {
-            List<EnhancedLocalSecondaryIndex> localSecondaryIndices = new ArrayList<>();
-            List<EnhancedGlobalSecondaryIndex> globalSecondaryIndices = new ArrayList<>();
-
-            getIndices(tableMetadata).forEach(i -> {
-                if (TableMetadata.primaryIndexName().equals(i)) {
-                    return;
-                }
-                ProjectionType type = types.getOrDefault(i, ProjectionType.KEYS_ONLY);
-                if (tableMetadata.primaryPartitionKey().equals(tableMetadata.indexPartitionKey(i))) {
-                    localSecondaryIndices.add(EnhancedLocalSecondaryIndex.create(i, Projection.builder().projectionType(type).build()));
-                } else {
-                    globalSecondaryIndices.add(EnhancedGlobalSecondaryIndex.builder().indexName(i).projection(Projection.builder().projectionType(type).build()).build());
-                }
-            });
-
-            if (!localSecondaryIndices.isEmpty()) {
-                b.localSecondaryIndices(localSecondaryIndices);
-            }
-
-            if (!globalSecondaryIndices.isEmpty()) {
-                b.globalSecondaryIndices(globalSecondaryIndices);
-            }
-        });
-
-    }
-
-    private <T> Map<String, ProjectionType> getProjectionTypes(DynamoDbTable<T> table) {
-        Map<String, ProjectionType> types = new HashMap<>();
-
-        BeanIntrospection<T> introspection = EntityIntrospection.getBeanIntrospection(table);
-        introspection.getBeanProperties().forEach(p -> {
-            AnnotationValue<com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Projection> projectionAnnotation = p.getAnnotation(com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Projection.class);
-
-            if (projectionAnnotation == null) {
-                return;
-            }
-
-            AnnotationValue<DynamoDbSecondarySortKey> secondaryIndex = p.getAnnotation(DynamoDbSecondarySortKey.class);
-            Collection<String> indexNames = new ArrayList<>();
-            if (secondaryIndex != null) {
-                indexNames.addAll(Arrays.asList(secondaryIndex.stringValues("indexNames")));
-            }
-
-            AnnotationValue<DynamoDbSecondaryPartitionKey> secondaryGlobalIndex = p.getAnnotation(DynamoDbSecondaryPartitionKey.class);
-            if (secondaryGlobalIndex != null) {
-                indexNames.addAll(Arrays.asList(secondaryGlobalIndex.stringValues("indexNames")));
-            }
-
-            if (indexNames.isEmpty()) {
-                return;
-            }
-
-            ProjectionType type = projectionAnnotation.enumValue(ProjectionType.class).orElse(ProjectionType.KEYS_ONLY);
-            for(String name : indexNames) {
-                types.put(name, type);
-            }
-        });
-
-        return types;
-    }
-
-    private Set<String> getIndices(TableMetadata metadata) {
-        if (metadata instanceof StaticTableMetadata) {
-            try {
-                Field indexByNameMapField = StaticTableMetadata.class.getDeclaredField("indexByNameMap");
-                indexByNameMapField.setAccessible(true);
-                Map<String, ?> indexByNameMap = (Map<String, ?>) indexByNameMapField.get(metadata);
-                return indexByNameMap.keySet();
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                LOGGER.error("Exception reading indices", e);
-            }
-        }
-
-        return Collections.emptySet();
-    }
 }

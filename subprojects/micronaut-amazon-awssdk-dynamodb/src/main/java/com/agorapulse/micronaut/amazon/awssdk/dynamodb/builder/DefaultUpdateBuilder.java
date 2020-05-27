@@ -18,11 +18,18 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeConversionHelper;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbEvent;
+import io.micronaut.context.event.ApplicationEventPublisher;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.MappedTableResource;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.*;
+import software.amazon.awssdk.services.dynamodb.model.AttributeAction;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValueUpdate;
+import software.amazon.awssdk.services.dynamodb.model.ReturnValue;
+import software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.UpdateItemResponse;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,7 +39,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-class DefaultUpdateBuilder<T> implements UpdateBuilder<T> {
+class DefaultUpdateBuilder<T, R> implements UpdateBuilder<T, R> {
 
     private static class Update {
         final String name;
@@ -57,52 +64,57 @@ class DefaultUpdateBuilder<T> implements UpdateBuilder<T> {
     private Consumer<UpdateItemRequest.Builder> __configurer = u -> {};
 
     @Override
-    public UpdateBuilder<T> partitionKey(Object key) {
+    public UpdateBuilder<T, R> partitionKey(Object key) {
         this.__hash = key;
         return this;
     }
 
     @Override
-    public UpdateBuilder<T> sortKey(Object key) {
+    public UpdateBuilder<T, R> sortKey(Object key) {
         this.__range = key;
         return this;
     }
 
     @Override
-    public UpdateBuilder<T> add(String attributeName, Object delta) {
+    public UpdateBuilder<T, R> add(String attributeName, Object delta) {
         __updates.add(new Update(attributeName, AttributeAction.ADD, delta));
         return this;
     }
 
     @Override
-    public UpdateBuilder<T> put(String attributeName, Object value) {
+    public UpdateBuilder<T, R> put(String attributeName, Object value) {
         __updates.add(new Update(attributeName, AttributeAction.PUT, value));
         return this;
     }
 
     @Override
-    public UpdateBuilder<T> delete(String attributeName) {
+    public UpdateBuilder<T, R> delete(String attributeName) {
         __updates.add(new Update(attributeName, AttributeAction.DELETE, null));
         return this;
     }
 
     @Override
-    public UpdateBuilder<T> configure(Consumer<UpdateItemRequest.Builder> configurer) {
+    public UpdateBuilder<T, R> configure(Consumer<UpdateItemRequest.Builder> configurer) {
         this.__configurer = configurer;
         return this;
     }
 
     @Override
-    public UpdateBuilder<T> returns(ReturnValue returnValue, Function<T, ?> mapper) {
+    @SuppressWarnings("unchecked")
+    public <N> UpdateBuilder<T, N> returns(ReturnValue returnValue, Function<T, N> mapper) {
         this.__returnValue = returnValue;
         this.__returnValueMapper = mapper;
 
-        return this;
+        return (UpdateBuilder<T, N>) this;
     }
 
     @Override
-    public Object update(DynamoDbTable<T> mapper, DynamoDbClient client, AttributeConversionHelper attributeConversionHelper) {
+    @SuppressWarnings("unchecked")
+    public R update(DynamoDbTable<T> mapper, DynamoDbClient client, AttributeConversionHelper attributeConversionHelper, ApplicationEventPublisher publisher) {
         UpdateItemRequest request = resolveRequest(mapper, attributeConversionHelper);
+        T keyItem = mapper.tableSchema().mapToItem(request.key());
+        publisher.publishEvent(DynamoDbEvent.preUpdate(keyItem));
+
         UpdateItemResponse result = client.updateItem(request);
         Map<String, AttributeValue> attributes = result.attributes();
 
@@ -114,7 +126,9 @@ class DefaultUpdateBuilder<T> implements UpdateBuilder<T> {
             return null;
         }
 
-        return __returnValueMapper.apply(mapper.tableSchema().mapToItem(attributes));
+        T item = mapper.tableSchema().mapToItem(attributes);
+        publisher.publishEvent(DynamoDbEvent.postUpdate(item));
+        return (R) __returnValueMapper.apply(item);
     }
 
     @Override

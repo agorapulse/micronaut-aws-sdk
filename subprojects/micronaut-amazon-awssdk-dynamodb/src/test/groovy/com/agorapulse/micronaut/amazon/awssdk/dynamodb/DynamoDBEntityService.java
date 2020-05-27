@@ -24,8 +24,6 @@ import io.reactivex.Flowable;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 // tag::all[]
 // tag::header[]
@@ -58,8 +56,8 @@ public interface DynamoDBEntityService {
     class EqRangeIndex implements QueryFunction<DynamoDBEntity> {
 
         @Override
-        public Consumer<QueryBuilder<DynamoDBEntity>> query(Map<String, Object> arguments) {
-            return b -> b.partitionKey(arguments.get("hashKey"))
+        public DetachedQuery<DynamoDBEntity> query(Map<String, Object> arguments) {
+            return builder().partitionKey(arguments.get("hashKey"))
                 .index(DynamoDBEntity.RANGE_INDEX)
                 .sortKey(r -> r.eq(arguments.get("rangeKey")));
         }
@@ -69,14 +67,16 @@ public interface DynamoDBEntityService {
     @Query(EqRangeIndex.class)
     int countByRangeIndex(String hashKey, String rangeKey);
 
-    class BetweenDateIndex implements Function<Map<String, Object>, DetachedQuery> {
-        public DetachedQuery apply(Map<String, Object> arguments) {
-            return Builders.query(DynamoDBEntity.class)
-                .index(DynamoDBEntity.DATE_INDEX)
-                .hash(arguments.get("hashKey"))
+    class BetweenDateIndex implements QueryFunction<DynamoDBEntity> {
+
+        @Override
+        public DetachedQuery<DynamoDBEntity> query(Map<String, Object> args) {
+            return builder().index(DynamoDBEntity.DATE_INDEX)
+                .partitionKey(args.get("hashKey"))
                 .page(1)
-                .range(r -> r.between(arguments.get("after"), arguments.get("before")));
+                .sortKey(r -> r.between(args.get("after"), args.get("before")));
         }
+
     }
     @Query(BetweenDateIndex.class)
     int countByDates(String hashKey, Date after, Date before);
@@ -88,8 +88,8 @@ public interface DynamoDBEntityService {
     // tag::sample-query-class[]
     class EqRangeProjection implements QueryFunction<DynamoDBEntity> {                  // <2>
 
-        public Consumer<QueryBuilder<DynamoDBEntity>> query(Map<String, Object> arguments) {
-            return b -> b.partitionKey(arguments.get("hashKey"))
+        public QueryBuilder<DynamoDBEntity> query(Map<String, Object> arguments) {
+            return builder().partitionKey(arguments.get("hashKey"))
                 .index(DynamoDBEntity.RANGE_INDEX)
                 .sortKey(r ->
                     r.eq(arguments.get("rangeKey"))                                     // <4>
@@ -106,13 +106,13 @@ public interface DynamoDBEntityService {
     @Query(BetweenDateIndex.class)
     List<DynamoDBEntity> queryByDates(String hashKey, Date after, Date before);
 
-    class BetweenDateIndexScroll implements Function<Map<String, Object>, DetachedQuery> {
-        public DetachedQuery apply(Map<String, Object> arguments) {
-            return Builders.query(DynamoDBEntity.class)
+    class BetweenDateIndexScroll implements QueryFunction<DynamoDBEntity> {
+        public QueryBuilder<DynamoDBEntity> query(Map<String, Object> arguments) {
+            return builder()
                 .index(DynamoDBEntity.DATE_INDEX)
-                .hash(arguments.get("hashKey"))
+                .partitionKey(arguments.get("hashKey"))
                 .lastEvaluatedKey(arguments.get("lastEvaluatedKey"))
-                .range(r -> r.between(arguments.get("after"), arguments.get("before")));
+                .sortKey(r -> r.between(arguments.get("after"), arguments.get("before")));
         }
     }
     @Query(BetweenDateIndexScroll.class)
@@ -129,11 +129,11 @@ public interface DynamoDBEntityService {
     int deleteByDates(String hashKey, Date after, Date before);
 
     // tag::sample-update-class[]
-    class IncrementNumber implements UpdateFunction<DynamoDBEntity> {                   // <2>
+    class IncrementNumber implements UpdateFunction<DynamoDBEntity, Integer> {          // <2>
 
         @Override
-        public Consumer<UpdateBuilder<DynamoDBEntity>> update(Map<String, Object> args) {
-            return b -> b.partitionKey(args.get("hashKey"))                             // <3>
+        public UpdateBuilder<DynamoDBEntity, Integer> update(Map<String, Object> args) {
+            return builder().partitionKey(args.get("hashKey"))                          // <3>
                 .sortKey(args.get("rangeKey"))                                          // <4>
                 .add("number", 1)                                                       // <6>
                 .returnUpdatedNew(DynamoDBEntity::getNumber);                           // <6>
@@ -146,11 +146,12 @@ public interface DynamoDBEntityService {
     Number increment(String hashKey, String rangeKey);                                  // <8>
     // end::sample-update[]
 
-    class DecrementNumber implements Function<Map<String, Object>, DetachedUpdate> {
-        public DetachedUpdate apply(Map<String, Object> arguments) {
-            return Builders.update(DynamoDBEntity.class)
-                .hash(arguments.get("hashKey"))
-                .range(arguments.get("rangeKey"))
+    class DecrementNumber implements UpdateFunction<DynamoDBEntity, Integer> {
+        @Override
+        public UpdateBuilder<DynamoDBEntity, Integer> update(Map<String, Object> arguments){
+            return builder()
+                .partitionKey(arguments.get("hashKey"))
+                .sortKey(arguments.get("rangeKey"))
                 .add("number", -1)
                 .returnUpdatedNew(DynamoDBEntity::getNumber);
         }
@@ -163,8 +164,8 @@ public interface DynamoDBEntityService {
     class EqRangeScan implements ScanFunction<DynamoDBEntity> {                         // <2>
 
         @Override
-        public Consumer<ScanBuilder<DynamoDBEntity>> scan(Map<String, Object>  args) {
-            return b -> b.filter(f ->
+        public ScanBuilder<DynamoDBEntity> scan(Map<String, Object>  args) {
+            return builder().filter(f ->
                 f.eq(DynamoDBEntity.RANGE_INDEX, args.get("foo"))                       // <3>
             );
         }

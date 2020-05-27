@@ -35,7 +35,7 @@ import javax.inject.Singleton;
 @Factory
 public class DynamoDBClientsFactory {
 
-    @Bean
+    @Bean(preDestroy = "close")
     @Singleton
     public DynamoDbClient dynamoDbClient(
         DynamoDBConfiguration configuration,
@@ -47,7 +47,7 @@ public class DynamoDBClientsFactory {
         return builder.build();
     }
 
-    @Bean
+    @Bean(preDestroy = "close")
     @Singleton
     public DynamoDbAsyncClient dynamoDbAsyncClient(
         DynamoDBConfiguration configuration,
