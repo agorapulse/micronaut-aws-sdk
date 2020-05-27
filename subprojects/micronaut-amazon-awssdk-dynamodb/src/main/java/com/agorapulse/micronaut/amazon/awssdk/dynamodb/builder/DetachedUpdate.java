@@ -28,16 +28,16 @@ import software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest;
  * An interface for updates which can be executed using supplied mapper.
  * @param <T> type of the DynamoDB entity
  */
-public interface DetachedUpdate<T> {
+public interface DetachedUpdate<T, R> {
 
     /**
      * Executes an update using provided mapper.
      * @param mapper DynamoDB mapper
      * @param client low level AWS SDK client
-     * @param publisher
+     * @param publisher application event publisher
      * @return the return value which depends on the configuration of the update request
      */
-    Object update(DynamoDbTable<T> mapper, DynamoDbClient client, AttributeConversionHelper attributeConversionHelper, ApplicationEventPublisher publisher);
+    R update(DynamoDbTable<T> mapper, DynamoDbClient client, AttributeConversionHelper attributeConversionHelper, ApplicationEventPublisher publisher);
 
     /**
      * Resolves the current update into native update request using provided mapper.

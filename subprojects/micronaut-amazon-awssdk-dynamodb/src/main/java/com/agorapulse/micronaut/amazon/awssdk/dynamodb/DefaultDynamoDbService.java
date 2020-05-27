@@ -93,8 +93,8 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
     }
 
     @Override
-    public TableSchema<T> getTableSchema() {
-        return table.tableSchema();
+    public DynamoDbTable<T> getTable() {
+        return table;
     }
 
     @Override
@@ -103,8 +103,8 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
     }
 
     @Override
-    public Flowable<T> scan(DetachedScan<T> query) {
-        return query.scan(table, attributeConversionHelper).map(this::postLoad);
+    public Flowable<T> scan(DetachedScan<T> scan) {
+        return scan.scan(table, attributeConversionHelper).map(this::postLoad);
     }
 
     @Override
@@ -113,12 +113,12 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
     }
 
     @Override
-    public Object update(DetachedUpdate<T> update) {
+    public <R> R update(DetachedUpdate<T, R> update) {
         return update.update(table, client, attributeConversionHelper, publisher);
     }
 
     @Override
-    public int updateAll(Flowable<T> items, UpdateBuilder<T> update) {
+    public int updateAll(Flowable<T> items, UpdateBuilder<T, ?> update) {
         // there is no batch update API, we can do batch updates in transaction but in that case it would cause
         // doubling the writes
 

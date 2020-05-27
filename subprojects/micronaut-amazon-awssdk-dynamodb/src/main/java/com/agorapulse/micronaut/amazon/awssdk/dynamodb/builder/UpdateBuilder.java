@@ -26,15 +26,16 @@ import java.util.function.Function;
 /**
  * Builder for DynamoDB updates.
  * @param <T> type of the DynamoDB entity
+ * @param <R> type of the result returned from the update method
  */
-public interface UpdateBuilder<T> extends DetachedUpdate<T> {
+public interface UpdateBuilder<T, R> extends DetachedUpdate<T, R> {
 
     /**
      * Sets the partition key value of the updated entity.
      * @param key the partition key of the query
      * @return self
      */
-    UpdateBuilder<T> partitionKey(Object key);
+    UpdateBuilder<T, R> partitionKey(Object key);
 
     /**
      * Sets the partition key value of the updated entity.
@@ -43,7 +44,7 @@ public interface UpdateBuilder<T> extends DetachedUpdate<T> {
      * @deprecated use {@link #partitionKey(Object)} instead
      */
     @Deprecated
-    default UpdateBuilder<T> hash(Object key) {
+    default UpdateBuilder<T, R> hash(Object key) {
         return partitionKey(key);
     }
 
@@ -52,7 +53,7 @@ public interface UpdateBuilder<T> extends DetachedUpdate<T> {
      * @param key the sort key of the updated entity
      * @return self
      */
-    UpdateBuilder<T> sortKey(Object key);
+    UpdateBuilder<T, R> sortKey(Object key);
 
     /**
      * Sets the sort key value of the updated entity.
@@ -61,7 +62,7 @@ public interface UpdateBuilder<T> extends DetachedUpdate<T> {
      * @deprecated use {@link #sortKey(Object)} instead
      */
     @Deprecated
-    default UpdateBuilder<T> range(Object key) {
+    default UpdateBuilder<T, R> range(Object key) {
         return sortKey(key);
     }
 
@@ -71,7 +72,7 @@ public interface UpdateBuilder<T> extends DetachedUpdate<T> {
      * @param delta the difference - usually a number or set of new items for set attributes
      * @return self
      */
-    UpdateBuilder<T> add(String attributeName, Object delta);
+    UpdateBuilder<T, R> add(String attributeName, Object delta);
 
     /**
      * Sets a particular attribute of the entity.
@@ -79,29 +80,30 @@ public interface UpdateBuilder<T> extends DetachedUpdate<T> {
      * @param value new value to be set
      * @return self
      */
-    UpdateBuilder<T> put(String attributeName, Object value);
+    UpdateBuilder<T, R> put(String attributeName, Object value);
 
     /**
      * Deletes the value of the particular attribute of the entity.
      * @param attributeName name of the attribute
      * @return self
      */
-    UpdateBuilder<T> delete(String attributeName);
+    UpdateBuilder<T, R> delete(String attributeName);
 
     /**
      * Declares a return value of the update operation.
      * @param returnValue whether none, old or new, all or updated attributes should be returned
      * @param mapper function to map the returned entity to another value (e.g. value of the particular attribute)
      * @return self
+     * @param <N> new return type of the update call
      */
-    UpdateBuilder<T> returns(ReturnValue returnValue, Function<T, ?> mapper);
+    <N> UpdateBuilder<T, N> returns(ReturnValue returnValue, Function<T, N> mapper);
 
     /**
      * Declares a return value of the update operation.
      * @param returnValue whether none, old or new, all or updated attributes should be returned
      * @return self
      */
-    default UpdateBuilder<T> returns(ReturnValue returnValue) {
+    default UpdateBuilder<T, T> returns(ReturnValue returnValue) {
         return returns(returnValue, Function.identity());
     }
 
@@ -109,16 +111,17 @@ public interface UpdateBuilder<T> extends DetachedUpdate<T> {
      * Declares that the update operation will not return any value.
      * @return self
      */
-    default UpdateBuilder<T> returnNone() {
-        return returns(ReturnValue.NONE, Function.identity());
+    default UpdateBuilder<T, Void> returnNone() {
+        return returns(ReturnValue.NONE, i -> null);
     }
 
     /**
      * Declares that the update operation will return all previous values.
      * @param mapper function to map the returned entity to another value (e.g. value of the particular attribute)
      * @return self
+     * @param <N> new return type of the update call
      */
-    default UpdateBuilder<T> returnAllOld(Function<T, ?> mapper) {
+    default <N> UpdateBuilder<T, N> returnAllOld(Function<T, N> mapper) {
         return returns(ReturnValue.ALL_OLD, mapper);
     }
 
@@ -126,8 +129,9 @@ public interface UpdateBuilder<T> extends DetachedUpdate<T> {
      * Declares that the update operation will only return updated previous values.
      * @param mapper function to map the returned entity to another value (e.g. value of the particular attribute)
      * @return self
+     * @param <N> new return type of the update call
      */
-    default UpdateBuilder<T> returnUpdatedOld(Function<T, ?> mapper) {
+    default <N> UpdateBuilder<T, N> returnUpdatedOld(Function<T, N> mapper) {
         return returns(ReturnValue.UPDATED_OLD, mapper);
     }
 
@@ -135,8 +139,9 @@ public interface UpdateBuilder<T> extends DetachedUpdate<T> {
      * Declares that the update operation will return all new values.
      * @param mapper function to map the returned entity to another value (e.g. value of the particular attribute)
      * @return self
+     * @param <N> new return type of the update call
      */
-    default UpdateBuilder<T> returnAllNew(Function<T, ?> mapper) {
+    default <N> UpdateBuilder<T, N> returnAllNew(Function<T, N> mapper) {
         return returns(ReturnValue.ALL_NEW, mapper);
     }
 
@@ -144,8 +149,9 @@ public interface UpdateBuilder<T> extends DetachedUpdate<T> {
      * Declares that the update operation will only return updated new values.
      * @param mapper function to map the returned entity to another value (e.g. value of the particular attribute)
      * @return self
+     * @param <N> new return type of the update call
      */
-    default UpdateBuilder<T> returnUpdatedNew(Function<T, ?> mapper) {
+    default <N> UpdateBuilder<T, N> returnUpdatedNew(Function<T, N> mapper) {
         return returns(ReturnValue.UPDATED_NEW, mapper);
     }
 
@@ -157,6 +163,6 @@ public interface UpdateBuilder<T> extends DetachedUpdate<T> {
      * @param configurer consumer to configure the native update request
      * @return self
      */
-    UpdateBuilder<T> configure(Consumer<UpdateItemRequest.Builder> configurer);
+    UpdateBuilder<T, R> configure(Consumer<UpdateItemRequest.Builder> configurer);
 
 }

@@ -26,6 +26,7 @@ import groovy.lang.DelegatesTo;
 import groovy.transform.stc.ClosureParams;
 import groovy.transform.stc.FromString;
 import space.jasan.support.groovy.closure.ConsumerWithDelegate;
+import space.jasan.support.groovy.closure.FunctionWithDelegate;
 
 public class GroovyBuilders extends Builders {
 
@@ -71,13 +72,13 @@ public class GroovyBuilders extends Builders {
      * @param <T> type of DynamoDB entity
      * @return update builder for given DynamoDB entity
      */
-    public static <T> UpdateBuilder<T> update(
+    public static <T, R> UpdateBuilder<T, R> update(
         Class<T> type,
-        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T>")
-            Closure<UpdateBuilder<T>> definition
+        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T, T>", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T, T>")
+            Closure<UpdateBuilder<T, R>> definition
     ) {
-        return Builders.update(ConsumerWithDelegate.create(definition));
+        return Builders.update(FunctionWithDelegate.create(definition));
     }
 
 }

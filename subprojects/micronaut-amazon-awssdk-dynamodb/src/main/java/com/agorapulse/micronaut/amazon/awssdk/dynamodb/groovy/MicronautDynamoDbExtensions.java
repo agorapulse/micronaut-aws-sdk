@@ -190,12 +190,12 @@ public class MicronautDynamoDbExtensions {
      * @param mapper closure to map the returned entity to another value (e.g. value of the particular attribute)
      * @return self
      */
-    public static <T> UpdateBuilder<T> returns(
-        UpdateBuilder<T> self,
+    public static <T, R, N> UpdateBuilder<T, N> returns(
+        UpdateBuilder<T, R> self,
         ReturnValue returnValue,
         @DelegatesTo(type = "T", strategy = Closure.DELEGATE_FIRST)
         @ClosureParams(value = FromString.class, options = "T")
-            Closure<Object> mapper
+            Closure<N> mapper
     ) {
         return self.returns(returnValue, FunctionWithDelegate.create(mapper));
     }
@@ -205,11 +205,11 @@ public class MicronautDynamoDbExtensions {
      * @param mapper closure to map the returned entity to another value (e.g. value of the particular attribute)
      * @return self
      */
-    public static <T> UpdateBuilder<T> returnAllOld(
-        UpdateBuilder<T> self,
+    public static <T, R, N> UpdateBuilder<T, N> returnAllOld(
+        UpdateBuilder<T, R> self,
         @DelegatesTo(type = "T", strategy = Closure.DELEGATE_FIRST)
         @ClosureParams(value = FromString.class, options = "T")
-            Closure<Object> mapper
+            Closure<N> mapper
     ) {
         return self.returns(ReturnValue.ALL_OLD, FunctionWithDelegate.create(mapper));
     }
@@ -219,11 +219,11 @@ public class MicronautDynamoDbExtensions {
      * @param mapper closure to map the returned entity to another value (e.g. value of the particular attribute)
      * @return self
      */
-    public static <T> UpdateBuilder<T> returnUpdatedOld(
-        UpdateBuilder<T> self,
+    public static <T, R, N> UpdateBuilder<T, N> returnUpdatedOld(
+        UpdateBuilder<T, R> self,
         @DelegatesTo(type = "T", strategy = Closure.DELEGATE_FIRST)
         @ClosureParams(value = FromString.class, options = "T")
-            Closure<Object> mapper
+            Closure<N> mapper
     ) {
         return self.returns(ReturnValue.UPDATED_OLD, FunctionWithDelegate.create(mapper));
     }
@@ -233,11 +233,11 @@ public class MicronautDynamoDbExtensions {
      * @param mapper closure to map the returned entity to another value (e.g. value of the particular attribute)
      * @return self
      */
-    public static <T> UpdateBuilder<T> returnAllNew(
-        UpdateBuilder<T> self,
+    public static <T, R, N> UpdateBuilder<T, N> returnAllNew(
+        UpdateBuilder<T, R> self,
         @DelegatesTo(type = "T", strategy = Closure.DELEGATE_FIRST)
         @ClosureParams(value = FromString.class, options = "T")
-            Closure<Object> mapper
+            Closure<N> mapper
     ) {
         return self.returns(ReturnValue.ALL_NEW, FunctionWithDelegate.create(mapper));
     }
@@ -247,11 +247,11 @@ public class MicronautDynamoDbExtensions {
      * @param mapper closure to map the returned entity to another value (e.g. value of the particular attribute)
      * @return self
      */
-    public static <T> UpdateBuilder<T> returnUpdatedNew(
-        UpdateBuilder<T> self,
+    public static <T, R, N> UpdateBuilder<T, N> returnUpdatedNew(
+        UpdateBuilder<T, R> self,
         @DelegatesTo(type = "T", strategy = Closure.DELEGATE_FIRST)
         @ClosureParams(value = FromString.class, options = "T")
-            Closure<Object> mapper
+            Closure<N> mapper
     ) {
         return self.returns(ReturnValue.UPDATED_NEW, FunctionWithDelegate.create(mapper));
     }
@@ -264,8 +264,8 @@ public class MicronautDynamoDbExtensions {
      * @param configurer closure to configure the native update request
      * @return self
      */
-    public static <T> UpdateBuilder<T> configure(
-        UpdateBuilder<T> self,
+    public static <T, R> UpdateBuilder<T, R> configure(
+        UpdateBuilder<T, R> self,
         @DelegatesTo(type = "software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest.Builder", strategy = Closure.DELEGATE_FIRST)
         @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest.Builder")
             Closure<Object> configurer
@@ -291,23 +291,23 @@ public class MicronautDynamoDbExtensions {
         return service.scan(ConsumerWithDelegate.create(scan));
     }
 
-    public static <T> Object update(
+    public static <T, N> N update(
         DynamoDbService<T> service,
-        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T>")
-            Closure<UpdateBuilder<T>> update
+        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T, T>", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T, T>")
+            Closure<UpdateBuilder<T, N>> update
     ) {
-        return service.update(ConsumerWithDelegate.create(update));
+        return service.update(FunctionWithDelegate.create(update));
     }
 
-    public static <T> int updateAll(
+    public static <T, N> int updateAll(
         DynamoDbService<T> service,
         Flowable<T> items,
-        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T>", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T>")
-            Closure<UpdateBuilder<T>> update
+        @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T, T>", strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T, T>")
+            Closure<UpdateBuilder<T, N>> update
     ) {
-        return service.updateAll(items, ConsumerWithDelegate.create(update));
+        return service.updateAll(items, FunctionWithDelegate.create(update));
     }
 
     public static <T> int countUsingQuery(

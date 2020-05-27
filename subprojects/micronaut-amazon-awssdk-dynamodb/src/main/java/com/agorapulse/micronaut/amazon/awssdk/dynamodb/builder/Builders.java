@@ -22,6 +22,7 @@ import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.ReturnValue;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Utility class for building queries, updates and scan.
@@ -160,7 +161,7 @@ public class Builders {
      * @deprecated use {@link #update()} instead
      */
     @Deprecated
-    public static <T> UpdateBuilder<T> update(Class<T> type) {
+    public static <T> UpdateBuilder<T, T> update(Class<T> type) {
         return update();
     }
 
@@ -170,7 +171,7 @@ public class Builders {
      * @param <T> type of DynamoDB entity
      * @return update builder for given DynamoDB entity
      */
-    public static <T> UpdateBuilder<T> update() {
+    public static <T> UpdateBuilder<T, T> update() {
         return new DefaultUpdateBuilder<>();
     }
 
@@ -181,10 +182,10 @@ public class Builders {
      * @param definition definition of the query
      * @param <T> type of DynamoDB entity
      * @return update builder for given DynamoDB entity
-     * @deprecated use {@link #update(Consumer)} instead
+     * @deprecated use {@link #update(Function)} instead
      */
     @Deprecated
-    public static <T> UpdateBuilder<T> update(Class<T> type, Consumer<UpdateBuilder<T>> definition) {
+    public static <T, R> UpdateBuilder<T, R> update(Class<T> type, Function<UpdateBuilder<T, T>, UpdateBuilder<T, R>> definition) {
         return update(definition);
     }
 
@@ -195,10 +196,9 @@ public class Builders {
      * @param <T> type of DynamoDB entity
      * @return update builder for given DynamoDB entity
      */
-    public static <T> UpdateBuilder<T> update(Consumer<UpdateBuilder<T>> definition) {
-        UpdateBuilder<T> builder = update();
-        definition.accept(builder);
-        return builder;
+    public static <T, R> UpdateBuilder<T, R> update(Function<UpdateBuilder<T, T>, UpdateBuilder<T, R>> definition) {
+        UpdateBuilder<T, T> builder = update();
+        return definition.apply(builder);
     }
 
 }

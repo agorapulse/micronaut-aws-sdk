@@ -17,43 +17,115 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.*;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.Builders;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedQuery;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedScan;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedUpdate;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.QueryBuilder;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ScanBuilder;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder;
 import io.reactivex.Flowable;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
+/**
+ * Middle-level service for interaction with the DynamoDB.
+ *
+ * @param <T> the type of the items.
+ * @see DynamoDBServiceProvider for obtaining instances of this class.
+ */
 public interface DynamoDbService<T> {
 
+    /**
+     * @return the type of the items handled by this service
+     */
     Class<T> getItemType();
 
-    TableSchema<T> getTableSchema();
+    /**
+     * Returns the low-level {@link DynamoDbTable} instance to execute operations not covered by this service.
+     *
+     * Warning: no events are triggered while using the low level API.
+     *
+     * @return the low-level {@link DynamoDbTable} instance to execute operations not covered by this service
+     */
+    DynamoDbTable<T> getTable();
 
+    /**
+     * Executes the prepared query and returns the items matching the query.
+     * @param query the query
+     * @return the items matching the given query
+     */
     Flowable<T> query(DetachedQuery<T> query);
 
+    /**
+     * Defines the query using the query builder and returns the items matching the query.
+     * @param query the query definition
+     * @return the items matching the given query
+     */
     default Flowable<T> query(Consumer<QueryBuilder<T>> query) {
         return query(Builders.query(query));
     }
 
-    Flowable<T> scan(DetachedScan<T> query);
+    /**
+     * Executes the prepared scan (non-index query) and returns the items matching the scan.
+     * @param scan the scan
+     * @return the items matching the scan
+     */
+    Flowable<T> scan(DetachedScan<T> scan);
 
+    /**
+     * Defines the scan (non-index query) using the scan builder and returns the items matching the scan.
+     * @param scan the scan definition
+     * @return the items matching the scan
+     */
     default Flowable<T> scan(Consumer<ScanBuilder<T>> scan) {
         return scan(Builders.scan(scan));
     }
 
-    Flowable<T> findAll(Object partitionKey, Object sortKey);
+    /**
+     * Finds all the items for given partition key.
+     *
+     * If the sort key is present it either returns {@link Flowable} with single item or an empty one.
+     *
+     * @param partitionKey the partition key
+     * @param sortKey the sort key
+     * @return flowable of all items with given partition key and sort key (if present)
+     */
+    Flowable<T> findAll(Object partitionKey, @Nullable Object sortKey);
 
-    Object update(DetachedUpdate<T> update);
+    /**
+     * Finds all the items for given partition key.
+     *
+     * @param partitionKey the partition key
+     * @return flowable of all items with given partition key
+     */
+    default Flowable<T> findAll(Object partitionKey) {
+        return findAll(partitionKey, null);
+    }
 
-    default Object update(Consumer<UpdateBuilder<T>> update) {
+    /**
+     * Updates the item using the given update definition and returns the result according it's return definition.
+     * @param update the update definition
+     * @return the result according to update definition's return settings.
+     */
+    <R> R update(DetachedUpdate<T, R> update);
+
+    /**
+     * Updates the item using the given update definition and returns the result according it's return definition.
+     * @param update the update definition
+     * @return the result according to update definition's return settings.
+     */
+    default <R> R update(Function<UpdateBuilder<T, T>, UpdateBuilder<T, R>> update) {
         return update(Builders.update(update));
     }
 
-    int updateAll(Flowable<T> items, UpdateBuilder<T> update);
+    int updateAll(Flowable<T> items, UpdateBuilder<T, ?> update);
 
-    default int updateAll(Flowable<T> items, Consumer<UpdateBuilder<T>> update) {
+    default <R> int updateAll(Flowable<T> items, Function<UpdateBuilder<T, T>, UpdateBuilder<T, R>> update) {
         return updateAll(items, Builders.update(update));
     }
 

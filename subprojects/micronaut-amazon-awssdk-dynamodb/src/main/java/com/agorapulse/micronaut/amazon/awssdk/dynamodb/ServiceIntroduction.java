@@ -153,7 +153,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             }
 
             if (context.getTargetMethod().isAnnotationPresent(Update.class)) {
-                UpdateBuilder<T> update = (UpdateBuilder<T>) functionEvaluator.evaluateAnnotationType(context.getTargetMethod().getAnnotation(Update.class).value(), context);
+                UpdateBuilder<T, ?> update = (UpdateBuilder<T, ?>) functionEvaluator.evaluateAnnotationType(context.getTargetMethod().getAnnotation(Update.class).value(), context);
                 return service.updateAll(queryResult, update);
             }
 
@@ -174,7 +174,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             }
 
             if (context.getTargetMethod().isAnnotationPresent(Update.class)) {
-                UpdateBuilder<T> update = (UpdateBuilder<T>) functionEvaluator.evaluateAnnotationType(context.getTargetMethod().getAnnotation(Update.class).value(), context);
+                UpdateBuilder<T, ?> update = (UpdateBuilder<T, ?>) functionEvaluator.evaluateAnnotationType(context.getTargetMethod().getAnnotation(Update.class).value(), context);
                 return service.updateAll(scanResult, update);
             }
 
@@ -182,7 +182,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         }
 
         if (context.getTargetMethod().isAnnotationPresent(Update.class)) {
-            DetachedUpdate<T> criteria = functionEvaluator.evaluateAnnotationType(context.getTargetMethod().getAnnotation(Update.class).value(), context);
+            DetachedUpdate<T, ?> criteria = functionEvaluator.evaluateAnnotationType(context.getTargetMethod().getAnnotation(Update.class).value(), context);
 
             return service.update(criteria);
         }
@@ -291,7 +291,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
                     || argument.isAnnotationPresent(RangeKey.class)
                     || argument.getName().toLowerCase().contains(SORT)
                     || argument.getName().toLowerCase().contains(RANGE)
-                    || argument.getName().equals(table.getTableSchema().tableMetadata().primarySortKey().orElse(SORT))
+                    || argument.getName().equals(table.getTable().tableSchema().tableMetadata().primarySortKey().orElse(SORT))
             ) {
                 names.sortKey = argument;
             } else if (
@@ -299,7 +299,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
                     || argument.isAnnotationPresent(HashKey.class)
                     || argument.getName().toLowerCase().contains(PARTITION)
                     || argument.getName().toLowerCase().contains(HASH)
-                    || argument.getName().equals(table.getTableSchema().tableMetadata().primaryPartitionKey())
+                    || argument.getName().equals(table.getTable().tableSchema().tableMetadata().primaryPartitionKey())
             ) {
                 names.partitionKey = argument;
             }
