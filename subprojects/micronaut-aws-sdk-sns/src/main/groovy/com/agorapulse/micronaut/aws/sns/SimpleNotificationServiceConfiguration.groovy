@@ -40,15 +40,29 @@ abstract class SimpleNotificationServiceConfiguration extends DefaultRegionAndEn
 
     private final Environment environment
 
+    final Application adm
+    final Application apns
+    final Application apnsSandbox
+    final Application gcm
+
+    @Deprecated
     final Application ios
+    @Deprecated
     final Application iosSandbox
+    @Deprecated
     final Application android
+    @Deprecated
     final Application amazon
 
     String topic = ''
 
     protected SimpleNotificationServiceConfiguration(String prefix, Environment environment) {
         this.environment = environment
+        adm = forPlatform(prefix, 'adm', environment)
+        apns = forPlatform(prefix, 'apns', environment)
+        apnsSandbox = forPlatform(prefix, 'apnsSandbox', environment)
+        gcm = forPlatform(prefix, 'gcm', environment)
+
         ios = forPlatform(prefix, 'ios', environment)
         iosSandbox = forPlatform(prefix, 'iosSandbox', environment)
         android = forPlatform(prefix, 'android', environment)
