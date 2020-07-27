@@ -201,6 +201,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
         return createPlatformApplication(name, platform.toString(), principal, credential)
     }
 
+    @Deprecated
     @Override
     String createPlatformApplication(String name, String platformType, String principal, String credential) {
         CreatePlatformApplicationRequest request = new CreatePlatformApplicationRequest()
