@@ -125,18 +125,15 @@ public class SimpleNotificationServiceTest {
     @Test
     public void testPlatformApplications() {
         // tag::applications[]
-        String appArn = service.createAndroidApplication("my-app", API_KEY);        // <1>
+        String appArn = service.createPlatformApplication("my-app", SimpleNotificationService.PlatformType.GCM, null, API_KEY);        // <1>
 
-        String endpoint = service.registerAndroidDevice(appArn, DEVICE_TOKEN, DATA);    // <2>
+        String endpoint = service.registerDevice(SimpleNotificationService.PlatformType.GCM, DEVICE_TOKEN, DATA);    // <2>
 
-        Map<String, String> notif = new LinkedHashMap<>();
-        notif.put("badge", "9");
-        notif.put("data", "{\"foo\": \"some bar\"}");
-        notif.put("title", "Some Title");
+        String jsonMessage = "{\"data\", \"{\"foo\": \"some bar\"}\", \"notification\", \"{\"title\": \"some title\", \"body\": \"some body\"}\"}";
 
-        String msgId = service.sendAndroidAppNotification(endpoint, notif, "Welcome");  // <3>
+        String msgId = service.sendNotification(endpoint, SimpleNotificationService.PlatformType.GCM, jsonMessage);  // <3>
 
-        service.validateAndroidDevice(appArn, endpoint, DEVICE_TOKEN, DATA);            // <4>
+        service.validateDeviceToken(appArn, endpoint, DEVICE_TOKEN, DATA); // <4>
 
         service.unregisterDevice(endpoint);                                             // <5>
         // end::applications[]
