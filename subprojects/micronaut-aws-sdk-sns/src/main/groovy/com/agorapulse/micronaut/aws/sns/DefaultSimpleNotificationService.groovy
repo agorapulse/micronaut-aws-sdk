@@ -155,7 +155,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
      * @param jsonMessage a JSON-formatted message
      * @return
      */
-    String sendPushNotification(String endpointArn, PlatformType platformType, String jsonMessage) {
+    String sendNotification(String endpointArn, PlatformType platformType, String jsonMessage) {
         publishToTarget(endpointArn, platformType.toString(), jsonMessage)
     }
 

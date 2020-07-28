@@ -62,28 +62,28 @@ public interface SimpleNotificationService {
     String getPlatformApplicationArn(PlatformType platformType);
 
     /**
-     * deprecated : use getPushPlatformArn() with matching PUSH_PLATFORM
+     * deprecated : use getPlatformApplicationArn() with matching PUSH_PLATFORM
      * @return the default Application ARN for Amazon devices integration.
      */
     @Deprecated
     String getAmazonApplicationArn();
 
     /**
-     * deprecated : use getPushPlatformArn() with matching PUSH_PLATFORM
+     * deprecated : use getPlatformApplicationArn() with matching PUSH_PLATFORM
      * @return the default Application ARN for Android devices integration.
      */
     @Deprecated
     String getAndroidApplicationArn();
 
     /**
-     * deprecated : use getPushPlatformArn() with matching PUSH_PLATFORM
+     * deprecated : use getPlatformApplicationArn() with matching PUSH_PLATFORM
      * @return the default Application ARN for iOS devices integration.
      */
     @Deprecated
     String getIosApplicationArn();
 
     /**
-     * deprecated : use getPushPlatformArn() with matching PUSH_PLATFORM
+     * deprecated : use getPlatformApplicationArn() with matching PUSH_PLATFORM
      * @return the default Application ARN for iOS sandbox devices integration.
      */
     @Deprecated
@@ -247,15 +247,16 @@ public interface SimpleNotificationService {
     /**
      * Creates new platform application.
      * @param name name of the application
-     * @param endpointName type of the platform
+     * @param platformType type of the platform
      * @param principal user's principal
      * @param credential user's credentials
      * @return ARN of the platform
      */
     @Deprecated
-    String createPlatformApplication(String name, String endpointName, String principal, String credential);
+    String createPlatformApplication(String name, String platformType, String principal, String credential);
 
     /**
+     * Deprecated: use createPlatformApplication()
      * Creates new platform application.
      * @param name name of the application
      * @param privateKey private key
@@ -269,6 +270,7 @@ public interface SimpleNotificationService {
     }
 
     /**
+     * Deprecated: use createPlatformApplication()
      * Creates new platform application.
      * @param name name of the application
      * @param apiKey API key
@@ -280,6 +282,7 @@ public interface SimpleNotificationService {
     }
 
     /**
+     * Deprecated: use createPlatformApplication()
      * Creates new platform application.
      * @param name name of the application
      * @param clientId client ID
@@ -350,6 +353,7 @@ public interface SimpleNotificationService {
     }
 
     /**
+     * Deprecated: use registerDevice()
      * Register new Android device.
      * @param deviceToken device token
      * @return ARN of the endpoint
@@ -360,6 +364,7 @@ public interface SimpleNotificationService {
     }
 
     /**
+     * Deprecated: use registerDevice()
      * Register new Android device.
      * @param deviceToken device token
      * @param customUserData custom user data
@@ -384,6 +389,7 @@ public interface SimpleNotificationService {
     }
 
     /**
+     * Deprecated: use registerDevice()
      * Register new iOS device.
      * @param deviceToken device token
      * @return ARN of the endpoint
@@ -394,6 +400,7 @@ public interface SimpleNotificationService {
     }
 
     /**
+     * Deprecated: use registerDevice()
      * Register new iOS device.
      * @param deviceToken device token
      * @param customUserData custom user data
@@ -405,6 +412,7 @@ public interface SimpleNotificationService {
     }
 
     /**
+     * Deprecated: use registerDevice()
      * Register new iOS Sandbox device.
      * @param deviceToken device token
      * @return ARN of the endpoint
@@ -415,6 +423,7 @@ public interface SimpleNotificationService {
     }
 
     /**
+     * Deprecated: use registerDevice()
      * Register new iOS Sandbox device.
      * @param deviceToken device token
      * @param customUserData custom user data
@@ -439,6 +448,7 @@ public interface SimpleNotificationService {
     }
 
     /**
+     * Deprecated: use registerDevice()
      * Register new Amazon device.
      * @param deviceToken device token
      * @return ARN of the endpoint
@@ -449,6 +459,7 @@ public interface SimpleNotificationService {
     }
 
     /**
+     * Deprecated: use registerDevice()
      * Register new Amazon device.
      * @param deviceToken device token
      * @param customUserData custom user data
@@ -492,6 +503,7 @@ public interface SimpleNotificationService {
     }
 
     /**
+     * Deprecated: use sendNotification()
      * Send Android application notification.
      * @param endpointArn endpoint ARN
      * @param notification notification payload
@@ -505,6 +517,7 @@ public interface SimpleNotificationService {
     String sendAndroidAppNotification(String endpointArn, Map notification, String collapseKey, boolean delayWhileIdle, int timeToLive, boolean dryRun);
 
     /**
+     * Deprecated: use sendNotification()
      * Send Android application notification.
      * @param endpointArn endpoint ARN
      * @param notification notification payload
@@ -519,6 +532,7 @@ public interface SimpleNotificationService {
     }
 
     /**
+     * Deprecated: use sendNotification()
      * Send Android application notification.
      * @param endpointArn endpoint ARN
      * @param notification notification payload
@@ -532,6 +546,7 @@ public interface SimpleNotificationService {
     }
 
     /**
+     * Deprecated: use sendNotification()
      * Send Android application notification.
      * @param endpointArn endpoint ARN
      * @param notification notification payload
@@ -545,6 +560,7 @@ public interface SimpleNotificationService {
 
 
     /**
+     * Deprecated: use sendNotification()
      * Send iOS application notification.
      * @param endpointArn endpoint ARN
      * @param notification notification payload
@@ -555,6 +571,7 @@ public interface SimpleNotificationService {
     String sendIosAppNotification(String endpointArn, Map notification, boolean sandbox);
 
     /**
+     * Deprecated: use sendNotification()
      * Send iOS application notification.
      * @param endpointArn endpoint ARN
      * @param notification notification payload
@@ -566,6 +583,7 @@ public interface SimpleNotificationService {
     }
 
     /**
+     * Deprecated: use validateDeviceToken()
      * Validates Amazon device.
      *
      * This method is able to update the custom user data as well as the type of the platform.
@@ -581,6 +599,7 @@ public interface SimpleNotificationService {
     }
 
     /**
+     * Deprecated: use validateDeviceToken()
      * Validates Amazon device.
      *
      * This method is able to update the custom user data as well as the type of the platform.
@@ -612,6 +631,7 @@ public interface SimpleNotificationService {
     }
 
     /**
+     * Deprecated: use validateDeviceToken()
      * Validates Android device.
      *
      * This method is able to update the custom user data as well as the type of the platform.
@@ -627,6 +647,7 @@ public interface SimpleNotificationService {
     }
 
     /**
+     * Deprecated: use validateDeviceToken()
      * Validates Android device.
      *
      * This method is able to update the custom user data as well as the type of the platform.
@@ -658,6 +679,7 @@ public interface SimpleNotificationService {
     }
 
     /**
+     * Deprecated: use validateDeviceToken()
      * Validates iOS device.
      *
      * This method is able to update the custom user data as well as the type of the platform.
@@ -673,6 +695,7 @@ public interface SimpleNotificationService {
     }
 
     /**
+     * Deprecated: use validateDeviceToken()
      * Validates iOS device.
      *
      * This method is able to update the custom user data as well as the type of the platform.
@@ -687,6 +710,7 @@ public interface SimpleNotificationService {
     }
 
     /**
+     * Deprecated: use validateDeviceToken()
      * Validates iOS Sandbox device.
      *
      * This method is able to update the custom user data as well as the type of the platform.
@@ -702,6 +726,7 @@ public interface SimpleNotificationService {
     }
 
     /**
+     * Deprecated: use validateDeviceToken()
      * Validates iOS Sandbox device.
      *
      * This method is able to update the custom user data as well as the type of the platform.
@@ -720,13 +745,13 @@ public interface SimpleNotificationService {
      *
      * This method is able to update the custom user data as well as the type of the platform.
      *
-     * @param platform Push platform
+     * @param platformType platform type
      * @param endpointArn endpoint ARN
      * @param deviceToken device token
      * @param customUserData custom user data
      * @return endpoint ARN which can point to different platform if required
      */
-    default String validatePlatformDeviceToken(PlatformType platformType, String endpointArn, String deviceToken, String customUserData) {
+    default String validateDeviceToken(PlatformType platformType, String endpointArn, String deviceToken, String customUserData) {
         return validateDeviceToken(getPlatformApplicationArn(platformType), endpointArn, deviceToken, customUserData);
     }
 
@@ -744,6 +769,7 @@ public interface SimpleNotificationService {
     String validateDeviceToken(String applicationArn, String endpointArn, String deviceToken, String customUserData);
 
     /**
+     * Deprecated: use validateDeviceToken()
      * Validates device token depending on platform
      *
      * This method is able to update the custom user data as well as the type of the platform.
@@ -771,6 +797,7 @@ public interface SimpleNotificationService {
     }
 
     /**
+     * Deprecated: use validateDeviceToken()
      * Validates device token depending on platform
      *
      * This method is able to update the custom user data as well as the type of the platform.
@@ -798,7 +825,7 @@ public interface SimpleNotificationService {
      * @param jsonMessage a JSON-formatted message
      * @return notificationId
      */
-    String sendPushNotification(String endpointArn, PlatformType platformType, String jsonMessage);
+    String sendNotification(String endpointArn, PlatformType platformType, String jsonMessage);
 
     /**
      * Send SMS
