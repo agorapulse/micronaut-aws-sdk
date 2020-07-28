@@ -48,7 +48,7 @@ public interface SimpleNotificationService {
     @Deprecated
     String PLATFORM_TYPE_AMAZON = "ADM";
 
-    enum PLATFORM_TYPE {
+    enum PlatformType {
         ADM,
         APNS,
         APNS_SANDBOX,
@@ -56,10 +56,10 @@ public interface SimpleNotificationService {
     }
 
     /**
-     * @param platform: target platform
+     * @param platformType
      * @return the default Application ARN for given platform
      */
-    String getPushPlatformArn(PLATFORM_TYPE platform);
+    String getPlatformApplicationArn(PlatformType platformType);
 
     /**
      * deprecated : use getPushPlatformArn() with matching PUSH_PLATFORM
@@ -237,23 +237,23 @@ public interface SimpleNotificationService {
     /**
      * Creates new platform application.
      * @param name name of the application
-     * @param platform
+     * @param platformType
      * @param principal (ADM: clientId - APNS: sslCertificate - GCM: null)
      * @param credential (ADM: clientSecret - APNS: privateKey - GCM: apiKey)
      * @return ARN of the platform
      */
-    String createPlatformApplication(String name, PLATFORM_TYPE platform, String principal, String credential);
+    String createPlatformApplication(String name, PlatformType platformType, String principal, String credential);
 
     /**
      * Creates new platform application.
      * @param name name of the application
-     * @param platformType type of the platform
+     * @param endpointName type of the platform
      * @param principal user's principal
      * @param credential user's credentials
      * @return ARN of the platform
      */
     @Deprecated
-    String createPlatformApplication(String name, String platformType, String principal, String credential);
+    String createPlatformApplication(String name, String endpointName, String principal, String credential);
 
     /**
      * Creates new platform application.
@@ -294,23 +294,23 @@ public interface SimpleNotificationService {
     /**
      * Register new device depending on patform
      * deprecated: use PUSH_PLATFORM instead of platform string
-     * @param platform
+     * @param platformType
      * @param deviceToken device token
      * @param customUserData custom user data
      * @return ARN of the endpoint
      */
-    default String registerDevice(PLATFORM_TYPE platform, String deviceToken, String customUserData) {
-        return createPlatformEndpoint(getPushPlatformArn(platform), deviceToken, customUserData);
+    default String registerDevice(PlatformType platformType, String deviceToken, String customUserData) {
+        return createPlatformEndpoint(getPlatformApplicationArn(platformType), deviceToken, customUserData);
     }
 
     /**
      * Register new device depending on patform
-     * @param platform
+     * @param platformType
      * @param deviceToken device token
      * @return ARN of the endpoint
      */
-    default String registerDevice(PLATFORM_TYPE platform, String deviceToken) {
-        return registerDevice(platform, deviceToken, "");
+    default String registerDevice(PlatformType platformType, String deviceToken) {
+        return registerDevice(platformType, deviceToken, "");
     }
 
     /**
@@ -726,8 +726,8 @@ public interface SimpleNotificationService {
      * @param customUserData custom user data
      * @return endpoint ARN which can point to different platform if required
      */
-    default String validatePlatformDeviceToken(PLATFORM_TYPE platform, String endpointArn, String deviceToken, String customUserData) {
-        return validateDeviceToken(getPushPlatformArn(platform), endpointArn, deviceToken, customUserData);
+    default String validatePlatformDeviceToken(PlatformType platformType, String endpointArn, String deviceToken, String customUserData) {
+        return validateDeviceToken(getPlatformApplicationArn(platformType), endpointArn, deviceToken, customUserData);
     }
 
     /**
@@ -798,7 +798,7 @@ public interface SimpleNotificationService {
      * @param jsonMessage a JSON-formatted message
      * @return notificationId
      */
-    String sendPushNotification(String endpointArn, PLATFORM_TYPE platformType, String jsonMessage);
+    String sendPushNotification(String endpointArn, PlatformType platformType, String jsonMessage);
 
     /**
      * Send SMS

@@ -48,18 +48,18 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
         this.objectMapper = objectMapper
     }
 
-    String getPushPlatformArn(PLATFORM_TYPE platform) {
-        switch (platform) {
-            case PLATFORM_TYPE.ADM:
+    String getPlatformApplicationArn(PlatformType platformType) {
+        switch (platformType) {
+            case PlatformType.ADM:
                 return checkNotEmpty(configuration.adm.arn, 'Amazon Device Manager application arn must be defined in config')
                 break
-            case PLATFORM_TYPE.APNS:
+            case PlatformType.APNS:
                 return checkNotEmpty(configuration.apns.arn, 'Apple Push Notification service application arn must be defined in config')
                 break
-            case PLATFORM_TYPE.APNS_SANDBOX:
+            case PlatformType.APNS_SANDBOX:
                 return checkNotEmpty(configuration.apnsSandbox.arn, 'Apple Push Notification service Sandbox application arn must be defined in config')
                 break
-            case PLATFORM_TYPE.GCM:
+            case PlatformType.GCM:
                 return checkNotEmpty(configuration.gcm.arn, 'Google Cloud Messaging (Firebase) application arn must be defined in config')
         }
     }
@@ -155,7 +155,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
      * @param jsonMessage a JSON-formatted message
      * @return
      */
-    String sendPushNotification(String endpointArn, PLATFORM_TYPE platformType, String jsonMessage) {
+    String sendPushNotification(String endpointArn, PlatformType platformType, String jsonMessage) {
         publishToTarget(endpointArn, platformType.toString(), jsonMessage)
     }
 
@@ -197,16 +197,16 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
         deleteEndpoint(endpointArn)
     }
 
-    String createPlatformApplication(String name, PLATFORM_TYPE platform, String principal, String credential) {
-        return createPlatformApplication(name, platform.toString(), principal, credential)
+    String createPlatformApplication(String name, PlatformType platformType, String principal, String credential) {
+        return createPlatformApplication(name, platformType.toString(), principal, credential)
     }
 
     @Deprecated
     @Override
-    String createPlatformApplication(String name, String platformType, String principal, String credential) {
+    String createPlatformApplication(String name, String endpointName, String principal, String credential) {
         CreatePlatformApplicationRequest request = new CreatePlatformApplicationRequest()
             .withName(name)
-            .withPlatform(platformType)
+            .withPlatform(endpointName)
 
         Map<String, String> attributes = [:]
 
