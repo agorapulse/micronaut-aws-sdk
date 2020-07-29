@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.ses;
 
+import io.micronaut.core.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
@@ -107,11 +108,11 @@ public class DefaultSimpleEmailService implements SimpleEmailService {
         MimeMessage mimeMessage = new MimeMessage(session);
         mimeMessage.setSubject(email.getSubject());
 
-        if (email.getFrom() != null) {
+        if (!StringUtils.isEmpty(email.getFrom())) {
             mimeMessage.setFrom(new InternetAddress(email.getFrom()));
         }
 
-        if (email.getReplyTo() != null) {
+        if (!StringUtils.isEmpty(email.getReplyTo())) {
             mimeMessage.setReplyTo(new InternetAddress[]{ new InternetAddress(email.getReplyTo()) });
         }
 
