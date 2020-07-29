@@ -113,7 +113,7 @@ public class DefaultSimpleEmailService implements SimpleEmailService {
         }
 
         if (!StringUtils.isEmpty(email.getReplyTo())) {
-            mimeMessage.setReplyTo(new InternetAddress[]{ new InternetAddress(email.getReplyTo()) });
+            mimeMessage.setReplyTo(new InternetAddress[] {new InternetAddress(email.getReplyTo())});
         }
 
         for (String r : email.getRecipients()) {
