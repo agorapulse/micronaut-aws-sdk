@@ -61,21 +61,41 @@ public class DefaultSimpleNotificationService implements SimpleNotificationServi
     }
 
     @Override
+    public String getPlatformApplicationArn(PlatformType platformType) {
+        switch (platformType) {
+            case ADM:
+                return checkNotEmpty(configuration.getAdm().getArn(), "Amazon Device Manager application arn must be defined in config");
+            case APNS:
+                return checkNotEmpty(configuration.getApns().getArn(), "Apple Push Notification service application arn must be defined in config");
+            case APNS_SANDBOX:
+                return checkNotEmpty(configuration.getApnsSandbox().getArn(), "Apple Push Notification service Sandbox application arn must be defined in config");
+            case GCM:
+                return checkNotEmpty(configuration.getGcm().getArn(), "Google Cloud Messaging (Firebase) application arn must be defined in config");
+            default:
+                throw new IllegalArgumentException("Unknown platform type " + platformType);
+        }
+    }
+
+    @Override
+    @Deprecated
     public String getAmazonApplicationArn() {
         return checkNotEmpty(configuration.getAmazon().getArn(), "Amazon application arn must be defined in config");
     }
 
     @Override
+    @Deprecated
     public String getAndroidApplicationArn() {
         return checkNotEmpty(configuration.getAmazon().getArn(), "Android application arn must be defined in config");
     }
 
     @Override
+    @Deprecated
     public String getIosApplicationArn() {
         return checkNotEmpty(configuration.getIos().getArn(), "Ios application arn must be defined in config");
     }
 
     @Override
+    @Deprecated
     public String getIosSandboxApplicationArn() {
         return checkNotEmpty(configuration.getIosSandbox().getArn(), "Ios sandbox application arn must be defined in config");
     }
@@ -130,9 +150,15 @@ public class DefaultSimpleNotificationService implements SimpleNotificationServi
     }
 
     @Override
-    public String createPlatformApplication(String name, String platformType, String principal, String credential) {
+    public String createPlatformApplication(String name, PlatformType platformType, String principal, String credential) {
+        return createPlatformApplication(name, platformType.toString(), principal, credential);
+    }
+
+    @Override
+    @Deprecated
+    public String createPlatformApplication(String name, String endpointName, String principal, String credential) {
         return client.createPlatformApplication(r -> {
-            r.name(name).platform(platformType);
+            r.name(name).platform(endpointName);
 
             Map<String, String> attributes = new HashMap<>();
 
@@ -178,13 +204,19 @@ public class DefaultSimpleNotificationService implements SimpleNotificationServi
     }
 
     @Override
+    @Deprecated
     public String sendAndroidAppNotification(String endpointArn, Map<String, Object> notification, String collapseKey, boolean delayWhileIdle, int timeToLive, boolean dryRun) {
-        return publishToTarget(endpointArn, PLATFORM_TYPE_ANDROID, buildAndroidMessage(notification, collapseKey, delayWhileIdle, timeToLive, dryRun));
+        return publishToTarget(endpointArn, PlatformType.GCM.toString(), buildAndroidMessage(notification, collapseKey, delayWhileIdle, timeToLive, dryRun));
     }
 
     @Override
+    @Deprecated
     public String sendIosAppNotification(String endpointArn, Map<String, Object> notification, boolean sandbox) {
-        return publishToTarget(endpointArn, sandbox ? PLATFORM_TYPE_IOS_SANDBOX : PLATFORM_TYPE_IOS, buildIosMessage(notification));
+        return publishToTarget(endpointArn, sandbox ? PlatformType.APNS_SANDBOX.toString() : PlatformType.APNS.toString(), buildIosMessage(notification));
+    }
+
+    public String sendNotification(String endpointArn, PlatformType platformType, String jsonMessage) {
+        return publishToTarget(endpointArn, platformType.toString(), jsonMessage);
     }
 
     @Override
@@ -277,9 +309,9 @@ public class DefaultSimpleNotificationService implements SimpleNotificationServi
         return toJson(Collections.singletonMap("aps", data));
     }
 
-    private String publishToTarget(String endpointArn, String platformType, String message) {
+    private String publishToTarget(String endpointArn, String platformType, String jsonMessage) {
         return client.publish(r -> {
-            r.targetArn(endpointArn).messageStructure("json").message(toJson(Collections.singletonMap(platformType, message)));
+            r.targetArn(endpointArn).messageStructure("json").message(toJson(Collections.singletonMap(platformType, jsonMessage)));
         }).messageId();
     }
 

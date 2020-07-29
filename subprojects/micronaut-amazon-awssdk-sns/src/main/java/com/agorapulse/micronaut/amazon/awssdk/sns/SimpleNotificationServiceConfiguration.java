@@ -27,33 +27,59 @@ import io.micronaut.context.env.Environment;
 public abstract class SimpleNotificationServiceConfiguration extends DefaultRegionAndEndpointConfiguration {
 
     protected SimpleNotificationServiceConfiguration(String prefix, Environment environment) {
-        ios = forPlatform(prefix, "ios", environment);
-        iosSandbox = forPlatform(prefix, "ios-sandbox", environment);
-        android = forPlatform(prefix, "android", environment);
-        amazon = forPlatform(prefix, "amazon", environment);
+        apns = forPlatform(prefix, "apns", "ios", environment);
+        apnsSandbox = forPlatform(prefix, "apns-sandbox", "ios-sandbox", environment);
+        gcm = forPlatform(prefix, "gcm", "android", environment);
+        adm = forPlatform(prefix, "adm", "amazon", environment);
     }
 
     @SuppressWarnings("DuplicateStringLiteral")
-    private static Application forPlatform(final String prefix, final String platform, final Environment environment) {
-        return new Application(environment.get(prefix + "." + platform + ".arn", String.class).orElseGet(() ->
-            environment.get(prefix + "." + platform + ".applicationArn", String.class).orElse(null)
-       ));
+    private static Application forPlatform(final String prefix, final String platform, final String fallbackPlatform, final Environment environment) {
+        return new Application(
+            environment.get(prefix + "." + platform + ".arn", String.class).orElseGet(() ->
+                environment.get(prefix + "." + platform + ".applicationArn", String.class).orElseGet(() ->
+                    environment.get(prefix + "." + fallbackPlatform + ".arn", String.class).orElseGet(() ->
+                        environment.get(prefix + "." + fallbackPlatform + ".applicationArn", String.class).orElse(null)
+                    )
+                )
+            )
+        );
     }
 
+    @Deprecated
     public final Application getIos() {
-        return ios;
+        return apns;
     }
 
+    @Deprecated
     public final Application getIosSandbox() {
-        return iosSandbox;
+        return apnsSandbox;
     }
 
+    @Deprecated
     public final Application getAndroid() {
-        return android;
+        return gcm;
     }
 
+    @Deprecated
     public final Application getAmazon() {
-        return amazon;
+        return adm;
+    }
+
+    public Application getApns() {
+        return apns;
+    }
+
+    public Application getApnsSandbox() {
+        return apnsSandbox;
+    }
+
+    public Application getGcm() {
+        return gcm;
+    }
+
+    public Application getAdm() {
+        return adm;
     }
 
     public String getTopic() {
@@ -64,10 +90,10 @@ public abstract class SimpleNotificationServiceConfiguration extends DefaultRegi
         this.topic = topic;
     }
 
-    private final Application ios;
-    private final Application iosSandbox;
-    private final Application android;
-    private final Application amazon;
+    private final Application apns;
+    private final Application apnsSandbox;
+    private final Application gcm;
+    private final Application adm;
     private String topic = "";
 
     public static class Application {

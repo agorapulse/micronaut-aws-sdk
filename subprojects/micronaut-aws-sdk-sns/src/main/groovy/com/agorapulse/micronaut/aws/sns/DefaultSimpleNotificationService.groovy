@@ -48,21 +48,38 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
         this.objectMapper = objectMapper
     }
 
+    String getPlatformApplicationArn(PlatformType platformType) {
+        switch (platformType) {
+            case PlatformType.ADM:
+                return checkNotEmpty(configuration.adm.arn, 'Amazon Device Manager application arn must be defined in config')
+            case PlatformType.APNS:
+                return checkNotEmpty(configuration.apns.arn, 'Apple Push Notification service application arn must be defined in config')
+            case PlatformType.APNS_SANDBOX:
+                return checkNotEmpty(configuration.apnsSandbox.arn, 'Apple Push Notification service Sandbox application arn must be defined in config')
+            case PlatformType.GCM:
+                return checkNotEmpty(configuration.gcm.arn, 'Google Cloud Messaging (Firebase) application arn must be defined in config')
+        }
+    }
+
+    @Deprecated
     @Override
     String getAmazonApplicationArn() {
         return checkNotEmpty(configuration.amazon.arn, 'Amazon application arn must be defined in config')
     }
 
+    @Deprecated
     @Override
     String getAndroidApplicationArn() {
         return checkNotEmpty(configuration.android.arn, 'Android application arn must be defined in config')
     }
 
+    @Deprecated
     @Override
     String getIosApplicationArn() {
         return checkNotEmpty(configuration.ios.arn, 'Ios application arn must be defined in config')
     }
 
+    @Deprecated
     @Override
     String getIosSandboxApplicationArn() {
         return checkNotEmpty(configuration.iosSandbox.arn, 'Ios sandbox application arn must be defined in config')
@@ -110,6 +127,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
      * @param dryRun
      * @return
      */
+    @Deprecated
     @SuppressWarnings('ParameterCount')
     String sendAndroidAppNotification(String endpointArn, Map notification, String collapseKey, boolean delayWhileIdle, int timeToLive, boolean dryRun) {
         publishToTarget(endpointArn, PLATFORM_TYPE_ANDROID, buildAndroidMessage(notification, collapseKey, delayWhileIdle, timeToLive, dryRun))
@@ -122,8 +140,20 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
      * @param sandbox
      * @return
      */
+    @Deprecated
     String sendIosAppNotification(String endpointArn, Map notification, boolean sandbox) {
         publishToTarget(endpointArn, sandbox ? PLATFORM_TYPE_IOS_SANDBOX : PLATFORM_TYPE_IOS, buildIosMessage(notification))
+    }
+
+    /**
+     *
+     * @param endpointArn mobile target's arn
+     * @param platformType identifier of the platform the device is registered in
+     * @param jsonMessage a JSON-formatted message
+     * @return
+     */
+    String sendNotification(String endpointArn, PlatformType platformType, String jsonMessage) {
+        publishToTarget(endpointArn, platformType.toString(), jsonMessage)
     }
 
     /**
@@ -164,11 +194,16 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
         deleteEndpoint(endpointArn)
     }
 
+    String createPlatformApplication(String name, PlatformType platformType, String principal, String credential) {
+        return createPlatformApplication(name, platformType.toString(), principal, credential)
+    }
+
+    @Deprecated
     @Override
-    String createPlatformApplication(String name, String platformType, String principal, String credential) {
+    String createPlatformApplication(String name, String endpointName, String principal, String credential) {
         CreatePlatformApplicationRequest request = new CreatePlatformApplicationRequest()
             .withName(name)
-            .withPlatform(platformType)
+            .withPlatform(endpointName)
 
         Map<String, String> attributes = [:]
 
@@ -254,6 +289,8 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
         }
         return arn
     }
+
+    @Deprecated
     private String buildAndroidMessage(Map data, String collapseKey, boolean delayWhileIdle, int timeToLive, boolean dryRun) {
         objectMapper.writeValueAsString([
             collapse_key    : collapseKey,
@@ -264,6 +301,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
         ])
     }
 
+    @Deprecated
     private String buildIosMessage(Map data) {
         objectMapper.writeValueAsString([
             aps: data,
@@ -285,9 +323,9 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
         client.setEndpointAttributes(saeReq)
     }
 
-    private String publishToTarget(String endpointArn, String platformType, String message) {
+    private String publishToTarget(String endpointArn, String platformType, String jsonMessage) {
         PublishRequest request = new PublishRequest(
-            message: objectMapper.writeValueAsString([(platformType): message]),
+            message: objectMapper.writeValueAsString([(platformType): jsonMessage]),
             messageStructure: 'json',
             targetArn: endpointArn, // For direct publish to mobile end points, topicArn is not relevant.
         )
