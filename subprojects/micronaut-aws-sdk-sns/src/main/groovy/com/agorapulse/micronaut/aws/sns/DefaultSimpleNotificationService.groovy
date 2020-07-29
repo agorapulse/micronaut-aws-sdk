@@ -52,13 +52,10 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
         switch (platformType) {
             case PlatformType.ADM:
                 return checkNotEmpty(configuration.adm.arn, 'Amazon Device Manager application arn must be defined in config')
-                break
             case PlatformType.APNS:
                 return checkNotEmpty(configuration.apns.arn, 'Apple Push Notification service application arn must be defined in config')
-                break
             case PlatformType.APNS_SANDBOX:
                 return checkNotEmpty(configuration.apnsSandbox.arn, 'Apple Push Notification service Sandbox application arn must be defined in config')
-                break
             case PlatformType.GCM:
                 return checkNotEmpty(configuration.gcm.arn, 'Google Cloud Messaging (Firebase) application arn must be defined in config')
         }

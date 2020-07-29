@@ -29,7 +29,6 @@ import org.testcontainers.containers.localstack.LocalStackContainer;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;

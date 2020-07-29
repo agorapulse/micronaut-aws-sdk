@@ -46,34 +46,36 @@ abstract class SimpleNotificationServiceConfiguration extends DefaultRegionAndEn
     final Application gcm
 
     @Deprecated
-    final Application ios
+    Application getIos() { return apns }
+
     @Deprecated
-    final Application iosSandbox
+    Application getIosSandbox() { return apnsSandbox }
+
     @Deprecated
-    final Application android
+    Application getAndroid() { return gcm }
+
     @Deprecated
-    final Application amazon
+    Application getAmazon() { return adm }
 
     String topic = ''
 
     protected SimpleNotificationServiceConfiguration(String prefix, Environment environment) {
         this.environment = environment
-        adm = forPlatform(prefix, 'adm', environment)
-        apns = forPlatform(prefix, 'apns', environment)
-        apnsSandbox = forPlatform(prefix, 'apnsSandbox', environment)
-        gcm = forPlatform(prefix, 'gcm', environment)
-
-        ios = forPlatform(prefix, 'ios', environment)
-        iosSandbox = forPlatform(prefix, 'iosSandbox', environment)
-        android = forPlatform(prefix, 'android', environment)
-        amazon = forPlatform(prefix, 'amazon', environment)
+        adm = forPlatform(prefix, 'adm', 'amazon', environment)
+        apns = forPlatform(prefix, 'apns', 'ios', environment)
+        apnsSandbox = forPlatform(prefix, 'apnsSandbox', 'iosSandbox', environment)
+        gcm = forPlatform(prefix, 'gcm', 'android', environment)
     }
 
     @SuppressWarnings('DuplicateStringLiteral')
-    private static Application forPlatform(String prefix, String platform, Environment environment) {
+    private static Application forPlatform(String prefix, String platform, String fallbackPlatform, Environment environment) {
         return new Application(
             environment.get(prefix + '.' + platform + '.arn', String).orElseGet {
-                environment.get(prefix + '.' + platform + '.applicationArn', String).orElse(null)
+                environment.get(prefix + '.' + platform + '.applicationArn', String).orElseGet {
+                    environment.get(prefix + '.' + fallbackPlatform + '.arn', String).orElseGet {
+                        environment.get(prefix + '.' + fallbackPlatform + '.applicationArn', String).orElse(null)
+                    }
+                }
             })
     }
 
