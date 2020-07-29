@@ -127,7 +127,7 @@ public class SimpleNotificationServiceTest {
         // tag::applications[]
         String appArn = service.createPlatformApplication("my-app", SimpleNotificationService.PlatformType.GCM, null, API_KEY);        // <1>
 
-        String endpoint = service.registerDevice(SimpleNotificationService.PlatformType.GCM, DEVICE_TOKEN, DATA);    // <2>
+        String endpoint = service.createPlatformEndpoint(appArn, DEVICE_TOKEN, DATA);    // <2>
 
         String jsonMessage = "{\"data\", \"{\"foo\": \"some bar\"}\", \"notification\", \"{\"title\": \"some title\", \"body\": \"some body\"}\"}";
 
