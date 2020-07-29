@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.ses;
 
+import io.micronaut.core.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
@@ -30,6 +31,7 @@ import javax.activation.DataSource;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.Session;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
@@ -40,6 +42,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
+
+import static javax.mail.Message.RecipientType.TO;
 
 /**
  * Default implementation of simple email service.
@@ -103,6 +107,18 @@ public class DefaultSimpleEmailService implements SimpleEmailService {
         Session session = Session.getInstance(new Properties());
         MimeMessage mimeMessage = new MimeMessage(session);
         mimeMessage.setSubject(email.getSubject());
+
+        if (!StringUtils.isEmpty(email.getFrom())) {
+            mimeMessage.setFrom(new InternetAddress(email.getFrom()));
+        }
+
+        if (!StringUtils.isEmpty(email.getReplyTo())) {
+            mimeMessage.setReplyTo(new InternetAddress[] {new InternetAddress(email.getReplyTo())});
+        }
+
+        for (String r : email.getRecipients()) {
+            mimeMessage.addRecipients(TO, r);
+        }
 
         MimeMultipart mimeMultipart = new MimeMultipart();
 

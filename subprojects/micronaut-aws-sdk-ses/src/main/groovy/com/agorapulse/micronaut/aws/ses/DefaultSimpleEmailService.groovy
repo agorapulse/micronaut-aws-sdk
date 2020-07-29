@@ -29,6 +29,7 @@ import javax.activation.DataSource
 import javax.inject.Singleton
 import javax.mail.BodyPart
 import javax.mail.Session
+import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeBodyPart
 import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeMultipart
@@ -36,6 +37,7 @@ import javax.mail.util.ByteArrayDataSource
 import java.nio.ByteBuffer
 
 import static java.util.Collections.singletonList
+import static javax.mail.Message.RecipientType.*
 
 /**
  * Default implementation of simple email service.
@@ -97,8 +99,20 @@ class DefaultSimpleEmailService implements SimpleEmailService {
     private EmailDeliveryStatus sendEmailWithAttachment(TransactionalEmail email) throws UnsupportedAttachmentTypeException {
         Session session = Session.getInstance(new Properties())
         MimeMessage mimeMessage = new MimeMessage(session)
-        String subject = email.subject
-        mimeMessage.subject = subject
+
+        if (email.from) {
+            mimeMessage.from = new InternetAddress(email.from)
+        }
+
+        if (email.replyTo) {
+            mimeMessage.replyTo = [new InternetAddress(email.replyTo)] as InternetAddress[]
+        }
+
+        email.recipients.each { recipient ->
+            mimeMessage.addRecipients(TO, new InternetAddress(recipient))
+        }
+
+        mimeMessage.subject = email.subject
         MimeMultipart mimeMultipart = new MimeMultipart()
 
         BodyPart p = new MimeBodyPart()
