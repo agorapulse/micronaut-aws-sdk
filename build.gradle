@@ -177,6 +177,10 @@ subprojects { Project subproject ->
     }
 
     clean.dependsOn cleanOut
+
+    bintray {
+        override = true
+    }
 }
 
 check.dependsOn('aggregateCheckstyle', 'aggregateCodenarc', 'aggregateAllTestReports', 'coveralls')
