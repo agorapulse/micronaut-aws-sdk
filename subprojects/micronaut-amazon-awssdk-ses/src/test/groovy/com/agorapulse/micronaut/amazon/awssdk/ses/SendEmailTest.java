@@ -43,7 +43,7 @@ public class SendEmailTest {
 
     private SesClient simpleEmailService = mock(SesClient.class);
 
-    private SimpleEmailService service = new DefaultSimpleEmailService(simpleEmailService);
+    private SimpleEmailService service = new DefaultSimpleEmailService(simpleEmailService, new SimpleEmailServiceConfiguration());
 
     @Test
     public void testSendEmail() throws IOException {

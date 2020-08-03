@@ -42,7 +42,10 @@ public class SendEmailTest {
 
     private AmazonSimpleEmailService simpleEmailService = mock(AmazonSimpleEmailService.class);
 
-    private SimpleEmailService service = new DefaultSimpleEmailService(simpleEmailService);
+    private SimpleEmailService service = new DefaultSimpleEmailService(
+        simpleEmailService,
+        new SimpleEmailServiceConfiguration()
+    );
 
     @Test
     public void testSendEmail() throws IOException {

@@ -35,7 +35,13 @@ class SimpleEmailServiceSpec extends Specification {
     SesClient simpleEmailService = Mock(SesClient)
 
     @Subject
-    SimpleEmailService service = new DefaultSimpleEmailService(simpleEmailService)
+    SimpleEmailService service = new DefaultSimpleEmailService(
+        simpleEmailService,
+        new SimpleEmailServiceConfiguration(
+            sourceEmail: Optional.of('vlad@agorapulse.com'),
+            subjectPrefix: Optional.of('[TEST]')
+        )
+    )
 
     void "test transactionalEmailWithClosure"() {
         when:
@@ -187,7 +193,6 @@ class SimpleEmailServiceSpec extends Specification {
                 subject subjectStr
                 htmlBody '<p>This is an example body</p>'
                 to 'test.to@example.com'
-                from 'test.from@example.com'
                 attachment {
                     filepath f.absolutePath
                 }
@@ -212,7 +217,6 @@ class SimpleEmailServiceSpec extends Specification {
                 subject subjectStr
                 htmlBody '<p>This is an example body</p>'
                 to 'test.to@example.com'
-                from 'test.from@example.com'
                 attachment {
                     filename f.name
                     filepath f.absolutePath

@@ -20,7 +20,28 @@ package com.agorapulse.micronaut.amazon.awssdk.ses;
 import com.agorapulse.micronaut.amazon.awssdk.core.DefaultRegionAndEndpointConfiguration;
 import io.micronaut.context.annotation.ConfigurationProperties;
 
+import java.util.Optional;
+
 @ConfigurationProperties("aws.ses")
 public class SimpleEmailServiceConfiguration extends DefaultRegionAndEndpointConfiguration {
+
+    private Optional<String> sourceEmail = Optional.empty();
+    private Optional<String> subjectPrefix = Optional.empty();
+
+    public Optional<String> getSourceEmail() {
+        return sourceEmail;
+    }
+
+    public void setSourceEmail(Optional<String> sourceEmail) {
+        this.sourceEmail = sourceEmail;
+    }
+
+    public Optional<String> getSubjectPrefix() {
+        return subjectPrefix;
+    }
+
+    public void setSubjectPrefix(Optional<String> subjectPrefix) {
+        this.subjectPrefix = subjectPrefix;
+    }
 
 }

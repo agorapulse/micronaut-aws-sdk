@@ -35,7 +35,10 @@ class SimpleEmailServiceSpec extends Specification {
     AmazonSimpleEmailService simpleEmailService = Mock(AmazonSimpleEmailService)
 
     @Subject
-    SimpleEmailService service = new DefaultSimpleEmailService(simpleEmailService)
+    SimpleEmailService service = new DefaultSimpleEmailService(simpleEmailService, new SimpleEmailServiceConfiguration(
+        sourceEmail: Optional.of('vlad@agorapulse.com'),
+        subjectPrefix: Optional.of('[TEST]')
+    ))
 
     void "test transactionalEmailWithClosure"() {
         when:
@@ -163,7 +166,6 @@ class SimpleEmailServiceSpec extends Specification {
             EmailDeliveryStatus deliveryIndicator = service.send {
                 to 'test.to@example.com'
                 subject 'Groovy AWS SDK SES Subject'
-                from 'test.from@example.com'
                 replyTo 'test.reply@example.com'
             }
         then:
@@ -187,7 +189,6 @@ class SimpleEmailServiceSpec extends Specification {
                 subject subjectStr
                 htmlBody '<p>This is an example body</p>'
                 to 'test.to@example.com'
-                from 'test.from@example.com'
                 attachment {
                     filepath f.absolutePath
                 }

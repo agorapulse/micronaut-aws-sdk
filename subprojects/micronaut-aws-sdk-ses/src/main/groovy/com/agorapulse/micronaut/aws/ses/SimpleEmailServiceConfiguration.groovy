@@ -37,4 +37,7 @@ import javax.inject.Named
 @Requires(classes = AmazonSimpleEmailService)
 class SimpleEmailServiceConfiguration extends DefaultRegionAndEndpointConfiguration {
 
+    Optional<String> sourceEmail = Optional.empty()
+    Optional<String> subjectPrefix = Optional.empty()
+
 }

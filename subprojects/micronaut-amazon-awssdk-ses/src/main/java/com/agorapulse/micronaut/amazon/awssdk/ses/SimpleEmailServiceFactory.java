@@ -55,8 +55,8 @@ public class SimpleEmailServiceFactory {
 
     @Bean
     @Singleton
-    public SimpleEmailService simpleEmailService(SesClient client) {
-        return new DefaultSimpleEmailService(client);
+    public SimpleEmailService simpleEmailService(SesClient client, SimpleEmailServiceConfiguration configuration) {
+        return new DefaultSimpleEmailService(client, configuration);
     }
 
 }
