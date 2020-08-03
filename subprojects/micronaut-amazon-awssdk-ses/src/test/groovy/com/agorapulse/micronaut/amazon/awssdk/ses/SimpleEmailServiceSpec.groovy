@@ -137,7 +137,6 @@ class SimpleEmailServiceSpec extends Specification {
             EmailDeliveryStatus deliveryIndicator = service.send {
                 to 'test.to@example.com'
                 subject 'Groovy AWS SDK SES Subject'
-                from 'test.from@example.com'
                 replyTo 'test.reply@example.com'
             }
         then:
@@ -153,13 +152,14 @@ class SimpleEmailServiceSpec extends Specification {
             EmailDeliveryStatus deliveryIndicator = service.send {
                 to 'test.to@example.com'
                 subject 'Groovy AWS SDK SES Subject'
-                from 'test.from@example.com'
                 replyTo 'test.reply@example.com'
             }
         then:
             deliveryIndicator == EmailDeliveryStatus.STATUS_BLACKLISTED
 
             simpleEmailService.sendEmail(_) >> { SendEmailRequest request ->
+                request.source() == 'vlad@agorapulse.com'
+                request.message().subject().data().startsWith('[TEST] ')
                 throw AwsServiceException.builder().message('Address blacklisted').build()
             }
     }
@@ -205,6 +205,7 @@ class SimpleEmailServiceSpec extends Specification {
             deliveryIndicator == EmailDeliveryStatus.STATUS_DELIVERED
 
             simpleEmailService.sendRawEmail(_) >> { SendRawEmailRequest request ->
+                request.source() == 'vlad@agorapulse.com'
                 return SendRawEmailResponse.builder().messageId('foobar').build()
             }
     }
