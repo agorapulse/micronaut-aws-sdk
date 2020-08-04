@@ -68,7 +68,10 @@ SimpleEmailServiceConfiguration.groovy
 <a name="37"><font color="#808080">37</font>&nbsp;</a><font color="#646464">@Requires</font><font color="#000000">(</font><font color="#000000">classes&nbsp;=&nbsp;AmazonSimpleEmailService</font><font color="#000000">)</font><br />
 <a name="38"><font color="#808080">38</font>&nbsp;</a><font color="#0000c0"><b>class&nbsp;</b></font><font color="#000000">SimpleEmailServiceConfiguration&nbsp;</font><font color="#0000c0"><b>extends&nbsp;</b></font><font color="#000000">DefaultRegionAndEndpointConfiguration&nbsp;</font><font color="#000000">{</font><br />
 <a name="39"><font color="#808080">39</font>&nbsp;</a><font color="#ffffff"></font><br />
-<a name="40"><font color="#808080">40</font>&nbsp;</a><font color="#000000">}</font></code>
+<a name="40"><font color="#808080">40</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">Optional&lt;String&gt;&nbsp;sourceEmail&nbsp;=&nbsp;Optional.empty</font><font color="#000000">()</font><br />
+<a name="41"><font color="#808080">41</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">Optional&lt;String&gt;&nbsp;subjectPrefix&nbsp;=&nbsp;Optional.empty</font><font color="#000000">()</font><br />
+<a name="42"><font color="#808080">42</font>&nbsp;</a><font color="#ffffff"></font><br />
+<a name="43"><font color="#808080">43</font>&nbsp;</a><font color="#000000">}</font></code>
     
    </td>
   <!-- end source code -->
