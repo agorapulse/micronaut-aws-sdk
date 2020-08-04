@@ -41,6 +41,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.Properties;
 
 import static javax.mail.Message.RecipientType.TO;
@@ -53,9 +54,11 @@ public class DefaultSimpleEmailService implements SimpleEmailService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSimpleEmailService.class);
 
     private final SesClient client;
+    private final SimpleEmailServiceConfiguration configuration;
 
-    DefaultSimpleEmailService(SesClient client) {
+    DefaultSimpleEmailService(SesClient client, SimpleEmailServiceConfiguration configuration) {
         this.client = client;
+        this.configuration = configuration;
     }
 
     public EmailDeliveryStatus send(TransactionalEmail email) {
@@ -106,10 +109,15 @@ public class DefaultSimpleEmailService implements SimpleEmailService {
     private EmailDeliveryStatus sendEmailWithAttachment(TransactionalEmail email) throws MessagingException, IOException {
         Session session = Session.getInstance(new Properties());
         MimeMessage mimeMessage = new MimeMessage(session);
-        mimeMessage.setSubject(email.getSubject());
+        mimeMessage.setSubject(configuration.getSubjectPrefix().isPresent()
+            ? configuration.getSubjectPrefix().get() + " " + email.getSubject()
+            : email.getSubject()
+        );
 
         if (!StringUtils.isEmpty(email.getFrom())) {
             mimeMessage.setFrom(new InternetAddress(email.getFrom()));
+        } else if (configuration.getSourceEmail().isPresent()) {
+            mimeMessage.setFrom(new InternetAddress(configuration.getSourceEmail().get()));
         }
 
         if (!StringUtils.isEmpty(email.getReplyTo())) {
@@ -147,8 +155,7 @@ public class DefaultSimpleEmailService implements SimpleEmailService {
         SendRawEmailRequest rawEmailRequest = SendRawEmailRequest.builder()
             .rawMessage(b -> b.data(SdkBytes.fromByteArray(outputStream.toByteArray())))
             .destinations(email.getRecipients())
-            .source(email.getFrom())
-            .build();
+            .source(Optional.ofNullable(email.getFrom()).orElseGet(() -> configuration.getSourceEmail().orElse(null))).build();
 
         return handleSend(email, () -> client.sendRawEmail(rawEmailRequest));
     }
@@ -157,10 +164,15 @@ public class DefaultSimpleEmailService implements SimpleEmailService {
         SendEmailRequest.Builder builder = SendEmailRequest.builder()
             .destination(b -> b.toAddresses(email.getRecipients()))
             .message(b -> {
-                b.subject(c -> c.data(email.getSubject()));
+                b.subject(c -> c.data(
+                        configuration.getSubjectPrefix().isPresent()
+                        ? configuration.getSubjectPrefix().get() + " " + email.getSubject()
+                        : email.getSubject()
+                    )
+                );
                 b.body(body -> body.html(c -> c.data(email.getHtmlBody())));
             })
-            .source(email.getFrom());
+            .source(Optional.ofNullable(email.getFrom()).orElseGet(() -> configuration.getSourceEmail().orElse(null)));
 
         if (email.getReplyTo() != null && email.getReplyTo().length() > 0) {
             builder.replyToAddresses(email.getReplyTo());

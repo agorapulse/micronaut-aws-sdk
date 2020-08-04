@@ -36,7 +36,7 @@ class SendEmailSpec extends Specification {
     TemporaryFolder tmp = new TemporaryFolder()
 
     @Subject
-    SimpleEmailService service = new DefaultSimpleEmailService(simpleEmailService)
+    SimpleEmailService service = new DefaultSimpleEmailService(simpleEmailService, new SimpleEmailServiceConfiguration())
 
     void "send email"() {
         given:

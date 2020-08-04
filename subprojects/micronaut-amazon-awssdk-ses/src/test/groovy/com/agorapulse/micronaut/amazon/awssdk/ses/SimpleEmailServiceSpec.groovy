@@ -35,7 +35,13 @@ class SimpleEmailServiceSpec extends Specification {
     SesClient simpleEmailService = Mock(SesClient)
 
     @Subject
-    SimpleEmailService service = new DefaultSimpleEmailService(simpleEmailService)
+    SimpleEmailService service = new DefaultSimpleEmailService(
+        simpleEmailService,
+        new SimpleEmailServiceConfiguration(
+            sourceEmail: Optional.of('Vladimir Orany <vlad@agorapulse.com>'),
+            subjectPrefix: Optional.of('[TEST]')
+        )
+    )
 
     void "test transactionalEmailWithClosure"() {
         when:
@@ -131,7 +137,6 @@ class SimpleEmailServiceSpec extends Specification {
             EmailDeliveryStatus deliveryIndicator = service.send {
                 to 'test.to@example.com'
                 subject 'Groovy AWS SDK SES Subject'
-                from 'test.from@example.com'
                 replyTo 'test.reply@example.com'
             }
         then:
@@ -147,13 +152,14 @@ class SimpleEmailServiceSpec extends Specification {
             EmailDeliveryStatus deliveryIndicator = service.send {
                 to 'test.to@example.com'
                 subject 'Groovy AWS SDK SES Subject'
-                from 'test.from@example.com'
                 replyTo 'test.reply@example.com'
             }
         then:
             deliveryIndicator == EmailDeliveryStatus.STATUS_BLACKLISTED
 
             simpleEmailService.sendEmail(_) >> { SendEmailRequest request ->
+                request.source() == 'Vladimir Orany <vlad@agorapulse.com>'
+                request.message().subject().data().startsWith('[TEST] ')
                 throw AwsServiceException.builder().message('Address blacklisted').build()
             }
     }
@@ -187,7 +193,6 @@ class SimpleEmailServiceSpec extends Specification {
                 subject subjectStr
                 htmlBody '<p>This is an example body</p>'
                 to 'test.to@example.com'
-                from 'test.from@example.com'
                 attachment {
                     filepath f.absolutePath
                 }
@@ -200,6 +205,7 @@ class SimpleEmailServiceSpec extends Specification {
             deliveryIndicator == EmailDeliveryStatus.STATUS_DELIVERED
 
             simpleEmailService.sendRawEmail(_) >> { SendRawEmailRequest request ->
+                request.source() == 'Vladimir Orany <vlad@agorapulse.com>'
                 return SendRawEmailResponse.builder().messageId('foobar').build()
             }
     }
@@ -212,7 +218,6 @@ class SimpleEmailServiceSpec extends Specification {
                 subject subjectStr
                 htmlBody '<p>This is an example body</p>'
                 to 'test.to@example.com'
-                from 'test.from@example.com'
                 attachment {
                     filename f.name
                     filepath f.absolutePath

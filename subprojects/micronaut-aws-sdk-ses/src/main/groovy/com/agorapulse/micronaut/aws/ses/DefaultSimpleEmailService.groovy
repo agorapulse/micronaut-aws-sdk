@@ -67,9 +67,11 @@ class DefaultSimpleEmailService implements SimpleEmailService {
     }
 
     private final AmazonSimpleEmailService client
+    private final SimpleEmailServiceConfiguration configuration
 
-    DefaultSimpleEmailService(AmazonSimpleEmailService client) {
+    DefaultSimpleEmailService(AmazonSimpleEmailService client, SimpleEmailServiceConfiguration configuration) {
         this.client = client
+        this.configuration = configuration
     }
 
     EmailDeliveryStatus send(TransactionalEmail email) throws Exception {
@@ -95,13 +97,15 @@ class DefaultSimpleEmailService implements SimpleEmailService {
         }
     }
 
-    @SuppressWarnings(['LineLength', 'ElseBlockBraces', 'JavaIoPackageAccess'])
+    @SuppressWarnings(['LineLength', 'ElseBlockBraces', 'JavaIoPackageAccess', 'AbcMetric'])
     private EmailDeliveryStatus sendEmailWithAttachment(TransactionalEmail email) throws UnsupportedAttachmentTypeException {
         Session session = Session.getInstance(new Properties())
         MimeMessage mimeMessage = new MimeMessage(session)
 
         if (email.from) {
             mimeMessage.from = new InternetAddress(email.from)
+        } else if (configuration.sourceEmail.present) {
+            mimeMessage.from = new InternetAddress(configuration.sourceEmail.get())
         }
 
         if (email.replyTo) {
@@ -112,7 +116,10 @@ class DefaultSimpleEmailService implements SimpleEmailService {
             mimeMessage.addRecipients(TO, new InternetAddress(recipient))
         }
 
-        mimeMessage.subject = email.subject
+        mimeMessage.subject = configuration.subjectPrefix.map { prefix ->
+            "$prefix $email.subject".toString()
+        } orElse(email.subject)
+
         MimeMultipart mimeMultipart = new MimeMultipart()
 
         BodyPart p = new MimeBodyPart()
@@ -141,7 +148,7 @@ class DefaultSimpleEmailService implements SimpleEmailService {
         SendRawEmailRequest rawEmailRequest = new SendRawEmailRequest(rawMessage)
 
         rawEmailRequest.destinations = email.recipients
-        rawEmailRequest.source = email.from
+        rawEmailRequest.source = email.from ?: configuration.sourceEmail.orElse(null)
 
         return handleSend(email) {
             client.sendRawEmail(rawEmailRequest)
@@ -161,12 +168,19 @@ class DefaultSimpleEmailService implements SimpleEmailService {
     @SuppressWarnings(['LineLength', 'ElseBlockBraces'])
     private EmailDeliveryStatus sendWithoutAttachments(TransactionalEmail email) {
         Destination destination = new Destination(email.recipients)
-        Content messageSubject = new Content(email.subject)
+
+        String subject = configuration.subjectPrefix.map { prefix ->
+            "$prefix $email.subject".toString()
+        } orElse(email.subject)
+
+        Content messageSubject = new Content(subject)
+
         Body messageBody = new Body().withHtml(new Content(email.htmlBody))
         Message message = new Message(messageSubject, messageBody)
 
         return handleSend(email) {
-            SendEmailRequest sendEmailRequest = new SendEmailRequest(email.from, destination, message)
+            String from = email.from ?: configuration.sourceEmail.orElse(null)
+            SendEmailRequest sendEmailRequest = new SendEmailRequest(from, destination, message)
             if (email.replyTo) {
                 sendEmailRequest.replyToAddresses = singletonList(email.replyTo)
             }
