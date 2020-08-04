@@ -38,7 +38,7 @@ class SimpleEmailServiceSpec extends Specification {
     SimpleEmailService service = new DefaultSimpleEmailService(
         simpleEmailService,
         new SimpleEmailServiceConfiguration(
-            sourceEmail: Optional.of('vlad@agorapulse.com'),
+            sourceEmail: Optional.of('Vladimir Orany <vlad@agorapulse.com>'),
             subjectPrefix: Optional.of('[TEST]')
         )
     )
@@ -158,7 +158,7 @@ class SimpleEmailServiceSpec extends Specification {
             deliveryIndicator == EmailDeliveryStatus.STATUS_BLACKLISTED
 
             simpleEmailService.sendEmail(_) >> { SendEmailRequest request ->
-                request.source() == 'vlad@agorapulse.com'
+                request.source() == 'Vladimir Orany <vlad@agorapulse.com>'
                 request.message().subject().data().startsWith('[TEST] ')
                 throw AwsServiceException.builder().message('Address blacklisted').build()
             }
@@ -205,7 +205,7 @@ class SimpleEmailServiceSpec extends Specification {
             deliveryIndicator == EmailDeliveryStatus.STATUS_DELIVERED
 
             simpleEmailService.sendRawEmail(_) >> { SendRawEmailRequest request ->
-                request.source() == 'vlad@agorapulse.com'
+                request.source() == 'Vladimir Orany <vlad@agorapulse.com>'
                 return SendRawEmailResponse.builder().messageId('foobar').build()
             }
     }
