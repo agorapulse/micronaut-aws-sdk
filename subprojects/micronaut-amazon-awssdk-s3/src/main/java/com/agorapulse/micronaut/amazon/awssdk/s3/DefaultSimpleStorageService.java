@@ -22,6 +22,7 @@ import io.reactivex.Flowable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -116,7 +117,11 @@ public class DefaultSimpleStorageService implements SimpleStorageService {
 
     @Override
     public GetObjectResponse getObject(String bucketName, String key) {
-        return s3.getObject(b -> b.bucket(bucketName).key(key)).response();
+        try (ResponseInputStream<GetObjectResponse> stream = s3.getObject(b -> b.bucket(bucketName).key(key))) {
+            return stream.response();
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Exception closing stream", e);
+        }
     }
 
     @Override
