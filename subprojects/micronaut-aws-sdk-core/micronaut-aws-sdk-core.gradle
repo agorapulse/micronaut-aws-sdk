@@ -22,10 +22,5 @@ config {
 }
 
 dependencies {
-    if (micronautVersion.startsWith('2')) {
-        compile 'io.micronaut.aws:micronaut-aws-common'
-
-    } else {
-        compile 'io.micronaut.configuration:micronaut-aws-common'
-    }
+    compile 'io.micronaut.configuration:micronaut-aws-common'
 }
