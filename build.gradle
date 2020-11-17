@@ -137,7 +137,7 @@ subprojects { Project subproject ->
             testCompile "org.codehaus.groovy:groovy:$groovyVersion"
         } else {
             compile "org.codehaus.groovy:groovy:$groovyVersion"
-            compile "io.micronaut:micronaut-runtime-groovy"
+            compile "io.micronaut:micronaut-runtime"
             compileOnly "io.micronaut:micronaut-inject-groovy"
         }
 

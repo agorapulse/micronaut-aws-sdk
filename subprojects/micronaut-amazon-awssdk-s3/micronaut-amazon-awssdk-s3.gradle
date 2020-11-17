@@ -30,5 +30,10 @@ dependencies {
 
     testCompile group: 'org.testcontainers', name: 'testcontainers', version: testcontainersVersion
     testCompile group: 'org.testcontainers', name: 'spock', version: testcontainersVersion
-    testCompile 'io.micronaut.configuration:micronaut-aws-common'
+
+    if (micronautVersion.startsWith('2')) {
+        testCompile 'io.micronaut.aws:micronaut-aws-common'
+    } else {
+        testCompile 'io.micronaut.configuration:micronaut-aws-common'
+    }
 }
