@@ -240,9 +240,12 @@ class SimpleStorageServiceSpec extends Specification {
             new URL(url).text == SAMPLE_CONTENT
     }
 
+    @SuppressWarnings([
+        'LineLength'
+    ])
     void 'generate standard presigned URL'() {
         given:
-            String broken = "https://reports.example.com.s3.us-east-1.amazonaws.com/foo/bar.baz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20201117T110811Z&X-Amz-SignedHeaders=host&X-Amz-Expires=86359&X-Amz-Credential=accesskey%2F20201117%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=8695c4d50738365e05a7550e5223ad56b65ea71459fefe35ab3cc887b945224b"
+            String broken = 'https://reports.example.com.s3.us-east-1.amazonaws.com/foo/bar.baz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20201117T110811Z&X-Amz-SignedHeaders=host&X-Amz-Expires=86359&X-Amz-Credential=accesskey%2F20201117%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=8695c4d50738365e05a7550e5223ad56b65ea71459fefe35ab3cc887b945224b'
             S3Presigner presigner = Mock {
                 presignGetObject(_ as Consumer) >> PresignedGetObjectRequest.builder().httpRequest(
                         SdkHttpRequest.builder().uri(new URI(broken)).method(SdkHttpMethod.GET).build()
