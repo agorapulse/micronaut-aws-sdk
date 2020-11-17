@@ -24,6 +24,8 @@ import org.junit.rules.TemporaryFolder
 import org.testcontainers.spock.Testcontainers
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
+import software.amazon.awssdk.http.SdkHttpMethod
+import software.amazon.awssdk.http.SdkHttpRequest
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectAclResponse
@@ -33,11 +35,14 @@ import software.amazon.awssdk.services.s3.model.S3Object
 import software.amazon.awssdk.services.s3.model.Tag
 import software.amazon.awssdk.services.s3.model.Tagging
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
 import spock.lang.Unroll
+
+import java.util.function.Consumer
 
 /**
  * Tests for SimpleStorageService based on Testcontainers.
@@ -233,6 +238,32 @@ class SimpleStorageServiceSpec extends Specification {
         then:
             url
             new URL(url).text == SAMPLE_CONTENT
+    }
+
+    void 'generate standard presigned URL'() {
+        given:
+            String broken = "https://reports.example.com.s3.us-east-1.amazonaws.com/foo/bar.baz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20201117T110811Z&X-Amz-SignedHeaders=host&X-Amz-Expires=86359&X-Amz-Credential=accesskey%2F20201117%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=8695c4d50738365e05a7550e5223ad56b65ea71459fefe35ab3cc887b945224b"
+            S3Presigner presigner = Mock {
+                presignGetObject(_ as Consumer) >> PresignedGetObjectRequest.builder().httpRequest(
+                        SdkHttpRequest.builder().uri(new URI(broken)).method(SdkHttpMethod.GET).build()
+                    )
+                    .expiration(TOMORROW.toInstant())
+                    .isBrowserExecutable(true)
+                    .signedHeaders(foo: ['bar'])
+                    .build()
+            }
+
+            S3Client client = Mock()
+
+            SimpleStorageService service = new DefaultSimpleStorageService(
+                'reports.example.com',
+                client,
+                presigner
+            )
+        when:
+            String url = service.generateStandardPresignedUrl(KEY, TOMORROW)
+        then:
+            url.startsWith('https://s3-us-east-1.amazonaws.com/reports.example.com/foo/bar.baz')
     }
 
     void 'download file'() {

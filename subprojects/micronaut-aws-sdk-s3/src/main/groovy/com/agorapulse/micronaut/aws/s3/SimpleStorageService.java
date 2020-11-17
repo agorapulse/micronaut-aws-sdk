@@ -23,10 +23,13 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.Upload;
 import io.micronaut.http.multipart.PartData;
+import io.micronaut.http.uri.UriBuilder;
 import io.reactivex.Flowable;
 
 import java.io.File;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.List;
 
@@ -273,6 +276,49 @@ public interface SimpleStorageService {
      */
     default Flowable<S3ObjectSummary> listObjectSummaries() {
         return listObjectSummaries("");
+    }
+
+    /**
+     * Generates the pre-signed URL for downloading an object by clients which points to AWS host
+     * to ensure the SSL certificate will be valid.
+     *
+     * @param bucketName the name of the bucket
+     * @param key the key of the object
+     * @param expirationDate the expiration date of the link
+     * @return the URL to download the object without any credentials required
+     */
+    default String generateStandardPresignedUrl(String bucketName, String key, Date expirationDate) {
+        String url = generatePresignedUrl(bucketName, key, expirationDate);
+
+        if (!url.contains(".s3.")) {
+            return url;
+        }
+
+        try {
+            url = url.replace(bucketName, "");
+            url = url.replace(".s3.", "s3-");
+            UriBuilder builder = UriBuilder.of(new URI(url));
+            builder.replacePath(bucketName);
+            builder.path("/");
+            builder.path(key);
+            return builder.toString();
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException(
+                "Wrong URL generated for bucket " + bucketName + " and " + key + " expiring at " + expirationDate, e
+            );
+        }
+    }
+
+    /**
+     * Generates the pre-signed URL for downloading an object by clients which points to AWS host
+     * to ensure the SSL certificate will be valid.
+     *
+     * @param key the key of the object
+     * @param expirationDate the expiration date of the link
+     * @return the URL to download the object without any credentials required
+     */
+    default String generateStandardPresignedUrl(String key, Date expirationDate) {
+        return generateStandardPresignedUrl(getDefaultBucketName(), key, expirationDate);
     }
 
     /**
