@@ -21,6 +21,7 @@ import io.micronaut.context.ApplicationContext
 import io.reactivex.Flowable
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import org.testcontainers.containers.localstack.LocalStackContainer
 import org.testcontainers.spock.Testcontainers
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
@@ -76,18 +77,18 @@ class SimpleStorageServiceSpec extends Specification {
             .builder()
             .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.S3))
             .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.defaultAccessKey, localstack.defaultSecretKey
+                localstack.accessKey, localstack.secretKey
             )))
-            .region(Region.of(localstack.defaultRegion))
+            .region(Region.of(localstack.region))
             .build()
 
         presigner = S3Presigner
             .builder()
             .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.S3))
             .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.defaultAccessKey, localstack.defaultSecretKey
+                localstack.accessKey, localstack.secretKey
             )))
-            .region(Region.of(localstack.defaultRegion))
+            .region(Region.of(localstack.region))
             .build()
         context = ApplicationContext
             .build(

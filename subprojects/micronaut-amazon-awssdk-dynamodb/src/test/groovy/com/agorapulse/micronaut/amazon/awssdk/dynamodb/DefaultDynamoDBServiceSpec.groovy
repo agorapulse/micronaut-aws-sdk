@@ -23,7 +23,9 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Service
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Update
 import io.micronaut.context.ApplicationContext
 import io.reactivex.Flowable
+import org.testcontainers.containers.localstack.LocalStackContainer
 import org.testcontainers.spock.Testcontainers
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
@@ -36,6 +38,7 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 import static com.agorapulse.micronaut.amazon.awssdk.dynamodb.groovy.GroovyBuilders.*
+import static software.amazon.awssdk.auth.credentials.StaticCredentialsProvider.create
 
 @SuppressWarnings([
     'AbcMetric',
@@ -60,8 +63,8 @@ class DefaultDynamoDBServiceSpec extends Specification {
     // tag::testcontainers-setup[]
     @AutoCleanup ApplicationContext context                                             // <2>
 
-    @Shared LocalStackV2Container localstack = new LocalStackV2Container()                  // <3>
-        .withServices(LocalStackV2Container.Service.DYNAMODB)
+    @Shared LocalStackContainer localstack = new LocalStackContainer()                    // <3>
+        .withServices(LocalStackContainer.Service.DYNAMODB)
 
     DynamoDBItemDBService service
     UnknownMethodsService unknownMethodsService
@@ -71,8 +74,8 @@ class DefaultDynamoDBServiceSpec extends Specification {
     void setup() {
         DynamoDbClient client = DynamoDbClient                                          // <4>
             .builder()
-            .endpointOverride(localstack.getEndpointOverride(LocalStackV2Container.Service.DYNAMODB))
-            .credentialsProvider(localstack.defaultCredentialsProvider)
+            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.DYNAMODB))
+            .credentialsProvider(create(AwsBasicCredentials.create(localstack.accessKey, localstack.secretKey)))
             .region(Region.EU_WEST_1)
             .build()
 
