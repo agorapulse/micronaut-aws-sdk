@@ -17,18 +17,19 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.sqs
 
-import com.agorapulse.micronaut.amazon.awssdk.sqs.DefaultSimpleQueueService
-import com.agorapulse.micronaut.amazon.awssdk.sqs.DefaultSimpleQueueServiceConfiguration
-import com.agorapulse.micronaut.amazon.awssdk.sqs.SimpleQueueService
-import com.agorapulse.micronaut.amazon.awssdk.sqs.SimpleQueueServiceConfiguration
-import com.amazonaws.AmazonClientException
-import com.amazonaws.AmazonServiceException
-import com.amazonaws.services.sqs.AmazonSQS
-import com.amazonaws.services.sqs.model.AmazonSQSException
-import com.amazonaws.services.sqs.model.CreateQueueResult
-import com.amazonaws.services.sqs.model.GetQueueAttributesResult
-import com.amazonaws.services.sqs.model.QueueDoesNotExistException
 import io.micronaut.context.ApplicationContext
+import software.amazon.awssdk.awscore.exception.AwsErrorDetails
+import software.amazon.awssdk.awscore.exception.AwsServiceException
+import software.amazon.awssdk.core.exception.SdkClientException
+import software.amazon.awssdk.services.sqs.SqsClient
+import software.amazon.awssdk.services.sqs.model.CreateQueueResponse
+import software.amazon.awssdk.services.sqs.model.GetQueueAttributesResponse
+import software.amazon.awssdk.services.sqs.model.ListQueuesResponse
+import software.amazon.awssdk.services.sqs.model.Message
+import software.amazon.awssdk.services.sqs.model.QueueAttributeName
+import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException
+import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse
+import software.amazon.awssdk.services.sqs.model.SendMessageResponse
 import spock.lang.Specification
 
 /**
@@ -37,7 +38,7 @@ import spock.lang.Specification
 class SimpleQueueServiceWithMockSpec extends Specification {
 
     SimpleQueueServiceConfiguration configuration = new DefaultSimpleQueueServiceConfiguration(cache: true)
-    AmazonSQS amazonSQS = Mock(AmazonSQS)
+    SqsClient amazonSQS = Mock()
     SimpleQueueService service = new DefaultSimpleQueueService(amazonSQS, configuration)
 
     /*
@@ -50,7 +51,7 @@ class SimpleQueueServiceWithMockSpec extends Specification {
             String queueUrl = service.createQueue('someQueue')
 
         then:
-            1 * amazonSQS.createQueue(_) >> ['queueUrl': 'somepath/queueName']
+            1 * amazonSQS.createQueue(_) >> CreateQueueResponse.builder().queueUrl('somepath/queueName').build()
             queueUrl
             queueUrl == 'somepath/queueName'
     }
@@ -90,7 +91,7 @@ class SimpleQueueServiceWithMockSpec extends Specification {
             service.deleteQueue('queueName')
 
         then:
-            1 * amazonSQS.deleteQueue('somepath/queueName')
+            1 * amazonSQS.deleteQueue(_)
     }
 
     /*
@@ -102,7 +103,7 @@ class SimpleQueueServiceWithMockSpec extends Specification {
             List queueNames = service.listQueueNames()
 
         then:
-            1 * amazonSQS.listQueues(_) >> ['queueUrls': ['somepath/queueName1', 'somepath/queueName2', 'somepath/queueName3']]
+            1 * amazonSQS.listQueues(_) >> ListQueuesResponse.builder().queueUrls('somepath/queueName1', 'somepath/queueName2', 'somepath/queueName3').build()
             queueNames
             queueNames.size() == 3
             queueNames == ['queueName1', 'queueName2', 'queueName3']
@@ -117,7 +118,7 @@ class SimpleQueueServiceWithMockSpec extends Specification {
             List queueUrls = service.listQueueUrls()
 
         then:
-            1 * amazonSQS.listQueues(_) >> ['queueUrls': ['somepath/queueName1', 'somepath/queueName2', 'somepath/queueName3']]
+            1 * amazonSQS.listQueues(_) >> ListQueuesResponse.builder().queueUrls('somepath/queueName1', 'somepath/queueName2', 'somepath/queueName3').build()
 
             queueUrls
             queueUrls.size() == 3
@@ -138,9 +139,10 @@ class SimpleQueueServiceWithMockSpec extends Specification {
 
         then:
             1 * amazonSQS.getQueueAttributes(_) >> {
-                GetQueueAttributesResult attrResult = new GetQueueAttributesResult()
-                attrResult.attributes = ['attribute1': 'value1', 'attribute2': 'value2']
-                attrResult
+                GetQueueAttributesResponse
+                    .builder()
+                    .attributes((QueueAttributeName.DELAY_SECONDS): '10', (QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES): '50')
+                    .build()
             }
 
             attributes
@@ -160,10 +162,11 @@ class SimpleQueueServiceWithMockSpec extends Specification {
             String arn = service.getQueueArn('queueName')
 
         then:
-            1 * amazonSQS.getQueueAttributes(_, ['QueueArn']) >> {
-                GetQueueAttributesResult attrResult = new GetQueueAttributesResult()
-                attrResult.attributes = ['QueueArn': 'arn:sqs:queueName']
-                attrResult
+            1 * amazonSQS.getQueueAttributes(_) >> {
+                GetQueueAttributesResponse
+                    .builder()
+                    .attributes((QueueAttributeName.QUEUE_ARN): 'arn:sqs:queueName')
+                    .build()
             }
 
             arn == 'arn:sqs:queueName'
@@ -178,10 +181,13 @@ class SimpleQueueServiceWithMockSpec extends Specification {
 
         then:
             1 * amazonSQS.getQueueAttributes(_) >> {
-                AmazonServiceException exception = new AmazonServiceException('Error')
-                exception.errorCode = 'AWS.SimpleQueueService.NonExistentQueue'
-                throw exception
+                throw AwsServiceException
+                    .builder()
+                    .message('Error')
+                    .awsErrorDetails(AwsErrorDetails.builder().errorCode('AWS.SimpleQueueService.NonExistentQueue').build())
+                    .build()
             }
+
             !attributes
             old(service.queueUrlByNames.size() == 1)
             service.queueUrlByNames.size() == 0
@@ -195,7 +201,7 @@ class SimpleQueueServiceWithMockSpec extends Specification {
             Map attributes = service.getQueueAttributes('queueName')
 
         then:
-            1 * amazonSQS.getQueueAttributes(_) >> { throw new AmazonClientException('Error') }
+            1 * amazonSQS.getQueueAttributes(_) >> { throw SdkClientException.builder().message('Error').build() }
 
             !attributes
     }
@@ -213,8 +219,8 @@ class SimpleQueueServiceWithMockSpec extends Specification {
             String queueUrl = service.queueUrl
 
         then:
-            amazonSQS.listQueues(_) >> ['queueUrls': ['somepath/queueName1', 'somepath/queueName2', 'somepath/queueName3']]
-            amazonSQS.createQueue(_) >> ['queueUrl': 'somepath/queueName']
+            amazonSQS.listQueues(_) >> ListQueuesResponse.builder().queueUrls('somepath/queueName1', 'somepath/queueName2', 'somepath/queueName3').build()
+            amazonSQS.createQueue(_) >> CreateQueueResponse.builder().queueUrl('somepath/queueName').build()
             amazonSQS
             queueUrl == 'somepath/queueName'
             old(service.queueUrlByNames.size() == 0)
@@ -231,9 +237,9 @@ class SimpleQueueServiceWithMockSpec extends Specification {
             service.getQueueUrl('queueName')
 
         then:
-            thrown(AmazonSQSException)
+            thrown(AwsServiceException)
 
-            1 * amazonSQS.getQueueUrl('vlad_queueName') >> { throw new QueueDoesNotExistException('Queue does not exist') }
+            1 * amazonSQS.getQueueUrl(_) >> { throw  QueueDoesNotExistException.builder().message('Queue does not exist').build() }
     }
 
     /*
@@ -249,7 +255,10 @@ class SimpleQueueServiceWithMockSpec extends Specification {
             List messages = service.receiveMessages(1, 1, 1)
 
         then:
-            1 * amazonSQS.receiveMessage(_) >> ['messages': ['message1', 'message2']]
+            1 * amazonSQS.receiveMessage(_) >> ReceiveMessageResponse.builder().messages(
+                Message.builder().body('message1').build(),
+                Message.builder().body('message2').build()
+            ).build()
             messages
             messages.size() == 2
     }
@@ -266,7 +275,7 @@ class SimpleQueueServiceWithMockSpec extends Specification {
             String messageId = service.sendMessage('queueName', 'messageBody')
 
         then:
-            1 * amazonSQS.sendMessage(_) >> ['messageId': 'msg_id']
+            1 * amazonSQS.sendMessage(_) >> SendMessageResponse.builder().messageId('msg_id').build()
 
             messageId == 'msg_id'
     }
@@ -286,7 +295,7 @@ class SimpleQueueServiceWithMockSpec extends Specification {
     void 'integration spec'() {
         when:
             ApplicationContext context = ApplicationContext.build().build()
-            context.registerSingleton(AmazonSQS, amazonSQS)
+            context.registerSingleton(SqsClient, amazonSQS)
             context.start()
 
             SimpleQueueService service = context.getBean(SimpleQueueService)
@@ -298,7 +307,7 @@ class SimpleQueueServiceWithMockSpec extends Specification {
             configuration
             service
 
-            amazonSQS.createQueue(_) >> new CreateQueueResult().withQueueUrl('http://test.example.com/my-queue')
+            amazonSQS.createQueue(_) >> CreateQueueResponse.builder().queueUrl('http://test.example.com/my-queue').build()
 
         cleanup:
             context.stop()
