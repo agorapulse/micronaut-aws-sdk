@@ -17,8 +17,6 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.sqs
 
-import com.agorapulse.micronaut.amazon.awssdk.sqs.SimpleQueueService
-import com.agorapulse.micronaut.amazon.awssdk.sqs.SimpleQueueServiceConfiguration
 import io.micronaut.context.ApplicationContext
 import io.micronaut.inject.qualifiers.Qualifiers
 import spock.lang.AutoCleanup

@@ -78,7 +78,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
             .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
                 localstack.accessKey, localstack.secretKey
             )))
-            .region(Region.of(localstack.getRegion()))
+            .region(Region.of(localstack.region))
             .build()
 
         DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient

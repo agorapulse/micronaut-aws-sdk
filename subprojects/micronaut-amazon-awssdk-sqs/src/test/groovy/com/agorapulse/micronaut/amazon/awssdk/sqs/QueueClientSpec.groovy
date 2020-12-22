@@ -17,7 +17,6 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.sqs
 
-
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.micronaut.context.ApplicationContext
 import io.micronaut.inject.qualifiers.Qualifiers

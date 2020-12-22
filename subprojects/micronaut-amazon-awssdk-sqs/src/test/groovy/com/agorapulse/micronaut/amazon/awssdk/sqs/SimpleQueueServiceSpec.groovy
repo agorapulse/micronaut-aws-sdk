@@ -68,7 +68,7 @@ class SimpleQueueServiceSpec extends Specification {
             .builder()
             .endpointOverride(localstack.getEndpointOverride(SQS))
             .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.getAccessKey(), localstack.getSecretKey()
+                localstack.accessKey, localstack.secretKey
             )))
             .region(Region.of(localstack.region))
             .build()
