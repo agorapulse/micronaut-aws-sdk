@@ -15,23 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-config {
-    bintray {
-        enabled = true
-    }
-}
+package com.agorapulse.micronaut.amazon.awssdk.sqs;
 
-dependencies {
-    compile project(':micronaut-amazon-awssdk-core')
+import com.agorapulse.micronaut.amazon.awssdk.sqs.annotation.QueueClient;
 
-    compile "space.jasan:groovy-closure-support:$closureSupportVersion"
+@QueueClient(queue = "SomeQueue", delay = 10)
+public interface SomeClient {
 
-    compile "software.amazon.awssdk:dynamodb"
-    compile "software.amazon.awssdk:dynamodb-enhanced"
+    String sendMessage(Pogo event);
 
-    testCompile group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
-    testCompile group: 'org.testcontainers', name: 'testcontainers', version: testcontainersVersion
-    testCompile group: 'org.testcontainers', name: 'spock', version: testcontainersVersion
-    testCompile 'io.micronaut.configuration:micronaut-aws-common'
-
+    String SOME_QUEUE = "SomeQueue";
 }

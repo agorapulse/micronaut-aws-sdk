@@ -15,17 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.aws.sqs;
+package com.agorapulse.micronaut.amazon.awssdk.sqs;
 
-import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.AmazonSQSClient;
-import com.amazonaws.services.sqs.model.Message;
 import io.micronaut.context.ApplicationContext;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.testcontainers.containers.localstack.LocalStackContainer;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.Message;
+import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
 
 import java.util.*;
 
@@ -53,10 +56,13 @@ public class SimpleQueueServiceTest {
     public void setup() {
         System.setProperty("com.amazonaws.sdk.disableCbor", "true");                    // <3>
 
-        AmazonSQS amazonSQS = AmazonSQSClient                                           // <4>
+        SqsClient amazonSQS = SqsClient                                                 // <4>
             .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(SQS))
-            .withCredentials(localstack.getDefaultCredentialsProvider())
+            .endpointOverride(localstack.getEndpointOverride(SQS))
+            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
+                localstack.getAccessKey(), localstack.getSecretKey()
+            )))
+            .region(Region.of(localstack.getRegion()))
             .build();
 
 
@@ -65,7 +71,7 @@ public class SimpleQueueServiceTest {
 
 
         context = ApplicationContext.build(properties).build();                         // <6>
-        context.registerSingleton(AmazonSQS.class, amazonSQS);
+        context.registerSingleton(SqsClient.class, amazonSQS);
         context.start();
 
         service = context.getBean(SimpleQueueService.class);
@@ -92,9 +98,11 @@ public class SimpleQueueServiceTest {
         assertNotNull(queueUrl);
 
         // tag::describe-queue[]
-        Map<String, String> queueAttributes = service.getQueueAttributes(TEST_QUEUE);   // <1>
+        Map<QueueAttributeName, String> queueAttributes = service
+            .getQueueAttributes(TEST_QUEUE);                                            // <1>
 
-        assertEquals("0", queueAttributes.get("DelaySeconds"));                         // <2>
+        assertEquals("0", queueAttributes
+            .get(QueueAttributeName.DELAY_SECONDS));                                    // <2>
         // end::describe-queue[]
 
         // tag::messages[]
@@ -105,8 +113,8 @@ public class SimpleQueueServiceTest {
         List<Message> messages = service.receiveMessages();                             // <2>
         Message first = messages.get(0);
 
-        assertEquals(DATA, first.getBody());                                            // <3>
-        assertEquals(msgId, first.getMessageId());
+        assertEquals(DATA, first.body());                                               // <3>
+        assertEquals(msgId, first.messageId());
         assertEquals(1, messages.size());
 
         service.deleteMessage(msgId);                                                   // <4>

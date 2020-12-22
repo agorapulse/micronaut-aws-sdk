@@ -29,6 +29,8 @@ dependencies {
     compile "software.amazon.awssdk:sns"
 
 
+    testCompile group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
     testCompile group: 'org.testcontainers', name: 'testcontainers', version: testcontainersVersion
     testCompile group: 'org.testcontainers', name: 'spock', version: testcontainersVersion
+    testCompile 'io.micronaut.configuration:micronaut-aws-common'
 }

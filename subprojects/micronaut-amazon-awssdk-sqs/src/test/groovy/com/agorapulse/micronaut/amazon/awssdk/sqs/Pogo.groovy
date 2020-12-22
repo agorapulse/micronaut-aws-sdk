@@ -15,23 +15,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-config {
-    bintray {
-        enabled = true
+package com.agorapulse.micronaut.amazon.awssdk.sqs
+
+import groovy.transform.CompileStatic
+import groovy.transform.ToString
+
+/**
+ * Plain old Groovy object for testing.
+ */
+@ToString
+@CompileStatic
+class Pogo {
+
+    // java way
+    Pogo(String foo) {
+        this.foo = foo
     }
-}
 
-dependencies {
-    compile project(':micronaut-amazon-awssdk-core')
+    // groovy way
+    Pogo() { }
 
-    compile "space.jasan:groovy-closure-support:$closureSupportVersion"
-
-    compile "software.amazon.awssdk:dynamodb"
-    compile "software.amazon.awssdk:dynamodb-enhanced"
-
-    testCompile group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
-    testCompile group: 'org.testcontainers', name: 'testcontainers', version: testcontainersVersion
-    testCompile group: 'org.testcontainers', name: 'spock', version: testcontainersVersion
-    testCompile 'io.micronaut.configuration:micronaut-aws-common'
+    String foo
 
 }

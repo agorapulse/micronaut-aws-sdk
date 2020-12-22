@@ -15,21 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-config {
-    bintray {
-        enabled = true
-    }
-}
+package com.agorapulse.micronaut.amazon.awssdk.sqs;
 
-dependencies {
-    compile project(':micronaut-amazon-awssdk-core')
+import com.agorapulse.micronaut.amazon.awssdk.sqs.annotation.QueueClient;
 
-    compile "space.jasan:groovy-closure-support:$closureSupportVersion"
+@QueueClient("test")
+interface TestClient {
+    String sendMessage(Pogo event);
 
-    compile "software.amazon.awssdk:s3"
-
-    testCompile group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
-    testCompile group: 'org.testcontainers', name: 'testcontainers', version: testcontainersVersion
-    testCompile group: 'org.testcontainers', name: 'spock', version: testcontainersVersion
-    testCompile 'io.micronaut.configuration:micronaut-aws-common'
+    void doWhatever(Object one, Object two, Object three, Object four);
 }

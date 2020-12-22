@@ -22,6 +22,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.testcontainers.containers.localstack.LocalStackContainer;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -52,7 +53,7 @@ public class SimpleNotificationServiceTest {
     public SimpleNotificationService service;
 
     @Rule
-    public LocalStackContainer localstack = new LocalStackContainer("0.8.10")            // <2>
+    public LocalStackContainer localstack = new LocalStackContainer()                   // <2>
         .withServices(LocalStackContainer.Service.SNS);
 
     @Before
@@ -61,9 +62,9 @@ public class SimpleNotificationServiceTest {
             .builder()
             .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.SNS))
             .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.getDefaultAccessKey(), localstack.getDefaultSecretKey()
+                localstack.getAccessKey(), localstack.getSecretKey()
             )))
-            .region(Region.of(localstack.getDefaultRegion()))
+            .region(Region.of(localstack.getRegion()))
             .build();
 
 

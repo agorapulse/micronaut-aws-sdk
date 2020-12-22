@@ -19,6 +19,7 @@ package com.agorapulse.micronaut.amazon.awssdk.sns
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.micronaut.context.ApplicationContext
+import org.testcontainers.containers.localstack.LocalStackContainer
 import org.testcontainers.spock.Testcontainers
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
@@ -43,7 +44,7 @@ class SimpleNotificationServiceSpec extends Specification {
     private static final String TEST_TOPIC = 'TestTopic'
 
     // tag::testcontainers-fields[]
-    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.10')          // <2>
+    @Shared LocalStackContainer localstack = new LocalStackContainer()                  // <2>
         .withServices(LocalStackContainer.Service.SNS)
 
     @AutoCleanup ApplicationContext context                                             // <3>
@@ -65,9 +66,9 @@ class SimpleNotificationServiceSpec extends Specification {
             .builder()
             .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.SNS))
             .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.defaultAccessKey, localstack.defaultSecretKey
+                localstack.accessKey, localstack.secretKey
             )))
-            .region(Region.of(localstack.defaultRegion))
+            .region(Region.of(localstack.region))
             .build()
 
         SimpleNotificationServiceConfiguration mockConfiguration = Mock(SimpleNotificationServiceConfiguration) {

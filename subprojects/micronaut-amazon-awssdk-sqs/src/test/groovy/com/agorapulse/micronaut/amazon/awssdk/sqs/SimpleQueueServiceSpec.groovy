@@ -15,14 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.aws.sqs
+package com.agorapulse.micronaut.amazon.awssdk.sqs
 
-import com.amazonaws.services.sqs.AmazonSQS
-import com.amazonaws.services.sqs.AmazonSQSClient
-import com.amazonaws.services.sqs.model.Message
 import io.micronaut.context.ApplicationContext
 import org.testcontainers.containers.localstack.LocalStackContainer
 import org.testcontainers.spock.Testcontainers
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
+import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.sqs.SqsClient
+import software.amazon.awssdk.services.sqs.model.Message
+import software.amazon.awssdk.services.sqs.model.QueueAttributeName
 import spock.lang.AutoCleanup
 import spock.lang.Retry
 import spock.lang.Shared
@@ -61,14 +64,17 @@ class SimpleQueueServiceSpec extends Specification {
     // tag::testcontainers-setup[]
     void setup() {
         System.setProperty('com.amazonaws.sdk.disableCbor', 'true')                     // <5>
-        AmazonSQS sqs = AmazonSQSClient                                                 // <6>
+        SqsClient sqs = SqsClient                                                       // <6>
             .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(SQS))
-            .withCredentials(localstack.defaultCredentialsProvider)
+            .endpointOverride(localstack.getEndpointOverride(SQS))
+            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
+                localstack.accessKey, localstack.secretKey
+            )))
+            .region(Region.of(localstack.region))
             .build()
 
         context = ApplicationContext.build('aws.sqs.queue': TEST_QUEUE).build()         // <7>
-        context.registerSingleton(AmazonSQS, sqs)
+        context.registerSingleton(SqsClient, sqs)
         context.start()
 
         service = context.getBean(SimpleQueueService)                                   // <8>
@@ -83,9 +89,9 @@ class SimpleQueueServiceSpec extends Specification {
             service.listQueueUrls().contains(queueUrl)
 
         when:
-            Map<String, String> queueAttributes = service.getQueueAttributes(TEST_QUEUE)
+            Map<QueueAttributeName, String> queueAttributes = service.getQueueAttributes(TEST_QUEUE)
         then:
-            queueAttributes.DelaySeconds == '0'
+            queueAttributes[QueueAttributeName.DELAY_SECONDS] == '0'
 
         when:
             String msgId = service.sendMessage(DATA)
@@ -93,8 +99,8 @@ class SimpleQueueServiceSpec extends Specification {
         then:
             msgId
             messages
-            messages.first().body == DATA
-            messages.first().messageId == msgId
+            messages.first().body() == DATA
+            messages.first().messageId() == msgId
 
         when:
             service.deleteMessage(msgId)
