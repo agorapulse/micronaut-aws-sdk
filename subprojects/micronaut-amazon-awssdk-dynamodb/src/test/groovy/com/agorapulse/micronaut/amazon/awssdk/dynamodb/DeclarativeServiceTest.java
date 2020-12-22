@@ -23,6 +23,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.testcontainers.containers.localstack.LocalStackContainer;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
@@ -41,16 +44,18 @@ public class DeclarativeServiceTest {
     private static final Instant REFERENCE_DATE = Instant.ofEpochMilli(1358487600000L);
 
     @Rule
-    public LocalStackV2Container localstack = new LocalStackV2Container().withServices(LocalStackV2Container.Service.DYNAMODB);
+    public LocalStackContainer localstack = new LocalStackContainer().withServices(LocalStackContainer.Service.DYNAMODB);
     public ApplicationContext context;
 
     @Before
-    public void setup() throws URISyntaxException {
+    public void setup() {
         DynamoDbClient client = DynamoDbClient
             .builder()
-            .endpointOverride(localstack.getEndpointOverride(LocalStackV2Container.Service.DYNAMODB))
-            .credentialsProvider(localstack.getDefaultCredentialsProvider())
-            .region(Region.EU_WEST_1)
+            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.DYNAMODB))
+            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
+                localstack.getAccessKey(), localstack.getSecretKey()
+            )))
+            .region(Region.of(localstack.getRegion()))
             .build();
 
         DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient

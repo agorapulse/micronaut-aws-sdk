@@ -18,8 +18,8 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb
 
 import io.micronaut.context.ApplicationContext
+import org.testcontainers.containers.localstack.LocalStackContainer
 import org.testcontainers.spock.Testcontainers
-import software.amazon.awssdk.auth.credentials.AwsCredentials
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
@@ -30,19 +30,18 @@ import spock.lang.Specification
 @Testcontainers
 class DefaultDynamoDBServiceNoRangeSpec extends Specification {
 
-    @Shared LocalStackV2Container localstack = new LocalStackV2Container().withServices(LocalStackV2Container.Service.DYNAMODB)
+    @Shared LocalStackContainer localstack = new LocalStackContainer().withServices(LocalStackV2Container.Service.DYNAMODB)
 
     @AutoCleanup ApplicationContext context
 
     DynamoDBEntityNoRangeService service
 
     void setup() {
-        AwsCredentials credentials = localstack.defaultCredentialsProvider.resolveCredentials()
         context = ApplicationContext.build(
             'aws.region': 'eu-west-1',
-            'aws.access-key-id': credentials.accessKeyId(),
-            'aws.secret-access-key': credentials.secretAccessKey(),
-            'aws.dynamodb.endpoint': localstack.getEndpointOverride(LocalStackV2Container.Service.DYNAMODB).toString()
+            'aws.access-key-id': localstack.accessKey,
+            'aws.secret-access-key': localstack.secretKey,
+            'aws.dynamodb.endpoint': localstack.getEndpointOverride(LocalStackContainer.Service.DYNAMODB).toString()
         ).build()
 
         context.start()

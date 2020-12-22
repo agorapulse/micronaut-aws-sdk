@@ -29,7 +29,9 @@ dependencies {
     compile "software.amazon.awssdk:dynamodb"
     compile "software.amazon.awssdk:dynamodb-enhanced"
 
+    testCompile group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
     testCompile group: 'org.testcontainers', name: 'testcontainers', version: testcontainersVersion
     testCompile group: 'org.testcontainers', name: 'spock', version: testcontainersVersion
+    testCompile 'io.micronaut.configuration:micronaut-aws-common'
 
 }
