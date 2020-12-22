@@ -30,7 +30,7 @@ import spock.lang.Specification
 @Testcontainers
 class DefaultDynamoDBServiceNoRangeSpec extends Specification {
 
-    @Shared LocalStackContainer localstack = new LocalStackContainer().withServices(LocalStackV2Container.Service.DYNAMODB)
+    @Shared LocalStackContainer localstack = new LocalStackContainer().withServices(LocalStackContainer.Service.DYNAMODB)
 
     @AutoCleanup ApplicationContext context
 
