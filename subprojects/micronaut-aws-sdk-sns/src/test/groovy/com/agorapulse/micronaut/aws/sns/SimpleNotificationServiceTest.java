@@ -50,7 +50,7 @@ public class SimpleNotificationServiceTest {
     public SimpleNotificationService service;
 
     @Rule
-    public LocalStackContainer localstack = new LocalStackContainer("0.8.10")            // <2>
+    public LocalStackContainer localstack = new LocalStackContainer()                   // <2>
         .withServices(SNS);
 
     @Before

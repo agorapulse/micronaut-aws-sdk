@@ -53,7 +53,7 @@ class SimpleQueueServiceSpec extends Specification {
     private static final String DATA = 'Hello World'
 
     // tag::testcontainers-fields[]
-    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.10')          // <3>
+    @Shared LocalStackContainer localstack = new LocalStackContainer()                  // <3>
         .withServices(SQS)
 
     @AutoCleanup ApplicationContext context                                             // <4>

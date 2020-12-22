@@ -42,7 +42,7 @@ class SimpleNotificationServiceSpec extends Specification {
     private static final String TEST_TOPIC = 'TestTopic'
 
     // tag::testcontainers-fields[]
-    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.10')          // <2>
+    @Shared LocalStackContainer localstack = new LocalStackContainer()                  // <2>
         .withServices(SNS)
 
     @AutoCleanup ApplicationContext context                                             // <3>
