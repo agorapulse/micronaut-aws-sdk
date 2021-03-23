@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2018-2020 Agorapulse.
+ * Copyright 2018-2021 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -240,7 +240,7 @@ public interface KinesisService {
     default Flowable<Record> listShardRecordsAfterSequenceNumber(String streamName, Shard shard, String startingSequenceNumber) {
         return getShardRecords(streamName, shard, ShardIteratorType.AFTER_SEQUENCE_NUMBER, startingSequenceNumber, 0);
     }
-    
+
     /**
      *
      * @param shard the shard to be used
