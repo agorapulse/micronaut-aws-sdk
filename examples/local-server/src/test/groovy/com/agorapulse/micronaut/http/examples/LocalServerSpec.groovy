@@ -22,7 +22,7 @@ import com.agorapulse.gru.http.Http
 import com.agorapulse.micronaut.http.examples.spacecrafts.SpacecraftDBService
 import com.amazonaws.services.lambda.runtime.Context
 import io.micronaut.runtime.server.EmbeddedServer
-import org.junit.Rule
+import spock.lang.AutoCleanup
 import spock.lang.Specification
 
 /**
@@ -30,7 +30,7 @@ import spock.lang.Specification
  */
 class LocalServerSpec extends Specification {
 
-   @Rule Gru gru = Gru.equip(Http.steal(this))
+   @AutoCleanup Gru gru = Gru.equip(Http.steal(this))
 
     void 'sanity check'() {
         when:

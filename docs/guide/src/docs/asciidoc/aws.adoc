@@ -20,7 +20,7 @@ Key concepts of the AWS SDK for Micronaut:
 
 *   Fully leveraging of Micronaut best practises
 ** Low-level API clients such as `AmazonDynamoDB` available for dependency injection
-** Declarative clients and services such as `@KinesisListener` where applicable
+** Declarative clients and services such as `@KinesisClient` where applicable
 ** Configuration driven named service beans
 ** Sensible defaults
 ** Conditional beans based on presence of classes on the classpath or on the presence of specific properties

@@ -6,14 +6,3 @@ aws:
     streams:                                                                            # <2>
       test:                                                                             # <3>
         stream: TestStream
-
-    application:
-      name: MyKinesisApp                                                                # <4>
-    worker:
-      id: rubble                                                                        # <5>
-    listener:
-      stream: MyStreamToConsume                                                         # <6>
-
-    listeners:                                                                          # <7>
-      test:                                                                             # <8>
-        stream: TestStreamToConsume

@@ -15,32 +15,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.aws.kinesis.annotation;
-
-import com.agorapulse.micronaut.aws.util.ConfigurationUtil;
-import io.micronaut.context.annotation.Executable;
-import io.micronaut.context.annotation.Parallel;
+package com.agorapulse.micronaut.amazon.awssdk.kinesis.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Makes annotated method triggered by new Kinesis events.
+ * Declares the name of the stream to publish events.
  */
+@Inherited
 @Documented
-@Retention(RUNTIME)
-@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
-@Executable(processOnStartup = true)
-@Parallel
-public @interface KinesisListener {
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD})
+public @interface Stream {
 
     /**
-     * @return the name of the client configuration
+     * @return the name of the stream to publish new records.
      */
-    String value() default ConfigurationUtil.DEFAULT_CONFIGURATION_NAME;
+    String value();
 
 }

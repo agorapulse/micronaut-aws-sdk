@@ -5,8 +5,7 @@
 This library provides three approaches to work with Kinesis streams:
 
 1. High-level <<Publishing with `@KinesisClient`>>
-2. High-level <<Listening with `@KinesisListener`>>
-3. Middle-level <<Kinesis Service>>
+2. Middle-level <<Kinesis Service>>
 
 ==== Installation
 
@@ -30,8 +29,7 @@ compile 'com.agorapulse:micronaut-aws-sdk-kinesis:{project-version}'
 
 ==== Configuration
 
-By default, only `aws.kinesis.application.name` and `aws.kinesis.listener.stream` are required if you decide to use `@KinesisListener`.
-Otherwise you need no configuration at all but some of the configuration may be useful for you.
+You need no configuration at all but some of the configuration may be useful for you.
 
 [source,yaml,indent=0,options="nowrap"]
 .application.yml
@@ -41,11 +39,6 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-test/src/test/resources/applic
 <1> You can specify the default stream for https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/kinesis/KinesisService.html[KinesisService] and `@KinesisClient`
 <2> You can define multiple configurations
 <3> Each of the configuration can be access using `@Named('test') KinesisService` qualifier or you can define the configuration as `value` of `@KinesisClient('test')`
-<4> Application name is required for `@KinesisListner`
-<5> Optional id of the Kinesis worker (listener)
-<6> Stream to listen is required for `@KinesisListener`
-<7> You can define multiple listeners configurations
-<8> The name of the configuration will be used as `value` of `@KinesisListener('test')`
 
 
 ==== Publishing with `@KinesisClient`
@@ -119,10 +112,6 @@ By default, `KinesisClient` publishes records into the default stream defined by
 You can switch to different configuration by changing the `value` of the annotation such as `@KinesisClient("other")` or
 by setting the `stream` property of the annotation such as `@KinesisClient(stream = "MyStream")`. You can change stream
 used by particular method using `@Stream` annotation as mentioned above.
-
-==== Listening with `@KinesisListener`
-
-NOTE: Kinesis Worker support has been discontinued. Consume Kinesis events with Lambda instead.
 
 ==== Kinesis Service
 
