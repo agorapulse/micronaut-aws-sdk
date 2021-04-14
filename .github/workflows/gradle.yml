@@ -26,7 +26,10 @@ jobs:
     - name: Check
       uses: eskatos/gradle-command-action@v1
       with:
-        arguments: check coveralls --stacktrace
+        arguments: check coveralls -Dscan.uploadInBackground=false --scan --stacktrace
+    - name: Show Build Scan
+      if: always()
+      run: cat scan-journal.log
     - name: Show Reports
       uses: actions/upload-artifact@v1
       if: failure()

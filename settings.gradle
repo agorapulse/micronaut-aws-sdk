@@ -45,7 +45,22 @@ buildscript {
     }
 }
 
+plugins {
+    id 'com.gradle.enterprise' version '3.6.1'
+}
+
 apply plugin: 'org.kordamp.gradle.settings'
+
+gradleEnterprise {
+    buildScan {
+        termsOfServiceUrl = "https://gradle.com/terms-of-service"
+        termsOfServiceAgree = "yes"
+
+        buildScanPublished { scan ->
+            file("scan-journal.log") << "${new Date()} - ${scan.buildScanId} - ${scan.buildScanUri}\n"
+        }
+    }
+}
 
 projects {
     directories = ['subprojects', 'examples', 'docs']
