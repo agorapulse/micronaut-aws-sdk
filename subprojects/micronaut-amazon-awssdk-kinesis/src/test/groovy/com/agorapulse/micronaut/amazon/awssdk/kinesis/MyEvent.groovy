@@ -17,7 +17,6 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.kinesis
 
-import com.agorapulse.micronaut.amazon.awssdk.kinesis.DefaultEvent
 import groovy.transform.CompileStatic
 
 /**

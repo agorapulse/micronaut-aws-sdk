@@ -59,7 +59,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
     static String serializeDate(Date date) {
         SimpleDateFormat dateFormatter = new SimpleDateFormat(SERIALIZED_DATE_FORMAT, Locale.ENGLISH)
         dateFormatter.timeZone = TimeZone.getTimeZone(SERIALIZED_DATE_TIMEZONE)
-        dateFormatter.format(date)
+        return dateFormatter.format(date)
     }
 
     @CompileDynamic
@@ -116,7 +116,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      */
     int count(Object hashKey, String rangeKeyName, Object rangeKeyValue, ComparisonOperator operator, Map settings) {
         Map conditions = rangeKeyValue ? [(rangeKeyName): buildCondition(rangeKeyValue, operator)] : [:]
-        countByConditions(hashKey, conditions, settings)
+        return countByConditions(hashKey, conditions, settings)
     }
 
     /**
@@ -133,7 +133,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      */
     int countByDates(Object hashKey, String rangeKeyName, Map rangeKeyDates, Map settings) {
         Map conditions = buildDateConditions(rangeKeyName, rangeKeyDates, settings[MAX_AFTER_DATE_KEY] as Date)
-        countByConditions(hashKey, conditions, settings)
+        return countByConditions(hashKey, conditions, settings)
     }
 
     /**
@@ -153,7 +153,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
             settings.putAll(limit: DEFAULT_COUNT_LIMIT)
         }
         QueryResultPage resultPage = queryByConditions(hashKey, rangeKeyConditions, settings)
-        resultPage?.results?.size() ?: 0
+        return resultPage?.results?.size() ?: 0
     }
 
     /**
@@ -250,7 +250,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
                   ComparisonOperator operator,
                   Map settings) {
         Map conditions = [(rangeKeyName): buildCondition(rangeKeyValue, operator)]
-        deleteAllByConditions(
+        return deleteAllByConditions(
             hashKey,
             conditions,
             settings
@@ -283,7 +283,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
             query.indexName = indexName
         }
 
-        deleteAllByConditions(query, settings)
+        return deleteAllByConditions(query, settings)
     }
 
     /**
@@ -316,7 +316,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
             lastEvaluatedKey = itemsPage.lastEvaluatedKey
         }
         log.debug "Successfully deleted ${deletedItemsCount} items"
-        deletedItemsCount
+        return deletedItemsCount
     }
 
     /**
@@ -327,7 +327,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      * @return
      */
     TItemClass get(Object hashKey, Object rangeKey) {
-        mapper.load(metadata.itemClass, hashKey, rangeKey)
+        return mapper.load(metadata.itemClass, hashKey, rangeKey)
     }
 
     /**
@@ -393,15 +393,15 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      */
     Integer increment(Object hashKey, Object rangeKey, String attributeName, int attributeIncrement) {
         UpdateItemResult result = updateItemAttribute(hashKey, rangeKey, attributeName, attributeIncrement, AttributeAction.ADD)
-        result?.attributes[attributeName]?.n?.toInteger()
+        return result?.attributes[attributeName]?.n?.toInteger()
     }
 
     TItemClass getNewInstance() {
-        metadata.itemClass.newInstance()
+        return metadata.itemClass.newInstance()
     }
 
     PaginatedQueryList<TItemClass> query(DynamoDBQueryExpression queryExpression) {
-        mapper.query(this.metadata.itemClass, queryExpression)
+        return mapper.query(this.metadata.itemClass, queryExpression)
     }
 
     /**
@@ -509,7 +509,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      */
     QueryResultPage<TItemClass> queryByDates(Object hashKey, String rangeKeyName, Map rangeKeyDates, Map settings) {
         Map conditions = buildDateConditions(rangeKeyName, rangeKeyDates, settings[MAX_AFTER_DATE_KEY] as Date)
-        queryByConditions(hashKey, conditions, settings)
+        return queryByConditions(hashKey, conditions, settings)
     }
 
     /**
@@ -550,7 +550,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
             return itemsToSave
         }
 
-        itemsToSave.each {
+        return itemsToSave.each {
             log.debug "Saving item in DynamoDB ${it}"
             settings.config ? mapper.save(it, settings.config as DynamoDBMapperConfig) : mapper.save(it)
         }
@@ -581,7 +581,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
                 action: AttributeAction.DELETE
             )
         )
-        client.updateItem(request)
+        return client.updateItem(request)
     }
 
     /**
@@ -610,11 +610,11 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
                 value: buildAttributeValue(attributeValue)
             )
         )
-        client.updateItem(request)
+        return client.updateItem(request)
     }
 
     boolean isIndexRangeKey(String rangeName) {
-        metadata.secondaryIndexes.contains(rangeName)
+        return metadata.secondaryIndexes.contains(rangeName)
     }
 
     String getHashKeyName() {
@@ -650,7 +650,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
             // Make sure that 'before' date is after 'after' date, to generate valid BETWEEN DynamoDB query (even if query will return nothing, it won't break)
             params[BEFORE_KEY] = params[AFTER_KEY]
         }
-        params
+        return params
     }
 
     /**
@@ -683,7 +683,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      */
     static protected Condition buildCondition(Object rangeKeyValue,
                                               ComparisonOperator operator = ComparisonOperator.EQ) {
-        new Condition()
+        return new Condition()
             .withComparisonOperator(operator)
             .withAttributeValueList(buildAttributeValue(rangeKeyValue))
     }
@@ -715,7 +715,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
         if (rangeKeyDates.containsKey(AFTER_KEY) && rangeKeyDates.containsKey(BEFORE_KEY)) {
             operator = ComparisonOperator.BETWEEN
         }
-        [
+        return [
             (rangeKeyName): new Condition()
                 .withComparisonOperator(operator)
                 .withAttributeValueList(attributeValueList),
@@ -753,7 +753,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
         } else {
             query.scanIndexForward = false
         }
-        query
+        return query
     }
 
     /**
@@ -765,7 +765,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      */
     @SuppressWarnings('Instanceof')
     static protected Map buildStartKey(Map map) {
-        map.inject([:]) { startKey, it ->
+        return map.inject([:]) { startKey, it ->
             if (it.value instanceof AttributeValue) {
                 startKey[it.key] = it.value
             } else {
@@ -784,7 +784,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
         if (indexName) {
             query.indexName = indexName
         }
-        query
+        return query
     }
 
     @SuppressWarnings('ParameterCount')

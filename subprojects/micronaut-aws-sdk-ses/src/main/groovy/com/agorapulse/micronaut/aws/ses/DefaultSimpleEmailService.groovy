@@ -63,7 +63,7 @@ class DefaultSimpleEmailService implements SimpleEmailService {
             throw new IllegalArgumentException("Email does not contain recepients: $transactionalEmail")
         }
 
-        transactionalEmail
+        return transactionalEmail
     }
 
     private final AmazonSimpleEmailService client

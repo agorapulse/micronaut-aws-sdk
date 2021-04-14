@@ -23,6 +23,7 @@ import com.amazonaws.services.kinesis.model.PutRecordsRequestEntry
 import com.amazonaws.services.kinesis.model.PutRecordsResult
 import com.amazonaws.services.kinesis.model.ResourceNotFoundException
 import com.fasterxml.jackson.databind.ObjectMapper
+import groovy.transform.CompileDynamic
 import io.micronaut.context.ApplicationContext
 import io.micronaut.inject.qualifiers.Qualifiers
 import spock.lang.AutoCleanup
@@ -31,6 +32,7 @@ import spock.lang.Specification
 /**
  * Tests for Kinesis declarative clients.
  */
+@CompileDynamic
 class KinesisClientSpec extends Specification {
 
     private static final String DEFAULT_STREAM_NAME = 'DefaultStream'
@@ -292,7 +294,7 @@ class KinesisClientSpec extends Specification {
     }
 
     private byte[] json(Object object) {
-        context.getBean(ObjectMapper).writeValueAsBytes(object)
+        return context.getBean(ObjectMapper).writeValueAsBytes(object)
     }
 
 }

@@ -23,6 +23,7 @@ import com.agorapulse.micronaut.aws.dynamodb.DynamoDBEntity
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
+import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import spock.lang.Specification
 
@@ -31,6 +32,7 @@ import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*
 /**
  * Tests for builders.
  */
+@CompileDynamic
 @SuppressWarnings('NoJavaUtilDate')
 class BuildersSpec extends Specification {
 
@@ -92,7 +94,7 @@ class BuildersSpec extends Specification {
 
     @CompileStatic
     private static QueryBuilder<DynamoDBEntity> createEntityQueryInconsistentDesc() {
-        query(DynamoDBEntity) {
+        return query(DynamoDBEntity) {
             hash 'abc'
             sort desc
             inconsistent read
@@ -110,7 +112,7 @@ class BuildersSpec extends Specification {
 
     @CompileStatic
     private static QueryBuilder<DynamoDBEntity> createEntityQueryConsistentAsc() {
-        query(DynamoDBEntity) {
+        return query(DynamoDBEntity) {
             hash new DynamoDBEntity(parentId: 'abc')
             sort asc
             consistent read
@@ -124,7 +126,7 @@ class BuildersSpec extends Specification {
 
     @CompileStatic
     private static ScanBuilder<DynamoDBEntity> createEntityScanInconsistentDesc() {
-        scan(DynamoDBEntity) {
+        return scan(DynamoDBEntity) {
             inconsistent read
             index DynamoDBEntity.RANGE_INDEX
             or {
@@ -137,7 +139,7 @@ class BuildersSpec extends Specification {
 
     @CompileStatic
     private static ScanBuilder<DynamoDBEntity> createEntityScanConsistentAsc() {
-        scan(DynamoDBEntity) {
+        return scan(DynamoDBEntity) {
             consistent read
             configure {
                 it.indexName = DynamoDBEntity.RANGE_INDEX

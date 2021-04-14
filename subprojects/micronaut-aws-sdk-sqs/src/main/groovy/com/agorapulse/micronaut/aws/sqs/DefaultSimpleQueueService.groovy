@@ -97,7 +97,7 @@ class DefaultSimpleQueueService implements SimpleQueueService {
         String queueUrl = client.createQueue(createQueueRequest).queueUrl
         log.debug "Queue created (queueUrl=$queueUrl)"
         addQueue(queueUrl)
-        queueUrl
+        return queueUrl
     }
 
     /**
@@ -142,7 +142,7 @@ class DefaultSimpleQueueService implements SimpleQueueService {
         } catch (AmazonClientException exception) {
             log.warn 'An amazon client exception was catched while getting queue attributes', exception
         }
-        attributes
+        return attributes
     }
 
     /**
@@ -170,7 +170,7 @@ class DefaultSimpleQueueService implements SimpleQueueService {
         if (!queueUrl) {
             throw new QueueDoesNotExistException("Queue ${queueName} not found")
         }
-        queueUrl
+        return queueUrl
     }
 
     @Override
@@ -188,7 +188,7 @@ class DefaultSimpleQueueService implements SimpleQueueService {
         if (!queueUrlByNames || reload) {
             loadQueues()
         }
-        queueUrlByNames?.keySet()?.sort()
+        return queueUrlByNames?.keySet()?.sort()
     }
 
     /**
@@ -200,7 +200,7 @@ class DefaultSimpleQueueService implements SimpleQueueService {
         if (!queueUrlByNames || reload) {
             loadQueues()
         }
-        queueUrlByNames?.values()?.sort()
+        return queueUrlByNames?.values()?.sort()
     }
 
     /**
@@ -226,7 +226,7 @@ class DefaultSimpleQueueService implements SimpleQueueService {
         }
         List<Message> messages = client.receiveMessage(receiveMessageRequest).messages
         log.debug "Messages received (count=${messages.size()})"
-        messages
+        return messages
     }
 
     /**
@@ -248,7 +248,7 @@ class DefaultSimpleQueueService implements SimpleQueueService {
         }
         String messageId = client.sendMessage(request).messageId
         log.debug "Message sent (messageId=$messageId)"
-        messageId
+        return messageId
     }
 
     /**
@@ -267,7 +267,7 @@ class DefaultSimpleQueueService implements SimpleQueueService {
 
         String messageId = client.sendMessage(request).messageId
         log.debug "Message sent (messageId=$messageId)"
-        messageId
+        return messageId
     }
 
     void assertDefaultQueueName() {
@@ -276,7 +276,7 @@ class DefaultSimpleQueueService implements SimpleQueueService {
 
     // PRIVATE
     private static String getQueueNameFromUrl(String queueUrl) {
-        queueUrl.tokenize('/').last()
+        return queueUrl.tokenize('/').last()
     }
 
     @SuppressWarnings('ReturnNullFromCatchBlock')

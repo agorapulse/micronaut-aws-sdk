@@ -31,10 +31,11 @@ import javax.inject.Named
  * Default simple storage service configuration.
  */
 @Primary
-@Named(ConfigurationUtil.DEFAULT_CONFIGURATION_NAME)
 @CompileStatic
+@SuppressWarnings('OptionalField')
 @ConfigurationProperties('aws.ses')
 @Requires(classes = AmazonSimpleEmailService)
+@Named(ConfigurationUtil.DEFAULT_CONFIGURATION_NAME)
 class SimpleEmailServiceConfiguration extends DefaultRegionAndEndpointConfiguration {
 
     Optional<String> sourceEmail = Optional.empty()

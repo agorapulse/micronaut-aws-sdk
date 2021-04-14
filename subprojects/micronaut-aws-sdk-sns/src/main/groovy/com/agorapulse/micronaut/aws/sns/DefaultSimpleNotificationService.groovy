@@ -130,7 +130,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
     @Deprecated
     @SuppressWarnings('ParameterCount')
     String sendAndroidAppNotification(String endpointArn, Map notification, String collapseKey, boolean delayWhileIdle, int timeToLive, boolean dryRun) {
-        publishToTarget(endpointArn, PLATFORM_TYPE_ANDROID, buildAndroidMessage(notification, collapseKey, delayWhileIdle, timeToLive, dryRun))
+        return publishToTarget(endpointArn, PLATFORM_TYPE_ANDROID, buildAndroidMessage(notification, collapseKey, delayWhileIdle, timeToLive, dryRun))
     }
 
     /**
@@ -142,7 +142,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
      */
     @Deprecated
     String sendIosAppNotification(String endpointArn, Map notification, boolean sandbox) {
-        publishToTarget(endpointArn, sandbox ? PLATFORM_TYPE_IOS_SANDBOX : PLATFORM_TYPE_IOS, buildIosMessage(notification))
+        return publishToTarget(endpointArn, sandbox ? PLATFORM_TYPE_IOS_SANDBOX : PLATFORM_TYPE_IOS, buildIosMessage(notification))
     }
 
     /**
@@ -153,7 +153,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
      * @return
      */
     String sendNotification(String endpointArn, PlatformType platformType, String jsonMessage) {
-        publishToTarget(endpointArn, platformType.toString(), jsonMessage)
+        return publishToTarget(endpointArn, platformType.toString(), jsonMessage)
     }
 
     /**
@@ -164,7 +164,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
      * @return
      */
     String sendSMSMessage(String phoneNumber, String message, Map smsAttributes) {
-        client.publish(new PublishRequest().withMessage(message).withPhoneNumber(phoneNumber).withMessageAttributes(smsAttributes)).messageId
+        return client.publish(new PublishRequest().withMessage(message).withPhoneNumber(phoneNumber).withMessageAttributes(smsAttributes)).messageId
     }
 
     /**
@@ -175,7 +175,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
      */
     String subscribeTopic(String topic, String protocol, String endpoint) {
         log.debug("Creating a topic subscription to endpoint $endpoint")
-        client.subscribe(new SubscribeRequest(ensureTopicArn(topic), protocol, endpoint)).subscriptionArn
+        return client.subscribe(new SubscribeRequest(ensureTopicArn(topic), protocol, endpoint)).subscriptionArn
     }
 
     /**
@@ -280,7 +280,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
     }
 
     Flowable<Topic> listTopics() {
-        FlowableListTopicHelper.generateTopics(client)
+        return FlowableListTopicHelper.generateTopics(client)
     }
 
     private static String checkNotEmpty(String arn, String errorMessage) {
@@ -292,7 +292,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
 
     @Deprecated
     private String buildAndroidMessage(Map data, String collapseKey, boolean delayWhileIdle, int timeToLive, boolean dryRun) {
-        objectMapper.writeValueAsString([
+        return objectMapper.writeValueAsString([
             collapse_key    : collapseKey,
             data            : data,
             delay_while_idle: delayWhileIdle,
@@ -303,7 +303,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
 
     @Deprecated
     private String buildIosMessage(Map data) {
-        objectMapper.writeValueAsString([
+        return objectMapper.writeValueAsString([
             aps: data,
         ])
     }
@@ -311,7 +311,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
     private DeleteEndpointResult deleteEndpoint(String endpointArn) {
         DeleteEndpointRequest depReq = new DeleteEndpointRequest()
             .withEndpointArn(endpointArn)
-        client.deleteEndpoint(depReq)
+        return client.deleteEndpoint(depReq)
     }
 
     @SuppressWarnings('UnnecessarySetter')
@@ -320,7 +320,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
         SetEndpointAttributesRequest saeReq = new SetEndpointAttributesRequest()
             .withEndpointArn(endpointArn)
             .withAttributes(attributes)
-        client.setEndpointAttributes(saeReq)
+        return client.setEndpointAttributes(saeReq)
     }
 
     private String publishToTarget(String endpointArn, String platformType, String jsonMessage) {
@@ -329,7 +329,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
             messageStructure: 'json',
             targetArn: endpointArn, // For direct publish to mobile end points, topicArn is not relevant.
         )
-        client.publish(request).messageId
+        return client.publish(request).messageId
     }
 
     @SuppressWarnings('UnnecessarySubstring')
