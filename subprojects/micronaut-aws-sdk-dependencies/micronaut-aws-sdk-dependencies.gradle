@@ -57,3 +57,7 @@ dependencies {
         api group: "com.fasterxml.jackson.dataformat", name: "jackson-dataformat-cbor", version: project["jackson.datatype.version"]
     }
 }
+
+project.afterEvaluate {
+    generatePomFileForMainPublication.pom.packaging = 'pom'
+}
