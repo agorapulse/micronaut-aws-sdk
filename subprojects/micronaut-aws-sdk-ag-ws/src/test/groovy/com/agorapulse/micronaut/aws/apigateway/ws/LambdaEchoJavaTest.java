@@ -25,11 +25,13 @@ import io.micronaut.context.ApplicationContext;
 import io.micronaut.runtime.server.EmbeddedServer;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
+@Ignore
 public class LambdaEchoJavaTest {
 
     private static final String CONNECTION_ID = "abcdefghij";

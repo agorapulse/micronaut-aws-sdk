@@ -15,12 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-config {
-    bintray {
-        enabled = true
-    }
-}
-
 dependencies {
     compile project(':micronaut-aws-sdk-core')
     compile "space.jasan:groovy-closure-support:$closureSupportVersion"

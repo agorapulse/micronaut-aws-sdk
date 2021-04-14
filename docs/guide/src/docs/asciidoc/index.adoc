@@ -10,14 +10,14 @@
 image::ribbon.png[link={project-url}]
 
 --
-image::https://api.bintray.com/packages/agorapulse/libs/{project-name}/images/download.svg[link="https://bintray.com/agorapulse/libs/{project-name}/_latestVersion",float="left"]
+image::https://img.shields.io/maven-central/v/com.agorapulse/micronaut-aws-sdk.svg?label=Maven%20Central[link="https://search.maven.org/search?q=g:%22com.agorapulse%22%20AND%20a:%22micronaut-aws-sdk%22",float="left"]
 image::https://github.com/{project-slug}/workflows/Check/badge.svg["Build Status", link="https://github.com/{project-slug}/actions?query=workflow%3ACheck"float="left"]
 image::https://coveralls.io/repos/github/{project-slug}/badge.svg?branch=master[link=https://coveralls.io/github/{project-slug}?branch=master",float="left"]
 --
 
 ---
 
-Set of useful libraries for http://micronaut.io[Micronaut]. All the libraries are available in https://bintray.com/bintray/jcenter[JCenter Maven repository].
+Set of useful libraries for http://micronaut.io[Micronaut]. All the libraries are available in the Maven Central.
 
  * <<AWS SDK for Micronaut>> - integration for <<DynamoDB>>, <<Kinesis>>, <<Simple Storage Service (S3)>>, <<Simple Email Service (SES)>>, <<Simple Notification Service (SNS)>>,  <<Simple Queue Service (SQS)>> and <<WebSockets for API Gateway>>
  * <<Micronaut for API Gateway Proxy>> - develop API Gateway Proxy Lambda functions using Micronaut HTTP server capabilities (currently superseded by
