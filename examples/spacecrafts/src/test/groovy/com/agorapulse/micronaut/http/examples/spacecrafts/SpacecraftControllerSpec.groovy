@@ -23,7 +23,7 @@ import com.agorapulse.gru.Gru
 import com.agorapulse.gru.agp.ApiGatewayProxy
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
 import io.micronaut.context.ApplicationContext
-import org.junit.Rule
+import spock.lang.AutoCleanup
 import spock.lang.Specification
 
 /**
@@ -31,12 +31,12 @@ import spock.lang.Specification
  */
 class SpacecraftControllerSpec extends Specification {
 
-    @Rule private final Gru gru = Gru.equip(ApiGatewayProxy.steal(this) {
+    @AutoCleanup private final Gru gru = Gru.equip(ApiGatewayProxy.steal(this) {
         map '/spacecraft/{country}' to MicronautHandler
         map '/spacecraft/{country}/{name}' to MicronautHandler
     })
 
-    @Rule private final Dru dru = Dru.steal(this)
+    @AutoCleanup private final Dru dru = Dru.steal(this)
 
     void setup() {
         MicronautHandler.reset()

@@ -35,6 +35,7 @@ import com.amazonaws.services.s3.model.S3ObjectSummary
 import com.amazonaws.services.s3.model.Tag
 import com.amazonaws.services.s3.transfer.Upload
 import com.amazonaws.services.s3.transfer.model.UploadResult
+import groovy.transform.CompileDynamic
 import io.micronaut.http.MediaType
 import io.micronaut.http.multipart.PartData
 import org.junit.Rule
@@ -47,6 +48,7 @@ import java.nio.ByteBuffer
 /**
  * Tests for simple storage service.
  */
+@CompileDynamic
 @SuppressWarnings('MethodCount')
 class SimpleStorageServiceWithMockSpec extends Specification {
 
@@ -226,7 +228,7 @@ class SimpleStorageServiceWithMockSpec extends Specification {
     }
 
     InputStream mockInputStream() {
-        new InputStream() {
+        return new InputStream() {
 
             @Override
             int read() throws IOException {

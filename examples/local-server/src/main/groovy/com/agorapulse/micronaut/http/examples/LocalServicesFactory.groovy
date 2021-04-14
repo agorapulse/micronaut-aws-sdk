@@ -74,7 +74,7 @@ class LocalServicesFactory {
     @Primary
     @Singleton
     IDynamoDBMapper dynamoDBMapper() {
-        mapper
+        return mapper
     }
 
 }

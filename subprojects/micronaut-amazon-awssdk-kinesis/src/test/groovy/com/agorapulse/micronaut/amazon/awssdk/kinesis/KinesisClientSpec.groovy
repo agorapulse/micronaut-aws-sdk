@@ -15,17 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.aws.kinesis
+package com.agorapulse.micronaut.amazon.awssdk.kinesis
 
-import com.agorapulse.micronaut.aws.kinesis.annotation.KinesisClient
-import com.amazonaws.services.kinesis.model.PutRecordResult
-import com.amazonaws.services.kinesis.model.PutRecordsRequestEntry
-import com.amazonaws.services.kinesis.model.PutRecordsResult
-import com.amazonaws.services.kinesis.model.ResourceNotFoundException
+import com.agorapulse.micronaut.amazon.awssdk.kinesis.annotation.KinesisClient
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.transform.CompileDynamic
 import io.micronaut.context.ApplicationContext
 import io.micronaut.inject.qualifiers.Qualifiers
+import software.amazon.awssdk.services.kinesis.model.PutRecordResponse
+import software.amazon.awssdk.services.kinesis.model.PutRecordsRequestEntry
+import software.amazon.awssdk.services.kinesis.model.PutRecordsResponse
+import software.amazon.awssdk.services.kinesis.model.ResourceNotFoundException
 import spock.lang.AutoCleanup
 import spock.lang.Specification
 
@@ -43,9 +43,9 @@ class KinesisClientSpec extends Specification {
     private static final MyEvent EVENT_2 = new MyEvent(value: 'bar')
     private static final Pogo POGO_1 = new Pogo(foo: 'bar')
     private static final Pogo POGO_2 = new Pogo(foo: 'baz')
-    private static final PutRecordsRequestEntry PUT_RECORDS_REQUEST_ENTRY = new PutRecordsRequestEntry()
-    private static final PutRecordResult PUT_RECORD_RESULT = new PutRecordResult().withSequenceNumber('1')
-    private static final PutRecordsResult PUT_RECORDS_RESULT = new PutRecordsResult()
+    private static final PutRecordsRequestEntry PUT_RECORDS_REQUEST_ENTRY = PutRecordsRequestEntry.builder().build()
+    private static final PutRecordResponse PUT_RECORD_RESULT = PutRecordResponse.builder().sequenceNumber('1').build()
+    private static final PutRecordsResponse PUT_RECORDS_RESULT = PutRecordsResponse.builder().build()
 
     KinesisService defaultService = Mock(KinesisService) {
         getDefaultStreamName() >> DEFAULT_STREAM_NAME
@@ -70,7 +70,7 @@ class KinesisClientSpec extends Specification {
         given:
             DefaultClient client = context.getBean(DefaultClient)
         when:
-            PutRecordResult result = client.putEvent(EVENT_1)
+            PutRecordResponse result = client.putEvent(EVENT_1)
         then:
             result == PUT_RECORD_RESULT
 
@@ -81,7 +81,7 @@ class KinesisClientSpec extends Specification {
         given:
             TestClient client = context.getBean(TestClient)
         when:
-            PutRecordResult result = client.putEvent(EVENT_1)
+            PutRecordResponse result = client.putEvent(EVENT_1)
         then:
             result == PUT_RECORD_RESULT
 
@@ -92,7 +92,7 @@ class KinesisClientSpec extends Specification {
         given:
             StreamClient client = context.getBean(StreamClient)
         when:
-            PutRecordResult result = client.putEvent(EVENT_1)
+            PutRecordResponse result = client.putEvent(EVENT_1)
         then:
             result == PUT_RECORD_RESULT
 
@@ -103,7 +103,7 @@ class KinesisClientSpec extends Specification {
         given:
             DefaultClient client = context.getBean(DefaultClient)
         when:
-            PutRecordResult result = client.putEventToStream(EVENT_1)
+            PutRecordResponse result = client.putEventToStream(EVENT_1)
         then:
             result == PUT_RECORD_RESULT
 
@@ -114,7 +114,7 @@ class KinesisClientSpec extends Specification {
         given:
             DefaultClient client = context.getBean(DefaultClient)
         when:
-            PutRecordsResult results = client.putEventsIterable([EVENT_1, EVENT_2])
+            PutRecordsResponse results = client.putEventsIterable([EVENT_1, EVENT_2])
         then:
             results == PUT_RECORDS_RESULT
 
@@ -161,7 +161,7 @@ class KinesisClientSpec extends Specification {
         given:
             DefaultClient client = context.getBean(DefaultClient)
         when:
-            PutRecordsResult results = client.putRecordObjects([POGO_1, POGO_2])
+            PutRecordsResponse results = client.putRecordObjects([POGO_1, POGO_2])
         then:
             results == PUT_RECORDS_RESULT
 
@@ -172,7 +172,7 @@ class KinesisClientSpec extends Specification {
         given:
             DefaultClient client = context.getBean(DefaultClient)
         when:
-            PutRecordsResult results = client.putRecordObjects(POGO_1, POGO_2)
+            PutRecordsResponse results = client.putRecordObjects(POGO_1, POGO_2)
         then:
             results == PUT_RECORDS_RESULT
 
@@ -192,7 +192,7 @@ class KinesisClientSpec extends Specification {
         given:
             DefaultClient client = context.getBean(DefaultClient)
         when:
-            PutRecordResult result = client.putRecord(PARTITION_KEY, RECORD)
+            PutRecordResponse result = client.putRecord(PARTITION_KEY, RECORD)
         then:
             result == PUT_RECORD_RESULT
 
@@ -284,11 +284,11 @@ class KinesisClientSpec extends Specification {
         given:
             DefaultClient client = context.getBean(DefaultClient)
         when:
-            PutRecordResult result = client.putEvent(EVENT_1)
+            PutRecordResponse result = client.putEvent(EVENT_1)
         then:
             result == PUT_RECORD_RESULT
 
-            1 * defaultService.putEvent(DEFAULT_STREAM_NAME, EVENT_1) >> { throw new ResourceNotFoundException() }
+            1 * defaultService.putEvent(DEFAULT_STREAM_NAME, EVENT_1) >> { throw ResourceNotFoundException.builder().build() }
             1 * defaultService.createStream(DEFAULT_STREAM_NAME)
             1 * defaultService.putEvent(DEFAULT_STREAM_NAME, EVENT_1) >> PUT_RECORD_RESULT
     }
@@ -301,7 +301,7 @@ class KinesisClientSpec extends Specification {
 
 @KinesisClient('test') interface TestClient {
 
-    PutRecordResult putEvent(MyEvent event)
+    PutRecordResponse putEvent(MyEvent event)
     void doWhatever(Object one, Object two, Object three, Object four)
 
 }
@@ -310,7 +310,7 @@ class KinesisClientSpec extends Specification {
 
     public String SOME_STREAM = 'SomeStream'
 
-    PutRecordResult putEvent(MyEvent event)
+    PutRecordResponse putEvent(MyEvent event)
 
 }
 
