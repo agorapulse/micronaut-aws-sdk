@@ -53,4 +53,4 @@ jobs:
           repository: ${{ matrix.repository }}
           event-type: ap-new-version-released-event
           # beware, we're using version with "-micronaut-1.2" suffix in BOM
-          client-payload: '{ "group": "com.agorapulse", "module": "micronaut-aws-sdk", "version": "${{ steps.version.outputs.tag }}-micronaut-1.2", "property" : "micronaut.aws.sdk.version", "github" : ${{ toJson(github) }} }'
+          client-payload: '{ "group": "com.agorapulse", "module": "micronaut-aws-sdk", "version": "${{ steps.version.outputs.tag }}", "property" : "micronaut.aws.sdk.version", "github" : ${{ toJson(github) }} }'
