@@ -31,7 +31,7 @@ import spock.lang.Specification
  */
 class PlanetControllerSpec extends Specification {
 
-    @AutoCleanup private final Gru gru = Gru.equip(ApiGatewayProxy.steal(this) {        // <1>
+    @AutoCleanup private final Gru gru = Gru.equip(ApiGatewayProxy.steal(this) {               // <1>
         map '/planet/{star}' to MicronautHandler                                        // <2>
         map '/planet/{star}/{name}' to MicronautHandler
     })

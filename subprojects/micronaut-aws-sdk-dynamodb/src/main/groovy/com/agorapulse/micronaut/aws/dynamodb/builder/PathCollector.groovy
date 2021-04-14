@@ -32,7 +32,7 @@ class PathCollector {
         Closure closure = collector.rehydrate(pathCollector, pathCollector, pathCollector)
         closure.resolveStrategy = Closure.DELEGATE_ONLY
         closure.call(pathCollector)
-        pathCollector
+        return pathCollector
     }
 
     private final String path

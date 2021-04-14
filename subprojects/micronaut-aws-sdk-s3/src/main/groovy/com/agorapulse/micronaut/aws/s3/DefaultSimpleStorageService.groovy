@@ -96,7 +96,7 @@ class DefaultSimpleStorageService implements SimpleStorageService {
         if (cannedAcl) {
             metadata.setHeader('x-amz-acl', cannedAcl.toString())
         }
-        metadata
+        return metadata
     }
 
     @SuppressWarnings([
@@ -155,7 +155,7 @@ class DefaultSimpleStorageService implements SimpleStorageService {
         }
         PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, path, file)
             .withCannedAcl(cannedAcl)
-        transferManager.upload(putObjectRequest)
+        return transferManager.upload(putObjectRequest)
     }
 
     /**
@@ -199,7 +199,7 @@ class DefaultSimpleStorageService implements SimpleStorageService {
      */
     boolean deleteFile(String key) {
         assertDefaultBucketName()
-        deleteFile(defaultBucketName, key)
+        return deleteFile(defaultBucketName, key)
     }
 
     /**
@@ -260,7 +260,7 @@ class DefaultSimpleStorageService implements SimpleStorageService {
                  String key,
                  File localFile) {
         client.getObject(new GetObjectRequest(bucketName, key), localFile)
-        localFile
+        return localFile
     }
 
     /**
@@ -268,7 +268,7 @@ class DefaultSimpleStorageService implements SimpleStorageService {
      * @return
      */
     List listBucketNames() {
-        client.listBuckets()*.name
+        return client.listBuckets()*.name
     }
 
     /**
@@ -278,7 +278,7 @@ class DefaultSimpleStorageService implements SimpleStorageService {
      * @return
      */
     Flowable<ObjectListing> listObjects(String bucketName, String prefix) {
-        FlowableObjectListingHelper.generate(client, bucketName, prefix)
+        return FlowableObjectListingHelper.generate(client, bucketName, prefix)
     }
 
     /**
@@ -292,7 +292,7 @@ class DefaultSimpleStorageService implements SimpleStorageService {
     String generatePresignedUrl(String bucketName,
                                 String key,
                                 Date expirationDate) {
-        client.generatePresignedUrl(bucketName, key, expirationDate).toString()
+        return client.generatePresignedUrl(bucketName, key, expirationDate).toString()
     }
 
     /**
@@ -317,7 +317,7 @@ class DefaultSimpleStorageService implements SimpleStorageService {
             return ''
         }
 
-        client.getUrl(bucketName, path)
+        return client.getUrl(bucketName, path)
     }
 
     /**
@@ -338,7 +338,7 @@ class DefaultSimpleStorageService implements SimpleStorageService {
             return ''
         }
 
-        client.getUrl(bucketName, path)
+        return client.getUrl(bucketName, path)
     }
 
     /**
@@ -362,7 +362,7 @@ class DefaultSimpleStorageService implements SimpleStorageService {
         byte[] resultByte = DigestUtils.md5(partData.inputStream)
         metadata.contentMD5 = resultByte.encodeBase64().toString()
         partData.contentType.ifPresent { metadata.contentType = it.name }
-        storeInputStream(bucketName, path, partData.inputStream, metadata)
+        return storeInputStream(bucketName, path, partData.inputStream, metadata)
     }
 
     String getDefaultBucketName() {
