@@ -19,13 +19,6 @@ plugins {
     id "java-platform"
 }
 
-config {
-    bintray {
-        name = 'micronaut-aws-sdk-dependencies'
-        enabled = true
-    }
-}
-
 javaPlatform {
     allowDependencies()
 }
@@ -63,8 +56,4 @@ dependencies {
         api group: "com.amazonaws", name: "aws-lambda-java-events", version: "2.2.7"
         api group: "com.fasterxml.jackson.dataformat", name: "jackson-dataformat-cbor", version: project["jackson.datatype.version"]
     }
-}
-
-bintray {
-    override = true
 }

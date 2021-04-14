@@ -17,12 +17,10 @@
  */
 pluginManagement {
     repositories {
-        jcenter()
         gradlePluginPortal()
     }
     plugins {
         id 'org.kordamp.gradle.groovy-project' version kordampVersion
-        id 'org.kordamp.gradle.bintray'        version kordampVersion
         id 'org.kordamp.gradle.checkstyle'     version kordampVersion
         id 'org.kordamp.gradle.codenarc'       version kordampVersion
         id 'org.kordamp.gradle.guide'          version kordampVersion
@@ -43,6 +41,7 @@ buildscript {
             force = true
         }
         classpath 'org.ajoberstar.grgit:grgit-core:4.0.1'
+        classpath "io.github.gradle-nexus:publish-plugin:1.0.0"
     }
 }
 

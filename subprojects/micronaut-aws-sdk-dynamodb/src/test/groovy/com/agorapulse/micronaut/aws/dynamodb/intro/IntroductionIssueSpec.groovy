@@ -21,7 +21,6 @@ import com.agorapulse.dru.Dru
 import com.agorapulse.dru.dynamodb.persistence.DynamoDB
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
 import io.micronaut.context.ApplicationContext
-import org.junit.Rule
 import spock.lang.AutoCleanup
 import spock.lang.Specification
 
@@ -37,7 +36,7 @@ class IntroductionIssueSpec extends Specification {
 
     @AutoCleanup ApplicationContext context
 
-    @Rule Dru dru = Dru.steal(this)
+    @AutoCleanup Dru dru = Dru.steal(this)
 
     IDynamoDBMapper mapper = DynamoDB.createMapper(dru)
 

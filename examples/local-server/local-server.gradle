@@ -20,7 +20,6 @@ apply plugin: "com.github.johnrengelman.shadow"
 
 config {
     publishing { enabled = false }
-    bintray { enabled = false }
 }
 
 dependencies {
