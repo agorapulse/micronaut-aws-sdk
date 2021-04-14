@@ -19,3 +19,6 @@ out
 
 # Redis
 *.rdb
+
+# Build Scan Link
+scan-journal.log
