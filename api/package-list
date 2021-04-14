@@ -8,12 +8,17 @@ com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert
 com.agorapulse.micronaut.amazon.awssdk.dynamodb.events
 com.agorapulse.micronaut.amazon.awssdk.dynamodb.groovy
 com.agorapulse.micronaut.amazon.awssdk.dynamodb.util
+com.agorapulse.micronaut.amazon.awssdk.kinesis
+com.agorapulse.micronaut.amazon.awssdk.kinesis.annotation
 com.agorapulse.micronaut.amazon.awssdk.s3
 com.agorapulse.micronaut.amazon.awssdk.s3.groovy
 com.agorapulse.micronaut.amazon.awssdk.ses
 com.agorapulse.micronaut.amazon.awssdk.ses.groovy
 com.agorapulse.micronaut.amazon.awssdk.sns
 com.agorapulse.micronaut.amazon.awssdk.sns.annotation
+com.agorapulse.micronaut.amazon.awssdk.sqs
+com.agorapulse.micronaut.amazon.awssdk.sqs.annotation
+com.agorapulse.micronaut.amazon.awssdk.sqs.groovy
 com.agorapulse.micronaut.aws
 com.agorapulse.micronaut.aws.apigateway.ws
 com.agorapulse.micronaut.aws.apigateway.ws.event

@@ -32,7 +32,7 @@ DefaultSimpleQueueService.groovy
 <a name="1"><font color="#808080">001</font>&nbsp;</a><font color="#008000">/*</font><br />
 <a name="2"><font color="#808080">002</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*&nbsp;SPDX-License-Identifier:&nbsp;Apache-2.0</font><br />
 <a name="3"><font color="#808080">003</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*</font><br />
-<a name="4"><font color="#808080">004</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*&nbsp;Copyright&nbsp;2018-2020&nbsp;Agorapulse.</font><br />
+<a name="4"><font color="#808080">004</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*&nbsp;Copyright&nbsp;2018-2021&nbsp;Agorapulse.</font><br />
 <a name="5"><font color="#808080">005</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*</font><br />
 <a name="6"><font color="#808080">006</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*&nbsp;Licensed&nbsp;under&nbsp;the&nbsp;Apache&nbsp;License,&nbsp;Version&nbsp;2.0&nbsp;(the&nbsp;&#34;License&#34;);</font><br />
 <a name="7"><font color="#808080">007</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*&nbsp;you&nbsp;may&nbsp;not&nbsp;use&nbsp;this&nbsp;file&nbsp;except&nbsp;in&nbsp;compliance&nbsp;with&nbsp;the&nbsp;License.</font><br />
@@ -128,7 +128,7 @@ DefaultSimpleQueueService.groovy
 <a name="97"><font color="#808080">097</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">String&nbsp;queueUrl&nbsp;=&nbsp;client.createQueue</font><font color="#000000">(</font><font color="#000000">createQueueRequest</font><font color="#000000">)</font><font color="#000000">.queueUrl</font><br />
 <a name="98"><font color="#808080">098</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">log.debug&nbsp;</font><font color="#990000">&#34;Queue&nbsp;created&nbsp;(queueUrl=$queueUrl)&#34;</font><br />
 <a name="99"><font color="#808080">099</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">addQueue</font><font color="#000000">(</font><font color="#000000">queueUrl</font><font color="#000000">)</font><br />
-<a name="100"><font color="#808080">100</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">queueUrl</font><br />
+<a name="100"><font color="#808080">100</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>return&nbsp;</b></font><font color="#000000">queueUrl</font><br />
 <a name="101"><font color="#808080">101</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
 <a name="102"><font color="#808080">102</font>&nbsp;</a><font color="#ffffff"></font><br />
 <a name="103"><font color="#808080">103</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#008000">/**</font><br />
@@ -173,7 +173,7 @@ DefaultSimpleQueueService.groovy
 <a name="142"><font color="#808080">142</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}&nbsp;</font><font color="#0000c0"><b>catch&nbsp;</b></font><font color="#000000">(</font><font color="#000000">AmazonClientException&nbsp;exception</font><font color="#000000">)&nbsp;{</font><br />
 <a name="143"><font color="#808080">143</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">log.warn&nbsp;</font><font color="#ff6100">'An&nbsp;</font><font color="#000000">amazon&nbsp;client&nbsp;exception&nbsp;was&nbsp;catched&nbsp;</font><font color="#0000c0"><b>while&nbsp;</b></font><font color="#000000">getting&nbsp;queue&nbsp;attributes</font><font color="#ff6100">',&nbsp;</font><font color="#000000">exception</font><br />
 <a name="144"><font color="#808080">144</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
-<a name="145"><font color="#808080">145</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">attributes</font><br />
+<a name="145"><font color="#808080">145</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>return&nbsp;</b></font><font color="#000000">attributes</font><br />
 <a name="146"><font color="#808080">146</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
 <a name="147"><font color="#808080">147</font>&nbsp;</a><font color="#ffffff"></font><br />
 <a name="148"><font color="#808080">148</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#008000">/**</font><br />
@@ -201,7 +201,7 @@ DefaultSimpleQueueService.groovy
 <a name="170"><font color="#808080">170</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>if&nbsp;</b></font><font color="#000000">(</font><font color="#000000">!queueUrl</font><font color="#000000">)&nbsp;{</font><br />
 <a name="171"><font color="#808080">171</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>throw&nbsp;new&nbsp;</b></font><font color="#000000">QueueDoesNotExistException</font><font color="#000000">(</font><font color="#990000">&#34;Queue&nbsp;${queueName}&nbsp;not&nbsp;found&#34;</font><font color="#000000">)</font><br />
 <a name="172"><font color="#808080">172</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
-<a name="173"><font color="#808080">173</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">queueUrl</font><br />
+<a name="173"><font color="#808080">173</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>return&nbsp;</b></font><font color="#000000">queueUrl</font><br />
 <a name="174"><font color="#808080">174</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
 <a name="175"><font color="#808080">175</font>&nbsp;</a><font color="#ffffff"></font><br />
 <a name="176"><font color="#808080">176</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#646464">@Override</font><br />
@@ -219,7 +219,7 @@ DefaultSimpleQueueService.groovy
 <a name="188"><font color="#808080">188</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>if&nbsp;</b></font><font color="#000000">(</font><font color="#000000">!queueUrlByNames&nbsp;||&nbsp;reload</font><font color="#000000">)&nbsp;{</font><br />
 <a name="189"><font color="#808080">189</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">loadQueues</font><font color="#000000">()</font><br />
 <a name="190"><font color="#808080">190</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
-<a name="191"><font color="#808080">191</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">queueUrlByNames?.keySet</font><font color="#000000">()</font><font color="#000000">?.sort</font><font color="#000000">()</font><br />
+<a name="191"><font color="#808080">191</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>return&nbsp;</b></font><font color="#000000">queueUrlByNames?.keySet</font><font color="#000000">()</font><font color="#000000">?.sort</font><font color="#000000">()</font><br />
 <a name="192"><font color="#808080">192</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
 <a name="193"><font color="#808080">193</font>&nbsp;</a><font color="#ffffff"></font><br />
 <a name="194"><font color="#808080">194</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#008000">/**</font><br />
@@ -231,7 +231,7 @@ DefaultSimpleQueueService.groovy
 <a name="200"><font color="#808080">200</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>if&nbsp;</b></font><font color="#000000">(</font><font color="#000000">!queueUrlByNames&nbsp;||&nbsp;reload</font><font color="#000000">)&nbsp;{</font><br />
 <a name="201"><font color="#808080">201</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">loadQueues</font><font color="#000000">()</font><br />
 <a name="202"><font color="#808080">202</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
-<a name="203"><font color="#808080">203</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">queueUrlByNames?.values</font><font color="#000000">()</font><font color="#000000">?.sort</font><font color="#000000">()</font><br />
+<a name="203"><font color="#808080">203</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>return&nbsp;</b></font><font color="#000000">queueUrlByNames?.values</font><font color="#000000">()</font><font color="#000000">?.sort</font><font color="#000000">()</font><br />
 <a name="204"><font color="#808080">204</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
 <a name="205"><font color="#808080">205</font>&nbsp;</a><font color="#ffffff"></font><br />
 <a name="206"><font color="#808080">206</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#008000">/**</font><br />
@@ -257,7 +257,7 @@ DefaultSimpleQueueService.groovy
 <a name="226"><font color="#808080">226</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
 <a name="227"><font color="#808080">227</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">List&lt;Message&gt;&nbsp;messages&nbsp;=&nbsp;client.receiveMessage</font><font color="#000000">(</font><font color="#000000">receiveMessageRequest</font><font color="#000000">)</font><font color="#000000">.messages</font><br />
 <a name="228"><font color="#808080">228</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">log.debug&nbsp;</font><font color="#990000">&#34;Messages&nbsp;received&nbsp;(count=${messages.size()})&#34;</font><br />
-<a name="229"><font color="#808080">229</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">messages</font><br />
+<a name="229"><font color="#808080">229</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>return&nbsp;</b></font><font color="#000000">messages</font><br />
 <a name="230"><font color="#808080">230</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
 <a name="231"><font color="#808080">231</font>&nbsp;</a><font color="#ffffff"></font><br />
 <a name="232"><font color="#808080">232</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#008000">/**</font><br />
@@ -279,7 +279,7 @@ DefaultSimpleQueueService.groovy
 <a name="248"><font color="#808080">248</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
 <a name="249"><font color="#808080">249</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">String&nbsp;messageId&nbsp;=&nbsp;client.sendMessage</font><font color="#000000">(</font><font color="#000000">request</font><font color="#000000">)</font><font color="#000000">.messageId</font><br />
 <a name="250"><font color="#808080">250</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">log.debug&nbsp;</font><font color="#990000">&#34;Message&nbsp;sent&nbsp;(messageId=$messageId)&#34;</font><br />
-<a name="251"><font color="#808080">251</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">messageId</font><br />
+<a name="251"><font color="#808080">251</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>return&nbsp;</b></font><font color="#000000">messageId</font><br />
 <a name="252"><font color="#808080">252</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
 <a name="253"><font color="#808080">253</font>&nbsp;</a><font color="#ffffff"></font><br />
 <a name="254"><font color="#808080">254</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#008000">/**</font><br />
@@ -298,7 +298,7 @@ DefaultSimpleQueueService.groovy
 <a name="267"><font color="#808080">267</font>&nbsp;</a><font color="#ffffff"></font><br />
 <a name="268"><font color="#808080">268</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">String&nbsp;messageId&nbsp;=&nbsp;client.sendMessage</font><font color="#000000">(</font><font color="#000000">request</font><font color="#000000">)</font><font color="#000000">.messageId</font><br />
 <a name="269"><font color="#808080">269</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">log.debug&nbsp;</font><font color="#990000">&#34;Message&nbsp;sent&nbsp;(messageId=$messageId)&#34;</font><br />
-<a name="270"><font color="#808080">270</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">messageId</font><br />
+<a name="270"><font color="#808080">270</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>return&nbsp;</b></font><font color="#000000">messageId</font><br />
 <a name="271"><font color="#808080">271</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
 <a name="272"><font color="#808080">272</font>&nbsp;</a><font color="#ffffff"></font><br />
 <a name="273"><font color="#808080">273</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#c00000"><b>void&nbsp;</b></font><font color="#000000">assertDefaultQueueName</font><font color="#000000">()&nbsp;{</font><br />
@@ -307,7 +307,7 @@ DefaultSimpleQueueService.groovy
 <a name="276"><font color="#808080">276</font>&nbsp;</a><font color="#ffffff"></font><br />
 <a name="277"><font color="#808080">277</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#008000">//&nbsp;PRIVATE</font><br />
 <a name="278"><font color="#808080">278</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>private&nbsp;static&nbsp;</b></font><font color="#000000">String&nbsp;getQueueNameFromUrl</font><font color="#000000">(</font><font color="#000000">String&nbsp;queueUrl</font><font color="#000000">)&nbsp;{</font><br />
-<a name="279"><font color="#808080">279</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">queueUrl.tokenize</font><font color="#000000">(</font><font color="#990000">'/'</font><font color="#000000">)</font><font color="#000000">.last</font><font color="#000000">()</font><br />
+<a name="279"><font color="#808080">279</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>return&nbsp;</b></font><font color="#000000">queueUrl.tokenize</font><font color="#000000">(</font><font color="#990000">'/'</font><font color="#000000">)</font><font color="#000000">.last</font><font color="#000000">()</font><br />
 <a name="280"><font color="#808080">280</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
 <a name="281"><font color="#808080">281</font>&nbsp;</a><font color="#ffffff"></font><br />
 <a name="282"><font color="#808080">282</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#646464">@SuppressWarnings</font><font color="#000000">(</font><font color="#ff6100">'Re</font><font color="#000000">turnNullFromCatchBlock</font><font color="#ff6100">')</font><br />

@@ -32,7 +32,7 @@ KinesisService.java
 <a name="1"><font color="#808080">001</font>&nbsp;</a><font color="#008000">/*</font><br />
 <a name="2"><font color="#808080">002</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*&nbsp;SPDX-License-Identifier:&nbsp;Apache-2.0</font><br />
 <a name="3"><font color="#808080">003</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*</font><br />
-<a name="4"><font color="#808080">004</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*&nbsp;Copyright&nbsp;2018-2020&nbsp;Agorapulse.</font><br />
+<a name="4"><font color="#808080">004</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*&nbsp;Copyright&nbsp;2018-2021&nbsp;Agorapulse.</font><br />
 <a name="5"><font color="#808080">005</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*</font><br />
 <a name="6"><font color="#808080">006</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*&nbsp;Licensed&nbsp;under&nbsp;the&nbsp;Apache&nbsp;License,&nbsp;Version&nbsp;2.0&nbsp;(the&nbsp;&#34;License&#34;);</font><br />
 <a name="7"><font color="#808080">007</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*&nbsp;you&nbsp;may&nbsp;not&nbsp;use&nbsp;this&nbsp;file&nbsp;except&nbsp;in&nbsp;compliance&nbsp;with&nbsp;the&nbsp;License.</font><br />
@@ -271,7 +271,7 @@ KinesisService.java
 <a name="240"><font color="#808080">240</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>default&nbsp;</b></font><font color="#000000">Flowable&lt;Record&gt;&nbsp;listShardRecordsAfterSequenceNumber</font><font color="#000000">(</font><font color="#000000">String&nbsp;streamName,&nbsp;Shard&nbsp;shard,&nbsp;String&nbsp;startingSequenceNumber</font><font color="#000000">)&nbsp;{</font><br />
 <a name="241"><font color="#808080">241</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>return&nbsp;</b></font><font color="#000000">getShardRecords</font><font color="#000000">(</font><font color="#000000">streamName,&nbsp;shard,&nbsp;ShardIteratorType.AFTER_SEQUENCE_NUMBER,&nbsp;startingSequenceNumber,&nbsp;</font><font color="#990000">0</font><font color="#000000">)</font><font color="#000000">;</font><br />
 <a name="242"><font color="#808080">242</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
-<a name="243"><font color="#808080">243</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><br />
+<a name="243"><font color="#808080">243</font>&nbsp;</a><font color="#ffffff"></font><br />
 <a name="244"><font color="#808080">244</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#008000">/**</font><br />
 <a name="245"><font color="#808080">245</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#008000">*</font><br />
 <a name="246"><font color="#808080">246</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#008000">*&nbsp;</font><font color="#005500">@param&nbsp;</font><font color="#008000">shard&nbsp;the&nbsp;shard&nbsp;to&nbsp;be&nbsp;used</font><br />

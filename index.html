@@ -10,14 +10,90 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/docs.css?v=1.3.7.2" />
+<link rel="stylesheet" href="css/docs.css?v=1.3.7.6" />
+<style>
+.hidden {
+    display: none;
+}
+
+.switch {
+    border-width: 1px 1px 0 1px;
+    border-style: solid;
+    border-color: #7a2518;
+    display: inline-block;
+}
+
+.switch--item {
+    padding: 10px;
+    background-color: #ffffff;
+    color: #7a2518;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.switch--item.selected {
+    background-color: #7a2519;
+    color: #ffffff;
+}
+
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zepto/1.2.0/zepto.min.js"></script>
+<script type="text/javascript">
+function addBlockSwitches() {
+    $('.primary').each(function() {
+        primary = $(this);
+        createSwitchItem(primary, createBlockSwitch(primary)).item.addClass("selected");
+        primary.children('.title').remove();
+    });
+    $('.secondary').each(function(idx, node) {
+        secondary = $(node);
+        primary = findPrimary(secondary);
+        switchItem = createSwitchItem(secondary, primary.children('.switch'));
+        switchItem.content.addClass('hidden');
+        findPrimary(secondary).append(switchItem.content);
+        secondary.remove();
+    });
+}
+
+function createBlockSwitch(primary) {
+    blockSwitch = $('<div class="switch"></div>');
+    primary.prepend(blockSwitch);
+    return blockSwitch;
+}
+
+function findPrimary(secondary) {
+    candidate = secondary.prev();
+    while (!candidate.is('.primary')) {
+        candidate = candidate.prev();
+    }
+    return candidate;
+}
+
+function createSwitchItem(block, blockSwitch) {
+    blockName = block.children('.title').text();
+    content = block.children('.content').first().append(block.next('.colist'));
+    item = $('<div class="switch--item">' + blockName + '</div>');
+    item.on('click', '', content, function(e) {
+        $(this).addClass('selected');
+        $(this).siblings().removeClass('selected');
+        e.data.siblings('.content').addClass('hidden');
+        e.data.removeClass('hidden');
+    });
+    blockSwitch.append(item);
+    return {'item': item, 'content': content};
+}
+
+$(addBlockSwitches);
+
+</script>
+
 </head>
 <body class="book toc2 toc-left">
 <div id="header">
 <h1>Set of useful libraries for Micronaut</h1>
 <div class="details">
 <span id="author" class="author">Vladimir Orany</span><br>
-<span id="revnumber">version 1.3.7.2</span>
+<span id="revnumber">version 1.3.7.6</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -39,7 +115,6 @@
 <li><a href="#_installation_3">Installation</a></li>
 <li><a href="#_configuration">Configuration</a></li>
 <li><a href="#_publishing_with_kinesisclient">Publishing with <code>@KinesisClient</code></a></li>
-<li><a href="#_listening_with_kinesislistener">Listening with <code>@KinesisListener</code></a></li>
 <li><a href="#_kinesis_service">Kinesis Service</a></li>
 <li><a href="#_testing_2">Testing</a></li>
 </ul>
@@ -113,7 +188,7 @@
 <div class="content">
 <div class="imageblock left">
 <div class="content">
-<a class="image" href="https://bintray.com/agorapulse/libs/micronaut-aws-sdk/_latestVersion"><img src="https://api.bintray.com/packages/agorapulse/libs/micronaut-aws-sdk/images/download.svg" alt="download"></a>
+<a class="image" href="https://search.maven.org/search?q=g:%22com.agorapulse%22%20AND%20a:%22micronaut-aws-sdk%22"><img src="https://img.shields.io/maven-central/v/com.agorapulse/micronaut-aws-sdk.svg?label=Maven%20Central" alt="micronaut aws sdk"></a>
 </div>
 </div>
 <div class="imageblock left">
@@ -130,7 +205,7 @@
 </div>
 <hr>
 <div class="paragraph">
-<p>Set of useful libraries for <a href="http://micronaut.io">Micronaut</a>. All the libraries are available in <a href="https://bintray.com/bintray/jcenter">JCenter Maven repository</a>.</p>
+<p>Set of useful libraries for <a href="http://micronaut.io">Micronaut</a>. All the libraries are available in the Maven Central.</p>
 </div>
 <div class="ulist">
 <ul>
@@ -207,7 +282,7 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <p>Low-level API clients such as <code>AmazonDynamoDB</code> available for dependency injection</p>
 </li>
 <li>
-<p>Declarative clients and services such as <code>@KinesisListener</code> where applicable</p>
+<p>Declarative clients and services such as <code>@KinesisClient</code> where applicable</p>
 </li>
 <li>
 <p>Configuration driven named service beans</p>
@@ -253,22 +328,6 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <div class="paragraph">
 <p>Since  <code>1.2.8</code> see the particular subprojects for installation instruction.</p>
 </div>
-<div class="paragraph">
-<p>Micronaut AWS SDK comes in the three compatibility versions:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><code>1.3.7.2-micronaut-1.2</code> - for usage with Micronaut <code>1.2.x</code> and Grails <code>4.0.x</code> (Micronaut <code>1.0.x</code> and Micronaut <code>1.1.x</code> should also work well with these releases)</p>
-</li>
-<li>
-<p><code>1.3.7.2</code> - for usage with the latest Micronaut  <code>1.3.x</code></p>
-</li>
-<li>
-<p><code>1.3.7.2-micronaut-2.0</code> - for usage with upcoming Micronaut <code>2.0.x</code> version</p>
-</li>
-</ul>
-</div>
 </div>
 <div class="sect3">
 <h4 id="_dynamodb"><a class="anchor" href="#_dynamodb"></a>1.2. DynamoDB</h4>
@@ -297,7 +356,7 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-dynamodb:1.3.7.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-dynamodb:1.3.7.6'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -306,7 +365,7 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;1.3.7.2&lt;/version&gt;
+    &lt;version&gt;1.3.7.6&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1436,9 +1495,6 @@ You can obtain instances of declarative client from the context as well.
 <p>High-level <a href="#_publishing_with_kinesisclient">Publishing with <code>@KinesisClient</code></a></p>
 </li>
 <li>
-<p>High-level <a href="#_listening_with_kinesislistener">Listening with <code>@KinesisListener</code></a></p>
-</li>
-<li>
 <p>Middle-level <a href="#_kinesis_service">Kinesis Service</a></p>
 </li>
 </ol>
@@ -1449,7 +1505,7 @@ You can obtain instances of declarative client from the context as well.
 <div class="title">Gradle</div>
 <div class="content">
 <pre class="prettyprint highlight"><code>// for Kinesis client
-compile 'com.agorapulse:micronaut-aws-sdk-kinesis:1.3.7.2'</code></pre>
+compile 'com.agorapulse:micronaut-aws-sdk-kinesis:1.3.7.6'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -1459,7 +1515,7 @@ compile 'com.agorapulse:micronaut-aws-sdk-kinesis:1.3.7.2'</code></pre>
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-kinesis&lt;/artifactId&gt;
-    &lt;version&gt;1.3.7.2&lt;/version&gt;
+    &lt;version&gt;1.3.7.6&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1467,8 +1523,7 @@ compile 'com.agorapulse:micronaut-aws-sdk-kinesis:1.3.7.2'</code></pre>
 <div class="sect4">
 <h5 id="_configuration"><a class="anchor" href="#_configuration"></a>Configuration</h5>
 <div class="paragraph">
-<p>By default, only <code>aws.kinesis.application.name</code> and <code>aws.kinesis.listener.stream</code> are required if you decide to use <code>@KinesisListener</code>.
-Otherwise you need no configuration at all but some of the configuration may be useful for you.</p>
+<p>You need no configuration at all but some of the configuration may be useful for you.</p>
 </div>
 <div class="listingblock">
 <div class="title">application.yml</div>
@@ -1480,18 +1535,7 @@ Otherwise you need no configuration at all but some of the configuration may be 
 
     streams:                                                                            <i class="conum" data-value="2"></i><b>(2)</b>
       test:                                                                             <i class="conum" data-value="3"></i><b>(3)</b>
-        stream: TestStream
-
-    application:
-      name: MyKinesisApp                                                                <i class="conum" data-value="4"></i><b>(4)</b>
-    worker:
-      id: rubble                                                                        <i class="conum" data-value="5"></i><b>(5)</b>
-    listener:
-      stream: MyStreamToConsume                                                         <i class="conum" data-value="6"></i><b>(6)</b>
-
-    listeners:                                                                          <i class="conum" data-value="7"></i><b>(7)</b>
-      test:                                                                             <i class="conum" data-value="8"></i><b>(8)</b>
-        stream: TestStreamToConsume</code></pre>
+        stream: TestStream</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -1507,26 +1551,6 @@ Otherwise you need no configuration at all but some of the configuration may be 
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
 <td>Each of the configuration can be access using <code>@Named('test') KinesisService</code> qualifier or you can define the configuration as <code>value</code> of <code>@KinesisClient('test')</code></td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Application name is required for <code>@KinesisListner</code></td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Optional id of the Kinesis worker (listener)</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Stream to listen is required for <code>@KinesisListener</code></td>
-</tr>
-<tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>You can define multiple listeners configurations</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="8"></i><b>8</b></td>
-<td>The name of the configuration will be used as <code>value</code> of <code>@KinesisListener('test')</code></td>
 </tr>
 </table>
 </div>
@@ -1744,21 +1768,6 @@ used by particular method using <code>@Stream</code> annotation as mentioned abo
 </div>
 </div>
 <div class="sect4">
-<h5 id="_listening_with_kinesislistener"><a class="anchor" href="#_listening_with_kinesislistener"></a>Listening with <code>@KinesisListener</code></h5>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-Kinesis Worker support has been discontinued. Consume Kinesis events with Lambda instead.
-</td>
-</tr>
-</table>
-</div>
-</div>
-<div class="sect4">
 <h5 id="_kinesis_service"><a class="anchor" href="#_kinesis_service"></a>Kinesis Service</h5>
 <div class="paragraph">
 <p><code>KinesisService</code> provides middle-level API for creating, describing, and deleting streams. You can manage shards as well as read records
@@ -1951,7 +1960,7 @@ Unresolved directive in kinesis.adoc - include::/home/runner/work/micronaut-aws-
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-s3:1.3.7.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-s3:1.3.7.6'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -1960,7 +1969,7 @@ Unresolved directive in kinesis.adoc - include::/home/runner/work/micronaut-aws-
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-s3&lt;/artifactId&gt;
-    &lt;version&gt;1.3.7.2&lt;/version&gt;
+    &lt;version&gt;1.3.7.6&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2363,7 +2372,7 @@ class SimpleStorageServiceSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ses:1.3.7.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ses:1.3.7.6'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2372,7 +2381,7 @@ class SimpleStorageServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-ses&lt;/artifactId&gt;
-    &lt;version&gt;1.3.7.2&lt;/version&gt;
+    &lt;version&gt;1.3.7.6&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2633,7 +2642,7 @@ public class SendEmailTest {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sns:1.3.7.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sns:1.3.7.6'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2642,7 +2651,7 @@ public class SendEmailTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sns&lt;/artifactId&gt;
-    &lt;version&gt;1.3.7.2&lt;/version&gt;
+    &lt;version&gt;1.3.7.6&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2988,7 +2997,7 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 class SimpleNotificationServiceSpec extends Specification {
 
 
-    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.10')          <i class="conum" data-value="2"></i><b>(2)</b>
+    @Shared LocalStackContainer localstack = new LocalStackContainer()                  <i class="conum" data-value="2"></i><b>(2)</b>
         .withServices(SNS)
 
     @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="3"></i><b>(3)</b>
@@ -3052,7 +3061,7 @@ class SimpleNotificationServiceSpec extends Specification {
     public SimpleNotificationService service;
 
     @Rule
-    public LocalStackContainer localstack = new LocalStackContainer("0.8.10")            <i class="conum" data-value="2"></i><b>(2)</b>
+    public LocalStackContainer localstack = new LocalStackContainer()                   <i class="conum" data-value="2"></i><b>(2)</b>
         .withServices(SNS);
 
     @Before
@@ -3144,7 +3153,7 @@ class SimpleNotificationServiceSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sqs:1.3.7.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sqs:1.3.7.6'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3153,7 +3162,7 @@ class SimpleNotificationServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sqs&lt;/artifactId&gt;
-    &lt;version&gt;1.3.7.2&lt;/version&gt;
+    &lt;version&gt;1.3.7.6&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3507,7 +3516,7 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 class SimpleQueueServiceSpec extends Specification {
 
 
-    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.10')          <i class="conum" data-value="3"></i><b>(3)</b>
+    @Shared LocalStackContainer localstack = new LocalStackContainer()                  <i class="conum" data-value="3"></i><b>(3)</b>
         .withServices(SQS)
 
     @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="4"></i><b>(4)</b>
@@ -3580,7 +3589,7 @@ class SimpleQueueServiceSpec extends Specification {
     public SimpleQueueService service;
 
     @Rule
-    public LocalStackContainer localstack = new LocalStackContainer("0.8.10")           <i class="conum" data-value="2"></i><b>(2)</b>
+    public LocalStackContainer localstack = new LocalStackContainer()                   <i class="conum" data-value="2"></i><b>(2)</b>
         .withServices(SQS);
 
     @Before
@@ -3670,7 +3679,7 @@ class SimpleQueueServiceSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sts:1.3.7.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sts:1.3.7.6'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3679,7 +3688,7 @@ class SimpleQueueServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sts&lt;/artifactId&gt;
-    &lt;version&gt;1.3.7.2&lt;/version&gt;
+    &lt;version&gt;1.3.7.6&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3730,7 +3739,7 @@ messages back to the clients</p>
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ag-ws:1.3.7.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ag-ws:1.3.7.6'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3739,7 +3748,7 @@ messages back to the clients</p>
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-ag-ws&lt;/artifactId&gt;
-    &lt;version&gt;1.3.7.2&lt;/version&gt;
+    &lt;version&gt;1.3.7.6&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4207,8 +4216,8 @@ your Lambda function&#8217;s role must have following permissions (preferably co
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 1.3.7.2<br>
-Last updated 2020-11-03 12:07:50 UTC
+Version 1.3.7.6<br>
+Last updated 2021-04-14 16:47:57 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
