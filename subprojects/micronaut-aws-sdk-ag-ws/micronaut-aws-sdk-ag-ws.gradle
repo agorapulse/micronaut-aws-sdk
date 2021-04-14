@@ -16,10 +16,6 @@
  * limitations under the License.
  */
 
-repositories {
-    jcenter()
-}
-
 dependencies {
     compile project(':micronaut-aws-sdk-core')
 
