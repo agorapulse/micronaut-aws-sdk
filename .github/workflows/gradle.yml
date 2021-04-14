@@ -48,6 +48,12 @@ jobs:
     - name: Show Build Scan
       if: always()
       run: cat scan-journal.log
+    - name: Show Classes for Tests Only Failing on GHA
+      uses: actions/upload-artifact@v1
+      if: failure()
+      with:
+        name: reports
+        path: subprojects/micronaut-aws-sdk-ag-ws/build/classes/
     - name: Show Reports
       uses: actions/upload-artifact@v1
       if: failure()
