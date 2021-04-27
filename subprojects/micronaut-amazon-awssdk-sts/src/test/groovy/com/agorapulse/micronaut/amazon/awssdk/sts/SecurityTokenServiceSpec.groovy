@@ -17,8 +17,6 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.sts
 
-import com.agorapulse.micronaut.amazon.awssdk.sts.DefaultSecurityTokenService
-import com.agorapulse.micronaut.amazon.awssdk.sts.SecurityTokenService
 import groovy.transform.CompileDynamic
 import software.amazon.awssdk.services.sts.StsClient
 import software.amazon.awssdk.services.sts.model.AssumeRoleRequest
