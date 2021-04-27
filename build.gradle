@@ -26,6 +26,7 @@ plugins {
 
 logger.lifecycle "Using Micronaut $micronautVersion"
 
+if (!project.hasProperty('sonarToken'))         ext.sonarToken          = System.getenv('SONAR_TOKEN') ?: '**UNDEFINED**'
 if (!project.hasProperty('ossrhUsername'))      ext.ossrhUsername       = System.getenv('SONATYPE_USERNAME') ?: '**UNDEFINED**'
 if (!project.hasProperty('ossrhPassword'))      ext.ossrhPassword       = System.getenv('SONATYPE_PASSWORD') ?: '**UNDEFINED**'
 if (!project.hasProperty('signingKeyId'))       ext.signingKeyId        = System.getenv('SIGNING_KEY_ID') ?: '**UNDEFINED**'
@@ -98,6 +99,7 @@ config {
         sonar {
             projectKey = 'agorapulse_micronaut-aws-sdk'
             organization = 'agorapulse'
+            login = sonarToken
         }
     }
 
