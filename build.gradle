@@ -20,6 +20,7 @@ plugins {
     id 'org.kordamp.gradle.checkstyle'
     id 'org.kordamp.gradle.codenarc'
     id 'org.kordamp.gradle.coveralls'
+    id 'org.kordamp.gradle.sonar'
     id 'io.github.gradle-nexus.publish-plugin'
 }
 
@@ -92,6 +93,11 @@ config {
 
         codenarc {
             toolVersion = '1.5'
+        }
+
+        sonar {
+            projectKey = 'agorapulse_micronaut-aws-sdk'
+            organization = 'agorapulse'
         }
     }
 
