@@ -15,31 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.aws.sts;
+package com.agorapulse.micronaut.amazon.awssdk.sts;
 
-import io.micronaut.context.annotation.Bean;
-import io.micronaut.context.annotation.Factory;
+import com.agorapulse.micronaut.amazon.awssdk.core.DefaultRegionAndEndpointConfiguration;
+import com.agorapulse.micronaut.amazon.awssdk.core.util.ConfigurationUtil;
+import io.micronaut.context.annotation.ConfigurationProperties;
+import io.micronaut.context.annotation.Primary;
 import io.micronaut.context.annotation.Requires;
-import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
-import software.amazon.awssdk.regions.providers.AwsRegionProvider;
 import software.amazon.awssdk.services.sts.StsClient;
 
-import javax.inject.Singleton;
+import javax.inject.Named;
 
-@Factory
+/**
+ * Default simple storage service configuration.
+ */
+@Primary
+@Named(ConfigurationUtil.DEFAULT_CONFIGURATION_NAME)
+@ConfigurationProperties("aws.sts")
 @Requires(classes = StsClient.class)
-public class SecurityTokenServiceFactory {
-
-    @Bean
-    @Singleton
-    StsClient awsSecurityTokenService(
-        AwsCredentialsProvider credentialsProvider,
-        AwsRegionProvider awsRegionProvider,
-        SecurityTokenServiceConfiguration configuration
-    ) {
-        return configuration
-            .configure(StsClient.builder().credentialsProvider(credentialsProvider), awsRegionProvider)
-            .build();
-    }
-
+public class SecurityTokenServiceConfiguration extends DefaultRegionAndEndpointConfiguration {
 }

@@ -15,8 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.aws.sts
+package com.agorapulse.micronaut.amazon.awssdk.sts
 
+import com.agorapulse.micronaut.amazon.awssdk.sts.DefaultSecurityTokenService
+import com.agorapulse.micronaut.amazon.awssdk.sts.SecurityTokenService
 import groovy.transform.CompileDynamic
 import software.amazon.awssdk.services.sts.StsClient
 import software.amazon.awssdk.services.sts.model.AssumeRoleRequest
