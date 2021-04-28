@@ -39,7 +39,6 @@ import spock.lang.Stepwise
 
 // tag::builders-import[]
 import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  // <1>
-
 // end::builders-import[]
 
 /**
