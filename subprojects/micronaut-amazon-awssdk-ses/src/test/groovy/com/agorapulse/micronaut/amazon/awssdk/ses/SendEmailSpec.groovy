@@ -44,6 +44,7 @@ class SendEmailSpec extends Specification {
             file.text = 'not a real PDF'
             String thePath = file.canonicalPath
         when:
+            // tag::builder[]
             EmailDeliveryStatus status = service.send {                                 // <1>
                 subject 'Hi Paul'                                                       // <2>
                 from 'subscribe@groovycalamari.com'                                     // <3>
@@ -56,7 +57,7 @@ class SendEmailSpec extends Specification {
                     description 'An example pdf'                                        // <10>
                 }
             }
-
+            // end::builder[]
         then:
             status == EmailDeliveryStatus.STATUS_DELIVERED
 
