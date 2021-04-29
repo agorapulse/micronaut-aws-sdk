@@ -37,22 +37,23 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
 /**
  * Tests for kinesis service.
  */
-@Testcontainers
-@RestoreSystemProperties
+// tag::testcontainers-spec[]
+@Testcontainers                                                                         // <1>
+@RestoreSystemProperties                                                                // <2>
 class KinesisDemoSpec extends Specification {
 
     @Shared
-    LocalStackContainer localstack = new LocalStackContainer().withServices(KINESIS)
+    LocalStackContainer localstack = new LocalStackContainer().withServices(KINESIS)    // <3>
 
-    @AutoCleanup ApplicationContext context
+    @AutoCleanup ApplicationContext context                                             // <4>
 
     KinesisService service
 
     void setup() {
         // disable CBOR (not supported by Kinelite)
-        System.setProperty(SdkSystemSetting.CBOR_ENABLED.property(), 'false')
+        System.setProperty(SdkSystemSetting.CBOR_ENABLED.property(), 'false')           // <5>
 
-        KinesisClient kinesis = KinesisClient
+        KinesisClient kinesis = KinesisClient                                           // <6>
             .builder()
             .endpointOverride(localstack.getEndpointOverride(KINESIS))
             .credentialsProvider(
@@ -65,11 +66,11 @@ class KinesisDemoSpec extends Specification {
             .region(Region.EU_WEST_1)
             .build()
 
-        context = ApplicationContext.build().build()
+        context = ApplicationContext.build().build()                                    // <7>
         context.registerSingleton(KinesisClient, kinesis)
         context.start()
 
-        service = context.getBean(KinesisService)
+        service = context.getBean(KinesisService)                                       // <8>
     }
 
     @Retry
@@ -81,4 +82,4 @@ class KinesisDemoSpec extends Specification {
     }
 
 }
-
+// end::testcontainers-spec[]

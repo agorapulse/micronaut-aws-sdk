@@ -26,24 +26,28 @@ import org.junit.Test;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.SdkSystemSetting;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 
 import static org.junit.Assert.assertNotNull;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.KINESIS;
 
-// tag::testcontainers-setup[]
+// tag::testcontainers-spec[]
 public class KinesisJavaDemoTest {
 
     @Rule
     public LocalStackContainer localstack = new LocalStackContainer()                   // <1>
         .withServices(KINESIS);
 
-    public ApplicationContext context;                                                  // <2>
+    public ApplicationContext context;
     public KinesisService service;
 
     @Before
     public void setup() {
+        // disable CBOR (not supported by Kinelite)
+        System.setProperty(SdkSystemSetting.CBOR_ENABLED.property(), "false");          // <2>
+
         KinesisClient kinesis = KinesisClient                                           // <3>
             .builder()
             .endpointOverride(localstack.getEndpointOverride(KINESIS))
@@ -57,11 +61,11 @@ public class KinesisJavaDemoTest {
             .region(Region.EU_WEST_1)
             .build();
 
-        context = ApplicationContext.build().build();
-        context.registerSingleton(KinesisClient.class, kinesis);                        // <4>
+        context = ApplicationContext.build().build();                                   // <4>
+        context.registerSingleton(KinesisClient.class, kinesis);
         context.start();
 
-        service = context.getBean(KinesisService.class);
+        service = context.getBean(KinesisService.class);                                // <5>
     }
 
     @After
@@ -70,10 +74,10 @@ public class KinesisJavaDemoTest {
             context.close();                                                            // <6>
         }
     }
-    // end::testcontainers-setup[]
 
     @Test
     public void testJavaService() {
         assertNotNull(service.createStream("TestStream"));
     }
 }
+// end::testcontainers-spec[]

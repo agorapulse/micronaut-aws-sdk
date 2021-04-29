@@ -13,7 +13,7 @@ This library provides three approaches to work with Kinesis streams:
 .Gradle (AWS SDK 2.x)
 ----
 // for Kinesis client
-compile 'com.agorapulse:micronaut--amazon-awssdk-kinesis:{project-version}'
+compile 'com.agorapulse:micronaut-amazon-awssdk-kinesis:{project-version}'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']
@@ -27,7 +27,7 @@ compile 'com.agorapulse:micronaut--amazon-awssdk-kinesis:{project-version}'
 </dependency>
 ----
 
-[source,indent=0,role="primary",subs='verbatim,attributes']
+[source,indent=0,role="secondary",subs='verbatim,attributes']
 .Gradle (AWS SDK 1.x)
 ----
 // for Kinesis client
@@ -239,96 +239,56 @@ Then you can set up your tests like this:
 [source,groovy,indent=0,role="primary"]
 .Groovy (AWS SDK 2.x)
 ----
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-kinesis/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/kinesis/KinesisServiceSpec.groovy[tags=testcontainers-header]
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-kinesis/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/kinesis/KinesisServiceSpec.groovy[tags=testcontainers-setup]
-
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-kinesis/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/kinesis/KinesisServiceSpec.groovy[tags=testcontainers-test]
-
-}
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-kinesis/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/kinesis/KinesisDemoSpec.groovy[tags=testcontainers-spec]
 ----
 <1> Annotate the specification with `@Testcontainers` to let Spock manage the Testcontainers for you
 <2> `@RestoreSystemProperties` will guarantee that system properties will be restore after the test
-<3> Create an instance of `LocalStackContainer` with Kinesis and  DynamoDB (required by the listener) support enabled
+<3> Create an instance of `LocalStackContainer` with Kinesis support enabled
 <4> Prepare the reference to the `ApplicationContext`, `@AutoCleanup` guarantees closing the context after the tests
 <5> Disable CBOR protocol for Kinesis (not supported by LocalStack/Kinesilite)
-<6> Create `AmazonDynamoDB` client using the LocalStack configuration
-<7> Create `AmazonKinesis` client using the LocalStack configuration
-<8> Prepare the application context with required properties and service LocalStack
-<9> You can obtain instance of `KinesisService` from the context
-<10> You can obtain instance of declarative listener from the context
-<11> You can obtain instance of declarative client from the context
+<6> Create `KinesisClient` client using the LocalStack configuration
+<7> Prepare the application context
+<8> Obtain service from the application context
 
 [source,java,indent=0,role="secondary"]
 .Java (AWS SDK 2.x)
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisTest.java[tags=testcontainers-header]
-
-include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisTest.java[tags=testcontainers-setup]
-
-include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisTest.java[tags=testcontainers-test]
-
-}
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-kinesis/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/kinesis//KinesisJavaDemoTest.java[tags=testcontainers-spec]
 ----
-<1> Prepare the reference to the `ApplicationContext`
-<2> Create an instance of `LocalStackContainer` with Kinesis and  DynamoDB (required by the listener) support enabled
-<3> Disable CBOR protocol for Kinesis (not supported by LocalStack/Kinesilite)
-<4> Create `AmazonDynamoDB` client using the LocalStack configuration
-<5> Create `AmazonKinesis` client using the LocalStack configuration
-<6> Prepare required properties
-<7> Prepare the application context with required properties and service LocalStack
-<8> Reset CBOR protocol settings after the test
-<9> Close the application context after the test
-<10> You can obtain instance of `KinesisService` from the context
-<11> You can obtain instance of declarative listener from the context
-<12> You can obtain instance of declarative client from the context
+<1> Create an instance of `LocalStackContainer` with Kinesis support enabled
+<2> Disable CBOR protocol for Kinesis (not supported by LocalStack/Kinesilite)
+<3> Create `KinesisClient` client using the LocalStack configuration
+<4> Prepare the application context
+<5> Obtain service from the application context
+<6> Don't forget to clean up the application context after the tests
+
 
 
 
 [source,groovy,indent=0,role="secondary"]
 .Groovy (AWS SDK 1.x)
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisAnnotationsSpec.groovy[tags=testcontainers-header]
-
-include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisAnnotationsSpec.groovy[tags=testcontainers-setup]
-
-include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisAnnotationsSpec.groovy[tags=testcontainers-test]
-
-}
+include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisDemoSpec.groovy[tags=testcontainers-spec]
 ----
 <1> Annotate the specification with `@Testcontainers` to let Spock manage the Testcontainers for you
 <2> `@RestoreSystemProperties` will guarantee that system properties will be restore after the test
-<3> Create an instance of `LocalStackContainer` with Kinesis and  DynamoDB (required by the listener) support enabled
+<3> Create an instance of `LocalStackContainer` with Kinesis support enabled
 <4> Prepare the reference to the `ApplicationContext`, `@AutoCleanup` guarantees closing the context after the tests
 <5> Disable CBOR protocol for Kinesis (not supported by LocalStack/Kinesilite)
-<6> Create `AmazonDynamoDB` client using the LocalStack configuration
-<7> Create `AmazonKinesis` client using the LocalStack configuration
-<8> Prepare the application context with required properties and service LocalStack
-<9> You can obtain instance of `KinesisService` from the context
-<10> You can obtain instance of declarative listener from the context
-<11> You can obtain instance of declarative client from the context
+<6> Create `AmazonKinesis` client using the LocalStack configuration
+<7> Prepare the application context
+<8> Obtain service from the application context
 
 [source,java,indent=0,role="secondary"]
 .Java (AWS SDK 1.x)
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisTest.java[tags=testcontainers-header]
-
-include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisTest.java[tags=testcontainers-setup]
-
-include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisTest.java[tags=testcontainers-test]
-
-}
+include::{root-dir}/subprojects/micronaut-aws-sdk-kinesis/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/KinesisJavaDemoTest.java[tags=testcontainers-spec]
 ----
-<1> Prepare the reference to the `ApplicationContext`
-<2> Create an instance of `LocalStackContainer` with Kinesis and  DynamoDB (required by the listener) support enabled
-<3> Disable CBOR protocol for Kinesis (not supported by LocalStack/Kinesilite)
-<4> Create `AmazonDynamoDB` client using the LocalStack configuration
-<5> Create `AmazonKinesis` client using the LocalStack configuration
-<6> Prepare required properties
-<7> Prepare the application context with required properties and service LocalStack
-<8> Reset CBOR protocol settings after the test
-<9> Close the application context after the test
-<10> You can obtain instance of `KinesisService` from the context
-<11> You can obtain instance of declarative listener from the context
-<12> You can obtain instance of declarative client from the context
+<1> Create an instance of `LocalStackContainer` with Kinesis support enabled
+<2> Disable CBOR protocol for Kinesis (not supported by LocalStack/Kinesilite)
+<3> Create `AmazonKinesis` client using the LocalStack configuration
+<4> Prepare the application context
+<5> Obtain service from the application context
+<6> Don't forget to clean up the application context after the tests
 
 

@@ -29,7 +29,7 @@ import org.testcontainers.containers.localstack.LocalStackContainer;
 import static org.junit.Assert.assertNotNull;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.KINESIS;
 
-// tag::testcontainers-setup[]
+// tag::testcontainers-spec[]
 public class KinesisJavaDemoTest {
 
     @Rule
@@ -41,7 +41,9 @@ public class KinesisJavaDemoTest {
 
     @Before
     public void setup() {
-        AmazonKinesis kinesis = AmazonKinesisClient
+        System.setProperty("com.amazonaws.sdk.disableCbor", "false");                   // <2>
+
+        AmazonKinesis kinesis = AmazonKinesisClient                                     // <3>
             .builder()
             .withEndpointConfiguration(localstack.getEndpointConfiguration(KINESIS))
             .withCredentials(localstack.getDefaultCredentialsProvider())
@@ -51,7 +53,7 @@ public class KinesisJavaDemoTest {
         context.registerSingleton(AmazonKinesis.class, kinesis);                        // <4>
         context.start();
 
-        service = context.getBean(KinesisService.class);
+        service = context.getBean(KinesisService.class);                                // <5>
     }
 
     @After
@@ -60,10 +62,10 @@ public class KinesisJavaDemoTest {
             context.close();                                                            // <6>
         }
     }
-    // end::testcontainers-setup[]
 
     @Test
     public void testJavaService() {
         assertNotNull(service.createStream("TestStream"));
     }
 }
+// end::testcontainers-spec[]
