@@ -124,6 +124,7 @@ public class SimpleNotificationServiceTest {
 
     @Test
     public void testPlatformApplications() {
+        //CHECKSTYLE:OFF
         // tag::applications[]
         String appArn = service.createPlatformApplication(                              // <1>
             "my-app",
@@ -142,6 +143,7 @@ public class SimpleNotificationServiceTest {
 
         service.unregisterDevice(endpoint);                                             // <5>
         // end::applications[]
+        //CHECKSTYLE:ON
 
         assertNotNull(appArn);
         assertNotNull(endpoint);

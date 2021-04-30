@@ -25,7 +25,7 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import software.amazon.awssdk.core.SdkSystemSetting
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.kinesis.KinesisClient
-import software.amazon.awssdk.services.kinesis.model.*
+import software.amazon.awssdk.services.kinesis.model.CreateStreamResponse
 import spock.lang.AutoCleanup
 import spock.lang.Retry
 import spock.lang.Shared

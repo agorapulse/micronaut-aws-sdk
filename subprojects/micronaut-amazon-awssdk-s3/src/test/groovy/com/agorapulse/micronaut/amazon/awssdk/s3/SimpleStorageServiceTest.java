@@ -31,6 +31,7 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.S3Object;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -75,10 +76,20 @@ public class SimpleStorageServiceTest {
             .region(Region.of(localstack.getRegion()))
             .build();
 
+        S3Presigner presigner = S3Presigner
+            .builder()
+            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.S3))
+            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
+                localstack.getAccessKey(), localstack.getSecretKey()
+            )))
+            .region(Region.of(localstack.getRegion()))
+            .build();
+
         ctx = ApplicationContext
             .build(Collections.singletonMap("aws.s3.bucket", MY_BUCKET))
             .build();
         ctx.registerSingleton(S3Client.class, amazonS3);                                // <4>
+        ctx.registerSingleton(S3Presigner.class, presigner);
         ctx.start();
     }
 

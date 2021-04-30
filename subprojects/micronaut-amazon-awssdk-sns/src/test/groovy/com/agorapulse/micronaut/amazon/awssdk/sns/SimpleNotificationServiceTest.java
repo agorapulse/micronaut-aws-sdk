@@ -32,7 +32,6 @@ import software.amazon.awssdk.services.sns.model.Topic;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static com.agorapulse.micronaut.amazon.awssdk.sns.SimpleNotificationService.PlatformType.GCM;
@@ -130,6 +129,7 @@ public class SimpleNotificationServiceTest {
 
     @Test
     public void testPlatformApplications() {
+        //CHECKSTYLE:OFF
         // tag::applications[]
         String appArn = service.createPlatformApplication(                              // <1>
             "my-app",
@@ -148,7 +148,7 @@ public class SimpleNotificationServiceTest {
 
         service.unregisterDevice(endpoint);                                             // <5>
         // end::applications[]
-
+        //CHECKSTYLE:ON
         assertNotNull(appArn);
         assertNotNull(endpoint);
         assertNotNull(msgId);
