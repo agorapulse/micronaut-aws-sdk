@@ -1,3 +1,4 @@
+com.agorapulse.micronaut.amazon.awssdk.cloudwatch
 com.agorapulse.micronaut.amazon.awssdk.core
 com.agorapulse.micronaut.amazon.awssdk.core.util
 com.agorapulse.micronaut.amazon.awssdk.dynamodb
@@ -19,6 +20,7 @@ com.agorapulse.micronaut.amazon.awssdk.sns.annotation
 com.agorapulse.micronaut.amazon.awssdk.sqs
 com.agorapulse.micronaut.amazon.awssdk.sqs.annotation
 com.agorapulse.micronaut.amazon.awssdk.sqs.groovy
+com.agorapulse.micronaut.amazon.awssdk.sts
 com.agorapulse.micronaut.aws
 com.agorapulse.micronaut.aws.apigateway.ws
 com.agorapulse.micronaut.aws.apigateway.ws.event

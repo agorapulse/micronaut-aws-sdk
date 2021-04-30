@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/docs.css?v=1.3.7.6" />
+<link rel="stylesheet" href="css/docs.css?v=1.4.0" />
 <style>
 .hidden {
     display: none;
@@ -93,7 +93,7 @@ $(addBlockSwitches);
 <h1>Set of useful libraries for Micronaut</h1>
 <div class="details">
 <span id="author" class="author">Vladimir Orany</span><br>
-<span id="revnumber">version 1.3.7.6</span>
+<span id="revnumber">version 1.4.0</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -325,6 +325,30 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 </div>
 <div class="sect3">
 <h4 id="_installation"><a class="anchor" href="#_installation"></a>1.1. Installation</h4>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+For AWS SDK 2.x use artefacts starting with <code>micronaut-amazon-awssdk</code>. These artefacts are written pure Java.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+For AWS SDK 1.x use artefacts starting with <code>micrnoaut-aws-sdk</code>. These are considered legacy artefacts and might be removed in the future when the AWS SDK 2.x get wider adoption.
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
 <p>Since  <code>1.2.8</code> see the particular subprojects for installation instruction.</p>
 </div>
@@ -354,18 +378,34 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <div class="sect4">
 <h5 id="_installation_2"><a class="anchor" href="#_installation_2"></a>Installation</h5>
 <div class="listingblock primary">
-<div class="title">Gradle</div>
+<div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-dynamodb:1.3.7.6'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-dynamodb:1.4.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
-<div class="title">Maven</div>
+<div class="title">Maven (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
+    &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
+    &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
+    &lt;version&gt;1.4.0&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+<div class="listingblock secondary">
+<div class="title">Gradle (AWS SDK 1.x)</div>
+<div class="content">
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-dynamodb:1.4.0'</code></pre>
+</div>
+</div>
+<div class="listingblock secondary">
+<div class="title">Maven (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;1.3.7.6&lt;/version&gt;
+    &lt;version&gt;1.4.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -374,8 +414,31 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 <h5 id="_declarative_services_with_service"><a class="anchor" href="#_declarative_services_with_service"></a>Declarative Services with <code>@Service</code></h5>
 <div class="paragraph">
 <p>Declarative services are very similar to <a href="http://gorm.grails.org/6.1.x/hibernate/manual/#dataServices">Grails GORM Data Services</a>.
-If you place <code>com.agorapulse.micronaut.aws.dynamodb.annotation.Service</code> annotation on the interface then methods
-matching predefined pattern will be automatically implemented.</p>
+If you place <code>Service</code> annotation on the interface then methods matching predefined pattern will be automatically implemented.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+For AWS SDK 2.x, use packages starting <code>com.agorapulse.micronaut.amazon.awssdk.dynamodb</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+For AWS SDK 1.x, use packages starting <code>com.agorapulse.micronaut.aws.sdk.dynamodb</code>.
+</td>
+</tr>
+</table>
 </div>
 <div class="sect5">
 <h6 id="_method_signatures"><a class="anchor" href="#_method_signatures"></a>Method Signatures</h6>
@@ -725,7 +788,123 @@ Instead you can annotate any method with <code>@Query</code> annotation to make 
 </ul>
 </div>
 <div class="listingblock primary">
-<div class="title">Groovy</div>
+<div class="title">Groovy (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="groovy">import static com.agorapulse.micronaut.amazon.awssdk.dynamodb.groovy.GroovyBuilders.*   <i class="conum" data-value="1"></i><b>(1)</b>
+@Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
+interface DynamoDBItemDBService {
+
+    @Query({                                                                            <i class="conum" data-value="3"></i><b>(3)</b>
+        query(DynamoDBEntity) {
+            partitionKey hashKey                                                        <i class="conum" data-value="4"></i><b>(4)</b>
+            index DynamoDBEntity.RANGE_INDEX
+            range {
+                eq rangeKey                                                             <i class="conum" data-value="5"></i><b>(5)</b>
+            }
+            only {                                                                      <i class="conum" data-value="6"></i><b>(6)</b>
+                rangeIndex                                                              <i class="conum" data-value="7"></i><b>(7)</b>
+            }
+        }
+    })
+    Flowable&lt;DynamoDBEntity&gt; queryByRangeIndex(String hashKey, String rangeKey)         <i class="conum" data-value="8"></i><b>(8)</b>
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>GroovyBuilders</code> class provides all necessary factory methods and keywords</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Annotate an interface with <code>@Service</code> with the type of the entity as its <code>value</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td><code>@Query</code> annotation accepts a closure which returns a query builder (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/QueryBuilder.html">QueryBuilder</a> for full reference)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Specify a partition key with <code>partitionKey</code> method and method&#8217;s <code>hashKey</code> argument</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Specify some range key criteria with the method&#8217;s <code>rangeKey</code> argument (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html">RangeConditionCollector</a> for full reference)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>You can limit which properties are returned from the query</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Only <code>rangeIndex</code> property will be populated in the entities returned</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>The arguments have no special meaning but you can use them in the query. The method must return either <code>Flowable</code> or <code>List</code> of entities.</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Java</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="java">@Service(DynamoDBEntity.class)                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+public interface DynamoDBEntityService {
+
+    class EqRangeProjection implements QueryFunction&lt;DynamoDBEntity&gt; {                  <i class="conum" data-value="2"></i><b>(2)</b>
+
+        public QueryBuilder&lt;DynamoDBEntity&gt; query(Map&lt;String, Object&gt; arguments) {
+            return builder().partitionKey(arguments.get("hashKey"))                     <i class="conum" data-value="3"></i><b>(3)</b>
+                .index(DynamoDBEntity.RANGE_INDEX)
+                .sortKey(r -&gt;
+                    r.eq(arguments.get("rangeKey"))                                     <i class="conum" data-value="4"></i><b>(4)</b>
+                )
+                .only(DynamoDBEntity.RANGE_INDEX);                                      <i class="conum" data-value="5"></i><b>(5)</b>
+        }
+    }
+
+    @Query(EqRangeProjection.class)                                                     <i class="conum" data-value="6"></i><b>(6)</b>
+    Flowable&lt;DynamoDBEntity&gt; queryByRangeIndex(String hashKey, String rangeKey);        <i class="conum" data-value="7"></i><b>(7)</b>
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Annotate an interface with <code>@Service</code> with the type of the entity as its <code>value</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Define class which implements <code>QueryFunction</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Specify a partition key with <code>partitionKey</code> method and method&#8217;s <code>hashKey</code> argument</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Specify some range key criteria with the method&#8217;s <code>rangeKey</code> argument (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html">RangeConditionCollector</a> for full reference)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Only <code>rangeIndex</code> property will be populated in the entities returned</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td><code>@Query</code> annotation accepts a class which implements <code>Function&lt;Map&lt;String, Object&gt;, DetachedQuery&gt;</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>The arguments have no special meaning but you can use them in the query using <code>arguments</code> map. The method must return either <code>Flowable</code> or <code>List</code> of entities.</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Groovy  (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
 
@@ -764,7 +943,7 @@ interface DynamoDBItemDBService {
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Specify a hash key with <code>hash</code> method and method&#8217;s <code>hashKey</code> argument</td>
+<td>Specify a partition key with <code>partitionKey</code> method and method&#8217;s <code>hashKey</code> argument</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
@@ -781,61 +960,6 @@ interface DynamoDBItemDBService {
 <tr>
 <td><i class="conum" data-value="8"></i><b>8</b></td>
 <td>The arguments have no special meaning but you can use them in the query. The method must return either <code>Flowable</code> or <code>List</code> of entities.</td>
-</tr>
-</table>
-</div>
-<div class="listingblock secondary">
-<div class="title">Java</div>
-<div class="content">
-<pre class="prettyprint highlight nowrap"><code data-lang="java">@Service(DynamoDBEntity.class)                                                          <i class="conum" data-value="1"></i><b>(1)</b>
-public interface DynamoDBEntityService {
-
-    class EqRangeProjection implements Function&lt;Map&lt;String, Object&gt;, DetachedQuery&gt; {   <i class="conum" data-value="2"></i><b>(2)</b>
-        public DetachedQuery apply(Map&lt;String, Object&gt; arguments) {
-            return Builders.query(DynamoDBEntity.class)                                 <i class="conum" data-value="3"></i><b>(3)</b>
-                .hash(arguments.get("hashKey"))                                         <i class="conum" data-value="4"></i><b>(4)</b>
-                .range(r -&gt;
-                    r.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("rangeKey"))         <i class="conum" data-value="5"></i><b>(5)</b>
-                )
-                .only(DynamoDBEntity.RANGE_INDEX);                                      <i class="conum" data-value="6"></i><b>(6)</b>
-        }
-    }
-
-    @Query(EqRangeProjection.class)                                                     <i class="conum" data-value="7"></i><b>(7)</b>
-    Flowable&lt;DynamoDBEntity&gt; queryByRangeIndex(String hashKey, String rangeKey);        <i class="conum" data-value="8"></i><b>(8)</b>
-
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Annotate an interface with <code>@Service</code> with the type of the entity as its <code>value</code></td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Define class which implements <code>QueryFunction</code></td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Specify a hash key with <code>hash</code> method and method&#8217;s <code>hashKey</code> argument</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Specify some range key criteria with the method&#8217;s <code>rangeKey</code> argument (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html">RangeConditionCollector</a> for full reference)</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Only <code>rangeIndex</code> property will be populated in the entities returned</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td><code>@Query</code> annotation accepts a class which implements <code>Function&lt;Map&lt;String, Object&gt;, DetachedQuery&gt;</code></td>
-</tr>
-<tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>The arguments have no special meaning but you can use them in the query using <code>arguments</code> map. The method must return either <code>Flowable</code> or <code>List</code> of entities.</td>
 </tr>
 </table>
 </div>
@@ -857,7 +981,103 @@ If you need to scan the table by unindexed attributes you can annotate any metho
 </ul>
 </div>
 <div class="listingblock primary">
-<div class="title">Groovy</div>
+<div class="title">Groovy (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="groovy">import static com.agorapulse.micronaut.amazon.awssdk.dynamodb.groovy.GroovyBuilders.*   <i class="conum" data-value="1"></i><b>(1)</b>
+
+@Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
+interface DynamoDBItemDBService {
+
+
+    @Scan({                                                                             <i class="conum" data-value="3"></i><b>(3)</b>
+        scan(DynamoDBEntity) {
+            filter {
+                eq DynamoDBEntity.RANGE_INDEX, foo                                      <i class="conum" data-value="4"></i><b>(4)</b>
+            }
+            only {
+                rangeIndex
+            }
+        }
+    })
+    Flowable&lt;DynamoDBEntity&gt; scanAllByRangeIndex(String foo)                            <i class="conum" data-value="5"></i><b>(5)</b>
+
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>GroovyBuilders</code> class provides all necessary factory methods and keywords</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Annotate an interface with <code>@Service</code> with the type of the entity as its <code>value</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td><code>@Scan</code> annotation accepts a closure which returns a scan builder (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/ScanBuilder.html">ScanBuilder</a> for full reference)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Specify some filter criteria with the method&#8217;s <code>foo</code> argument (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html">RangeConditionCollector</a> for full reference)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>The arguments have no special meaning but you can use them in the scan definition. The method must return either <code>Flowable</code> or <code>List</code> of entities.</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Java</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="java">@Service(DynamoDBEntity.class)                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+public interface DynamoDBEntityService {
+
+    class EqRangeScan implements ScanFunction&lt;DynamoDBEntity&gt; {                         <i class="conum" data-value="2"></i><b>(2)</b>
+
+        @Override
+        public ScanBuilder&lt;DynamoDBEntity&gt; scan(Map&lt;String, Object&gt;  args) {
+            return builder().filter(f -&gt;
+                f.eq(DynamoDBEntity.RANGE_INDEX, args.get("foo"))                       <i class="conum" data-value="3"></i><b>(3)</b>
+            );
+        }
+
+    }
+
+    @Scan(EqRangeScan.class)                                                            <i class="conum" data-value="4"></i><b>(4)</b>
+    Flowable&lt;DynamoDBEntity&gt; scanAllByRangeIndex(String foo);                           <i class="conum" data-value="5"></i><b>(5)</b>
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Annotate an interface with <code>@Service</code> with the type of the entity as its <code>value</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Define class which implements <code>ScanFunction</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Specify some filter criteria with the method&#8217;s <code>foo</code> argument (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html">RangeConditionCollector</a> for full reference)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td><code>@Scan</code> annotation accepts a class which implements <code>Function&lt;Map&lt;String, Object&gt;, DetachedScan&gt;</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>The arguments have no special meaning but you can use them in the scan definition. The method must return either <code>Flowable</code> or <code>List</code> of entities.</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Groovy  (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
 
@@ -903,21 +1123,91 @@ interface DynamoDBItemDBService {
 </tr>
 </table>
 </div>
+</div>
+<div class="sect5">
+<h6 id="_updates"><a class="anchor" href="#_updates"></a>Updates</h6>
+<div class="paragraph">
+<p>Declarative services allows you to execute fine-grained updates. Any method annotated with <code>@Update</code> will perform the update in the DynamoDB table.</p>
+</div>
+<div class="listingblock primary">
+<div class="title">Groovy (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="groovy">import static com.agorapulse.micronaut.amazon.awssdk.dynamodb.groovy.GroovyBuilders.*   <i class="conum" data-value="1"></i><b>(1)</b>
+
+@Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
+interface DynamoDBItemDBService {
+
+
+    @Update({                                                                           <i class="conum" data-value="3"></i><b>(3)</b>
+        update(DynamoDBEntity) {
+            partitionKey hashKey                                                        <i class="conum" data-value="4"></i><b>(4)</b>
+            sortKey rangeKey                                                            <i class="conum" data-value="5"></i><b>(5)</b>
+            add 'number', 1                                                             <i class="conum" data-value="6"></i><b>(6)</b>
+            returnUpdatedNew { number }                                                 <i class="conum" data-value="7"></i><b>(7)</b>
+        }
+    })
+    Number increment(String hashKey, String rangeKey)                                   <i class="conum" data-value="8"></i><b>(8)</b>
+
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>Builders</code> class provides all necessary factory methods and keywords</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Annotate an interface with <code>@Service</code> with the type of the entity as its <code>value</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td><code>@Update</code> annotation accepts a closure which returns an update builder (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Specify a partition key with <code>partitionKey</code> method and method&#8217;s <code>hashKey</code> argument</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Specify a sort key with <code>sortKey</code> method and method&#8217;s <code>rangeKey</code> argument</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Specify update operation - increment <code>number</code> attribute (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference). You may have multiple update operations.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Specify what should be returned from the method (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference).</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>The arguments have no special meaning but you can use them in the scan definition. The method&#8217;s return value depends on the value returned from <code>returnUpdatedNew</code> mapper.</td>
+</tr>
+</table>
+</div>
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="java">@Service(DynamoDBEntity.class)                                                          <i class="conum" data-value="1"></i><b>(1)</b>
 public interface DynamoDBEntityService {
 
-    class EqRangeScan implements Function&lt;Map&lt;String, Object&gt;, DetachedScan&gt; {          <i class="conum" data-value="2"></i><b>(2)</b>
-        public DetachedScan apply(Map&lt;String, Object&gt; arguments) {
-            return Builders.scan(DynamoDBEntity.class)                                  <i class="conum" data-value="3"></i><b>(3)</b>
-                .filter(f -&gt; f.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("foo")));   <i class="conum" data-value="4"></i><b>(4)</b>
+    class IncrementNumber implements UpdateFunction&lt;DynamoDBEntity, Integer&gt; {          <i class="conum" data-value="2"></i><b>(2)</b>
+
+        @Override
+        public UpdateBuilder&lt;DynamoDBEntity, Integer&gt; update(Map&lt;String, Object&gt; args) {
+            return builder().partitionKey(args.get("hashKey"))                          <i class="conum" data-value="3"></i><b>(3)</b>
+                .sortKey(args.get("rangeKey"))                                          <i class="conum" data-value="4"></i><b>(4)</b>
+                .add("number", 1)                                                       <i class="conum" data-value="5"></i><b>(5)</b>
+                .returnUpdatedNew(DynamoDBEntity::getNumber);                           <i class="conum" data-value="6"></i><b>(6)</b>
         }
+
     }
 
-    @Scan(EqRangeScan.class)                                                            <i class="conum" data-value="5"></i><b>(5)</b>
-    Flowable&lt;DynamoDBEntity&gt; scanAllByRangeIndex(String foo);                           <i class="conum" data-value="6"></i><b>(6)</b>
+    @Update(IncrementNumber.class)                                                      <i class="conum" data-value="7"></i><b>(7)</b>
+    Number increment(String hashKey, String rangeKey);                                  <i class="conum" data-value="8"></i><b>(8)</b>
 
 }</code></pre>
 </div>
@@ -930,30 +1220,36 @@ public interface DynamoDBEntityService {
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Define class which implements <code>ScanFunction</code></td>
+<td>Define class which implements <code>Function&lt;Map&lt;String, Object&gt;, DetachedUpdate&gt;</code></td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Specify some filter criteria with the method&#8217;s <code>foo</code> argument (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html">RangeConditionCollector</a> for full reference)</td>
+<td>Specify a partition key with <code>partitionKey</code> method and method&#8217;s <code>hashKey</code> argument</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td><code>@Scan</code> annotation accepts a class which implements <code>Function&lt;Map&lt;String, Object&gt;, DetachedScan&gt;</code></td>
+<td>Specify a sort key with <code>sortKey</code> method and method&#8217;s <code>rangeKey</code> argument</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>The arguments have no special meaning but you can use them in the scan definition. The method must return either <code>Flowable</code> or <code>List</code> of entities.</td>
+<td>Specify update operation - increment <code>number</code> attribute (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference). You may have multiple update operations.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Specify what should be returned from the method (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference).</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td><code>@Update</code> annotation accepts a class which implements <code>Function&lt;Map&lt;String, Object&gt;, DetachedUpdate&gt;</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>The arguments have no special meaning but you can use them in the scan definition. The method&#8217;s return value depends on the value returned from <code>returnUpdatedNew</code> mapper.</td>
 </tr>
 </table>
 </div>
-</div>
-<div class="sect5">
-<h6 id="_updates"><a class="anchor" href="#_updates"></a>Updates</h6>
-<div class="paragraph">
-<p>Declarative services allows you to execute fine-grained updates. Any method annotated with <code>@Update</code> will perform the update in the DynamoDB table.</p>
-</div>
-<div class="listingblock primary">
-<div class="title">Groovy</div>
+<div class="listingblock secondary">
+<div class="title">Groovy  (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="groovy">import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  <i class="conum" data-value="1"></i><b>(1)</b>
 
@@ -992,7 +1288,7 @@ interface DynamoDBItemDBService {
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Specify a hash key with <code>hash</code> method and method&#8217;s <code>hashKey</code> argument</td>
+<td>Specify a partition key with <code>partitionKey</code> method and method&#8217;s <code>hashKey</code> argument</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
@@ -1005,64 +1301,6 @@ interface DynamoDBItemDBService {
 <tr>
 <td><i class="conum" data-value="7"></i><b>7</b></td>
 <td>Specify what should be returned from the method (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference).</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="8"></i><b>8</b></td>
-<td>The arguments have no special meaning but you can use them in the scan definition. The method&#8217;s return value depends on the value returned from <code>returnUpdatedNew</code> mapper.</td>
-</tr>
-</table>
-</div>
-<div class="listingblock secondary">
-<div class="title">Java</div>
-<div class="content">
-<pre class="prettyprint highlight nowrap"><code data-lang="java">@Service(DynamoDBEntity.class)                                                          <i class="conum" data-value="1"></i><b>(1)</b>
-public interface DynamoDBEntityService {
-
-    class IncrementNumber implements Function&lt;Map&lt;String, Object&gt;, DetachedUpdate&gt; {    <i class="conum" data-value="2"></i><b>(2)</b>
-        public DetachedUpdate apply(Map&lt;String, Object&gt; arguments) {
-            return Builders.update(DynamoDBEntity.class)                                <i class="conum" data-value="3"></i><b>(3)</b>
-                .hash(arguments.get("hashKey"))                                         <i class="conum" data-value="4"></i><b>(4)</b>
-                .range(arguments.get("rangeKey"))                                       <i class="conum" data-value="5"></i><b>(5)</b>
-                .add("number", 1)                                                       <i class="conum" data-value="6"></i><b>(6)</b>
-                .returnUpdatedNew(DynamoDBEntity::getNumber);                           <i class="conum" data-value="7"></i><b>(7)</b>
-        }
-    }
-
-    @Update(IncrementNumber.class)                                                      <i class="conum" data-value="8"></i><b>(8)</b>
-    Number increment(String hashKey, String rangeKey);                                  <i class="conum" data-value="9"></i><b>(9)</b>
-
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Annotate an interface with <code>@Service</code> with the type of the entity as its <code>value</code></td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Define class which implements <code>Function&lt;Map&lt;String, Object&gt;, DetachedUpdate&gt;</code></td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Specify a hash key with <code>hash</code> method and method&#8217;s <code>hashKey</code> argument</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Specify a range key with <code>range</code> method and method&#8217;s <code>rangeKey</code> argument</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Specify update operation - increment <code>number</code> attribute (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference). You may have multiple update operations.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Specify what should be returned from the method (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference).</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
-<td><code>@Update</code> annotation accepts a class which implements <code>Function&lt;Map&lt;String, Object&gt;, DetachedUpdate&gt;</code></td>
 </tr>
 <tr>
 <td><i class="conum" data-value="8"></i><b>8</b></td>
@@ -1079,7 +1317,139 @@ public interface DynamoDBEntityService {
 <code>DynamoDBServiceProvider</code> which can be injected to any bean.</p>
 </div>
 <div class="listingblock primary">
-<div class="title">Groovy</div>
+<div class="title">Groovy (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="groovy">DynamoDBServiceProvider provider = context.getBean(DynamoDBServiceProvider)
+DynamoDBService&lt;DynamoDBEntity&gt; service = provider.findOrCreate(DynamoDBEntity)         <i class="conum" data-value="1"></i><b>(1)</b>
+
+service.createTable()                                                                   <i class="conum" data-value="2"></i><b>(2)</b>
+
+service.save(new DynamoDBEntity(                                                        <i class="conum" data-value="3"></i><b>(3)</b>
+    parentId: '1',
+    id: '1',
+    rangeIndex: 'foo',
+    number: 1,
+    date: Date.from(REFERENCE_DATE)
+))
+
+service.get('1', '1')                                                                   <i class="conum" data-value="4"></i><b>(4)</b>
+
+service.query {                                                                         <i class="conum" data-value="5"></i><b>(5)</b>
+    partitionKey '1'
+    index DynamoDBEntity.DATE_INDEX
+    range { between from, to }
+}
+
+service.update {                                                                        <i class="conum" data-value="6"></i><b>(6)</b>
+    partitionKey '1001'
+    sortKey '1'
+    add 'number', 13
+    returns allNew
+}
+
+service.delete('1001', '1')                                                             <i class="conum" data-value="7"></i><b>(7)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Obtain the instance of <code>DynamoDBService</code> from <code>DynamoDBServiceProvider</code> (provider can be injected)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Create table for the entity</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Save an entity</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Load the entity by its hash and range keys</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Query the table for entities with given range index value</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Increment a property for entity specified by hash and range keys</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Delete an entity</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Java (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="java">DynamoDBServiceProvider provider = context.getBean(DynamoDBServiceProvider);
+DynamoDBService&lt;DynamoDBEntity&gt; service = provider.findOrCreate(DynamoDBEntity.class);  <i class="conum" data-value="1"></i><b>(1)</b>
+
+service.createTable();                                                                  <i class="conum" data-value="2"></i><b>(2)</b>
+
+DynamoDBEntity entity = new DynamoDBEntity();
+entity.setParentId("1");
+entity.setId("1");
+entity.setRangeIndex("foo");
+entity.setNumber(1);
+entity.setDate(new Date());
+service.save(entity);                                                                   <i class="conum" data-value="3"></i><b>(3)</b>
+
+service.get("1", "1");                                                                  <i class="conum" data-value="4"></i><b>(4)</b>
+
+service.query(query -&gt;                                                                  <i class="conum" data-value="5"></i><b>(5)</b>
+    query.partitionKey("1")
+    .index(DynamoDBEntity.DATE_INDEX)
+    .range(r -&gt; r.between(from, to))
+);
+
+service.update(update -&gt;                                                                <i class="conum" data-value="6"></i><b>(6)</b>
+    update.partitionKey("1001")
+    .sortKey("1")
+    .add("number", 13)
+    .returns(ReturnValue.ALL_NEW)
+);
+
+service.delete("1001", "1");                                                            <i class="conum" data-value="7"></i><b>(7)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Obtain the instance of <code>DynamoDBService</code> from <code>DynamoDBServiceProvider</code> (provider can be injected)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Create table for the entity</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Save an entity</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Load the entity by its hash and range keys</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Query the table for entities with given range index value</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Increment a property for entity specified by hash and range keys</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Delete an entity</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Groovy (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="groovy">DynamoDBServiceProvider provider = context.getBean(DynamoDBServiceProvider)
 DynamoDBService&lt;DynamoDBEntity&gt; s = provider.findOrCreate(DynamoDBEntity)       <i class="conum" data-value="1"></i><b>(1)</b>
@@ -1150,7 +1520,7 @@ s.deleteAll('1', DynamoDBEntity.RANGE_INDEX, 'bar') == 1                        
 </table>
 </div>
 <div class="listingblock secondary">
-<div class="title">Java</div>
+<div class="title">Java (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="java">DynamoDBServiceProvider provider = ctx.getBean(DynamoDBServiceProvider.class);
 DynamoDBService&lt;DynamoDBEntity&gt; s = provider.findOrCreate(DynamoDBEntity.class);<i class="conum" data-value="1"></i><b>(1)</b>
@@ -1230,7 +1600,8 @@ assertEquals(1,
 </table>
 </div>
 <div class="paragraph">
-<p>Please see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/DynamoDBService.html">DynamoDBService</a> for full reference.</p>
+<p>Please see  <a href="https://agorapulse.github.io/micronaut-amazon-awssdk/api/com/agorapulse/micronaut/amazon/awssdk/dynamodb/DynamoDBService.html">DynamoDBService</a> (AWS SDK 2.x)
+and <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/DynamoDBService.html">DynamoDBService</a> (AwS SDK 1.x) for full reference.</p>
 </div>
 </div>
 <div class="sect4">
@@ -1277,8 +1648,8 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile group: 'org.testcontainers', name: 'localstack', version: '1.10.2'
-compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile group: 'org.testcontainers', name: 'localstack', version: '1.15.3'
+compile group: 'org.testcontainers', name: 'spock', version: '1.15.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -1287,13 +1658,13 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
     &lt;artifactId&gt;localstack&lt;/artifactId&gt;
-    &lt;version&gt;1.10.2&lt;/version&gt;
+    &lt;version&gt;1.15.3&lt;/version&gt;
     &lt;scope&gt;test&lt;/scope&gt;
 &lt;/dependency&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
     &lt;artifactId&gt;spock&lt;/artifactId&gt;
-    &lt;version&gt;1.10.2&lt;/version&gt;
+    &lt;version&gt;1.15.3&lt;/version&gt;
     &lt;scope&gt;test&lt;/scope&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
@@ -1302,7 +1673,174 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <p>Then you can setup your tests like this:</p>
 </div>
 <div class="listingblock primary">
-<div class="title">Groovy</div>
+<div class="title">Groovy (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">@Stepwise
+@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
+class DefaultDynamoDBServiceSpec extends Specification {
+
+    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="2"></i><b>(2)</b>
+
+    @Shared LocalStackContainer localstack = new LocalStackContainer()                  <i class="conum" data-value="3"></i><b>(3)</b>
+        .withServices(DYNAMODB)
+
+    DynamoDBItemDBService service
+    DynamoDbService&lt;DynamoDBEntity&gt; dbs
+
+    void setup() {
+        DynamoDbClient client = DynamoDbClient                                          <i class="conum" data-value="4"></i><b>(4)</b>
+            .builder()
+            .endpointOverride(localstack.getEndpointOverride(DYNAMODB))
+            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
+                localstack.accessKey, localstack.secretKey
+            )))
+            .region(Region.of(localstack.region))
+            .build()
+
+        DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient
+            .builder()
+            .dynamoDbClient(client)
+            .build()
+
+        context = ApplicationContext.build().build()
+        context.registerSingleton(DynamoDbClient, client)                               <i class="conum" data-value="5"></i><b>(5)</b>
+        context.registerSingleton(DynamoDbEnhancedClient, enhancedClient)               <i class="conum" data-value="6"></i><b>(6)</b>
+        context.start()
+
+        service = context.getBean(DynamoDBItemDBService)                                <i class="conum" data-value="7"></i><b>(7)</b>
+        dbs = context.getBean(DynamoDBServiceProvider).findOrCreate(DynamoDBEntity)     <i class="conum" data-value="8"></i><b>(8)</b>
+    }
+
+    // test methods
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Annotate the specification with <code>@Testcontainers</code> to let Spock manage the Testcontainers for you</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Prepare the reference to the <code>ApplicationContext</code>, <code>@AutoCleanup</code> guarantees closing the context after the tests</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Create an instance of <code>LocalStackContainer</code> with only DynamoDB support enabled</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Create <code>DynamoDbClient</code> client using the LocalStack configuration</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Register the client using LocalStack to the application context</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Register the enhanced client using LocalStack to the application context</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Obtain the declarative service</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>Obtain <code>DynamoDBService</code> for particular DynamoDB entity</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Java (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="java">public class DeclarativeServiceTest {
+
+    private static final Instant REFERENCE_DATE = Instant.ofEpochMilli(1358487600000L);
+
+    @Rule
+    public LocalStackContainer localstack = new LocalStackContainer()                   <i class="conum" data-value="1"></i><b>(1)</b>
+        .withServices(DYNAMODB);
+
+    public ApplicationContext context;                                                  <i class="conum" data-value="2"></i><b>(2)</b>
+
+    @Before
+    public void setup() {
+        DynamoDbClient client = DynamoDbClient                                          <i class="conum" data-value="3"></i><b>(3)</b>
+            .builder()
+            .endpointOverride(localstack.getEndpointOverride(DYNAMODB))
+            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
+                localstack.getAccessKey(), localstack.getSecretKey()
+            )))
+            .region(Region.of(localstack.getRegion()))
+            .build();
+
+        DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient
+            .builder()
+            .dynamoDbClient(client)
+            .build();
+
+        context = ApplicationContext.build().build();
+        context.registerSingleton(DynamoDbClient.class, client);                        <i class="conum" data-value="4"></i><b>(4)</b>
+        context.registerSingleton(DynamoDbEnhancedClient.class, enhancedClient);        <i class="conum" data-value="5"></i><b>(5)</b>
+        context.start();
+    }
+
+    @After
+    public void cleanup() {
+        if (context != null) {
+            context.close();                                                            <i class="conum" data-value="6"></i><b>(6)</b>
+        }
+    }
+    @Test
+    public void testSomething() {
+        DynamoDBServiceProvider provider = ctx.getBean(DynamoDBServiceProvider.class);  <i class="conum" data-value="7"></i><b>(7)</b>
+        DynamoDBService&lt;DynamoDBEntity&gt; s = provider.findOrCreate(DynamoDBEntity.class);<i class="conum" data-value="8"></i><b>(8)</b>
+
+        // test code
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Create an instance of <code>LocalStackContainer</code> with only DynamoDB support enabled</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Prepare the reference to the <code>ApplicationContext</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Create <code>DynamoDbClient</code> client using the LocalStack configuration</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Register the client using LocalStack to the application context</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Register the enhanced client using LocalStack to the application context</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Close the application context after test execution</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Obtain the provider bean</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>Obtain <code>DynamoDBService</code> for particular DynamoDB entity</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Groovy (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="groovy">@Stepwise
 @Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
@@ -1381,7 +1919,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
 </table>
 </div>
 <div class="listingblock secondary">
-<div class="title">Java</div>
+<div class="title">Java (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="java">public class DynamoDBServiceTest {
     @Rule
@@ -1502,20 +2040,38 @@ You can obtain instances of declarative client from the context as well.
 <div class="sect4">
 <h5 id="_installation_3"><a class="anchor" href="#_installation_3"></a>Installation</h5>
 <div class="listingblock primary">
-<div class="title">Gradle</div>
+<div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code>// for Kinesis client
-compile 'com.agorapulse:micronaut-aws-sdk-kinesis:1.3.7.6'</code></pre>
+compile 'com.agorapulse:micronaut-amazon-awssdk-kinesis:1.4.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
-<div class="title">Maven</div>
+<div class="title">Maven (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;!-- for Kinesis client --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
+    &lt;artifactId&gt;micronaut-amazon-awssdk-kinesis&lt;/artifactId&gt;
+    &lt;version&gt;1.4.0&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+<div class="listingblock secondary">
+<div class="title">Gradle (AWS SDK 1.x)</div>
+<div class="content">
+<pre class="prettyprint highlight"><code>// for Kinesis client
+compile 'com.agorapulse:micronaut-aws-sdk-kinesis:1.4.0'</code></pre>
+</div>
+</div>
+<div class="listingblock secondary">
+<div class="title">Maven (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;!-- for Kinesis client --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-kinesis&lt;/artifactId&gt;
-    &lt;version&gt;1.3.7.6&lt;/version&gt;
+    &lt;version&gt;1.4.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1558,15 +2114,98 @@ compile 'com.agorapulse:micronaut-aws-sdk-kinesis:1.3.7.6'</code></pre>
 <div class="sect4">
 <h5 id="_publishing_with_kinesisclient"><a class="anchor" href="#_publishing_with_kinesisclient"></a>Publishing with <code>@KinesisClient</code></h5>
 <div class="paragraph">
-<p>If you place <code>com.agorapulse.micronaut.aws.kinesis.annotation.KinesisClient</code> annotation on the interface then methods
+<p>If you place <code>KinesisClient</code> annotation on the interface then methods
 matching predefined pattern will be automatically implemented. Every method of <code>KinesisClient</code> puts new records into
 the stream.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+For AWS SDK 2.x, use packages starting <code>com.agorapulse.micronaut.amazon.awssdk.kinesis</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+For AWS SDK 1.x, use packages starting <code>com.agorapulse.micronaut.aws.sdk.kinesis</code>.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>The following example shows many of available method signatures for publishing records:</p>
 </div>
-<div class="listingblock">
-<div class="title">Publishing String Records</div>
+<div class="listingblock primary">
+<div class="title">Publishing String Records (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="java">@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+interface DefaultClient {
+    void putRecordString(String record);                                                <i class="conum" data-value="2"></i><b>(2)</b>
+
+    PutRecordResponse putRecord(String partitionKey, String record);                    <i class="conum" data-value="3"></i><b>(3)</b>
+
+    void putRecordAnno(@PartitionKey String id, String record);                         <i class="conum" data-value="4"></i><b>(4)</b>
+
+    void putRecord(String partitionKey, String record, String sequenceNumber);          <i class="conum" data-value="5"></i><b>(5)</b>
+
+    void putRecordAnno(                                                                 <i class="conum" data-value="6"></i><b>(6)</b>
+        @PartitionKey String id,
+        String record,
+        @SequenceNumber String sqn
+    );
+
+    void putRecordAnnoNumbers(                                                          <i class="conum" data-value="7"></i><b>(7)</b>
+        @PartitionKey Long id,
+        String record,
+        @SequenceNumber int sequenceNumber
+    );
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>@KinesisClient</code> annotation makes the interface a Kinesis client</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>You can put String into the stream with generated UUID as partition key</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>You can user predefined partition key</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>If the name of the argument does not contain word <code>parition</code> then <code>@PartitionKey</code> annotation must to be used</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>You can put String into the stream with predefined partition key and a sequence number</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>If the name of the sequence number argument does not contain word <code>sequence</code> then <code>@SequenceKey</code> annotation must to be used</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>The type of parition key and sequence number does not matter as the value will be always converted to string</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Publishing String Records (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="java">@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
 interface DefaultClient {
@@ -1624,8 +2263,53 @@ interface DefaultClient {
 </tr>
 </table>
 </div>
-<div class="listingblock">
-<div class="title">Publishing Byte Array Records</div>
+<div class="listingblock primary">
+<div class="title">Publishing Byte Array Records (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="java">@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+interface DefaultClient {
+    void putRecordBytes(byte[] record);                                                 <i class="conum" data-value="2"></i><b>(2)</b>
+
+    void putRecordDataByteArray(@PartitionKey String id, byte[] value);                 <i class="conum" data-value="3"></i><b>(3)</b>
+
+    PutRecordsResponse putRecords(Iterable&lt;PutRecordsRequestEntry&gt; entries);            <i class="conum" data-value="4"></i><b>(4)</b>
+
+    PutRecordsResponse putRecords(PutRecordsRequestEntry... entries);                   <i class="conum" data-value="5"></i><b>(5)</b>
+
+    PutRecordsResponse putRecord(PutRecordsRequestEntry entry);                         <i class="conum" data-value="6"></i><b>(6)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>@KinesisClient</code> annotation makes the interface a Kinesis client</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>You can put byte array into the stream, UUID as partition key will be generated</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>If the name of the argument does not contain word <code>parition</code> then <code>@PartitionKey</code> annotation must to be used</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>You can put several records wrapped into iterable of <code>PutRecordsRequestEntry</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>You can put several records wrapped into array of <code>PutRecordsRequestEntry</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>If the single argument is of type <code>PutRecordsRequestEntry</code> then <code>PutRecordsResult</code> object is returned from the method despite only single record has been published</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Publishing Byte Array Records (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="java">@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
 interface DefaultClient {
@@ -1669,8 +2353,47 @@ interface DefaultClient {
 </tr>
 </table>
 </div>
-<div class="listingblock">
-<div class="title">Publishing Plain Old Java Objects</div>
+<div class="listingblock primary">
+<div class="title">Publishing Plain Old Java Objects (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="java">@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+interface DefaultClient {
+    void putRecordObject(Pogo pogo);                                                    <i class="conum" data-value="2"></i><b>(2)</b>
+
+    PutRecordsResponse putRecordObjects(Pogo... pogo);                                  <i class="conum" data-value="3"></i><b>(3)</b>
+
+    PutRecordsResponse putRecordObjects(Iterable&lt;Pogo&gt; pogo);                           <i class="conum" data-value="4"></i><b>(4)</b>
+
+    void putRecordDataObject(@PartitionKey String id, Pogo value);                      <i class="conum" data-value="5"></i><b>(5)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>@KinesisClient</code> annotation makes the interface a Kinesis client</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>You can put any object into the stream, UUID as partition key will be generated, the objects will be serialized to JSON</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>You can put array of any objects into the stream, UUID as partition key will be generated for each record, each object will be serialized to JSON</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>You can put iterable of any objects into the stream, UUID as partition key will be generated for each record, each object will be serialized to JSON</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>You can put any object into the stream with predefined partition key, if the name of the argument does not contain word <code>parition</code> then <code>@PartitionKey</code> annotation must to be used</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Publishing Plain Old Java Objects (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="java">@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
 interface DefaultClient {
@@ -1708,8 +2431,47 @@ interface DefaultClient {
 </tr>
 </table>
 </div>
-<div class="listingblock">
-<div class="title">Publishing Events</div>
+<div class="listingblock primary">
+<div class="title">Publishing Events (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="java">@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+interface DefaultClient {
+    PutRecordResponse putEvent(MyEvent event);                                          <i class="conum" data-value="2"></i><b>(2)</b>
+
+    PutRecordsResponse putEventsIterable(Iterable&lt;MyEvent&gt; events);                     <i class="conum" data-value="3"></i><b>(3)</b>
+
+    void putEventsArrayNoReturn(MyEvent... events);                                     <i class="conum" data-value="4"></i><b>(4)</b>
+
+    @Stream("OtherStream") PutRecordResponse putEventToStream(MyEvent event);           <i class="conum" data-value="5"></i><b>(5)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>@KinesisClient</code> annotation makes the interface a Kinesis client</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>You can put object implementing <code>Event</code> into the stream</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>You can put iterable of objects implementing <code>Event</code> into the stream</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>You can put array of objects implementing <code>Event</code> into the stream</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Without any parameters <code>@KinesisClient</code> publishes to default stream of the default configuration but you can change it using <code>@Stream</code> annotation on the method</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Publishing Events (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="java">@KinesisClient                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
 interface DefaultClient {
@@ -1754,8 +2516,7 @@ interface DefaultClient {
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-The return value of the method is <code>PutRecordResult</code> or <code>PutRecordsResult</code> for putting multiple records but it can be always
-omitted and replaced with <code>void</code>.
+The return value of the method is <code>PutRecordResponse</code> and <code>PutRecordsResponse</code> for AWS SDK 2,x or <code>PutRecordResult</code> or <code>PutRecordsResult</code> for AWS SDK 1.x, but it can be always omitted and replaced with <code>void</code>.
 </td>
 </tr>
 </table>
@@ -1778,7 +2539,10 @@ from particular shards.</p>
 You should always use <code>@Named</code> qualifier when injecting <code>KinesisService</code> if you have more than one stream configuration present, e.g. <code>@Named("other") KinesisService otherService</code>.</p>
 </div>
 <div class="paragraph">
-<p>Please, see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/kinesis/KinesisService.html">KinesisService</a> for the full reference.</p>
+<p>Please, see
+<a href="https://agorapulse.github.io/micronaut-amazon-awssdk/api/com/agorapulse/micronaut/amazon/awssdk/kinesis/KinesisService.html">KinesisService for AWS SDK 2.x</a> or
+<a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/kinesis/KinesisService.html">KinesisService for AWS SDK 1.x</a>
+for the full reference.</p>
 </div>
 </div>
 <div class="sect4">
@@ -1793,8 +2557,8 @@ Kinesis integration works well with <a href="https://www.testcontainers.org/">Te
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile group: 'org.testcontainers', name: 'localstack', version: '1.10.2'
-compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile group: 'org.testcontainers', name: 'localstack', version: '1.15.3'
+compile group: 'org.testcontainers', name: 'spock', version: '1.15.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -1803,28 +2567,65 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
     &lt;artifactId&gt;localstack&lt;/artifactId&gt;
-    &lt;version&gt;1.10.2&lt;/version&gt;
+    &lt;version&gt;1.15.3&lt;/version&gt;
     &lt;scope&gt;test&lt;/scope&gt;
 &lt;/dependency&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
     &lt;artifactId&gt;spock&lt;/artifactId&gt;
-    &lt;version&gt;1.10.2&lt;/version&gt;
+    &lt;version&gt;1.15.3&lt;/version&gt;
     &lt;scope&gt;test&lt;/scope&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Then you can setup your tests like this:</p>
+<p>Then you can set up your tests like this:</p>
 </div>
 <div class="listingblock primary">
-<div class="title">Groovy</div>
+<div class="title">Groovy (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">Unresolved directive in kinesis.adoc - include::/home/runner/work/micronaut-aws-sdk/micronaut-aws-sdk/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisAnnotationsSpec.groovy[tags=testcontainers-header]
+<pre class="prettyprint highlight"><code data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
+@RestoreSystemProperties                                                                <i class="conum" data-value="2"></i><b>(2)</b>
+class KinesisDemoSpec extends Specification {
 
-Unresolved directive in kinesis.adoc - include::/home/runner/work/micronaut-aws-sdk/micronaut-aws-sdk/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisAnnotationsSpec.groovy[tags=testcontainers-setup]
+    @Shared
+    LocalStackContainer localstack = new LocalStackContainer().withServices(KINESIS)    <i class="conum" data-value="3"></i><b>(3)</b>
 
-Unresolved directive in kinesis.adoc - include::/home/runner/work/micronaut-aws-sdk/micronaut-aws-sdk/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisAnnotationsSpec.groovy[tags=testcontainers-test]
+    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="4"></i><b>(4)</b>
+
+    KinesisService service
+
+    void setup() {
+        // disable CBOR (not supported by Kinelite)
+        System.setProperty(SdkSystemSetting.CBOR_ENABLED.property(), 'false')           <i class="conum" data-value="5"></i><b>(5)</b>
+
+        KinesisClient kinesis = KinesisClient                                           <i class="conum" data-value="6"></i><b>(6)</b>
+            .builder()
+            .endpointOverride(localstack.getEndpointOverride(KINESIS))
+            .credentialsProvider(
+                StaticCredentialsProvider.create(
+                    AwsBasicCredentials.create(
+                        localstack.accessKey, localstack.secretKey
+                    )
+                )
+            )
+            .region(Region.EU_WEST_1)
+            .build()
+
+        context = ApplicationContext.build().build()                                    <i class="conum" data-value="7"></i><b>(7)</b>
+        context.registerSingleton(KinesisClient, kinesis)
+        context.start()
+
+        service = context.getBean(KinesisService)                                       <i class="conum" data-value="8"></i><b>(8)</b>
+    }
+
+    @Retry
+    void 'new default stream'() {
+        when:
+            CreateStreamResponse stream = service.createStream('NewStream')
+        then:
+            stream
+    }
 
 }</code></pre>
 </div>
@@ -1841,7 +2642,7 @@ Unresolved directive in kinesis.adoc - include::/home/runner/work/micronaut-aws-
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with Kinesis and  DynamoDB (required by the listener) support enabled</td>
+<td>Create an instance of <code>LocalStackContainer</code> with Kinesis support enabled</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
@@ -1853,38 +2654,135 @@ Unresolved directive in kinesis.adoc - include::/home/runner/work/micronaut-aws-
 </tr>
 <tr>
 <td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Create <code>AmazonDynamoDB</code> client using the LocalStack configuration</td>
+<td>Create <code>KinesisClient</code> client using the LocalStack configuration</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>Create <code>AmazonKinesis</code> client using the LocalStack configuration</td>
+<td>Prepare the application context</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="8"></i><b>8</b></td>
-<td>Prepare the application context with required properties and service LocalStack</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="9"></i><b>9</b></td>
-<td>You can obtain instance of <code>KinesisService</code> from the context</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="10"></i><b>10</b></td>
-<td>You can obtain instance of declarative listener from the context</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="11"></i><b>11</b></td>
-<td>You can obtain instance of declarative client from the context</td>
+<td>Obtain service from the application context</td>
 </tr>
 </table>
 </div>
 <div class="listingblock secondary">
-<div class="title">Java</div>
+<div class="title">Java (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="java">Unresolved directive in kinesis.adoc - include::/home/runner/work/micronaut-aws-sdk/micronaut-aws-sdk/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisTest.java[tags=testcontainers-header]
+<pre class="prettyprint highlight"><code data-lang="java">public class KinesisJavaDemoTest {
 
-Unresolved directive in kinesis.adoc - include::/home/runner/work/micronaut-aws-sdk/micronaut-aws-sdk/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisTest.java[tags=testcontainers-setup]
+    @Rule
+    public LocalStackContainer localstack = new LocalStackContainer()                   <i class="conum" data-value="1"></i><b>(1)</b>
+        .withServices(KINESIS);
 
-Unresolved directive in kinesis.adoc - include::/home/runner/work/micronaut-aws-sdk/micronaut-aws-sdk/subprojects/micronaut-aws-sdk-kinesis-worker/src/test/groovy/com/agorapulse/micronaut/aws/kinesis/worker/KinesisTest.java[tags=testcontainers-test]
+    public ApplicationContext context;
+    public KinesisService service;
+
+    @Before
+    public void setup() {
+        // disable CBOR (not supported by Kinelite)
+        System.setProperty(SdkSystemSetting.CBOR_ENABLED.property(), "false");          <i class="conum" data-value="2"></i><b>(2)</b>
+
+        KinesisClient kinesis = KinesisClient                                           <i class="conum" data-value="3"></i><b>(3)</b>
+            .builder()
+            .endpointOverride(localstack.getEndpointOverride(KINESIS))
+            .credentialsProvider(
+                StaticCredentialsProvider.create(
+                    AwsBasicCredentials.create(
+                        localstack.getAccessKey(), localstack.getSecretKey()
+                    )
+                )
+            )
+            .region(Region.EU_WEST_1)
+            .build();
+
+        context = ApplicationContext.build().build();                                   <i class="conum" data-value="4"></i><b>(4)</b>
+        context.registerSingleton(KinesisClient.class, kinesis);
+        context.start();
+
+        service = context.getBean(KinesisService.class);                                <i class="conum" data-value="5"></i><b>(5)</b>
+    }
+
+    @After
+    public void cleanup() {
+        if (context != null) {
+            context.close();                                                            <i class="conum" data-value="6"></i><b>(6)</b>
+        }
+    }
+
+    @Test
+    public void testJavaService() {
+        assertNotNull(service.createStream("TestStream"));
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Create an instance of <code>LocalStackContainer</code> with Kinesis support enabled</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Disable CBOR protocol for Kinesis (not supported by LocalStack/Kinesilite)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Create <code>KinesisClient</code> client using the LocalStack configuration</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Prepare the application context</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Obtain service from the application context</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Don&#8217;t forget to clean up the application context after the tests</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Groovy (AWS SDK 1.x)</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
+@RestoreSystemProperties                                                                <i class="conum" data-value="2"></i><b>(2)</b>
+class KinesisDemoSpec extends Specification {
+
+    @Shared
+    LocalStackContainer localstack = new LocalStackContainer().withServices(KINESIS)    <i class="conum" data-value="3"></i><b>(3)</b>
+
+    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="4"></i><b>(4)</b>
+
+    KinesisService service
+
+    void setup() {
+        // disable CBOR (not supported by Kinelite)
+        System.setProperty('com.amazonaws.sdk.disableCbor', 'false')                    <i class="conum" data-value="5"></i><b>(5)</b>
+
+        AmazonKinesis kinesis = AmazonKinesisClient                                     <i class="conum" data-value="6"></i><b>(6)</b>
+            .builder()
+            .withEndpointConfiguration(localstack.getEndpointConfiguration(KINESIS))
+            .withCredentials(localstack.defaultCredentialsProvider)
+            .build()
+
+        context = ApplicationContext.build().build()
+        context.registerSingleton(AmazonKinesis, kinesis)                               <i class="conum" data-value="7"></i><b>(7)</b>
+        context.start()
+
+        service = context.getBean(KinesisService)                                       <i class="conum" data-value="8"></i><b>(8)</b>
+    }
+
+    @Retry
+    void 'new default stream'() {
+        when:
+            CreateStreamResult stream = service.createStream('NewStream')
+        then:
+            stream
+    }
 
 }</code></pre>
 </div>
@@ -1893,51 +2791,106 @@ Unresolved directive in kinesis.adoc - include::/home/runner/work/micronaut-aws-
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Prepare the reference to the <code>ApplicationContext</code></td>
+<td>Annotate the specification with <code>@Testcontainers</code> to let Spock manage the Testcontainers for you</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with Kinesis and  DynamoDB (required by the listener) support enabled</td>
+<td><code>@RestoreSystemProperties</code> will guarantee that system properties will be restore after the test</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Disable CBOR protocol for Kinesis (not supported by LocalStack/Kinesilite)</td>
+<td>Create an instance of <code>LocalStackContainer</code> with Kinesis support enabled</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Create <code>AmazonDynamoDB</code> client using the LocalStack configuration</td>
+<td>Prepare the reference to the <code>ApplicationContext</code>, <code>@AutoCleanup</code> guarantees closing the context after the tests</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Create <code>AmazonKinesis</code> client using the LocalStack configuration</td>
+<td>Disable CBOR protocol for Kinesis (not supported by LocalStack/Kinesilite)</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Prepare required properties</td>
+<td>Create <code>AmazonKinesis</code> client using the LocalStack configuration</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>Prepare the application context with required properties and service LocalStack</td>
+<td>Prepare the application context</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="8"></i><b>8</b></td>
-<td>Reset CBOR protocol settings after the test</td>
+<td>Obtain service from the application context</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Java (AWS SDK 1.x)</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="java">public class KinesisJavaDemoTest {
+
+    @Rule
+    public LocalStackContainer localstack = new LocalStackContainer()                   <i class="conum" data-value="1"></i><b>(1)</b>
+        .withServices(KINESIS);
+
+    public ApplicationContext context;                                                  <i class="conum" data-value="2"></i><b>(2)</b>
+    public KinesisService service;
+
+    @Before
+    public void setup() {
+        System.setProperty("com.amazonaws.sdk.disableCbor", "false");                   <i class="conum" data-value="2"></i><b>(2)</b>
+
+        AmazonKinesis kinesis = AmazonKinesisClient                                     <i class="conum" data-value="3"></i><b>(3)</b>
+            .builder()
+            .withEndpointConfiguration(localstack.getEndpointConfiguration(KINESIS))
+            .withCredentials(localstack.getDefaultCredentialsProvider())
+            .build();
+
+        context = ApplicationContext.build().build();
+        context.registerSingleton(AmazonKinesis.class, kinesis);                        <i class="conum" data-value="4"></i><b>(4)</b>
+        context.start();
+
+        service = context.getBean(KinesisService.class);                                <i class="conum" data-value="5"></i><b>(5)</b>
+    }
+
+    @After
+    public void cleanup() {
+        if (context != null) {
+            context.close();                                                            <i class="conum" data-value="6"></i><b>(6)</b>
+        }
+    }
+
+    @Test
+    public void testJavaService() {
+        assertNotNull(service.createStream("TestStream"));
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Create an instance of <code>LocalStackContainer</code> with Kinesis support enabled</td>
 </tr>
 <tr>
-<td><i class="conum" data-value="9"></i><b>9</b></td>
-<td>Close the application context after the test</td>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Disable CBOR protocol for Kinesis (not supported by LocalStack/Kinesilite)</td>
 </tr>
 <tr>
-<td><i class="conum" data-value="10"></i><b>10</b></td>
-<td>You can obtain instance of <code>KinesisService</code> from the context</td>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Create <code>AmazonKinesis</code> client using the LocalStack configuration</td>
 </tr>
 <tr>
-<td><i class="conum" data-value="11"></i><b>11</b></td>
-<td>You can obtain instance of declarative listener from the context</td>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Prepare the application context</td>
 </tr>
 <tr>
-<td><i class="conum" data-value="12"></i><b>12</b></td>
-<td>You can obtain instance of declarative client from the context</td>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Obtain service from the application context</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Don&#8217;t forget to clean up the application context after the tests</td>
 </tr>
 </table>
 </div>
@@ -1958,18 +2911,34 @@ Unresolved directive in kinesis.adoc - include::/home/runner/work/micronaut-aws-
 <div class="sect4">
 <h5 id="_installation_4"><a class="anchor" href="#_installation_4"></a>Installation</h5>
 <div class="listingblock primary">
-<div class="title">Gradle</div>
+<div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-s3:1.3.7.6'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-s3:1.4.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
-<div class="title">Maven</div>
+<div class="title">Maven (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
+    &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
+    &lt;artifactId&gt;micronaut-amazon-awssdk-s3&lt;/artifactId&gt;
+    &lt;version&gt;1.4.0&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+<div class="listingblock secondary">
+<div class="title">Gradle (AWS SDK 1.x)</div>
+<div class="content">
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-s3:1.4.0'</code></pre>
+</div>
+</div>
+<div class="listingblock secondary">
+<div class="title">Maven (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-s3&lt;/artifactId&gt;
-    &lt;version&gt;1.3.7.6&lt;/version&gt;
+    &lt;version&gt;1.4.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2042,8 +3011,37 @@ assertTrue(service.listBucketNames().contains(MY_BUCKET));                      
 </tr>
 </table>
 </div>
-<div class="listingblock">
-<div class="title">Upload File</div>
+<div class="listingblock primary">
+<div class="title">Upload File (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="java">File sampleContent = createFileWithSampleContent();
+
+service.storeFile(TEXT_FILE_PATH, sampleContent);                               <i class="conum" data-value="1"></i><b>(1)</b>
+
+assertTrue(service.exists(TEXT_FILE_PATH));                                     <i class="conum" data-value="2"></i><b>(2)</b>
+
+Flowable&lt;S3Object&gt; summaries = service.listObjectSummaries("foo");              <i class="conum" data-value="3"></i><b>(3)</b>
+assertEquals(Long.valueOf(0L), summaries.count().blockingGet());</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Upload file</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>File is uploaded</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>File is present in the summaries of all files</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Upload File (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="java">File sampleContent = createFileWithSampleContent();
 
@@ -2071,8 +3069,37 @@ assertEquals(Long.valueOf(0L), summaries.count().blockingGet());</code></pre>
 </tr>
 </table>
 </div>
-<div class="listingblock">
-<div class="title">Upload from <code>InputStream</code></div>
+<div class="listingblock primary">
+<div class="title">Upload from <code>InputStream</code> (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="java">service.storeInputStream(                                                       <i class="conum" data-value="1"></i><b>(1)</b>
+    KEY,
+    new ByteArrayInputStream(SAMPLE_CONTENT.getBytes()),
+    metadata -&gt; {
+        metadata.contentLength((long) SAMPLE_CONTENT.length())
+            .contentType("text/plain")
+            .contentDisposition("bar.baz");
+    }
+);
+
+Flowable&lt;S3Object&gt; fooSummaries = service.listObjectSummaries("foo");           <i class="conum" data-value="2"></i><b>(2)</b>
+assertEquals(KEY, fooSummaries.blockingFirst().key());</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Upload data from stream</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Stream is uploaded</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Upload from <code>InputStream</code> (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="java">service.storeInputStream(                                                       <i class="conum" data-value="1"></i><b>(1)</b>
     KEY,
@@ -2179,7 +3206,9 @@ assertFalse(service.listBucketNames().contains(MY_BUCKET));                     
 </table>
 </div>
 <div class="paragraph">
-<p>Please, see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/s3/SimpleStorageService.html">SimpleStorageService</a> for the full reference.</p>
+<p>Please, see
+<a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/amazon/awssdk/s3/SimpleStorageService.html">SimpleStorageService AWS SDK 2.x</a> or
+<a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/s3/SimpleStorageService.html">SimpleStorageService AWS SDK 1.x</a> for the full reference.</p>
 </div>
 </div>
 <div class="sect4">
@@ -2194,8 +3223,8 @@ S3 integration works well with <a href="https://www.testcontainers.org/">Testcon
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile group: 'org.testcontainers', name: 'localstack', version: '1.10.2'
-compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile group: 'org.testcontainers', name: 'localstack', version: '1.15.3'
+compile group: 'org.testcontainers', name: 'spock', version: '1.15.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2204,13 +3233,13 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
     &lt;artifactId&gt;localstack&lt;/artifactId&gt;
-    &lt;version&gt;1.10.2&lt;/version&gt;
+    &lt;version&gt;1.15.3&lt;/version&gt;
     &lt;scope&gt;test&lt;/scope&gt;
 &lt;/dependency&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
     &lt;artifactId&gt;spock&lt;/artifactId&gt;
-    &lt;version&gt;1.10.2&lt;/version&gt;
+    &lt;version&gt;1.15.3&lt;/version&gt;
     &lt;scope&gt;test&lt;/scope&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
@@ -2219,7 +3248,169 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <p>Then you can setup your tests like this:</p>
 </div>
 <div class="listingblock primary">
-<div class="title">Groovy</div>
+<div class="title">Groovy (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
+class SimpleStorageServiceSpec extends Specification {
+
+    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="2"></i><b>(2)</b>
+    @AutoCleanup S3Client amazonS3
+    @AutoCleanup S3Presigner presigner
+
+    @Shared LocalStackContainer localstack = new LocalStackContainer()                  <i class="conum" data-value="3"></i><b>(3)</b>
+        .withServices(LocalStackContainer.Service.S3)
+
+    SimpleStorageService service
+
+    void setup() {
+        amazonS3 = S3Client                                                             <i class="conum" data-value="4"></i><b>(4)</b>
+            .builder()
+            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.S3))
+            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
+                localstack.accessKey, localstack.secretKey
+            )))
+            .region(Region.of(localstack.region))
+            .build()
+
+        presigner = S3Presigner                                                         <i class="conum" data-value="5"></i><b>(5)</b>
+            .builder()
+            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.S3))
+            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
+                localstack.accessKey, localstack.secretKey
+            )))
+            .region(Region.of(localstack.region))
+            .build()
+        context = ApplicationContext                                                    <i class="conum" data-value="6"></i><b>(6)</b>
+            .build(
+                'aws.s3.bucket': MY_BUCKET,
+                'aws.s3.region': 'eu-west-1'
+            )
+            .build()
+
+        context.registerSingleton(S3Client, amazonS3)
+        context.registerSingleton(S3Presigner, presigner)
+        context.start()
+
+        service = context.getBean(SimpleStorageService)                                 <i class="conum" data-value="7"></i><b>(7)</b>
+    }
+
+    // test methods
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Annotate the specification with <code>@Testcontainers</code> to let Spock manage the Testcontainers for you</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Prepare the reference to the <code>ApplicationContext</code>, <code>@AutoCleanup</code> guarantees closing the context after the tests</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Create an instance of <code>LocalStackContainer</code> with S3 support enabled</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Create <code>S3Client</code> client using the LocalStack configuration</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Create <code>S3Presigner</code> client using the LocalStack configuration</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Prepare the application context with default configuration</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>You can obtain instance of <code>SimpleStorageService</code> from the context</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Java (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="java">public class SimpleStorageServiceTest {
+
+    @Rule
+    public final LocalStackContainer localstack = new LocalStackContainer()            <i class="conum" data-value="1"></i><b>(1)</b>
+        .withServices(S3);
+
+    @Rule
+    public final TemporaryFolder tmp = new TemporaryFolder();
+
+    private ApplicationContext ctx;                                                     <i class="conum" data-value="2"></i><b>(2)</b>
+
+    @Before
+    public void setup() {
+        S3Client amazonS3 = S3Client                                                    <i class="conum" data-value="3"></i><b>(3)</b>
+            .builder()
+            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.S3))
+            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
+                localstack.getAccessKey(), localstack.getSecretKey()
+            )))
+            .region(Region.of(localstack.getRegion()))
+            .build();
+
+        S3Presigner presigner = S3Presigner
+            .builder()
+            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.S3))
+            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
+                localstack.getAccessKey(), localstack.getSecretKey()
+            )))
+            .region(Region.of(localstack.getRegion()))
+            .build();
+
+        ctx = ApplicationContext
+            .build(Collections.singletonMap("aws.s3.bucket", MY_BUCKET))
+            .build();
+        ctx.registerSingleton(S3Client.class, amazonS3);                                <i class="conum" data-value="4"></i><b>(4)</b>
+        ctx.registerSingleton(S3Presigner.class, presigner);
+        ctx.start();
+    }
+
+    @After
+    public void cleanup() {
+        if (ctx != null) {                                                              <i class="conum" data-value="5"></i><b>(5)</b>
+            ctx.close();
+        }
+    }
+
+    // test methods
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Create an instance of <code>LocalStackContainer</code> with Kinesis and  DynamoDB (required by the listener) support enabled</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Prepare the reference to the <code>ApplicationContext</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Create <code>S3Client</code> client using the LocalStack configuration</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Register <code>S3Client</code> service running against LocalStack</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Don&#8217;t forget to close <code>ApplicationContext</code></td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Groovy (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="groovy">@Stepwise
 @Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
@@ -2289,7 +3480,7 @@ class SimpleStorageServiceSpec extends Specification {
 </table>
 </div>
 <div class="listingblock secondary">
-<div class="title">Java</div>
+<div class="title">Java (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="java">public class SimpleStorageServiceTest {
 
@@ -2370,18 +3561,34 @@ class SimpleStorageServiceSpec extends Specification {
 <div class="sect4">
 <h5 id="_installation_5"><a class="anchor" href="#_installation_5"></a>Installation</h5>
 <div class="listingblock primary">
-<div class="title">Gradle</div>
+<div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ses:1.3.7.6'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-ses:1.4.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
-<div class="title">Maven</div>
+<div class="title">Maven (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
+    &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
+    &lt;artifactId&gt;micronaut-amazon-awssdk-ses&lt;/artifactId&gt;
+    &lt;version&gt;1.4.0&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+<div class="listingblock secondary">
+<div class="title">Gradle (AWS SDK 1.x)</div>
+<div class="content">
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ses:1.4.0'</code></pre>
+</div>
+</div>
+<div class="listingblock secondary">
+<div class="title">Maven (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-ses&lt;/artifactId&gt;
-    &lt;version&gt;1.3.7.6&lt;/version&gt;
+    &lt;version&gt;1.4.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2398,59 +3605,17 @@ it uses default credentials chain to obtain the credentials.</p>
 <div class="listingblock primary">
 <div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code data-lang="groovy">package com.agorapulse.micronaut.aws.ses
-
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailService
-import com.amazonaws.services.simpleemail.model.SendRawEmailRequest
-import com.amazonaws.services.simpleemail.model.SendRawEmailResult
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
-import spock.lang.Specification
-import spock.lang.Subject
-
-/**
- * Tests for sending emails with Groovy.
- */
-class SendEmailSpec extends Specification {
-
-    AmazonSimpleEmailService simpleEmailService = Mock(AmazonSimpleEmailService)
-
-    @Rule
-    TemporaryFolder tmp = new TemporaryFolder()
-
-    @Subject
-    SimpleEmailService service = new DefaultSimpleEmailService(
-        simpleEmailService,
-        new SimpleEmailServiceConfiguration()
-    )
-
-    void "send email"() {
-        given:
-            File file = tmp.newFile('test.pdf')
-            file.text = 'not a real PDF'
-            String thePath = file.canonicalPath
-        when:
-            EmailDeliveryStatus status = service.send {                                 <i class="conum" data-value="1"></i><b>(1)</b>
-                subject 'Hi Paul'                                                       <i class="conum" data-value="2"></i><b>(2)</b>
-                from 'subscribe@groovycalamari.com'                                     <i class="conum" data-value="3"></i><b>(3)</b>
-                to 'me@sergiodelamo.com'                                                <i class="conum" data-value="4"></i><b>(4)</b>
-                htmlBody '&lt;p&gt;This is an example body&lt;/p&gt;'                               <i class="conum" data-value="5"></i><b>(5)</b>
-                attachment {                                                            <i class="conum" data-value="6"></i><b>(6)</b>
-                    filepath thePath                                                    <i class="conum" data-value="7"></i><b>(7)</b>
-                    filename 'test.pdf'                                                 <i class="conum" data-value="8"></i><b>(8)</b>
-                    mimeType 'application/pdf'                                          <i class="conum" data-value="9"></i><b>(9)</b>
-                    description 'An example pdf'                                        <i class="conum" data-value="10"></i><b>(10)</b>
-                }
-            }
-
-        then:
-            status == EmailDeliveryStatus.STATUS_DELIVERED
-
-            simpleEmailService.sendRawEmail(_) &gt;&gt; { SendRawEmailRequest request -&gt;
-                return new SendRawEmailResult().withMessageId('foobar')
-            }
+<pre class="prettyprint highlight nowrap"><code data-lang="groovy">EmailDeliveryStatus status = service.send {                                 <i class="conum" data-value="1"></i><b>(1)</b>
+    subject 'Hi Paul'                                                       <i class="conum" data-value="2"></i><b>(2)</b>
+    from 'subscribe@groovycalamari.com'                                     <i class="conum" data-value="3"></i><b>(3)</b>
+    to 'me@sergiodelamo.com'                                                <i class="conum" data-value="4"></i><b>(4)</b>
+    htmlBody '&lt;p&gt;This is an example body&lt;/p&gt;'                               <i class="conum" data-value="5"></i><b>(5)</b>
+    attachment {                                                            <i class="conum" data-value="6"></i><b>(6)</b>
+        filepath thePath                                                    <i class="conum" data-value="7"></i><b>(7)</b>
+        filename 'test.pdf'                                                 <i class="conum" data-value="8"></i><b>(8)</b>
+        mimeType 'application/pdf'                                          <i class="conum" data-value="9"></i><b>(9)</b>
+        description 'An example pdf'                                        <i class="conum" data-value="10"></i><b>(10)</b>
     }
-
 }</code></pre>
 </div>
 </div>
@@ -2501,63 +3666,18 @@ class SendEmailSpec extends Specification {
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code data-lang="java">package com.agorapulse.micronaut.aws.ses;
-
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
-import com.amazonaws.services.simpleemail.model.SendRawEmailResult;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.mockito.Mockito;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Collections;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-/**
- * Tests for sending emails with Java.
- */
-public class SendEmailTest {
-
-    @Rule public TemporaryFolder tmp = new TemporaryFolder();
-
-    private AmazonSimpleEmailService simpleEmailService = mock(AmazonSimpleEmailService.class);
-
-    private SimpleEmailService service = new DefaultSimpleEmailService(
-        simpleEmailService,
-        new SimpleEmailServiceConfiguration()
-    );
-
-    @Test
-    public void testSendEmail() throws IOException {
-        when(simpleEmailService.sendRawEmail(Mockito.any()))
-            .thenReturn(new SendRawEmailResult().withMessageId("foobar"));
-
-        File file = tmp.newFile("test.pdf");
-        Files.write(file.toPath(), Collections.singletonList("not a real PDF"));
-        String filepath = file.getCanonicalPath();
-
-        EmailDeliveryStatus status = service.send(e -&gt;                                  <i class="conum" data-value="1"></i><b>(1)</b>
-            e.subject("Hi Paul")                                                        <i class="conum" data-value="2"></i><b>(2)</b>
-                .from("subscribe@groovycalamari.com")                                   <i class="conum" data-value="3"></i><b>(3)</b>
-                .to("me@sergiodelamo.com")                                              <i class="conum" data-value="4"></i><b>(4)</b>
-                .htmlBody("&lt;p&gt;This is an example body&lt;/p&gt;")                             <i class="conum" data-value="5"></i><b>(5)</b>
-                .attachment(a -&gt;                                                        <i class="conum" data-value="6"></i><b>(6)</b>
-                    a.filepath(filepath)                                                <i class="conum" data-value="7"></i><b>(7)</b>
-                        .filename("test.pdf")                                           <i class="conum" data-value="8"></i><b>(8)</b>
-                        .mimeType("application/pdf")                                    <i class="conum" data-value="9"></i><b>(9)</b>
-                        .description("An example pdf")                                  <i class="conum" data-value="10"></i><b>(10)</b>
-                )
-        );
-
-        Assert.assertEquals(EmailDeliveryStatus.STATUS_DELIVERED, status);
-    }
-}</code></pre>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">EmailDeliveryStatus status = service.send(e -&gt;                                  <i class="conum" data-value="1"></i><b>(1)</b>
+    e.subject("Hi Paul")                                                        <i class="conum" data-value="2"></i><b>(2)</b>
+        .from("subscribe@groovycalamari.com")                                   <i class="conum" data-value="3"></i><b>(3)</b>
+        .to("me@sergiodelamo.com")                                              <i class="conum" data-value="4"></i><b>(4)</b>
+        .htmlBody("&lt;p&gt;This is an example body&lt;/p&gt;")                             <i class="conum" data-value="5"></i><b>(5)</b>
+        .attachment(a -&gt;                                                        <i class="conum" data-value="6"></i><b>(6)</b>
+            a.filepath(filepath)                                                <i class="conum" data-value="7"></i><b>(7)</b>
+                .filename("test.pdf")                                           <i class="conum" data-value="8"></i><b>(8)</b>
+                .mimeType("application/pdf")                                    <i class="conum" data-value="9"></i><b>(9)</b>
+                .description("An example pdf")                                  <i class="conum" data-value="10"></i><b>(10)</b>
+        )
+);</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2605,7 +3725,11 @@ public class SendEmailTest {
 </table>
 </div>
 <div class="paragraph">
-<p>Please, see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/ses/SimpleEmailService.html">SimpleEmailService</a> for the full reference.</p>
+<p>Please, see
+<a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/amazon/awsses/SimpleEmailService.html">SimpleEmailService AWS SDK 2.x</a>
+or
+<a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/ses/SimpleEmailService.html">SimpleEmailService AWS SDK 1.x</a>
+for the full reference.</p>
 </div>
 </div>
 <div class="sect4">
@@ -2640,18 +3764,34 @@ public class SendEmailTest {
 <div class="sect4">
 <h5 id="_installation_6"><a class="anchor" href="#_installation_6"></a>Installation</h5>
 <div class="listingblock primary">
-<div class="title">Gradle</div>
+<div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sns:1.3.7.6'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-sns:1.4.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
-<div class="title">Maven</div>
+<div class="title">Maven (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
+    &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
+    &lt;artifactId&gt;micronaut-amazon-awssdk-sns&lt;/artifactId&gt;
+    &lt;version&gt;1.4.0&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+<div class="listingblock secondary">
+<div class="title">Gradle (AWS SDK 1.x)</div>
+<div class="content">
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sns:1.4.0'</code></pre>
+</div>
+</div>
+<div class="listingblock secondary">
+<div class="title">Maven (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sns&lt;/artifactId&gt;
-    &lt;version&gt;1.3.7.6&lt;/version&gt;
+    &lt;version&gt;1.4.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2713,15 +3853,99 @@ public class SendEmailTest {
 <div class="sect4">
 <h5 id="_publishing_with_notificationclient"><a class="anchor" href="#_publishing_with_notificationclient"></a>Publishing with <code>@NotificationClient</code></h5>
 <div class="paragraph">
-<p>If you place <code>com.agorapulse.micronaut.aws.sns.annotation.NotificationClient</code> annotation on the interface then methods
+<p>If you place <code>NotificationClient</code> annotation on the interface then methods
 matching predefined pattern will be automatically implemented. Methods containing word <code>sms</code> will send text messages.
 Other methods of <code>NotificationClient</code> will publish new messages into the topic.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+For AWS SDK 2.x, use packages starting <code>com.agorapulse.micronaut.amazon.awssdk.sns</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+For AWS SDK 1.x, use packages starting <code>com.agorapulse.micronaut.aws.sdk.sns</code>.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>The following example shows many of available method signatures for publishing records:</p>
 </div>
-<div class="listingblock">
-<div class="title">Publishing String Records</div>
+<div class="listingblock primary">
+<div class="title">Publishing String Records (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="java">package com.agorapulse.micronaut.amazon.awssdk.sns;
+
+import com.agorapulse.micronaut.amazon.awssdk.sns.annotation.NotificationClient;
+import com.agorapulse.micronaut.amazon.awssdk.sns.annotation.Topic;
+
+import java.util.Map;
+
+@NotificationClient                                                                     <i class="conum" data-value="1"></i><b>(1)</b>
+interface DefaultClient {
+
+    String OTHER_TOPIC = "OtherTopic";
+
+    @Topic("OtherTopic") String publishMessageToDifferentTopic(Pogo pogo);              <i class="conum" data-value="2"></i><b>(2)</b>
+
+    String publishMessage(Pogo message);                                                <i class="conum" data-value="3"></i><b>(3)</b>
+    String publishMessage(String subject, Pogo message);                                <i class="conum" data-value="4"></i><b>(4)</b>
+    String publishMessage(String message);                                              <i class="conum" data-value="5"></i><b>(5)</b>
+    String publishMessage(String subject, String message);
+
+    String sendSMS(String phoneNumber, String message);                                 <i class="conum" data-value="6"></i><b>(6)</b>
+    String sendSms(String phoneNumber, String message, Map attributes);                 <i class="conum" data-value="7"></i><b>(7)</b>
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>@NotificationClient</code> annotation makes the interface a SNS client</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>You can specify to which topic is the message published using <code>@Topic</code> annotation</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>You can publish any object which can be converted into JSON.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>You can add additional subject to published message (only useful for few protocols, e.g. email)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>You can publish a string message</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>You can send SMS using the word <code>SMS</code> in the name of the method. One argument must be phone number and its name must contain the word <code>number</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>You can provide additional attributes for the SMS message</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Publishing String Records (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="java">package com.agorapulse.micronaut.aws.sns;
 
@@ -2814,8 +4038,30 @@ You should always use <code>@Named</code> qualifier when injecting <code>SimpleN
 </div>
 <div class="sect5">
 <h6 id="_working_with_topics"><a class="anchor" href="#_working_with_topics"></a>Working with Topics</h6>
-<div class="listingblock">
-<div class="title">Creating Topic</div>
+<div class="listingblock primary">
+<div class="title">Creating Topic (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="java">String topicArn = service.createTopic(TEST_TOPIC);                              <i class="conum" data-value="1"></i><b>(1)</b>
+
+Topic found = service.listTopics().filter(t -&gt;                                  <i class="conum" data-value="2"></i><b>(2)</b>
+    t.topicArn().endsWith(TEST_TOPIC)
+).blockingFirst();</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Create new topic of given name</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The topic is present within the list of all topics' names</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Creating Topic (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="java">String topicArn = service.createTopic(TEST_TOPIC);                              <i class="conum" data-value="1"></i><b>(1)</b>
 
@@ -2866,8 +4112,30 @@ service.unsubscribeTopic(subArn);                                               
 </tr>
 </table>
 </div>
-<div class="listingblock">
-<div class="title">Delete Topic</div>
+<div class="listingblock primary">
+<div class="title">Delete Topic (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="java">service.deleteTopic(topicArn);                                                  <i class="conum" data-value="1"></i><b>(1)</b>
+
+Long zero = service.listTopics().filter(t -&gt;                                    <i class="conum" data-value="2"></i><b>(2)</b>
+    t.topicArn().endsWith(TEST_TOPIC)
+).count().blockingGet();</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Delete the topic</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The topic is no longer present within the list of all topics' names</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Delete Topic (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="java">service.deleteTopic(topicArn);                                                  <i class="conum" data-value="1"></i><b>(1)</b>
 
@@ -2894,15 +4162,20 @@ Long zero = service.listTopics().filter(t -&gt;                                 
 <div class="listingblock">
 <div class="title">Working with Applications</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code data-lang="java">String appArn = service.createPlatformApplication("my-app", SimpleNotificationService.PlatformType.GCM, null, API_KEY);        <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">String appArn = service.createPlatformApplication(                              <i class="conum" data-value="1"></i><b>(1)</b>
+    "my-app",
+    GCM,
+    null,
+    API_KEY
+);
 
-String endpoint = service.createPlatformEndpoint(appArn, DEVICE_TOKEN, DATA);    <i class="conum" data-value="2"></i><b>(2)</b>
+String endpoint = service.createPlatformEndpoint(appArn, DEVICE_TOKEN, DATA);   <i class="conum" data-value="2"></i><b>(2)</b>
 
 String jsonMessage = "{\"data\", \"{\"foo\": \"some bar\"}\", \"notification\", \"{\"title\": \"some title\", \"body\": \"some body\"}\"}";
 
-String msgId = service.sendNotification(endpoint, SimpleNotificationService.PlatformType.GCM, jsonMessage);  <i class="conum" data-value="3"></i><b>(3)</b>
+String msgId = service.sendNotification(endpoint, GCM, jsonMessage);            <i class="conum" data-value="3"></i><b>(3)</b>
 
-service.validateDeviceToken(appArn, endpoint, DEVICE_TOKEN, DATA); <i class="conum" data-value="4"></i><b>(4)</b>
+service.validateDeviceToken(appArn, endpoint, DEVICE_TOKEN, DATA);              <i class="conum" data-value="4"></i><b>(4)</b>
 
 service.unregisterDevice(endpoint);                                             <i class="conum" data-value="5"></i><b>(5)</b></code></pre>
 </div>
@@ -2934,8 +4207,23 @@ service.unregisterDevice(endpoint);                                             
 </div>
 <div class="sect5">
 <h6 id="_sending_sms"><a class="anchor" href="#_sending_sms"></a>Sending SMS</h6>
-<div class="listingblock">
-<div class="title">Sending SMS</div>
+<div class="listingblock primary">
+<div class="title">Sending SMS (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="java">Map&lt;String, MessageAttributeValue&gt; attrs = Collections.emptyMap();
+String msgId = service.sendSMSMessage(PHONE_NUMBER, "Hello World", attrs);      <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Send a message to the phone number</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Sending SMS (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="java">Map&lt;Object, Object&gt; attrs = Collections.emptyMap();
 String msgId = service.sendSMSMessage(PHONE_NUMBER, "Hello World", attrs);      <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
@@ -2950,7 +4238,10 @@ String msgId = service.sendSMSMessage(PHONE_NUMBER, "Hello World", attrs);      
 </table>
 </div>
 <div class="paragraph">
-<p>Please, see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/sns/SimpleNotificationService.html">SimpleNotificationService</a> for the full reference.</p>
+<p>Please, see
+<a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationService.html">SimpleNotificationService AWS SDK 2.x</a> or
+<a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/sns/SimpleNotificationService.html">SimpleNotificationService AWS SDK 1.x</a>
+for the full reference.</p>
 </div>
 </div>
 </div>
@@ -2966,8 +4257,8 @@ SNS integration works well with <a href="https://www.testcontainers.org/">Testco
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile group: 'org.testcontainers', name: 'localstack', version: '1.10.2'
-compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile group: 'org.testcontainers', name: 'localstack', version: '1.15.3'
+compile group: 'org.testcontainers', name: 'spock', version: '1.15.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2976,13 +4267,13 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
     &lt;artifactId&gt;localstack&lt;/artifactId&gt;
-    &lt;version&gt;1.10.2&lt;/version&gt;
+    &lt;version&gt;1.15.3&lt;/version&gt;
     &lt;scope&gt;test&lt;/scope&gt;
 &lt;/dependency&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
     &lt;artifactId&gt;spock&lt;/artifactId&gt;
-    &lt;version&gt;1.10.2&lt;/version&gt;
+    &lt;version&gt;1.15.3&lt;/version&gt;
     &lt;scope&gt;test&lt;/scope&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
@@ -2991,7 +4282,149 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <p>Then you can setup your tests like this:</p>
 </div>
 <div class="listingblock primary">
-<div class="title">Groovy</div>
+<div class="title">Groovy (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
+class SimpleNotificationServiceSpec extends Specification {
+
+
+    @Shared LocalStackContainer localstack = new LocalStackContainer()                  <i class="conum" data-value="2"></i><b>(2)</b>
+        .withServices(LocalStackContainer.Service.SNS)
+
+    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="3"></i><b>(3)</b>
+
+    SimpleNotificationService service
+    SimpleNotificationServiceConfiguration configuration
+
+    void setup() {
+        SnsClient sns = SnsClient                                                       <i class="conum" data-value="4"></i><b>(4)</b>
+            .builder()
+            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.SNS))
+            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
+                localstack.accessKey, localstack.secretKey
+            )))
+            .region(Region.of(localstack.region))
+            .build()
+
+        context = ApplicationContext.build('aws.sns.topic', TEST_TOPIC).build()         <i class="conum" data-value="5"></i><b>(5)</b>
+        context.registerSingleton(SnsClient, sns)
+        context.start()
+
+        service = context.getBean(SimpleNotificationService)                            <i class="conum" data-value="6"></i><b>(6)</b>
+        configuration = context.getBean(SimpleNotificationServiceConfiguration)
+    }
+
+    // tests
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Annotate the specification with <code>@Testcontainers</code> to let Spock manage the Testcontainers for you</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Create an instance of <code>LocalStackContainer</code> with SNS support enabled</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Prepare the reference to the <code>ApplicationContext</code>, <code>@AutoCleanup</code> guarantees closing the context after the tests</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Create <code>AmazonSNS</code> client using the LocalStack configuration</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Prepare the application context with required properties and service using LocalStack</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>You can obtain instance of <code>SimpleNotificationService</code> from the context</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Java (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="java">class SimpleNotificationServiceTest {
+
+    public ApplicationContext context;                                                  <i class="conum" data-value="1"></i><b>(1)</b>
+
+    public SimpleNotificationService service;
+
+    @Rule
+    public LocalStackContainer localstack = new LocalStackContainer()                   <i class="conum" data-value="2"></i><b>(2)</b>
+        .withServices(LocalStackContainer.Service.SNS);
+
+    @Before
+    public void setup() {
+        SnsClient amazonSNS = SnsClient                                                 <i class="conum" data-value="3"></i><b>(3)</b>
+            .builder()
+            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.SNS))
+            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
+                localstack.getAccessKey(), localstack.getSecretKey()
+            )))
+            .region(Region.of(localstack.getRegion()))
+            .build();
+
+
+        Map&lt;String, Object&gt; properties = new HashMap&lt;&gt;();                               <i class="conum" data-value="4"></i><b>(4)</b>
+        properties.put("aws.sns.topic", TEST_TOPIC);
+
+
+        context = ApplicationContext.build(properties).build();                         <i class="conum" data-value="5"></i><b>(5)</b>
+        context.registerSingleton(SnsClient.class, amazonSNS);
+        context.start();
+
+        service = context.getBean(SimpleNotificationService.class);
+    }
+
+    @After
+    public void cleanup() {
+        if (context != null) {
+            context.close();                                                            <i class="conum" data-value="6"></i><b>(6)</b>
+        }
+    }
+
+    // tests
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Prepare the reference to the <code>ApplicationContext</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Create an instance of <code>LocalStackContainer</code> with SNS support enabled</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Create <code>AmazonSNS</code> client using the LocalStack configuration</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Prepare required properties</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Prepare the application context with required properties and service LocalStack</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Close the application context after the test</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Groovy (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
 class SimpleNotificationServiceSpec extends Specification {
@@ -3052,7 +4485,7 @@ class SimpleNotificationServiceSpec extends Specification {
 </table>
 </div>
 <div class="listingblock secondary">
-<div class="title">Java</div>
+<div class="title">Java (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="java">class SimpleNotificationServiceTest {
 
@@ -3151,18 +4584,34 @@ class SimpleNotificationServiceSpec extends Specification {
 <div class="sect4">
 <h5 id="_installation_7"><a class="anchor" href="#_installation_7"></a>Installation</h5>
 <div class="listingblock primary">
-<div class="title">Gradle</div>
+<div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sqs:1.3.7.6'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-sqs:1.4.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
-<div class="title">Maven</div>
+<div class="title">Maven (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
+    &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
+    &lt;artifactId&gt;micronaut-amazon-awssdk-sqs&lt;/artifactId&gt;
+    &lt;version&gt;1.4.0&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+<div class="listingblock secondary">
+<div class="title">Gradle (AWS SDK 1.x)</div>
+<div class="content">
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sqs:1.4.0'</code></pre>
+</div>
+</div>
+<div class="listingblock secondary">
+<div class="title">Maven (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sqs&lt;/artifactId&gt;
-    &lt;version&gt;1.3.7.6&lt;/version&gt;
+    &lt;version&gt;1.4.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3248,15 +4697,111 @@ class SimpleNotificationServiceSpec extends Specification {
 <div class="sect4">
 <h5 id="_publishing_with_queueclient"><a class="anchor" href="#_publishing_with_queueclient"></a>Publishing with <code>@QueueClient</code></h5>
 <div class="paragraph">
-<p>If you place <code>com.agorapulse.micronaut.aws.sqs.annotation.QueueClient</code> annotation on the interface then methods
+<p>If you place <code>QueueClient</code> annotation on the interface then methods
 matching predefined pattern will be automatically implemented. Methods containing word <code>delete</code> will delete queue messages.
 Other methods of <code>QueueClient</code> will publish new records into the queue.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+For AWS SDK 2.x, use packages starting <code>com.agorapulse.micronaut.amazon.awssdk.sqs</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+For AWS SDK 1.x, use packages starting <code>com.agorapulse.micronaut.aws.sdk.sqs</code>.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>The following example shows many of available method signatures for publishing records:</p>
 </div>
-<div class="listingblock">
-<div class="title">Publishing String Records</div>
+<div class="listingblock primary">
+<div class="title">Publishing String Records (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="java">package com.agorapulse.micronaut.amazon.awssdk.sqs;
+
+import com.agorapulse.micronaut.amazon.awssdk.sqs.annotation.Queue;
+import com.agorapulse.micronaut.amazon.awssdk.sqs.annotation.QueueClient;
+
+@QueueClient                                                                            <i class="conum" data-value="1"></i><b>(1)</b>
+interface DefaultClient {
+
+    @Queue(value = "OtherQueue", group = "SomeGroup")
+    String sendMessageToQueue(String message);                                          <i class="conum" data-value="2"></i><b>(2)</b>
+
+    String sendMessage(Pogo message);                                                   <i class="conum" data-value="3"></i><b>(3)</b>
+
+    String sendMessage(byte[] record);                                                  <i class="conum" data-value="4"></i><b>(4)</b>
+
+    String sendMessage(String record);                                                  <i class="conum" data-value="5"></i><b>(5)</b>
+
+    String sendMessage(String record, int delay);                                       <i class="conum" data-value="6"></i><b>(6)</b>
+
+    String sendMessage(String record, String group);                                    <i class="conum" data-value="7"></i><b>(7)</b>
+
+    String sendMessage(String record, int delay, String group);                         <i class="conum" data-value="8"></i><b>(8)</b>
+
+    void deleteMessage(String messageId);                                               <i class="conum" data-value="9"></i><b>(9)</b>
+
+    String OTHER_QUEUE = "OtherQueue";
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>@QueueClient</code> annotation makes the interface a SQS client</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>You can specify to which queue is the message published using <code>@Queue</code> annotation, you can also specify the <code>group</code> for FIFO queues</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>You can publish any record object which can be converted into JSON.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>You can publish a byte array record</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>You can publish a string record</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>You can publish a string with custom delay</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>You can publish a string with custom FIFO queue group</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>You can publish a string with custom delay and FIFO queue group</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="9"></i><b>9</b></td>
+<td>You can delete published message using the message ID if the</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Publishing String Records (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="java">package com.agorapulse.micronaut.aws.sqs;
 
@@ -3340,7 +4885,7 @@ The return value of the publishing methods is message id returned by AWS.
 </table>
 </div>
 <div class="paragraph">
-<p>By default, <code>QueueClient</code> publishes recoreds into the default queue defined by <code>aws.sqs.queue</code> property.
+<p>By default, <code>QueueClient</code> publishes records into the default queue defined by <code>aws.sqs.queue</code> property.
 You can switch to different configuration by changing the <code>value</code> of the annotation such as <code>@QueueClient("other")</code> or
 by setting the <code>queue</code> property of the annotation such as <code>@QueueClient(queue = "SomeQueue")</code>. You can change queue
 used by particular method using <code>@Queue</code> annotation as mentioned above.</p>
@@ -3378,8 +4923,30 @@ assertTrue(service.listQueueUrls().contains(queueUrl));                         
 </tr>
 </table>
 </div>
-<div class="listingblock">
-<div class="title">Describing Queue Attributes</div>
+<div class="listingblock primary">
+<div class="title">Describing Queue Attributes (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="java">Map&lt;QueueAttributeName, String&gt; queueAttributes = service
+    .getQueueAttributes(TEST_QUEUE);                                            <i class="conum" data-value="1"></i><b>(1)</b>
+
+assertEquals("0", queueAttributes
+    .get(QueueAttributeName.DELAY_SECONDS));                                    <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Fetch queue&#8217;s attributes</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>You can read the queue&#8217;s attributes from the map</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Describing Queue Attributes (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="java">Map&lt;String, String&gt; queueAttributes = service.getQueueAttributes(TEST_QUEUE);   <i class="conum" data-value="1"></i><b>(1)</b>
 
@@ -3418,8 +4985,45 @@ assertFalse(service.listQueueUrls().contains(queueUrl));                        
 </tr>
 </table>
 </div>
-<div class="listingblock">
-<div class="title">Working with Messages</div>
+<div class="listingblock primary">
+<div class="title">Working with Messages (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="java">String msgId = service.sendMessage(DATA);                                       <i class="conum" data-value="1"></i><b>(1)</b>
+
+assertNotNull(msgId);
+
+List&lt;Message&gt; messages = service.receiveMessages();                             <i class="conum" data-value="2"></i><b>(2)</b>
+Message first = messages.get(0);
+
+assertEquals(DATA, first.body());                                               <i class="conum" data-value="3"></i><b>(3)</b>
+assertEquals(msgId, first.messageId());
+assertEquals(1, messages.size());
+
+service.deleteMessage(msgId);                                                   <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Send a message</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Receive messages from the queue (in another application)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Read message body</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Developers are responsible to delete the message from the queue themselves</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Working with Messages (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="java">String msgId = service.sendMessage(DATA);                                       <i class="conum" data-value="1"></i><b>(1)</b>
 
@@ -3469,7 +5073,10 @@ complex message handling logic yourselves.
 </table>
 </div>
 <div class="paragraph">
-<p>Please, see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/sqs/SimpleQueueService.html">SimpleQueueService</a> for the full reference.</p>
+<p>Please, see
+<a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/amazon/awssdk/sqs/SimpleQueueService.html">SimpleQueueService AWS SDK 2.x</a> or
+<a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/sqs/SimpleQueueService.html">SimpleQueueService AWS SDK 1.x</a>
+for the full reference.</p>
 </div>
 </div>
 <div class="sect4">
@@ -3484,8 +5091,8 @@ SQS integration works well with <a href="https://www.testcontainers.org/">Testco
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile group: 'org.testcontainers', name: 'localstack', version: '1.10.2'
-compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pre>
+<pre class="prettyprint highlight"><code>compile group: 'org.testcontainers', name: 'localstack', version: '1.15.3'
+compile group: 'org.testcontainers', name: 'spock', version: '1.15.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3494,13 +5101,13 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
     &lt;artifactId&gt;localstack&lt;/artifactId&gt;
-    &lt;version&gt;1.10.2&lt;/version&gt;
+    &lt;version&gt;1.15.3&lt;/version&gt;
     &lt;scope&gt;test&lt;/scope&gt;
 &lt;/dependency&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
     &lt;artifactId&gt;spock&lt;/artifactId&gt;
-    &lt;version&gt;1.10.2&lt;/version&gt;
+    &lt;version&gt;1.15.3&lt;/version&gt;
     &lt;scope&gt;test&lt;/scope&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
@@ -3509,7 +5116,165 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'</code></pr
 <p>Then you can setup your tests like this:</p>
 </div>
 <div class="listingblock primary">
-<div class="title">Groovy</div>
+<div class="title">Groovy (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
+@RestoreSystemProperties                                                                <i class="conum" data-value="2"></i><b>(2)</b>
+class SimpleQueueServiceSpec extends Specification {
+
+
+    @Shared LocalStackContainer localstack = new LocalStackContainer()                  <i class="conum" data-value="3"></i><b>(3)</b>
+        .withServices(SQS)
+
+    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="4"></i><b>(4)</b>
+
+    SimpleQueueService service
+
+    void setup() {
+        System.setProperty('com.amazonaws.sdk.disableCbor', 'true')                     <i class="conum" data-value="5"></i><b>(5)</b>
+        SqsClient sqs = SqsClient                                                       <i class="conum" data-value="6"></i><b>(6)</b>
+            .builder()
+            .endpointOverride(localstack.getEndpointOverride(SQS))
+            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
+                localstack.accessKey, localstack.secretKey
+            )))
+            .region(Region.of(localstack.region))
+            .build()
+
+        context = ApplicationContext.build('aws.sqs.queue': TEST_QUEUE).build()         <i class="conum" data-value="7"></i><b>(7)</b>
+        context.registerSingleton(SqsClient, sqs)
+        context.start()
+
+        service = context.getBean(SimpleQueueService)                                   <i class="conum" data-value="8"></i><b>(8)</b>
+    }
+
+    // tests
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Annotate the specification with <code>@Testcontainers</code> to let Spock manage the Testcontainers for you</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td><code>@RestoreSystemProperties</code> will guarantee that system properties will be restore after the test</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Create an instance of <code>LocalStackContainer</code> with SQS support enabled</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Prepare the reference to the <code>ApplicationContext</code>, <code>@AutoCleanup</code> guarantees closing the context after the tests</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Disable CBOR protocol for SQS (not supported by the mock implementation)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Create <code>AmazonSQS</code> client using the LocalStack configuration</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Prepare the application context with required properties and service using LocalStack</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>You can obtain instance of <code>SimpleQueueService</code> from the context</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Java (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="java">class SimpleNotificationServiceTest {
+
+    public ApplicationContext context;                                                  <i class="conum" data-value="1"></i><b>(1)</b>
+
+    public SimpleQueueService service;
+
+    @Rule
+    public LocalStackContainer localstack = new LocalStackContainer()                   <i class="conum" data-value="2"></i><b>(2)</b>
+        .withServices(SQS);
+
+    @Before
+    public void setup() {
+        System.setProperty("com.amazonaws.sdk.disableCbor", "true");                    <i class="conum" data-value="3"></i><b>(3)</b>
+
+        SqsClient amazonSQS = SqsClient                                                 <i class="conum" data-value="4"></i><b>(4)</b>
+            .builder()
+            .endpointOverride(localstack.getEndpointOverride(SQS))
+            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
+                localstack.getAccessKey(), localstack.getSecretKey()
+            )))
+            .region(Region.of(localstack.getRegion()))
+            .build();
+
+
+        Map&lt;String, Object&gt; properties = new HashMap&lt;&gt;();                               <i class="conum" data-value="5"></i><b>(5)</b>
+        properties.put("aws.sqs.queue", TEST_QUEUE);
+
+
+        context = ApplicationContext.build(properties).build();                         <i class="conum" data-value="6"></i><b>(6)</b>
+        context.registerSingleton(SqsClient.class, amazonSQS);
+        context.start();
+
+        service = context.getBean(SimpleQueueService.class);
+    }
+
+    @After
+    public void cleanup() {
+        System.clearProperty("com.amazonaws.sdk.disableCbor");
+
+        if (context != null) {
+            context.close();                                                            <i class="conum" data-value="7"></i><b>(7)</b>
+        }
+    }
+
+    // tests
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Prepare the reference to the <code>ApplicationContext</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Create an instance of <code>LocalStackContainer</code> with SQS support enabled</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Disable CBOR protocol for SQS (not supported by the mock implementation)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Create <code>AmazonSQS</code> client using the LocalStack configuration</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Prepare required properties</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Prepare the application context with required properties and service LocalStack</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Close the application context after the test</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Groovy (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
 @RestoreSystemProperties                                                                <i class="conum" data-value="2"></i><b>(2)</b>
@@ -3580,7 +5345,7 @@ class SimpleQueueServiceSpec extends Specification {
 </table>
 </div>
 <div class="listingblock secondary">
-<div class="title">Java</div>
+<div class="title">Java (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="java">class SimpleNotificationServiceTest {
 
@@ -3677,18 +5442,34 @@ class SimpleQueueServiceSpec extends Specification {
 <div class="sect4">
 <h5 id="_installation_8"><a class="anchor" href="#_installation_8"></a>Installation</h5>
 <div class="listingblock primary">
-<div class="title">Gradle</div>
+<div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sts:1.3.7.6'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-sts:1.4.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
-<div class="title">Maven</div>
+<div class="title">Maven (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
+    &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
+    &lt;artifactId&gt;micronaut-amazon-awssdk-sts&lt;/artifactId&gt;
+    &lt;version&gt;1.4.0&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+<div class="listingblock secondary">
+<div class="title">Gradle (AWS SDK 1.x)</div>
+<div class="content">
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sts:1.4.0'</code></pre>
+</div>
+</div>
+<div class="listingblock secondary">
+<div class="title">Maven (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sts&lt;/artifactId&gt;
-    &lt;version&gt;1.3.7.6&lt;/version&gt;
+    &lt;version&gt;1.4.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3703,7 +5484,15 @@ which assumes usage of a certain IAM role.</p>
 <p>Following example shows how to create credentials for assumed role.</p>
 </div>
 <div class="listingblock primary">
-<div class="title">Assume Role</div>
+<div class="title">Assume Role (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="groovy">service.assumeRole('session', 'arn:::my-role', 360) {
+    externalId '123456789'
+}</code></pre>
+</div>
+</div>
+<div class="listingblock secondary">
+<div class="title">Assume Role (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="groovy">service.assumeRole('session', 'arn:::my-role', 360) {
     externalId = '123456789'
@@ -3711,7 +5500,10 @@ which assumes usage of a certain IAM role.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Please, see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/sts/SecurityTokenService.html">SecurityTokenService</a> for the full reference.</p>
+<p>Please, see
+<a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/amazon/awssdk/sts/SecurityTokenService.html">SecurityTokenService AWS SDK 2.x</a> or
+<a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/sts/SecurityTokenService.html">SecurityTokenService AWS SDK 1.x</a>
+for the full reference.</p>
 </div>
 </div>
 <div class="sect4">
@@ -3734,12 +5526,24 @@ which assumes usage of a certain IAM role.</p>
 <p>This library provides components for easy handling of incoming WebSocket proxied events as well as for sending
 messages back to the clients</p>
 </div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Use this part of the library with caution. Using WebSockets with API Gateway can be very expensive.
+</td>
+</tr>
+</table>
+</div>
 <div class="sect4">
 <h5 id="_installation_9"><a class="anchor" href="#_installation_9"></a>Installation</h5>
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ag-ws:1.3.7.6'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ag-ws:1.4.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3748,7 +5552,7 @@ messages back to the clients</p>
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-ag-ws&lt;/artifactId&gt;
-    &lt;version&gt;1.3.7.6&lt;/version&gt;
+    &lt;version&gt;1.4.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4216,8 +6020,8 @@ your Lambda function&#8217;s role must have following permissions (preferably co
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 1.3.7.6<br>
-Last updated 2021-04-14 17:32:40 UTC
+Version 1.4.0<br>
+Last updated 2021-04-30 10:06:11 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
