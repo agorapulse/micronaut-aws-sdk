@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static com.agorapulse.micronaut.amazon.awssdk.sns.SimpleNotificationService.PlatformType.GCM;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -58,7 +59,7 @@ public class SimpleNotificationServiceTest {
 
     @Before
     public void setup() {
-        SnsClient amazonSNS = SnsClient                                           // <3>
+        SnsClient amazonSNS = SnsClient                                                 // <3>
             .builder()
             .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.SNS))
             .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
@@ -130,18 +131,20 @@ public class SimpleNotificationServiceTest {
     @Test
     public void testPlatformApplications() {
         // tag::applications[]
-        String appArn = service.createAndroidApplication("my-app", API_KEY);        // <1>
+        String appArn = service.createPlatformApplication(                              // <1>
+            "my-app",
+            GCM,
+            null,
+            API_KEY
+        );
 
-        String endpoint = service.createPlatformEndpoint(appArn, DEVICE_TOKEN, DATA);    // <2>
+        String endpoint = service.createPlatformEndpoint(appArn, DEVICE_TOKEN, DATA);   // <2>
 
-        Map<String, Object> notif = new LinkedHashMap<>();
-        notif.put("badge", "9");
-        notif.put("data", "{\"foo\": \"some bar\"}");
-        notif.put("title", "Some Title");
+        String jsonMessage = "{\"data\", \"{\"foo\": \"some bar\"}\", \"notification\", \"{\"title\": \"some title\", \"body\": \"some body\"}\"}";
 
-        String msgId = service.sendAndroidAppNotification(endpoint, notif, "Welcome");  // <3>
+        String msgId = service.sendNotification(endpoint, GCM, jsonMessage);            // <3>
 
-        service.validateDeviceToken(appArn, endpoint, DEVICE_TOKEN, DATA);                // <4>
+        service.validateDeviceToken(appArn, endpoint, DEVICE_TOKEN, DATA);              // <4>
 
         service.unregisterDevice(endpoint);                                             // <5>
         // end::applications[]

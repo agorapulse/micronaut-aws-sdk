@@ -10,13 +10,29 @@ This library provides two approaches to work with Simple Notification Service to
 ==== Installation
 
 [source,indent=0,role="primary",subs='verbatim,attributes']
-.Gradle
+.Gradle (AWS SDK 2.x)
+----
+compile 'com.agorapulse:micronaut-amazon-awssdk-sns:{project-version}'
+----
+
+[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
+.Maven (AWS SDK 2.x)
+----
+<dependency>
+    <groupId>com.agorapulse</groupId>
+    <artifactId>micronaut-amazon-awssdk-sns</artifactId>
+    <version>{project-version}</version>
+</dependency>
+----
+
+[source,indent=0,role="secondary",subs='verbatim,attributes']
+.Gradle (AWS SDK 1.x)
 ----
 compile 'com.agorapulse:micronaut-aws-sdk-sns:{project-version}'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']
-.Maven
+.Maven (AWS SDK 1.x)
 ----
 <dependency>
     <groupId>com.agorapulse</groupId>
@@ -43,14 +59,31 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-test/src/test/resources/applic
 
 ==== Publishing with `@NotificationClient`
 
-If you place `com.agorapulse.micronaut.aws.sns.annotation.NotificationClient` annotation on the interface then methods
+If you place `NotificationClient` annotation on the interface then methods
 matching predefined pattern will be automatically implemented. Methods containing word `sms` will send text messages.
 Other methods of `NotificationClient` will publish new messages into the topic.
 
+For AWS SDK 2.x, use packages starting `com.agorapulse.micronaut.amazon.awsskd.sns`.
+
+For AWS SDK 1.x, use packages starting `com.agorapulse.micronaut.aws.skd.sns`.
+
 The following example shows many of available method signatures for publishing records:
 
-[source,java,indent=0,options="nowrap"]
-.Publishing String Records
+[source,java,indent=0,options="nowrap",role="primary"]
+.Publishing String Records (AWS SDK 2.x)
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/DefaultClient.java[lines=18..-1]
+----
+<1> `@NotificationClient` annotation makes the interface a SNS client
+<2> You can specify to which topic is the message published using `@Topic` annotation
+<3> You can publish any object which can be converted into JSON.
+<4> You can add additional subject to published message (only useful for few protocols, e.g. email)
+<5> You can publish a string message
+<6> You can send SMS using the word `SMS` in the name of the method. One argument must be phone number and its name must contain the word `number`
+<7> You can provide additional attributes for the SMS message
+
+[source,java,indent=0,options="nowrap",role="secondary"]
+.Publishing String Records (AWS SDK 1.x)
 ----
 include::{root-dir}/subprojects/micronaut-aws-sdk-sns/src/test/groovy/com/agorapulse/micronaut/aws/sns/DefaultClient.java[lines=18..-1]
 ----
@@ -81,8 +114,16 @@ Following example shows some of the most common use cases for working with Amazo
 
 ===== Working with Topics
 
-[source,java,indent=0,options="nowrap"]
-.Creating Topic
+[source,java,indent=0,options="nowrap",role="primary"]
+.Creating Topic (AWS SDK 2.x)
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationServiceTest.java[tags=new-topic]
+----
+<1> Create new topic of given name
+<2> The topic is present within the list of all topics' names
+
+[source,java,indent=0,options="nowrap",role="secondary"]
+.Creating Topic (AWS SDK 1.x)
 ----
 include::{root-dir}/subprojects/micronaut-aws-sdk-sns/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=new-topic]
 ----
@@ -93,14 +134,22 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-sns/src/test/groovy/com/agorap
 [source,java,indent=0,options="nowrap"]
 .Subscribe to Topic
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk-sns/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=subscription]
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationServiceTest.java[tags=subscription]
 ----
 <1> Subscribe to the topic with an email (there are more variants of this method to subscribe to most common protocols such as HTTP(S) endpoints, SQS, ...)
 <2> Publish message to the topic
 <3> Use the subscription ARN to unsubscribe from the topic
 
-[source,java,indent=0,options="nowrap"]
-.Delete Topic
+[source,java,indent=0,options="nowrap",role="primary"]
+.Delete Topic (AWS SDK 2.x)
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationServiceTest.java[tags=delete-topic]
+----
+<1> Delete the topic
+<2> The topic is no longer present within the list of all topics' names
+
+[source,java,indent=0,options="nowrap",role="secondary"]
+.Delete Topic (AWS SDK 1.x)
 ----
 include::{root-dir}/subprojects/micronaut-aws-sdk-sns/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=delete-topic]
 ----
@@ -112,7 +161,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-sns/src/test/groovy/com/agorap
 [source,java,indent=0,options="nowrap"]
 .Working with Applications
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk-sns/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=applications]
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationServiceTest.java[tags=applications]
 ----
 <1> Create new Android application (more platforms available)
 <2> Register Android device (more platforms available)
@@ -122,14 +171,24 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-sns/src/test/groovy/com/agorap
 
 ===== Sending SMS
 
-[source,java,indent=0,options="nowrap"]
-.Sending SMS
+[source,java,indent=0,options="nowrap",role="primary"]
+.Sending SMS (AWS SDK 2.x)
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationServiceTest.java[tags=sms]
+----
+<1> Send a message to the phone number
+
+[source,java,indent=0,options="nowrap",role="secondary"]
+.Sending SMS (AWS SDK 1.x)
 ----
 include::{root-dir}/subprojects/micronaut-aws-sdk-sns/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=sms]
 ----
 <1> Send a message to the phone number
 
-Please, see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/sns/SimpleNotificationService.html[SimpleNotificationService] for the full reference.
+Please, see
+https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationService.html[SimpleNotificationService AWS SDK 2.x] or
+https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/sns/SimpleNotificationService.html[SimpleNotificationService AWS SDK 1.x]
+for the full reference.
 
 ==== Testing
 You can very easily mock any of the interfaces and declarative services but if you need close-to-production
@@ -140,8 +199,8 @@ You need to add following dependencies into your build file:
 [source,indent=0,role="primary"]
 .Gradle
 ----
-compile group: 'org.testcontainers', name: 'localstack', version: '1.10.2'
-compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'
+compile group: 'org.testcontainers', name: 'localstack', version: '1.15.3'
+compile group: 'org.testcontainers', name: 'spock', version: '1.15.3'
 ----
 
 [source,xml,indent=0,role="secondary"]
@@ -150,13 +209,13 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'
 <dependency>
     <groupId>org.testcontainers</groupId>
     <artifactId>localstack</artifactId>
-    <version>1.10.2</version>
+    <version>1.15.3</version>
     <scope>test</scope>
 </dependency>
 <dependency>
     <groupId>org.testcontainers</groupId>
     <artifactId>spock</artifactId>
-    <version>1.10.2</version>
+    <version>1.15.3</version>
     <scope>test</scope>
 </dependency>
 
@@ -165,7 +224,49 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'
 Then you can setup your tests like this:
 
 [source,groovy,indent=0,role="primary"]
-.Groovy
+.Groovy (AWS SDK 2.x)
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-header]
+
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-fields]
+
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-setup]
+
+        context = ApplicationContext.build('aws.sns.topic', TEST_TOPIC).build()         // <5>
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-setup-2]
+
+    // tests
+
+}
+----
+<1> Annotate the specification with `@Testcontainers` to let Spock manage the Testcontainers for you
+<2> Create an instance of `LocalStackContainer` with SNS support enabled
+<3> Prepare the reference to the `ApplicationContext`, `@AutoCleanup` guarantees closing the context after the tests
+<4> Create `AmazonSNS` client using the LocalStack configuration
+<5> Prepare the application context with required properties and service using LocalStack
+<6> You can obtain instance of `SimpleNotificationService` from the context
+
+[source,java,indent=0,role="secondary"]
+.Java (AWS SDK 2.x)
+----
+class SimpleNotificationServiceTest {
+
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationServiceTest.java[tags=testcontainers-setup]
+
+    // tests
+
+}
+----
+<1> Prepare the reference to the `ApplicationContext`
+<2> Create an instance of `LocalStackContainer` with SNS support enabled
+<3> Create `AmazonSNS` client using the LocalStack configuration
+<4> Prepare required properties
+<5> Prepare the application context with required properties and service LocalStack
+<6> Close the application context after the test
+
+
+[source,groovy,indent=0,role="secondary"]
+.Groovy (AWS SDK 1.x)
 ----
 include::{root-dir}/subprojects/micronaut-aws-sdk-sns/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-header]
 
@@ -185,7 +286,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-sns/src/test/groovy/com/agorap
 <6> You can obtain instance of `SimpleNotificationService` from the context
 
 [source,java,indent=0,role="secondary"]
-.Java
+.Java (AWS SDK 1.x)
 ----
 class SimpleNotificationServiceTest {
 

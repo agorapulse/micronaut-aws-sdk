@@ -62,7 +62,7 @@ class SimpleNotificationServiceSpec extends Specification {
 
     // tag::testcontainers-setup[]
     void setup() {
-        SnsClient sns = SnsClient                                                 // <4>
+        SnsClient sns = SnsClient                                                       // <4>
             .builder()
             .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.SNS))
             .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
@@ -70,28 +70,28 @@ class SimpleNotificationServiceSpec extends Specification {
             )))
             .region(Region.of(localstack.region))
             .build()
-
+        // end::testcontainers-setup[]
         SimpleNotificationServiceConfiguration mockConfiguration = Mock(SimpleNotificationServiceConfiguration) {
             getTopic() >> TEST_TOPIC
         }
 
         DefaultSimpleNotificationService configurer = new DefaultSimpleNotificationService(sns, mockConfiguration, new ObjectMapper())
 
-        context = ApplicationContext.build(
+        context = ApplicationContext.build(                                             // <5>
             'aws.sns.topic': TEST_TOPIC,
             'aws.sns.ios.arn': configurer.createIosApplication('IOS-APP', 'API-KEY', 'fake-cert', false),
             'aws.sns.ios-sandbox.arn': configurer.createIosApplication('IOS-APP', 'API-KEY', 'fake-cert', true),
             'aws.sns.android.arn': configurer.createAndroidApplication('ANDROID-APP', 'API-KEY'),
             'aws.sns.amazon.arn': configurer.createAmazonApplication('AMAZON-APP', 'API-KEY', 'API-SECRET')
-        ).build()         // <5>
-
+        ).build()
+        // tag::testcontainers-setup-2[]
         context.registerSingleton(SnsClient, sns)
         context.start()
 
         service = context.getBean(SimpleNotificationService)                            // <6>
         configuration = context.getBean(SimpleNotificationServiceConfiguration)
     }
-    // end::testcontainers-setup[]
+    // end::testcontainers-setup-2[]
 
     void 'new topic'() {
         when:
