@@ -35,7 +35,7 @@ In this documentation, the high-level approaches will be discussed first before 
 
 === Installation
 
-NOTE: For AWS SDK 2.x use artefacts starting with `micronaut-amazon-awssdk`. These artefacts are written pure Java, and they should be GraalVM Native Image friendly.
+NOTE: For AWS SDK 2.x use artefacts starting with `micronaut-amazon-awssdk`. These artefacts are written pure Java.
 
 NOTE: For AWS SDK 1.x use artefacts starting with `micrnoaut-aws-sdk`. These are considered legacy artefacts and might be removed in the future when the AWS SDK 2.x get wider adoption.
 
