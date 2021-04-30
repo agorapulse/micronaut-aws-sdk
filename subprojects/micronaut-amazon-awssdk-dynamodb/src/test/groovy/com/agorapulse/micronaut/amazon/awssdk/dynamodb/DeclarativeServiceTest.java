@@ -37,20 +37,24 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.*;
+import static org.testcontainers.containers.localstack.LocalStackContainer.Service.DYNAMODB;
 
+// tag::testcontainers-setup[]
 public class DeclarativeServiceTest {
 
     private static final Instant REFERENCE_DATE = Instant.ofEpochMilli(1358487600000L);
 
     @Rule
-    public LocalStackContainer localstack = new LocalStackContainer().withServices(LocalStackContainer.Service.DYNAMODB);
-    public ApplicationContext context;
+    public LocalStackContainer localstack = new LocalStackContainer()                   // <1>
+        .withServices(DYNAMODB);
+
+    public ApplicationContext context;                                                  // <2>
 
     @Before
     public void setup() {
-        DynamoDbClient client = DynamoDbClient
+        DynamoDbClient client = DynamoDbClient                                          // <3>
             .builder()
-            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.DYNAMODB))
+            .endpointOverride(localstack.getEndpointOverride(DYNAMODB))
             .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
                 localstack.getAccessKey(), localstack.getSecretKey()
             )))
@@ -63,17 +67,18 @@ public class DeclarativeServiceTest {
             .build();
 
         context = ApplicationContext.build().build();
-        context.registerSingleton(DynamoDbClient.class, client);
-        context.registerSingleton(DynamoDbEnhancedClient.class, enhancedClient);
+        context.registerSingleton(DynamoDbClient.class, client);                        // <4>
+        context.registerSingleton(DynamoDbEnhancedClient.class, enhancedClient);        // <5>
         context.start();
     }
 
     @After
     public void cleanup() {
         if (context != null) {
-            context.close();
+            context.close();                                                            // <6>
         }
     }
+    // end::testcontainers-setup[]
 
     @Test
     public void testJavaService() {

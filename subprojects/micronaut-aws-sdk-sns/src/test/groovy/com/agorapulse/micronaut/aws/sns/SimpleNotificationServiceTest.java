@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.agorapulse.micronaut.aws.sns.SimpleNotificationService.PlatformType.GCM;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.SNS;
@@ -123,19 +124,26 @@ public class SimpleNotificationServiceTest {
 
     @Test
     public void testPlatformApplications() {
+        //CHECKSTYLE:OFF
         // tag::applications[]
-        String appArn = service.createPlatformApplication("my-app", SimpleNotificationService.PlatformType.GCM, null, API_KEY);        // <1>
+        String appArn = service.createPlatformApplication(                              // <1>
+            "my-app",
+            GCM,
+            null,
+            API_KEY
+        );
 
-        String endpoint = service.createPlatformEndpoint(appArn, DEVICE_TOKEN, DATA);    // <2>
+        String endpoint = service.createPlatformEndpoint(appArn, DEVICE_TOKEN, DATA);   // <2>
 
         String jsonMessage = "{\"data\", \"{\"foo\": \"some bar\"}\", \"notification\", \"{\"title\": \"some title\", \"body\": \"some body\"}\"}";
 
-        String msgId = service.sendNotification(endpoint, SimpleNotificationService.PlatformType.GCM, jsonMessage);  // <3>
+        String msgId = service.sendNotification(endpoint, GCM, jsonMessage);            // <3>
 
-        service.validateDeviceToken(appArn, endpoint, DEVICE_TOKEN, DATA); // <4>
+        service.validateDeviceToken(appArn, endpoint, DEVICE_TOKEN, DATA);              // <4>
 
         service.unregisterDevice(endpoint);                                             // <5>
         // end::applications[]
+        //CHECKSTYLE:ON
 
         assertNotNull(appArn);
         assertNotNull(endpoint);

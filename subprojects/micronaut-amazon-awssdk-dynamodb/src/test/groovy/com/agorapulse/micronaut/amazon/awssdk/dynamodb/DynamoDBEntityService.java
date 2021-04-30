@@ -33,7 +33,7 @@ public interface DynamoDBEntityService {
 
     DynamoDBEntity get(@PartitionKey String parentId, @SortKey String id);
 
-    DynamoDBEntity load(@HashKey String parentId, @RangeKey String id);
+    DynamoDBEntity load(@PartitionKey String parentId, @SortKey String id);
 
     List<DynamoDBEntity> getAll(String hash, List<String> rangeKeys);
 
@@ -89,7 +89,7 @@ public interface DynamoDBEntityService {
     class EqRangeProjection implements QueryFunction<DynamoDBEntity> {                  // <2>
 
         public QueryBuilder<DynamoDBEntity> query(Map<String, Object> arguments) {
-            return builder().partitionKey(arguments.get("hashKey"))
+            return builder().partitionKey(arguments.get("hashKey"))                     // <3>
                 .index(DynamoDBEntity.RANGE_INDEX)
                 .sortKey(r ->
                     r.eq(arguments.get("rangeKey"))                                     // <4>
@@ -135,7 +135,7 @@ public interface DynamoDBEntityService {
         public UpdateBuilder<DynamoDBEntity, Integer> update(Map<String, Object> args) {
             return builder().partitionKey(args.get("hashKey"))                          // <3>
                 .sortKey(args.get("rangeKey"))                                          // <4>
-                .add("number", 1)                                                       // <6>
+                .add("number", 1)                                                       // <5>
                 .returnUpdatedNew(DynamoDBEntity::getNumber);                           // <6>
         }
 

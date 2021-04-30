@@ -44,9 +44,12 @@ import spock.lang.Unroll
  * Tests for SimpleStorageService based on Testcontainers.
  */
 @SuppressWarnings('NoJavaUtilDate')
-@Testcontainers
 @Stepwise
+// tag::header[]
+@Testcontainers                                                                         // <1>
 class SimpleStorageServiceSpec extends Specification {
+
+    // end::header[]
 
     private static final String KEY = 'foo/bar.baz'
     private static final String MY_BUCKET = 'testbucket'
@@ -55,20 +58,20 @@ class SimpleStorageServiceSpec extends Specification {
     private static final Date TOMORROW = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000)
     private static final String NO_SUCH_BUCKET = 'no-such-bucket'
 
-    @AutoCleanup ApplicationContext context
-
-    @Shared LocalStackContainer localstack = new LocalStackContainer()
-        .withServices(LocalStackContainer.Service.S3)
-
     @Rule TemporaryFolder tmp
 
+    // tag::setup[]
+    @AutoCleanup ApplicationContext context                                             // <2>
     @AutoCleanup S3Client amazonS3
     @AutoCleanup S3Presigner presigner
+
+    @Shared LocalStackContainer localstack = new LocalStackContainer()                  // <3>
+        .withServices(LocalStackContainer.Service.S3)
 
     SimpleStorageService service
 
     void setup() {
-        amazonS3 = S3Client
+        amazonS3 = S3Client                                                             // <4>
             .builder()
             .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.S3))
             .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
@@ -77,7 +80,7 @@ class SimpleStorageServiceSpec extends Specification {
             .region(Region.of(localstack.region))
             .build()
 
-        presigner = S3Presigner
+        presigner = S3Presigner                                                         // <5>
             .builder()
             .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.S3))
             .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
@@ -85,7 +88,7 @@ class SimpleStorageServiceSpec extends Specification {
             )))
             .region(Region.of(localstack.region))
             .build()
-        context = ApplicationContext
+        context = ApplicationContext                                                    // <6>
             .build(
                 'aws.s3.bucket': MY_BUCKET,
                 'aws.s3.region': 'eu-west-1'
@@ -96,8 +99,9 @@ class SimpleStorageServiceSpec extends Specification {
         context.registerSingleton(S3Presigner, presigner)
         context.start()
 
-        service = context.getBean(SimpleStorageService)
+        service = context.getBean(SimpleStorageService)                                 // <7>
     }
+    // end::setup[]
 
     void 'new bucket'() {
         when:

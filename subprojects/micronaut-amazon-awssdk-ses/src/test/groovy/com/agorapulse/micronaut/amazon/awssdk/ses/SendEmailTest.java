@@ -54,6 +54,7 @@ public class SendEmailTest {
         Files.write(file.toPath(), Collections.singletonList("not a real PDF"));
         String filepath = file.getCanonicalPath();
 
+        // tag::builder[]
         EmailDeliveryStatus status = service.send(e ->                                  // <1>
             e.subject("Hi Paul")                                                        // <2>
                 .from("subscribe@groovycalamari.com")                                   // <3>
@@ -66,6 +67,7 @@ public class SendEmailTest {
                         .description("An example pdf")                                  // <10>
                 )
         );
+        // end::builder[]
 
         Assert.assertEquals(EmailDeliveryStatus.STATUS_DELIVERED, status);
     }
