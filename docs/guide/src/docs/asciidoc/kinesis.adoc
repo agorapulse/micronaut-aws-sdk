@@ -65,9 +65,9 @@ If you place `KinesisClient` annotation on the interface then methods
 matching predefined pattern will be automatically implemented. Every method of `KinesisClient` puts new records into
 the stream.
 
-For AWS SDK 2.x, use packages starting `com.agorapulse.micronaut.amazon.awsskd.kinesis`.
+NOTE: For AWS SDK 2.x, use packages starting `com.agorapulse.micronaut.amazon.awssdk.kinesis`.
 
-For AWS SDK 1.x, use packages starting `com.agorapulse.micronaut.aws.skd.kinesis`.
+NOTE: For AWS SDK 1.x, use packages starting `com.agorapulse.micronaut.aws.sdk.kinesis`.
 
 
 The following example shows many of available method signatures for publishing records:

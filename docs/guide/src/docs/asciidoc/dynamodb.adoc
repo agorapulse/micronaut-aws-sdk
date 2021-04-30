@@ -47,10 +47,9 @@ compile 'com.agorapulse:micronaut-aws-sdk-dynamodb:{project-version}'
 Declarative services are very similar to http://gorm.grails.org/6.1.x/hibernate/manual/#dataServices[Grails GORM Data Services].
 If you place `Service` annotation on the interface then methods matching predefined pattern will be automatically implemented.
 
-For AWS SDK 1.x use classes from `com.agorapulse.micronaut.aws.dynamodb` package. It uses
-https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBMapper.html[DynamoDBMapper] for entity mappings.
+NOTE: For AWS SDK 2.x, use packages starting `com.agorapulse.micronaut.amazon.awssdk.dynamodb`.
 
-For AWS SDK 2.x use classes from `com.agorapulse.micronaut.amazon.awssdk.dynamodb` package. It uses https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/examples-dynamodb-enhanced.html[DynamoDB Enhanced Client] for entity mappings.
+NOTE: For AWS SDK 1.x, use packages starting `com.agorapulse.micronaut.aws.sdk.dynamodb`.
 
 ===== Method Signatures
 

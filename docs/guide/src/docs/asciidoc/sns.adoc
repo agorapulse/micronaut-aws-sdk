@@ -63,9 +63,9 @@ If you place `NotificationClient` annotation on the interface then methods
 matching predefined pattern will be automatically implemented. Methods containing word `sms` will send text messages.
 Other methods of `NotificationClient` will publish new messages into the topic.
 
-For AWS SDK 2.x, use packages starting `com.agorapulse.micronaut.amazon.awsskd.sns`.
+NOTE: For AWS SDK 2.x, use packages starting `com.agorapulse.micronaut.amazon.awssdk.sns`.
 
-For AWS SDK 1.x, use packages starting `com.agorapulse.micronaut.aws.skd.sns`.
+NOTE: For AWS SDK 1.x, use packages starting `com.agorapulse.micronaut.aws.sdk.sns`.
 
 The following example shows many of available method signatures for publishing records:
 
