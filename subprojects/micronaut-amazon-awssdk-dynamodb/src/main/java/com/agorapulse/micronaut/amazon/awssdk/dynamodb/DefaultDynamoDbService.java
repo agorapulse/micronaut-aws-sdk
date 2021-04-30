@@ -23,14 +23,11 @@ import io.micronaut.context.event.ApplicationEventPublisher;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.beans.BeanIntrospection;
 import io.reactivex.Flowable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableMetadata;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticTableMetadata;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondarySortKey;
 import software.amazon.awssdk.enhanced.dynamodb.model.EnhancedGlobalSecondaryIndex;
@@ -43,24 +40,19 @@ import software.amazon.awssdk.services.dynamodb.model.Projection;
 import software.amazon.awssdk.services.dynamodb.model.ProjectionType;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDynamoDbService.class);
 
     private static final int BATCH_SIZE = 25;
 
@@ -247,20 +239,19 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
     public void createTable() {
         Map<String, ProjectionType> types = getProjectionTypes();
         TableMetadata tableMetadata = table.tableSchema().tableMetadata();
-        tableMetadata.allKeys();
         table.createTable(b -> {
             List<EnhancedLocalSecondaryIndex> localSecondaryIndices = new ArrayList<>();
             List<EnhancedGlobalSecondaryIndex> globalSecondaryIndices = new ArrayList<>();
 
-            getIndices(tableMetadata).forEach(i -> {
-                if (TableMetadata.primaryIndexName().equals(i)) {
+            tableMetadata.indices().forEach(i -> {
+                if (TableMetadata.primaryIndexName().equals(i.name())) {
                     return;
                 }
-                ProjectionType type = types.getOrDefault(i, ProjectionType.KEYS_ONLY);
-                if (tableMetadata.primaryPartitionKey().equals(tableMetadata.indexPartitionKey(i))) {
-                    localSecondaryIndices.add(EnhancedLocalSecondaryIndex.create(i, Projection.builder().projectionType(type).build()));
+                ProjectionType type = types.getOrDefault(i.name(), ProjectionType.KEYS_ONLY);
+                if (tableMetadata.primaryPartitionKey().equals(tableMetadata.indexPartitionKey(i.name()))) {
+                    localSecondaryIndices.add(EnhancedLocalSecondaryIndex.create(i.name(), Projection.builder().projectionType(type).build()));
                 } else {
-                    globalSecondaryIndices.add(EnhancedGlobalSecondaryIndex.builder().indexName(i).projection(Projection.builder().projectionType(type).build()).build());
+                    globalSecondaryIndices.add(EnhancedGlobalSecondaryIndex.builder().indexName(i.name()).projection(Projection.builder().projectionType(type).build()).build());
                 }
             });
 
@@ -326,21 +317,6 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
         });
 
         return types;
-    }
-
-    private Set<String> getIndices(TableMetadata metadata) {
-        if (metadata instanceof StaticTableMetadata) {
-            try {
-                Field indexByNameMapField = StaticTableMetadata.class.getDeclaredField("indexByNameMap");
-                indexByNameMapField.setAccessible(true);
-                Map<String, ?> indexByNameMap = (Map<String, ?>) indexByNameMapField.get(metadata);
-                return indexByNameMap.keySet();
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                LOGGER.error("Exception reading indices", e);
-            }
-        }
-
-        return Collections.emptySet();
     }
 
     private T postLoad(T i) {
