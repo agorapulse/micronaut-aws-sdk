@@ -5,6 +5,8 @@
 This library provides components for easy handling of incoming WebSocket proxied events as well as for sending
 messages back to the clients
 
+WARNING: Use this part of the library with caution. Using WebSockets with API Gateway can be very expensive.
+
 ==== Installation
 
 [source,indent=0,role="primary",subs='verbatim,attributes']
