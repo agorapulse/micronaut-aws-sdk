@@ -38,7 +38,10 @@ import spock.lang.Stepwise
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-import static com.agorapulse.micronaut.amazon.awssdk.dynamodb.groovy.GroovyBuilders.*
+// tag::builders-import[]
+import static com.agorapulse.micronaut.amazon.awssdk.dynamodb.groovy.GroovyBuilders.*   // <1>
+// end::builders-import[]
+import static org.testcontainers.containers.localstack.LocalStackContainer.Service.DYNAMODB
 
 @SuppressWarnings([
     'AbcMetric',
@@ -60,21 +63,22 @@ class DefaultDynamoDBServiceSpec extends Specification {
 
     private static final Instant REFERENCE_DATE = Instant.ofEpochMilli(1358487600000)
 
+    UnknownMethodsService unknownMethodsService
+    Playbook playbook
+
     // tag::testcontainers-setup[]
     @AutoCleanup ApplicationContext context                                             // <2>
 
     @Shared LocalStackContainer localstack = new LocalStackContainer()                  // <3>
-        .withServices(LocalStackContainer.Service.DYNAMODB)
+        .withServices(DYNAMODB)
 
     DynamoDBItemDBService service
-    UnknownMethodsService unknownMethodsService
-    Playbook playbook
-    DynamoDbService<DynamoDBEntity> dynamoDbService
+    DynamoDbService<DynamoDBEntity> dbs
 
     void setup() {
         DynamoDbClient client = DynamoDbClient                                          // <4>
             .builder()
-            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.DYNAMODB))
+            .endpointOverride(localstack.getEndpointOverride(DYNAMODB))
             .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
                 localstack.accessKey, localstack.secretKey
             )))
@@ -91,10 +95,11 @@ class DefaultDynamoDBServiceSpec extends Specification {
         context.registerSingleton(DynamoDbEnhancedClient, enhancedClient)               // <6>
         context.start()
 
-        service = context.getBean(DynamoDBItemDBService)                                      // <7>
+        service = context.getBean(DynamoDBItemDBService)                                // <7>
+        dbs = context.getBean(DynamoDBServiceProvider).findOrCreate(DynamoDBEntity)     // <8>
+        // end::testcontainers-setup[]
         unknownMethodsService = context.getBean(UnknownMethodsService)
         playbook = context.getBean(Playbook)
-        dynamoDbService = context.getBean(DynamoDBServiceProvider).findOrCreate(DynamoDBEntity)
     }
 
     void 'unsupported methods throws meaningful messages'() {
@@ -138,13 +143,15 @@ class DefaultDynamoDBServiceSpec extends Specification {
     ])
     void 'service introduction works'() {
         when:
-            service.save(new DynamoDBEntity(                                                      // <3>
+            // tag::save-entity[]
+            service.save(new DynamoDBEntity(                                                        // <3>
                 parentId: '1',
                 id: '1',
                 rangeIndex: 'foo',
                 number: 1,
                 date: Date.from(REFERENCE_DATE)
             ))
+            // end::save-entity[]
             service.save(new DynamoDBEntity(parentId: '1', id: '2', rangeIndex: 'bar', number: 2, date: Date.from(REFERENCE_DATE.plus(1, ChronoUnit.DAYS))))
             service.saveAll([
                 new DynamoDBEntity(parentId: '2', id: '1', rangeIndex: 'foo',  number: 3, date: Date.from(REFERENCE_DATE.minus(5, ChronoUnit.DAYS))),
@@ -180,7 +187,9 @@ class DefaultDynamoDBServiceSpec extends Specification {
             )
 
         when:
-            service.get('1', '1')
+            // tag::load-entity[]
+            service.get('1', '1')                                                                   // <4>
+            // end::load-entity[]
         then:
             playbook.verifyAndForget(
                 'POST_LOAD:1:1:foo:1'
@@ -306,12 +315,12 @@ class DefaultDynamoDBServiceSpec extends Specification {
             service.queryByNe('1', 'foo').toList().blockingGet().size() == 1
             service.queryInList('1', 'foo', 'bar').toList().blockingGet().size() == 2
 
-            dynamoDbService.countUsingQuery {
+            dbs.countUsingQuery {
                 partitionKey '1'
                 index DynamoDBEntity.DATE_INDEX
                 range { between Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS)) }
             } == 2
-            dynamoDbService.query {
+            dbs.query {
                 partitionKey '1'
                 index DynamoDBEntity.DATE_INDEX
                 range { between Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS)) }
@@ -334,14 +343,14 @@ class DefaultDynamoDBServiceSpec extends Specification {
             service.countComplex('bar') == 4
             service.countBetween('a', 'z') == 14
 
-            dynamoDbService.countUsingScan {
+            dbs.countUsingScan {
                 index DynamoDBEntity.DATE_INDEX
                 filter {
                     ne DynamoDBEntity.RANGE_INDEX, 'bar'
                 }
             } == 10
 
-            dynamoDbService.scan {
+            dbs.scan {
                 filter {
                     eq DynamoDBEntity.RANGE_INDEX, 'foo'
                 }
@@ -390,14 +399,14 @@ class DefaultDynamoDBServiceSpec extends Specification {
             service.get('1001', '1').number == 123
 
         and:
-            dynamoDbService.update {
+            dbs.update {
                 partitionKey '1001'
                 sortKey '1'
                 add 'number', 13
                 returns allNew
             }.number == 136
 
-            dynamoDbService.updateAll(dynamoDbService.findAll('1001', '1')) {
+            dbs.updateAll(dbs.findAll('1001', '1')) {
                 add 'number', 1
                 returns none
             }

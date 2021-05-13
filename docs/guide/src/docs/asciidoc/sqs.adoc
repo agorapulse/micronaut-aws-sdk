@@ -10,13 +10,29 @@ This library provides two approaches to work with Simple Queue Service queues:
 ==== Installation
 
 [source,indent=0,role="primary",subs='verbatim,attributes']
-.Gradle
+.Gradle (AWS SDK 2.x)
+----
+compile 'com.agorapulse:micronaut-amazon-awssdk-sqs:{project-version}'
+----
+
+[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
+.Maven (AWS SDK 2.x)
+----
+<dependency>
+    <groupId>com.agorapulse</groupId>
+    <artifactId>micronaut-amazon-awssdk-sqs</artifactId>
+    <version>{project-version}</version>
+</dependency>
+----
+
+[source,indent=0,role="secondary",subs='verbatim,attributes']
+.Gradle (AWS SDK 1.x)
 ----
 compile 'com.agorapulse:micronaut-aws-sdk-sqs:{project-version}'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']
-.Maven
+.Maven (AWS SDK 1.x)
 ----
 <dependency>
     <groupId>com.agorapulse</groupId>
@@ -47,14 +63,34 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-test/src/test/resources/applic
 
 ==== Publishing with `@QueueClient`
 
-If you place `com.agorapulse.micronaut.aws.sqs.annotation.QueueClient` annotation on the interface then methods
+If you place `QueueClient` annotation on the interface then methods
 matching predefined pattern will be automatically implemented. Methods containing word `delete` will delete queue messages.
 Other methods of `QueueClient` will publish new records into the queue.
 
+NOTE: For AWS SDK 2.x, use packages starting `com.agorapulse.micronaut.amazon.awssdk.sqs`.
+
+NOTE: For AWS SDK 1.x, use packages starting `com.agorapulse.micronaut.aws.sdk.sqs`.
+
+
 The following example shows many of available method signatures for publishing records:
 
-[source,java,indent=0,options="nowrap"]
-.Publishing String Records
+[source,java,indent=0,options="nowrap",role="primary"]
+.Publishing String Records (AWS SDK 2.x)
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sqs/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sqs/DefaultClient.java[lines=18..-1]
+----
+<1> `@QueueClient` annotation makes the interface a SQS client
+<2> You can specify to which queue is the message published using `@Queue` annotation, you can also specify the `group` for FIFO queues
+<3> You can publish any record object which can be converted into JSON.
+<4> You can publish a byte array record
+<5> You can publish a string record
+<6> You can publish a string with custom delay
+<7> You can publish a string with custom FIFO queue group
+<8> You can publish a string with custom delay and FIFO queue group
+<9> You can delete published message using the message ID if the
+
+[source,java,indent=0,options="nowrap",role="secondary"]
+.Publishing String Records (AWS SDK 1.x)
 ----
 include::{root-dir}/subprojects/micronaut-aws-sdk-sqs/src/test/groovy/com/agorapulse/micronaut/aws/sqs/DefaultClient.java[lines=18..-1]
 ----
@@ -70,7 +106,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-sqs/src/test/groovy/com/agorap
 
 NOTE: The return value of the publishing methods is message id returned by AWS.
 
-By default, `QueueClient` publishes recoreds into the default queue defined by `aws.sqs.queue` property.
+By default, `QueueClient` publishes records into the default queue defined by `aws.sqs.queue` property.
 You can switch to different configuration by changing the `value` of the annotation such as `@QueueClient("other")` or
 by setting the `queue` property of the annotation such as `@QueueClient(queue = "SomeQueue")`. You can change queue
 used by particular method using `@Queue` annotation as mentioned above.
@@ -87,13 +123,21 @@ Following example shows some of the most common use cases for working with Amazo
 [source,java,indent=0,options="nowrap"]
 .Creating Queue
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk-sqs/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=new-queue]
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sqs/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sqs/SimpleQueueServiceTest.java[tags=new-queue]
 ----
 <1> Create new queue of given name
 <2> The queue URL is present within the list of all queues' URLs
 
-[source,java,indent=0,options="nowrap"]
-.Describing Queue Attributes
+[source,java,indent=0,options="nowrap",role="primary"]
+.Describing Queue Attributes (AWS SDK 2.x)
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sqs/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sqs/SimpleQueueServiceTest.java[tags=describe-queue]
+----
+<1> Fetch queue's attributes
+<2> You can read the queue's attributes from the map
+
+[source,java,indent=0,options="nowrap",role="secondary"]
+.Describing Queue Attributes (AWS SDK 1.x)
 ----
 include::{root-dir}/subprojects/micronaut-aws-sdk-sqs/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=describe-queue]
 ----
@@ -103,13 +147,23 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-sqs/src/test/groovy/com/agorap
 [source,java,indent=0,options="nowrap"]
 .Delete Queue
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk-sqs/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=delete-queue]
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sqs/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sqs/SimpleQueueServiceTest.java[tags=delete-queue]
 ----
 <1> Delete queue
 <2> The queue URL is no longer present within the list of all queues' URLs
 
-[source,java,indent=0,options="nowrap"]
-.Working with Messages
+[source,java,indent=0,options="nowrap",role="primary"]
+.Working with Messages (AWS SDK 2.x)
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sqs/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sqs/SimpleQueueServiceTest.java[tags=messages]
+----
+<1> Send a message
+<2> Receive messages from the queue (in another application)
+<3> Read message body
+<4> Developers are responsible to delete the message from the queue themselves
+
+[source,java,indent=0,options="nowrap",role="secondary"]
+.Working with Messages (AWS SDK 1.x)
 ----
 include::{root-dir}/subprojects/micronaut-aws-sdk-sqs/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=messages]
 ----
@@ -121,7 +175,10 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-sqs/src/test/groovy/com/agorap
 TIP: Try to use AWS Lambda functions triggered by SQS messages to handle incoming SQS messages instead of implementing
 complex message handling logic yourselves.
 
-Please, see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/sqs/SimpleQueueService.html[SimpleQueueService] for the full reference.
+Please, see
+https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/amazon/awssdk/sqs/SimpleQueueService.html[SimpleQueueService AWS SDK 2.x] or
+https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/sqs/SimpleQueueService.html[SimpleQueueService AWS SDK 1.x]
+for the full reference.
 
 ==== Testing
 You can very easily mock any of the interfaces and declarative services but if you need close-to-production
@@ -132,8 +189,8 @@ You need to add following dependencies into your build file:
 [source,indent=0,role="primary"]
 .Gradle
 ----
-compile group: 'org.testcontainers', name: 'localstack', version: '1.10.2'
-compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'
+compile group: 'org.testcontainers', name: 'localstack', version: '1.15.3'
+compile group: 'org.testcontainers', name: 'spock', version: '1.15.3'
 ----
 
 [source,xml,indent=0,role="secondary"]
@@ -142,13 +199,13 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'
 <dependency>
     <groupId>org.testcontainers</groupId>
     <artifactId>localstack</artifactId>
-    <version>1.10.2</version>
+    <version>1.15.3</version>
     <scope>test</scope>
 </dependency>
 <dependency>
     <groupId>org.testcontainers</groupId>
     <artifactId>spock</artifactId>
-    <version>1.10.2</version>
+    <version>1.15.3</version>
     <scope>test</scope>
 </dependency>
 
@@ -157,7 +214,49 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.10.2'
 Then you can setup your tests like this:
 
 [source,groovy,indent=0,role="primary"]
-.Groovy
+.Groovy (AWS SDK 2.x)
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sqs/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sqs/SimpleQueueServiceSpec.groovy[tags=testcontainers-header]
+
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sqs/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sqs/SimpleQueueServiceSpec.groovy[tags=testcontainers-fields]
+
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sqs/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sqs/SimpleQueueServiceSpec.groovy[tags=testcontainers-setup]
+
+    // tests
+
+}
+----
+<1> Annotate the specification with `@Testcontainers` to let Spock manage the Testcontainers for you
+<2> `@RestoreSystemProperties` will guarantee that system properties will be restore after the test
+<3> Create an instance of `LocalStackContainer` with SQS support enabled
+<4> Prepare the reference to the `ApplicationContext`, `@AutoCleanup` guarantees closing the context after the tests
+<5> Disable CBOR protocol for SQS (not supported by the mock implementation)
+<6> Create `AmazonSQS` client using the LocalStack configuration
+<7> Prepare the application context with required properties and service using LocalStack
+<8> You can obtain instance of `SimpleQueueService` from the context
+
+[source,java,indent=0,role="secondary"]
+.Java (AWS SDK 2.x)
+----
+class SimpleNotificationServiceTest {
+
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sqs/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sqs/SimpleQueueServiceTest.java[tags=testcontainers-setup]
+
+    // tests
+
+}
+----
+<1> Prepare the reference to the `ApplicationContext`
+<2> Create an instance of `LocalStackContainer` with SQS support enabled
+<3> Disable CBOR protocol for SQS (not supported by the mock implementation)
+<4> Create `AmazonSQS` client using the LocalStack configuration
+<5> Prepare required properties
+<6> Prepare the application context with required properties and service LocalStack
+<7> Close the application context after the test
+
+
+[source,groovy,indent=0,role="secondary"]
+.Groovy (AWS SDK 1.x)
 ----
 include::{root-dir}/subprojects/micronaut-aws-sdk-sqs/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceSpec.groovy[tags=testcontainers-header]
 
@@ -179,7 +278,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-sqs/src/test/groovy/com/agorap
 <8> You can obtain instance of `SimpleQueueService` from the context
 
 [source,java,indent=0,role="secondary"]
-.Java
+.Java (AWS SDK 1.x)
 ----
 class SimpleNotificationServiceTest {
 

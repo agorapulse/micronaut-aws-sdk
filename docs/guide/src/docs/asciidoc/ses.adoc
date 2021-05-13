@@ -7,13 +7,29 @@ This library provides basic support for Amazon SES using <<Simple Email Service>
 ==== Installation
 
 [source,indent=0,role="primary",subs='verbatim,attributes']
-.Gradle
+.Gradle (AWS SDK 2.x)
+----
+compile 'com.agorapulse:micronaut-amazon-awssdk-ses:{project-version}'
+----
+
+[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
+.Maven (AWS SDK 2.x)
+----
+<dependency>
+    <groupId>com.agorapulse</groupId>
+    <artifactId>micronaut-amazon-awssdk-ses</artifactId>
+    <version>{project-version}</version>
+</dependency>
+----
+
+[source,indent=0,role="secondary",subs='verbatim,attributes']
+.Gradle (AWS SDK 1.x)
 ----
 compile 'com.agorapulse:micronaut-aws-sdk-ses:{project-version}'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']
-.Maven
+.Maven (AWS SDK 1.x)
 ----
 <dependency>
     <groupId>com.agorapulse</groupId>
@@ -32,7 +48,7 @@ Following example shows how to send an email with attachment.
 [source,groovy,indent=0,options="nowrap",role="primary"]
 .Groovy
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk-ses/src/test/groovy/com/agorapulse/micronaut/aws/ses/SendEmailSpec.groovy[lines=18..-1]
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-ses/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/ses/SendEmailSpec.groovy[tags=builder]
 ----
 <1> Start building an email
 <2> Define subject of the email
@@ -49,7 +65,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-ses/src/test/groovy/com/agorap
 [source,java,indent=0,options="nowrap",role="secondary"]
 .Java
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk-ses/src/test/groovy/com/agorapulse/micronaut/aws/ses/SendEmailTest.java[lines=18..-1]
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-ses/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/ses/SendEmailTest.java[tags=builder]
 ----
 <1> Start building an email
 <2> Define subject of the email
@@ -62,7 +78,11 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-ses/src/test/groovy/com/agorap
 <9> Define the mime type (usually optional - deduced from the file)
 <10> Define the description of the file (optional)
 
-Please, see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/ses/SimpleEmailService.html[SimpleEmailService] for the full reference.
+Please, see
+https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/amazon/awsses/SimpleEmailService.html[SimpleEmailService AWS SDK 2.x]
+or
+https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/ses/SimpleEmailService.html[SimpleEmailService AWS SDK 1.x]
+for the full reference.
 
 ==== Testing
 It is recommended just to mock the `SimpleEmailService` in your tests as it only contains single abstract method.

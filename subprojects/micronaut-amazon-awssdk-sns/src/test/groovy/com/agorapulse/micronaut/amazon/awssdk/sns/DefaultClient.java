@@ -22,8 +22,7 @@ import com.agorapulse.micronaut.amazon.awssdk.sns.annotation.Topic;
 
 import java.util.Map;
 
-@NotificationClient
-    // <1>
+@NotificationClient                                                                     // <1>
 interface DefaultClient {
 
     String OTHER_TOPIC = "OtherTopic";

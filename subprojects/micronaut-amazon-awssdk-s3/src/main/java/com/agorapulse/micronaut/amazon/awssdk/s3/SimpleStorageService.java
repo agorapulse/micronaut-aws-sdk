@@ -19,7 +19,10 @@ package com.agorapulse.micronaut.amazon.awssdk.s3;
 
 import io.micronaut.http.multipart.PartData;
 import io.reactivex.Flowable;
-import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.io.File;
 import java.io.IOException;
