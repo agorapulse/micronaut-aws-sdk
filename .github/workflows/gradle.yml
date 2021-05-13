@@ -45,7 +45,7 @@ jobs:
     - name: Check
       uses: eskatos/gradle-command-action@v1
       with:
-        arguments: check coveralls sonarqube -Dsonar.login="${{ secrets.SONAR_TOKEN }}" -Dscan.uploadInBackground=false --scan --stacktrace --parallel
+        arguments: check coveralls sonarqube -Dsonar.login="${{ secrets.SONAR_TOKEN }}" -Dscan.uploadInBackground=false --scan --stacktrace --debug --parallel
     - name: Show Build Scan
       if: always()
       run: cat scan-journal.log
