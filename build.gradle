@@ -99,6 +99,7 @@ config {
         sonar {
             hostUrl = "https://sonarcloud.io"
             login = sonarToken
+            password = ''
             organization = 'agorapulse'
             projectKey = 'agorapulse_micronaut-aws-sdk'
         }
