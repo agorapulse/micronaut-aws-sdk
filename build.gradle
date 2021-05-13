@@ -97,9 +97,10 @@ config {
         }
 
         sonar {
-            projectKey = 'agorapulse_micronaut-aws-sdk'
-            organization = 'agorapulse'
+            hostUrl = "https://sonarcloud.io"
             login = sonarToken
+            organization = 'agorapulse'
+            projectKey = 'agorapulse_micronaut-aws-sdk'
         }
     }
 
