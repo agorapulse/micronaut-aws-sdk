@@ -28,6 +28,7 @@ jobs:
       CI: true
       COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_PASSWORD: ""
     steps:
     - uses: actions/checkout@v1
 
@@ -42,10 +43,14 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}-${{ hashFiles('**/gradle.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
+    - name: Generate sonar.properties
+      run: |
+        echo "sonar.login=$SONAR_TOKEN" >> sonar.properties
+        echo "sonar.password=$SONAR_PASSWORD" >> sonar.properties
     - name: Check
       uses: eskatos/gradle-command-action@v1
       with:
-        arguments: check coveralls sonarqube -Dsonar.login="${{ secrets.SONAR_TOKEN }}" -Dscan.uploadInBackground=false --scan --stacktrace --debug --parallel
+        arguments: check coveralls sonarqube -Dsonar.login="${{ secrets.SONAR_TOKEN }}" -Dsonar.password="" -Dscan.uploadInBackground=false --scan--parallel
     - name: Show Build Scan
       if: always()
       run: cat scan-journal.log
