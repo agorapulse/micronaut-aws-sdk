@@ -73,6 +73,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
         .withServices(DYNAMODB)
 
     DynamoDBItemDBService service
+    DynamoDBEntityDynamicNameService dynamicNameService
     DynamoDbService<DynamoDBEntity> dbs
 
     void setup() {
@@ -90,7 +91,9 @@ class DefaultDynamoDBServiceSpec extends Specification {
             .dynamoDbClient(client)
             .build()
 
-        context = ApplicationContext.build().build()
+        context = ApplicationContext.build(
+            'aws.dynamodb.entity.table-name': 'MyDifferentTable'
+        ).build()
         context.registerSingleton(DynamoDbClient, client)                               // <5>
         context.registerSingleton(DynamoDbEnhancedClient, enhancedClient)               // <6>
         context.start()
@@ -98,6 +101,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
         service = context.getBean(DynamoDBItemDBService)                                // <7>
         dbs = context.getBean(DynamoDBServiceProvider).findOrCreate(DynamoDBEntity)     // <8>
         // end::testcontainers-setup[]
+        dynamicNameService = context.getBean(DynamoDBEntityDynamicNameService)
         unknownMethodsService = context.getBean(UnknownMethodsService)
         playbook = context.getBean(Playbook)
     }
@@ -466,6 +470,18 @@ class DefaultDynamoDBServiceSpec extends Specification {
             service.saveAll((1..101).collect { new DynamoDBEntity(parentId: parentKey, id: "$it") })
         then:
             service.count(parentKey) == 101
+    }
+
+    void 'dynamic table name'() {
+        when:
+            DynamoDBEntity withDynamicName = new DynamoDBEntity(
+                parentId: '9',
+                id: '6'
+            )
+
+            dynamicNameService.save(withDynamicName)
+        then:
+            dynamicNameService.get('9', '6')
     }
 
 }
