@@ -27,6 +27,8 @@ import io.micronaut.core.naming.NameUtils
 
 import java.lang.reflect.Method
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.format.DateTimeFormatter
 
 /**
  * Default implementation of DynamoDB service.
@@ -60,6 +62,12 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
         SimpleDateFormat dateFormatter = new SimpleDateFormat(SERIALIZED_DATE_FORMAT, Locale.ENGLISH)
         dateFormatter.timeZone = TimeZone.getTimeZone(SERIALIZED_DATE_TIMEZONE)
         return dateFormatter.format(date)
+    }
+
+    static String serializeDate(Instant instant) {
+        return DateTimeFormatter.ofPattern(SERIALIZED_DATE_FORMAT)
+            .withZone(TimeZone.getTimeZone(SERIALIZED_DATE_TIMEZONE).toZoneId())
+            .format(instant)
     }
 
     @CompileDynamic

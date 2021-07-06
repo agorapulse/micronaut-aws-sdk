@@ -37,6 +37,9 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
 
+import java.time.Instant
+import java.time.temporal.ChronoUnit
+
 // tag::builders-import[]
 import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  // <1>
 
@@ -57,6 +60,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
 // end::testcontainers-header[]
 
     private static final DateTime REFERENCE_DATE = new DateTime(1358487600000)
+    private static final Instant REFERENCE_INSTANT = Instant.ofEpochMilli(1358487600000)
 
     // tag::testcontainers-setup[]
     @AutoCleanup ApplicationContext context                                             // <2>
@@ -168,7 +172,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
             s.getAll('1', ['3', '4']).size() == 0
     }
 
-    void 'count items'() {
+    void 'count items (using java.util.Date)'() {
         expect:
             s.count('1') == 2
             s.count('1', '1') == 1
@@ -189,6 +193,27 @@ class DefaultDynamoDBServiceSpec extends Specification {
             ]) == 1
     }
 
+    void 'count items (using java.time.Instant)'() {
+        expect:
+            s.count('1') == 2
+            s.count('1', '1') == 1
+            s.count('1', DynamoDBEntity.RANGE_INDEX, 'bar') == 1
+            s.countByDates('1', DynamoDBEntity.DATE_INDEX, [
+                after: REFERENCE_INSTANT.minus(1, ChronoUnit.DAYS),
+                before: REFERENCE_INSTANT.plus(2, ChronoUnit.DAYS),
+            ]) == 2
+            s.countByDates(
+                '1',
+                DynamoDBEntity.DATE_INDEX,
+                REFERENCE_INSTANT.minus(1, ChronoUnit.DAYS),
+                REFERENCE_INSTANT.plus(2, ChronoUnit.DAYS)
+            ) == 2
+            s.countByDates('3', DynamoDBEntity.DATE_INDEX, [
+                after: REFERENCE_INSTANT.plus(9, ChronoUnit.DAYS),
+                before: REFERENCE_INSTANT.plus(20, ChronoUnit.DAYS),
+            ]) == 1
+    }
+
     void 'increment and decrement'() {
         when:
         // tag::increment[]
@@ -201,7 +226,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
             s.get('1', '1').number == 2
     }
 
-    void 'query items'() {
+    void 'query items (using java.util.Date)'() {
         expect:
             s.query('1').count == 2
             s.query('1', '1').count == 1
@@ -227,6 +252,36 @@ class DefaultDynamoDBServiceSpec extends Specification {
         s.queryByDates('3', DynamoDBEntity.DATE_INDEX, [                                // <6>
             after: REFERENCE_DATE.plusDays(9).toDate(),
             before: REFERENCE_DATE.plusDays(20).toDate(),
+        ]).count == 1
+        // end::query-by-dates[]
+    }
+
+    void 'query items (using java.time.Instant)'() {
+        expect:
+            s.query('1').count == 2
+            s.query('1', '1').count == 1
+            s.query(new DynamoDBQueryExpression().withHashKeyValues(new DynamoDBEntity(parentId: '1'))).size() == 2
+            s.query('1', 'range' , 'ANY', null, [returnAll: true, throttle: true])
+
+        // tag::query-by-range-index[]
+        s.query('1', DynamoDBEntity.RANGE_INDEX, 'bar').count == 1
+        // end::query-by-range-index[]
+
+            s.queryByDates('1', DynamoDBEntity.DATE_INDEX, [
+                after: REFERENCE_INSTANT.minus(1, ChronoUnit.DAYS),
+                before: REFERENCE_INSTANT.plus(2, ChronoUnit.DAYS),
+            ]).count == 2
+            s.queryByDates(
+                '1',
+                DynamoDBEntity.DATE_INDEX,
+                REFERENCE_INSTANT.minus(1, ChronoUnit.DAYS),
+                REFERENCE_INSTANT.plus(2, ChronoUnit.DAYS)
+            ).count == 2
+
+        // tag::query-by-dates[]
+        s.queryByDates('3', DynamoDBEntity.DATE_INDEX, [
+            after: REFERENCE_INSTANT.plus(9, ChronoUnit.DAYS),
+            before: REFERENCE_INSTANT.plus(20, ChronoUnit.DAYS),
         ]).count == 1
         // end::query-by-dates[]
     }

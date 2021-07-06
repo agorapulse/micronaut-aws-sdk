@@ -22,6 +22,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
 import com.amazonaws.services.dynamodbv2.datamodeling.QueryResultPage;
 import com.amazonaws.services.dynamodbv2.model.*;
 
+import java.time.Instant;
 import java.util.*;
 
 /**
@@ -106,6 +107,10 @@ public interface DynamoDBService<T> {
         return count(hashKey, null);
     }
 
+    /**
+     * @deprecated Consider using the method with java.time.Instant parameter {@code DynamoDBService.countByDates(Object hashKey, String rangeKeyName, Instant after, Instant before, Instant maxAfterDate)}
+     */
+    @Deprecated
     default int countByDates(Object hashKey, String rangeKeyName, Date after, Date before, Date maxAfterDate) {
         Map<String, Object> rangeKeyDates = new HashMap<>(2);
         rangeKeyDates.put("after", after);
@@ -113,7 +118,22 @@ public interface DynamoDBService<T> {
         return countByDates(hashKey, rangeKeyName, rangeKeyDates, Collections.singletonMap("maxAfterDate", maxAfterDate));
     }
 
+    /**
+     * @deprecated Consider using the method with java.time.Instant parameter {@code DynamoDBService.countByDates(Object hashKey, String rangeKeyName, Instant after, Instant before)}
+     */
+    @Deprecated
     default int countByDates(Object hashKey, String rangeKeyName, Date after, Date before) {
+        return countByDates(hashKey, rangeKeyName, after, before, null);
+    }
+
+    default int countByDates(Object hashKey, String rangeKeyName, Instant after, Instant before, Instant maxAfterDate) {
+        Map<String, Object> rangeKeyDates = new HashMap<>(2);
+        rangeKeyDates.put("after", after);
+        rangeKeyDates.put("before", before);
+        return countByDates(hashKey, rangeKeyName, rangeKeyDates, Collections.singletonMap("maxAfterDate", maxAfterDate));
+    }
+
+    default int countByDates(Object hashKey, String rangeKeyName, Instant after, Instant before) {
         return countByDates(hashKey, rangeKeyName, after, before, null);
     }
 
@@ -649,11 +669,30 @@ public interface DynamoDBService<T> {
         return queryByDates(hashKey, rangeKeyName, rangeKeyDates, Collections.emptyMap());
     }
 
+    /**
+     * @deprecated Consider using the method with java.time.Instant parameter {@code DynamoDBService.queryByDates(Object hashKey, String rangeKeyName, Instant after, Instant before)}
+     */
+    @Deprecated
     default QueryResultPage<T> queryByDates(Object hashKey, String rangeKeyName, Date after, Date before) {
         return queryByDates(hashKey, rangeKeyName, after, before, null);
     }
 
+    /**
+     * @deprecated Consider using the method with java.time.Instant parameter {@code DynamoDBService.queryByDates(Object hashKey, String rangeKeyName, Instant after, Instant before, Instant maxAfterDate)}
+     */
+    @Deprecated
     default QueryResultPage<T> queryByDates(Object hashKey, String rangeKeyName, Date after, Date before, Date maxAfterDate) {
+        Map<String, Object> rangeKeyDates = new HashMap<>(2);
+        rangeKeyDates.put("after", after);
+        rangeKeyDates.put("before", before);
+        return queryByDates(hashKey, rangeKeyName, rangeKeyDates, Collections.singletonMap("maxAfterDate", maxAfterDate));
+    }
+
+    default QueryResultPage<T> queryByDates(Object hashKey, String rangeKeyName, Instant after, Instant before) {
+        return queryByDates(hashKey, rangeKeyName, after, before, null);
+    }
+
+    default QueryResultPage<T> queryByDates(Object hashKey, String rangeKeyName, Instant after, Instant before, Instant maxAfterDate) {
         Map<String, Object> rangeKeyDates = new HashMap<>(2);
         rangeKeyDates.put("after", after);
         rangeKeyDates.put("before", before);
