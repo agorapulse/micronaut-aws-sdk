@@ -680,6 +680,9 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
         if (key instanceof Date) {
             return new AttributeValue().withS(serializeDate(key))
         }
+        if (key instanceof Instant) {
+            return new AttributeValue().withS(serializeDate(key))
+        }
         return new AttributeValue().withS(key.toString())
     }
 
