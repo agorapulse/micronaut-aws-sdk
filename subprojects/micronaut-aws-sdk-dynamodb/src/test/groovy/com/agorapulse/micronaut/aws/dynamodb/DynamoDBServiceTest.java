@@ -30,6 +30,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -40,6 +42,7 @@ public class DynamoDBServiceTest {
 // end::header[]
 
     private static final DateTime REFERENCE_DATE = new DateTime(1358487600000L);
+    private static final Instant REFERENCE_INSTANT = Instant.ofEpochMilli(1358487600000L);
 
     // tag::setup[]
     @Rule
@@ -129,6 +132,8 @@ public class DynamoDBServiceTest {
         );
         assertEquals(1, s.countByDates("3", DynamoDBEntity.DATE_INDEX, REFERENCE_DATE.plusDays(9).toDate(), REFERENCE_DATE.plusDays(20).toDate()));
 
+        assertEquals(1, s.countByDates("3", DynamoDBEntity.DATE_INDEX, REFERENCE_INSTANT.plus(9, ChronoUnit.DAYS), REFERENCE_INSTANT.plus(20, ChronoUnit.DAYS)));
+
         assertNotNull(
             s.query("1")
         );
@@ -141,9 +146,15 @@ public class DynamoDBServiceTest {
         // end::query-by-range-index[]
         assertEquals("bar", s.query("1", DynamoDBEntity.RANGE_INDEX, "bar").getResults().get(0).rangeIndex);
 
-        assertEquals(2,
+        assertEquals(
+            2,
+            s.queryByDates("1", DynamoDBEntity.DATE_INDEX, REFERENCE_DATE.minusDays(1).toDate(), REFERENCE_DATE.plusDays(2).toDate()).getCount().intValue()
+        );
 
-        s.queryByDates("1", DynamoDBEntity.DATE_INDEX, REFERENCE_DATE.minusDays(1).toDate(), REFERENCE_DATE.plusDays(2).toDate()).getCount().intValue());
+        assertEquals(
+            2,
+            s.queryByDates("1", DynamoDBEntity.DATE_INDEX, REFERENCE_INSTANT.minus(1, ChronoUnit.DAYS), REFERENCE_INSTANT.plus(2, ChronoUnit.DAYS)).getCount().intValue()
+        );
 
         //CHECKSTYLE:OFF
         // tag::query-by-dates[]
