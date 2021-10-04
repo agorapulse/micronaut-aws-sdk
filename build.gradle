@@ -116,6 +116,7 @@ nexusPublishing {
 }
 
 allprojects {
+    apply from: rootProject.file('gradle/micronaut-compatibility.gradle')
     repositories {
         mavenCentral()
         maven { url "https://repo.spring.io/release"  }
@@ -144,8 +145,8 @@ subprojects { Project subproject ->
             testCompile "org.codehaus.groovy:groovy:$groovyVersion"
         } else {
             compile "org.codehaus.groovy:groovy:$groovyVersion"
-            compile "io.micronaut:micronaut-runtime-groovy"
-            compileOnly "io.micronaut:micronaut-inject-groovy"
+            compile micronautMigratedDependency('micronaut-runtime-groovy')
+            compileOnly 'io.micronaut:micronaut-inject-groovy'
         }
 
         compile "io.micronaut:micronaut-inject"

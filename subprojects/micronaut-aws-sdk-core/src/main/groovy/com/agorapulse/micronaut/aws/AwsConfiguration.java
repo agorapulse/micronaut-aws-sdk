@@ -17,10 +17,19 @@
  */
 package com.agorapulse.micronaut.aws;
 
-import com.amazonaws.auth.*;
+import com.agorapulse.micronaut.aws.util.EnvironmentAWSCredentialsProvider;
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSCredentialsProviderChain;
+import com.amazonaws.auth.EC2ContainerCredentialsProviderWrapper;
+import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
+import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
-import com.amazonaws.regions.*;
-import io.micronaut.configuration.aws.EnvironmentAWSCredentialsProvider;
+import com.amazonaws.regions.AwsEnvVarOverrideRegionProvider;
+import com.amazonaws.regions.AwsProfileRegionProvider;
+import com.amazonaws.regions.AwsRegionProvider;
+import com.amazonaws.regions.AwsSystemPropertyRegionProvider;
+import com.amazonaws.regions.InstanceMetadataRegionProvider;
+import com.amazonaws.regions.Regions;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.env.Environment;

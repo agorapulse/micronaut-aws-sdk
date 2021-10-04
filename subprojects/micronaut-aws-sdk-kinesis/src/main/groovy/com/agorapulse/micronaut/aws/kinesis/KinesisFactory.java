@@ -17,12 +17,12 @@
  */
 package com.agorapulse.micronaut.aws.kinesis;
 
+import com.agorapulse.micronaut.aws.util.AWSClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.regions.AwsRegionProvider;
 import com.amazonaws.services.kinesis.AmazonKinesis;
 import com.amazonaws.services.kinesis.AmazonKinesisClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.micronaut.configuration.aws.AWSClientConfiguration;
 import io.micronaut.context.annotation.EachBean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;
