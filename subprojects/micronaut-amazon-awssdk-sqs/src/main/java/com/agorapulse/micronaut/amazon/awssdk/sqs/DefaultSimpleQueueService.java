@@ -71,6 +71,10 @@ public class DefaultSimpleQueueService implements SimpleQueueService {
         QueueConfiguration configuration = this.configuration.copy();
         configuration.setQueue(queueName);
 
+        if (queueName.endsWith(".fifo")) {
+            configuration.setFifo(true);
+        }
+
         return createQueue(configuration);
     }
 

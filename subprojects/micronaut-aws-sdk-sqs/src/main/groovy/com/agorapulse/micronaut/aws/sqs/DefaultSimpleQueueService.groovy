@@ -91,7 +91,7 @@ class DefaultSimpleQueueService implements SimpleQueueService {
         if (configuration.visibilityTimeout) {
             createQueueRequest.attributes['VisibilityTimeout'] = configuration.visibilityTimeout.toString()
         }
-        if (configuration.fifo) {
+        if (configuration.fifo || configuration.queue.endsWith('.fifo')) {
             createQueueRequest.attributes['FifoQueue'] = 'true'
         }
         String queueUrl = client.createQueue(createQueueRequest).queueUrl
