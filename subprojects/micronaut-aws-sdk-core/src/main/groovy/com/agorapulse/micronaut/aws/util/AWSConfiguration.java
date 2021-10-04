@@ -20,7 +20,6 @@ import io.micronaut.context.annotation.ConfigurationProperties;
 /**
  * Configuration options for AWS.
  *
- * @author graemerocher
  * @since 1.0
  */
 @ConfigurationProperties(AWSConfiguration.PREFIX)

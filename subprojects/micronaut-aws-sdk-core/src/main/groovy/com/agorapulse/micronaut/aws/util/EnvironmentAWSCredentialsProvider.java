@@ -25,9 +25,6 @@ import io.micronaut.context.env.Environment;
 
 /**
  * A {@link AWSCredentialsProvider} that reads from the {@link Environment}.
- *
- * @author graemerocher
- * @since 1.0
  */
 public class EnvironmentAWSCredentialsProvider implements AWSCredentialsProvider {
 
@@ -77,12 +74,13 @@ public class EnvironmentAWSCredentialsProvider implements AWSCredentialsProvider
 
         if (StringUtils.isNullOrEmpty(accessKey) || StringUtils.isNullOrEmpty(secretKey)) {
             throw new SdkClientException(
-                "Unable to load AWS credentials from environment " +
-                    "(" + ACCESS_KEY_ENV_VAR + " (or " + ALTERNATE_ACCESS_KEY_ENV_VAR + ") and " +
-                    SECRET_KEY_ENV_VAR + " (or " + ALTERNATE_SECRET_KEY_ENV_VAR + "))");
+                "Unable to load AWS credentials from environment "
+                    + "(" + ACCESS_KEY_ENV_VAR + " (or " + ALTERNATE_ACCESS_KEY_ENV_VAR + ") and "
+                    + SECRET_KEY_ENV_VAR + " (or " + ALTERNATE_SECRET_KEY_ENV_VAR + "))");
         }
 
-        return sessionToken == null ?
+        return sessionToken == null
+            ?
             new BasicAWSCredentials(accessKey, secretKey)
             :
             new BasicSessionCredentials(accessKey, secretKey, sessionToken);

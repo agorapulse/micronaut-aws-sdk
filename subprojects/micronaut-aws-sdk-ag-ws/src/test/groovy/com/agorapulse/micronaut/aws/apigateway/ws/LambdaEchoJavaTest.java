@@ -23,15 +23,15 @@ import com.agorapulse.micronaut.aws.apigateway.ws.event.WebSocketRequest;
 import com.agorapulse.micronaut.aws.apigateway.ws.event.WebSocketResponse;
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.runtime.server.EmbeddedServer;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
-@Ignore
+@Disabled
 public class LambdaEchoJavaTest {
 
     private static final String CONNECTION_ID = "abcdefghij";
@@ -47,7 +47,7 @@ public class LambdaEchoJavaTest {
     private MessageSenderFactory factory;
     private TestTopicPublisher publisher;
 
-    @Before
+    @BeforeEach
     public void setup() {
         sender = mock(MessageSender.class);
         publisher = mock(TestTopicPublisher.class);
@@ -66,7 +66,7 @@ public class LambdaEchoJavaTest {
         client = ctx.createBean(LambdaEchoJavaClient.class, server.getURL());
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         server.close();
         ctx.close();
@@ -81,7 +81,7 @@ public class LambdaEchoJavaTest {
 
         WebSocketResponse response = client.lambdaEcho(request).blockingGet();
 
-        assertEquals(Integer.valueOf(200), response.getStatusCode());
+        Assertions.assertEquals(Integer.valueOf(200), response.getStatusCode());
 
         verify(sender, never()).send(CONNECTION_ID, RESPONSE);
     }
@@ -95,7 +95,7 @@ public class LambdaEchoJavaTest {
 
         WebSocketResponse response = client.lambdaEcho(request).blockingGet();
 
-        assertEquals(Integer.valueOf(200), response.getStatusCode());
+        Assertions.assertEquals(Integer.valueOf(200), response.getStatusCode());
 
         verify(sender, never()).send(CONNECTION_ID, RESPONSE);
     }
@@ -110,7 +110,7 @@ public class LambdaEchoJavaTest {
 
         WebSocketResponse response = client.lambdaEcho(request).blockingGet();
 
-        assertEquals(Integer.valueOf(200), response.getStatusCode());
+        Assertions.assertEquals(Integer.valueOf(200), response.getStatusCode());
 
         verify(sender, times(1)).send(CONNECTION_ID, RESPONSE);
         verify(publisher, times(1)).publishMessage(CONNECTION_ID, RESPONSE);

@@ -24,7 +24,6 @@ import io.micronaut.context.annotation.Requires;
 /**
  * Configuration options for AWS client.
  *
- * @author graemerocher
  * @since 1.0
  */
 @ConfigurationProperties("client")
