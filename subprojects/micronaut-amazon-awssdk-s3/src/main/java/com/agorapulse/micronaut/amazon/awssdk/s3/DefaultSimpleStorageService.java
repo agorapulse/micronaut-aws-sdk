@@ -29,6 +29,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.utils.IoUtils;
 import software.amazon.awssdk.utils.Md5Utils;
 
@@ -144,6 +145,14 @@ public class DefaultSimpleStorageService implements SimpleStorageService {
     public String generatePresignedUrl(String bucketName, String key, Date expirationDate) {
         PresignedGetObjectRequest request = presigner.presignGetObject(b ->
             b.getObjectRequest(r -> r.bucket(bucketName).key(key)).signatureDuration(Duration.between(Instant.now(), expirationDate.toInstant()))
+        );
+        return request.url().toExternalForm();
+    }
+
+    @Override
+    public String generateUploadUrl(String bucketName, String key, Date expirationDate) {
+        PresignedPutObjectRequest request = presigner.presignPutObject(b ->
+            b.putObjectRequest(r -> r.bucket(bucketName).key(key)).signatureDuration(Duration.between(Instant.now(), expirationDate.toInstant()))
         );
         return request.url().toExternalForm();
     }
