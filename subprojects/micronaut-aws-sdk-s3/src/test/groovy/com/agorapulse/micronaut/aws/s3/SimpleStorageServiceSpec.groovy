@@ -44,6 +44,7 @@ class SimpleStorageServiceSpec extends Specification {
 // end::header[]
 
     private static final String KEY = 'foo/bar.baz'
+    private static final String UPLOAD_KEY = 'foo/foo.two'
     private static final String MY_BUCKET = 'testbucket'
     private static final String SAMPLE_CONTENT = 'hello world!'
     private static final Date TOMORROW = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000)
@@ -130,12 +131,32 @@ class SimpleStorageServiceSpec extends Specification {
             file.text == SAMPLE_CONTENT
     }
 
+    void 'generate upload URL'() {
+        when:
+            String uploadUrl = service.generateUploadUrl(UPLOAD_KEY, TOMORROW)
+
+            HttpURLConnection connection = (HttpURLConnection) new URL(uploadUrl).openConnection()
+            connection.doOutput = true
+            connection.requestMethod = 'PUT'
+            connection.setRequestProperty('User-Agent', 'Groovy')
+
+            connection.outputStream.withWriter { Writer w ->
+                w.write('Hello')
+            }
+
+        then:
+            connection.responseCode == 200
+            service.exists(UPLOAD_KEY)
+    }
+
     void 'delete file'() {
         when:
             service.deleteFile(KEY)
+            service.deleteFile(UPLOAD_KEY)
             service.deleteFile('bar/foo.txt')
         then:
             !service.exists(KEY)
+            !service.exists(UPLOAD_KEY)
             !service.exists('bar/foo.txt')
     }
 

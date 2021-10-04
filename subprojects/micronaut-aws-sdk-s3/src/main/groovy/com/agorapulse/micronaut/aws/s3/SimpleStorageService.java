@@ -297,6 +297,27 @@ public interface SimpleStorageService {
     }
 
     /**
+     * Generates the pre-signed URL for uploading an object by clients.
+     *
+     * @param bucketName the name of the bucket
+     * @param key the key of the object
+     * @param expirationDate the expiration date of the link
+     * @return the URL to upload the object without any credentials required
+     */
+    String generateUploadUrl(String bucketName, String key, Date expirationDate);
+
+    /**
+     * Generates the pre-signed URL for uploading an object by clients.
+     *
+     * @param key the key of the object
+     * @param expirationDate the expiration date of the link
+     * @return the URL to download the object without any credentials required
+     */
+    default String generateUploadUrl(String key, Date expirationDate) {
+        return generateUploadUrl(getDefaultBucketName(), key, expirationDate);
+    }
+
+    /**
      * Uploads data from the input stream to desired path on S3.
      * @param bucketName the name of the bucket
      * @param path the destination path (key) on S3

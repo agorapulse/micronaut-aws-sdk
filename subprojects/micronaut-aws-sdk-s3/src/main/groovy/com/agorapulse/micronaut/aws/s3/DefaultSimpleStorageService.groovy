@@ -18,6 +18,7 @@
 package com.agorapulse.micronaut.aws.s3
 
 import com.amazonaws.AmazonClientException
+import com.amazonaws.HttpMethod
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.Headers
 import com.amazonaws.services.s3.model.*
@@ -293,6 +294,11 @@ class DefaultSimpleStorageService implements SimpleStorageService {
                                 String key,
                                 Date expirationDate) {
         return client.generatePresignedUrl(bucketName, key, expirationDate).toString()
+    }
+
+    @Override
+    String generateUploadUrl(String bucketName, String key, Date expirationDate) {
+        return client.generatePresignedUrl(bucketName, key, expirationDate, HttpMethod.PUT).toString()
     }
 
     /**

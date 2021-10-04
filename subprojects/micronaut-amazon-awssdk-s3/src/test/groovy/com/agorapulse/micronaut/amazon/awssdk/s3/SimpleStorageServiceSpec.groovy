@@ -52,6 +52,7 @@ class SimpleStorageServiceSpec extends Specification {
     // end::header[]
 
     private static final String KEY = 'foo/bar.baz'
+    private static final String UPLOAD_KEY = 'foo/foo.two'
     private static final String MY_BUCKET = 'testbucket'
     private static final String OTHER_BUCKET = 'otherbucket'
     private static final String SAMPLE_CONTENT = 'hello world!'
@@ -283,6 +284,24 @@ class SimpleStorageServiceSpec extends Specification {
             service.deleteFiles(NO_SUCH_BUCKET, 'mix/foo/bar/baz')
         then:
             thrown(IllegalArgumentException)
+    }
+
+    void 'generate upload URL'() {
+        when:
+            String uploadUrl = service.generateUploadUrl(UPLOAD_KEY, TOMORROW)
+
+            HttpURLConnection connection = (HttpURLConnection) new URL(uploadUrl).openConnection()
+            connection.doOutput = true
+            connection.requestMethod = 'PUT'
+            connection.setRequestProperty('User-Agent', 'Groovy')
+
+            connection.outputStream.withWriter { Writer w ->
+                w.write('Hello')
+            }
+
+        then:
+            connection.responseCode == 200
+            service.exists(UPLOAD_KEY)
     }
 
     void 'delete bucket'() {
