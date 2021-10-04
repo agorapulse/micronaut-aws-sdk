@@ -24,6 +24,7 @@ jobs:
     name: Check
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         micronaut: ['1.3.7', '2.5.13', '3.0.3']
     env:
@@ -44,10 +45,10 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}-${{ hashFiles('**/gradle.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
-    - name: Check (${{ matrix.micronautVersion }})
+    - name: Check (${{ matrix.micronaut }})
       uses: eskatos/gradle-command-action@v1
       with:
-        arguments: check coveralls -Dscan.uploadInBackground=false --scan --stacktrace --parallel -PmicronautVersion=${{ matrix.micronautVersion }}
+        arguments: check coveralls -Dscan.uploadInBackground=false --scan --stacktrace --parallel -PmicronautVersion=${{ matrix.micronaut }}
     - name: Show Build Scan
       if: always()
       run: cat scan-journal.log
