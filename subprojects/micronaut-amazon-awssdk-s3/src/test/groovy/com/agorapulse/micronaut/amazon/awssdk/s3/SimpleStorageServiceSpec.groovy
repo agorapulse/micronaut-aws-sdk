@@ -19,8 +19,6 @@ package com.agorapulse.micronaut.amazon.awssdk.s3
 
 import io.micronaut.context.ApplicationContext
 import io.reactivex.Flowable
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import org.testcontainers.containers.localstack.LocalStackContainer
 import org.testcontainers.spock.Testcontainers
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
