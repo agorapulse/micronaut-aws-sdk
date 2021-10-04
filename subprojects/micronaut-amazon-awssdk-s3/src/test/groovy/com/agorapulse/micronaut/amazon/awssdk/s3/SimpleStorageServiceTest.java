@@ -24,7 +24,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.io.TempDir;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -60,8 +60,8 @@ public class SimpleStorageServiceTest {
     public final LocalStackContainer localstack = new LocalStackContainer()            // <1>
         .withServices(S3);
 
-    @Rule
-    public final TemporaryFolder tmp = new TemporaryFolder();
+    @TempDir
+    public File tmp;
 
     private ApplicationContext ctx;                                                     // <2>
 
@@ -146,8 +146,7 @@ public class SimpleStorageServiceTest {
         // end::generate-url[]
 
         // tag::download-file[]
-        File dir = tmp.newFolder();
-        File file = new File(dir, "bar.baz");                                           // <1>
+        File file = new File(tmp, "bar.baz");                                           // <1>
 
         service.getFile(KEY, file);                                                     // <2>
         assertTrue(file.exists());
@@ -170,7 +169,7 @@ public class SimpleStorageServiceTest {
     }
 
     private File createFileWithSampleContent() throws IOException {
-        File file = tmp.newFile("foo.txt");
+        File file = new File(tmp, "foo.txt");
         file.createNewFile();
 
         Files.write(Paths.get(file.toURI()), SAMPLE_CONTENT.getBytes());
