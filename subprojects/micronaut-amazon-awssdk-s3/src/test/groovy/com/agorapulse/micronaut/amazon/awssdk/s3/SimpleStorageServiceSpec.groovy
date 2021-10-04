@@ -244,7 +244,7 @@ class SimpleStorageServiceSpec extends Specification {
 
     void 'download file'() {
         when:
-            File file = new File(mp, 'bar.baz')
+            File file = new File(tmp, 'bar.baz')
             service.getFile(KEY, file)
         then:
             file.exists()
