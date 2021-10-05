@@ -21,8 +21,7 @@ import com.agorapulse.dru.Dru
 import com.agorapulse.dru.dynamodb.persistence.DynamoDB
 import com.agorapulse.gru.Gru
 import com.agorapulse.gru.agp.ApiGatewayProxy
-import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
-import io.micronaut.context.ApplicationContext
+import io.micronaut.context.ApplicationContextBuilder
 import spock.lang.AutoCleanup
 import spock.lang.Specification
 
@@ -31,7 +30,7 @@ import spock.lang.Specification
  */
 class SpacecraftControllerSpec extends Specification {
 
-    @AutoCleanup private final Gru gru = Gru.equip(ApiGatewayProxy.steal(this) {
+    @AutoCleanup private final Gru gru = Gru.create(ApiGatewayProxy.steal(this) {
         map '/spacecraft/{country}' to MicronautHandler
         map '/spacecraft/{country}/{name}' to MicronautHandler
     })
@@ -39,9 +38,8 @@ class SpacecraftControllerSpec extends Specification {
     @AutoCleanup private final Dru dru = Dru.steal(this)
 
     void setup() {
-        MicronautHandler.reset()
-        MicronautHandler.applicationContext.with { ApplicationContext ctx ->
-            ctx.registerSingleton(IDynamoDBMapper, DynamoDB.createMapper(dru))
+        MicronautHandler.reset { ApplicationContextBuilder builder ->
+            builder.singletons(DynamoDB.createMapper(dru))
         }
         dru.add(new Spacecraft(country: 'russia', name: 'vostok'))
         dru.add(new Spacecraft(country: 'usa', name: 'dragon'))

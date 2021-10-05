@@ -21,8 +21,7 @@ import com.agorapulse.dru.Dru
 import com.agorapulse.dru.dynamodb.persistence.DynamoDB
 import com.agorapulse.gru.Gru
 import com.agorapulse.gru.agp.ApiGatewayProxy
-import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
-import io.micronaut.context.ApplicationContext
+import io.micronaut.context.ApplicationContextBuilder
 import spock.lang.AutoCleanup
 import spock.lang.Specification
 
@@ -31,7 +30,7 @@ import spock.lang.Specification
  */
 class PlanetControllerSpec extends Specification {
 
-    @AutoCleanup private final Gru gru = Gru.equip(ApiGatewayProxy.steal(this) {               // <1>
+    @AutoCleanup private final Gru gru = Gru.create(ApiGatewayProxy.steal(this) {      // <1>
         map '/planet/{star}' to MicronautHandler                                        // <2>
         map '/planet/{star}/{name}' to MicronautHandler
     })
@@ -39,9 +38,8 @@ class PlanetControllerSpec extends Specification {
     @AutoCleanup private final Dru dru = Dru.steal(this)
 
     void setup() {
-        MicronautHandler.reset()                                                        // <3>
-        MicronautHandler.applicationContext.with { ApplicationContext ctx ->
-            ctx.registerSingleton(IDynamoDBMapper, DynamoDB.createMapper(dru))          // <4>
+        MicronautHandler.reset { ApplicationContextBuilder builder ->                   // <3>
+            builder.singletons(DynamoDB.createMapper(dru))                              // <4>
         }
         dru.add(new Planet(star: 'sun', name: 'mercury'))
         dru.add(new Planet(star: 'sun', name: 'venus'))

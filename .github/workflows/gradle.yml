@@ -27,7 +27,7 @@ jobs:
       fail-fast: false
       matrix:
         versions:
-        - 'coveralls'
+        - 'coveralls -PmicronautVersion=2.5.13 -PspockVersion=2.0-groovy-3.0 -PgroovyVersion=2.5.8'
         - '-PmicronautVersion=2.5.13 -PspockVersion=2.0-groovy-3.0 -PgroovyVersion=3.0.9'
         - '-PmicronautVersion=3.0.3 -PspockVersion=2.0-groovy-3.0 -PgroovyVersion=3.0.9'
     env:
