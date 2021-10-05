@@ -45,7 +45,7 @@ buildscript {
     }
 }
 
-/*
+
 plugins {
     id 'com.gradle.enterprise' version '3.6.1'
 }
@@ -60,7 +60,7 @@ gradleEnterprise {
         }
     }
 }
-*/
+
 
 apply plugin: 'org.kordamp.gradle.settings'
 
