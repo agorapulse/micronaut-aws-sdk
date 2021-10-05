@@ -27,5 +27,6 @@ dependencies {
     testCompile group: 'org.testcontainers', name: 'spock', version: testcontainersVersion
 
     testCompile micronautMigratedDependency('micronaut-aws-common')
+    testCompile 'com.amazonaws:aws-java-sdk-core'
 
 }

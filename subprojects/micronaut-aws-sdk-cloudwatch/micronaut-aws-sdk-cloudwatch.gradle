@@ -19,4 +19,5 @@
 dependencies {
     compile project(':micronaut-aws-sdk-core')
     compile group: 'com.amazonaws', name: 'aws-java-sdk-cloudwatch'
+    testCompile 'io.micronaut:micronaut-inject'
 }

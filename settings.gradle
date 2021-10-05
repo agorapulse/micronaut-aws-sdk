@@ -45,11 +45,10 @@ buildscript {
     }
 }
 
+/*
 plugins {
     id 'com.gradle.enterprise' version '3.6.1'
 }
-
-apply plugin: 'org.kordamp.gradle.settings'
 
 gradleEnterprise {
     buildScan {
@@ -61,6 +60,9 @@ gradleEnterprise {
         }
     }
 }
+*/
+
+apply plugin: 'org.kordamp.gradle.settings'
 
 projects {
     directories = ['subprojects', 'examples', 'docs']

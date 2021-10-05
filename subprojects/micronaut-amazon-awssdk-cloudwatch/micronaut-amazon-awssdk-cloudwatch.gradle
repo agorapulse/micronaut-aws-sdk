@@ -19,4 +19,5 @@
 dependencies {
     compile project(':micronaut-amazon-awssdk-core')
     compile "software.amazon.awssdk:cloudwatch"
+    testCompile 'io.micronaut:micronaut-inject'
 }

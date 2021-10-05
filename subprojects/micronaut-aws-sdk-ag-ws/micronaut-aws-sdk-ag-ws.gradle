@@ -21,7 +21,7 @@ dependencies {
 
     testCompile 'com.amazonaws:aws-lambda-java-events'
     testCompile project(':micronaut-aws-sdk-sns')
-    testCompile "io.micronaut:micronaut-function-groovy"
+    testCompile micronautMigratedDependency('micronaut-function-groovy')
     testCompile "io.micronaut:micronaut-function-client"
     testRuntime "io.micronaut:micronaut-http-server-netty"
     testRuntime "io.micronaut:micronaut-function-web"
