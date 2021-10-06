@@ -67,7 +67,7 @@ class SimpleQueueServiceSpec extends Specification {
             .withCredentials(localstack.defaultCredentialsProvider)
             .build()
 
-        context = ApplicationContext.build('aws.sqs.queue': TEST_QUEUE).build()         // <7>
+        context = ApplicationContext.builder('aws.sqs.queue': TEST_QUEUE).build()       // <7>
         context.registerSingleton(AmazonSQS, sqs)
         context.start()
 

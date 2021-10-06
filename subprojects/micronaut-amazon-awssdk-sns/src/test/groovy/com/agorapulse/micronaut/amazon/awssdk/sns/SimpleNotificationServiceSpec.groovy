@@ -77,7 +77,7 @@ class SimpleNotificationServiceSpec extends Specification {
 
         DefaultSimpleNotificationService configurer = new DefaultSimpleNotificationService(sns, mockConfiguration, new ObjectMapper())
 
-        context = ApplicationContext.build(                                             // <5>
+        context = ApplicationContext.builder(                                           // <5>
             'aws.sns.topic': TEST_TOPIC,
             'aws.sns.ios.arn': configurer.createIosApplication('IOS-APP', 'API-KEY', 'fake-cert', false),
             'aws.sns.ios-sandbox.arn': configurer.createIosApplication('IOS-APP', 'API-KEY', 'fake-cert', true),

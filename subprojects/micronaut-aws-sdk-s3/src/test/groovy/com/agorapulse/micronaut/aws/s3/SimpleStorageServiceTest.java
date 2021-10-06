@@ -72,7 +72,7 @@ public class SimpleStorageServiceTest {
             .build();
 
         ctx = ApplicationContext
-            .build(Collections.singletonMap("aws.s3.bucket", MY_BUCKET))
+            .builder(Collections.singletonMap("aws.s3.bucket", MY_BUCKET))
             .build();
         ctx.registerSingleton(AmazonS3.class, amazonS3);                                // <4>
         ctx.start();

@@ -37,7 +37,7 @@ class DefaultDynamoDBServiceNoRangeSpec extends Specification {
     DynamoDBEntityNoRangeService service
 
     void setup() {
-        context = ApplicationContext.build(
+        context = ApplicationContext.builder(
             'aws.region': 'eu-west-1',
             'aws.access-key-id': localstack.accessKey,
             'aws.secret-access-key': localstack.secretKey,

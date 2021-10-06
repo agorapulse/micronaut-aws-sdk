@@ -73,7 +73,7 @@ class SimpleQueueServiceSpec extends Specification {
             .region(Region.of(localstack.region))
             .build()
 
-        context = ApplicationContext.build('aws.sqs.queue': TEST_QUEUE).build()         // <7>
+        context = ApplicationContext.builder('aws.sqs.queue': TEST_QUEUE).build()       // <7>
         context.registerSingleton(SqsClient, sqs)
         context.start()
 

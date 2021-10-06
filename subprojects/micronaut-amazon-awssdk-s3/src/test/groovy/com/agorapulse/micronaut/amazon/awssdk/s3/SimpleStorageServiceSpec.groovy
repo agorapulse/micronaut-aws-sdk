@@ -89,7 +89,7 @@ class SimpleStorageServiceSpec extends Specification {
             .region(Region.of(localstack.region))
             .build()
         context = ApplicationContext                                                    // <6>
-            .build(
+            .builder(
                 'aws.s3.bucket': MY_BUCKET,
                 'aws.s3.region': 'eu-west-1'
             )

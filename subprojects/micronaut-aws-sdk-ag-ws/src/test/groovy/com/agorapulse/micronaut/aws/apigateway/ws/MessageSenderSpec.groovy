@@ -111,7 +111,7 @@ class MessageSenderSpec extends Specification {
         server.expectations {
             post("/$CONNECTION_ID/", response)
         }
-        ctx = ApplicationContext.build(
+        ctx = ApplicationContext.builder(
             'aws.websocket.connections.url': server.httpUrl
         ).build()
 

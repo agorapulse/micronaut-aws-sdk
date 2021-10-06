@@ -67,7 +67,7 @@ class SimpleStorageServiceSpec extends Specification {
             .build()
 
         context = ApplicationContext
-            .build('aws.s3.bucket': MY_BUCKET)                                          // <5>
+            .builder('aws.s3.bucket': MY_BUCKET)                                        // <5>
             .build()
         context.registerSingleton(AmazonS3, amazonS3)                                   // <6>
         context.start()
