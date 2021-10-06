@@ -107,7 +107,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
         unknownMethodsService.doSomething()
         then:
         UnsupportedOperationException e1 = thrown(UnsupportedOperationException)
-        e1.message == 'Cannot implement method void doSomething()'
+        e1.message == 'Cannot implement method public abstract void com.agorapulse.micronaut.amazon.awssdk.dynamodb.UnknownMethodsService.doSomething()'
 
         when:
         unknownMethodsService.save()
