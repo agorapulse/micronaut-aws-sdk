@@ -54,7 +54,7 @@ public class LambdaEchoJavaTest {
 
         factory = url -> sender;
 
-        ctx = ApplicationContext.build().build();
+        ctx = ApplicationContext.builder().build();
 
         ctx.registerSingleton(MessageSenderFactory.class, factory);
         ctx.registerSingleton(TestTopicPublisher.class, publisher);

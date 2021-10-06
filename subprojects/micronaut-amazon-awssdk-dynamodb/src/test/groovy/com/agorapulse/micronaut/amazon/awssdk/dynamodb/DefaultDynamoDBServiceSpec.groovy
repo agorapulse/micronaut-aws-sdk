@@ -90,7 +90,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
             .dynamoDbClient(client)
             .build()
 
-        context = ApplicationContext.build().build()
+        context = ApplicationContext.builder().build()
         context.registerSingleton(DynamoDbClient, client)                               // <5>
         context.registerSingleton(DynamoDbEnhancedClient, enhancedClient)               // <6>
         context.start()

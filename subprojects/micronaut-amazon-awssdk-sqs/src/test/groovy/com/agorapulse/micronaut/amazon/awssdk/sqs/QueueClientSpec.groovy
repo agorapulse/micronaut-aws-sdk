@@ -48,7 +48,7 @@ class QueueClientSpec extends Specification {
     String marshalledPogo
 
     void setup() {
-        context = ApplicationContext.build().build()
+        context = ApplicationContext.builder().build()
 
         context.registerSingleton(SimpleQueueService, defaultService)
         context.registerSingleton(SimpleQueueService, testService, Qualifiers.byName('test'))

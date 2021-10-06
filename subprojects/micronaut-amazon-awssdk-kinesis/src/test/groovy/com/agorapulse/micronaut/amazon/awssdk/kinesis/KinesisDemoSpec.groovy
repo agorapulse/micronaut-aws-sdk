@@ -66,7 +66,7 @@ class KinesisDemoSpec extends Specification {
             .region(Region.EU_WEST_1)
             .build()
 
-        context = ApplicationContext.build().build()                                    // <7>
+        context = ApplicationContext.builder().build()                                  // <7>
         context.registerSingleton(KinesisClient, kinesis)
         context.start()
 

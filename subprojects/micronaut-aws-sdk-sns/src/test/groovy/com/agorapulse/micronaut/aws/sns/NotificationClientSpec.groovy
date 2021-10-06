@@ -48,7 +48,7 @@ class NotificationClientSpec extends Specification {
     @AutoCleanup ApplicationContext context
 
     void setup() {
-        context = ApplicationContext.build().build()
+        context = ApplicationContext.builder().build()
 
         context.registerSingleton(SimpleNotificationService, defaultService)
         context.registerSingleton(SimpleNotificationService, testService, Qualifiers.byName('test'))

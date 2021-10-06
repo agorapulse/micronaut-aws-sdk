@@ -65,7 +65,7 @@ public class DynamoDBServiceTest {
 
         IDynamoDBMapper mapper = new DynamoDBMapper(amazonDynamoDB);
 
-        ctx = ApplicationContext.build().build();
+        ctx = ApplicationContext.builder().build();
         ctx.registerSingleton(AmazonDynamoDB.class, amazonDynamoDB);                    // <4>
         ctx.registerSingleton(IDynamoDBMapper.class, mapper);                           // <5>
         ctx.start();

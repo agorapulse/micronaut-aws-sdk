@@ -49,7 +49,7 @@ public class KinesisJavaDemoTest {
             .withCredentials(localstack.getDefaultCredentialsProvider())
             .build();
 
-        context = ApplicationContext.build().build();
+        context = ApplicationContext.builder().build();
         context.registerSingleton(AmazonKinesis.class, kinesis);                        // <4>
         context.start();
 

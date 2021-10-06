@@ -66,7 +66,7 @@ public class DeclarativeServiceTest {
             .dynamoDbClient(client)
             .build();
 
-        context = ApplicationContext.build().build();
+        context = ApplicationContext.builder().build();
         context.registerSingleton(DynamoDbClient.class, client);                        // <4>
         context.registerSingleton(DynamoDbEnhancedClient.class, enhancedClient);        // <5>
         context.start();
