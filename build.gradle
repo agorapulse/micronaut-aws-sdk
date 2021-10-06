@@ -152,6 +152,12 @@ subprojects { Project subproject ->
         compile "io.micronaut:micronaut-inject"
         compile "io.micronaut:micronaut-runtime"
 
+        // Micronaut 3.x Compatibilty
+        compile 'javax.inject:javax.inject:1'
+        annotationProcessor 'com.google.code.findbugs:jsr305:3.0.2'
+        compile 'com.google.code.findbugs:jsr305:3.0.2'
+
+
         compileOnly "io.micronaut:micronaut-inject-java"
 
         runtime "ch.qos.logback:logback-classic:1.2.3"
