@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2018-2021 Agorapulse.
+ * Copyright 2018-2020 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,16 @@
  * limitations under the License.
  */
 
+// TODO: re-enable once the V1 version is fixed (remove `x-` prefix from this file)
 dependencies {
-    compile project(':micronaut-aws-sdk-core')
+    compile project(':micronaut-amazon-awssdk-core')
 
-    testCompile 'com.amazonaws:aws-lambda-java-events'
-    testCompile project(':micronaut-aws-sdk-sns')
-    testCompile micronautMigratedDependency('micronaut-function-groovy')
-    testCompile "io.micronaut:micronaut-function-client"
-    testRuntime "io.micronaut:micronaut-http-server-netty"
-    testRuntime "io.micronaut:micronaut-function-web"
+    compile group: 'software.amazon.kinesis', name: 'amazon-kinesis-client', version: kinesisClientV2Version
+
+    testCompile group: 'org.testcontainers', name: 'testcontainers', version: testcontainersVersion
+    testCompile group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
+    testCompile group: 'org.testcontainers', name: 'spock', version: testcontainersVersion
+
+    testCompile project(':micronaut-amazon-awssdk-kinesis')
     testCompile "org.mockito:mockito-core:$mockitoVersion"
-    testCompile group: 'com.stehno.ersatz', name: 'ersatz', version: '1.9.0'
-    testCompile "space.jasan:groovy-closure-support:$closureSupportVersion"
-    testCompile group: 'io.undertow', name: 'undertow-core', version: '2.0.13.Final'
 }

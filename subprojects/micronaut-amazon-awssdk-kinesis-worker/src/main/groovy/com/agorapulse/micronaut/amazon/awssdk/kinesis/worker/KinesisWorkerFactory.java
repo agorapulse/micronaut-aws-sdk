@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2018-2021 Agorapulse.
+ * Copyright 2018-2020 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker;
 
-dependencies {
-    compile project(':micronaut-amazon-awssdk-core')
+import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
 
-    compile "space.jasan:groovy-closure-support:$closureSupportVersion"
+public interface KinesisWorkerFactory {
 
-    compile "software.amazon.awssdk:ses"
-    compile 'javax.mail:mail:1.4.4'
+    KinesisWorker create(KinesisClientLibConfiguration configuration);
 
-    testCompile "org.mockito:mockito-core:$mockitoVersion"
 }
