@@ -46,6 +46,7 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
  */
 
 @SuppressWarnings('ClassStartsWithBlankLine')
+// TODO remove once fixed
 @Requires({ System.getenv('CI') != 'true' })
 
 // tag::testcontainers-header[]

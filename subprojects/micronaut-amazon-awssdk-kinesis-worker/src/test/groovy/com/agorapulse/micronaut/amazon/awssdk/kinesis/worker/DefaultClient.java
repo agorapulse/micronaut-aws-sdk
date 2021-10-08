@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2018-2020 Agorapulse.
+ * Copyright 2018-2021 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ import com.agorapulse.micronaut.amazon.awssdk.kinesis.annotation.KinesisClient;
 import com.agorapulse.micronaut.amazon.awssdk.kinesis.annotation.PartitionKey;
 import com.agorapulse.micronaut.amazon.awssdk.kinesis.annotation.SequenceNumber;
 import com.agorapulse.micronaut.amazon.awssdk.kinesis.annotation.Stream;
-import com.amazonaws.services.kinesis.model.PutRecordResult;
-import com.amazonaws.services.kinesis.model.PutRecordsRequestEntry;
-import com.amazonaws.services.kinesis.model.PutRecordsResult;
+import software.amazon.awssdk.services.kinesis.model.PutRecordResponse;
+import software.amazon.awssdk.services.kinesis.model.PutRecordsRequestEntry;
+import software.amazon.awssdk.services.kinesis.model.PutRecordsResponse;
 
 // tag::header[]
 @KinesisClient                                                                          // <1>
@@ -36,7 +36,7 @@ interface DefaultClient {
     // tag::string[]
     void putRecordString(String record);                                                // <2>
 
-    PutRecordResult putRecord(String partitionKey, String record);                      // <3>
+    PutRecordResponse putRecord(String partitionKey, String record);                    // <3>
 
     void putRecordAnno(@PartitionKey String id, String record);                         // <4>
 
@@ -61,32 +61,32 @@ interface DefaultClient {
 
     void putRecordDataByteArray(@PartitionKey String id, byte[] value);                 // <3>
 
-    PutRecordsResult putRecords(Iterable<PutRecordsRequestEntry> entries);              // <4>
+    PutRecordsResponse putRecords(Iterable<PutRecordsRequestEntry> entries);            // <4>
 
-    PutRecordsResult putRecords(PutRecordsRequestEntry... entries);                     // <5>
+    PutRecordsResponse putRecords(PutRecordsRequestEntry... entries);                   // <5>
 
-    PutRecordsResult putRecord(PutRecordsRequestEntry entry);                           // <6>
+    PutRecordsResponse putRecord(PutRecordsRequestEntry entry);                         // <6>
     // end::bytes[]
 
     // tag::pogo[]
     void putRecordObject(Pogo pogo);                                                    // <2>
 
-    PutRecordsResult putRecordObjects(Pogo... pogo);                                    // <3>
+    PutRecordsResponse putRecordObjects(Pogo... pogo);                                  // <3>
 
-    PutRecordsResult putRecordObjects(Iterable<Pogo> pogo);                             // <4>
+    PutRecordsResponse putRecordObjects(Iterable<Pogo> pogo);                           // <4>
 
     void putRecordDataObject(@PartitionKey String id, Pogo value);                      // <5>
     // end::pogo[]
 
 
     // tag::events[]
-    PutRecordResult putEvent(MyEvent event);                                            // <2>
+    PutRecordResponse putEvent(MyEvent event);                                          // <2>
 
-    PutRecordsResult putEventsIterable(Iterable<MyEvent> events);                       // <3>
+    PutRecordsResponse putEventsIterable(Iterable<MyEvent> events);                     // <3>
 
     void putEventsArrayNoReturn(MyEvent... events);                                     // <4>
 
-    @Stream("OtherStream") PutRecordResult putEventToStream(MyEvent event);             // <5>
+    @Stream("OtherStream") PutRecordResponse putEventToStream(MyEvent event);           // <5>
     // end::events[]
 
 }

@@ -17,17 +17,18 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker;
 
-import com.agorapulse.micronaut.amazon.awssdk.kinesis.worker.annotation.KinesisListener;
-import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.kinesis.AmazonKinesis;
-import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
-import com.amazonaws.services.kinesis.clientlibrary.lib.worker.Worker;
-import com.amazonaws.services.kinesis.model.Record;
 import io.micronaut.context.event.ApplicationEventPublisher;
-import io.micronaut.core.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
+import software.amazon.awssdk.services.kinesis.KinesisAsyncClient;
+import software.amazon.kinesis.common.ConfigsBuilder;
+import software.amazon.kinesis.coordinator.Scheduler;
+import software.amazon.kinesis.coordinator.WorkerStateChangeListener;
+import software.amazon.kinesis.processor.ShardRecordProcessorFactory;
+import software.amazon.kinesis.retrieval.KinesisClientRecord;
+import software.amazon.kinesis.retrieval.polling.PollingConfig;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,14 +39,24 @@ import java.util.function.BiConsumer;
 
 class DefaultKinesisWorker implements KinesisWorker {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(KinesisListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultKinesisWorker.class);
+
+    private final KinesisClientConfiguration configuration;
+    private final ApplicationEventPublisher applicationEventPublisher;
+    private final Optional<DynamoDbAsyncClient> amazonDynamoDB;
+    private final Optional<KinesisAsyncClient> amazonKinesis;
+    private final Optional<CloudWatchAsyncClient> amazonCloudWatch;
+    private final List<BiConsumer<String, KinesisClientRecord>> consumers = new CopyOnWriteArrayList<>();
+
+    private Scheduler scheduler;
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     DefaultKinesisWorker(
-        KinesisClientLibConfiguration configuration,
+        KinesisClientConfiguration configuration,
         ApplicationEventPublisher applicationEventPublisher,
-        Optional<AmazonDynamoDB> amazonDynamoDB,
-        Optional<AmazonKinesis> amazonKinesis,
-        Optional<AmazonCloudWatch> amazonCloudWatch
+        Optional<DynamoDbAsyncClient> amazonDynamoDB,
+        Optional<KinesisAsyncClient> amazonKinesis,
+        Optional<CloudWatchAsyncClient> amazonCloudWatch
     ) {
         this.configuration = configuration;
         this.applicationEventPublisher = applicationEventPublisher;
@@ -56,34 +67,40 @@ class DefaultKinesisWorker implements KinesisWorker {
 
     @Override
     public void start() {
-        Worker.Builder builder = new Worker.Builder().config(configuration);
-
-        if (StringUtils.isEmpty(configuration.getDynamoDBEndpoint())) {
-            amazonDynamoDB.ifPresent(builder::dynamoDBClient);
-        }
-
-        if (StringUtils.isEmpty(configuration.getKinesisEndpoint())) {
-            amazonKinesis.ifPresent(builder::kinesisClient);
-        }
-
-        amazonCloudWatch.ifPresent(builder::cloudWatchClient);
-
-        builder.recordProcessorFactory(DefaultRecordProcessorFactory.create((string, record) ->
+        ShardRecordProcessorFactory recordProcessorFactory = DefaultRecordProcessorFactory.create((string, record) ->
             consumers.forEach(c -> {
                 try {
                     c.accept(string, record);
                 } catch (Exception e) {
                     LOGGER.error("Exception processing Kinesis record " + record + " decoded as " + string, e);
                 }
-            }))
+            })
         );
 
-        builder.workerStateChangeListener(s -> applicationEventPublisher.publishEvent(new WorkerStateEvent(s, configuration.getStreamName())));
+        ConfigsBuilder configsBuilder = configuration.getConfigsBuilder(
+            amazonDynamoDB,
+            amazonKinesis,
+            amazonCloudWatch,
+            recordProcessorFactory
+        );
+
+        WorkerStateChangeListener workerStateChangeListener = s -> applicationEventPublisher.publishEvent(new WorkerStateEvent(s, configuration.getStream()));
+
+        PollingConfig pollingConfig = new PollingConfig(configuration.getStream(), configsBuilder.kinesisClient());
+
+        scheduler = new Scheduler(
+            configsBuilder.checkpointConfig(),
+            configsBuilder.coordinatorConfig().workerStateChangeListener(workerStateChangeListener),
+            configsBuilder.leaseManagementConfig(),
+            configsBuilder.lifecycleConfig(),
+            configsBuilder.metricsConfig(),
+            configsBuilder.processorConfig(),
+            configsBuilder.retrievalConfig().retrievalSpecificConfig(pollingConfig)
+        );
 
         try {
-            LOGGER.info("Starting Kinesis worker for {}", configuration.getStreamName());
-            worker = builder.build();
-            executorService.execute(worker);
+            LOGGER.info("Starting Kinesis worker for {}", configuration.getStream());
+            executorService.submit(scheduler);
         } catch (Exception t) {
             LOGGER.error("Caught throwable while processing Kinesis data.", t);
         }
@@ -91,9 +108,9 @@ class DefaultKinesisWorker implements KinesisWorker {
 
     @Override
     public void shutdown() {
-        if (worker != null) {
+        if (scheduler != null) {
             try {
-                worker.shutdown();
+                scheduler.shutdown();
             } catch (Exception e) {
                 LOGGER.warn("Exception shutting down worker", e);
             }
@@ -106,16 +123,8 @@ class DefaultKinesisWorker implements KinesisWorker {
     }
 
     @Override
-    public void addConsumer(BiConsumer<String, Record> next) {
+    public void addConsumer(BiConsumer<String, KinesisClientRecord> next) {
         consumers.add(next);
     }
 
-    private final KinesisClientLibConfiguration configuration;
-    private final ExecutorService executorService = Executors.newCachedThreadPool();
-    private final ApplicationEventPublisher applicationEventPublisher;
-    private final Optional<AmazonDynamoDB> amazonDynamoDB;
-    private final Optional<AmazonKinesis> amazonKinesis;
-    private final Optional<AmazonCloudWatch> amazonCloudWatch;
-    private final List<BiConsumer<String, Record>> consumers = new CopyOnWriteArrayList<>();
-    private Worker worker;
 }

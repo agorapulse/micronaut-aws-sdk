@@ -17,27 +17,28 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker;
 
-import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessor;
-import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessorFactory;
-import com.amazonaws.services.kinesis.model.Record;
+import software.amazon.kinesis.processor.ShardRecordProcessor;
+import software.amazon.kinesis.processor.ShardRecordProcessorFactory;
+import software.amazon.kinesis.retrieval.KinesisClientRecord;
 
 import java.util.function.BiConsumer;
 
-class DefaultRecordProcessorFactory implements IRecordProcessorFactory {
+class DefaultRecordProcessorFactory implements ShardRecordProcessorFactory {
 
-    static IRecordProcessorFactory create(BiConsumer<String, Record> consumer) {
+    private final BiConsumer<String, KinesisClientRecord> consumer;
+
+    static ShardRecordProcessorFactory create(BiConsumer<String, KinesisClientRecord> consumer) {
         return new DefaultRecordProcessorFactory(consumer);
     }
 
-    private DefaultRecordProcessorFactory(BiConsumer<String, Record> consumer) {
+    private DefaultRecordProcessorFactory(BiConsumer<String, KinesisClientRecord> consumer) {
         this.consumer = consumer;
     }
 
     @Override
-    public IRecordProcessor createProcessor() {
+    public ShardRecordProcessor shardRecordProcessor() {
         return DefaultRecordProcessor.create(consumer);
     }
 
-    private BiConsumer<String, Record> consumer;
 
 }

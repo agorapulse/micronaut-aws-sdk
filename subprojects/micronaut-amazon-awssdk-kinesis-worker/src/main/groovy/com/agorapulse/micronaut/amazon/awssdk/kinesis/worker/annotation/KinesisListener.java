@@ -42,4 +42,6 @@ public @interface KinesisListener {
      */
     String value() default "default";
 
+    int maxNumberOrWorkers() default 1;
+
 }

@@ -18,17 +18,6 @@
 package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker;
 
 import com.agorapulse.micronaut.amazon.awssdk.kinesis.KinesisService;
-import com.amazonaws.AmazonWebServiceRequest;
-import com.amazonaws.ResponseMetadata;
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.regions.Region;
-import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
-import com.amazonaws.services.cloudwatch.model.*;
-import com.amazonaws.services.cloudwatch.waiters.AmazonCloudWatchWaiters;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-import com.amazonaws.services.kinesis.AmazonKinesis;
-import com.amazonaws.services.kinesis.AmazonKinesisClient;
 import io.micronaut.context.ApplicationContext;
 import io.reactivex.Flowable;
 import io.reactivex.disposables.Disposable;
@@ -36,6 +25,14 @@ import io.reactivex.schedulers.Schedulers;
 import org.junit.*;
 import org.mockito.Mockito;
 import org.testcontainers.containers.localstack.LocalStackContainer;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.SdkSystemSetting;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
+import software.amazon.awssdk.services.kinesis.KinesisAsyncClient;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,27 +54,33 @@ public class KinesisTest {
     public ApplicationContext context;                                                  // <1>
 
     @Rule
-    public LocalStackContainer localstack = new LocalStackContainer("0.8.10")           // <2>
+    public LocalStackContainer localstack = new LocalStackContainer()                   // <2>
         .withServices(DYNAMODB, KINESIS);
 
     @Before
     public void setup() {
-        System.setProperty("com.amazonaws.sdk.disableCbor", "true");                    // <3>
+        System.setProperty(SdkSystemSetting.CBOR_ENABLED.property(), "false");          // <3>
         System.setProperty("aws.region", "eu-west-1");
 
-        AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClient                            // <4>
+        StaticCredentialsProvider credentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(
+            localstack.getAccessKey(), localstack.getSecretKey()
+        ));
+
+        DynamoDbAsyncClient dynamo = DynamoDbAsyncClient                                // <4>
             .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(DYNAMODB))
-            .withCredentials(localstack.getDefaultCredentialsProvider())
+            .endpointOverride(localstack.getEndpointOverride(DYNAMODB))
+            .credentialsProvider(credentialsProvider)
+            .region(Region.EU_WEST_1)
             .build();
 
-        AmazonKinesis amazonKinesis = AmazonKinesisClient                               // <5>
+        KinesisAsyncClient kinesis = KinesisAsyncClient                                 // <5>
             .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(KINESIS))
-            .withCredentials(localstack.getDefaultCredentialsProvider())
+            .endpointOverride(localstack.getEndpointOverride(KINESIS))
+            .credentialsProvider(credentialsProvider)
+            .region(Region.EU_WEST_1)
             .build();
 
-        AmazonCloudWatch cloudWatch = Mockito.mock(AmazonCloudWatch.class);
+        CloudWatchAsyncClient cloudWatch = Mockito.mock(CloudWatchAsyncClient.class);
 
         Map<String, Object> properties = new HashMap<>();                               // <6>
         properties.put("aws.kinesis.application.name", "TestApp");
@@ -95,10 +98,10 @@ public class KinesisTest {
 
 
         context = ApplicationContext.builder(properties).build();                       // <7>
-        context.registerSingleton(AmazonKinesis.class, amazonKinesis);
-        context.registerSingleton(AmazonDynamoDB.class, amazonDynamoDB);
-        context.registerSingleton(AmazonCloudWatch.class, cloudWatch);
-        context.registerSingleton(AWSCredentialsProvider.class, localstack.getDefaultCredentialsProvider());
+        context.registerSingleton(KinesisAsyncClient.class, kinesis);
+        context.registerSingleton(DynamoDbAsyncClient.class, dynamo);
+        context.registerSingleton(CloudWatchAsyncClient.class, cloudWatch);
+        context.registerSingleton(AwsCredentialsProvider.class, credentialsProvider);
         context.start();
     }
 

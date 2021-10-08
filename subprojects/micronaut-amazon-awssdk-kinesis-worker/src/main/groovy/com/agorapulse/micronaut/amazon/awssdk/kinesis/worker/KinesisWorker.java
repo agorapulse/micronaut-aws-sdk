@@ -17,12 +17,12 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker;
 
-import com.amazonaws.services.kinesis.model.Record;
+import software.amazon.kinesis.retrieval.KinesisClientRecord;
 
 import java.util.function.BiConsumer;
 
 public interface KinesisWorker {
     void start();
     void shutdown();
-    void addConsumer(BiConsumer<String, Record> next);
+    void addConsumer(BiConsumer<String, KinesisClientRecord> next);
 }

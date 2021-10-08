@@ -18,8 +18,6 @@
 package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker;
 
 import com.agorapulse.micronaut.amazon.awssdk.kinesis.worker.annotation.KinesisListener;
-import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
-import com.amazonaws.services.kinesis.model.Record;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.context.BeanContext;
 import io.micronaut.context.annotation.Requires;
@@ -33,23 +31,24 @@ import io.micronaut.inject.ExecutableMethod;
 import io.micronaut.inject.qualifiers.Qualifiers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.kinesis.retrieval.KinesisClientRecord;
 
 import javax.inject.Qualifier;
 import javax.inject.Singleton;
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 @Singleton
 @Requires(
-    property = "aws.kinesis",
-    classes = KinesisClientLibConfiguration.class
+    property = "aws.kinesis"
 )
-public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor<KinesisListener>, ApplicationEventListener<ShutdownEvent> {
+public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor<KinesisListener>, ApplicationEventListener<ShutdownEvent>, Closeable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(KinesisListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(KinesisListenerMethodProcessor.class);
 
-    private static class StringListener implements BiConsumer<String, Record> {
+    private static class StringListener implements BiConsumer<String, KinesisClientRecord> {
 
         private final ExecutableMethod method;
         private final Object bean;
@@ -60,12 +59,12 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
         }
 
         @Override
-        public void accept(String s, Record record) {
+        public void accept(String s, KinesisClientRecord record) {
             method.invoke(bean, s);
         }
     }
 
-    private static class RecordListener implements BiConsumer<String, Record> {
+    private static class RecordListener implements BiConsumer<String, KinesisClientRecord> {
 
         private final ExecutableMethod method;
         private final Object bean;
@@ -76,12 +75,12 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
         }
 
         @Override
-        public void accept(String s, Record record) {
+        public void accept(String s, KinesisClientRecord record) {
             method.invoke(bean, record);
         }
     }
 
-    private static class StringAndRecordListener implements BiConsumer<String, Record> {
+    private static class StringAndRecordListener implements BiConsumer<String, KinesisClientRecord> {
 
         private final ExecutableMethod method;
         private final Object bean;
@@ -92,12 +91,12 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
         }
 
         @Override
-        public void accept(String s, Record record) {
+        public void accept(String s, KinesisClientRecord record) {
             method.invoke(bean, s, record);
         }
     }
 
-    private static class EventListener implements BiConsumer<String, Record> {
+    private static class EventListener implements BiConsumer<String, KinesisClientRecord> {
 
         private final ExecutableMethod method;
         private final Object bean;
@@ -110,7 +109,7 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
         }
 
         @Override
-        public void accept(String s, Record record) {
+        public void accept(String s, KinesisClientRecord record) {
             Class type = method.getArguments()[0].getType();
             try {
                 method.invoke(bean, mapper.readValue(s, type));
@@ -120,7 +119,7 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
         }
     }
 
-    private static class EventAndRecordListener implements BiConsumer<String, Record> {
+    private static class EventAndRecordListener implements BiConsumer<String, KinesisClientRecord> {
 
         private final ExecutableMethod method;
         private final Object bean;
@@ -133,7 +132,7 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
         }
 
         @Override
-        public void accept(String s, Record record) {
+        public void accept(String s, KinesisClientRecord record) {
             Class type = method.getArguments()[0].getType();
             try {
                 method.invoke(bean, mapper.readValue(s, type), record);
@@ -167,7 +166,7 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
             throw new IllegalArgumentException("Method must implement at least one arguments");
         }
 
-        if (arguments.length == 2 && !Record.class.isAssignableFrom(arguments[1].getType())) {
+        if (arguments.length == 2 && !KinesisClientRecord.class.isAssignableFrom(arguments[1].getType())) {
             throw new IllegalArgumentException("Second argument must be Record");
         }
 
@@ -179,7 +178,7 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
         Class beanType = beanDefinition.getBeanType();
         Object bean = beanContext.getBean(beanType, qualifer);
 
-        BiConsumer<String, Record> consumer = createConsumer(method, bean);
+        BiConsumer<String, KinesisClientRecord> consumer = createConsumer(method, bean);
 
         String configurationName = method.getValue(KinesisListener.class, String.class).get();
 
@@ -202,19 +201,24 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
 
     @Override
     public void onApplicationEvent(ShutdownEvent event) {
+        close();
+    }
+
+    @Override
+    public void close() {
         workers.values().forEach(KinesisWorker::shutdown);
     }
 
-    private KinesisClientLibConfiguration getKinesisConfiguration(String key) {
+    private KinesisClientConfiguration getKinesisConfiguration(String key) {
         try {
-            return beanContext.getBean(KinesisClientLibConfiguration.class, Qualifiers.byName(key));
+            return beanContext.getBean(KinesisClientConfiguration.class, Qualifiers.byName(key));
         } catch (NoSuchBeanException ignored) {
             LOGGER.error("Cannot setup listener Kinesis listener, application name is missing. Configuration for Kinesis client with name '{}' is missing", key);
             return null;
         }
     }
 
-    private BiConsumer<String, Record> createConsumer(ExecutableMethod method, Object bean) {
+    private BiConsumer<String, KinesisClientRecord> createConsumer(ExecutableMethod method, Object bean) {
         Argument[] arguments = method.getArguments();
 
         if (arguments.length == 2) {
@@ -228,7 +232,7 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
             return new StringListener(method, bean);
         }
 
-        if (Record.class.isAssignableFrom(arguments[0].getType())) {
+        if (KinesisClientRecord.class.isAssignableFrom(arguments[0].getType())) {
             return new RecordListener(method, bean);
         }
 

@@ -17,8 +17,8 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker;
 
-import com.amazonaws.services.kinesis.clientlibrary.lib.worker.WorkerStateChangeListener;
 import io.micronaut.context.event.ApplicationEventListener;
+import software.amazon.kinesis.coordinator.WorkerStateChangeListener;
 
 import javax.inject.Singleton;
 import java.util.Map;

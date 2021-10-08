@@ -18,7 +18,7 @@
 package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker;
 
 import com.agorapulse.micronaut.amazon.awssdk.kinesis.worker.annotation.KinesisListener;
-import com.amazonaws.services.kinesis.model.Record;
+import software.amazon.kinesis.retrieval.KinesisClientRecord;
 
 import javax.inject.Singleton;
 import java.util.List;
@@ -35,13 +35,13 @@ public class KinesisListenerTester {
     }
 
     @KinesisListener
-    public void listenRecord(Record record) {                                           // <3>
+    public void listenRecord(KinesisClientRecord record) {                                           // <3>
         logExecution("EXECUTED: listenRecord(" + record + ")");
     }
 
 
     @KinesisListener
-    public void listenStringRecord(String string, Record record) {                      // <4>
+    public void listenStringRecord(String string, KinesisClientRecord record) {         // <4>
         logExecution("EXECUTED: listenStringRecord(" + string + ", " + record + ")");
     }
 
@@ -51,7 +51,7 @@ public class KinesisListenerTester {
     }
 
     @KinesisListener
-    public void listenObjectRecord(MyEvent event, Record record) {                      // <6>
+    public void listenObjectRecord(MyEvent event, KinesisClientRecord record) {         // <6>
         logExecution("EXECUTED: listenObjectRecord(" + event + ", " + record + ")");
     }
 

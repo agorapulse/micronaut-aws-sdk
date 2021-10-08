@@ -18,20 +18,23 @@
 package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker
 
 import com.agorapulse.micronaut.amazon.awssdk.kinesis.KinesisService
-import com.amazonaws.auth.AWSCredentialsProvider
-import com.amazonaws.services.cloudwatch.AmazonCloudWatch
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
-import com.amazonaws.services.kinesis.AmazonKinesis
-import com.amazonaws.services.kinesis.AmazonKinesisClient
 import io.micronaut.context.ApplicationContext
 import io.reactivex.Flowable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import org.testcontainers.containers.localstack.LocalStackContainer
 import org.testcontainers.spock.Testcontainers
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
+import software.amazon.awssdk.core.SdkSystemSetting
+import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import software.amazon.awssdk.services.kinesis.KinesisAsyncClient
+import software.amazon.awssdk.services.kinesis.KinesisClient
 import spock.lang.AutoCleanup
-import spock.lang.Requires
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
@@ -46,7 +49,6 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
  */
 
 @SuppressWarnings('ClassStartsWithBlankLine')
-@Requires({ System.getenv('CI') != 'true' })
 
 // tag::testcontainers-header[]
 @Testcontainers                                                                         // <1>
@@ -58,28 +60,49 @@ class KinesisAnnotationsSpec extends Specification {
     private static final String TEST_STREAM = 'TestStream'
     private static final String APP_NAME = 'AppName'
 
-    @Shared LocalStackContainer localstack = new LocalStackContainer('0.8.10')          // <3>
+    @Shared LocalStackContainer localstack = new LocalStackContainer()                  // <3>
         .withServices(KINESIS, DYNAMODB)
 
     @AutoCleanup ApplicationContext context                                             // <4>
 
     void setup() {
-        System.setProperty('com.amazonaws.sdk.disableCbor', 'true')                     // <5>
+        // disable CBOR (not supported by Kinelite)
+        System.setProperty(SdkSystemSetting.CBOR_ENABLED.property(), 'false')           // <5>
         System.setProperty('aws.region', 'eu-west-1')
 
-        AmazonDynamoDB dynamo = AmazonDynamoDBClient                                    // <6>
+        StaticCredentialsProvider credentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(
+            localstack.accessKey, localstack.secretKey
+        ))
+
+        DynamoDbAsyncClient dynamoAsync = DynamoDbAsyncClient                            // <6>
             .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(DYNAMODB))
-            .withCredentials(localstack.defaultCredentialsProvider)
+            .endpointOverride(localstack.getEndpointOverride(DYNAMODB))
+            .credentialsProvider(credentialsProvider)
+            .region(Region.EU_WEST_1)
             .build()
 
-        AmazonKinesis kinesis = AmazonKinesisClient                                     // <7>
+        DynamoDbClient dynamo = DynamoDbClient
             .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(KINESIS))
-            .withCredentials(localstack.defaultCredentialsProvider)
+            .endpointOverride(localstack.getEndpointOverride(DYNAMODB))
+            .credentialsProvider(credentialsProvider)
+            .region(Region.EU_WEST_1)
             .build()
 
-        AmazonCloudWatch amazonCloudWatch = Mock(AmazonCloudWatch)
+        KinesisAsyncClient kinesisAsync = KinesisAsyncClient                             // <7>
+            .builder()
+            .endpointOverride(localstack.getEndpointOverride(KINESIS))
+            .credentialsProvider(credentialsProvider)
+            .region(Region.EU_WEST_1)
+            .build()
+
+        KinesisClient kinesis = KinesisClient
+            .builder()
+            .endpointOverride(localstack.getEndpointOverride(KINESIS))
+            .credentialsProvider(credentialsProvider)
+            .region(Region.EU_WEST_1)
+            .build()
+
+        CloudWatchAsyncClient amazonCloudWatch = Mock(CloudWatchAsyncClient)
 
         context = ApplicationContext.builder().properties(                              // <8>
             'aws.kinesis.application.name': APP_NAME,
@@ -90,13 +113,14 @@ class KinesisAnnotationsSpec extends Specification {
             'aws.kinesis.listener.idleTimeBetweenReadsInMillis': '1000',
             'aws.kinesis.listener.parentShardPollIntervalMillis': '1000',
             'aws.kinesis.listener.timeoutInSeconds': '1000',
-            'aws.kinesis.listener.retryGetRecordsInSeconds': '1000',
-            'aws.kinesis.listener.metricsLevel': 'NONE',
+            'aws.kinesis.listener.retryGetRecordsInSeconds': '1000'
         ).build()
-        context.registerSingleton(AmazonKinesis, kinesis)
-        context.registerSingleton(AmazonDynamoDB, dynamo)
-        context.registerSingleton(AmazonCloudWatch, amazonCloudWatch)
-        context.registerSingleton(AWSCredentialsProvider, localstack.defaultCredentialsProvider)
+        context.registerSingleton(KinesisClient, kinesis)
+        context.registerSingleton(KinesisAsyncClient, kinesisAsync)
+        context.registerSingleton(DynamoDbClient, dynamo)
+        context.registerSingleton(DynamoDbAsyncClient, dynamoAsync)
+        context.registerSingleton(CloudWatchAsyncClient, amazonCloudWatch)
+        context.registerSingleton(AwsCredentialsProvider, credentialsProvider)
         context.start()
     }
     // end::testcontainers-setup[]
@@ -116,7 +140,7 @@ class KinesisAnnotationsSpec extends Specification {
             service.createStream()
             service.waitForActive()
 
-            waitForWorkerReady(300, 100)
+            waitForWorkerReady(600, 100)
 
             Disposable subscription = publishEventAsync(tester, client)
 
@@ -125,6 +149,8 @@ class KinesisAnnotationsSpec extends Specification {
             subscription.dispose()
         then:
             allTestEventsReceived(tester)
+        cleanup:
+            context.getBean(KinesisListenerMethodProcessor).close()
     }
     // end::testcontainers-test[]
 

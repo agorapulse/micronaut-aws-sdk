@@ -17,31 +17,28 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker;
 
-import com.agorapulse.micronaut.amazon.awssdk.kinesis.worker.annotation.KinesisListener;
-import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.kinesis.AmazonKinesis;
-import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
-import com.amazonaws.services.kinesis.model.Record;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.ApplicationEventPublisher;
 import io.micronaut.core.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
+import software.amazon.awssdk.services.kinesis.KinesisAsyncClient;
+import software.amazon.kinesis.retrieval.KinesisClientRecord;
 
 import javax.inject.Singleton;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 import java.util.function.BiConsumer;
 
 @Singleton
 @Requires(
-    classes = KinesisClientLibConfiguration.class,
     property = "aws.kinesis"
 )
 public class DefaultKinesisWorkerFactory implements KinesisWorkerFactory {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(KinesisListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultKinesisWorkerFactory.class);
+
     private static final KinesisWorker NOOP = new KinesisWorker() {
         @Override
         public void start() {
@@ -54,19 +51,17 @@ public class DefaultKinesisWorkerFactory implements KinesisWorkerFactory {
         }
 
         @Override
-        public void addConsumer(BiConsumer<String, Record> next) {
+        public void addConsumer(BiConsumer<String, KinesisClientRecord> next) {
             // do nothing
         }
     };
 
-    private final ExecutorService executorService;
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final Optional<AmazonDynamoDB> amazonDynamoDB;
-    private final Optional<AmazonKinesis> kinesis;
-    private final Optional<AmazonCloudWatch> cloudWatch;
+    private final Optional<DynamoDbAsyncClient> amazonDynamoDB;
+    private final Optional<KinesisAsyncClient> kinesis;
+    private final Optional<CloudWatchAsyncClient> cloudWatch;
 
-    public DefaultKinesisWorkerFactory(ExecutorService executorService, ApplicationEventPublisher applicationEventPublisher, Optional<AmazonDynamoDB> amazonDynamoDB, Optional<AmazonKinesis> kinesis, Optional<AmazonCloudWatch> cloudWatch) {
-        this.executorService = executorService;
+    public DefaultKinesisWorkerFactory(ApplicationEventPublisher applicationEventPublisher, Optional<DynamoDbAsyncClient> amazonDynamoDB, Optional<KinesisAsyncClient> kinesis, Optional<CloudWatchAsyncClient> cloudWatch) {
         this.applicationEventPublisher = applicationEventPublisher;
         this.amazonDynamoDB = amazonDynamoDB;
         this.kinesis = kinesis;
@@ -74,7 +69,7 @@ public class DefaultKinesisWorkerFactory implements KinesisWorkerFactory {
     }
 
     @Override
-    public KinesisWorker create(KinesisClientLibConfiguration kinesisConfiguration) {
+    public KinesisWorker create(KinesisClientConfiguration kinesisConfiguration) {
         if (kinesisConfiguration == null) {
             return NOOP;
         }
@@ -86,4 +81,5 @@ public class DefaultKinesisWorkerFactory implements KinesisWorkerFactory {
 
         return new DefaultKinesisWorker(kinesisConfiguration, applicationEventPublisher, amazonDynamoDB, kinesis, cloudWatch);
     }
+
 }

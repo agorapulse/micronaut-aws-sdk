@@ -17,7 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker;
 
-import com.amazonaws.services.kinesis.clientlibrary.lib.worker.WorkerStateChangeListener;
+import software.amazon.kinesis.coordinator.WorkerStateChangeListener;
 
 /**
  * Event published for the changes of the state of the Kinesis worker.

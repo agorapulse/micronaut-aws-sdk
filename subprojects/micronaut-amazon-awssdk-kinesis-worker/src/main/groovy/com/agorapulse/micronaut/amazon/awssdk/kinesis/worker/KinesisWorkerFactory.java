@@ -17,10 +17,8 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker;
 
-import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
-
 public interface KinesisWorkerFactory {
 
-    KinesisWorker create(KinesisClientLibConfiguration configuration);
+    KinesisWorker create(KinesisClientConfiguration configuration);
 
 }

@@ -16,16 +16,18 @@
  * limitations under the License.
  */
 
-// TODO: re-enable once the V1 version is fixed (remove `x-` prefix from this file)
 dependencies {
     compile project(':micronaut-amazon-awssdk-core')
 
-    compile group: 'software.amazon.kinesis', name: 'amazon-kinesis-client', version: kinesisClientV2Version
+    compile(group: 'software.amazon.kinesis', name: 'amazon-kinesis-client', version: kinesisClientV2Version) {
+        exclude group: 'software.amazon.awssdk', module: 'url-connection-client'
+    }
 
     testCompile group: 'org.testcontainers', name: 'testcontainers', version: testcontainersVersion
     testCompile group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
     testCompile group: 'org.testcontainers', name: 'spock', version: testcontainersVersion
 
     testCompile project(':micronaut-amazon-awssdk-kinesis')
+    testCompile 'com.amazonaws:aws-java-sdk-core'
     testCompile "org.mockito:mockito-core:$mockitoVersion"
 }

@@ -135,9 +135,6 @@ class DefaultRecordProcessor implements IRecordProcessor {
         try {
             // For this app, we interpret the payload as UTF-8 chars.
             data = decoder.decode(record.data).toString()
-
-            // Process record (method to be overriden with custom code)
-            log.debug "[${shardId}] ${record.sequenceNumber}, ${record.partitionKey}, processRecordData not implemented"
             processor.accept(data, record)
         } catch (CharacterCodingException e) {
             log.error "[${shardId}] Malformed data: ${data}", e
