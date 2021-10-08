@@ -81,7 +81,7 @@ class KinesisAnnotationsSpec extends Specification {
 
         AmazonCloudWatch amazonCloudWatch = Mock(AmazonCloudWatch)
 
-        context = ApplicationContext.build().properties(                                // <8>
+        context = ApplicationContext.builder().properties(                              // <8>
             'aws.kinesis.application.name': APP_NAME,
             'aws.kinesis.stream': TEST_STREAM,
             'aws.kinesis.listener.stream': TEST_STREAM,
@@ -138,11 +138,11 @@ class KinesisAnnotationsSpec extends Specification {
 
     @SuppressWarnings('CatchException')
     private static Disposable publishEventAsync(KinesisListenerTester tester, DefaultClient client) {
-        Flowable
+        return Flowable
             .interval(100, TimeUnit.MILLISECONDS, Schedulers.io())
             .takeWhile {
                 !allTestEventsReceived(tester)
-            } subscribe {
+            }.subscribe {
             try {
                 client.putEvent(new MyEvent(value: 'foo'))
                 client.putRecordDataObject('1234567890', new Pogo(foo: 'bar'))
@@ -156,7 +156,7 @@ class KinesisAnnotationsSpec extends Specification {
         }
     }
 
-    @SuppressWarnings('SystemErrPrint')
+    @SuppressWarnings(['SystemErrPrint', 'VariableName'])
     private static boolean allTestEventsReceived(KinesisListenerTester tester) {
         final int EXPECTED = 6
         int passedEvents = 0

@@ -94,7 +94,7 @@ public class KinesisTest {
         properties.put("aws.kinesis.listener.metricsLevel", "NONE");
 
 
-        context = ApplicationContext.build(properties).build();                         // <7>
+        context = ApplicationContext.builder(properties).build();                       // <7>
         context.registerSingleton(AmazonKinesis.class, amazonKinesis);
         context.registerSingleton(AmazonDynamoDB.class, amazonDynamoDB);
         context.registerSingleton(AmazonCloudWatch.class, cloudWatch);
