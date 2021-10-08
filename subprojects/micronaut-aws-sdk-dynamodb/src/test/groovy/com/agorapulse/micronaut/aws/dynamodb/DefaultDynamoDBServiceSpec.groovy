@@ -85,7 +85,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
 
         mapper = new DynamoDBMapper(amazonDynamoDB)
 
-        context = ApplicationContext.build().build()
+        context = ApplicationContext.builder().build()
         context.registerSingleton(AmazonDynamoDB, amazonDynamoDB)                       // <5>
         context.registerSingleton(IDynamoDBMapper, mapper)                              // <6>
         context.start()

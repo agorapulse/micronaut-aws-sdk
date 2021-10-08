@@ -17,11 +17,11 @@
  */
 package com.agorapulse.micronaut.aws.cloudwatch;
 
+import com.agorapulse.micronaut.aws.util.AWSClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.regions.AwsRegionProvider;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
-import io.micronaut.configuration.aws.AWSClientConfiguration;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;

@@ -17,11 +17,11 @@
  */
 package com.agorapulse.micronaut.aws.s3;
 
+import com.agorapulse.micronaut.aws.util.AWSClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.regions.AwsRegionProvider;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import io.micronaut.configuration.aws.AWSClientConfiguration;
 import io.micronaut.context.annotation.EachBean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;

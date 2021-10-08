@@ -202,7 +202,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             );
         }
 
-        throw new UnsupportedOperationException("Cannot implement method " + context.getExecutableMethod());
+        throw new UnsupportedOperationException("Cannot implement method " + context.getExecutableMethod().getTargetMethod());
     }
 
     private Object flowableOrList(Flowable<?> result, Class<?> type) {

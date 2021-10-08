@@ -25,6 +25,7 @@ dependencies {
 
     // gru lambda incubation
     testCompile "com.agorapulse:gru-api-gateway:$gruVersion"
+    testCompile 'io.micronaut:micronaut-http-client'
 }
 
 task buildZip(type: Zip) {

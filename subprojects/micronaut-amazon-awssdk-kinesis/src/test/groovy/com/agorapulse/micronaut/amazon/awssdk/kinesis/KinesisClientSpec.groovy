@@ -58,7 +58,7 @@ class KinesisClientSpec extends Specification {
     @AutoCleanup ApplicationContext context
 
     void setup() {
-        context = ApplicationContext.build().build()
+        context = ApplicationContext.builder().build()
 
         context.registerSingleton(KinesisService, defaultService)
         context.registerSingleton(KinesisService, testService, Qualifiers.byName('test'))

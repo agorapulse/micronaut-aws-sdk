@@ -61,7 +61,7 @@ public class KinesisJavaDemoTest {
             .region(Region.EU_WEST_1)
             .build();
 
-        context = ApplicationContext.build().build();                                   // <4>
+        context = ApplicationContext.builder().build();                                 // <4>
         context.registerSingleton(KinesisClient.class, kinesis);
         context.start();
 

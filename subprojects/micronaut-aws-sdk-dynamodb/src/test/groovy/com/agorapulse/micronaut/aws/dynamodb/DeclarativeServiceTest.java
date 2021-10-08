@@ -50,7 +50,7 @@ public class DeclarativeServiceTest {
 
         IDynamoDBMapper mapper = new DynamoDBMapper(amazonDynamoDB);
 
-        context = ApplicationContext.build().build();
+        context = ApplicationContext.builder().build();
         context.registerSingleton(AmazonDynamoDB.class, amazonDynamoDB);
         context.registerSingleton(IDynamoDBMapper.class, mapper);
         context.start();

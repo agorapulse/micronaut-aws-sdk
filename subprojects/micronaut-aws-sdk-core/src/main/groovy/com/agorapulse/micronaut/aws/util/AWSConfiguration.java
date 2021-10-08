@@ -15,9 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.agorapulse.micronaut.aws.util;
 
-dependencies {
-    compile project(':micronaut-aws-sdk-core')
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-cloudwatch'
-    testCompile 'io.micronaut:micronaut-inject'
+import io.micronaut.context.annotation.ConfigurationProperties;
+
+/**
+ * Configuration options for AWS.
+ *
+ * @since 1.0
+ */
+@ConfigurationProperties(AWSConfiguration.PREFIX)
+public class AWSConfiguration {
+
+    /**
+     * Prefix for all AWS settings.
+     */
+    public static final String PREFIX = "aws";
 }

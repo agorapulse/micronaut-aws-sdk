@@ -38,9 +38,8 @@ import com.amazonaws.services.s3.transfer.model.UploadResult
 import groovy.transform.CompileDynamic
 import io.micronaut.http.MediaType
 import io.micronaut.http.multipart.PartData
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 import java.nio.ByteBuffer
@@ -55,7 +54,7 @@ class SimpleStorageServiceWithMockSpec extends Specification {
     private static final String BUCKET_NAME = 'bucket'
     private static final String REGION = 'eu-west-1'
 
-    @Rule TemporaryFolder tmp
+    @TempDir File tmp
 
     AmazonS3 client = Mock(AmazonS3) {
         getUrl(_, _) >> { String bucket, String key ->
@@ -265,7 +264,7 @@ class SimpleStorageServiceWithMockSpec extends Specification {
     }
 
     @Unroll
-    void 'Build metadata for #type and #extension'() {
+    void 'Build metadata for #type and #ext'() {
         when:
             ObjectMetadata metadata = service.buildMetadataFromType(type, ext, CannedAccessControlList.BucketOwnerRead)
         then:
@@ -365,7 +364,7 @@ class SimpleStorageServiceWithMockSpec extends Specification {
 
     void 'transfer file'() {
         given:
-            File file = tmp.newFile('transferred.txt')
+            File file = new File(tmp, 'transferred.txt')
             file.text = 'transferring...'
         when:
             Upload upload = service.transferFile('transferred.txt', file)
@@ -392,7 +391,7 @@ class SimpleStorageServiceWithMockSpec extends Specification {
 
     void 'get file'() {
         given:
-            File file = tmp.newFile('transferred.txt')
+            File file =  new File(tmp, 'transferred.txt')
         when:
             service.getFile('transferred.txt', file.absolutePath)
         then:

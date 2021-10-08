@@ -294,7 +294,7 @@ class SimpleQueueServiceWithMockSpec extends Specification {
 
     void 'integration spec'() {
         when:
-            ApplicationContext context = ApplicationContext.build().build()
+            ApplicationContext context = ApplicationContext.builder().build()
             context.registerSingleton(SqsClient, amazonSQS)
             context.start()
 

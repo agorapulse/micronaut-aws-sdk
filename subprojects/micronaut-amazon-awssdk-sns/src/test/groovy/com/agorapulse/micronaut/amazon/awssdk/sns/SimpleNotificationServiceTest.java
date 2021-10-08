@@ -72,7 +72,7 @@ public class SimpleNotificationServiceTest {
         properties.put("aws.sns.topic", TEST_TOPIC);
 
 
-        context = ApplicationContext.build(properties).build();                         // <5>
+        context = ApplicationContext.builder(properties).build();                       // <5>
         context.registerSingleton(SnsClient.class, amazonSNS);
         context.start();
 

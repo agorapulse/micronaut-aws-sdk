@@ -17,13 +17,12 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.ses
 
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import software.amazon.awssdk.services.ses.SesClient
 import software.amazon.awssdk.services.ses.model.SendRawEmailRequest
 import software.amazon.awssdk.services.ses.model.SendRawEmailResponse
 import spock.lang.Specification
 import spock.lang.Subject
+import spock.lang.TempDir
 
 /**
  * Tests for sending emails with Groovy.
@@ -32,15 +31,16 @@ class SendEmailSpec extends Specification {
 
     SesClient simpleEmailService = Mock(SesClient)
 
-    @Rule
-    TemporaryFolder tmp = new TemporaryFolder()
+    @TempDir
+    File tmp
 
     @Subject
     SimpleEmailService service = new DefaultSimpleEmailService(simpleEmailService, new SimpleEmailServiceConfiguration())
 
     void "send email"() {
         given:
-            File file = tmp.newFile('test.pdf')
+            File file = new File(tmp, 'test.pdf')
+            file.createNewFile()
             file.text = 'not a real PDF'
             String thePath = file.canonicalPath
         when:

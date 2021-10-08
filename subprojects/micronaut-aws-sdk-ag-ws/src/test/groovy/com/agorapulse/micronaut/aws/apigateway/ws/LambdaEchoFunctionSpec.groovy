@@ -52,7 +52,7 @@ class LambdaEchoFunctionSpec extends Specification {
     TestTopicPublisher publisher = Mock()
 
     void setup() {
-        ctx = ApplicationContext.build().build()
+        ctx = ApplicationContext.builder().build()
 
         ctx.registerSingleton(MessageSenderFactory, factory)
         ctx.registerSingleton(TestTopicPublisher, publisher)

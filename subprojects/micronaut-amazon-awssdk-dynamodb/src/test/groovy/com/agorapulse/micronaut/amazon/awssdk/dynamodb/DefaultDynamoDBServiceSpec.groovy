@@ -90,7 +90,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
             .dynamoDbClient(client)
             .build()
 
-        context = ApplicationContext.build().build()
+        context = ApplicationContext.builder().build()
         context.registerSingleton(DynamoDbClient, client)                               // <5>
         context.registerSingleton(DynamoDbEnhancedClient, enhancedClient)               // <6>
         context.start()
@@ -107,7 +107,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
         unknownMethodsService.doSomething()
         then:
         UnsupportedOperationException e1 = thrown(UnsupportedOperationException)
-        e1.message == 'Cannot implement method void doSomething()'
+        e1.message == 'Cannot implement method public abstract void com.agorapulse.micronaut.amazon.awssdk.dynamodb.UnknownMethodsService.doSomething()'
 
         when:
         unknownMethodsService.save()

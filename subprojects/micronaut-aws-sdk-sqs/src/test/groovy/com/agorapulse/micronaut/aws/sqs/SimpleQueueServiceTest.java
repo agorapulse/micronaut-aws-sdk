@@ -64,7 +64,7 @@ public class SimpleQueueServiceTest {
         properties.put("aws.sqs.queue", TEST_QUEUE);
 
 
-        context = ApplicationContext.build(properties).build();                         // <6>
+        context = ApplicationContext.builder(properties).build();                       // <6>
         context.registerSingleton(AmazonSQS.class, amazonSQS);
         context.start();
 

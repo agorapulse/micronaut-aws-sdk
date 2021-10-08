@@ -15,22 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.http.examples
+package com.agorapulse.micronaut.http.examples;
 
-import groovy.transform.CompileStatic
-import io.micronaut.context.ApplicationContext
-import io.micronaut.runtime.Micronaut
+import io.micronaut.context.ApplicationContext;
+import io.micronaut.runtime.Micronaut;
 
 /**
  * Entry point to the example application.
  */
-@CompileStatic
-class Application {
+public class Application {
 
-    static ApplicationContext context
+    private static ApplicationContext context;
 
-    static void main(String[] args) {
-        context = Micronaut.run(Application)
+    public static ApplicationContext getContext() {
+        return context;
+    }
+
+    public static void main(String[] args) {
+        context = Micronaut.run(Application.class);
     }
 
 }

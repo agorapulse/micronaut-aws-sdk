@@ -63,7 +63,7 @@ class SimpleNotificationServiceSpec extends Specification {
             .withCredentials(localstack.defaultCredentialsProvider)
             .build()
 
-        context = ApplicationContext.build('aws.sns.topic', TEST_TOPIC).build()         // <5>
+        context = ApplicationContext.builder('aws.sns.topic', TEST_TOPIC).build()       // <5>
         context.registerSingleton(AmazonSNS, sns)
         context.start()
 

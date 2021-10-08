@@ -56,7 +56,7 @@ class KinesisDemoSpec extends Specification {
             .withCredentials(localstack.defaultCredentialsProvider)
             .build()
 
-        context = ApplicationContext.build().build()
+        context = ApplicationContext.builder().build()
         context.registerSingleton(AmazonKinesis, kinesis)                               // <7>
         context.start()
 

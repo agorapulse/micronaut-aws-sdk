@@ -116,6 +116,7 @@ nexusPublishing {
 }
 
 allprojects {
+    apply from: rootProject.file('gradle/micronaut-compatibility.gradle')
     repositories {
         mavenCentral()
         maven { url "https://repo.spring.io/release"  }
@@ -144,12 +145,19 @@ subprojects { Project subproject ->
             testCompile "org.codehaus.groovy:groovy:$groovyVersion"
         } else {
             compile "org.codehaus.groovy:groovy:$groovyVersion"
-            compile "io.micronaut:micronaut-runtime-groovy"
-            compileOnly "io.micronaut:micronaut-inject-groovy"
+            compile micronautMigratedDependency('micronaut-runtime-groovy')
+            compileOnly 'io.micronaut:micronaut-inject-groovy'
         }
 
         compile "io.micronaut:micronaut-inject"
         compile "io.micronaut:micronaut-runtime"
+
+        // Micronaut 3.x Compatibilty
+        annotationProcessor 'com.google.code.findbugs:jsr305:3.0.2'
+        compile 'com.google.code.findbugs:jsr305:3.0.2'
+        compile 'javax.inject:javax.inject:1'
+        compile 'io.reactivex.rxjava2:rxjava:2.2.10'
+
 
         compileOnly "io.micronaut:micronaut-inject-java"
 
@@ -160,6 +168,9 @@ subprojects { Project subproject ->
 
         testCompile platform("io.micronaut:micronaut-bom:$micronautVersion")
         testCompile "io.micronaut:micronaut-inject-groovy"
+
+        testCompile 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+        testCompile 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 
         testCompile("org.spockframework:spock-core:$spockVersion") {
             exclude group: "org.codehaus.groovy", module: "groovy-all"
@@ -174,6 +185,7 @@ subprojects { Project subproject ->
     compileTestJava.options.compilerArgs += '-parameters'
 
     test {
+        useJUnitPlatform()
         environment 'AWS_CBOR_DISABLE', 'true'
         systemProperty 'TEST_RESOURCES_FOLDER', new File(subproject.projectDir, 'src/test/resources').canonicalPath
         systemProperty 'user.timezone', 'UTC'

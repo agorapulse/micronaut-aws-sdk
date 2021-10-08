@@ -19,10 +19,9 @@ package com.agorapulse.micronaut.aws.ses;
 
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.amazonaws.services.simpleemail.model.SendRawEmailResult;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 
 import java.io.File;
@@ -38,7 +37,7 @@ import static org.mockito.Mockito.when;
  */
 public class SendEmailTest {
 
-    @Rule public TemporaryFolder tmp = new TemporaryFolder();
+    @TempDir public File tmp;
 
     private AmazonSimpleEmailService simpleEmailService = mock(AmazonSimpleEmailService.class);
 
@@ -52,7 +51,8 @@ public class SendEmailTest {
         when(simpleEmailService.sendRawEmail(Mockito.any()))
             .thenReturn(new SendRawEmailResult().withMessageId("foobar"));
 
-        File file = tmp.newFile("test.pdf");
+        File file = new File(tmp, "test.pdf");
+        file.createNewFile();
         Files.write(file.toPath(), Collections.singletonList("not a real PDF"));
         String filepath = file.getCanonicalPath();
 
@@ -71,6 +71,6 @@ public class SendEmailTest {
         );
         // end::builder[]
 
-        Assert.assertEquals(EmailDeliveryStatus.STATUS_DELIVERED, status);
+        Assertions.assertEquals(EmailDeliveryStatus.STATUS_DELIVERED, status);
     }
 }

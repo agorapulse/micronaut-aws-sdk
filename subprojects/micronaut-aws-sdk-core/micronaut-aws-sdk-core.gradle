@@ -17,5 +17,6 @@
  */
 
 dependencies {
-    compile 'io.micronaut.configuration:micronaut-aws-common'
+    compile micronautMigratedDependency('micronaut-aws-common')
+    compile 'com.amazonaws:aws-java-sdk-core'
 }

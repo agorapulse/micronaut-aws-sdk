@@ -21,14 +21,13 @@ import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.ObjectMetadata
 import io.micronaut.context.ApplicationContext
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import org.testcontainers.containers.localstack.LocalStackContainer
 import org.testcontainers.spock.Testcontainers
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
+import spock.lang.TempDir
 
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3
 
@@ -55,7 +54,7 @@ class SimpleStorageServiceSpec extends Specification {
     @Shared LocalStackContainer localstack = new LocalStackContainer()                  // <3>
         .withServices(S3)
 
-    @Rule TemporaryFolder tmp
+    @TempDir File tmp
 
     AmazonS3 amazonS3
     SimpleStorageService service
@@ -68,7 +67,7 @@ class SimpleStorageServiceSpec extends Specification {
             .build()
 
         context = ApplicationContext
-            .build('aws.s3.bucket': MY_BUCKET)                                          // <5>
+            .builder('aws.s3.bucket': MY_BUCKET)                                        // <5>
             .build()
         context.registerSingleton(AmazonS3, amazonS3)                                   // <6>
         context.start()
@@ -86,7 +85,7 @@ class SimpleStorageServiceSpec extends Specification {
 
     void 'upload file'() {
         when:
-            File file = tmp.newFile('foo.txt')
+            File file = new File(tmp, 'foo.txt')
             file.createNewFile()
             file.text = SAMPLE_CONTENT
 
@@ -122,8 +121,7 @@ class SimpleStorageServiceSpec extends Specification {
 
     void 'download file'() {
         when:
-            File dir = tmp.newFolder()
-            File file = new File(dir, 'bar.baz')
+            File file = new File(tmp, 'bar.baz')
 
             service.getFile(KEY, file)
         then:

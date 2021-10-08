@@ -19,8 +19,6 @@ package com.agorapulse.micronaut.amazon.awssdk.s3
 
 import io.micronaut.context.ApplicationContext
 import io.reactivex.Flowable
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import org.testcontainers.containers.localstack.LocalStackContainer
 import org.testcontainers.spock.Testcontainers
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
@@ -38,6 +36,7 @@ import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
+import spock.lang.TempDir
 import spock.lang.Unroll
 
 /**
@@ -59,7 +58,7 @@ class SimpleStorageServiceSpec extends Specification {
     private static final Date TOMORROW = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000)
     private static final String NO_SUCH_BUCKET = 'no-such-bucket'
 
-    @Rule TemporaryFolder tmp
+    @TempDir File tmp
 
     // tag::setup[]
     @AutoCleanup ApplicationContext context                                             // <2>
@@ -90,7 +89,7 @@ class SimpleStorageServiceSpec extends Specification {
             .region(Region.of(localstack.region))
             .build()
         context = ApplicationContext                                                    // <6>
-            .build(
+            .builder(
                 'aws.s3.bucket': MY_BUCKET,
                 'aws.s3.region': 'eu-west-1'
             )
@@ -114,7 +113,7 @@ class SimpleStorageServiceSpec extends Specification {
 
     void 'upload file'() {
         when:
-            File file = tmp.newFile('foo.txt')
+            File file = new File(tmp, 'foo.txt')
             file.createNewFile()
             file.text = SAMPLE_CONTENT
 
@@ -242,17 +241,15 @@ class SimpleStorageServiceSpec extends Specification {
     }
 
     void 'download file'() {
-        given:
-            File dir = tmp.newFolder()
         when:
-            File file = new File(dir, 'bar.baz')
+            File file = new File(tmp, 'bar.baz')
             service.getFile(KEY, file)
         then:
             file.exists()
             file.text == SAMPLE_CONTENT
 
         when:
-            File file2 = new File(dir, 'bar2.baz')
+            File file2 = new File(tmp, 'bar2.baz')
             service.getFile(KEY, file2.canonicalPath)
         then:
             file2.exists()

@@ -56,9 +56,9 @@ public class MicronautHandler implements RequestStreamHandler {
      */
     public static void reset(Consumer<ApplicationContextBuilder> configuration) {
         try {
-            builder = ApplicationContext.build();
+            builder = ApplicationContext.builder();
             configuration.accept(builder);
-            handler = MicronautLambdaContainerHandler.getAwsProxyHandler(builder);
+            handler = new MicronautLambdaContainerHandler(builder);
         } catch (ContainerInitializationException e) {
             // if we fail here. We re-throw the exception to force another cold start
             if (LOGGER.isErrorEnabled()) {

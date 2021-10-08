@@ -44,7 +44,7 @@ class IntroductionIssueSpec extends Specification {
         dru.add(new IntroProblemEntity(hashKey: 'hash1'))
         dru.add(new IntroProblemEntity2(hashKey: 'hash2'))
 
-        context = ApplicationContext.build().build()
+        context = ApplicationContext.builder().build()
         context.registerSingleton(IDynamoDBMapper, mapper)
         context.start()
     }

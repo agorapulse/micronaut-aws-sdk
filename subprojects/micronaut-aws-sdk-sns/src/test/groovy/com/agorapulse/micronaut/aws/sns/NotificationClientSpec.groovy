@@ -17,7 +17,7 @@
  */
 package com.agorapulse.micronaut.aws.sns
 
-import groovy.json.JsonOutput
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.micronaut.context.ApplicationContext
 import io.micronaut.inject.qualifiers.Qualifiers
 import spock.lang.AutoCleanup
@@ -34,7 +34,7 @@ class NotificationClientSpec extends Specification {
     private static final String SUBJECT = 'Subject'
     private static final String PHONE_NUMBER = '+883510000000094'
     private static final Map SMS_ATTRIBUTES = Collections.singletonMap('foo', 'bar')
-    private static final String POGO_AS_JSON = JsonOutput.toJson(POGO)
+    private static final String POGO_AS_JSON = new ObjectMapper().writeValueAsString(POGO)
     private static final String MESSAGE_ID = '1234567890'
 
     SimpleNotificationService defaultService = Mock(SimpleNotificationService) {
@@ -48,7 +48,7 @@ class NotificationClientSpec extends Specification {
     @AutoCleanup ApplicationContext context
 
     void setup() {
-        context = ApplicationContext.build().build()
+        context = ApplicationContext.builder().build()
 
         context.registerSingleton(SimpleNotificationService, defaultService)
         context.registerSingleton(SimpleNotificationService, testService, Qualifiers.byName('test'))

@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.aws.dynamodb;
 
+import com.agorapulse.micronaut.aws.util.AWSClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.regions.AwsRegionProvider;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -24,7 +25,6 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
-import io.micronaut.configuration.aws.AWSClientConfiguration;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;
