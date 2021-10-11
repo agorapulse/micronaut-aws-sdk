@@ -35,7 +35,7 @@ public class KinesisListenerTester {
     }
 
     @KinesisListener
-    public void listenRecord(KinesisClientRecord record) {                                           // <3>
+    public void listenRecord(KinesisClientRecord record) {                              // <3>
         logExecution("EXECUTED: listenRecord(" + record + ")");
     }
 

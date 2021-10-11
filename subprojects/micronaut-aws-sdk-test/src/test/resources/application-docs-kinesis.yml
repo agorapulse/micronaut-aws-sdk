@@ -1,8 +1,20 @@
 aws:
   kinesis:
     region: sa-east-1
+
+    # for Kinesis client
     stream: MyStream                                                                    # <1>
 
     streams:                                                                            # <2>
       test:                                                                             # <3>
         stream: TestStream
+
+    # for Kinesis listener
+    application-name: my-application # defaults to micronaut.application.name           # <4>
+    worker-id: myworker              # defaults to host + UUID                          # <5>
+    listener:
+        stream: IncomingMessages                                                        # <6>
+
+    listeners:
+      other:                                                                            # <7>
+        stream: OtherStream
