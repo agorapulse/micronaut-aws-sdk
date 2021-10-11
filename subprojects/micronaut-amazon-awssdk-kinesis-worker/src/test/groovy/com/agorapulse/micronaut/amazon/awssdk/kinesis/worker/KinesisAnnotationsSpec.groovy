@@ -28,12 +28,17 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import software.amazon.awssdk.core.SdkSystemSetting
+import software.amazon.awssdk.http.Protocol
+import software.amazon.awssdk.http.SdkHttpConfigurationOption
+import software.amazon.awssdk.http.async.SdkAsyncHttpClient
+import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.kinesis.KinesisAsyncClient
 import software.amazon.awssdk.services.kinesis.KinesisClient
+import software.amazon.awssdk.utils.AttributeMap
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
@@ -42,6 +47,7 @@ import spock.util.environment.RestoreSystemProperties
 import java.util.concurrent.TimeUnit
 
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.DYNAMODB
+import static org.testcontainers.containers.localstack.LocalStackContainer.Service.CLOUDWATCH
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.KINESIS
 
 /**
@@ -61,10 +67,11 @@ class KinesisAnnotationsSpec extends Specification {
     private static final String APP_NAME = 'AppName'
 
     @Shared LocalStackContainer localstack = new LocalStackContainer()                  // <3>
-        .withServices(KINESIS, DYNAMODB)
+        .withServices(KINESIS, DYNAMODB, CLOUDWATCH)
 
     @AutoCleanup ApplicationContext context                                             // <4>
 
+    @SuppressWarnings(['AbcMetric', 'UnnecessaryObjectReferences'])
     void setup() {
         // disable CBOR (not supported by Kinelite)
         System.setProperty(SdkSystemSetting.CBOR_ENABLED.property(), 'false')           // <5>
@@ -74,11 +81,25 @@ class KinesisAnnotationsSpec extends Specification {
             localstack.accessKey, localstack.secretKey
         ))
 
+        SdkAsyncHttpClient asyncClient = NettyNioAsyncHttpClient
+            .builder()
+            .protocol(Protocol.HTTP1_1)
+            .buildWithDefaults(
+                AttributeMap
+                    .builder()
+                    .put(
+                        SdkHttpConfigurationOption.TRUST_ALL_CERTIFICATES,
+                        Boolean.TRUE
+                    )
+                    .build()
+            )
+
         DynamoDbAsyncClient dynamoAsync = DynamoDbAsyncClient                            // <6>
             .builder()
             .endpointOverride(localstack.getEndpointOverride(DYNAMODB))
             .credentialsProvider(credentialsProvider)
             .region(Region.EU_WEST_1)
+            .httpClient(asyncClient)
             .build()
 
         DynamoDbClient dynamo = DynamoDbClient
@@ -93,6 +114,7 @@ class KinesisAnnotationsSpec extends Specification {
             .endpointOverride(localstack.getEndpointOverride(KINESIS))
             .credentialsProvider(credentialsProvider)
             .region(Region.EU_WEST_1)
+            .httpClient(asyncClient)
             .build()
 
         KinesisClient kinesis = KinesisClient
@@ -102,7 +124,13 @@ class KinesisAnnotationsSpec extends Specification {
             .region(Region.EU_WEST_1)
             .build()
 
-        CloudWatchAsyncClient amazonCloudWatch = Mock(CloudWatchAsyncClient)
+        CloudWatchAsyncClient amazonCloudWatch = CloudWatchAsyncClient
+            .builder()
+            .endpointOverride(localstack.getEndpointOverride(CLOUDWATCH))
+            .credentialsProvider(credentialsProvider)
+            .region(Region.EU_WEST_1)
+            .httpClient(asyncClient)
+            .build()
 
         context = ApplicationContext.builder().properties(                              // <8>
             'aws.kinesis.application.name': APP_NAME,
@@ -126,7 +154,7 @@ class KinesisAnnotationsSpec extends Specification {
     // end::testcontainers-setup[]
 
     void cleanup() {
-        System.clearProperty('com.amazonaws.sdk.disableCbor')
+        System.clearProperty(SdkSystemSetting.CBOR_ENABLED.property())
         System.clearProperty('aws.region')
     }
 
@@ -140,7 +168,7 @@ class KinesisAnnotationsSpec extends Specification {
             service.createStream()
             service.waitForActive()
 
-            waitForWorkerReady(600, 100)
+            waitForWorkerReady(1200, 100)
 
             Disposable subscription = publishEventAsync(tester, client)
 
