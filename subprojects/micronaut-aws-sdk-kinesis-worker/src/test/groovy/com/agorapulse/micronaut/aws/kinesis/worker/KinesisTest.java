@@ -18,13 +18,8 @@
 package com.agorapulse.micronaut.aws.kinesis.worker;
 
 import com.agorapulse.micronaut.aws.kinesis.KinesisService;
-import com.amazonaws.AmazonWebServiceRequest;
-import com.amazonaws.ResponseMetadata;
 import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.regions.Region;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
-import com.amazonaws.services.cloudwatch.model.*;
-import com.amazonaws.services.cloudwatch.waiters.AmazonCloudWatchWaiters;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.kinesis.AmazonKinesis;
