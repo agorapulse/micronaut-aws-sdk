@@ -15,14 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker;
 
-dependencies {
-    compile project(':micronaut-amazon-awssdk-core')
+public interface KinesisWorkerFactory {
 
-    compile "space.jasan:groovy-closure-support:$closureSupportVersion"
+    KinesisWorker create(KinesisClientConfiguration configuration);
 
-    compile "software.amazon.awssdk:ses"
-    compile 'javax.mail:mail:1.4.4'
-
-    testCompile "org.mockito:mockito-core:$mockitoVersion"
 }

@@ -15,14 +15,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker
 
-dependencies {
-    compile project(':micronaut-amazon-awssdk-core')
+import com.agorapulse.micronaut.amazon.awssdk.kinesis.DefaultEvent
+import groovy.transform.CompileStatic
 
-    compile "space.jasan:groovy-closure-support:$closureSupportVersion"
+/**
+ * Testing event.
+ */
+@CompileStatic
+class MyEvent extends DefaultEvent {
 
-    compile "software.amazon.awssdk:ses"
-    compile 'javax.mail:mail:1.4.4'
+    // java way
+    MyEvent(String value) {
+        this.value = value
+    }
 
-    testCompile "org.mockito:mockito-core:$mockitoVersion"
+    // groovy way
+    MyEvent() { }
+
+    String value
+
 }

@@ -232,7 +232,7 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/
 
 include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-setup]
 
-        context = ApplicationContext.build('aws.sns.topic', TEST_TOPIC).build()         // <5>
+        context = ApplicationContext.builder('aws.sns.topic', TEST_TOPIC).build()       // <5>
 include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-setup-2]
 
     // tests

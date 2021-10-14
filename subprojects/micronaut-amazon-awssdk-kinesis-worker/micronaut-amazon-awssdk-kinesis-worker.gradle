@@ -15,32 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 dependencies {
-    compile project(':micronaut-aws-sdk-core')
-    compile "space.jasan:groovy-closure-support:$closureSupportVersion"
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-sns'
-//
-//    testCompile 'com.amazonaws:aws-lambda-java-events'
-//
-//    testCompile "io.micronaut:micronaut-function-groovy"
-//    testCompile "io.micronaut:micronaut-function-aws"
-//    testCompile "io.micronaut:micronaut-function-client"
-//    testRuntime "io.micronaut:micronaut-http-server-netty"
-//    testRuntime "io.micronaut:micronaut-function-web"
-//
+    compile project(':micronaut-amazon-awssdk-core')
+
+    compile(group: 'software.amazon.kinesis', name: 'amazon-kinesis-client', version: kinesisClientV2Version) {
+        exclude group: 'software.amazon.awssdk', module: 'url-connection-client'
+    }
+
     testCompile group: 'org.testcontainers', name: 'testcontainers', version: testcontainersVersion
     testCompile group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
     testCompile group: 'org.testcontainers', name: 'spock', version: testcontainersVersion
-//
-//    // for java tests
-//    testCompile "org.mockito:mockito-core:$mockitoVersion"
-//
-//    // message sender tests
-//    testCompile group: 'com.stehno.ersatz', name: 'ersatz', version: '1.9.0'
-//    testCompile group: 'io.undertow', name: 'undertow-core', version: '2.0.13.Final'
-//
-//    // DynamoDB tests
-//    testCompile "com.agorapulse:dru-client-dynamodb:${druVersion}"
 
+    testCompile project(':micronaut-amazon-awssdk-kinesis')
+    testCompile 'com.amazonaws:aws-java-sdk-core'
+    testCompile "org.mockito:mockito-core:$mockitoVersion"
 }

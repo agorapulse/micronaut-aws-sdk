@@ -15,14 +15,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker
 
-dependencies {
-    compile project(':micronaut-amazon-awssdk-core')
+import groovy.transform.CompileStatic
+import groovy.transform.ToString
 
-    compile "space.jasan:groovy-closure-support:$closureSupportVersion"
+/**
+ * Plain old Groovy object for testing.
+ */
+@ToString
+@CompileStatic
+class Pogo {
 
-    compile "software.amazon.awssdk:ses"
-    compile 'javax.mail:mail:1.4.4'
+    // java way
+    Pogo(String foo) {
+        this.foo = foo
+    }
 
-    testCompile "org.mockito:mockito-core:$mockitoVersion"
+    // groovy way
+    Pogo() { }
+
+    String foo
+
 }
