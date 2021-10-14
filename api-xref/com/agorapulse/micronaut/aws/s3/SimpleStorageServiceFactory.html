@@ -25,11 +25,11 @@
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> */</em>
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>  <strong class="jxr_keyword">package</strong> com.agorapulse.micronaut.aws.s3;
 <a class="jxr_linenumber" name="L19" href="#L19">19</a>  
-<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> com.amazonaws.auth.AWSCredentialsProvider;
-<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> com.amazonaws.regions.AwsRegionProvider;
-<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> com.amazonaws.services.s3.AmazonS3;
-<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> com.amazonaws.services.s3.AmazonS3ClientBuilder;
-<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> io.micronaut.configuration.aws.AWSClientConfiguration;
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> com.agorapulse.micronaut.aws.util.AWSClientConfiguration;
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> com.amazonaws.auth.AWSCredentialsProvider;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> com.amazonaws.regions.AwsRegionProvider;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> com.amazonaws.services.s3.AmazonS3;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> com.amazonaws.services.s3.AmazonS3ClientBuilder;
 <a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> io.micronaut.context.annotation.EachBean;
 <a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> io.micronaut.context.annotation.Factory;
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> io.micronaut.context.annotation.Requires;
@@ -43,7 +43,7 @@
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>      @Singleton
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>      @EachBean(SimpleStorageServiceConfiguration.<strong class="jxr_keyword">class</strong>)
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>      AmazonS3 amazonS3(
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>          AWSClientConfiguration clientConfiguration,
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>          <a name="AWSClientConfiguration" href="../../../../../com/agorapulse/micronaut/aws/util/AWSClientConfiguration.html#AWSClientConfiguration">AWSClientConfiguration</a> clientConfiguration,
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>          AWSCredentialsProvider credentialsProvider,
 <a class="jxr_linenumber" name="L40" href="#L40">40</a>          AwsRegionProvider awsRegionProvider,
 <a class="jxr_linenumber" name="L41" href="#L41">41</a>          SimpleStorageServiceConfiguration configuration

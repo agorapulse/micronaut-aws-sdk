@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/docs.css?v=1.4.1" />
+<link rel="stylesheet" href="css/docs.css?v=1.5.0" />
 <style>
 .hidden {
     display: none;
@@ -93,7 +93,7 @@ $(addBlockSwitches);
 <h1>Set of useful libraries for Micronaut</h1>
 <div class="details">
 <span id="author" class="author">Vladimir Orany</span><br>
-<span id="revnumber">version 1.4.1</span>
+<span id="revnumber">version 1.5.0</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -115,6 +115,7 @@ $(addBlockSwitches);
 <li><a href="#_installation_3">Installation</a></li>
 <li><a href="#_configuration">Configuration</a></li>
 <li><a href="#_publishing_with_kinesisclient">Publishing with <code>@KinesisClient</code></a></li>
+<li><a href="#_listening_with_kinesislistener">Listening with <code>@KinesisListener</code></a></li>
 <li><a href="#_kinesis_service">Kinesis Service</a></li>
 <li><a href="#_testing_2">Testing</a></li>
 </ul>
@@ -380,7 +381,7 @@ For AWS SDK 1.x use artefacts starting with <code>micrnoaut-aws-sdk</code>. Thes
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-dynamodb:1.4.1'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-dynamodb:1.5.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -389,14 +390,14 @@ For AWS SDK 1.x use artefacts starting with <code>micrnoaut-aws-sdk</code>. Thes
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;1.4.1&lt;/version&gt;
+    &lt;version&gt;1.5.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-dynamodb:1.4.1'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-dynamodb:1.5.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -405,7 +406,7 @@ For AWS SDK 1.x use artefacts starting with <code>micrnoaut-aws-sdk</code>. Thes
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;1.4.1&lt;/version&gt;
+    &lt;version&gt;1.5.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1707,7 +1708,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
             .dynamoDbClient(client)
             .build()
 
-        context = ApplicationContext.build().build()
+        context = ApplicationContext.builder().build()
         context.registerSingleton(DynamoDbClient, client)                               <i class="conum" data-value="5"></i><b>(5)</b>
         context.registerSingleton(DynamoDbEnhancedClient, enhancedClient)               <i class="conum" data-value="6"></i><b>(6)</b>
         context.start()
@@ -1786,7 +1787,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
             .dynamoDbClient(client)
             .build();
 
-        context = ApplicationContext.build().build();
+        context = ApplicationContext.builder().build();
         context.registerSingleton(DynamoDbClient.class, client);                        <i class="conum" data-value="4"></i><b>(4)</b>
         context.registerSingleton(DynamoDbEnhancedClient.class, enhancedClient);        <i class="conum" data-value="5"></i><b>(5)</b>
         context.start();
@@ -1873,7 +1874,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
 
         mapper = new DynamoDBMapper(amazonDynamoDB)
 
-        context = ApplicationContext.build().build()
+        context = ApplicationContext.builder().build()
         context.registerSingleton(AmazonDynamoDB, amazonDynamoDB)                       <i class="conum" data-value="5"></i><b>(5)</b>
         context.registerSingleton(IDynamoDBMapper, mapper)                              <i class="conum" data-value="6"></i><b>(6)</b>
         context.start()
@@ -1947,7 +1948,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
 
         IDynamoDBMapper mapper = new DynamoDBMapper(amazonDynamoDB);
 
-        ctx = ApplicationContext.build().build();
+        ctx = ApplicationContext.builder().build();
         ctx.registerSingleton(AmazonDynamoDB.class, amazonDynamoDB);                    <i class="conum" data-value="4"></i><b>(4)</b>
         ctx.registerSingleton(IDynamoDBMapper.class, mapper);                           <i class="conum" data-value="5"></i><b>(5)</b>
         ctx.start();
@@ -2038,6 +2039,9 @@ You can obtain instances of declarative client from the context as well.
 <p>High-level <a href="#_publishing_with_kinesisclient">Publishing with <code>@KinesisClient</code></a></p>
 </li>
 <li>
+<p>High-level <a href="#_listening_with_kinesislistener">Listening with <code>@KinesisListener</code></a></p>
+</li>
+<li>
 <p>Middle-level <a href="#_kinesis_service">Kinesis Service</a></p>
 </li>
 </ol>
@@ -2048,7 +2052,10 @@ You can obtain instances of declarative client from the context as well.
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code>// for Kinesis client
-compile 'com.agorapulse:micronaut-amazon-awssdk-kinesis:1.4.1'</code></pre>
+compile 'com.agorapulse:micronaut-amazon-awssdk-kinesis:1.5.0'
+
+// for Kinesis listener
+compile 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:1.5.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2058,7 +2065,13 @@ compile 'com.agorapulse:micronaut-amazon-awssdk-kinesis:1.4.1'</code></pre>
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-kinesis&lt;/artifactId&gt;
-    &lt;version&gt;1.4.1&lt;/version&gt;
+    &lt;version&gt;1.5.0&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;!-- for Kinesis listener --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
+    &lt;artifactId&gt;micronaut-amazon-awssdk-kinesis-worker&lt;/artifactId&gt;
+    &lt;version&gt;1.5.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2066,7 +2079,9 @@ compile 'com.agorapulse:micronaut-amazon-awssdk-kinesis:1.4.1'</code></pre>
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code>// for Kinesis client
-compile 'com.agorapulse:micronaut-aws-sdk-kinesis:1.4.1'</code></pre>
+compile 'com.agorapulse:micronaut-aws-sdk-kinesis:1.5.0'
+// for Kinesis listener
+compile 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:1.5.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2076,7 +2091,13 @@ compile 'com.agorapulse:micronaut-aws-sdk-kinesis:1.4.1'</code></pre>
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-kinesis&lt;/artifactId&gt;
-    &lt;version&gt;1.4.1&lt;/version&gt;
+    &lt;version&gt;1.5.0&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;!-- for Kinesis listener --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
+    &lt;artifactId&gt;micronaut-aws-sdk-kinesis-worker&lt;/artifactId&gt;
+    &lt;version&gt;1.5.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2092,11 +2113,23 @@ compile 'com.agorapulse:micronaut-aws-sdk-kinesis:1.4.1'</code></pre>
 <pre class="prettyprint highlight nowrap"><code data-lang="yaml">aws:
   kinesis:
     region: sa-east-1
+
+    # for Kinesis client
     stream: MyStream                                                                    <i class="conum" data-value="1"></i><b>(1)</b>
 
     streams:                                                                            <i class="conum" data-value="2"></i><b>(2)</b>
       test:                                                                             <i class="conum" data-value="3"></i><b>(3)</b>
-        stream: TestStream</code></pre>
+        stream: TestStream
+
+    # for Kinesis listener
+    application-name: my-application # defaults to micronaut.application.name           <i class="conum" data-value="4"></i><b>(4)</b>
+    worker-id: myworker              # defaults to host + UUID                          <i class="conum" data-value="5"></i><b>(5)</b>
+    listener:
+        stream: IncomingMessages                                                        <i class="conum" data-value="6"></i><b>(6)</b>
+
+    listeners:
+      other:                                                                            <i class="conum" data-value="7"></i><b>(7)</b>
+        stream: OtherStream</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2112,6 +2145,22 @@ compile 'com.agorapulse:micronaut-aws-sdk-kinesis:1.4.1'</code></pre>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
 <td>Each of the configuration can be access using <code>@Named('test') KinesisService</code> qualifier or you can define the configuration as <code>value</code> of <code>@KinesisClient('test')</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>For Kinesis listeners you should provide application name which default to <code>micronaut.application.name</code> if not present</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>You can also provide the of the Kinesis worker</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>This is the default stream to listen</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>You can listen to the multiple Kinesis stream by declaring the name of the configuration in the annotation such as <code>@KinesisListener("other")</code></td>
 </tr>
 </table>
 </div>
@@ -2534,6 +2583,205 @@ used by particular method using <code>@Stream</code> annotation as mentioned abo
 </div>
 </div>
 <div class="sect4">
+<h5 id="_listening_with_kinesislistener"><a class="anchor" href="#_listening_with_kinesislistener"></a>Listening with <code>@KinesisListener</code></h5>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+Before you start implementing your service with <code>@KinesisListener</code> you may consider implementing a Lambda function instead.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If you place <code>KinesisListener</code> annotation on the method in the bean then the method will be triggered with the new records in the stream.</p>
+</div>
+<div class="listingblock primary">
+<div class="title">Listening to Events (AWS SDK 2.x)</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="java">@Singleton                                                                              <i class="conum" data-value="1"></i><b>(1)</b>
+public class KinesisListenerTester {
+
+    @KinesisListener
+    public void listenString(String string) {                                           <i class="conum" data-value="2"></i><b>(2)</b>
+        String message = "EXECUTED: listenString(" + string + ")";
+        logExecution(message);
+    }
+
+    @KinesisListener
+    public void listenRecord(KinesisClientRecord record) {                              <i class="conum" data-value="3"></i><b>(3)</b>
+        logExecution("EXECUTED: listenRecord(" + record + ")");
+    }
+
+
+    @KinesisListener
+    public void listenStringRecord(String string, KinesisClientRecord record) {         <i class="conum" data-value="4"></i><b>(4)</b>
+        logExecution("EXECUTED: listenStringRecord(" + string + ", " + record + ")");
+    }
+
+    @KinesisListener
+    public void listenObject(MyEvent event) {                                           <i class="conum" data-value="5"></i><b>(5)</b>
+        logExecution("EXECUTED: listenObject(" + event + ")");
+    }
+
+    @KinesisListener
+    public void listenObjectRecord(MyEvent event, KinesisClientRecord record) {         <i class="conum" data-value="6"></i><b>(6)</b>
+        logExecution("EXECUTED: listenObjectRecord(" + event + ", " + record + ")");
+    }
+
+    @KinesisListener
+    public void listenPogoRecord(Pogo event) {                                          <i class="conum" data-value="7"></i><b>(7)</b>
+        logExecution("EXECUTED: listenPogoRecord(" + event + ")");
+    }
+
+    public List&lt;String&gt; getExecutions() {
+        return executions;
+    }
+
+    public void setExecutions(List&lt;String&gt; executions) {
+        this.executions = executions;
+    }
+
+    private void logExecution(String message) {
+        executions.add(message);
+        System.err.println(message);
+    }
+
+    private List&lt;String&gt; executions = new CopyOnWriteArrayList&lt;&gt;();
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>@KinesisListener</code> method must be declared in a bean, e.g. <code>@Singleton</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>You can listen to just plain string records</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>You can listen to <code>KinesisClientRecord</code> objects</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>You can listen to both string and <code>KinesisClientRecord</code> objects</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>You can listen to objects implementing <code>Event</code> interface</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>You can listen to both <code>Event</code> and <code>KinesisClientRecord</code> objects</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>You can listen to any object as long as it can be unmarshalled from the record payload</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondsary">
+<div class="title">Listening to Events (AWS SDK 1.x)</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="java">@Singleton                                                                              <i class="conum" data-value="1"></i><b>(1)</b>
+public class KinesisListenerTester {
+
+    @KinesisListener
+    public void listenString(String string) {                                           <i class="conum" data-value="2"></i><b>(2)</b>
+        String message = "EXECUTED: listenString(" + string + ")";
+        logExecution(message);
+    }
+
+    @KinesisListener
+    public void listenRecord(Record record) {                                           <i class="conum" data-value="3"></i><b>(3)</b>
+        logExecution("EXECUTED: listenRecord(" + record + ")");
+    }
+
+
+    @KinesisListener
+    public void listenStringRecord(String string, Record record) {                      <i class="conum" data-value="4"></i><b>(4)</b>
+        logExecution("EXECUTED: listenStringRecord(" + string + ", " + record + ")");
+    }
+
+    @KinesisListener
+    public void listenObject(MyEvent event) {                                           <i class="conum" data-value="5"></i><b>(5)</b>
+        logExecution("EXECUTED: listenObject(" + event + ")");
+    }
+
+    @KinesisListener
+    public void listenObjectRecord(MyEvent event, Record record) {                      <i class="conum" data-value="6"></i><b>(6)</b>
+        logExecution("EXECUTED: listenObjectRecord(" + event + ", " + record + ")");
+    }
+
+    @KinesisListener
+    public void listenPogoRecord(Pogo event) {                                          <i class="conum" data-value="7"></i><b>(7)</b>
+        logExecution("EXECUTED: listenPogoRecord(" + event + ")");
+    }
+
+    public List&lt;String&gt; getExecutions() {
+        return executions;
+    }
+
+    public void setExecutions(List&lt;String&gt; executions) {
+        this.executions = executions;
+    }
+
+    private void logExecution(String message) {
+        executions.add(message);
+        System.err.println(message);
+    }
+
+    private List&lt;String&gt; executions = new CopyOnWriteArrayList&lt;&gt;();
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>@KinesisListener</code> method must be declared in a bean, e.g. <code>@Singleton</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>You can listen to just plain string records</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>You can listen to <code>Record</code> objects</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>You can listen to both string and <code>Record</code> objects</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>You can listen to objects implementing <code>Event</code> interface</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>You can listen to both <code>Event</code> and <code>Record</code> objects</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>You can listen to any object as long as it can be unmarshalled from the record payload</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>You can listen to different than default configuration by changing the <code>value</code> of the annotation such as <code>@KinesisListener("other")</code>.</p>
+</div>
+<div class="paragraph">
+<p>Multiple methods in a single application can listen to the same configuration (stream). In that case, every method will be executed with the
+incoming payload.</p>
+</div>
+</div>
+<div class="sect4">
 <h5 id="_kinesis_service"><a class="anchor" href="#_kinesis_service"></a>Kinesis Service</h5>
 <div class="paragraph">
 <p><code>KinesisService</code> provides middle-level API for creating, describing, and deleting streams. You can manage shards as well as read records
@@ -2617,7 +2865,7 @@ class KinesisDemoSpec extends Specification {
             .region(Region.EU_WEST_1)
             .build()
 
-        context = ApplicationContext.build().build()                                    <i class="conum" data-value="7"></i><b>(7)</b>
+        context = ApplicationContext.builder().build()                                  <i class="conum" data-value="7"></i><b>(7)</b>
         context.registerSingleton(KinesisClient, kinesis)
         context.start()
 
@@ -2701,7 +2949,7 @@ class KinesisDemoSpec extends Specification {
             .region(Region.EU_WEST_1)
             .build();
 
-        context = ApplicationContext.build().build();                                   <i class="conum" data-value="4"></i><b>(4)</b>
+        context = ApplicationContext.builder().build();                                 <i class="conum" data-value="4"></i><b>(4)</b>
         context.registerSingleton(KinesisClient.class, kinesis);
         context.start();
 
@@ -2774,7 +3022,7 @@ class KinesisDemoSpec extends Specification {
             .withCredentials(localstack.defaultCredentialsProvider)
             .build()
 
-        context = ApplicationContext.build().build()
+        context = ApplicationContext.builder().build()
         context.registerSingleton(AmazonKinesis, kinesis)                               <i class="conum" data-value="7"></i><b>(7)</b>
         context.start()
 
@@ -2850,7 +3098,7 @@ class KinesisDemoSpec extends Specification {
             .withCredentials(localstack.getDefaultCredentialsProvider())
             .build();
 
-        context = ApplicationContext.build().build();
+        context = ApplicationContext.builder().build();
         context.registerSingleton(AmazonKinesis.class, kinesis);                        <i class="conum" data-value="4"></i><b>(4)</b>
         context.start();
 
@@ -2918,7 +3166,7 @@ class KinesisDemoSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-s3:1.4.1'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-s3:1.5.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2927,14 +3175,14 @@ class KinesisDemoSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-s3&lt;/artifactId&gt;
-    &lt;version&gt;1.4.1&lt;/version&gt;
+    &lt;version&gt;1.5.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-s3:1.4.1'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-s3:1.5.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2943,7 +3191,7 @@ class KinesisDemoSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-s3&lt;/artifactId&gt;
-    &lt;version&gt;1.4.1&lt;/version&gt;
+    &lt;version&gt;1.5.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3151,8 +3399,7 @@ assertEquals(SAMPLE_CONTENT, download(url));                                    
 <div class="listingblock">
 <div class="title">Download File</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code data-lang="java">File dir = tmp.newFolder();
-File file = new File(dir, "bar.baz");                                           <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">File file = new File(tmp, "bar.baz");                                           <i class="conum" data-value="1"></i><b>(1)</b>
 
 service.getFile(KEY, file);                                                     <i class="conum" data-value="2"></i><b>(2)</b>
 assertTrue(file.exists());
@@ -3286,7 +3533,7 @@ class SimpleStorageServiceSpec extends Specification {
             .region(Region.of(localstack.region))
             .build()
         context = ApplicationContext                                                    <i class="conum" data-value="6"></i><b>(6)</b>
-            .build(
+            .builder(
                 'aws.s3.bucket': MY_BUCKET,
                 'aws.s3.region': 'eu-west-1'
             )
@@ -3345,8 +3592,8 @@ class SimpleStorageServiceSpec extends Specification {
     public final LocalStackContainer localstack = new LocalStackContainer()            <i class="conum" data-value="1"></i><b>(1)</b>
         .withServices(S3);
 
-    @Rule
-    public final TemporaryFolder tmp = new TemporaryFolder();
+    @TempDir
+    public File tmp;
 
     private ApplicationContext ctx;                                                     <i class="conum" data-value="2"></i><b>(2)</b>
 
@@ -3371,7 +3618,7 @@ class SimpleStorageServiceSpec extends Specification {
             .build();
 
         ctx = ApplicationContext
-            .build(Collections.singletonMap("aws.s3.bucket", MY_BUCKET))
+            .builder(Collections.singletonMap("aws.s3.bucket", MY_BUCKET))
             .build();
         ctx.registerSingleton(S3Client.class, amazonS3);                                <i class="conum" data-value="4"></i><b>(4)</b>
         ctx.registerSingleton(S3Presigner.class, presigner);
@@ -3426,7 +3673,7 @@ class SimpleStorageServiceSpec extends Specification {
     @Shared LocalStackContainer localstack = new LocalStackContainer()                  <i class="conum" data-value="3"></i><b>(3)</b>
         .withServices(S3)
 
-    @Rule TemporaryFolder tmp
+    @TempDir File tmp
 
     AmazonS3 amazonS3
     SimpleStorageService service
@@ -3439,7 +3686,7 @@ class SimpleStorageServiceSpec extends Specification {
             .build()
 
         context = ApplicationContext
-            .build('aws.s3.bucket': MY_BUCKET)                                          <i class="conum" data-value="5"></i><b>(5)</b>
+            .builder('aws.s3.bucket': MY_BUCKET)                                        <i class="conum" data-value="5"></i><b>(5)</b>
             .build()
         context.registerSingleton(AmazonS3, amazonS3)                                   <i class="conum" data-value="6"></i><b>(6)</b>
         context.start()
@@ -3493,8 +3740,8 @@ class SimpleStorageServiceSpec extends Specification {
     public final LocalStackContainer localstack = new LocalStackContainer()            <i class="conum" data-value="1"></i><b>(1)</b>
         .withServices(S3);
 
-    @Rule
-    public final TemporaryFolder tmp = new TemporaryFolder();
+    @TempDir
+    public File tmp;
 
     private ApplicationContext ctx;                                                     <i class="conum" data-value="2"></i><b>(2)</b>
 
@@ -3507,7 +3754,7 @@ class SimpleStorageServiceSpec extends Specification {
             .build();
 
         ctx = ApplicationContext
-            .build(Collections.singletonMap("aws.s3.bucket", MY_BUCKET))
+            .builder(Collections.singletonMap("aws.s3.bucket", MY_BUCKET))
             .build();
         ctx.registerSingleton(AmazonS3.class, amazonS3);                                <i class="conum" data-value="4"></i><b>(4)</b>
         ctx.start();
@@ -3568,7 +3815,7 @@ class SimpleStorageServiceSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-ses:1.4.1'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-ses:1.5.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3577,14 +3824,14 @@ class SimpleStorageServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-ses&lt;/artifactId&gt;
-    &lt;version&gt;1.4.1&lt;/version&gt;
+    &lt;version&gt;1.5.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ses:1.4.1'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ses:1.5.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3593,7 +3840,7 @@ class SimpleStorageServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-ses&lt;/artifactId&gt;
-    &lt;version&gt;1.4.1&lt;/version&gt;
+    &lt;version&gt;1.5.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3771,7 +4018,7 @@ for the full reference.</p>
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-sns:1.4.1'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-sns:1.5.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3780,14 +4027,14 @@ for the full reference.</p>
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-sns&lt;/artifactId&gt;
-    &lt;version&gt;1.4.1&lt;/version&gt;
+    &lt;version&gt;1.5.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sns:1.4.1'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sns:1.5.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3796,7 +4043,7 @@ for the full reference.</p>
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sns&lt;/artifactId&gt;
-    &lt;version&gt;1.4.1&lt;/version&gt;
+    &lt;version&gt;1.5.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4311,7 +4558,7 @@ class SimpleNotificationServiceSpec extends Specification {
             .region(Region.of(localstack.region))
             .build()
 
-        context = ApplicationContext.build('aws.sns.topic', TEST_TOPIC).build()         <i class="conum" data-value="5"></i><b>(5)</b>
+        context = ApplicationContext.builder('aws.sns.topic', TEST_TOPIC).build()       <i class="conum" data-value="5"></i><b>(5)</b>
         context.registerSingleton(SnsClient, sns)
         context.start()
 
@@ -4381,7 +4628,7 @@ class SimpleNotificationServiceSpec extends Specification {
         properties.put("aws.sns.topic", TEST_TOPIC);
 
 
-        context = ApplicationContext.build(properties).build();                         <i class="conum" data-value="5"></i><b>(5)</b>
+        context = ApplicationContext.builder(properties).build();                       <i class="conum" data-value="5"></i><b>(5)</b>
         context.registerSingleton(SnsClient.class, amazonSNS);
         context.start();
 
@@ -4449,7 +4696,7 @@ class SimpleNotificationServiceSpec extends Specification {
             .withCredentials(localstack.defaultCredentialsProvider)
             .build()
 
-        context = ApplicationContext.build('aws.sns.topic', TEST_TOPIC).build()         <i class="conum" data-value="5"></i><b>(5)</b>
+        context = ApplicationContext.builder('aws.sns.topic', TEST_TOPIC).build()       <i class="conum" data-value="5"></i><b>(5)</b>
         context.registerSingleton(AmazonSNS, sns)
         context.start()
 
@@ -4515,7 +4762,7 @@ class SimpleNotificationServiceSpec extends Specification {
         properties.put("aws.sns.topic", TEST_TOPIC);
 
 
-        context = ApplicationContext.build(properties).build();                         <i class="conum" data-value="5"></i><b>(5)</b>
+        context = ApplicationContext.builder(properties).build();                       <i class="conum" data-value="5"></i><b>(5)</b>
         context.registerSingleton(AmazonSNS.class, amazonSNS);
         context.start();
 
@@ -4591,7 +4838,7 @@ class SimpleNotificationServiceSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-sqs:1.4.1'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-sqs:1.5.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4600,14 +4847,14 @@ class SimpleNotificationServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-sqs&lt;/artifactId&gt;
-    &lt;version&gt;1.4.1&lt;/version&gt;
+    &lt;version&gt;1.5.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sqs:1.4.1'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sqs:1.5.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4616,7 +4863,7 @@ class SimpleNotificationServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sqs&lt;/artifactId&gt;
-    &lt;version&gt;1.4.1&lt;/version&gt;
+    &lt;version&gt;1.5.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -5146,7 +5393,7 @@ class SimpleQueueServiceSpec extends Specification {
             .region(Region.of(localstack.region))
             .build()
 
-        context = ApplicationContext.build('aws.sqs.queue': TEST_QUEUE).build()         <i class="conum" data-value="7"></i><b>(7)</b>
+        context = ApplicationContext.builder('aws.sqs.queue': TEST_QUEUE).build()       <i class="conum" data-value="7"></i><b>(7)</b>
         context.registerSingleton(SqsClient, sqs)
         context.start()
 
@@ -5225,7 +5472,7 @@ class SimpleQueueServiceSpec extends Specification {
         properties.put("aws.sqs.queue", TEST_QUEUE);
 
 
-        context = ApplicationContext.build(properties).build();                         <i class="conum" data-value="6"></i><b>(6)</b>
+        context = ApplicationContext.builder(properties).build();                       <i class="conum" data-value="6"></i><b>(6)</b>
         context.registerSingleton(SqsClient.class, amazonSQS);
         context.start();
 
@@ -5301,7 +5548,7 @@ class SimpleQueueServiceSpec extends Specification {
             .withCredentials(localstack.defaultCredentialsProvider)
             .build()
 
-        context = ApplicationContext.build('aws.sqs.queue': TEST_QUEUE).build()         <i class="conum" data-value="7"></i><b>(7)</b>
+        context = ApplicationContext.builder('aws.sqs.queue': TEST_QUEUE).build()       <i class="conum" data-value="7"></i><b>(7)</b>
         context.registerSingleton(AmazonSQS, sqs)
         context.start()
 
@@ -5377,7 +5624,7 @@ class SimpleQueueServiceSpec extends Specification {
         properties.put("aws.sqs.queue", TEST_QUEUE);
 
 
-        context = ApplicationContext.build(properties).build();                         <i class="conum" data-value="6"></i><b>(6)</b>
+        context = ApplicationContext.builder(properties).build();                       <i class="conum" data-value="6"></i><b>(6)</b>
         context.registerSingleton(AmazonSQS.class, amazonSQS);
         context.start();
 
@@ -5449,7 +5696,7 @@ class SimpleQueueServiceSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-sts:1.4.1'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-sts:1.5.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -5458,14 +5705,14 @@ class SimpleQueueServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-sts&lt;/artifactId&gt;
-    &lt;version&gt;1.4.1&lt;/version&gt;
+    &lt;version&gt;1.5.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sts:1.4.1'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sts:1.5.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -5474,7 +5721,7 @@ class SimpleQueueServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sts&lt;/artifactId&gt;
-    &lt;version&gt;1.4.1&lt;/version&gt;
+    &lt;version&gt;1.5.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -5548,7 +5795,7 @@ Use this part of the library with caution. Using WebSockets with API Gateway can
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ag-ws:1.4.1'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ag-ws:1.5.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -5557,7 +5804,7 @@ Use this part of the library with caution. Using WebSockets with API Gateway can
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-ag-ws&lt;/artifactId&gt;
-    &lt;version&gt;1.4.1&lt;/version&gt;
+    &lt;version&gt;1.5.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -6025,8 +6272,8 @@ your Lambda function&#8217;s role must have following permissions (preferably co
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 1.4.1<br>
-Last updated 2021-07-12 10:28:31 UTC
+Version 1.5.0<br>
+Last updated 2021-10-14 13:09:44 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
