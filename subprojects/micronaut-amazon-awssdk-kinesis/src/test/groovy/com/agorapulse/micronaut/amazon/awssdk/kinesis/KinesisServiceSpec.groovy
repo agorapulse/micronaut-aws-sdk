@@ -92,7 +92,7 @@ class KinesisServiceSpec extends Specification {
             DescribeStreamResponse stream = service.describeStream()
         then:
             stream.streamDescription().streamName() == STREAM
-            stream.streamDescription().streamStatus() == StreamStatus.CREATING
+            stream.streamDescription().streamStatus() in [StreamStatus.CREATING, StreamStatus.ACTIVE]
     }
 
     void 'stream in listed streams'() {
