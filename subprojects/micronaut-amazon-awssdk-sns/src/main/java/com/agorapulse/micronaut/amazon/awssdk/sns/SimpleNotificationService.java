@@ -232,7 +232,19 @@ public interface SimpleNotificationService {
      * @param message the message
      * @return the is of the message published
      */
-    String publishMessageToTopic(String topicArn, String subject, String message);
+    default String publishMessageToTopic(String topicArn, String subject, String message) {
+        return publishMessageToTopic(topicArn, subject, message, Collections.emptyMap());
+    }
+
+    /**
+     * Publishes a message into the topic.
+     * @param topicArn topic ARN or name
+     * @param subject subject of the message (ignored by most of the protocols)
+     * @param message the message
+     * @param attributes the message attributes
+     * @return the is of the message published
+     */
+    String publishMessageToTopic(String topicArn, String subject, String message, Map<String, String> attributes);
 
     /**
      * Creates new platform application.

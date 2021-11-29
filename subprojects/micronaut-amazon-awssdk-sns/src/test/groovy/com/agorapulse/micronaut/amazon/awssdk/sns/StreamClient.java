@@ -27,7 +27,7 @@ import com.agorapulse.micronaut.amazon.awssdk.sns.annotation.NotificationClient;
 
     // invalid
     String sendSMS(String number);
-    String doSomething(String one, String two, String three);
+    String doSomething(String one, String two, String three, String four);
     String sendMessage(String subject);
 
 }

@@ -44,6 +44,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class DefaultSimpleNotificationService implements SimpleNotificationService {
 
@@ -145,8 +146,8 @@ public class DefaultSimpleNotificationService implements SimpleNotificationServi
     }
 
     @Override
-    public String publishMessageToTopic(String topicArn, String subject, String message) {
-        return client.publish(r -> r.topicArn(ensureTopicArn(topicArn)).message(message).subject(subject)).messageId();
+    public String publishMessageToTopic(String topicArn, String subject, String message, Map<String, String> attributes) {
+        return client.publish(r -> r.topicArn(ensureTopicArn(topicArn)).message(message).subject(subject).messageAttributes(toAttributes(attributes))).messageId();
     }
 
     @Override
@@ -265,6 +266,17 @@ public class DefaultSimpleNotificationService implements SimpleNotificationServi
             throw new IllegalStateException(errorMessage);
         }
         return arn;
+    }
+
+    private static Map<String, MessageAttributeValue> toAttributes(Map<String, String> attributes) {
+        if (attributes.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        return attributes.entrySet().stream().collect(Collectors.toMap(
+            Map.Entry::getKey,
+            e -> MessageAttributeValue.builder().stringValue(e.getValue()).dataType("String").build()
+        ));
     }
 
     private String ensureTopicArn(String nameOrArn) {
