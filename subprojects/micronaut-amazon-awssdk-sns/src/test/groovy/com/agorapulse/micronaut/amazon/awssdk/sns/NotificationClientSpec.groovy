@@ -35,6 +35,8 @@ class NotificationClientSpec extends Specification {
     private static final String SUBJECT = 'Subject'
     private static final String PHONE_NUMBER = '+883510000000094'
     private static final Map SMS_ATTRIBUTES = Collections.singletonMap('foo', 'bar')
+    private static final Map PUBLISH_ATTRIBUTES = Collections.singletonMap('attr', 'value')
+    private static final Map EMPTY_MAP = Collections.emptyMap()
     private static final String POGO_AS_JSON = new ObjectMapper().writeValueAsString(POGO)
     private static final String MESSAGE_ID = '1234567890'
 
@@ -65,7 +67,7 @@ class NotificationClientSpec extends Specification {
         then:
             messageId == MESSAGE_ID
 
-            1 * defaultService.publishMessageToTopic(DefaultClient.OTHER_TOPIC, null, POGO_AS_JSON) >> MESSAGE_ID
+            1 * defaultService.publishMessageToTopic(DefaultClient.OTHER_TOPIC, null, POGO_AS_JSON, EMPTY_MAP) >> MESSAGE_ID
     }
 
     void 'can publish to default topic'() {
@@ -76,7 +78,7 @@ class NotificationClientSpec extends Specification {
         then:
             messageId == MESSAGE_ID
 
-            1 * defaultService.publishMessageToTopic(DEFAULT_TOPIC, null, POGO_AS_JSON) >> MESSAGE_ID
+            1 * defaultService.publishMessageToTopic(DEFAULT_TOPIC, null, POGO_AS_JSON, EMPTY_MAP) >> MESSAGE_ID
     }
 
     void 'topic is created automatically'() {
@@ -87,11 +89,11 @@ class NotificationClientSpec extends Specification {
         then:
             messageId == MESSAGE_ID
 
-            1 * defaultService.publishMessageToTopic(DEFAULT_TOPIC, null, POGO_AS_JSON) >> {
+            1 * defaultService.publishMessageToTopic(DEFAULT_TOPIC, null, POGO_AS_JSON, EMPTY_MAP) >> {
                 throw NotFoundException.builder().message('Not found').build()
             }
             1 * defaultService.createTopic(DEFAULT_TOPIC)
-            1 * defaultService.publishMessageToTopic(DEFAULT_TOPIC, null, POGO_AS_JSON) >> MESSAGE_ID
+            1 * defaultService.publishMessageToTopic(DEFAULT_TOPIC, null, POGO_AS_JSON, EMPTY_MAP) >> MESSAGE_ID
     }
 
     void 'can publish to default topic with subject'() {
@@ -102,7 +104,18 @@ class NotificationClientSpec extends Specification {
         then:
             messageId == MESSAGE_ID
 
-            1 * defaultService.publishMessageToTopic(DEFAULT_TOPIC, SUBJECT, POGO_AS_JSON) >> MESSAGE_ID
+            1 * defaultService.publishMessageToTopic(DEFAULT_TOPIC, SUBJECT, POGO_AS_JSON, EMPTY_MAP) >> MESSAGE_ID
+    }
+
+    void 'can publish to default topic with subject and attributes'() {
+        given:
+            DefaultClient client = context.getBean(DefaultClient)
+        when:
+            String messageId = client.publishMessage(SUBJECT, POGO, PUBLISH_ATTRIBUTES)
+        then:
+            messageId == MESSAGE_ID
+
+            1 * defaultService.publishMessageToTopic(DEFAULT_TOPIC, SUBJECT, POGO_AS_JSON, PUBLISH_ATTRIBUTES) >> MESSAGE_ID
     }
 
     void 'cen publish string message'() {
@@ -113,7 +126,7 @@ class NotificationClientSpec extends Specification {
         then:
             messageId == MESSAGE_ID
 
-            1 * defaultService.publishMessageToTopic(DEFAULT_TOPIC, null, MESSAGE) >> MESSAGE_ID
+            1 * defaultService.publishMessageToTopic(DEFAULT_TOPIC, null, MESSAGE, EMPTY_MAP) >> MESSAGE_ID
     }
 
     void 'can publish string to default topic with subject'() {
@@ -124,7 +137,7 @@ class NotificationClientSpec extends Specification {
         then:
             messageId == MESSAGE_ID
 
-            1 * defaultService.publishMessageToTopic(DEFAULT_TOPIC, SUBJECT, MESSAGE) >> MESSAGE_ID
+            1 * defaultService.publishMessageToTopic(DEFAULT_TOPIC, SUBJECT, MESSAGE, EMPTY_MAP) >> MESSAGE_ID
     }
 
     void 'can send SMS'() {
@@ -157,7 +170,7 @@ class NotificationClientSpec extends Specification {
         then:
             messageId == MESSAGE_ID
 
-            1 * testService.publishMessageToTopic(DEFAULT_TOPIC, null, POGO_AS_JSON) >> MESSAGE_ID
+            1 * testService.publishMessageToTopic(DEFAULT_TOPIC, null, POGO_AS_JSON, EMPTY_MAP) >> MESSAGE_ID
     }
 
     void 'can publish with different topic'() {
@@ -168,7 +181,7 @@ class NotificationClientSpec extends Specification {
         then:
             messageId == MESSAGE_ID
 
-            1 * defaultService.publishMessageToTopic(StreamClient.SOME_STREAM, null, POGO_AS_JSON) >> MESSAGE_ID
+            1 * defaultService.publishMessageToTopic(StreamClient.SOME_STREAM, null, POGO_AS_JSON, EMPTY_MAP) >> MESSAGE_ID
     }
 
     void 'wrong sms method format'() {
@@ -193,7 +206,7 @@ class NotificationClientSpec extends Specification {
         given:
             StreamClient client = context.getBean(StreamClient)
         when:
-            client.doSomething('one', 'two', 'three')
+            client.doSomething('one', 'two', 'three', 'four')
         then:
             thrown(UnsupportedOperationException)
     }

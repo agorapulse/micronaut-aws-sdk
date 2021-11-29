@@ -97,6 +97,8 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-sns/src/test/groovy/com/agorap
 
 NOTE: The return value of the methods is message id returned by AWS.
 
+TIP: You can add `Map<String, String> attributes` argument to send message attributes.
+
 By default, `NotificationClient` publishes messages into the default topic defined by `aws.sns.topic` property.
 You can switch to different configuration by changing the `value` of the annotation such as `@NotificationClient("other")` or
 by setting the `topic` property of the annotation such as `@NotificationClient(topic = "SomeTopic")`. You can change topic

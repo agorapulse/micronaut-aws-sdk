@@ -113,8 +113,14 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
      * @param message
      * @return
      */
-    String publishMessageToTopic(String topicArn, String subject, String message) {
-        return client.publish(new PublishRequest(ensureTopicArn(topicArn), message, subject)).messageId
+    String publishMessageToTopic(String topicArn, String subject, String message, Map<String, String> attributes) {
+        PublishRequest request = new PublishRequest(ensureTopicArn(topicArn), message, subject)
+
+        attributes.each { Map.Entry<String, String> e ->
+            request.addMessageAttributesEntry e.key, new MessageAttributeValue().withDataType('String').withStringValue(e.value)
+        }
+
+        return client.publish(request).messageId
     }
 
     /**

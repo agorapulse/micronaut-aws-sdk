@@ -35,6 +35,7 @@ import io.micronaut.inject.qualifiers.Qualifiers;
 
 import javax.inject.Singleton;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -44,6 +45,7 @@ import java.util.function.Function;
 public class NotificationClientIntroduction implements MethodInterceptor<Object, Object> {
 
     private static final String SUBJECT = "subject";
+    private static final String ATTRIBUTES = "attributes";
     private static final String NUMBER = "number";
 
     private static final Function<String, Optional<String>> EMPTY_IF_UNDEFINED = (String s) -> Undefined.STRING.equals(s) ? Optional.empty() : Optional.of(s);
@@ -51,6 +53,7 @@ public class NotificationClientIntroduction implements MethodInterceptor<Object,
     private static class PublishingArguments {
         Argument<?> message;
         Argument<?> subject;
+        Argument<?> attributes;
 
         boolean isValid() {
             return message != null;
@@ -128,7 +131,7 @@ public class NotificationClientIntroduction implements MethodInterceptor<Object,
             return service.sendSMSMessage(phoneNumber, message, attributes);
         }
 
-        if (arguments.length >= 1 && arguments.length <= 2) {
+        if (arguments.length >= 1 && arguments.length <= 3) {
             PublishingArguments publishingArguments = findArguments(arguments);
 
             String subject = null;
@@ -138,22 +141,32 @@ public class NotificationClientIntroduction implements MethodInterceptor<Object,
                 subject =  subjectValue == null ? null : String.valueOf(subjectValue);
             }
 
+            Map<String, String> attributes = new HashMap<>();
+            if (publishingArguments.attributes != null) {
+                Map<String, Object> attrs = (Map<String, Object>) params.get(publishingArguments.attributes.getName());
+                attrs.forEach((key, value) -> {
+                    if (value != null) {
+                        attributes.put(key, value.toString());
+                    }
+                });
+            }
+
             Object message = params.get(publishingArguments.message.getName());
             Class<?> messageType = publishingArguments.message.getType();
 
             if (CharSequence.class.isAssignableFrom(messageType)) {
-                return service.publishMessageToTopic(topicName, subject, message.toString());
+                return service.publishMessageToTopic(topicName, subject, message.toString(), attributes);
             }
 
-            return publishJson(service, topicName, subject, message);
+            return publishJson(service, topicName, subject, message, attributes);
         }
 
         throw new UnsupportedOperationException("Cannot implement method " + context.getExecutableMethod());
     }
 
-    private String publishJson(SimpleNotificationService service, String topic, String subject, Object message) {
+    private String publishJson(SimpleNotificationService service, String topic, String subject, Object message, Map<String, String> attributes) {
         try {
-            return service.publishMessageToTopic(topic, subject, objectMapper.writeValueAsString(message));
+            return service.publishMessageToTopic(topic, subject, objectMapper.writeValueAsString(message), attributes);
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException("Failed to marshal " + message + " to JSON", e);
         }
@@ -165,6 +178,11 @@ public class NotificationClientIntroduction implements MethodInterceptor<Object,
         for (Argument<?> argument : arguments) {
             if (argument.getName().toLowerCase().contains(SUBJECT)) {
                 names.subject = argument;
+                continue;
+            }
+            // attributes are map and must contain attributes or must come after the message (as the message can be map as well)
+            if (Map.class.isAssignableFrom(argument.getType()) && (argument.getName().toLowerCase().contains(ATTRIBUTES) || names.message != null)) {
+                names.attributes = argument;
                 continue;
             }
             names.message = argument;

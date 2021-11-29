@@ -31,8 +31,10 @@ interface DefaultClient {
 
     String publishMessage(Pogo message);                                                // <3>
     String publishMessage(String subject, Pogo message);                                // <4>
+    String publishMessage(String subject, Pogo message, Map<String, String> attributes);
     String publishMessage(String message);                                              // <5>
     String publishMessage(String subject, String message);
+    String publishMessage(String subject, String message, Map<String, String> attributes);
 
     String sendSMS(String phoneNumber, String message);                                 // <6>
     String sendSms(String phoneNumber, String message, Map attributes);                 // <7>
