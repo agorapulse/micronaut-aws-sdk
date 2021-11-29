@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/docs.css?v=1.5.0" />
+<link rel="stylesheet" href="css/docs.css?v=1.5.1" />
 <style>
 .hidden {
     display: none;
@@ -93,7 +93,7 @@ $(addBlockSwitches);
 <h1>Set of useful libraries for Micronaut</h1>
 <div class="details">
 <span id="author" class="author">Vladimir Orany</span><br>
-<span id="revnumber">version 1.5.0</span>
+<span id="revnumber">version 1.5.1</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -381,7 +381,7 @@ For AWS SDK 1.x use artefacts starting with <code>micrnoaut-aws-sdk</code>. Thes
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-dynamodb:1.5.0'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-dynamodb:1.5.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -390,14 +390,14 @@ For AWS SDK 1.x use artefacts starting with <code>micrnoaut-aws-sdk</code>. Thes
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;1.5.0&lt;/version&gt;
+    &lt;version&gt;1.5.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-dynamodb:1.5.0'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-dynamodb:1.5.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -406,7 +406,7 @@ For AWS SDK 1.x use artefacts starting with <code>micrnoaut-aws-sdk</code>. Thes
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;1.5.0&lt;/version&gt;
+    &lt;version&gt;1.5.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2052,10 +2052,10 @@ You can obtain instances of declarative client from the context as well.
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code>// for Kinesis client
-compile 'com.agorapulse:micronaut-amazon-awssdk-kinesis:1.5.0'
+compile 'com.agorapulse:micronaut-amazon-awssdk-kinesis:1.5.1'
 
 // for Kinesis listener
-compile 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:1.5.0'</code></pre>
+compile 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:1.5.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2065,13 +2065,13 @@ compile 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:1.5.0'</code></pr
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-kinesis&lt;/artifactId&gt;
-    &lt;version&gt;1.5.0&lt;/version&gt;
+    &lt;version&gt;1.5.1&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;!-- for Kinesis listener --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-kinesis-worker&lt;/artifactId&gt;
-    &lt;version&gt;1.5.0&lt;/version&gt;
+    &lt;version&gt;1.5.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2079,9 +2079,9 @@ compile 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:1.5.0'</code></pr
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code>// for Kinesis client
-compile 'com.agorapulse:micronaut-aws-sdk-kinesis:1.5.0'
+compile 'com.agorapulse:micronaut-aws-sdk-kinesis:1.5.1'
 // for Kinesis listener
-compile 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:1.5.0'</code></pre>
+compile 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:1.5.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2091,13 +2091,13 @@ compile 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:1.5.0'</code></pre>
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-kinesis&lt;/artifactId&gt;
-    &lt;version&gt;1.5.0&lt;/version&gt;
+    &lt;version&gt;1.5.1&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;!-- for Kinesis listener --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-kinesis-worker&lt;/artifactId&gt;
-    &lt;version&gt;1.5.0&lt;/version&gt;
+    &lt;version&gt;1.5.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3166,7 +3166,7 @@ class KinesisDemoSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-s3:1.5.0'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-s3:1.5.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3175,14 +3175,14 @@ class KinesisDemoSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-s3&lt;/artifactId&gt;
-    &lt;version&gt;1.5.0&lt;/version&gt;
+    &lt;version&gt;1.5.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-s3:1.5.0'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-s3:1.5.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3191,7 +3191,7 @@ class KinesisDemoSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-s3&lt;/artifactId&gt;
-    &lt;version&gt;1.5.0&lt;/version&gt;
+    &lt;version&gt;1.5.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3815,7 +3815,7 @@ class SimpleStorageServiceSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-ses:1.5.0'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-ses:1.5.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3824,14 +3824,14 @@ class SimpleStorageServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-ses&lt;/artifactId&gt;
-    &lt;version&gt;1.5.0&lt;/version&gt;
+    &lt;version&gt;1.5.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ses:1.5.0'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ses:1.5.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3840,7 +3840,7 @@ class SimpleStorageServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-ses&lt;/artifactId&gt;
-    &lt;version&gt;1.5.0&lt;/version&gt;
+    &lt;version&gt;1.5.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4018,7 +4018,7 @@ for the full reference.</p>
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-sns:1.5.0'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-sns:1.5.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4027,14 +4027,14 @@ for the full reference.</p>
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-sns&lt;/artifactId&gt;
-    &lt;version&gt;1.5.0&lt;/version&gt;
+    &lt;version&gt;1.5.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sns:1.5.0'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sns:1.5.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4043,7 +4043,7 @@ for the full reference.</p>
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sns&lt;/artifactId&gt;
-    &lt;version&gt;1.5.0&lt;/version&gt;
+    &lt;version&gt;1.5.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4155,8 +4155,10 @@ interface DefaultClient {
 
     String publishMessage(Pogo message);                                                <i class="conum" data-value="3"></i><b>(3)</b>
     String publishMessage(String subject, Pogo message);                                <i class="conum" data-value="4"></i><b>(4)</b>
+    String publishMessage(String subject, Pogo message, Map&lt;String, String&gt; attributes);
     String publishMessage(String message);                                              <i class="conum" data-value="5"></i><b>(5)</b>
     String publishMessage(String subject, String message);
+    String publishMessage(String subject, String message, Map&lt;String, String&gt; attributes);
 
     String sendSMS(String phoneNumber, String message);                                 <i class="conum" data-value="6"></i><b>(6)</b>
     String sendSms(String phoneNumber, String message, Map attributes);                 <i class="conum" data-value="7"></i><b>(7)</b>
@@ -4215,8 +4217,10 @@ interface DefaultClient {
 
     String publishMessage(Pogo message);                                                <i class="conum" data-value="3"></i><b>(3)</b>
     String publishMessage(String subject, Pogo message);                                <i class="conum" data-value="4"></i><b>(4)</b>
+    String publishMessage(String subject, Pogo message, Map&lt;String, String&gt; attributes);
     String publishMessage(String message);                                              <i class="conum" data-value="5"></i><b>(5)</b>
     String publishMessage(String subject, String message);
+    String publishMessage(String subject, String message, Map&lt;String, String&gt; attributes);
 
     String sendSMS(String phoneNumber, String message);                                 <i class="conum" data-value="6"></i><b>(6)</b>
     String sendSms(String phoneNumber, String message, Map attributes);                 <i class="conum" data-value="7"></i><b>(7)</b>
@@ -4264,6 +4268,18 @@ interface DefaultClient {
 </td>
 <td class="content">
 The return value of the methods is message id returned by AWS.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+You can add <code>Map&lt;String, String&gt; attributes</code> argument to send message attributes.
 </td>
 </tr>
 </table>
@@ -4838,7 +4854,7 @@ class SimpleNotificationServiceSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-sqs:1.5.0'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-sqs:1.5.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4847,14 +4863,14 @@ class SimpleNotificationServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-sqs&lt;/artifactId&gt;
-    &lt;version&gt;1.5.0&lt;/version&gt;
+    &lt;version&gt;1.5.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sqs:1.5.0'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sqs:1.5.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4863,7 +4879,7 @@ class SimpleNotificationServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sqs&lt;/artifactId&gt;
-    &lt;version&gt;1.5.0&lt;/version&gt;
+    &lt;version&gt;1.5.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -5696,7 +5712,7 @@ class SimpleQueueServiceSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-sts:1.5.0'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-sts:1.5.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -5705,14 +5721,14 @@ class SimpleQueueServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-sts&lt;/artifactId&gt;
-    &lt;version&gt;1.5.0&lt;/version&gt;
+    &lt;version&gt;1.5.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sts:1.5.0'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sts:1.5.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -5721,7 +5737,7 @@ class SimpleQueueServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sts&lt;/artifactId&gt;
-    &lt;version&gt;1.5.0&lt;/version&gt;
+    &lt;version&gt;1.5.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -5795,7 +5811,7 @@ Use this part of the library with caution. Using WebSockets with API Gateway can
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ag-ws:1.5.0'</code></pre>
+<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ag-ws:1.5.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -5804,7 +5820,7 @@ Use this part of the library with caution. Using WebSockets with API Gateway can
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-ag-ws&lt;/artifactId&gt;
-    &lt;version&gt;1.5.0&lt;/version&gt;
+    &lt;version&gt;1.5.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -6272,8 +6288,8 @@ your Lambda function&#8217;s role must have following permissions (preferably co
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 1.5.0<br>
-Last updated 2021-10-14 13:09:44 UTC
+Version 1.5.1<br>
+Last updated 2021-11-29 13:03:00 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
