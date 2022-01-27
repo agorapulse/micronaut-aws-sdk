@@ -1,0 +1,104 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2020-2021 Agorapulse.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import groovy.transform.Field
+
+@Field static final Map<String, String> MICRONAUT_1 = [
+    'micronaut-runtime-groovy': 'io.micronaut',
+    'micronaut-function-groovy': 'io.micronaut',
+    'micronaut-function-aws': 'io.micronaut',
+    'micronaut-aws-common': 'io.micronaut.configuration',
+    'micronaut-security': 'io.micronaut',
+    'micronaut-security-jwt': 'io.micronaut',
+    'micronaut-jdbc-tomcat': 'io.micronaut.configuration',
+    'micronaut-hibernate-gorm': 'io.micronaut.configuration',
+    'micronaut-spring': 'io.micronaut',
+]
+
+@Field static final Map<String, String> MICRONAUT_2 = [
+    'micronaut-runtime-groovy': 'io.micronaut.groovy',
+    'micronaut-function-groovy': 'io.micronaut.groovy',
+    'micronaut-function-aws': 'io.micronaut.aws',
+    'micronaut-aws-common': 'io.micronaut.aws',
+    'micronaut-security': 'io.micronaut.security',
+    'micronaut-security-jwt': 'io.micronaut.security',
+    'micronaut-jdbc-tomcat': 'io.micronaut.sql',
+    'micronaut-hibernate-gorm': 'io.micronaut.groovy',
+    'micronaut-spring': 'io.micronaut.spring',
+]
+
+@Field static final Map<String, Object> IMPORTS = [
+        'javax.annotation.Nullable': 'io.micronaut.core.annotation.Nullable',
+        'javax.annotation.Nonnull': 'io.micronaut.core.annotation.NonNull',
+        'javax.inject.Singleton': 'jakarta.inject.Singleton',
+        'javax.inject.Named': 'jakarta.inject.Named',
+        'javax.inject.Inject': 'jakarta.inject.Inject',
+        'io.micronaut.test.annotation.MicronautTest':  [
+                java: 'io.micronaut.test.extensions.junit5.annotation.MicronautTest',
+                groovy: 'io.micronaut.test.extensions.spock.annotation.MicronautTest',
+        ]
+]
+
+ext.micronautMigratedDependency = { String module ->
+    Map<String, String> groups  = project.getProperty('micronautVersion').startsWith('1') ? MICRONAUT_1 : MICRONAUT_2
+    String group = groups[module]
+
+    if (!group) {
+        throw new IllegalArgumentException("Cannot find group for $module. Known modules: ${groups.keySet()}")
+    }
+
+    return "$group:$module"
+}
+
+pluginManager.withPlugin('java') {
+    tasks.register('migrateImports') { Task task ->
+        File javaSources = project.file('src/main/java')
+        File javaTestSources = project.file('src/test/java')
+        File groovySources = project.file('src/main/groovy')
+        File groovyTestSources = project.file('src/test/groovy')
+
+        List<File> dirs = [javaSources, javaTestSources, groovySources, groovyTestSources]
+
+        for (File dir in dirs) {
+            if (dir.exists()) {
+                task.inputs.dir dir
+                task.outputs.dir dir
+
+                task.doFirst {
+                    task.inputs.files.forEach { File file ->
+                        String content = file.text
+                        String newContent = content
+
+                        if (IMPORTS.keySet().any { String original -> content.contains(original) }) {
+                            IMPORTS.each { String original, Object value ->
+                                String replacement = value instanceof CharSequence ? value : (file.name.endsWith('.groovy') ? value['groovy'] : value['java'])
+                                newContent = newContent.replace(original, replacement)
+                            }
+                        }
+
+                        if (content != newContent) {
+                            project.logger.lifecycle("Migrated imports in $file")
+                            file.text = newContent
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
