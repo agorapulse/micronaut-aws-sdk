@@ -134,6 +134,7 @@ subprojects { Project subproject ->
     if (subproject.name == 'guide' || subproject.name == 'micronaut-aws-sdk-dependencies') return
 
     apply plugin: 'groovy'
+    apply plugin: 'micronaut-compatibility'
 
     dependencies {
         annotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
