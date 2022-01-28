@@ -9,7 +9,7 @@
 <a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
 <a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * SPDX-License-Identifier: Apache-2.0</em>
 <a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> *</em>
-<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * Copyright 2018-2021 Agorapulse.</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * Copyright 2018-2022 Agorapulse.</em>
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
 <a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
@@ -25,7 +25,7 @@
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> */</em>
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>  <strong class="jxr_keyword">package</strong> com.agorapulse.micronaut.amazon.awssdk.ses;
 <a class="jxr_linenumber" name="L19" href="#L19">19</a>  
-<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> javax.annotation.Nonnull;
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> io.micronaut.core.annotation.NonNull;
 <a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> java.util.ArrayList;
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> java.util.Collection;
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> java.util.Collections;
@@ -801,13 +801,13 @@
 <a class="jxr_linenumber" name="L793" href="#L793">793</a>         <strong class="jxr_keyword">return</strong> !UNSUPPORTED_EXTENSIONS.contains(fileExtension(filename));
 <a class="jxr_linenumber" name="L794" href="#L794">794</a>     }
 <a class="jxr_linenumber" name="L795" href="#L795">795</a> 
-<a class="jxr_linenumber" name="L796" href="#L796">796</a>     @Nonnull
+<a class="jxr_linenumber" name="L796" href="#L796">796</a>     @NonNull
 <a class="jxr_linenumber" name="L797" href="#L797">797</a>     <strong class="jxr_keyword">static</strong> String fileExtension(<strong class="jxr_keyword">final</strong> String filename) {
 <a class="jxr_linenumber" name="L798" href="#L798">798</a>         <strong class="jxr_keyword">int</strong> i = filename.lastIndexOf('.');
 <a class="jxr_linenumber" name="L799" href="#L799">799</a>         <strong class="jxr_keyword">return</strong> i &lt; 0 ? <span class="jxr_string">""</span> : filename.substring(i);
 <a class="jxr_linenumber" name="L800" href="#L800">800</a>     }
 <a class="jxr_linenumber" name="L801" href="#L801">801</a> 
-<a class="jxr_linenumber" name="L802" href="#L802">802</a>     @Nonnull
+<a class="jxr_linenumber" name="L802" href="#L802">802</a>     @NonNull
 <a class="jxr_linenumber" name="L803" href="#L803">803</a>     <strong class="jxr_keyword">static</strong> String mimeTypeFromFilename(String filename) {
 <a class="jxr_linenumber" name="L804" href="#L804">804</a>         <strong class="jxr_keyword">return</strong> ALL_EXTENSIONS_TO_MIME_TYPES.getOrDefault(fileExtension(filename), Collections.emptyList()).stream().findFirst().orElse(<span class="jxr_string">""</span>);
 <a class="jxr_linenumber" name="L805" href="#L805">805</a>     }
