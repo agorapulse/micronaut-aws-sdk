@@ -65,7 +65,7 @@ gradleEnterprise {
 apply plugin: 'org.kordamp.gradle.settings'
 
 projects {
-    directories = ['subprojects', 'examples', 'docs']
+    directories = ['subprojects', 'examples', 'docs', 'benchmarks']
 }
 
 rootProject.name = 'micronaut-aws-sdk'

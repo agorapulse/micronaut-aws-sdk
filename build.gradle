@@ -127,6 +127,7 @@ allprojects {
     license {
         exclude '**/*.json'
         exclude '***.yml'
+        exclude 'logback.xml'
     }
 }
 
