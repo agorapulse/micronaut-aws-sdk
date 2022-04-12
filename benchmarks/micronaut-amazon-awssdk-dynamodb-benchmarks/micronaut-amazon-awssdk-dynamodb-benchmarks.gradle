@@ -1,0 +1,47 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2018-2022 Agorapulse.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+plugins {
+    id "me.champeau.jmh" version "0.6.6"
+}
+
+dependencies {
+    compile project(':micronaut-amazon-awssdk-dynamodb')
+
+    jmhAnnotationProcessor "io.micronaut:micronaut-inject-java:$micronautVersion"
+    jmhAnnotationProcessor "io.micronaut:micronaut-validation:$micronautVersion"
+    jmhRuntimeOnly "io.micronaut:micronaut-core:$micronautVersion"
+
+    // AWS SDK v1 needed to satisfy compilation with Testcontainers Localstack module
+    jmhImplementation project(':micronaut-aws-sdk-dynamodb')
+
+    jmhImplementation "org.testcontainers:localstack:$testcontainersVersion"
+
+}
+
+jmh {
+    includes = ['bench\\.*']
+    benchmarkMode = ['avgt']
+    timeUnit = 'ms'
+    iterations = 10
+    timeOnIteration = '10s'
+    warmup = '20s'
+    warmupIterations = 1
+    batchSize = 1
+    fork = 1
+    jvmArgsAppend = ['-DuseAws=' + System.getProperty('useAws', 'false')]
+}

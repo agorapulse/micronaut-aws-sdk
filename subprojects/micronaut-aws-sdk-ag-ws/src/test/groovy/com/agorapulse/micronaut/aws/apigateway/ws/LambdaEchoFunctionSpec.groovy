@@ -33,7 +33,7 @@ import spock.lang.Specification
  */
 @Ignore
 @Remember(
-    value = '2021-12-01',
+    value = '2022-06-01',
     description = 'Try to fix this test or remove this feature completely'
 )
 class LambdaEchoFunctionSpec extends Specification {
