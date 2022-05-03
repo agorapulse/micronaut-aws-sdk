@@ -8,4 +8,5 @@ dependencies {
     compileOnly project(':micronaut-amazon-awssdk-core')
     compileOnly project(':micronaut-amazon-awssdk-dynamodb')
     compileOnly project(':micronaut-amazon-awssdk-kinesis')
+    compileOnly project(':micronaut-amazon-awssdk-s3')
 }
