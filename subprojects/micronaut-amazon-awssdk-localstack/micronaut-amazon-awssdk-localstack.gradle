@@ -1,6 +1,9 @@
 dependencies {
     compile group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
 
+    compile 'com.amazonaws:aws-java-sdk-core'
+
     compileOnly project(':micronaut-amazon-awssdk-core')
     compileOnly project(':micronaut-amazon-awssdk-dynamodb')
+    compileOnly project(':micronaut-amazon-awssdk-kinesis')
 }
