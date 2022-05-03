@@ -17,37 +17,18 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb
 
-import io.micronaut.context.ApplicationContext
-import org.testcontainers.containers.localstack.LocalStackContainer
-import org.testcontainers.spock.Testcontainers
-import spock.lang.AutoCleanup
-import spock.lang.Shared
+import io.micronaut.test.annotation.MicronautTest
 import spock.lang.Specification
+
+import javax.inject.Inject
 
 /**
  * Specification for testing DefaultDynamoDBService using entity with no range key.
  */
-@Testcontainers
+@MicronautTest
 class DefaultDynamoDBServiceNoRangeSpec extends Specification {
 
-    @Shared LocalStackContainer localstack = new LocalStackContainer().withServices(LocalStackContainer.Service.DYNAMODB)
-
-    @AutoCleanup ApplicationContext context
-
-    DynamoDBEntityNoRangeService service
-
-    void setup() {
-        context = ApplicationContext.builder(
-            'aws.region': 'eu-west-1',
-            'aws.access-key-id': localstack.accessKey,
-            'aws.secret-access-key': localstack.secretKey,
-            'aws.dynamodb.endpoint': localstack.getEndpointOverride(LocalStackContainer.Service.DYNAMODB).toString()
-        ).build()
-
-        context.start()
-
-        service = context.getBean(DynamoDBEntityNoRangeService)
-    }
+    @Inject DynamoDBEntityNoRangeService service
 
     void 'basic CRUD'() {
         when:

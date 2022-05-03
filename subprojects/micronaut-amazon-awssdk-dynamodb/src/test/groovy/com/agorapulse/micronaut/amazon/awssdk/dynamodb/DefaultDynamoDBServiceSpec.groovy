@@ -21,27 +21,18 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Query
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Scan
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Service
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Update
-import io.micronaut.context.ApplicationContext
+import io.micronaut.test.annotation.MicronautTest
 import io.reactivex.Flowable
-import org.testcontainers.containers.localstack.LocalStackContainer
-import org.testcontainers.spock.Testcontainers
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import spock.lang.AutoCleanup
-import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
 
+import javax.inject.Inject
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 // tag::builders-import[]
 import static com.agorapulse.micronaut.amazon.awssdk.dynamodb.groovy.GroovyBuilders.*   // <1>
 // end::builders-import[]
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.DYNAMODB
 
 @SuppressWarnings([
     'AbcMetric',
@@ -56,50 +47,23 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
  */
 // tag::testcontainers-header[]
 @Stepwise
-@Testcontainers                                                                         // <1>
+@MicronautTest
 class DefaultDynamoDBServiceSpec extends Specification {
 
 // end::testcontainers-header[]
 
     private static final Instant REFERENCE_DATE = Instant.ofEpochMilli(1358487600000)
 
-    UnknownMethodsService unknownMethodsService
-    Playbook playbook
+    @Inject UnknownMethodsService unknownMethodsService
+    @Inject Playbook playbook
+    @Inject DynamoDBItemDBService service
 
-    // tag::testcontainers-setup[]
-    @AutoCleanup ApplicationContext context                                             // <2>
+    @Inject DynamoDBServiceProvider dynamoDBServiceProvider
 
-    @Shared LocalStackContainer localstack = new LocalStackContainer()                  // <3>
-        .withServices(DYNAMODB)
-
-    DynamoDBItemDBService service
     DynamoDbService<DynamoDBEntity> dbs
 
     void setup() {
-        DynamoDbClient client = DynamoDbClient                                          // <4>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(DYNAMODB))
-            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.accessKey, localstack.secretKey
-            )))
-            .region(Region.of(localstack.region))
-            .build()
-
-        DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient
-            .builder()
-            .dynamoDbClient(client)
-            .build()
-
-        context = ApplicationContext.builder().build()
-        context.registerSingleton(DynamoDbClient, client)                               // <5>
-        context.registerSingleton(DynamoDbEnhancedClient, enhancedClient)               // <6>
-        context.start()
-
-        service = context.getBean(DynamoDBItemDBService)                                // <7>
-        dbs = context.getBean(DynamoDBServiceProvider).findOrCreate(DynamoDBEntity)     // <8>
-        // end::testcontainers-setup[]
-        unknownMethodsService = context.getBean(UnknownMethodsService)
-        playbook = context.getBean(Playbook)
+        dbs = dynamoDBServiceProvider.findOrCreate(DynamoDBEntity)
     }
 
     void 'unsupported methods throws meaningful messages'() {

@@ -1,0 +1,6 @@
+dependencies {
+    compile group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
+
+    compileOnly project(':micronaut-amazon-awssdk-core')
+    compileOnly project(':micronaut-amazon-awssdk-dynamodb')
+}
