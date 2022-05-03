@@ -23,11 +23,14 @@ import io.micronaut.context.annotation.EachBean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
 import software.amazon.awssdk.services.kinesis.KinesisAsyncClient;
+import software.amazon.awssdk.services.kinesis.KinesisAsyncClientBuilder;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 
 import javax.inject.Singleton;
+import java.util.Optional;
 
 @Factory
 @Requires(classes = KinesisClient.class)
@@ -52,11 +55,13 @@ public class KinesisFactory {
     KinesisAsyncClient kinesisAsync(
         KinesisConfiguration configuration,
         AwsCredentialsProvider credentialsProvider,
-        AwsRegionProvider awsRegionProvider
+        AwsRegionProvider awsRegionProvider,
+        Optional<SdkAsyncHttpClient> httpClient
     ) {
-        return configuration.configure(KinesisAsyncClient.builder(), awsRegionProvider)
-            .credentialsProvider(credentialsProvider)
-            .build();
+        KinesisAsyncClientBuilder builder = KinesisAsyncClient.builder().credentialsProvider(credentialsProvider);
+        configuration.configure(builder, awsRegionProvider);
+        httpClient.ifPresent(builder::httpClient);
+        return builder.build();
     }
 
     @Singleton

@@ -2,7 +2,9 @@ dependencies {
     compile group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
 
     compile 'com.amazonaws:aws-java-sdk-core'
+    compile "software.amazon.awssdk:netty-nio-client:$kinesisClientV2Version"
 
+    compileOnly project(':micronaut-amazon-awssdk-cloudwatch')
     compileOnly project(':micronaut-amazon-awssdk-core')
     compileOnly project(':micronaut-amazon-awssdk-dynamodb')
     compileOnly project(':micronaut-amazon-awssdk-kinesis')
