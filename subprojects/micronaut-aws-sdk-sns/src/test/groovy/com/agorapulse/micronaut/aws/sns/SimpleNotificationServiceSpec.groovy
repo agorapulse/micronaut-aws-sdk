@@ -19,7 +19,6 @@ package com.agorapulse.micronaut.aws.sns
 
 import io.micronaut.context.annotation.Property
 import io.micronaut.test.annotation.MicronautTest
-import spock.lang.PendingFeature
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
