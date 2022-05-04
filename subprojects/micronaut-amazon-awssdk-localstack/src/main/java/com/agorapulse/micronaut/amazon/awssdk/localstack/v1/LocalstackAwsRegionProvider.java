@@ -15,36 +15,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.amazon.awssdk.localstack.v2;
+package com.agorapulse.micronaut.amazon.awssdk.localstack.v1;
 
 import com.agorapulse.micronaut.amazon.awssdk.localstack.LocalstackContainerHolder;
+import com.agorapulse.micronaut.aws.SafeAwsRegionProviderChain;
+import com.amazonaws.SdkClientException;
+import com.amazonaws.regions.AwsRegionProvider;
 import io.micronaut.context.annotation.Primary;
 import io.micronaut.context.annotation.Replaces;
-import org.testcontainers.containers.localstack.LocalStackContainer;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.AwsCredentials;
-import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
-import software.amazon.awssdk.auth.credentials.AwsCredentialsProviderChain;
 
 import javax.inject.Singleton;
 
 @Primary
 @Singleton
-@Replaces(AwsCredentialsProviderChain.class)
-public class LocalstackAwsCredentialsProvider implements AwsCredentialsProvider {
+@Replaces(SafeAwsRegionProviderChain.class)
+public class LocalstackAwsRegionProvider extends AwsRegionProvider {
 
     private final LocalstackContainerHolder holder;
 
-    public LocalstackAwsCredentialsProvider(LocalstackContainerHolder holder) {
+    public LocalstackAwsRegionProvider(LocalstackContainerHolder holder) {
         this.holder = holder;
     }
 
     @Override
-    public AwsCredentials resolveCredentials() {
-        LocalStackContainer localstack = holder.requireRunningContainer();
-        return AwsBasicCredentials.create(
-            localstack.getAccessKey(), localstack.getSecretKey()
-        );
+    public String getRegion() throws SdkClientException {
+        return holder.requireRunningContainer().getRegion();
     }
-
 }

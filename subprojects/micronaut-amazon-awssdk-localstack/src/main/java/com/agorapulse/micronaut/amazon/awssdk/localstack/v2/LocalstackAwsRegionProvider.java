@@ -39,7 +39,7 @@ public class LocalstackAwsRegionProvider implements AwsRegionProvider {
 
     @Override
     public Region getRegion() {
-        return Region.of(holder.getRunningContainer().getRegion());
+        return Region.of(holder.requireRunningContainer().getRegion());
     }
 
 }

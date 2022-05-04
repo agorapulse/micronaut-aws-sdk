@@ -55,7 +55,7 @@ public class LocalstackContainerHolder implements Closeable {
     }
 
     public URI getEndpointOverride(LocalStackContainer.Service service) {
-        return getRunningContainer().getEndpointOverride(service);
+        return requireRunningContainer().getEndpointOverride(service);
     }
 
     @Override
@@ -65,7 +65,7 @@ public class LocalstackContainerHolder implements Closeable {
         LOGGER.info("Closed Localstack container {}:{} for services {}", configuration.getImage(), configuration.getTag(), enabledServices);
     }
 
-    public LocalStackContainer getRunningContainer() {
+    public LocalStackContainer requireRunningContainer() {
         startLock.lock();
         if (container == null) {
             LOGGER.info("Starting Localstack container {}:{} for services {}", configuration.getImage(), configuration.getTag(), enabledServices);

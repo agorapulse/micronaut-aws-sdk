@@ -30,4 +30,14 @@ dependencies {
     compileOnly project(':micronaut-amazon-awssdk-sns')
     compileOnly project(':micronaut-amazon-awssdk-sqs')
     compileOnly project(':micronaut-amazon-awssdk-sts')
+
+    compileOnly project(':micronaut-aws-sdk-cloudwatch')
+    compileOnly project(':micronaut-aws-sdk-core')
+    compileOnly project(':micronaut-aws-sdk-dynamodb')
+    compileOnly project(':micronaut-aws-sdk-kinesis')
+    compileOnly project(':micronaut-aws-sdk-s3')
+    compileOnly project(':micronaut-aws-sdk-ses')
+    compileOnly project(':micronaut-aws-sdk-sns')
+    compileOnly project(':micronaut-aws-sdk-sqs')
+    compileOnly project(':micronaut-aws-sdk-sts')
 }
