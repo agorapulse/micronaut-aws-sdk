@@ -17,40 +17,39 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.sns
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import io.micronaut.context.ApplicationContext
-import org.testcontainers.containers.localstack.LocalStackContainer
-import org.testcontainers.spock.Testcontainers
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.services.sns.SnsClient
-import spock.lang.AutoCleanup
+
+import io.micronaut.context.annotation.Property
+import io.micronaut.test.annotation.MicronautTest
 import spock.lang.PendingFeature
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
+
+import javax.inject.Inject
 
 /**
  * Tests for simple notification service.
  */
 @Stepwise
 // tag::testcontainers-header[]
-@Testcontainers                                                                         // <1>
+@MicronautTest
+@Property(name = 'aws.sns.topic', value = TEST_TOPIC)
+@Property(name = 'aws.sns.ios.arn', value = IOS_APP_ARN)
+@Property(name = 'aws.sns.ios-sandbox.arn', value = IOS_SANDBOX_APP_ARN)
+@Property(name = 'aws.sns.android.arn', value = ANDROID_APP_ARN)
+@Property(name = 'aws.sns.amazon.arn', value = AMAZON_APP_ARN)
 class SimpleNotificationServiceSpec extends Specification {
 
 // end::testcontainers-header[]
 
     private static final String TEST_TOPIC = 'TestTopic'
+    private static final String IOS_APP_ARN = 'arn:aws:sns:us-east-1:000000000000:app/APNS/IOS-APP'
+    private static final String IOS_SANDBOX_APP_ARN = 'arn:aws:sns:us-east-1:000000000000:app/APNS_SANDBOX/IOS-APP'
+    private static final String ANDROID_APP_ARN = 'arn:aws:sns:us-east-1:000000000000:app/GCM/ANDROID-APP'
+    private static final String AMAZON_APP_ARN = 'arn:aws:sns:us-east-1:000000000000:app/ADM/AMAZON-APP'
 
-    // tag::testcontainers-fields[]
-    @Shared LocalStackContainer localstack = new LocalStackContainer()                  // <2>
-        .withServices(LocalStackContainer.Service.SNS)
-
-    @AutoCleanup ApplicationContext context                                             // <3>
-
-    SimpleNotificationService service
-    SimpleNotificationServiceConfiguration configuration
+    @Inject SimpleNotificationService service
+    @Inject SimpleNotificationServiceConfiguration configuration
     // end::testcontainers-fields[]
 
     @Shared String androidEndpointArn
@@ -60,38 +59,14 @@ class SimpleNotificationServiceSpec extends Specification {
     @Shared String subscriptionArn
     @Shared String topicArn
 
+
     // tag::testcontainers-setup[]
     void setup() {
-        SnsClient sns = SnsClient                                                       // <4>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.SNS))
-            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.accessKey, localstack.secretKey
-            )))
-            .region(Region.of(localstack.region))
-            .build()
-        // end::testcontainers-setup[]
-        SimpleNotificationServiceConfiguration mockConfiguration = Mock(SimpleNotificationServiceConfiguration) {
-            getTopic() >> TEST_TOPIC
-        }
-
-        DefaultSimpleNotificationService configurer = new DefaultSimpleNotificationService(sns, mockConfiguration, new ObjectMapper())
-
-        context = ApplicationContext.builder(                                           // <5>
-            'aws.sns.topic': TEST_TOPIC,
-            'aws.sns.ios.arn': configurer.createIosApplication('IOS-APP', 'API-KEY', 'fake-cert', false),
-            'aws.sns.ios-sandbox.arn': configurer.createIosApplication('IOS-APP', 'API-KEY', 'fake-cert', true),
-            'aws.sns.android.arn': configurer.createAndroidApplication('ANDROID-APP', 'API-KEY'),
-            'aws.sns.amazon.arn': configurer.createAmazonApplication('AMAZON-APP', 'API-KEY', 'API-SECRET')
-        ).build()
-        // tag::testcontainers-setup-2[]
-        context.registerSingleton(SnsClient, sns)
-        context.start()
-
-        service = context.getBean(SimpleNotificationService)                            // <6>
-        configuration = context.getBean(SimpleNotificationServiceConfiguration)
+        service.createIosApplication('IOS-APP', 'API-KEY', 'fake-cert', false)
+        service.createIosApplication('IOS-APP', 'API-KEY', 'fake-cert', true)
+        service.createAndroidApplication('ANDROID-APP', 'API-KEY')
+        service.createAmazonApplication('AMAZON-APP', 'API-KEY', 'API-SECRET')
     }
-    // end::testcontainers-setup-2[]
 
     void 'new topic'() {
         when:
