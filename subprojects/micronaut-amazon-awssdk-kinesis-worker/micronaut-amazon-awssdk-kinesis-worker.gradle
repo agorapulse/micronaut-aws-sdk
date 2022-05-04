@@ -22,6 +22,7 @@ dependencies {
         exclude group: 'software.amazon.awssdk', module: 'url-connection-client'
     }
 
+    // TODO: make localstack stubbing also work for this library
     testCompile group: 'org.testcontainers', name: 'testcontainers', version: testcontainersVersion
     testCompile group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
     testCompile group: 'org.testcontainers', name: 'spock', version: testcontainersVersion
