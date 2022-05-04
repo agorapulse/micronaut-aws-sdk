@@ -10,4 +10,5 @@ dependencies {
     compileOnly project(':micronaut-amazon-awssdk-kinesis')
     compileOnly project(':micronaut-amazon-awssdk-s3')
     compileOnly project(':micronaut-amazon-awssdk-sns')
+    compileOnly project(':micronaut-amazon-awssdk-sqs')
 }

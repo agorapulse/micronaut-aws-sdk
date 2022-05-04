@@ -17,23 +17,15 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.sqs
 
-import io.micronaut.context.ApplicationContext
-import org.testcontainers.containers.localstack.LocalStackContainer
-import org.testcontainers.spock.Testcontainers
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.services.sqs.SqsClient
+import io.micronaut.context.annotation.Property
+import io.micronaut.test.annotation.MicronautTest
 import software.amazon.awssdk.services.sqs.model.Message
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName
-import spock.lang.AutoCleanup
 import spock.lang.Retry
-import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
-import spock.util.environment.RestoreSystemProperties
 
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.SQS
+import javax.inject.Inject
 
 /**
  * Tests for simple queue service.
@@ -43,8 +35,8 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
 @Stepwise
 
 // tag::testcontainers-header[]
-@Testcontainers                                                                         // <1>
-@RestoreSystemProperties                                                                // <2>
+@MicronautTest
+@Property(name = 'aws.sqs.queue', value = TEST_QUEUE)
 class SimpleQueueServiceSpec extends Specification {
 
 // end::testcontainers-header[]
@@ -52,34 +44,7 @@ class SimpleQueueServiceSpec extends Specification {
     private static final String TEST_QUEUE = 'TestQueue'
     private static final String DATA = 'Hello World'
 
-    // tag::testcontainers-fields[]
-    @Shared LocalStackContainer localstack = new LocalStackContainer()                  // <3>
-        .withServices(SQS)
-
-    @AutoCleanup ApplicationContext context                                             // <4>
-
-    SimpleQueueService service
-    // end::testcontainers-fields[]
-
-    // tag::testcontainers-setup[]
-    void setup() {
-        System.setProperty('com.amazonaws.sdk.disableCbor', 'true')                     // <5>
-        SqsClient sqs = SqsClient                                                       // <6>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(SQS))
-            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.accessKey, localstack.secretKey
-            )))
-            .region(Region.of(localstack.region))
-            .build()
-
-        context = ApplicationContext.builder('aws.sqs.queue': TEST_QUEUE).build()       // <7>
-        context.registerSingleton(SqsClient, sqs)
-        context.start()
-
-        service = context.getBean(SimpleQueueService)                                   // <8>
-    }
-    // end::testcontainers-setup[]
+    @Inject SimpleQueueService service
 
     void 'working with queues'() {
         when:

@@ -18,6 +18,8 @@
 package com.agorapulse.micronaut.amazon.awssdk.sqs;
 
 import io.micronaut.context.ApplicationContext;
+import io.micronaut.context.annotation.Property;
+import io.micronaut.test.annotation.MicronautTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -30,62 +32,24 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.Message;
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
 
+import javax.inject.Inject;
 import java.util.*;
 
 import static org.junit.Assert.*;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.SQS;
 
+@MicronautTest
+@Property(name = "aws.sqs.queue", value = SimpleQueueServiceTest.TEST_QUEUE)
 public class SimpleQueueServiceTest {
 
-    private static final String TEST_QUEUE = "TestQueue";
+    public static final String TEST_QUEUE = "TestQueue";
+
     private static final String DATA = "Hello World";
 
     @Rule
     public Retry retry = new Retry(5);
 
-    // tag::testcontainers-setup[]
-    public ApplicationContext context;                                                  // <1>
-
-    public SimpleQueueService service;
-
-    @Rule
-    public LocalStackContainer localstack = new LocalStackContainer()                   // <2>
-        .withServices(SQS);
-
-    @Before
-    public void setup() {
-        System.setProperty("com.amazonaws.sdk.disableCbor", "true");                    // <3>
-
-        SqsClient amazonSQS = SqsClient                                                 // <4>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(SQS))
-            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.getAccessKey(), localstack.getSecretKey()
-            )))
-            .region(Region.of(localstack.getRegion()))
-            .build();
-
-
-        Map<String, Object> properties = new HashMap<>();                               // <5>
-        properties.put("aws.sqs.queue", TEST_QUEUE);
-
-
-        context = ApplicationContext.builder(properties).build();                       // <6>
-        context.registerSingleton(SqsClient.class, amazonSQS);
-        context.start();
-
-        service = context.getBean(SimpleQueueService.class);
-    }
-
-    @After
-    public void cleanup() {
-        System.clearProperty("com.amazonaws.sdk.disableCbor");
-
-        if (context != null) {
-            context.close();                                                            // <7>
-        }
-    }
-    // end::testcontainers-setup[]
+    @Inject SimpleQueueService service;
 
     @Test
     public void testWorkingWithQueue() {
