@@ -17,79 +17,47 @@
  */
 package com.agorapulse.micronaut.aws.s3;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import io.micronaut.context.ApplicationContext;
+import io.micronaut.context.annotation.Property;
+import io.micronaut.test.annotation.MicronautTest;
 import io.reactivex.Flowable;
 import org.codehaus.groovy.runtime.ResourceGroovyMethods;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.testcontainers.containers.localstack.LocalStackContainer;
 
+import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.Date;
 
-import static org.junit.Assert.*;
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
+import static org.junit.jupiter.api.Assertions.*;
 
 // tag::header[]
+@MicronautTest
+@Property(name = "aws.s3.bucket", value = SimpleStorageServiceTest.MY_BUCKET)
 public class SimpleStorageServiceTest {
     // end::header[]
 
+    public static final String MY_BUCKET = "testbucket";
+
     private static final String KEY = "foo/bar.baz";
-    private static final String MY_BUCKET = "testbucket";
     private static final String SAMPLE_CONTENT = "hello world!";
     private static final String TEXT_FILE_PATH = "bar/foo.txt";
     private static final Date TOMORROW = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000);
 
-    // tag::setup[]
-    @Rule
-    public final LocalStackContainer localstack = new LocalStackContainer()            // <1>
-        .withServices(S3);
 
     @TempDir
     public File tmp;
 
-    private ApplicationContext ctx;                                                     // <2>
-
-    @Before
-    public void setup() {
-        AmazonS3 amazonS3 = AmazonS3Client                                              // <3>
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(S3))
-            .withCredentials(localstack.getDefaultCredentialsProvider())
-            .build();
-
-        ctx = ApplicationContext
-            .builder(Collections.singletonMap("aws.s3.bucket", MY_BUCKET))
-            .build();
-        ctx.registerSingleton(AmazonS3.class, amazonS3);                                // <4>
-        ctx.start();
-    }
-
-    @After
-    public void cleanup() {
-        if (ctx != null) {                                                              // <5>
-            ctx.close();
-        }
-    }
-    // end::setup[]
+    @Inject SimpleStorageService service;
 
     @Test
     public void testJavaService() throws IOException {
-        SimpleStorageService service = ctx.getBean(SimpleStorageService.class);
-
         // tag::create-bucket[]
         service.createBucket(MY_BUCKET);                                                // <1>
 

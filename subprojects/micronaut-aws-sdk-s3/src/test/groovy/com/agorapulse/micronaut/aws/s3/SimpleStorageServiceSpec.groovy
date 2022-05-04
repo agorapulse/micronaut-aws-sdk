@@ -17,19 +17,14 @@
  */
 package com.agorapulse.micronaut.aws.s3
 
-import com.amazonaws.services.s3.AmazonS3
-import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.ObjectMetadata
-import io.micronaut.context.ApplicationContext
-import org.testcontainers.containers.localstack.LocalStackContainer
-import org.testcontainers.spock.Testcontainers
-import spock.lang.AutoCleanup
-import spock.lang.Shared
+import io.micronaut.context.annotation.Property
+import io.micronaut.test.annotation.MicronautTest
 import spock.lang.Specification
 import spock.lang.Stepwise
 import spock.lang.TempDir
 
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3
+import javax.inject.Inject
 
 /**
  * Tests for SimpleStorageService based on Testcontainers.
@@ -37,7 +32,8 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
 @SuppressWarnings('NoJavaUtilDate')
 // tag::header[]
 @Stepwise
-@Testcontainers                                                                         // <1>
+@MicronautTest
+@Property(name = 'aws.s3.bucket', value = MY_BUCKET)
 class SimpleStorageServiceSpec extends Specification {
 
 // end::header[]
@@ -48,33 +44,9 @@ class SimpleStorageServiceSpec extends Specification {
     private static final String SAMPLE_CONTENT = 'hello world!'
     private static final Date TOMORROW = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000)
 
-    // tag::setup[]
-    @AutoCleanup ApplicationContext context                                             // <2>
-
-    @Shared LocalStackContainer localstack = new LocalStackContainer()                  // <3>
-        .withServices(S3)
-
     @TempDir File tmp
 
-    AmazonS3 amazonS3
-    SimpleStorageService service
-
-    void setup() {
-        amazonS3 = AmazonS3Client                                                       // <4>
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(S3))
-            .withCredentials(localstack.defaultCredentialsProvider)
-            .build()
-
-        context = ApplicationContext
-            .builder('aws.s3.bucket': MY_BUCKET)                                        // <5>
-            .build()
-        context.registerSingleton(AmazonS3, amazonS3)                                   // <6>
-        context.start()
-
-        service = context.getBean(SimpleStorageService)                                 // <7>
-    }
-    // end::setup[]
+    @Inject SimpleStorageService service
 
     void 'new bucket'() {
         when:
