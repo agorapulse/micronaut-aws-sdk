@@ -9,6 +9,8 @@ dependencies {
     compileOnly project(':micronaut-amazon-awssdk-dynamodb')
     compileOnly project(':micronaut-amazon-awssdk-kinesis')
     compileOnly project(':micronaut-amazon-awssdk-s3')
+    compileOnly project(':micronaut-amazon-awssdk-ses')
     compileOnly project(':micronaut-amazon-awssdk-sns')
     compileOnly project(':micronaut-amazon-awssdk-sqs')
+    compileOnly project(':micronaut-amazon-awssdk-sts')
 }

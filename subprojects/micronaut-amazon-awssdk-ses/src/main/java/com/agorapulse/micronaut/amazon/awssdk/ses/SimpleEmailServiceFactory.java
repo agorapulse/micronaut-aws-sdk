@@ -20,11 +20,14 @@ package com.agorapulse.micronaut.amazon.awssdk.ses;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
 import software.amazon.awssdk.services.ses.SesAsyncClient;
+import software.amazon.awssdk.services.ses.SesAsyncClientBuilder;
 import software.amazon.awssdk.services.ses.SesClient;
 
 import javax.inject.Singleton;
+import java.util.Optional;
 
 @Factory
 public class SimpleEmailServiceFactory {
@@ -46,11 +49,13 @@ public class SimpleEmailServiceFactory {
     public SesAsyncClient sesAsyncClient(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
-        SimpleEmailServiceConfiguration configuration
+        SimpleEmailServiceConfiguration configuration,
+        Optional<SdkAsyncHttpClient> httpClient
     ) {
-        return configuration.configure(SesAsyncClient.builder(), awsRegionProvider)
-            .credentialsProvider(credentialsProvider)
-            .build();
+        SesAsyncClientBuilder builder = SesAsyncClient.builder().credentialsProvider(credentialsProvider);
+        httpClient.ifPresent(builder::httpClient);
+        configuration.configure(builder, awsRegionProvider);
+        return builder.build();
     }
 
     @Bean

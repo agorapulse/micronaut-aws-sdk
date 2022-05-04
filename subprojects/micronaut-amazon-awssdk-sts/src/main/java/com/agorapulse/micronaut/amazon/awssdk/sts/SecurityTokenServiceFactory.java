@@ -21,10 +21,14 @@ import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
+import software.amazon.awssdk.services.sts.StsAsyncClient;
+import software.amazon.awssdk.services.sts.StsAsyncClientBuilder;
 import software.amazon.awssdk.services.sts.StsClient;
 
 import javax.inject.Singleton;
+import java.util.Optional;
 
 @Factory
 @Requires(classes = StsClient.class)
@@ -40,6 +44,20 @@ public class SecurityTokenServiceFactory {
         return configuration
             .configure(StsClient.builder().credentialsProvider(credentialsProvider), awsRegionProvider)
             .build();
+    }
+
+    @Bean
+    @Singleton
+    StsAsyncClient awsSecurityTokenAsyncService(
+        AwsCredentialsProvider credentialsProvider,
+        AwsRegionProvider awsRegionProvider,
+        SecurityTokenServiceConfiguration configuration,
+        Optional<SdkAsyncHttpClient> httpClient
+    ) {
+        StsAsyncClientBuilder builder = StsAsyncClient.builder().credentialsProvider(credentialsProvider);
+        configuration.configure(builder, awsRegionProvider);
+        httpClient.ifPresent(builder::httpClient);
+        return builder.build();
     }
 
 }

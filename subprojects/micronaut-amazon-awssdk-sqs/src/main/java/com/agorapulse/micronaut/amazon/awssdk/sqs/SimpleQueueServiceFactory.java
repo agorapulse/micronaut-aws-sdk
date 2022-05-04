@@ -21,11 +21,14 @@ import io.micronaut.context.annotation.EachBean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
 import software.amazon.awssdk.services.sqs.SqsAsyncClient;
+import software.amazon.awssdk.services.sqs.SqsAsyncClientBuilder;
 import software.amazon.awssdk.services.sqs.SqsClient;
 
 import javax.inject.Singleton;
+import java.util.Optional;
 
 @Factory
 @Requires(classes = SqsClient.class)
@@ -48,11 +51,13 @@ public class SimpleQueueServiceFactory {
     SqsAsyncClient sqsAsyncClient(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
-        SimpleQueueServiceConfiguration configuration
+        SimpleQueueServiceConfiguration configuration,
+        Optional<SdkAsyncHttpClient> httpClient
     ) {
-        return configuration.configure(SqsAsyncClient.builder(), awsRegionProvider)
-            .credentialsProvider(credentialsProvider)
-            .build();
+        SqsAsyncClientBuilder builder = SqsAsyncClient.builder().credentialsProvider(credentialsProvider);
+        configuration.configure(builder, awsRegionProvider);
+        httpClient.ifPresent(builder::httpClient);
+        return builder.build();
     }
 
     @Singleton
