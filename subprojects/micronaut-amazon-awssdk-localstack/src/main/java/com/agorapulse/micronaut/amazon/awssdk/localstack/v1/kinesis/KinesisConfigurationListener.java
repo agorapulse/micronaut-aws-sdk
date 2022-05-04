@@ -23,7 +23,6 @@ import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.context.event.BeanCreatedEventListener;
 import org.testcontainers.containers.localstack.LocalStackContainer;
-import software.amazon.awssdk.core.SdkSystemSetting;
 
 import javax.inject.Singleton;
 import java.io.Closeable;
@@ -32,13 +31,15 @@ import java.io.Closeable;
 @Requires(classes = KinesisConfiguration.class, beans = LocalstackContainerHolder.class)
 public class KinesisConfigurationListener implements BeanCreatedEventListener<KinesisConfiguration>, Closeable {
 
+    private static final String CBOR_DISABLED = "com.amazonaws.sdk.disableCbor";
+
     private final LocalstackContainerHolder holder;
     private final String oldCborValue;
 
     public KinesisConfigurationListener(LocalstackContainerHolder holder) {
         this.holder = holder.withServiceEnabled(LocalStackContainer.Service.KINESIS);
-        this.oldCborValue = System.getProperty(SdkSystemSetting.CBOR_ENABLED.property());
-        System.setProperty(SdkSystemSetting.CBOR_ENABLED.property(), "false");
+        this.oldCborValue = System.getProperty(CBOR_DISABLED);
+        System.setProperty(CBOR_DISABLED, "true");
     }
 
     @Override
@@ -53,7 +54,6 @@ public class KinesisConfigurationListener implements BeanCreatedEventListener<Ki
 
     @Override
     public void close() {
-        System.setProperty(SdkSystemSetting.CBOR_ENABLED.property(), oldCborValue);
+        System.setProperty(CBOR_DISABLED, oldCborValue);
     }
-
 }
