@@ -19,11 +19,12 @@ package com.agorapulse.micronaut.amazon.awssdk.kinesis;
 
 
 import io.micronaut.test.annotation.MicronautTest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 
 // tag::testcontainers-spec[]
 @MicronautTest
