@@ -21,54 +21,26 @@ import com.agorapulse.micronaut.aws.dynamodb.DynamoDBService
 import com.agorapulse.micronaut.aws.dynamodb.DynamoDBServiceProvider
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
-import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.amazonaws.services.dynamodbv2.model.GetItemRequest
 import com.amazonaws.services.dynamodbv2.model.GetItemResult
 import groovy.util.logging.Slf4j
-import io.micronaut.context.ApplicationContext
-import org.testcontainers.containers.localstack.LocalStackContainer
-import org.testcontainers.spock.Testcontainers
-import spock.lang.AutoCleanup
-import spock.lang.Shared
+import io.micronaut.test.annotation.MicronautTest
 import spock.lang.Specification
 
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.DYNAMODB
+import javax.inject.Inject
 
 @Slf4j
-@Testcontainers
+@MicronautTest
 class CompressedStringConverterSpec extends Specification {
 
-    @AutoCleanup
-    @Shared
-    ApplicationContext ctx
+    @Inject AmazonDynamoDB amazonDynamoDB
+    @Inject DynamoDBServiceProvider provider
 
-    @Shared
-    @AutoCleanup
-    LocalStackContainer localstack = new LocalStackContainer().withServices(DYNAMODB)
-
-    @Shared
-    AmazonDynamoDB amazonDynamoDB
-
-    @Shared
     DynamoDBService<EntityExample> dynamoDBService
 
-    void setupSpec() {
-        amazonDynamoDB = AmazonDynamoDBClient.builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(DYNAMODB))
-            .withCredentials(localstack.defaultCredentialsProvider)
-            .build()
-
-        IDynamoDBMapper mapper = new DynamoDBMapper(amazonDynamoDB)
-
-        ctx = ApplicationContext.builder().build()
-        ctx.registerSingleton(AmazonDynamoDB, amazonDynamoDB)
-        ctx.registerSingleton(IDynamoDBMapper, mapper)
-        ctx.start()
-
-        dynamoDBService = ctx.getBean(DynamoDBServiceProvider).findOrCreate(EntityExample)
+    void setup() {
+        dynamoDBService = provider.findOrCreate(EntityExample)
         try {
             dynamoDBService.createTable()
         } catch (AmazonServiceException e) {
