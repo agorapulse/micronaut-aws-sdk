@@ -21,10 +21,7 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.DynamoDBServiceProvider
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.DynamoDbService
 import groovy.util.logging.Slf4j
 import io.micronaut.test.annotation.MicronautTest
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import software.amazon.awssdk.enhanced.dynamodb.Key
-import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import software.amazon.awssdk.services.dynamodb.model.GetItemRequest

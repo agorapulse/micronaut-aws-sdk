@@ -32,6 +32,7 @@ import java.time.temporal.ChronoUnit
 
 // tag::builders-import[]
 import static com.agorapulse.micronaut.amazon.awssdk.dynamodb.groovy.GroovyBuilders.*   // <1>
+
 // end::builders-import[]
 
 @SuppressWarnings([
@@ -41,6 +42,7 @@ import static com.agorapulse.micronaut.amazon.awssdk.dynamodb.groovy.GroovyBuild
     'DuplicateListLiteral',
     'DuplicateNumberLiteral',
     'DuplicateStringLiteral',
+    'MissingBlankLineAfterImports',
 ])
 /**
  * Specification for testing DefaultDynamoDBService using entity with range key.

@@ -17,7 +17,6 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.sns
 
-
 import io.micronaut.context.annotation.Property
 import io.micronaut.test.annotation.MicronautTest
 import spock.lang.PendingFeature
@@ -58,7 +57,6 @@ class SimpleNotificationServiceSpec extends Specification {
     @Shared String iosSandboxEndpointArn
     @Shared String subscriptionArn
     @Shared String topicArn
-
 
     // tag::testcontainers-setup[]
     void setup() {

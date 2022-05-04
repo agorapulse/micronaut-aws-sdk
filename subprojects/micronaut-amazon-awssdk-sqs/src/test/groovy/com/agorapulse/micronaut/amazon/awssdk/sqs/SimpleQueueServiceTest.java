@@ -17,18 +17,10 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.sqs;
 
-import io.micronaut.context.ApplicationContext;
 import io.micronaut.context.annotation.Property;
 import io.micronaut.test.annotation.MicronautTest;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.testcontainers.containers.localstack.LocalStackContainer;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.Message;
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
 
@@ -36,7 +28,6 @@ import javax.inject.Inject;
 import java.util.*;
 
 import static org.junit.Assert.*;
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.SQS;
 
 @MicronautTest
 @Property(name = "aws.sqs.queue", value = SimpleQueueServiceTest.TEST_QUEUE)

@@ -56,7 +56,6 @@ class KinesisServiceSpec extends Specification {
     @Inject KinesisClient kinesis
     @Inject KinesisService service
 
-
     @Retry
     void 'new default stream'() {
         when:
