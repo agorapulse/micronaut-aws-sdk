@@ -16,7 +16,9 @@
  * limitations under the License.
  */
 dependencies {
-    compile project(':micronaut-aws-sdk-core')
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-cloudwatch'
-    testCompile 'io.micronaut:micronaut-inject'
+    api 'com.amazonaws:aws-java-sdk-cloudwatch'
+
+    implementation project(':micronaut-aws-sdk-core')
+
+    testImplementation 'io.micronaut:micronaut-inject'
 }

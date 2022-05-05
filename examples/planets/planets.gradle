@@ -37,9 +37,9 @@ apply from: '../gradle/lambda.gradle'
 apply plugin: 'jp.classmethod.aws.lambda'
 
 dependencies {
-    compile project(':micronaut-aws-sdk-dynamodb')
+    implementation project(':micronaut-aws-sdk-dynamodb')
 
-    testCompile group: 'com.agorapulse', name: 'dru-client-dynamodb', version: druVersion
+    testImplementation group: 'com.agorapulse', name: 'dru-client-dynamodb', version: druVersion
 }
 
 task deployLambda(type: AWSLambdaMigrateFunctionTask, dependsOn: build, group: 'deploy')  {

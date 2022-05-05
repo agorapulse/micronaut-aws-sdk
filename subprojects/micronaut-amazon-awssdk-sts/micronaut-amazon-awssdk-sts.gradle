@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 dependencies {
-    compile project(':micronaut-amazon-awssdk-core')
-    compile "software.amazon.awssdk:sts"
-    compile "space.jasan:groovy-closure-support:$closureSupportVersion"
+    api 'software.amazon.awssdk:sts'
+    implementation project(':micronaut-amazon-awssdk-core')
+    implementation "space.jasan:groovy-closure-support:$closureSupportVersion"
 }

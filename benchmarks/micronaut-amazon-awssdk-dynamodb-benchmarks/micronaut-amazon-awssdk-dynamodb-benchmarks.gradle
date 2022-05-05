@@ -20,7 +20,7 @@ plugins {
 }
 
 dependencies {
-    compile project(':micronaut-amazon-awssdk-dynamodb')
+    implementation project(':micronaut-amazon-awssdk-dynamodb')
 
     jmhAnnotationProcessor "io.micronaut:micronaut-inject-java:$micronautVersion"
     jmhAnnotationProcessor "io.micronaut:micronaut-validation:$micronautVersion"
