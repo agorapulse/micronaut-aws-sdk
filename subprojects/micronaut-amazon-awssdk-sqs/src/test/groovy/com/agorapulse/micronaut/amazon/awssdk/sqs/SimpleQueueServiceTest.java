@@ -19,15 +19,15 @@ package com.agorapulse.micronaut.amazon.awssdk.sqs;
 
 import io.micronaut.context.annotation.Property;
 import io.micronaut.test.annotation.MicronautTest;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.services.sqs.model.Message;
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
 
 import javax.inject.Inject;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @MicronautTest
 @Property(name = "aws.sqs.queue", value = SimpleQueueServiceTest.TEST_QUEUE)
@@ -36,9 +36,6 @@ public class SimpleQueueServiceTest {
     public static final String TEST_QUEUE = "TestQueue";
 
     private static final String DATA = "Hello World";
-
-    @Rule
-    public Retry retry = new Retry(5);
 
     @Inject SimpleQueueService service;
 
