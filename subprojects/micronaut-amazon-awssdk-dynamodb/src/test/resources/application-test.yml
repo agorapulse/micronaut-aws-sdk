@@ -1,0 +1,3 @@
+localstack:
+  services: dynamodb
+  shared: true
