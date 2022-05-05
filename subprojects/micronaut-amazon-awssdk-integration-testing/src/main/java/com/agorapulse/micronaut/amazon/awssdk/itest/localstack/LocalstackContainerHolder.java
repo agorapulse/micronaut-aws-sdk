@@ -34,6 +34,8 @@ public class LocalstackContainerHolder implements Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalstackContainerHolder.class);
 
+    private static LocalStackContainer sharedContainer;
+
     private final Lock startLock = new ReentrantLock();
     private final Set<LocalStackContainer.Service> enabledServices = new HashSet<>();
     private final LocalstackContainerConfiguration configuration;
@@ -60,20 +62,35 @@ public class LocalstackContainerHolder implements Closeable {
 
     @Override
     public void close() {
-        LOGGER.info("Closing Localstack container {}:{} for services {}", configuration.getImage(), configuration.getTag(), enabledServices);
-        container.close();
-        LOGGER.info("Closed Localstack container {}:{} for services {}", configuration.getImage(), configuration.getTag(), enabledServices);
+        if (container != null) {
+            LOGGER.info("Closing Localstack container {}:{} for services {}", configuration.getImage(), configuration.getTag(), enabledServices);
+            container.close();
+            LOGGER.info("Closed Localstack container {}:{} for services {}", configuration.getImage(), configuration.getTag(), enabledServices);
+        }
     }
 
     public LocalStackContainer requireRunningContainer() {
-        startLock.lock();
-        if (container == null) {
-            LOGGER.info("Starting Localstack container {}:{} for services {}", configuration.getImage(), configuration.getTag(), enabledServices);
-            DockerImageName dockerImageName = DockerImageName.parse(configuration.getImage()).withTag(configuration.getTag());
-            container = new LocalStackContainer(dockerImageName).withServices(enabledServices.toArray(new LocalStackContainer.Service[0]));
-            container.start();
-            LOGGER.info("Started Localstack container {}:{} for services {}", configuration.getImage(), configuration.getTag(), enabledServices);
+        if (configuration.isShared()) {
+            if (sharedContainer == null) {
+                sharedContainer = createAndStartContainer();
+            }
+            return sharedContainer;
         }
+
+        if (container == null) {
+            container = createAndStartContainer();
+        }
+
+        return container;
+    }
+
+    private LocalStackContainer createAndStartContainer() {
+        startLock.lock();
+        LOGGER.info("Starting Localstack container {}:{} for services {}", configuration.getImage(), configuration.getTag(), enabledServices);
+        DockerImageName dockerImageName = DockerImageName.parse(configuration.getImage()).withTag(configuration.getTag());
+        LocalStackContainer container = new LocalStackContainer(dockerImageName).withServices(enabledServices.toArray(new LocalStackContainer.Service[0]));
+        container.start();
+        LOGGER.info("Started Localstack container {}:{} for services {}", configuration.getImage(), configuration.getTag(), enabledServices);
         startLock.unlock();
         return container;
     }

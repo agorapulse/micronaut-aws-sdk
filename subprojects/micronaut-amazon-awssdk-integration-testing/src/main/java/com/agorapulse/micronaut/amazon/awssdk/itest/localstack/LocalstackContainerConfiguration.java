@@ -31,6 +31,8 @@ public class LocalstackContainerConfiguration {
 
     private List<String> services = new ArrayList<>();
 
+    private boolean shared;
+
     public String getImage() {
         return image;
     }
@@ -53,5 +55,13 @@ public class LocalstackContainerConfiguration {
 
     public void setServices(List<String> services) {
         this.services = services;
+    }
+
+    public boolean isShared() {
+        return shared;
+    }
+
+    public void setShared(boolean shared) {
+        this.shared = shared;
     }
 }
