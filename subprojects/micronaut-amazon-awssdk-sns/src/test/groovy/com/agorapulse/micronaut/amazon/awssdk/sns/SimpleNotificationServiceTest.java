@@ -28,8 +28,8 @@ import java.util.Collections;
 import java.util.Map;
 
 import static com.agorapulse.micronaut.amazon.awssdk.sns.SimpleNotificationService.PlatformType.GCM;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @MicronautTest
 @Property(name = "aws.sns.topic", value = SimpleNotificationServiceTest.TEST_TOPIC)

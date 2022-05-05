@@ -18,55 +18,25 @@
 package com.agorapulse.micronaut.aws.dynamodb;
 
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
-import io.micronaut.context.ApplicationContext;
+import io.micronaut.test.annotation.MicronautTest;
 import org.joda.time.DateTime;
-import org.junit.*;
-import org.testcontainers.containers.localstack.LocalStackContainer;
+import org.junit.jupiter.api.Test;
 
+import javax.inject.Inject;
 import java.util.Arrays;
 import java.util.Date;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
+@MicronautTest
 public class DeclarativeServiceTest {
 
     private static final DateTime REFERENCE_DATE = new DateTime(1358487600000L);
 
-    @Rule
-    public LocalStackContainer localstack = new LocalStackContainer().withServices(LocalStackContainer.Service.DYNAMODB);
-    public ApplicationContext context;
-
-    @Before
-    public void setup() {
-        AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClient
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(LocalStackContainer.Service.DYNAMODB))
-            .withCredentials(localstack.getDefaultCredentialsProvider())
-            .build();
-
-        IDynamoDBMapper mapper = new DynamoDBMapper(amazonDynamoDB);
-
-        context = ApplicationContext.builder().build();
-        context.registerSingleton(AmazonDynamoDB.class, amazonDynamoDB);
-        context.registerSingleton(IDynamoDBMapper.class, mapper);
-        context.start();
-    }
-
-    @After
-    public void cleanup() {
-        if (context != null) {
-            context.close();
-        }
-    }
+    @Inject DynamoDBEntityService s;
 
     @Test
     public void testJavaService() {
-        DynamoDBEntityService s = context.getBean(DynamoDBEntityService.class);
-
         assertNotNull(s.save(createEntity("1", "1", "foo", REFERENCE_DATE.toDate())));
         assertNotNull(s.save(createEntity("1", "2", "bar", REFERENCE_DATE.plusDays(1).toDate())));
         assertNotNull(s.saveAll(Arrays.asList(
