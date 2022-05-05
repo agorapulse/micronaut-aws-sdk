@@ -102,6 +102,11 @@ config {
                 enabled = false
             }
         }
+        javadoc {
+            autoLinks {
+                enabled = false
+            }
+        }
     }
 
 }
