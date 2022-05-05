@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/docs.css?v=1.6.2-micronaut-3.0" />
+<link rel="stylesheet" href="css/docs.css?v=1.7.2-micronaut-3.0" />
 <style>
 .hidden {
     display: none;
@@ -93,7 +93,7 @@ $(addBlockSwitches);
 <h1>Set of useful libraries for Micronaut</h1>
 <div class="details">
 <span id="author" class="author">Vladimir Orany</span><br>
-<span id="revnumber">version 1.6.2-micronaut-3.0</span>
+<span id="revnumber">version 1.7.2-micronaut-3.0</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -381,7 +381,7 @@ For AWS SDK 1.x use artefacts starting with <code>micrnoaut-aws-sdk</code>. Thes
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-dynamodb:1.6.2-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb:1.7.2-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -390,14 +390,14 @@ For AWS SDK 1.x use artefacts starting with <code>micrnoaut-aws-sdk</code>. Thes
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;1.6.2-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;1.7.2-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-dynamodb:1.6.2-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-dynamodb:1.7.2-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -406,7 +406,7 @@ For AWS SDK 1.x use artefacts starting with <code>micrnoaut-aws-sdk</code>. Thes
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;1.6.2-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;1.7.2-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -710,7 +710,7 @@ public interface DynamoDBEntityService {
 <td class="tableblock halign-left valign-top"><p class="tableblock">An entity, array of entities or iterable of entities</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>DynamoDBEntity save(DynamoDBEntity entity)</code></p>
 <p class="tableblock">    <code>List&lt;DynamoDBEntity&gt; saveAll(DynamoDBEntity&#8230;&#8203; entities)</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Perists the entity or a list of entities and returns self</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Persists the entity or a list of entities and returns self</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>T</code></p>
@@ -792,6 +792,7 @@ Instead you can annotate any method with <code>@Query</code> annotation to make 
 <div class="title">Groovy (AWS SDK 2.x)</div>
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="groovy">import static com.agorapulse.micronaut.amazon.awssdk.dynamodb.groovy.GroovyBuilders.*   <i class="conum" data-value="1"></i><b>(1)</b>
+
 @Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
 interface DynamoDBItemDBService {
 
@@ -851,7 +852,7 @@ interface DynamoDBItemDBService {
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code data-lang="java">@Service(DynamoDBEntity.class)                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">@Service(value = DynamoDBEntity.class, tableName = "DynamoDBJava")                      <i class="conum" data-value="1"></i><b>(1)</b>
 public interface DynamoDBEntityService {
 
     class EqRangeProjection implements QueryFunction&lt;DynamoDBEntity&gt; {                  <i class="conum" data-value="2"></i><b>(2)</b>
@@ -969,7 +970,7 @@ interface DynamoDBItemDBService {
 <h6 id="_scanning"><a class="anchor" href="#_scanning"></a>Scanning</h6>
 <div class="paragraph">
 <p>DynamoDB integration does not support feature known as <a href="http://gorm.grails.org/6.0.x/hibernate/manual/index.html#finders"><em>dynamic finders</em></a>.
-If you need to scan the table by unindexed attributes you can annotate any method with <code>@scan</code> annotation to make it</p>
+If you need to scan the table by unindexed attributes you can annotate any method with <code>@Scan</code> annotation to make it</p>
 </div>
 <div class="ulist">
 <ul>
@@ -985,6 +986,7 @@ If you need to scan the table by unindexed attributes you can annotate any metho
 <div class="title">Groovy (AWS SDK 2.x)</div>
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="groovy">import static com.agorapulse.micronaut.amazon.awssdk.dynamodb.groovy.GroovyBuilders.*   <i class="conum" data-value="1"></i><b>(1)</b>
+
 
 @Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
 interface DynamoDBItemDBService {
@@ -1033,7 +1035,7 @@ interface DynamoDBItemDBService {
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code data-lang="java">@Service(DynamoDBEntity.class)                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">@Service(value = DynamoDBEntity.class, tableName = "DynamoDBJava")                      <i class="conum" data-value="1"></i><b>(1)</b>
 public interface DynamoDBEntityService {
 
     class EqRangeScan implements ScanFunction&lt;DynamoDBEntity&gt; {                         <i class="conum" data-value="2"></i><b>(2)</b>
@@ -1135,6 +1137,7 @@ interface DynamoDBItemDBService {
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="groovy">import static com.agorapulse.micronaut.amazon.awssdk.dynamodb.groovy.GroovyBuilders.*   <i class="conum" data-value="1"></i><b>(1)</b>
 
+
 @Service(DynamoDBEntity)                                                                <i class="conum" data-value="2"></i><b>(2)</b>
 interface DynamoDBItemDBService {
 
@@ -1192,7 +1195,7 @@ interface DynamoDBItemDBService {
 <div class="listingblock secondary">
 <div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code data-lang="java">@Service(DynamoDBEntity.class)                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">@Service(value = DynamoDBEntity.class, tableName = "DynamoDBJava")                      <i class="conum" data-value="1"></i><b>(1)</b>
 public interface DynamoDBEntityService {
 
     class IncrementNumber implements UpdateFunction&lt;DynamoDBEntity, Integer&gt; {          <i class="conum" data-value="2"></i><b>(2)</b>
@@ -1314,7 +1317,7 @@ interface DynamoDBItemDBService {
 <div class="sect4">
 <h5 id="_dynamodb_service"><a class="anchor" href="#_dynamodb_service"></a>DynamoDB Service</h5>
 <div class="paragraph">
-<p><code>DynamoDBService</code> provides middle-level API for working with DynamoDB tables and entites. You can obtain instance of <code>DynamoDBService</code> from
+<p><code>DynamoDBService</code> provides middle-level API for working with DynamoDB tables and entities. You can obtain instance of <code>DynamoDBService</code> from
 <code>DynamoDBServiceProvider</code> which can be injected to any bean.</p>
 </div>
 <div class="listingblock primary">
@@ -1528,8 +1531,7 @@ s.deleteAll('1', DynamoDBEntity.RANGE_INDEX, 'bar') == 1                        
 <div class="listingblock secondary">
 <div class="title">Java (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight nowrap"><code data-lang="java">DynamoDBServiceProvider provider = ctx.getBean(DynamoDBServiceProvider.class);
-DynamoDBService&lt;DynamoDBEntity&gt; s = provider.findOrCreate(DynamoDBEntity.class);<i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight nowrap"><code data-lang="java">DynamoDBService&lt;DynamoDBEntity&gt; s = provider.findOrCreate(DynamoDBEntity.class);<i class="conum" data-value="1"></i><b>(1)</b>
 
 assertNotNull(
     s.createTable(5L, 5L)                                                       <i class="conum" data-value="2"></i><b>(2)</b>
@@ -1623,7 +1625,7 @@ article to understand the subsequence of using DAX instead of direct DynamoDB op
 </div>
 <div class="paragraph">
 <p>Make sure you have set up proper policy to access the DAX cluster. See <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.access-control.html">DAX Access Control</a> for more information.
-Following policy allow every DAX operatin on any resource. In production, you should constraint the scope to single cluster.</p>
+Following policy allow every DAX operation on any resource. In production, you should constrain the scope to single cluster.</p>
 </div>
 <div class="listingblock">
 <div class="title">DAX Access Policy</div>
@@ -1646,7 +1648,7 @@ Following policy allow every DAX operatin on any resource. In production, you sh
 <h5 id="_testing"><a class="anchor" href="#_testing"></a>Testing</h5>
 <div class="paragraph">
 <p>You can very easily mock any of the interfaces and declarative services but if you need close-to-production
-DynamoDB integration works well with <a href="https://www.testcontainers.org/">Testcontainers</a> and <a href="https://localstack.cloud/">LocalStack</a>.</p>
+DynamoDB integration works well with <a href="https://www.testcontainers.org/">Testcontainers</a> and <a href="https://localstack.cloud/">LocalStack</a> using <code>micronaut-amazon-awssdk-integration-testing</code> module.</p>
 </div>
 <div class="paragraph">
 <p>You need to add following dependencies into your build file:</p>
@@ -1654,67 +1656,34 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile group: 'org.testcontainers', name: 'localstack', version: '1.15.3'
-compile group: 'org.testcontainers', name: 'spock', version: '1.15.3'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:1.7.2-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Maven</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
-    &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
-    &lt;artifactId&gt;localstack&lt;/artifactId&gt;
-    &lt;version&gt;1.15.3&lt;/version&gt;
-    &lt;scope&gt;test&lt;/scope&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
-    &lt;artifactId&gt;spock&lt;/artifactId&gt;
-    &lt;version&gt;1.15.3&lt;/version&gt;
-    &lt;scope&gt;test&lt;/scope&gt;
+    &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
+    &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
+    &lt;version&gt;1.7.2-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Then you can setup your tests like this:</p>
+<p>Then you can set up your tests like this:</p>
 </div>
 <div class="listingblock primary">
-<div class="title">Groovy (AWS SDK 2.x)</div>
+<div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">@Stepwise
-@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">@MicronautTest                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
 class DefaultDynamoDBServiceSpec extends Specification {
 
-    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="2"></i><b>(2)</b>
+    @Inject DynamoDBServiceProvider dynamoDBServiceProvider                             <i class="conum" data-value="2"></i><b>(2)</b>
 
-    @Shared LocalStackContainer localstack = new LocalStackContainer()                  <i class="conum" data-value="3"></i><b>(3)</b>
-        .withServices(DYNAMODB)
-
-    DynamoDBItemDBService service
     DynamoDbService&lt;DynamoDBEntity&gt; dbs
 
     void setup() {
-        DynamoDbClient client = DynamoDbClient                                          <i class="conum" data-value="4"></i><b>(4)</b>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(DYNAMODB))
-            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.accessKey, localstack.secretKey
-            )))
-            .region(Region.of(localstack.region))
-            .build()
-
-        DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient
-            .builder()
-            .dynamoDbClient(client)
-            .build()
-
-        context = ApplicationContext.builder().build()
-        context.registerSingleton(DynamoDbClient, client)                               <i class="conum" data-value="5"></i><b>(5)</b>
-        context.registerSingleton(DynamoDbEnhancedClient, enhancedClient)               <i class="conum" data-value="6"></i><b>(6)</b>
-        context.start()
-
-        service = context.getBean(DynamoDBItemDBService)                                <i class="conum" data-value="7"></i><b>(7)</b>
-        dbs = context.getBean(DynamoDBServiceProvider).findOrCreate(DynamoDBEntity)     <i class="conum" data-value="8"></i><b>(8)</b>
+        dbs = dynamoDBServiceProvider.findOrCreate(DynamoDBEntity)                      <i class="conum" data-value="3"></i><b>(3)</b>
     }
 
     // test methods
@@ -1726,83 +1695,29 @@ class DefaultDynamoDBServiceSpec extends Specification {
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Annotate the specification with <code>@Testcontainers</code> to let Spock manage the Testcontainers for you</td>
+<td>Annotate the specification with <code>@MicronautTest</code> to let Micronaut handle the application context lifecycle</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Prepare the reference to the <code>ApplicationContext</code>, <code>@AutoCleanup</code> guarantees closing the context after the tests</td>
+<td>Use <code>@Inject</code> to let Micronaut inject the beans into your tests</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with only DynamoDB support enabled</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Create <code>DynamoDbClient</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Register the client using LocalStack to the application context</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Register the enhanced client using LocalStack to the application context</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>Obtain the declarative service</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="8"></i><b>8</b></td>
-<td>Obtain <code>DynamoDBService</code> for particular DynamoDB entity</td>
+<td>Create the low-level service using <code>DynamoDBServiceProvider</code></td>
 </tr>
 </table>
 </div>
 <div class="listingblock secondary">
-<div class="title">Java (AWS SDK 2.x)</div>
+<div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="java">public class DeclarativeServiceTest {
+<pre class="prettyprint highlight"><code data-lang="java">@MicronautTest                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+public class DeclarativeServiceTest {
 
-    private static final Instant REFERENCE_DATE = Instant.ofEpochMilli(1358487600000L);
+    @Inject DynamoDBServiceProvider provider                                            <i class="conum" data-value="2"></i><b>(2)</b>
 
-    @Rule
-    public LocalStackContainer localstack = new LocalStackContainer()                   <i class="conum" data-value="1"></i><b>(1)</b>
-        .withServices(DYNAMODB);
-
-    public ApplicationContext context;                                                  <i class="conum" data-value="2"></i><b>(2)</b>
-
-    @Before
-    public void setup() {
-        DynamoDbClient client = DynamoDbClient                                          <i class="conum" data-value="3"></i><b>(3)</b>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(DYNAMODB))
-            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.getAccessKey(), localstack.getSecretKey()
-            )))
-            .region(Region.of(localstack.getRegion()))
-            .build();
-
-        DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient
-            .builder()
-            .dynamoDbClient(client)
-            .build();
-
-        context = ApplicationContext.builder().build();
-        context.registerSingleton(DynamoDbClient.class, client);                        <i class="conum" data-value="4"></i><b>(4)</b>
-        context.registerSingleton(DynamoDbEnhancedClient.class, enhancedClient);        <i class="conum" data-value="5"></i><b>(5)</b>
-        context.start();
-    }
-
-    @After
-    public void cleanup() {
-        if (context != null) {
-            context.close();                                                            <i class="conum" data-value="6"></i><b>(6)</b>
-        }
-    }
     @Test
     public void testSomething() {
-        DynamoDBServiceProvider provider = ctx.getBean(DynamoDBServiceProvider.class);  <i class="conum" data-value="7"></i><b>(7)</b>
-        DynamoDBService&lt;DynamoDBEntity&gt; s = provider.findOrCreate(DynamoDBEntity.class);<i class="conum" data-value="8"></i><b>(8)</b>
+        DynamoDBService&lt;DynamoDBEntity&gt; s = provider.findOrCreate(DynamoDBEntity.class);<i class="conum" data-value="3"></i><b>(3)</b>
 
         // test code
     }
@@ -1813,197 +1728,15 @@ class DefaultDynamoDBServiceSpec extends Specification {
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with only DynamoDB support enabled</td>
+<td>Annotate the specification with <code>@MicronautTest</code> to let Micronaut handle the application context lifecycle</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Prepare the reference to the <code>ApplicationContext</code></td>
+<td>Use <code>@Inject</code> to let Micronaut inject the beans into your tests</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Create <code>DynamoDbClient</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Register the client using LocalStack to the application context</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Register the enhanced client using LocalStack to the application context</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Close the application context after test execution</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>Obtain the provider bean</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="8"></i><b>8</b></td>
-<td>Obtain <code>DynamoDBService</code> for particular DynamoDB entity</td>
-</tr>
-</table>
-</div>
-<div class="listingblock secondary">
-<div class="title">Groovy (AWS SDK 1.x)</div>
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">@Stepwise
-@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
-class DefaultDynamoDBServiceSpec extends Specification {
-
-    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="2"></i><b>(2)</b>
-
-    @Shared LocalStackContainer localstack = new LocalStackContainer()                  <i class="conum" data-value="3"></i><b>(3)</b>
-        .withServices(LocalStackContainer.Service.DYNAMODB)
-
-    DynamoDBService&lt;DynamoDBEntity&gt; s
-    AmazonDynamoDB amazonDynamoDB
-    IDynamoDBMapper mapper
-
-    void setup() {
-        amazonDynamoDB = AmazonDynamoDBClient                                           <i class="conum" data-value="4"></i><b>(4)</b>
-            .builder()
-            .withEndpointConfiguration(
-                localstack.getEndpointConfiguration(LocalStackContainer.Service.DYNAMODB)
-            )
-            .withCredentials(
-                localstack.defaultCredentialsProvider
-            )
-            .build()
-
-        mapper = new DynamoDBMapper(amazonDynamoDB)
-
-        context = ApplicationContext.builder().build()
-        context.registerSingleton(AmazonDynamoDB, amazonDynamoDB)                       <i class="conum" data-value="5"></i><b>(5)</b>
-        context.registerSingleton(IDynamoDBMapper, mapper)                              <i class="conum" data-value="6"></i><b>(6)</b>
-        context.start()
-
-        DynamoDBServiceProvider provider = context.getBean(DynamoDBServiceProvider)     <i class="conum" data-value="7"></i><b>(7)</b>
-        s = provider.findOrCreate(DynamoDBEntity)                                       <i class="conum" data-value="8"></i><b>(8)</b>
-    }
-
-    // test methods
-
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Annotate the specification with <code>@Testcontainers</code> to let Spock manage the Testcontainers for you</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Prepare the reference to the <code>ApplicationContext</code>, <code>@AutoCleanup</code> guarantees closing the context after the tests</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with only DynamoDB support enabled</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Create <code>AmazonDynamoDB</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Register the client using LocalStack to the application context</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Register the mapper using LocalStack to the application context</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>Obtain the provider bean</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="8"></i><b>8</b></td>
-<td>Obtain <code>DynamoDBService</code> for particular DynamoDB entity</td>
-</tr>
-</table>
-</div>
-<div class="listingblock secondary">
-<div class="title">Java (AWS SDK 1.x)</div>
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="java">public class DynamoDBServiceTest {
-    @Rule
-    public LocalStackContainer localstack = new LocalStackContainer()                   <i class="conum" data-value="1"></i><b>(1)</b>
-        .withServices(LocalStackContainer.Service.DYNAMODB);
-
-    public ApplicationContext ctx;                                                      <i class="conum" data-value="2"></i><b>(2)</b>
-
-    @Before
-    public void setup() {
-        AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClient                            <i class="conum" data-value="3"></i><b>(3)</b>
-            .builder()
-            .withEndpointConfiguration(
-                localstack.getEndpointConfiguration(LocalStackContainer.Service.DYNAMODB)
-            )
-            .withCredentials(
-                localstack.getDefaultCredentialsProvider()
-            )
-            .build();
-
-        IDynamoDBMapper mapper = new DynamoDBMapper(amazonDynamoDB);
-
-        ctx = ApplicationContext.builder().build();
-        ctx.registerSingleton(AmazonDynamoDB.class, amazonDynamoDB);                    <i class="conum" data-value="4"></i><b>(4)</b>
-        ctx.registerSingleton(IDynamoDBMapper.class, mapper);                           <i class="conum" data-value="5"></i><b>(5)</b>
-        ctx.start();
-    }
-
-    @After
-    public void cleanup() {
-        if (ctx != null) {                                                              <i class="conum" data-value="6"></i><b>(6)</b>
-            ctx.close();
-        }
-    }
-
-    @Test
-    public void testSomething() {
-        DynamoDBServiceProvider provider = ctx.getBean(DynamoDBServiceProvider.class);  <i class="conum" data-value="7"></i><b>(7)</b>
-        DynamoDBService&lt;DynamoDBEntity&gt; s = provider.findOrCreate(DynamoDBEntity.class);<i class="conum" data-value="8"></i><b>(8)</b>
-
-        // test code
-    }
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with only DynamoDB support enabled</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Prepare the reference to the <code>ApplicationContext</code></td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Create <code>AmazonDynamoDB</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Register the client using LocalStack to the application context</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Register the mapper using LocalStack to the application context</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Close the application context after test execution</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>Obtain the provider bean</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="8"></i><b>8</b></td>
-<td>Obtain <code>DynamoDBService</code> for particular DynamoDB entity</td>
+<td>Create the low-level service using <code>DynamoDBServiceProvider</code></td>
 </tr>
 </table>
 </div>
@@ -2014,7 +1747,17 @@ class DefaultDynamoDBServiceSpec extends Specification {
 <i class="fa icon-tip" title="Tip"></i>
 </td>
 <td class="content">
-You can obtain instances of declarative client from the context as well.
+<div class="paragraph">
+<p>You can save time creating the new Localstack container by sharing it between the tests.</p>
+</div>
+<div class="listingblock">
+<div class="title">application-test.yml</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="yaml">localstack:
+  services: dynamodb
+  shared: true</code></pre>
+</div>
+</div>
 </td>
 </tr>
 </table>
@@ -2052,10 +1795,10 @@ You can obtain instances of declarative client from the context as well.
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code>// for Kinesis client
-compile 'com.agorapulse:micronaut-amazon-awssdk-kinesis:1.6.2-micronaut-3.0'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis:1.7.2-micronaut-3.0'
 
 // for Kinesis listener
-compile 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:1.6.2-micronaut-3.0'</code></pre>
+implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:1.7.2-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2065,13 +1808,13 @@ compile 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:1.6.2-micronaut-3
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-kinesis&lt;/artifactId&gt;
-    &lt;version&gt;1.6.2-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;1.7.2-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;!-- for Kinesis listener --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-kinesis-worker&lt;/artifactId&gt;
-    &lt;version&gt;1.6.2-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;1.7.2-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2079,9 +1822,9 @@ compile 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:1.6.2-micronaut-3
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code>// for Kinesis client
-compile 'com.agorapulse:micronaut-aws-sdk-kinesis:1.6.2-micronaut-3.0'
+implementation 'com.agorapulse:micronaut-aws-sdk-kinesis:1.7.2-micronaut-3.0'
 // for Kinesis listener
-compile 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:1.6.2-micronaut-3.0'</code></pre>
+implementation 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:1.7.2-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2091,13 +1834,13 @@ compile 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:1.6.2-micronaut-3.0'</c
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-kinesis&lt;/artifactId&gt;
-    &lt;version&gt;1.6.2-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;1.7.2-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;!-- for Kinesis listener --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-kinesis-worker&lt;/artifactId&gt;
-    &lt;version&gt;1.6.2-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;1.7.2-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2802,7 +2545,7 @@ for the full reference.</p>
 <h5 id="_testing_2"><a class="anchor" href="#_testing_2"></a>Testing</h5>
 <div class="paragraph">
 <p>You can very easily mock any of the interfaces and declarative services but if you need close-to-production
-Kinesis integration works well with <a href="https://www.testcontainers.org/">Testcontainers</a> and <a href="https://localstack.cloud/">LocalStack</a>.</p>
+DynamoDB integration works well with <a href="https://www.testcontainers.org/">Testcontainers</a> and <a href="https://localstack.cloud/">LocalStack</a> using <code>micronaut-amazon-awssdk-integration-testing</code> module.</p>
 </div>
 <div class="paragraph">
 <p>You need to add following dependencies into your build file:</p>
@@ -2810,24 +2553,16 @@ Kinesis integration works well with <a href="https://www.testcontainers.org/">Te
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile group: 'org.testcontainers', name: 'localstack', version: '1.15.3'
-compile group: 'org.testcontainers', name: 'spock', version: '1.15.3'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:1.7.2-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Maven</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
-    &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
-    &lt;artifactId&gt;localstack&lt;/artifactId&gt;
-    &lt;version&gt;1.15.3&lt;/version&gt;
-    &lt;scope&gt;test&lt;/scope&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
-    &lt;artifactId&gt;spock&lt;/artifactId&gt;
-    &lt;version&gt;1.15.3&lt;/version&gt;
-    &lt;scope&gt;test&lt;/scope&gt;
+    &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
+    &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
+    &lt;version&gt;1.7.2-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2835,42 +2570,12 @@ compile group: 'org.testcontainers', name: 'spock', version: '1.15.3'</code></pr
 <p>Then you can set up your tests like this:</p>
 </div>
 <div class="listingblock primary">
-<div class="title">Groovy (AWS SDK 2.x)</div>
+<div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
-@RestoreSystemProperties                                                                <i class="conum" data-value="2"></i><b>(2)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">@MicronautTest                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
 class KinesisDemoSpec extends Specification {
 
-    @Shared
-    LocalStackContainer localstack = new LocalStackContainer().withServices(KINESIS)    <i class="conum" data-value="3"></i><b>(3)</b>
-
-    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="4"></i><b>(4)</b>
-
-    KinesisService service
-
-    void setup() {
-        // disable CBOR (not supported by Kinelite)
-        System.setProperty(SdkSystemSetting.CBOR_ENABLED.property(), 'false')           <i class="conum" data-value="5"></i><b>(5)</b>
-
-        KinesisClient kinesis = KinesisClient                                           <i class="conum" data-value="6"></i><b>(6)</b>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(KINESIS))
-            .credentialsProvider(
-                StaticCredentialsProvider.create(
-                    AwsBasicCredentials.create(
-                        localstack.accessKey, localstack.secretKey
-                    )
-                )
-            )
-            .region(Region.EU_WEST_1)
-            .build()
-
-        context = ApplicationContext.builder().build()                                  <i class="conum" data-value="7"></i><b>(7)</b>
-        context.registerSingleton(KinesisClient, kinesis)
-        context.start()
-
-        service = context.getBean(KinesisService)                                       <i class="conum" data-value="8"></i><b>(8)</b>
-    }
+    @Inject KinesisService service                                                      <i class="conum" data-value="2"></i><b>(2)</b>
 
     @Retry
     void 'new default stream'() {
@@ -2887,81 +2592,21 @@ class KinesisDemoSpec extends Specification {
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Annotate the specification with <code>@Testcontainers</code> to let Spock manage the Testcontainers for you</td>
+<td>Annotate the specification with <code>@MicronautTest</code> to let Micronaut handle the application context lifecycle</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td><code>@RestoreSystemProperties</code> will guarantee that system properties will be restore after the test</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with Kinesis support enabled</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Prepare the reference to the <code>ApplicationContext</code>, <code>@AutoCleanup</code> guarantees closing the context after the tests</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Disable CBOR protocol for Kinesis (not supported by LocalStack/Kinesilite)</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Create <code>KinesisClient</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>Prepare the application context</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="8"></i><b>8</b></td>
-<td>Obtain service from the application context</td>
+<td>Use <code>@Inject</code> to let Micronaut inject the beans into your tests</td>
 </tr>
 </table>
 </div>
 <div class="listingblock secondary">
-<div class="title">Java (AWS SDK 2.x)</div>
+<div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="java">public class KinesisJavaDemoTest {
+<pre class="prettyprint highlight"><code data-lang="java">@MicronautTest                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+public class KinesisJavaDemoTest {
 
-    @Rule
-    public LocalStackContainer localstack = new LocalStackContainer()                   <i class="conum" data-value="1"></i><b>(1)</b>
-        .withServices(KINESIS);
-
-    public ApplicationContext context;
-    public KinesisService service;
-
-    @Before
-    public void setup() {
-        // disable CBOR (not supported by Kinelite)
-        System.setProperty(SdkSystemSetting.CBOR_ENABLED.property(), "false");          <i class="conum" data-value="2"></i><b>(2)</b>
-
-        KinesisClient kinesis = KinesisClient                                           <i class="conum" data-value="3"></i><b>(3)</b>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(KINESIS))
-            .credentialsProvider(
-                StaticCredentialsProvider.create(
-                    AwsBasicCredentials.create(
-                        localstack.getAccessKey(), localstack.getSecretKey()
-                    )
-                )
-            )
-            .region(Region.EU_WEST_1)
-            .build();
-
-        context = ApplicationContext.builder().build();                                 <i class="conum" data-value="4"></i><b>(4)</b>
-        context.registerSingleton(KinesisClient.class, kinesis);
-        context.start();
-
-        service = context.getBean(KinesisService.class);                                <i class="conum" data-value="5"></i><b>(5)</b>
-    }
-
-    @After
-    public void cleanup() {
-        if (context != null) {
-            context.close();                                                            <i class="conum" data-value="6"></i><b>(6)</b>
-        }
-    }
+    @Inject KinesisService service;                                                     <i class="conum" data-value="2"></i><b>(2)</b>
 
     @Test
     public void testJavaService() {
@@ -2974,176 +2619,33 @@ class KinesisDemoSpec extends Specification {
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with Kinesis support enabled</td>
+<td>Annotate the specification with <code>@MicronautTest</code> to let Micronaut handle the application context lifecycle</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Disable CBOR protocol for Kinesis (not supported by LocalStack/Kinesilite)</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Create <code>KinesisClient</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Prepare the application context</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Obtain service from the application context</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Don&#8217;t forget to clean up the application context after the tests</td>
+<td>Use <code>@Inject</code> to let Micronaut inject the beans into your tests</td>
 </tr>
 </table>
 </div>
-<div class="listingblock secondary">
-<div class="title">Groovy (AWS SDK 1.x)</div>
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
-@RestoreSystemProperties                                                                <i class="conum" data-value="2"></i><b>(2)</b>
-class KinesisDemoSpec extends Specification {
-
-    @Shared
-    LocalStackContainer localstack = new LocalStackContainer().withServices(KINESIS)    <i class="conum" data-value="3"></i><b>(3)</b>
-
-    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="4"></i><b>(4)</b>
-
-    KinesisService service
-
-    void setup() {
-        // disable CBOR (not supported by Kinelite)
-        System.setProperty('com.amazonaws.sdk.disableCbor', 'false')                    <i class="conum" data-value="5"></i><b>(5)</b>
-
-        AmazonKinesis kinesis = AmazonKinesisClient                                     <i class="conum" data-value="6"></i><b>(6)</b>
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(KINESIS))
-            .withCredentials(localstack.defaultCredentialsProvider)
-            .build()
-
-        context = ApplicationContext.builder().build()
-        context.registerSingleton(AmazonKinesis, kinesis)                               <i class="conum" data-value="7"></i><b>(7)</b>
-        context.start()
-
-        service = context.getBean(KinesisService)                                       <i class="conum" data-value="8"></i><b>(8)</b>
-    }
-
-    @Retry
-    void 'new default stream'() {
-        when:
-            CreateStreamResult stream = service.createStream('NewStream')
-        then:
-            stream
-    }
-
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
+<div class="admonitionblock tip">
 <table>
 <tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Annotate the specification with <code>@Testcontainers</code> to let Spock manage the Testcontainers for you</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td><code>@RestoreSystemProperties</code> will guarantee that system properties will be restore after the test</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with Kinesis support enabled</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Prepare the reference to the <code>ApplicationContext</code>, <code>@AutoCleanup</code> guarantees closing the context after the tests</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Disable CBOR protocol for Kinesis (not supported by LocalStack/Kinesilite)</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Create <code>AmazonKinesis</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>Prepare the application context</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="8"></i><b>8</b></td>
-<td>Obtain service from the application context</td>
-</tr>
-</table>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>You can save time creating the new Localstack container by sharing it between the tests.</p>
 </div>
-<div class="listingblock secondary">
-<div class="title">Java (AWS SDK 1.x)</div>
+<div class="listingblock">
+<div class="title">application-test.yml</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="java">public class KinesisJavaDemoTest {
-
-    @Rule
-    public LocalStackContainer localstack = new LocalStackContainer()                   <i class="conum" data-value="1"></i><b>(1)</b>
-        .withServices(KINESIS);
-
-    public ApplicationContext context;                                                  <i class="conum" data-value="2"></i><b>(2)</b>
-    public KinesisService service;
-
-    @Before
-    public void setup() {
-        System.setProperty("com.amazonaws.sdk.disableCbor", "false");                   <i class="conum" data-value="2"></i><b>(2)</b>
-
-        AmazonKinesis kinesis = AmazonKinesisClient                                     <i class="conum" data-value="3"></i><b>(3)</b>
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(KINESIS))
-            .withCredentials(localstack.getDefaultCredentialsProvider())
-            .build();
-
-        context = ApplicationContext.builder().build();
-        context.registerSingleton(AmazonKinesis.class, kinesis);                        <i class="conum" data-value="4"></i><b>(4)</b>
-        context.start();
-
-        service = context.getBean(KinesisService.class);                                <i class="conum" data-value="5"></i><b>(5)</b>
-    }
-
-    @After
-    public void cleanup() {
-        if (context != null) {
-            context.close();                                                            <i class="conum" data-value="6"></i><b>(6)</b>
-        }
-    }
-
-    @Test
-    public void testJavaService() {
-        assertNotNull(service.createStream("TestStream"));
-    }
-}</code></pre>
+<pre class="prettyprint highlight"><code data-lang="yaml">localstack:
+  services: kinesis
+  shared: true</code></pre>
 </div>
 </div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with Kinesis support enabled</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Disable CBOR protocol for Kinesis (not supported by LocalStack/Kinesilite)</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Create <code>AmazonKinesis</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Prepare the application context</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Obtain service from the application context</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Don&#8217;t forget to clean up the application context after the tests</td>
+</td>
 </tr>
 </table>
 </div>
@@ -3166,7 +2668,7 @@ class KinesisDemoSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-s3:1.6.2-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-s3:1.7.2-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3175,14 +2677,14 @@ class KinesisDemoSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-s3&lt;/artifactId&gt;
-    &lt;version&gt;1.6.2-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;1.7.2-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-s3:1.6.2-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-s3:1.7.2-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3191,7 +2693,7 @@ class KinesisDemoSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-s3&lt;/artifactId&gt;
-    &lt;version&gt;1.6.2-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;1.7.2-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3466,8 +2968,8 @@ assertFalse(service.listBucketNames().contains(MY_BUCKET));                     
 <div class="sect4">
 <h5 id="_testing_3"><a class="anchor" href="#_testing_3"></a>Testing</h5>
 <div class="paragraph">
-<p>You can very easily mock the <code>SimpleStorageService</code> but if you need close-to-production
-S3 integration works well with <a href="https://www.testcontainers.org/">Testcontainers</a> and <a href="https://localstack.cloud/">LocalStack</a>.</p>
+<p>You can very easily mock any of the interfaces and declarative services but if you need close-to-production
+DynamoDB integration works well with <a href="https://www.testcontainers.org/">Testcontainers</a> and <a href="https://localstack.cloud/">LocalStack</a> using <code>micronaut-amazon-awssdk-integration-testing</code> module.</p>
 </div>
 <div class="paragraph">
 <p>You need to add following dependencies into your build file:</p>
@@ -3475,76 +2977,30 @@ S3 integration works well with <a href="https://www.testcontainers.org/">Testcon
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile group: 'org.testcontainers', name: 'localstack', version: '1.15.3'
-compile group: 'org.testcontainers', name: 'spock', version: '1.15.3'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:1.7.2-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Maven</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
-    &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
-    &lt;artifactId&gt;localstack&lt;/artifactId&gt;
-    &lt;version&gt;1.15.3&lt;/version&gt;
-    &lt;scope&gt;test&lt;/scope&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
-    &lt;artifactId&gt;spock&lt;/artifactId&gt;
-    &lt;version&gt;1.15.3&lt;/version&gt;
-    &lt;scope&gt;test&lt;/scope&gt;
+    &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
+    &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
+    &lt;version&gt;1.7.2-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Then you can setup your tests like this:</p>
+<p>Then you can set up your tests like this:</p>
 </div>
 <div class="listingblock primary">
-<div class="title">Groovy (AWS SDK 2.x)</div>
+<div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">@MicronautTest                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+@Property(name = 'aws.s3.bucket', value = MY_BUCKET)                                    <i class="conum" data-value="2"></i><b>(2)</b>
 class SimpleStorageServiceSpec extends Specification {
 
-    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="2"></i><b>(2)</b>
-    @AutoCleanup S3Client amazonS3
-    @AutoCleanup S3Presigner presigner
-
-    @Shared LocalStackContainer localstack = new LocalStackContainer()                  <i class="conum" data-value="3"></i><b>(3)</b>
-        .withServices(LocalStackContainer.Service.S3)
-
-    SimpleStorageService service
-
-    void setup() {
-        amazonS3 = S3Client                                                             <i class="conum" data-value="4"></i><b>(4)</b>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.S3))
-            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.accessKey, localstack.secretKey
-            )))
-            .region(Region.of(localstack.region))
-            .build()
-
-        presigner = S3Presigner                                                         <i class="conum" data-value="5"></i><b>(5)</b>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.S3))
-            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.accessKey, localstack.secretKey
-            )))
-            .region(Region.of(localstack.region))
-            .build()
-        context = ApplicationContext                                                    <i class="conum" data-value="6"></i><b>(6)</b>
-            .builder(
-                'aws.s3.bucket': MY_BUCKET,
-                'aws.s3.region': 'eu-west-1'
-            )
-            .build()
-
-        context.registerSingleton(S3Client, amazonS3)
-        context.registerSingleton(S3Presigner, presigner)
-        context.start()
-
-        service = context.getBean(SimpleStorageService)                                 <i class="conum" data-value="7"></i><b>(7)</b>
-    }
+    @Inject SimpleStorageService service                                                <i class="conum" data-value="3"></i><b>(3)</b>
 
     // test methods
 
@@ -3555,82 +3011,26 @@ class SimpleStorageServiceSpec extends Specification {
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Annotate the specification with <code>@Testcontainers</code> to let Spock manage the Testcontainers for you</td>
+<td>Annotate the specification with <code>@MicronautTest</code> to let Micronaut handle the application context lifecycle</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Prepare the reference to the <code>ApplicationContext</code>, <code>@AutoCleanup</code> guarantees closing the context after the tests</td>
+<td>Annotate the specification with <code>@Property</code> to set the required Micronaut properties</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with S3 support enabled</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Create <code>S3Client</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Create <code>S3Presigner</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Prepare the application context with default configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>You can obtain instance of <code>SimpleStorageService</code> from the context</td>
+<td>Use <code>@Inject</code> to let Micronaut inject the beans into your tests</td>
 </tr>
 </table>
 </div>
 <div class="listingblock secondary">
-<div class="title">Java (AWS SDK 2.x)</div>
+<div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="java">public class SimpleStorageServiceTest {
+<pre class="prettyprint highlight"><code data-lang="java">@MicronautTest                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+@Property(name = "aws.s3.bucket", value = SimpleStorageServiceTest.MY_BUCKET)           <i class="conum" data-value="2"></i><b>(2)</b>
+public class SimpleStorageServiceTest {
 
-    @Rule
-    public final LocalStackContainer localstack = new LocalStackContainer()            <i class="conum" data-value="1"></i><b>(1)</b>
-        .withServices(S3);
-
-    @TempDir
-    public File tmp;
-
-    private ApplicationContext ctx;                                                     <i class="conum" data-value="2"></i><b>(2)</b>
-
-    @Before
-    public void setup() {
-        S3Client amazonS3 = S3Client                                                    <i class="conum" data-value="3"></i><b>(3)</b>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.S3))
-            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.getAccessKey(), localstack.getSecretKey()
-            )))
-            .region(Region.of(localstack.getRegion()))
-            .build();
-
-        S3Presigner presigner = S3Presigner
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.S3))
-            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.getAccessKey(), localstack.getSecretKey()
-            )))
-            .region(Region.of(localstack.getRegion()))
-            .build();
-
-        ctx = ApplicationContext
-            .builder(Collections.singletonMap("aws.s3.bucket", MY_BUCKET))
-            .build();
-        ctx.registerSingleton(S3Client.class, amazonS3);                                <i class="conum" data-value="4"></i><b>(4)</b>
-        ctx.registerSingleton(S3Presigner.class, presigner);
-        ctx.start();
-    }
-
-    @After
-    public void cleanup() {
-        if (ctx != null) {                                                              <i class="conum" data-value="5"></i><b>(5)</b>
-            ctx.close();
-        }
-    }
+    @Inject SimpleStorageService service;                                               <i class="conum" data-value="3"></i><b>(3)</b>
 
     // test methods
 
@@ -3641,158 +3041,37 @@ class SimpleStorageServiceSpec extends Specification {
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with Kinesis and  DynamoDB (required by the listener) support enabled</td>
+<td>Annotate the specification with <code>@MicronautTest</code> to let Micronaut handle the application context lifecycle</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Prepare the reference to the <code>ApplicationContext</code></td>
+<td>Annotate the specification with <code>@Property</code> to set the required Micronaut properties</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Create <code>S3Client</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Register <code>S3Client</code> service running against LocalStack</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Don&#8217;t forget to close <code>ApplicationContext</code></td>
+<td>Use <code>@Inject</code> to let Micronaut inject the beans into your tests</td>
 </tr>
 </table>
 </div>
-<div class="listingblock secondary">
-<div class="title">Groovy (AWS SDK 1.x)</div>
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">@Stepwise
-@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
-class SimpleStorageServiceSpec extends Specification {
-
-    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="2"></i><b>(2)</b>
-
-    @Shared LocalStackContainer localstack = new LocalStackContainer()                  <i class="conum" data-value="3"></i><b>(3)</b>
-        .withServices(S3)
-
-    @TempDir File tmp
-
-    AmazonS3 amazonS3
-    SimpleStorageService service
-
-    void setup() {
-        amazonS3 = AmazonS3Client                                                       <i class="conum" data-value="4"></i><b>(4)</b>
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(S3))
-            .withCredentials(localstack.defaultCredentialsProvider)
-            .build()
-
-        context = ApplicationContext
-            .builder('aws.s3.bucket': MY_BUCKET)                                        <i class="conum" data-value="5"></i><b>(5)</b>
-            .build()
-        context.registerSingleton(AmazonS3, amazonS3)                                   <i class="conum" data-value="6"></i><b>(6)</b>
-        context.start()
-
-        service = context.getBean(SimpleStorageService)                                 <i class="conum" data-value="7"></i><b>(7)</b>
-    }
-
-    // test methods
-
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
+<div class="admonitionblock tip">
 <table>
 <tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Annotate the specification with <code>@Testcontainers</code> to let Spock manage the Testcontainers for you</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Prepare the reference to the <code>ApplicationContext</code>, <code>@AutoCleanup</code> guarantees closing the context after the tests</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with S3 support enabled</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Create <code>AmazonS3</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Set the default bucket</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Register <code>AmazonS3</code> service running against LocalStack</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>You can obtain instance of <code>SimpleStorageService</code> from the context</td>
-</tr>
-</table>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>You can save time creating the new Localstack container by sharing it between the tests.</p>
 </div>
-<div class="listingblock secondary">
-<div class="title">Java (AWS SDK 1.x)</div>
+<div class="listingblock">
+<div class="title">application-test.yml</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="java">public class SimpleStorageServiceTest {
-
-    @Rule
-    public final LocalStackContainer localstack = new LocalStackContainer()            <i class="conum" data-value="1"></i><b>(1)</b>
-        .withServices(S3);
-
-    @TempDir
-    public File tmp;
-
-    private ApplicationContext ctx;                                                     <i class="conum" data-value="2"></i><b>(2)</b>
-
-    @Before
-    public void setup() {
-        AmazonS3 amazonS3 = AmazonS3Client                                              <i class="conum" data-value="3"></i><b>(3)</b>
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(S3))
-            .withCredentials(localstack.getDefaultCredentialsProvider())
-            .build();
-
-        ctx = ApplicationContext
-            .builder(Collections.singletonMap("aws.s3.bucket", MY_BUCKET))
-            .build();
-        ctx.registerSingleton(AmazonS3.class, amazonS3);                                <i class="conum" data-value="4"></i><b>(4)</b>
-        ctx.start();
-    }
-
-    @After
-    public void cleanup() {
-        if (ctx != null) {                                                              <i class="conum" data-value="5"></i><b>(5)</b>
-            ctx.close();
-        }
-    }
-
-    // test methods
-
-}</code></pre>
+<pre class="prettyprint highlight"><code data-lang="yaml">localstack:
+  services: s3
+  shared: true</code></pre>
 </div>
 </div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with Kinesis and  DynamoDB (required by the listener) support enabled</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Prepare the reference to the <code>ApplicationContext</code></td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Create <code>AmazonS3</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Register <code>AmazonS3</code> service running against LocalStack</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Don&#8217;t forget to close <code>ApplicationContext</code></td>
+</td>
 </tr>
 </table>
 </div>
@@ -3815,7 +3094,7 @@ class SimpleStorageServiceSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-ses:1.6.2-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-ses:1.7.2-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3824,14 +3103,14 @@ class SimpleStorageServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-ses&lt;/artifactId&gt;
-    &lt;version&gt;1.6.2-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;1.7.2-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ses:1.6.2-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-ses:1.7.2-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3840,7 +3119,7 @@ class SimpleStorageServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-ses&lt;/artifactId&gt;
-    &lt;version&gt;1.6.2-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;1.7.2-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4018,7 +3297,7 @@ for the full reference.</p>
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-sns:1.6.2-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-sns:1.7.2-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4027,14 +3306,14 @@ for the full reference.</p>
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-sns&lt;/artifactId&gt;
-    &lt;version&gt;1.6.2-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;1.7.2-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sns:1.6.2-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-sns:1.7.2-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4043,7 +3322,7 @@ for the full reference.</p>
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sns&lt;/artifactId&gt;
-    &lt;version&gt;1.6.2-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;1.7.2-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4517,7 +3796,7 @@ for the full reference.</p>
 <h5 id="_testing_5"><a class="anchor" href="#_testing_5"></a>Testing</h5>
 <div class="paragraph">
 <p>You can very easily mock any of the interfaces and declarative services but if you need close-to-production
-SNS integration works well with <a href="https://www.testcontainers.org/">Testcontainers</a> and <a href="https://localstack.cloud/">LocalStack</a>.</p>
+DynamoDB integration works well with <a href="https://www.testcontainers.org/">Testcontainers</a> and <a href="https://localstack.cloud/">LocalStack</a> using <code>micronaut-amazon-awssdk-integration-testing</code> module.</p>
 </div>
 <div class="paragraph">
 <p>You need to add following dependencies into your build file:</p>
@@ -4525,62 +3804,34 @@ SNS integration works well with <a href="https://www.testcontainers.org/">Testco
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile group: 'org.testcontainers', name: 'localstack', version: '1.15.3'
-compile group: 'org.testcontainers', name: 'spock', version: '1.15.3'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:1.7.2-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Maven</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
-    &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
-    &lt;artifactId&gt;localstack&lt;/artifactId&gt;
-    &lt;version&gt;1.15.3&lt;/version&gt;
-    &lt;scope&gt;test&lt;/scope&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
-    &lt;artifactId&gt;spock&lt;/artifactId&gt;
-    &lt;version&gt;1.15.3&lt;/version&gt;
-    &lt;scope&gt;test&lt;/scope&gt;
+    &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
+    &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
+    &lt;version&gt;1.7.2-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Then you can setup your tests like this:</p>
+<p>Then you can set up your tests like this:</p>
 </div>
 <div class="listingblock primary">
-<div class="title">Groovy (AWS SDK 2.x)</div>
+<div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">@MicronautTest                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+@Property(name = 'aws.sns.topic', value = TEST_TOPIC)                                   <i class="conum" data-value="2"></i><b>(2)</b>
+@Property(name = 'aws.sns.ios.arn', value = IOS_APP_ARN)
+@Property(name = 'aws.sns.ios-sandbox.arn', value = IOS_SANDBOX_APP_ARN)
+@Property(name = 'aws.sns.android.arn', value = ANDROID_APP_ARN)
+@Property(name = 'aws.sns.amazon.arn', value = AMAZON_APP_ARN)
 class SimpleNotificationServiceSpec extends Specification {
 
-
-    @Shared LocalStackContainer localstack = new LocalStackContainer()                  <i class="conum" data-value="2"></i><b>(2)</b>
-        .withServices(LocalStackContainer.Service.SNS)
-
-    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="3"></i><b>(3)</b>
-
-    SimpleNotificationService service
-    SimpleNotificationServiceConfiguration configuration
-
-    void setup() {
-        SnsClient sns = SnsClient                                                       <i class="conum" data-value="4"></i><b>(4)</b>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.SNS))
-            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.accessKey, localstack.secretKey
-            )))
-            .region(Region.of(localstack.region))
-            .build()
-
-        context = ApplicationContext.builder('aws.sns.topic', TEST_TOPIC).build()       <i class="conum" data-value="5"></i><b>(5)</b>
-        context.registerSingleton(SnsClient, sns)
-        context.start()
-
-        service = context.getBean(SimpleNotificationService)                            <i class="conum" data-value="6"></i><b>(6)</b>
-        configuration = context.getBean(SimpleNotificationServiceConfiguration)
-    }
+    @Inject SimpleNotificationService service                                           <i class="conum" data-value="3"></i><b>(3)</b>
 
     // tests
 
@@ -4591,72 +3842,28 @@ class SimpleNotificationServiceSpec extends Specification {
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Annotate the specification with <code>@Testcontainers</code> to let Spock manage the Testcontainers for you</td>
+<td>Annotate the specification with <code>@MicronautTest</code> to let Micronaut handle the application context lifecycle</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with SNS support enabled</td>
+<td>Annotate the specification with <code>@Property</code> to set the required Micronaut properties</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Prepare the reference to the <code>ApplicationContext</code>, <code>@AutoCleanup</code> guarantees closing the context after the tests</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Create <code>AmazonSNS</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Prepare the application context with required properties and service using LocalStack</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>You can obtain instance of <code>SimpleNotificationService</code> from the context</td>
+<td>Use <code>@Inject</code> to let Micronaut inject the beans into your tests</td>
 </tr>
 </table>
 </div>
 <div class="listingblock secondary">
-<div class="title">Java (AWS SDK 2.x)</div>
+<div class="title">Java</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="java">class SimpleNotificationServiceTest {
 
-    public ApplicationContext context;                                                  <i class="conum" data-value="1"></i><b>(1)</b>
+@MicronautTest                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+@Property(name = "aws.sns.topic", value = SimpleNotificationServiceTest.TEST_TOPIC)     <i class="conum" data-value="2"></i><b>(2)</b>
+public class SimpleNotificationServiceTest {
 
-    public SimpleNotificationService service;
-
-    @Rule
-    public LocalStackContainer localstack = new LocalStackContainer()                   <i class="conum" data-value="2"></i><b>(2)</b>
-        .withServices(LocalStackContainer.Service.SNS);
-
-    @Before
-    public void setup() {
-        SnsClient amazonSNS = SnsClient                                                 <i class="conum" data-value="3"></i><b>(3)</b>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.SNS))
-            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.getAccessKey(), localstack.getSecretKey()
-            )))
-            .region(Region.of(localstack.getRegion()))
-            .build();
-
-
-        Map&lt;String, Object&gt; properties = new HashMap&lt;&gt;();                               <i class="conum" data-value="4"></i><b>(4)</b>
-        properties.put("aws.sns.topic", TEST_TOPIC);
-
-
-        context = ApplicationContext.builder(properties).build();                       <i class="conum" data-value="5"></i><b>(5)</b>
-        context.registerSingleton(SnsClient.class, amazonSNS);
-        context.start();
-
-        service = context.getBean(SimpleNotificationService.class);
-    }
-
-    @After
-    public void cleanup() {
-        if (context != null) {
-            context.close();                                                            <i class="conum" data-value="6"></i><b>(6)</b>
-        }
-    }
+    @Inject SimpleNotificationService service;                                          <i class="conum" data-value="3"></i><b>(3)</b>
 
     // tests
 
@@ -4667,161 +3874,37 @@ class SimpleNotificationServiceSpec extends Specification {
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Prepare the reference to the <code>ApplicationContext</code></td>
+<td>Annotate the specification with <code>@MicronautTest</code> to let Micronaut handle the application context lifecycle</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with SNS support enabled</td>
+<td>Annotate the specification with <code>@Property</code> to set the required Micronaut properties</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Create <code>AmazonSNS</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Prepare required properties</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Prepare the application context with required properties and service LocalStack</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Close the application context after the test</td>
+<td>Use <code>@Inject</code> to let Micronaut inject the beans into your tests</td>
 </tr>
 </table>
 </div>
-<div class="listingblock secondary">
-<div class="title">Groovy (AWS SDK 1.x)</div>
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
-class SimpleNotificationServiceSpec extends Specification {
-
-
-    @Shared LocalStackContainer localstack = new LocalStackContainer()                  <i class="conum" data-value="2"></i><b>(2)</b>
-        .withServices(SNS)
-
-    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="3"></i><b>(3)</b>
-
-    SimpleNotificationService service
-
-    void setup() {
-        AmazonSNS sns = AmazonSNSClient                                                 <i class="conum" data-value="4"></i><b>(4)</b>
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(SNS))
-            .withCredentials(localstack.defaultCredentialsProvider)
-            .build()
-
-        context = ApplicationContext.builder('aws.sns.topic', TEST_TOPIC).build()       <i class="conum" data-value="5"></i><b>(5)</b>
-        context.registerSingleton(AmazonSNS, sns)
-        context.start()
-
-        service = context.getBean(SimpleNotificationService)                            <i class="conum" data-value="6"></i><b>(6)</b>
-    }
-
-    // tests
-
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
+<div class="admonitionblock tip">
 <table>
 <tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Annotate the specification with <code>@Testcontainers</code> to let Spock manage the Testcontainers for you</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with SNS support enabled</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Prepare the reference to the <code>ApplicationContext</code>, <code>@AutoCleanup</code> guarantees closing the context after the tests</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Create <code>AmazonSNS</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Prepare the application context with required properties and service using LocalStack</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>You can obtain instance of <code>SimpleNotificationService</code> from the context</td>
-</tr>
-</table>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>You can save time creating the new Localstack container by sharing it between the tests.</p>
 </div>
-<div class="listingblock secondary">
-<div class="title">Java (AWS SDK 1.x)</div>
+<div class="listingblock">
+<div class="title">application-test.yml</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="java">class SimpleNotificationServiceTest {
-
-    public ApplicationContext context;                                                  <i class="conum" data-value="1"></i><b>(1)</b>
-
-    public SimpleNotificationService service;
-
-    @Rule
-    public LocalStackContainer localstack = new LocalStackContainer()                   <i class="conum" data-value="2"></i><b>(2)</b>
-        .withServices(SNS);
-
-    @Before
-    public void setup() {
-        AmazonSNS amazonSNS = AmazonSNSClient                                           <i class="conum" data-value="3"></i><b>(3)</b>
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(SNS))
-            .withCredentials(localstack.getDefaultCredentialsProvider())
-            .build();
-
-
-        Map&lt;String, Object&gt; properties = new HashMap&lt;&gt;();                               <i class="conum" data-value="4"></i><b>(4)</b>
-        properties.put("aws.sns.topic", TEST_TOPIC);
-
-
-        context = ApplicationContext.builder(properties).build();                       <i class="conum" data-value="5"></i><b>(5)</b>
-        context.registerSingleton(AmazonSNS.class, amazonSNS);
-        context.start();
-
-        service = context.getBean(SimpleNotificationService.class);
-    }
-
-    @After
-    public void cleanup() {
-        if (context != null) {
-            context.close();                                                            <i class="conum" data-value="6"></i><b>(6)</b>
-        }
-    }
-
-    // tests
-
-}</code></pre>
+<pre class="prettyprint highlight"><code data-lang="yaml">localstack:
+  services: sns
+  shared: true</code></pre>
 </div>
 </div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Prepare the reference to the <code>ApplicationContext</code></td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with SNS support enabled</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Create <code>AmazonSNS</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Prepare required properties</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Prepare the application context with required properties and service LocalStack</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Close the application context after the test</td>
+</td>
 </tr>
 </table>
 </div>
@@ -4854,7 +3937,7 @@ class SimpleNotificationServiceSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-sqs:1.6.2-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-sqs:1.7.2-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4863,14 +3946,14 @@ class SimpleNotificationServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-sqs&lt;/artifactId&gt;
-    &lt;version&gt;1.6.2-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;1.7.2-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sqs:1.6.2-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-sqs:1.7.2-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4879,7 +3962,7 @@ class SimpleNotificationServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sqs&lt;/artifactId&gt;
-    &lt;version&gt;1.6.2-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;1.7.2-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4957,7 +4040,7 @@ class SimpleNotificationServiceSpec extends Specification {
 </tr>
 <tr>
 <td><i class="conum" data-value="11"></i><b>11</b></td>
-<td>Each of the configuration can be access using <code>@Named('test') SimpleNotificationService</code> qualifier or you can define the configuration as <code>value</code> of <code>@NotificationClient('test')</code></td>
+<td>Each of the configuration can be access using <code>@Named('test') SimpleNotificationService</code> qualifier, or you can define the configuration as <code>value</code> of <code>@NotificationClient('test')</code></td>
 </tr>
 </table>
 </div>
@@ -5351,7 +4434,7 @@ for the full reference.</p>
 <h5 id="_testing_6"><a class="anchor" href="#_testing_6"></a>Testing</h5>
 <div class="paragraph">
 <p>You can very easily mock any of the interfaces and declarative services but if you need close-to-production
-SQS integration works well with <a href="https://www.testcontainers.org/">Testcontainers</a> and <a href="https://localstack.cloud/">LocalStack</a>.</p>
+DynamoDB integration works well with <a href="https://www.testcontainers.org/">Testcontainers</a> and <a href="https://localstack.cloud/">LocalStack</a> using <code>micronaut-amazon-awssdk-integration-testing</code> module.</p>
 </div>
 <div class="paragraph">
 <p>You need to add following dependencies into your build file:</p>
@@ -5359,62 +4442,30 @@ SQS integration works well with <a href="https://www.testcontainers.org/">Testco
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile group: 'org.testcontainers', name: 'localstack', version: '1.15.3'
-compile group: 'org.testcontainers', name: 'spock', version: '1.15.3'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:1.7.2-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Maven</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
-    &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
-    &lt;artifactId&gt;localstack&lt;/artifactId&gt;
-    &lt;version&gt;1.15.3&lt;/version&gt;
-    &lt;scope&gt;test&lt;/scope&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
-    &lt;artifactId&gt;spock&lt;/artifactId&gt;
-    &lt;version&gt;1.15.3&lt;/version&gt;
-    &lt;scope&gt;test&lt;/scope&gt;
+    &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
+    &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
+    &lt;version&gt;1.7.2-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Then you can setup your tests like this:</p>
+<p>Then you can set up your tests like this:</p>
 </div>
 <div class="listingblock primary">
-<div class="title">Groovy (AWS SDK 2.x)</div>
+<div class="title">Groovy</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
-@RestoreSystemProperties                                                                <i class="conum" data-value="2"></i><b>(2)</b>
+<pre class="prettyprint highlight"><code data-lang="groovy">@MicronautTest                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+@Property(name = 'aws.sqs.queue', value = TEST_QUEUE)                                   <i class="conum" data-value="2"></i><b>(2)</b>
 class SimpleQueueServiceSpec extends Specification {
 
-
-    @Shared LocalStackContainer localstack = new LocalStackContainer()                  <i class="conum" data-value="3"></i><b>(3)</b>
-        .withServices(SQS)
-
-    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="4"></i><b>(4)</b>
-
-    SimpleQueueService service
-
-    void setup() {
-        System.setProperty('com.amazonaws.sdk.disableCbor', 'true')                     <i class="conum" data-value="5"></i><b>(5)</b>
-        SqsClient sqs = SqsClient                                                       <i class="conum" data-value="6"></i><b>(6)</b>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(SQS))
-            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.accessKey, localstack.secretKey
-            )))
-            .region(Region.of(localstack.region))
-            .build()
-
-        context = ApplicationContext.builder('aws.sqs.queue': TEST_QUEUE).build()       <i class="conum" data-value="7"></i><b>(7)</b>
-        context.registerSingleton(SqsClient, sqs)
-        context.start()
-
-        service = context.getBean(SimpleQueueService)                                   <i class="conum" data-value="8"></i><b>(8)</b>
-    }
+    @Inject SimpleQueueService service                                                  <i class="conum" data-value="3"></i><b>(3)</b>
 
     // tests
 
@@ -5425,84 +4476,26 @@ class SimpleQueueServiceSpec extends Specification {
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Annotate the specification with <code>@Testcontainers</code> to let Spock manage the Testcontainers for you</td>
+<td>Annotate the specification with <code>@MicronautTest</code> to let Micronaut handle the application context lifecycle</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td><code>@RestoreSystemProperties</code> will guarantee that system properties will be restore after the test</td>
+<td>Annotate the specification with <code>@Property</code> to set the required Micronaut properties</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with SQS support enabled</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Prepare the reference to the <code>ApplicationContext</code>, <code>@AutoCleanup</code> guarantees closing the context after the tests</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Disable CBOR protocol for SQS (not supported by the mock implementation)</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Create <code>AmazonSQS</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>Prepare the application context with required properties and service using LocalStack</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="8"></i><b>8</b></td>
-<td>You can obtain instance of <code>SimpleQueueService</code> from the context</td>
+<td>Use <code>@Inject</code> to let Micronaut inject the beans into your tests</td>
 </tr>
 </table>
 </div>
 <div class="listingblock secondary">
-<div class="title">Java (AWS SDK 2.x)</div>
+<div class="title">Java</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="java">class SimpleNotificationServiceTest {
+<pre class="prettyprint highlight"><code data-lang="java">@MicronautTest                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+@Property(name = "aws.sqs.queue", value = SimpleQueueServiceTest.TEST_QUEUE)            <i class="conum" data-value="2"></i><b>(2)</b>
+public class SimpleQueueServiceTest {
 
-    public ApplicationContext context;                                                  <i class="conum" data-value="1"></i><b>(1)</b>
-
-    public SimpleQueueService service;
-
-    @Rule
-    public LocalStackContainer localstack = new LocalStackContainer()                   <i class="conum" data-value="2"></i><b>(2)</b>
-        .withServices(SQS);
-
-    @Before
-    public void setup() {
-        System.setProperty("com.amazonaws.sdk.disableCbor", "true");                    <i class="conum" data-value="3"></i><b>(3)</b>
-
-        SqsClient amazonSQS = SqsClient                                                 <i class="conum" data-value="4"></i><b>(4)</b>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(SQS))
-            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.getAccessKey(), localstack.getSecretKey()
-            )))
-            .region(Region.of(localstack.getRegion()))
-            .build();
-
-
-        Map&lt;String, Object&gt; properties = new HashMap&lt;&gt;();                               <i class="conum" data-value="5"></i><b>(5)</b>
-        properties.put("aws.sqs.queue", TEST_QUEUE);
-
-
-        context = ApplicationContext.builder(properties).build();                       <i class="conum" data-value="6"></i><b>(6)</b>
-        context.registerSingleton(SqsClient.class, amazonSQS);
-        context.start();
-
-        service = context.getBean(SimpleQueueService.class);
-    }
-
-    @After
-    public void cleanup() {
-        System.clearProperty("com.amazonaws.sdk.disableCbor");
-
-        if (context != null) {
-            context.close();                                                            <i class="conum" data-value="7"></i><b>(7)</b>
-        }
-    }
+    @Inject SimpleQueueService service;                                                 <i class="conum" data-value="3"></i><b>(3)</b>
 
     // tests
 
@@ -5513,183 +4506,37 @@ class SimpleQueueServiceSpec extends Specification {
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Prepare the reference to the <code>ApplicationContext</code></td>
+<td>Annotate the specification with <code>@MicronautTest</code> to let Micronaut handle the application context lifecycle</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with SQS support enabled</td>
+<td>Annotate the specification with <code>@Property</code> to set the required Micronaut properties</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Disable CBOR protocol for SQS (not supported by the mock implementation)</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Create <code>AmazonSQS</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Prepare required properties</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Prepare the application context with required properties and service LocalStack</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>Close the application context after the test</td>
+<td>Use <code>@Inject</code> to let Micronaut inject the beans into your tests</td>
 </tr>
 </table>
 </div>
-<div class="listingblock secondary">
-<div class="title">Groovy (AWS SDK 1.x)</div>
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">@Testcontainers                                                                         <i class="conum" data-value="1"></i><b>(1)</b>
-@RestoreSystemProperties                                                                <i class="conum" data-value="2"></i><b>(2)</b>
-class SimpleQueueServiceSpec extends Specification {
-
-
-    @Shared LocalStackContainer localstack = new LocalStackContainer()                  <i class="conum" data-value="3"></i><b>(3)</b>
-        .withServices(SQS)
-
-    @AutoCleanup ApplicationContext context                                             <i class="conum" data-value="4"></i><b>(4)</b>
-
-    SimpleQueueService service
-
-    void setup() {
-        System.setProperty('com.amazonaws.sdk.disableCbor', 'true')                     <i class="conum" data-value="5"></i><b>(5)</b>
-        AmazonSQS sqs = AmazonSQSClient                                                 <i class="conum" data-value="6"></i><b>(6)</b>
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(SQS))
-            .withCredentials(localstack.defaultCredentialsProvider)
-            .build()
-
-        context = ApplicationContext.builder('aws.sqs.queue': TEST_QUEUE).build()       <i class="conum" data-value="7"></i><b>(7)</b>
-        context.registerSingleton(AmazonSQS, sqs)
-        context.start()
-
-        service = context.getBean(SimpleQueueService)                                   <i class="conum" data-value="8"></i><b>(8)</b>
-    }
-
-    // tests
-
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
+<div class="admonitionblock tip">
 <table>
 <tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Annotate the specification with <code>@Testcontainers</code> to let Spock manage the Testcontainers for you</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td><code>@RestoreSystemProperties</code> will guarantee that system properties will be restore after the test</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with SQS support enabled</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Prepare the reference to the <code>ApplicationContext</code>, <code>@AutoCleanup</code> guarantees closing the context after the tests</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Disable CBOR protocol for SQS (not supported by the mock implementation)</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Create <code>AmazonSQS</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>Prepare the application context with required properties and service using LocalStack</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="8"></i><b>8</b></td>
-<td>You can obtain instance of <code>SimpleQueueService</code> from the context</td>
-</tr>
-</table>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>You can save time creating the new Localstack container by sharing it between the tests.</p>
 </div>
-<div class="listingblock secondary">
-<div class="title">Java (AWS SDK 1.x)</div>
+<div class="listingblock">
+<div class="title">application-test.yml</div>
 <div class="content">
-<pre class="prettyprint highlight"><code data-lang="java">class SimpleNotificationServiceTest {
-
-    public ApplicationContext context;                                                  <i class="conum" data-value="1"></i><b>(1)</b>
-
-    public SimpleQueueService service;
-
-    @Rule
-    public LocalStackContainer localstack = new LocalStackContainer()                   <i class="conum" data-value="2"></i><b>(2)</b>
-        .withServices(SQS);
-
-    @Before
-    public void setup() {
-        System.setProperty("com.amazonaws.sdk.disableCbor", "true");                    <i class="conum" data-value="3"></i><b>(3)</b>
-
-        AmazonSQS amazonSQS = AmazonSQSClient                                           <i class="conum" data-value="4"></i><b>(4)</b>
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(SQS))
-            .withCredentials(localstack.getDefaultCredentialsProvider())
-            .build();
-
-
-        Map&lt;String, Object&gt; properties = new HashMap&lt;&gt;();                               <i class="conum" data-value="5"></i><b>(5)</b>
-        properties.put("aws.sqs.queue", TEST_QUEUE);
-
-
-        context = ApplicationContext.builder(properties).build();                       <i class="conum" data-value="6"></i><b>(6)</b>
-        context.registerSingleton(AmazonSQS.class, amazonSQS);
-        context.start();
-
-        service = context.getBean(SimpleQueueService.class);
-    }
-
-    @After
-    public void cleanup() {
-        System.clearProperty("com.amazonaws.sdk.disableCbor");
-
-        if (context != null) {
-            context.close();                                                            <i class="conum" data-value="7"></i><b>(7)</b>
-        }
-    }
-
-    // tests
-
-}</code></pre>
+<pre class="prettyprint highlight"><code data-lang="yaml">localstack:
+  services: sqs
+  shared: true</code></pre>
 </div>
 </div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Prepare the reference to the <code>ApplicationContext</code></td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Create an instance of <code>LocalStackContainer</code> with SQS support enabled</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Disable CBOR protocol for SQS (not supported by the mock implementation)</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Create <code>AmazonSQS</code> client using the LocalStack configuration</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Prepare required properties</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Prepare the application context with required properties and service LocalStack</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>Close the application context after the test</td>
+</td>
 </tr>
 </table>
 </div>
@@ -5712,7 +4559,7 @@ class SimpleQueueServiceSpec extends Specification {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-amazon-awssdk-sts:1.6.2-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-sts:1.7.2-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -5721,14 +4568,14 @@ class SimpleQueueServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-sts&lt;/artifactId&gt;
-    &lt;version&gt;1.6.2-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;1.7.2-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-sts:1.6.2-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-sts:1.7.2-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -5737,7 +4584,7 @@ class SimpleQueueServiceSpec extends Specification {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sts&lt;/artifactId&gt;
-    &lt;version&gt;1.6.2-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;1.7.2-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -5811,7 +4658,7 @@ Use this part of the library with caution. Using WebSockets with API Gateway can
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>compile 'com.agorapulse:micronaut-aws-sdk-ag-ws:1.6.2-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-ag-ws:1.7.2-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -5820,7 +4667,7 @@ Use this part of the library with caution. Using WebSockets with API Gateway can
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-ag-ws&lt;/artifactId&gt;
-    &lt;version&gt;1.6.2-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;1.7.2-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -6226,7 +5073,7 @@ your Lambda function&#8217;s role must have following permissions (preferably co
 <p>CloudWatch</p>
 </li>
 <li>
-<p>DynamodDB</p>
+<p>DynamoDB</p>
 </li>
 <li>
 <p>Kinesis</p>
@@ -6288,8 +5135,8 @@ your Lambda function&#8217;s role must have following permissions (preferably co
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 1.6.2-micronaut-3.0<br>
-Last updated 2022-04-12 07:25:33 UTC
+Version 1.7.2-micronaut-3.0<br>
+Last updated 2022-05-05 15:13:06 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
