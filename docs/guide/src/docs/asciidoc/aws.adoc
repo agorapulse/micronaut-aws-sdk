@@ -64,7 +64,7 @@ See the configuration sections for particular services.
 Following services support configuring `region` and `endpoint`:
 
  * CloudWatch
- * DynamodDB
+ * DynamoDB
  * Kinesis
  * S3
  * SES
@@ -74,10 +74,11 @@ Following services support configuring `region` and `endpoint`:
 
 For example, to configure region for DynamoDB you can add following settings:
 
-```yaml
+[source,yaml]
+----
 aws:
   dynamodb:
     region: us-east-1
     endpoint: http://localhost:8000
-```
+----
 

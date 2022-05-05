@@ -38,8 +38,8 @@ import java.util.Date;
 import static org.junit.jupiter.api.Assertions.*;
 
 // tag::header[]
-@MicronautTest
-@Property(name = "aws.s3.bucket", value = SimpleStorageServiceTest.MY_BUCKET)
+@MicronautTest                                                                          // <1>
+@Property(name = "aws.s3.bucket", value = SimpleStorageServiceTest.MY_BUCKET)           // <2>
 public class SimpleStorageServiceTest {
     // end::header[]
 
@@ -54,7 +54,9 @@ public class SimpleStorageServiceTest {
     @TempDir
     public File tmp;
 
-    @Inject SimpleStorageService service;
+    // tag::setup[]
+    @Inject SimpleStorageService service;                                               // <3>
+    // end::setup[]
 
     @Test
     public void testJavaService() throws IOException {

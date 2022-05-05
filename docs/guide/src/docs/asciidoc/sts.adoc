@@ -9,7 +9,7 @@ This library provides basic support for Amazon STS using <<Security Token Servic
 [source,indent=0,role="primary",subs='verbatim,attributes']
 .Gradle (AWS SDK 2.x)
 ----
-compile 'com.agorapulse:micronaut-amazon-awssdk-sts:{project-version}'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-sts:{project-version}'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']
@@ -25,7 +25,7 @@ compile 'com.agorapulse:micronaut-amazon-awssdk-sts:{project-version}'
 [source,indent=0,role="secondary",subs='verbatim,attributes']
 .Gradle (AWS SDK 1.x)
 ----
-compile 'com.agorapulse:micronaut-aws-sdk-sts:{project-version}'
+implementation 'com.agorapulse:micronaut-aws-sdk-sts:{project-version}'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']

@@ -31,14 +31,16 @@ import java.util.Date;
 import static org.junit.jupiter.api.Assertions.*;
 
 // tag::header[]
-@MicronautTest
+@MicronautTest                                                                          // <1>
 public class DynamoDBServiceTest {
 // end::header[]
 
     private static final DateTime REFERENCE_DATE = new DateTime(1358487600000L);
     private static final Instant REFERENCE_INSTANT = Instant.ofEpochMilli(1358487600000L);
 
-    @Inject DynamoDBServiceProvider provider;
+    // tag::setup[]
+    @Inject DynamoDBServiceProvider provider;                                           // <2>
+    // end::setup[]
 
     @Test
     public void testJavaService() {

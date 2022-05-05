@@ -47,12 +47,12 @@ import static com.agorapulse.micronaut.amazon.awssdk.dynamodb.groovy.GroovyBuild
 /**
  * Specification for testing DefaultDynamoDBService using entity with range key.
  */
-// tag::testcontainers-header[]
 @Stepwise
-@MicronautTest
+// tag::header[]
+@MicronautTest                                                                          // <1>
 class DefaultDynamoDBServiceSpec extends Specification {
 
-// end::testcontainers-header[]
+// end::header[]
 
     private static final Instant REFERENCE_DATE = Instant.ofEpochMilli(1358487600000)
 
@@ -60,13 +60,15 @@ class DefaultDynamoDBServiceSpec extends Specification {
     @Inject Playbook playbook
     @Inject DynamoDBItemDBService service
 
-    @Inject DynamoDBServiceProvider dynamoDBServiceProvider
+    // tag::setup[]
+    @Inject DynamoDBServiceProvider dynamoDBServiceProvider                             // <2>
 
     DynamoDbService<DynamoDBEntity> dbs
 
     void setup() {
-        dbs = dynamoDBServiceProvider.findOrCreate(DynamoDBEntity)
+        dbs = dynamoDBServiceProvider.findOrCreate(DynamoDBEntity)                      // <3>
     }
+    // end::setup[]
 
     void 'unsupported methods throws meaningful messages'() {
         when:

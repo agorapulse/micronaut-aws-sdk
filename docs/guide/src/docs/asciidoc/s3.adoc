@@ -9,7 +9,7 @@ This library provides basic support for Amazon S3 using <<Simple Storage Service
 [source,indent=0,role="primary",subs='verbatim,attributes']
 .Gradle (AWS SDK 2.x)
 ----
-compile 'com.agorapulse:micronaut-amazon-awssdk-s3:{project-version}'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-s3:{project-version}'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']
@@ -25,7 +25,7 @@ compile 'com.agorapulse:micronaut-amazon-awssdk-s3:{project-version}'
 [source,indent=0,role="secondary",subs='verbatim,attributes']
 .Gradle (AWS SDK 1.x)
 ----
-compile 'com.agorapulse:micronaut-aws-sdk-s3:{project-version}'
+implementation 'com.agorapulse:micronaut-aws-sdk-s3:{project-version}'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']
@@ -141,40 +141,33 @@ https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/amaz
 https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/s3/SimpleStorageService.html[SimpleStorageService AWS SDK 1.x] for the full reference.
 
 ==== Testing
-You can very easily mock the `SimpleStorageService` but if you need close-to-production
-S3 integration works well with https://www.testcontainers.org/[Testcontainers] and https://localstack.cloud/[LocalStack].
+
+You can very easily mock any of the interfaces and declarative services but if you need close-to-production
+DynamoDB integration works well with https://www.testcontainers.org/[Testcontainers] and https://localstack.cloud/[LocalStack] using `micronaut-amazon-awssdk-integration-testing` module.
 
 You need to add following dependencies into your build file:
 
-[source,indent=0,role="primary"]
+
+[source,indent=0,role="primary",subs='verbatim,attributes']
 .Gradle
 ----
-compile group: 'org.testcontainers', name: 'localstack', version: '1.15.3'
-compile group: 'org.testcontainers', name: 'spock', version: '1.15.3'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:{project-version}'
 ----
 
-[source,xml,indent=0,role="secondary"]
+[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
 .Maven
 ----
 <dependency>
-    <groupId>org.testcontainers</groupId>
-    <artifactId>localstack</artifactId>
-    <version>1.15.3</version>
-    <scope>test</scope>
+    <groupId>com.agorapulse</groupId>
+    <artifactId>micronaut-amazon-awssdk-dynamodb</artifactId>
+    <version>{project-version}</version>
 </dependency>
-<dependency>
-    <groupId>org.testcontainers</groupId>
-    <artifactId>spock</artifactId>
-    <version>1.15.3</version>
-    <scope>test</scope>
-</dependency>
-
 ----
 
-Then you can setup your tests like this:
+Then you can set up your tests like this:
 
 [source,groovy,indent=0,role="primary"]
-.Groovy (AWS SDK 2.x)
+.Groovy
 ----
 include::{root-dir}/subprojects/micronaut-amazon-awssdk-s3/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/s3/SimpleStorageServiceSpec.groovy[tags=header]
 include::{root-dir}/subprojects/micronaut-amazon-awssdk-s3/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/s3/SimpleStorageServiceSpec.groovy[tags=setup]
@@ -183,16 +176,12 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-s3/src/test/groovy/com/a
 
 }
 ----
-<1> Annotate the specification with `@Testcontainers` to let Spock manage the Testcontainers for you
-<2> Prepare the reference to the `ApplicationContext`, `@AutoCleanup` guarantees closing the context after the tests
-<3> Create an instance of `LocalStackContainer` with S3 support enabled
-<4> Create `S3Client` client using the LocalStack configuration
-<5> Create `S3Presigner` client using the LocalStack configuration
-<6> Prepare the application context with default configuration
-<7> You can obtain instance of `SimpleStorageService` from the context
+<1> Annotate the specification with `@MicronautTest` to let Micronaut handle the application context lifecycle
+<2> Annotate the specification with `@Property` to set the required Micronaut properties
+<3> Use `@Inject` to let Micronaut inject the beans into your tests
 
 [source,java,indent=0,role="secondary"]
-.Java (AWS SDK 2.x)
+.Java
 ----
 include::{root-dir}/subprojects/micronaut-amazon-awssdk-s3/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/s3/SimpleStorageServiceTest.java[tags=header]
 
@@ -202,46 +191,18 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-s3/src/test/groovy/com/a
 
 }
 ----
-<1> Create an instance of `LocalStackContainer` with Kinesis and  DynamoDB (required by the listener) support enabled
-<2> Prepare the reference to the `ApplicationContext`
-<3> Create `S3Client` client using the LocalStack configuration
-<4> Register `S3Client` service running against LocalStack
-<5> Don't forget to close `ApplicationContext`
+<1> Annotate the specification with `@MicronautTest` to let Micronaut handle the application context lifecycle
+<2> Annotate the specification with `@Property` to set the required Micronaut properties
+<3> Use `@Inject` to let Micronaut inject the beans into your tests
 
 
-[source,groovy,indent=0,role="secondary"]
-.Groovy (AWS SDK 1.x)
+[TIP]
+====
+You can save time creating the new Localstack container by sharing it between the tests.
+
+[source,yaml]
+.application-test.yml
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk-s3/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceSpec.groovy[tags=header]
-include::{root-dir}/subprojects/micronaut-aws-sdk-s3/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceSpec.groovy[tags=setup]
-
-    // test methods
-
-}
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-s3/src/test/resources/application-test.yml[]
 ----
-<1> Annotate the specification with `@Testcontainers` to let Spock manage the Testcontainers for you
-<2> Prepare the reference to the `ApplicationContext`, `@AutoCleanup` guarantees closing the context after the tests
-<3> Create an instance of `LocalStackContainer` with S3 support enabled
-<4> Create `AmazonS3` client using the LocalStack configuration
-<5> Set the default bucket
-<6> Register `AmazonS3` service running against LocalStack
-<7> You can obtain instance of `SimpleStorageService` from the context
-
-[source,java,indent=0,role="secondary"]
-.Java (AWS SDK 1.x)
-----
-include::{root-dir}/subprojects/micronaut-aws-sdk-s3/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=header]
-
-include::{root-dir}/subprojects/micronaut-aws-sdk-s3/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=setup]
-
-    // test methods
-
-}
-----
-<1> Create an instance of `LocalStackContainer` with Kinesis and  DynamoDB (required by the listener) support enabled
-<2> Prepare the reference to the `ApplicationContext`
-<3> Create `AmazonS3` client using the LocalStack configuration
-<4> Register `AmazonS3` service running against LocalStack
-<5> Don't forget to close `ApplicationContext`
-
-
+====

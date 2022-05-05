@@ -29,15 +29,19 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@MicronautTest
-@Property(name = "aws.sqs.queue", value = SimpleQueueServiceTest.TEST_QUEUE)
+// tag::header[]
+@MicronautTest                                                                          // <1>
+@Property(name = "aws.sqs.queue", value = SimpleQueueServiceTest.TEST_QUEUE)            // <2>
 public class SimpleQueueServiceTest {
 
+    // end::header[]
     public static final String TEST_QUEUE = "TestQueueJava";
 
     private static final String DATA = "Hello World";
 
-    @Inject SimpleQueueService service;
+    // tag::setup[]
+    @Inject SimpleQueueService service;                                                 // <3>
+    // end::setup[]
 
     @Test
     public void testWorkingWithQueue() {

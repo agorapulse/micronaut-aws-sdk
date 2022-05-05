@@ -41,8 +41,8 @@ import javax.inject.Inject
 @SuppressWarnings('NoJavaUtilDate')
 @Stepwise
 // tag::header[]
-@MicronautTest
-@Property(name = 'aws.s3.bucket', value = MY_BUCKET)
+@MicronautTest                                                                          // <1>
+@Property(name = 'aws.s3.bucket', value = MY_BUCKET)                                    // <2>
 class SimpleStorageServiceSpec extends Specification {
 
     // end::header[]
@@ -59,7 +59,9 @@ class SimpleStorageServiceSpec extends Specification {
 
     @Inject S3Client amazonS3
     @Inject S3Presigner presigner
-    @Inject SimpleStorageService service
+    // tag::setup[]
+    @Inject SimpleStorageService service                                                // <3>
+    // end::setup[]
 
     void 'new bucket'() {
         when:

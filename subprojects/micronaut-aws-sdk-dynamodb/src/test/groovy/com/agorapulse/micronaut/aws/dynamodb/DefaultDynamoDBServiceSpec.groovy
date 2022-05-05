@@ -48,26 +48,28 @@ import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*          
     'NoWildcardImports',
     'UnnecessaryObjectReferences',
 ])
-// tag::testcontainers-header[]
 @Stepwise
-@MicronautTest
+// tag::header[]
+@MicronautTest                                                                          // <1>
 class DefaultDynamoDBServiceSpec extends Specification {
 
-// end::testcontainers-header[]
+// end::header[]
 
     private static final DateTime REFERENCE_DATE = new DateTime(1358487600000)
     private static final Instant REFERENCE_INSTANT = Instant.ofEpochMilli(1358487600000)
 
     @Inject AmazonDynamoDB amazonDynamoDB
     @Inject IDynamoDBMapper mapper
-    @Inject DynamoDBServiceProvider provider
     @Inject DynamoDBItemDBService itemService
+    // tag::setup[]
+    @Inject DynamoDBServiceProvider provider                                            // <2>
 
     DynamoDBService<DynamoDBEntity> s
 
     void setup() {
-        s = provider.findOrCreate(DynamoDBEntity)                                       // <8>
+        s = provider.findOrCreate(DynamoDBEntity)                                       // <3>
     }
+    // end::setup[]
 
     // end::testcontainers-setup[]
 

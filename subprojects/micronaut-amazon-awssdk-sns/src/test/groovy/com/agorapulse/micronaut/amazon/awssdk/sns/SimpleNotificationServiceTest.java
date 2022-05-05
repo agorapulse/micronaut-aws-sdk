@@ -30,11 +30,12 @@ import java.util.Map;
 import static com.agorapulse.micronaut.amazon.awssdk.sns.SimpleNotificationService.PlatformType.GCM;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-@MicronautTest
-@Property(name = "aws.sns.topic", value = SimpleNotificationServiceTest.TEST_TOPIC)
+// tag::header[]
+@MicronautTest                                                                          // <1>
+@Property(name = "aws.sns.topic", value = SimpleNotificationServiceTest.TEST_TOPIC)     // <2>
 public class SimpleNotificationServiceTest {
 
+    // end::header[]
     public static final String TEST_TOPIC = "TestTopic";
 
     private static final String EMAIL = "vlad@agorapulse.com";
@@ -43,7 +44,9 @@ public class SimpleNotificationServiceTest {
     private static final String DATA = "Vlad";
     private static final String PHONE_NUMBER = "+420999888777";
 
-    @Inject SimpleNotificationService service;
+    // tag::setup[]
+    @Inject SimpleNotificationService service;                                          // <3>
+    // end::setup[]
 
     @Test
     public void testWorkingWithTopics() {

@@ -12,7 +12,7 @@ This library provides two approaches to work with Simple Notification Service to
 [source,indent=0,role="primary",subs='verbatim,attributes']
 .Gradle (AWS SDK 2.x)
 ----
-compile 'com.agorapulse:micronaut-amazon-awssdk-sns:{project-version}'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-sns:{project-version}'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']
@@ -28,7 +28,7 @@ compile 'com.agorapulse:micronaut-amazon-awssdk-sns:{project-version}'
 [source,indent=0,role="secondary",subs='verbatim,attributes']
 .Gradle (AWS SDK 1.x)
 ----
-compile 'com.agorapulse:micronaut-aws-sdk-sns:{project-version}'
+implementation 'com.agorapulse:micronaut-aws-sdk-sns:{project-version}'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']
@@ -193,115 +193,70 @@ https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/
 for the full reference.
 
 ==== Testing
+
 You can very easily mock any of the interfaces and declarative services but if you need close-to-production
-SNS integration works well with https://www.testcontainers.org/[Testcontainers] and https://localstack.cloud/[LocalStack].
+DynamoDB integration works well with https://www.testcontainers.org/[Testcontainers] and https://localstack.cloud/[LocalStack] using `micronaut-amazon-awssdk-integration-testing` module.
 
 You need to add following dependencies into your build file:
 
-[source,indent=0,role="primary"]
+
+[source,indent=0,role="primary",subs='verbatim,attributes']
 .Gradle
 ----
-compile group: 'org.testcontainers', name: 'localstack', version: '1.15.3'
-compile group: 'org.testcontainers', name: 'spock', version: '1.15.3'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:{project-version}'
 ----
 
-[source,xml,indent=0,role="secondary"]
+[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
 .Maven
 ----
 <dependency>
-    <groupId>org.testcontainers</groupId>
-    <artifactId>localstack</artifactId>
-    <version>1.15.3</version>
-    <scope>test</scope>
+    <groupId>com.agorapulse</groupId>
+    <artifactId>micronaut-amazon-awssdk-dynamodb</artifactId>
+    <version>{project-version}</version>
 </dependency>
-<dependency>
-    <groupId>org.testcontainers</groupId>
-    <artifactId>spock</artifactId>
-    <version>1.15.3</version>
-    <scope>test</scope>
-</dependency>
-
 ----
 
-Then you can setup your tests like this:
+Then you can set up your tests like this:
 
 [source,groovy,indent=0,role="primary"]
-.Groovy (AWS SDK 2.x)
+.Groovy
 ----
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-header]
-
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-fields]
-
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-setup]
-
-        context = ApplicationContext.builder('aws.sns.topic', TEST_TOPIC).build()       // <5>
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-setup-2]
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationServiceSpec.groovy[tags=header]
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationServiceSpec.groovy[tags=setup]
 
     // tests
 
 }
 ----
-<1> Annotate the specification with `@Testcontainers` to let Spock manage the Testcontainers for you
-<2> Create an instance of `LocalStackContainer` with SNS support enabled
-<3> Prepare the reference to the `ApplicationContext`, `@AutoCleanup` guarantees closing the context after the tests
-<4> Create `AmazonSNS` client using the LocalStack configuration
-<5> Prepare the application context with required properties and service using LocalStack
-<6> You can obtain instance of `SimpleNotificationService` from the context
+<1> Annotate the specification with `@MicronautTest` to let Micronaut handle the application context lifecycle
+<2> Annotate the specification with `@Property` to set the required Micronaut properties
+<3> Use `@Inject` to let Micronaut inject the beans into your tests
 
 [source,java,indent=0,role="secondary"]
-.Java (AWS SDK 2.x)
+.Java
 ----
 class SimpleNotificationServiceTest {
 
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationServiceTest.java[tags=testcontainers-setup]
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationServiceTest.java[tags=header]
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationServiceTest.java[tags=setup]
 
     // tests
 
 }
 ----
-<1> Prepare the reference to the `ApplicationContext`
-<2> Create an instance of `LocalStackContainer` with SNS support enabled
-<3> Create `AmazonSNS` client using the LocalStack configuration
-<4> Prepare required properties
-<5> Prepare the application context with required properties and service LocalStack
-<6> Close the application context after the test
+<1> Annotate the specification with `@MicronautTest` to let Micronaut handle the application context lifecycle
+<2> Annotate the specification with `@Property` to set the required Micronaut properties
+<3> Use `@Inject` to let Micronaut inject the beans into your tests
 
 
-[source,groovy,indent=0,role="secondary"]
-.Groovy (AWS SDK 1.x)
+[TIP]
+====
+You can save time creating the new Localstack container by sharing it between the tests.
+
+[source,yaml]
+.application-test.yml
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk-sns/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-header]
-
-include::{root-dir}/subprojects/micronaut-aws-sdk-sns/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-fields]
-
-include::{root-dir}/subprojects/micronaut-aws-sdk-sns/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceSpec.groovy[tags=testcontainers-setup]
-
-    // tests
-
-}
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/resources/application-test.yml[]
 ----
-<1> Annotate the specification with `@Testcontainers` to let Spock manage the Testcontainers for you
-<2> Create an instance of `LocalStackContainer` with SNS support enabled
-<3> Prepare the reference to the `ApplicationContext`, `@AutoCleanup` guarantees closing the context after the tests
-<4> Create `AmazonSNS` client using the LocalStack configuration
-<5> Prepare the application context with required properties and service using LocalStack
-<6> You can obtain instance of `SimpleNotificationService` from the context
-
-[source,java,indent=0,role="secondary"]
-.Java (AWS SDK 1.x)
-----
-class SimpleNotificationServiceTest {
-
-include::{root-dir}/subprojects/micronaut-aws-sdk-sns/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=testcontainers-setup]
-
-    // tests
-
-}
-----
-<1> Prepare the reference to the `ApplicationContext`
-<2> Create an instance of `LocalStackContainer` with SNS support enabled
-<3> Create `AmazonSNS` client using the LocalStack configuration
-<4> Prepare required properties
-<5> Prepare the application context with required properties and service LocalStack
-<6> Close the application context after the test
+====
 

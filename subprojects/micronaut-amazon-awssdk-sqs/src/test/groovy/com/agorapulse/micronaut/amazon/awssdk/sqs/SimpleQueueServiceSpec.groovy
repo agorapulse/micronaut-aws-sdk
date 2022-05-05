@@ -34,17 +34,19 @@ import javax.inject.Inject
 @Retry(count =  5)
 @Stepwise
 
-// tag::testcontainers-header[]
-@MicronautTest
-@Property(name = 'aws.sqs.queue', value = TEST_QUEUE)
+// tag::header[]
+@MicronautTest                                                                          // <1>
+@Property(name = 'aws.sqs.queue', value = TEST_QUEUE)                                   // <2>
 class SimpleQueueServiceSpec extends Specification {
 
-// end::testcontainers-header[]
+// end::header[]
 
     private static final String TEST_QUEUE = 'TestQueueGroovy'
     private static final String DATA = 'Hello World'
 
-    @Inject SimpleQueueService service
+    // tag::setup[]
+    @Inject SimpleQueueService service                                                  // <3>
+    // end::setup[]
 
     void 'working with queues'() {
         when:

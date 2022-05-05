@@ -30,16 +30,16 @@ import javax.inject.Inject
  * Tests for simple notification service.
  */
 @Stepwise
-// tag::testcontainers-header[]
-@MicronautTest
-@Property(name = 'aws.sns.topic', value = TEST_TOPIC)
+// tag::header[]
+@MicronautTest                                                                          // <1>
+@Property(name = 'aws.sns.topic', value = TEST_TOPIC)                                   // <2>
 @Property(name = 'aws.sns.ios.arn', value = IOS_APP_ARN)
 @Property(name = 'aws.sns.ios-sandbox.arn', value = IOS_SANDBOX_APP_ARN)
 @Property(name = 'aws.sns.android.arn', value = ANDROID_APP_ARN)
 @Property(name = 'aws.sns.amazon.arn', value = AMAZON_APP_ARN)
 class SimpleNotificationServiceSpec extends Specification {
 
-// end::testcontainers-header[]
+// end::header[]
 
     private static final String TEST_TOPIC = 'TestTopic'
     private static final String IOS_APP_ARN = 'arn:aws:sns:us-east-1:000000000000:app/APNS/IOS-APP'
@@ -47,9 +47,10 @@ class SimpleNotificationServiceSpec extends Specification {
     private static final String ANDROID_APP_ARN = 'arn:aws:sns:us-east-1:000000000000:app/GCM/ANDROID-APP'
     private static final String AMAZON_APP_ARN = 'arn:aws:sns:us-east-1:000000000000:app/ADM/AMAZON-APP'
 
-    @Inject SimpleNotificationService service
+    // tag::setup[]
+    @Inject SimpleNotificationService service                                           // <3>
+    // end::setup[]
     @Inject SimpleNotificationServiceConfiguration configuration
-    // end::testcontainers-fields[]
 
     @Shared String androidEndpointArn
     @Shared String amazonEndpointArn
@@ -58,7 +59,6 @@ class SimpleNotificationServiceSpec extends Specification {
     @Shared String subscriptionArn
     @Shared String topicArn
 
-    // tag::testcontainers-setup[]
     void setup() {
         service.createIosApplication('IOS-APP', 'API-KEY', 'fake-cert', false)
         service.createIosApplication('IOS-APP', 'API-KEY', 'fake-cert', true)

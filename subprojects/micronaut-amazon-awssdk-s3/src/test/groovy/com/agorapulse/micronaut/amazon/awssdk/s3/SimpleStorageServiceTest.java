@@ -37,8 +37,8 @@ import java.util.Date;
 import static org.junit.jupiter.api.Assertions.*;
 
 // tag::header[]
-@MicronautTest
-@Property(name = "aws.s3.bucket", value = SimpleStorageServiceTest.MY_BUCKET)
+@MicronautTest                                                                          // <1>
+@Property(name = "aws.s3.bucket", value = SimpleStorageServiceTest.MY_BUCKET)           // <2>
 public class SimpleStorageServiceTest {
     // end::header[]
     public static final String MY_BUCKET = "testbucket";
@@ -48,11 +48,12 @@ public class SimpleStorageServiceTest {
     private static final String TEXT_FILE_PATH = "bar/foo.txt";
     private static final Date TOMORROW = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000);
 
-    // tag::setup[]
     @TempDir
     public File tmp;
 
-    @Inject SimpleStorageService service;
+    // tag::setup[]
+    @Inject SimpleStorageService service;                                               // <3>
+    // end::setup[]
 
     @Test
     public void testJavaService() throws IOException {

@@ -30,8 +30,11 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@MicronautTest
+// tag::header[]
+@MicronautTest                                                                          // <1>
 public class DeclarativeServiceTest {
+
+    // end::header[]
 
     private static final Instant REFERENCE_DATE = Instant.ofEpochMilli(1358487600000L);
 

@@ -26,15 +26,15 @@ import javax.inject.Inject;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
-// tag::testcontainers-spec[]
-@MicronautTest
+// tag::spec[]
+@MicronautTest                                                                          // <1>
 public class KinesisJavaDemoTest {
 
-    @Inject KinesisService service;
+    @Inject KinesisService service;                                                     // <2>
 
     @Test
     public void testJavaService() {
         assertNotNull(service.createStream("TestStream"));
     }
 }
-// end::testcontainers-spec[]
+// end::spec[]

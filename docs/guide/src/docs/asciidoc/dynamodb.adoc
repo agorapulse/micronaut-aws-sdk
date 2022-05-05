@@ -13,7 +13,7 @@ This library provides two approaches to work with DynamoDB tables and entities:
 [source,indent=0,role="primary",subs='verbatim,attributes']
 .Gradle (AWS SDK 2.x)
 ----
-compile 'com.agorapulse:micronaut-amazon-awssdk-dynamodb:{project-version}'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb:{project-version}'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']
@@ -29,7 +29,7 @@ compile 'com.agorapulse:micronaut-amazon-awssdk-dynamodb:{project-version}'
 [source,indent=0,role="secondary",subs='verbatim,attributes']
 .Gradle (AWS SDK 1.x)
 ----
-compile 'com.agorapulse:micronaut-aws-sdk-dynamodb:{project-version}'
+implementation 'com.agorapulse:micronaut-aws-sdk-dynamodb:{project-version}'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']
@@ -307,7 +307,7 @@ The following table summarizes the supported method signatures:
 
     `List<DynamoDBEntity> saveAll(DynamoDBEntity... entities)`
 
-| Perists the entity or a list of entities and returns self
+| Persists the entity or a list of entities and returns self
 
 
 |
@@ -444,7 +444,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/a
 ===== Scanning
 
 DynamoDB integration does not support feature known as http://gorm.grails.org/6.0.x/hibernate/manual/index.html#finders[_dynamic finders_].
-If you need to scan the table by unindexed attributes you can annotate any method with `@scan` annotation to make it
+If you need to scan the table by unindexed attributes you can annotate any method with `@Scan` annotation to make it
 
  * counting method if its name begins with `count`
  * otherwise an advanced query method
@@ -568,7 +568,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/a
 
 ==== DynamoDB Service
 
-`DynamoDBService` provides middle-level API for working with DynamoDB tables and entites. You can obtain instance of `DynamoDBService` from
+`DynamoDBService` provides middle-level API for working with DynamoDB tables and entities. You can obtain instance of `DynamoDBService` from
 `DynamoDBServiceProvider` which can be injected to any bean.
 
 
@@ -727,7 +727,7 @@ Please, check https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/D
 article to understand the subsequence of using DAX instead of direct DynamoDB operations.
 
 Make sure you have set up proper policy to access the DAX cluster. See https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.access-control.html[DAX Access Control] for more information.
-Following policy allow every DAX operatin on any resource. In production, you should constraint the scope to single cluster.
+Following policy allow every DAX operation on any resource. In production, you should constrain the scope to single cluster.
 
 [source,json,indent=0]
 .DAX Access Policy
@@ -749,118 +749,67 @@ Following policy allow every DAX operatin on any resource. In production, you sh
 ==== Testing
 
 You can very easily mock any of the interfaces and declarative services but if you need close-to-production
-DynamoDB integration works well with https://www.testcontainers.org/[Testcontainers] and https://localstack.cloud/[LocalStack].
+DynamoDB integration works well with https://www.testcontainers.org/[Testcontainers] and https://localstack.cloud/[LocalStack] using `micronaut-amazon-awssdk-integration-testing` module.
 
 You need to add following dependencies into your build file:
 
-[source,indent=0,role="primary"]
+
+[source,indent=0,role="primary",subs='verbatim,attributes']
 .Gradle
 ----
-compile group: 'org.testcontainers', name: 'localstack', version: '1.15.3'
-compile group: 'org.testcontainers', name: 'spock', version: '1.15.3'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:{project-version}'
 ----
 
-[source,xml,indent=0,role="secondary"]
+[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
 .Maven
 ----
 <dependency>
-    <groupId>org.testcontainers</groupId>
-    <artifactId>localstack</artifactId>
-    <version>1.15.3</version>
-    <scope>test</scope>
+    <groupId>com.agorapulse</groupId>
+    <artifactId>micronaut-amazon-awssdk-dynamodb</artifactId>
+    <version>{project-version}</version>
 </dependency>
-<dependency>
-    <groupId>org.testcontainers</groupId>
-    <artifactId>spock</artifactId>
-    <version>1.15.3</version>
-    <scope>test</scope>
-</dependency>
-
 ----
-
-Then you can setup your tests like this:
+Then you can set up your tests like this:
 
 [source,groovy,indent=0,role="primary"]
-.Groovy (AWS SDK 2.x)
+.Groovy
 ----
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=testcontainers-header]
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=testcontainers-setup]
-    }
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=header]
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=setup]
 
     // test methods
 
 }
 ----
-<1> Annotate the specification with `@Testcontainers` to let Spock manage the Testcontainers for you
-<2> Prepare the reference to the `ApplicationContext`, `@AutoCleanup` guarantees closing the context after the tests
-<3> Create an instance of `LocalStackContainer` with only DynamoDB support enabled
-<4> Create `DynamoDbClient` client using the LocalStack configuration
-<5> Register the client using LocalStack to the application context
-<6> Register the enhanced client using LocalStack to the application context
-<7> Obtain the declarative service
-<8> Obtain `DynamoDBService` for particular DynamoDB entity
+<1> Annotate the specification with `@MicronautTest` to let Micronaut handle the application context lifecycle
+<2> Use `@Inject` to let Micronaut inject the beans into your tests
+<3> Create the low-level service using `DynamoDBServiceProvider`
 
 [source,java,indent=0,role="secondary"]
-.Java (AWS SDK 2.x)
+.Java
 ----
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/dynamodb/DeclarativeServiceTest.java[tags=testcontainers-setup]
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/dynamodb/DeclarativeServiceTest.java[tags=header]
+    @Inject DynamoDBServiceProvider provider                                            // <2>
+
     @Test
     public void testSomething() {
-        DynamoDBServiceProvider provider = ctx.getBean(DynamoDBServiceProvider.class);  // <7>
-        DynamoDBService<DynamoDBEntity> s = provider.findOrCreate(DynamoDBEntity.class);// <8>
+        DynamoDBService<DynamoDBEntity> s = provider.findOrCreate(DynamoDBEntity.class);// <3>
 
         // test code
     }
 }
 ----
-<1> Create an instance of `LocalStackContainer` with only DynamoDB support enabled
-<2> Prepare the reference to the `ApplicationContext`
-<3> Create `DynamoDbClient` client using the LocalStack configuration
-<4> Register the client using LocalStack to the application context
-<5> Register the enhanced client using LocalStack to the application context
-<6> Close the application context after test execution
-<7> Obtain the provider bean
-<8> Obtain `DynamoDBService` for particular DynamoDB entity
+<1> Annotate the specification with `@MicronautTest` to let Micronaut handle the application context lifecycle
+<2> Use `@Inject` to let Micronaut inject the beans into your tests
+<3> Create the low-level service using `DynamoDBServiceProvider`
 
-[source,groovy,indent=0,role="secondary"]
-.Groovy (AWS SDK 1.x)
+[TIP]
+====
+You can save time creating the new Localstack container by sharing it between the tests.
+
+[source,yaml]
+.application-test.yml
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=testcontainers-header]
-include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=testcontainers-setup]
-    // test methods
-
-}
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/resources/application-test.yml[]
 ----
-<1> Annotate the specification with `@Testcontainers` to let Spock manage the Testcontainers for you
-<2> Prepare the reference to the `ApplicationContext`, `@AutoCleanup` guarantees closing the context after the tests
-<3> Create an instance of `LocalStackContainer` with only DynamoDB support enabled
-<4> Create `AmazonDynamoDB` client using the LocalStack configuration
-<5> Register the client using LocalStack to the application context
-<6> Register the mapper using LocalStack to the application context
-<7> Obtain the provider bean
-<8> Obtain `DynamoDBService` for particular DynamoDB entity
-
-[source,java,indent=0,role="secondary"]
-.Java (AWS SDK 1.x)
-----
-include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=header]
-include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/aws/dynamodb/DynamoDBServiceTest.java[tags=setup]
-    @Test
-    public void testSomething() {
-        DynamoDBServiceProvider provider = ctx.getBean(DynamoDBServiceProvider.class);  // <7>
-        DynamoDBService<DynamoDBEntity> s = provider.findOrCreate(DynamoDBEntity.class);// <8>
-
-        // test code
-    }
-}
-----
-<1> Create an instance of `LocalStackContainer` with only DynamoDB support enabled
-<2> Prepare the reference to the `ApplicationContext`
-<3> Create `AmazonDynamoDB` client using the LocalStack configuration
-<4> Register the client using LocalStack to the application context
-<5> Register the mapper using LocalStack to the application context
-<6> Close the application context after test execution
-<7> Obtain the provider bean
-<8> Obtain `DynamoDBService` for particular DynamoDB entity
-
-TIP: You can obtain instances of declarative client from the context as well.
+====

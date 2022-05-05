@@ -27,11 +27,11 @@ import javax.inject.Inject
 /**
  * Tests for kinesis service.
  */
-// tag::testcontainers-spec[]
-@MicronautTest
+// tag::spec[]
+@MicronautTest                                                                          // <1>
 class KinesisDemoSpec extends Specification {
 
-    @Inject KinesisService service
+    @Inject KinesisService service                                                      // <2>
 
     @Retry
     void 'new default stream'() {
@@ -42,4 +42,4 @@ class KinesisDemoSpec extends Specification {
     }
 
 }
-// end::testcontainers-spec[]
+// end::spec[]
