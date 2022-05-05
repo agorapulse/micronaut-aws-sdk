@@ -23,15 +23,15 @@ config {
 }
 
 dependencies {
-    compile project(':planets')
-    compile project(':spacecrafts')
+    implementation project(':planets')
+    implementation project(':spacecrafts')
 
-    compile "com.agorapulse:dru-client-dynamodb:${druVersion}"
-    compile "com.agorapulse:gru-api-gateway:$gruVersion"
+    implementation "com.agorapulse:dru-client-dynamodb:${druVersion}"
+    implementation "com.agorapulse:gru-api-gateway:$gruVersion"
 
-    compile "io.micronaut:micronaut-http-server-netty"
+    implementation "io.micronaut:micronaut-http-server-netty"
 
-    testCompile "com.agorapulse:gru-http:$gruVersion"
+    testImplementation "com.agorapulse:gru-http:$gruVersion"
 }
 
 

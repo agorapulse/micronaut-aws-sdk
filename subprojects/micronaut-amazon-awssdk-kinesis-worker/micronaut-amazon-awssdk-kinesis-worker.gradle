@@ -16,18 +16,15 @@
  * limitations under the License.
  */
 dependencies {
-    compile project(':micronaut-amazon-awssdk-core')
-    compile project(':micronaut-amazon-awssdk-cloudwatch')
-    compile project(':micronaut-amazon-awssdk-dynamodb')
-    compile project(':micronaut-amazon-awssdk-kinesis')
-
-    compile(group: 'software.amazon.kinesis', name: 'amazon-kinesis-client', version: kinesisClientV2Version) {
+    api(group: 'software.amazon.kinesis', name: 'amazon-kinesis-client', version: kinesisClientV2Version) {
         exclude group: 'software.amazon.awssdk', module: 'url-connection-client'
     }
 
-    testCompile project(':micronaut-amazon-awssdk-integration-testing')
-    testCompile 'io.micronaut.test:micronaut-test-junit5'
-    testCompile 'io.micronaut.test:micronaut-test-spock'
+    implementation project(':micronaut-amazon-awssdk-core')
+    implementation project(':micronaut-amazon-awssdk-cloudwatch')
+    implementation project(':micronaut-amazon-awssdk-dynamodb')
+    implementation project(':micronaut-amazon-awssdk-kinesis')
 
-    testCompile "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation project(':micronaut-amazon-awssdk-integration-testing')
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
 }

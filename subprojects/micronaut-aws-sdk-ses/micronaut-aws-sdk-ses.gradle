@@ -16,10 +16,11 @@
  * limitations under the License.
  */
 dependencies {
-    compile project(':micronaut-aws-sdk-core')
-    compile "space.jasan:groovy-closure-support:$closureSupportVersion"
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-ses'
-    compile 'javax.mail:mail:1.4.4'
+    api 'com.amazonaws:aws-java-sdk-ses'
 
-    testCompile "org.mockito:mockito-core:$mockitoVersion"
+    implementation  project(':micronaut-aws-sdk-core')
+    implementation  "space.jasan:groovy-closure-support:$closureSupportVersion"
+    implementation  'javax.mail:mail:1.4.4'
+
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
 }

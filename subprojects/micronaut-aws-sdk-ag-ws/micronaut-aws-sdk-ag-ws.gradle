@@ -16,16 +16,16 @@
  * limitations under the License.
  */
 dependencies {
-    compile project(':micronaut-aws-sdk-core')
+    implementation project(':micronaut-aws-sdk-core')
 
-    testCompile 'com.amazonaws:aws-lambda-java-events'
-    testCompile project(':micronaut-aws-sdk-sns')
-    testCompile micronautMigratedDependency('micronaut-function-groovy')
-    testCompile "io.micronaut:micronaut-function-client"
-    testRuntime "io.micronaut:micronaut-http-server-netty"
-    testRuntime "io.micronaut:micronaut-function-web"
-    testCompile "org.mockito:mockito-core:$mockitoVersion"
-    testCompile group: 'com.stehno.ersatz', name: 'ersatz', version: '1.9.0'
-    testCompile "space.jasan:groovy-closure-support:$closureSupportVersion"
-    testCompile group: 'io.undertow', name: 'undertow-core', version: '2.0.13.Final'
+    testImplementation 'com.amazonaws:aws-lambda-java-events'
+    testImplementation project(':micronaut-aws-sdk-sns')
+    testImplementation micronautMigratedDependency('micronaut-function-groovy')
+    testImplementation 'io.micronaut:micronaut-function-client'
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation group: 'com.stehno.ersatz', name: 'ersatz', version: '1.9.0'
+    testImplementation "space.jasan:groovy-closure-support:$closureSupportVersion"
+    testImplementation group: 'io.undertow', name: 'undertow-core', version: '2.0.13.Final'
+    testRuntimeOnly 'io.micronaut:micronaut-http-server-netty'
+    testRuntimeOnly 'io.micronaut:micronaut-function-web'
 }

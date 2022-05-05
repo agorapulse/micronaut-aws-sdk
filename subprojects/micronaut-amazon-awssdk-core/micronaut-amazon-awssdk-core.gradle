@@ -16,5 +16,5 @@
  * limitations under the License.
  */
 dependencies {
-    compile "software.amazon.awssdk:aws-core"
+    api 'software.amazon.awssdk:aws-core'
 }

@@ -121,7 +121,7 @@ allprojects {
     apply from: rootProject.file('gradle/micronaut-compatibility.gradle')
     repositories {
         mavenCentral()
-        maven { url "https://repo.spring.io/release"  }
+        maven { url 'https://repo.spring.io/release' }
     }
 
     license {
@@ -135,51 +135,55 @@ subprojects { Project subproject ->
     if (subproject.name == 'guide' || subproject.name == 'micronaut-aws-sdk-dependencies') return
 
     apply plugin: 'groovy'
+    apply plugin: 'java-library'
     apply plugin: 'micronaut-compatibility'
 
     dependencies {
         annotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
-        compile platform(project(':micronaut-aws-sdk-dependencies'))
+        api platform(project(':micronaut-aws-sdk-dependencies'))
 
-        annotationProcessor "io.micronaut:micronaut-inject-java"
+        annotationProcessor 'io.micronaut:micronaut-inject-java'
 
         // Groovy
         if (subproject.name.startsWith('micronaut-amazon-awssdk')) {
             compileOnly "org.codehaus.groovy:groovy:$groovyVersion"
-            testCompile "org.codehaus.groovy:groovy:$groovyVersion"
+            testImplementation "org.codehaus.groovy:groovy:$groovyVersion"
         } else {
-            compile "org.codehaus.groovy:groovy:$groovyVersion"
-            compile micronautMigratedDependency('micronaut-runtime-groovy')
+            implementation "org.codehaus.groovy:groovy:$groovyVersion"
+            implementation micronautMigratedDependency('micronaut-runtime-groovy')
             compileOnly 'io.micronaut:micronaut-inject-groovy'
         }
 
-        compile "io.micronaut:micronaut-inject"
-        compile "io.micronaut:micronaut-runtime"
+        implementation 'io.micronaut:micronaut-inject'
+        implementation 'io.micronaut:micronaut-runtime'
 
         // Micronaut 3.x Compatibilty
         implementation 'io.reactivex.rxjava2:rxjava:2.2.10'
 
 
-        compileOnly "io.micronaut:micronaut-inject-java"
-
-        runtime "ch.qos.logback:logback-classic:1.2.3"
+        compileOnly 'io.micronaut:micronaut-inject-java'
 
         testAnnotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
-        testAnnotationProcessor "io.micronaut:micronaut-inject-java"
+        testAnnotationProcessor 'io.micronaut:micronaut-inject-java'
 
-        testCompile platform("io.micronaut:micronaut-bom:$micronautVersion")
-        testCompile "io.micronaut:micronaut-inject-groovy"
+        testImplementation platform("io.micronaut:micronaut-bom:$micronautVersion")
+        testImplementation 'io.micronaut:micronaut-inject-groovy'
 
-        testCompile 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-        testCompile 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+        testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 
-        testCompile("org.spockframework:spock-core:$spockVersion") {
-            exclude group: "org.codehaus.groovy", module: "groovy-all"
+        testImplementation("org.spockframework:spock-core:$spockVersion") {
+            exclude group: 'org.codehaus.groovy', module: 'groovy-all'
         }
-        testCompile 'cglib:cglib-nodep:3.2.0'
-        testCompile 'org.objenesis:objenesis:1.2'
+        testImplementation 'cglib:cglib-nodep:3.2.0'
+        testImplementation 'org.objenesis:objenesis:1.2'
 
         testCompileOnly 'com.agorapulse:remember:0.4.2'
+
+        testImplementation 'io.micronaut.test:micronaut-test-junit5'
+        testImplementation 'io.micronaut.test:micronaut-test-spock'
+
+        testRuntimeOnly 'ch.qos.logback:logback-classic:1.2.3'
     }
 
     compileJava.options.compilerArgs += '-parameters'
