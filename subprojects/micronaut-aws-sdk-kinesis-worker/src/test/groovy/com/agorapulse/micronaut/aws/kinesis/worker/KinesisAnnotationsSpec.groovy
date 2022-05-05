@@ -66,7 +66,7 @@ class KinesisAnnotationsSpec extends Specification {
             service.createStream()
             service.waitForActive()
 
-            waitForWorkerReady(300, 100)
+            waitForWorkerReady(1200, 100)
 
             Disposable subscription = publishEventAsync(tester, client)
 
