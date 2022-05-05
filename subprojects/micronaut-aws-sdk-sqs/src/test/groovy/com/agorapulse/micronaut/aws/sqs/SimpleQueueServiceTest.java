@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Property(name = "aws.sqs.queue", value = SimpleQueueServiceTest.TEST_QUEUE)
 public class SimpleQueueServiceTest {
 
-    public static final String TEST_QUEUE = "TestQueue";
+    public static final String TEST_QUEUE = "TestQueueJava";
     private static final String DATA = "Hello World";
 
     @Inject SimpleQueueService service;

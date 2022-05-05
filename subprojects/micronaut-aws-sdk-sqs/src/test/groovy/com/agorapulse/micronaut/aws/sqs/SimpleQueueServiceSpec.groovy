@@ -40,7 +40,7 @@ class SimpleQueueServiceSpec extends Specification {
 
 // end::testcontainers-header[]
 
-    private static final String TEST_QUEUE = 'TestQueue'
+    private static final String TEST_QUEUE = 'TestQueueGroovy'
     private static final String DATA = 'Hello World'
 
     @Inject SimpleQueueService service
