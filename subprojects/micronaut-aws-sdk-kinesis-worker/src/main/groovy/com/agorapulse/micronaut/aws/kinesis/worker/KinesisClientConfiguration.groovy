@@ -50,25 +50,18 @@ abstract class KinesisClientConfiguration {
     String kinesisEndpoint
     String dynamoDBEndpoint
     InitialPositionInStream initialPositionInStream = DEFAULT_INITIAL_POSITION_IN_STREAM
-    @Min(1L)
-    long failoverTimeMillis = DEFAULT_FAILOVER_TIME_MILLIS
-    @Min(1L)
-    long shardSyncIntervalMillis = DEFAULT_SHARD_SYNC_INTERVAL_MILLIS
-    @Min(1L)
-    int maxRecords = DEFAULT_MAX_RECORDS
-    @Min(1L)
-    long idleTimeBetweenReadsInMillis = DEFAULT_IDLETIME_BETWEEN_READS_MILLIS
+
+    @Min(1L) long failoverTimeMillis = DEFAULT_FAILOVER_TIME_MILLIS
+    @Min(1L) long shardSyncIntervalMillis = DEFAULT_SHARD_SYNC_INTERVAL_MILLIS
+    @Min(1L) int maxRecords = DEFAULT_MAX_RECORDS
+    @Min(1L) long idleTimeBetweenReadsInMillis = DEFAULT_IDLETIME_BETWEEN_READS_MILLIS
     boolean callProcessRecordsEvenForEmptyRecordList
-    @Min(1L)
-    long parentShardPollIntervalMillis = DEFAULT_PARENT_SHARD_POLL_INTERVAL_MILLIS
+    @Min(1L) long parentShardPollIntervalMillis = DEFAULT_PARENT_SHARD_POLL_INTERVAL_MILLIS
     boolean cleanupLeasesUponShardCompletion = DEFAULT_CLEANUP_LEASES_UPON_SHARDS_COMPLETION
     boolean ignoreUnexpectedChildShards
-    @Min(1L)
-    long taskBackoffTimeMillis = DEFAULT_TASK_BACKOFF_TIME_MILLIS
-    @Min(1L)
-    long metricsBufferTimeMillis = DEFAULT_METRICS_BUFFER_TIME_MILLIS
-    @Min(1L)
-    int metricsMaxQueueSize = DEFAULT_METRICS_MAX_QUEUE_SIZE
+    @Min(1L) long taskBackoffTimeMillis = DEFAULT_TASK_BACKOFF_TIME_MILLIS
+    @Min(1L) long metricsBufferTimeMillis = DEFAULT_METRICS_BUFFER_TIME_MILLIS
+    @Min(1L) int metricsMaxQueueSize = DEFAULT_METRICS_MAX_QUEUE_SIZE
     MetricsLevel metricsLevel = DEFAULT_METRICS_LEVEL
     Set<String> metricsEnabledDimensions = DEFAULT_METRICS_ENABLED_DIMENSIONS
     boolean validateSequenceNumberBeforeCheckpointing = DEFAULT_VALIDATE_SEQUENCE_NUMBER_BEFORE_CHECKPOINTING
@@ -77,8 +70,7 @@ abstract class KinesisClientConfiguration {
     int initialLeaseTableReadCapacity = DEFAULT_INITIAL_LEASE_TABLE_READ_CAPACITY
     int initialLeaseTableWriteCapacity = DEFAULT_INITIAL_LEASE_TABLE_WRITE_CAPACITY
     boolean skipShardSyncAtWorkerInitializationIfLeasesExist = DEFAULT_SKIP_SHARD_SYNC_AT_STARTUP_IF_LEASES_EXIST
-    @Min(1L)
-    long shutdownGraceMillis = DEFAULT_SHUTDOWN_GRACE_MILLIS
+    @Min(1L) long shutdownGraceMillis = DEFAULT_SHUTDOWN_GRACE_MILLIS
     int timeoutInSeconds = 0
     int retryGetRecordsInSeconds = 0
     int maxGetRecordsThreadPool = 0
