@@ -27,7 +27,7 @@ public class LocalstackContainerConfiguration {
 
     // taken from LocalstackContainer defaults which are private constants
     private String image = "localstack/localstack";
-    private String tag = "0.14.2";
+    private String tag = "0.11.2";
 
     private List<String> services = new ArrayList<>();
 
