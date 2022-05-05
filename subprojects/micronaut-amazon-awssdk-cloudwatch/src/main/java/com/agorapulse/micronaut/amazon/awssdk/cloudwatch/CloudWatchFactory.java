@@ -21,10 +21,14 @@ import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
+import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
+import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClientBuilder;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
 
 import javax.inject.Singleton;
+import java.util.Optional;
 
 /**
  * Factory for providing CloudWatch.
@@ -45,6 +49,21 @@ public class CloudWatchFactory {
         return configuration
             .configure(CloudWatchClient.builder().credentialsProvider(credentialsProvider), awsRegionProvider)
             .build();
+    }
+
+
+    @Bean
+    @Singleton
+    CloudWatchAsyncClient cloudWatchAsync(
+        AwsCredentialsProvider credentialsProvider,
+        AwsRegionProvider awsRegionProvider,
+        CloudWatchConfiguration configuration,
+        Optional<SdkAsyncHttpClient> httpClient
+    ) {
+        CloudWatchAsyncClientBuilder builder = configuration
+            .configure(CloudWatchAsyncClient.builder().credentialsProvider(credentialsProvider), awsRegionProvider);
+        httpClient.ifPresent(builder::httpClient);
+        return builder.build();
     }
 
 }

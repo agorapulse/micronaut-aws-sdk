@@ -18,73 +18,30 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
 
-import io.micronaut.context.ApplicationContext;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.testcontainers.containers.localstack.LocalStackContainer;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import io.micronaut.test.annotation.MicronautTest;
+import org.junit.jupiter.api.Test;
 
+import javax.inject.Inject;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.*;
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.DYNAMODB;
+import static org.junit.jupiter.api.Assertions.*;
 
-// tag::testcontainers-setup[]
+// tag::header[]
+@MicronautTest                                                                          // <1>
 public class DeclarativeServiceTest {
+
+    // end::header[]
 
     private static final Instant REFERENCE_DATE = Instant.ofEpochMilli(1358487600000L);
 
-    @Rule
-    public LocalStackContainer localstack = new LocalStackContainer()                   // <1>
-        .withServices(DYNAMODB);
-
-    public ApplicationContext context;                                                  // <2>
-
-    @Before
-    public void setup() {
-        DynamoDbClient client = DynamoDbClient                                          // <3>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(DYNAMODB))
-            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.getAccessKey(), localstack.getSecretKey()
-            )))
-            .region(Region.of(localstack.getRegion()))
-            .build();
-
-        DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient
-            .builder()
-            .dynamoDbClient(client)
-            .build();
-
-        context = ApplicationContext.builder().build();
-        context.registerSingleton(DynamoDbClient.class, client);                        // <4>
-        context.registerSingleton(DynamoDbEnhancedClient.class, enhancedClient);        // <5>
-        context.start();
-    }
-
-    @After
-    public void cleanup() {
-        if (context != null) {
-            context.close();                                                            // <6>
-        }
-    }
-    // end::testcontainers-setup[]
+    @Inject DynamoDBEntityService s;
 
     @Test
     public void testJavaService() {
-
-        DynamoDBEntityService s = context.getBean(DynamoDBEntityService.class);
-
         assertNotNull(s.save(createEntity("1", "1", "foo", Date.from(REFERENCE_DATE))));
         assertNotNull(s.save(createEntity("1", "2", "bar", Date.from(REFERENCE_DATE.plus(1, ChronoUnit.DAYS)))));
         assertNotNull(s.saveAll(Arrays.asList(

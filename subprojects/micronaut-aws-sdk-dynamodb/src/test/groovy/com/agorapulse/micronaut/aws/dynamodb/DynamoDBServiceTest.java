@@ -18,26 +18,20 @@
 package com.agorapulse.micronaut.aws.dynamodb;
 
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
-import io.micronaut.context.ApplicationContext;
+import io.micronaut.test.annotation.MicronautTest;
 import org.joda.time.DateTime;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.testcontainers.containers.localstack.LocalStackContainer;
+import org.junit.jupiter.api.Test;
 
+import javax.inject.Inject;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Date;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 // tag::header[]
+@MicronautTest                                                                          // <1>
 public class DynamoDBServiceTest {
 // end::header[]
 
@@ -45,39 +39,7 @@ public class DynamoDBServiceTest {
     private static final Instant REFERENCE_INSTANT = Instant.ofEpochMilli(1358487600000L);
 
     // tag::setup[]
-    @Rule
-    public LocalStackContainer localstack = new LocalStackContainer()                   // <1>
-        .withServices(LocalStackContainer.Service.DYNAMODB);
-
-    public ApplicationContext ctx;                                                      // <2>
-
-    @Before
-    public void setup() {
-        AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClient                            // <3>
-            .builder()
-            .withEndpointConfiguration(
-                localstack.getEndpointConfiguration(LocalStackContainer.Service.DYNAMODB)
-            )
-            .withCredentials(
-                localstack.getDefaultCredentialsProvider()
-            )
-            .build();
-
-        IDynamoDBMapper mapper = new DynamoDBMapper(amazonDynamoDB);
-
-        ctx = ApplicationContext.builder().build();
-        ctx.registerSingleton(AmazonDynamoDB.class, amazonDynamoDB);                    // <4>
-        ctx.registerSingleton(IDynamoDBMapper.class, mapper);                           // <5>
-        ctx.start();
-    }
-
-    @After
-    public void cleanup() {
-        if (ctx != null) {                                                              // <6>
-            ctx.close();
-        }
-    }
-
+    @Inject DynamoDBServiceProvider provider;                                           // <2>
     // end::setup[]
 
     @Test
@@ -85,7 +47,6 @@ public class DynamoDBServiceTest {
 
         //CHECKSTYLE:OFF
         // tag::obtain-service[]
-        DynamoDBServiceProvider provider = ctx.getBean(DynamoDBServiceProvider.class);
         DynamoDBService<DynamoDBEntity> s = provider.findOrCreate(DynamoDBEntity.class);// <1>
         // end::obtain-service[]
         //CHECKSTYLE:ON

@@ -18,12 +18,8 @@
 package com.agorapulse.micronaut.amazon.awssdk.kinesis
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.testcontainers.containers.localstack.LocalStackContainer
-import org.testcontainers.spock.Testcontainers
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
-import software.amazon.awssdk.core.SdkSystemSetting
-import software.amazon.awssdk.regions.Region
+import io.micronaut.context.annotation.Property
+import io.micronaut.test.annotation.MicronautTest
 import software.amazon.awssdk.services.kinesis.KinesisClient
 import software.amazon.awssdk.services.kinesis.model.CreateStreamResponse
 import software.amazon.awssdk.services.kinesis.model.DeleteStreamResponse
@@ -37,17 +33,18 @@ import software.amazon.awssdk.services.kinesis.model.Shard
 import software.amazon.awssdk.services.kinesis.model.SplitShardResponse
 import software.amazon.awssdk.services.kinesis.model.StreamStatus
 import spock.lang.Retry
-import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
-import spock.util.environment.RestoreSystemProperties
+
+import javax.inject.Inject
 
 /**
  * Tests for kinesis service.
  */
 @Stepwise
-@Testcontainers
-@RestoreSystemProperties
+@MicronautTest
+@Property(name = 'aws.kinesis.stream', value = STREAM)
+@Property(name = 'aws.kinesis.consumer-filter-key', value = 'test_')
 class KinesisServiceSpec extends Specification {
 
     private static final String STREAM = 'STREAM'
@@ -56,28 +53,8 @@ class KinesisServiceSpec extends Specification {
     private static final ObjectMapper MAPPER = new ObjectMapper()
     private static final int SHARD_COUNT = 2
 
-    @Shared
-    LocalStackContainer localstack = new LocalStackContainer()
-        .withServices(LocalStackContainer.Service.KINESIS)
-
-    KinesisClient kinesis
-    KinesisService service
-
-    void setup() {
-        // disable CBOR (not supported by Kinelite)
-        System.setProperty(SdkSystemSetting.CBOR_ENABLED.property(), 'false')
-
-        kinesis = KinesisClient
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.KINESIS))
-            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.accessKey, localstack.secretKey
-            )))
-            .region(Region.EU_WEST_1)
-            .build()
-
-        service = new DefaultKinesisService(kinesis, new DefaultKinesisConfiguration(stream: STREAM, consumerFilterKey: 'test_'), MAPPER)
-    }
+    @Inject KinesisClient kinesis
+    @Inject KinesisService service
 
     @Retry
     void 'new default stream'() {

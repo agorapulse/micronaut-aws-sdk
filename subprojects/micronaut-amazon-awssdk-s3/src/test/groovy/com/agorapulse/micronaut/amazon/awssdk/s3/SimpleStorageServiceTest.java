@@ -17,93 +17,46 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.s3;
 
-import io.micronaut.context.ApplicationContext;
+import io.micronaut.context.annotation.Property;
+import io.micronaut.test.annotation.MicronautTest;
 import io.reactivex.Flowable;
 import org.codehaus.groovy.runtime.ResourceGroovyMethods;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.testcontainers.containers.localstack.LocalStackContainer;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.S3Object;
-import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
+import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.Date;
 
-import static org.junit.Assert.*;
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
+import static org.junit.jupiter.api.Assertions.*;
 
 // tag::header[]
+@MicronautTest                                                                          // <1>
+@Property(name = "aws.s3.bucket", value = SimpleStorageServiceTest.MY_BUCKET)           // <2>
 public class SimpleStorageServiceTest {
     // end::header[]
+    public static final String MY_BUCKET = "testbucket";
 
     private static final String KEY = "foo/bar.baz";
-    private static final String MY_BUCKET = "testbucket";
     private static final String SAMPLE_CONTENT = "hello world!";
     private static final String TEXT_FILE_PATH = "bar/foo.txt";
     private static final Date TOMORROW = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000);
 
-    // tag::setup[]
-    @Rule
-    public final LocalStackContainer localstack = new LocalStackContainer()            // <1>
-        .withServices(S3);
-
     @TempDir
     public File tmp;
 
-    private ApplicationContext ctx;                                                     // <2>
-
-    @Before
-    public void setup() {
-        S3Client amazonS3 = S3Client                                                    // <3>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.S3))
-            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.getAccessKey(), localstack.getSecretKey()
-            )))
-            .region(Region.of(localstack.getRegion()))
-            .build();
-
-        S3Presigner presigner = S3Presigner
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.S3))
-            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.getAccessKey(), localstack.getSecretKey()
-            )))
-            .region(Region.of(localstack.getRegion()))
-            .build();
-
-        ctx = ApplicationContext
-            .builder(Collections.singletonMap("aws.s3.bucket", MY_BUCKET))
-            .build();
-        ctx.registerSingleton(S3Client.class, amazonS3);                                // <4>
-        ctx.registerSingleton(S3Presigner.class, presigner);
-        ctx.start();
-    }
-
-    @After
-    public void cleanup() {
-        if (ctx != null) {                                                              // <5>
-            ctx.close();
-        }
-    }
+    // tag::setup[]
+    @Inject SimpleStorageService service;                                               // <3>
     // end::setup[]
 
     @Test
     public void testJavaService() throws IOException {
-        SimpleStorageService service = ctx.getBean(SimpleStorageService.class);
 
         // tag::create-bucket[]
         service.createBucket(MY_BUCKET);                                                // <1>

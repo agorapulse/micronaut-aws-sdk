@@ -20,57 +20,34 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.DynamoDBServiceProvider
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.DynamoDbService
 import groovy.util.logging.Slf4j
-import io.micronaut.context.ApplicationContext
-import org.testcontainers.containers.localstack.LocalStackContainer
-import org.testcontainers.spock.Testcontainers
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
-import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
+import io.micronaut.test.annotation.MicronautTest
 import software.amazon.awssdk.enhanced.dynamodb.Key
-import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import software.amazon.awssdk.services.dynamodb.model.GetItemRequest
 import software.amazon.awssdk.services.dynamodb.model.GetItemResponse
-import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
 
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.DYNAMODB
+import javax.inject.Inject
 
 @Slf4j
-@Testcontainers
+@MicronautTest
 class CompressedStringConverterSpec extends Specification {
 
-    @AutoCleanup
-    @Shared
-    ApplicationContext ctx
+    @Inject DynamoDBServiceProvider dynamoDBServiceProvider
+    @Inject DynamoDbClient dynamoDbClient
+    @Shared DynamoDbService<EntityExample> dynamoDbService
 
-    @Shared
-    @AutoCleanup
-    LocalStackContainer localstack = new LocalStackContainer().withServices(DYNAMODB)
-
-    @Shared
-    DynamoDbService<EntityExample> dynamoDbService
-
-    void setupSpec() {
-        final AwsBasicCredentials credentials = AwsBasicCredentials.create(localstack.accessKey, localstack.secretKey)
-        final AwsCredentialsProvider credentialsProvider = StaticCredentialsProvider.create(credentials)
-
-        ctx = ApplicationContext.builder([
-            'aws.dynamodb.region': localstack.region,
-            'aws.dynamodb.endpoint': localstack.getEndpointConfiguration(DYNAMODB).serviceEndpoint,
-        ]).build()
-        ctx.registerSingleton(AwsCredentialsProvider, credentialsProvider)
-        ctx.start()
-
-        dynamoDbService = ctx.getBean(DynamoDBServiceProvider).findOrCreate(EntityExample)
-
-        dynamoDbService.createTable()
+    void setup() {
+        dynamoDbService = dynamoDBServiceProvider.findOrCreate(EntityExample)
     }
 
     void 'should persist entity with compressed data field'() {
         given:
+        dynamoDbService.createTable()
+
+        and:
         String json = this.class.classLoader.getResourceAsStream('example.json').text
         EntityExample entity = new EntityExample(UUID.randomUUID().toString(), json)
 
@@ -96,15 +73,6 @@ class CompressedStringConverterSpec extends Specification {
     }
 
     private GetItemResponse getRawDynamoDbItem(String id) {
-        DynamoDbClient dynamoDbClient = DynamoDbClient
-            .builder()
-            .endpointOverride(localstack.getEndpointConfiguration(DYNAMODB).serviceEndpoint.toURI())
-            .credentialsProvider(StaticCredentialsProvider.create(
-                AwsBasicCredentials.create(localstack.accessKey, localstack.secretKey)
-            ))
-            .region(Region.of(localstack.region))
-            .build()
-
         GetItemRequest request = GetItemRequest
             .builder()
             .key([id: AttributeValue.builder().s(id).build()])

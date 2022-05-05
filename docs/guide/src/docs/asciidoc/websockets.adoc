@@ -12,7 +12,7 @@ WARNING: Use this part of the library with caution. Using WebSockets with API Ga
 [source,indent=0,role="primary",subs='verbatim,attributes']
 .Gradle
 ----
-compile 'com.agorapulse:micronaut-aws-sdk-ag-ws:{project-version}'
+implementation 'com.agorapulse:micronaut-aws-sdk-ag-ws:{project-version}'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']

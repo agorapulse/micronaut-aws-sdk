@@ -20,12 +20,15 @@ package com.agorapulse.micronaut.amazon.awssdk.s3;
 import io.micronaut.context.annotation.EachBean;
 import io.micronaut.context.annotation.Factory;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
+import software.amazon.awssdk.services.s3.S3AsyncClientBuilder;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import javax.inject.Singleton;
+import java.util.Optional;
 
 @Factory
 public class SimpleStorageServiceFactory {
@@ -59,11 +62,13 @@ public class SimpleStorageServiceFactory {
     public S3AsyncClient s3AsyncClient(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
-        SimpleStorageServiceConfiguration configuration
+        SimpleStorageServiceConfiguration configuration,
+        Optional<SdkAsyncHttpClient> httpClient
     ) {
-        return configuration.configure(S3AsyncClient.builder(), awsRegionProvider)
-            .credentialsProvider(credentialsProvider)
-            .build();
+        S3AsyncClientBuilder builder = S3AsyncClient.builder().credentialsProvider(credentialsProvider);
+        httpClient.ifPresent(builder::httpClient);
+        configuration.configure(builder, awsRegionProvider);
+        return builder.build();
     }
 
     @Singleton

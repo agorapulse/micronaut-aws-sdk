@@ -12,7 +12,7 @@ This library provides two approaches to work with Simple Queue Service queues:
 [source,indent=0,role="primary",subs='verbatim,attributes']
 .Gradle (AWS SDK 2.x)
 ----
-compile 'com.agorapulse:micronaut-amazon-awssdk-sqs:{project-version}'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-sqs:{project-version}'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']
@@ -28,7 +28,7 @@ compile 'com.agorapulse:micronaut-amazon-awssdk-sqs:{project-version}'
 [source,indent=0,role="secondary",subs='verbatim,attributes']
 .Gradle (AWS SDK 1.x)
 ----
-compile 'com.agorapulse:micronaut-aws-sdk-sqs:{project-version}'
+implementation 'com.agorapulse:micronaut-aws-sdk-sqs:{project-version}'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']
@@ -59,7 +59,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-test/src/test/resources/applic
 <8> The limit of how many bytes a message can contain before Amazon SQS rejects it. Valid values: An integer from `1,024` bytes (1 KiB) up to `262,144` bytes (256 KiB). Default: `262,144` (256 KiB).
 <9> The visibility timeout for the queue, in seconds. Valid values: an integer from `0` to `43,200` (12 hours). Default: `30`.
 <10> You can define multiple configurations
-<11> Each of the configuration can be access using `@Named('test') SimpleNotificationService` qualifier or you can define the configuration as `value` of `@NotificationClient('test')`
+<11> Each of the configuration can be access using `@Named('test') SimpleNotificationService` qualifier, or you can define the configuration as `value` of `@NotificationClient('test')`
 
 ==== Publishing with `@QueueClient`
 
@@ -181,118 +181,68 @@ https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/
 for the full reference.
 
 ==== Testing
+
 You can very easily mock any of the interfaces and declarative services but if you need close-to-production
-SQS integration works well with https://www.testcontainers.org/[Testcontainers] and https://localstack.cloud/[LocalStack].
+DynamoDB integration works well with https://www.testcontainers.org/[Testcontainers] and https://localstack.cloud/[LocalStack] using `micronaut-amazon-awssdk-integration-testing` module.
 
 You need to add following dependencies into your build file:
 
-[source,indent=0,role="primary"]
+
+[source,indent=0,role="primary",subs='verbatim,attributes']
 .Gradle
 ----
-compile group: 'org.testcontainers', name: 'localstack', version: '1.15.3'
-compile group: 'org.testcontainers', name: 'spock', version: '1.15.3'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:{project-version}'
 ----
 
-[source,xml,indent=0,role="secondary"]
+[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
 .Maven
 ----
 <dependency>
-    <groupId>org.testcontainers</groupId>
-    <artifactId>localstack</artifactId>
-    <version>1.15.3</version>
-    <scope>test</scope>
+    <groupId>com.agorapulse</groupId>
+    <artifactId>micronaut-amazon-awssdk-dynamodb</artifactId>
+    <version>{project-version}</version>
 </dependency>
-<dependency>
-    <groupId>org.testcontainers</groupId>
-    <artifactId>spock</artifactId>
-    <version>1.15.3</version>
-    <scope>test</scope>
-</dependency>
-
 ----
 
-Then you can setup your tests like this:
+Then you can set up your tests like this:
 
 [source,groovy,indent=0,role="primary"]
-.Groovy (AWS SDK 2.x)
+.Groovy
 ----
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-sqs/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sqs/SimpleQueueServiceSpec.groovy[tags=testcontainers-header]
-
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-sqs/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sqs/SimpleQueueServiceSpec.groovy[tags=testcontainers-fields]
-
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-sqs/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sqs/SimpleQueueServiceSpec.groovy[tags=testcontainers-setup]
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sqs/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sqs/SimpleQueueServiceSpec.groovy[tags=header]
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sqs/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sqs/SimpleQueueServiceSpec.groovy[tags=setup]
 
     // tests
 
 }
 ----
-<1> Annotate the specification with `@Testcontainers` to let Spock manage the Testcontainers for you
-<2> `@RestoreSystemProperties` will guarantee that system properties will be restore after the test
-<3> Create an instance of `LocalStackContainer` with SQS support enabled
-<4> Prepare the reference to the `ApplicationContext`, `@AutoCleanup` guarantees closing the context after the tests
-<5> Disable CBOR protocol for SQS (not supported by the mock implementation)
-<6> Create `AmazonSQS` client using the LocalStack configuration
-<7> Prepare the application context with required properties and service using LocalStack
-<8> You can obtain instance of `SimpleQueueService` from the context
+<1> Annotate the specification with `@MicronautTest` to let Micronaut handle the application context lifecycle
+<2> Annotate the specification with `@Property` to set the required Micronaut properties
+<3> Use `@Inject` to let Micronaut inject the beans into your tests
 
 [source,java,indent=0,role="secondary"]
-.Java (AWS SDK 2.x)
+.Java
 ----
-class SimpleNotificationServiceTest {
-
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-sqs/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sqs/SimpleQueueServiceTest.java[tags=testcontainers-setup]
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sqs/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sqs/SimpleQueueServiceTest.java[tags=header]
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sqs/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sqs/SimpleQueueServiceTest.java[tags=setup]
 
     // tests
 
 }
 ----
-<1> Prepare the reference to the `ApplicationContext`
-<2> Create an instance of `LocalStackContainer` with SQS support enabled
-<3> Disable CBOR protocol for SQS (not supported by the mock implementation)
-<4> Create `AmazonSQS` client using the LocalStack configuration
-<5> Prepare required properties
-<6> Prepare the application context with required properties and service LocalStack
-<7> Close the application context after the test
+<1> Annotate the specification with `@MicronautTest` to let Micronaut handle the application context lifecycle
+<2> Annotate the specification with `@Property` to set the required Micronaut properties
+<3> Use `@Inject` to let Micronaut inject the beans into your tests
 
 
-[source,groovy,indent=0,role="secondary"]
-.Groovy (AWS SDK 1.x)
+[TIP]
+====
+You can save time creating the new Localstack container by sharing it between the tests.
+
+[source,yaml]
+.application-test.yml
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk-sqs/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceSpec.groovy[tags=testcontainers-header]
-
-include::{root-dir}/subprojects/micronaut-aws-sdk-sqs/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceSpec.groovy[tags=testcontainers-fields]
-
-include::{root-dir}/subprojects/micronaut-aws-sdk-sqs/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceSpec.groovy[tags=testcontainers-setup]
-
-    // tests
-
-}
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-sqs/src/test/resources/application-test.yml[]
 ----
-<1> Annotate the specification with `@Testcontainers` to let Spock manage the Testcontainers for you
-<2> `@RestoreSystemProperties` will guarantee that system properties will be restore after the test
-<3> Create an instance of `LocalStackContainer` with SQS support enabled
-<4> Prepare the reference to the `ApplicationContext`, `@AutoCleanup` guarantees closing the context after the tests
-<5> Disable CBOR protocol for SQS (not supported by the mock implementation)
-<6> Create `AmazonSQS` client using the LocalStack configuration
-<7> Prepare the application context with required properties and service using LocalStack
-<8> You can obtain instance of `SimpleQueueService` from the context
-
-[source,java,indent=0,role="secondary"]
-.Java (AWS SDK 1.x)
-----
-class SimpleNotificationServiceTest {
-
-include::{root-dir}/subprojects/micronaut-aws-sdk-sqs/src/test/groovy/com/agorapulse/micronaut/aws/sqs/SimpleQueueServiceTest.java[tags=testcontainers-setup]
-
-    // tests
-
-}
-----
-<1> Prepare the reference to the `ApplicationContext`
-<2> Create an instance of `LocalStackContainer` with SQS support enabled
-<3> Disable CBOR protocol for SQS (not supported by the mock implementation)
-<4> Create `AmazonSQS` client using the LocalStack configuration
-<5> Prepare required properties
-<6> Prepare the application context with required properties and service LocalStack
-<7> Close the application context after the test
+====
 

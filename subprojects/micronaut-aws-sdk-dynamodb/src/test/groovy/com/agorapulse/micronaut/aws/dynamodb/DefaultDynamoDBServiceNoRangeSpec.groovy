@@ -18,36 +18,28 @@
 package com.agorapulse.micronaut.aws.dynamodb
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
 import com.amazonaws.services.dynamodbv2.model.CreateTableResult
-import org.testcontainers.containers.localstack.LocalStackContainer
-import org.testcontainers.spock.Testcontainers
-import spock.lang.Shared
+import io.micronaut.test.annotation.MicronautTest
 import spock.lang.Specification
 import spock.lang.Stepwise
+
+import javax.inject.Inject
 
 /**
  * Specification for testing DefaultDynamoDBService using entity with no range key.
  */
 @Stepwise
-@Testcontainers
+@MicronautTest
 class DefaultDynamoDBServiceNoRangeSpec extends Specification {
 
-    @Shared LocalStackContainer localstack = new LocalStackContainer().withServices(LocalStackContainer.Service.DYNAMODB)
-
-    private DefaultDynamoDBService<DynamoDBEntityNoRange> service
-    private AmazonDynamoDB amazonDynamoDB
+    @Inject AmazonDynamoDB amazonDynamoDB
+    @Inject DynamoDBServiceProvider provider
+    DynamoDBService<DynamoDBEntityNoRange> service
 
     void setup() {
-        amazonDynamoDB = AmazonDynamoDBClient
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(LocalStackContainer.Service.DYNAMODB))
-            .withCredentials(localstack.defaultCredentialsProvider)
-            .build()
-
-        service = new DefaultDynamoDBService<>(this.amazonDynamoDB, new DynamoDBMapper(this.amazonDynamoDB), DynamoDBEntityNoRange)
+        service = provider.findOrCreate(DynamoDBEntityNoRange)
     }
 
     void 'required DynamoDB table annotation'() {

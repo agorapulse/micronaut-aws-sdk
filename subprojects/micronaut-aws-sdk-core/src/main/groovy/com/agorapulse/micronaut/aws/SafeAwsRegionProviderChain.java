@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * Region provider chain which throws no exception but returns null instead.
  */
-class SafeAwsRegionProviderChain extends AwsRegionProvider {
+public class SafeAwsRegionProviderChain extends AwsRegionProvider {
 
     private static final Log LOG = LogFactory.getLog(SafeAwsRegionProviderChain.class);
 

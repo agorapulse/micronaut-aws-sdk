@@ -27,7 +27,7 @@ import java.util.Map;
 
 // tag::all[]
 // tag::header[]
-@Service(DynamoDBEntity.class)                                                          // <1>
+@Service(value = DynamoDBEntity.class, tableName = "DynamoDBJava")                      // <1>
 public interface DynamoDBEntityService {
 // end::header[]
 

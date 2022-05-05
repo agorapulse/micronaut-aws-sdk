@@ -18,37 +18,15 @@
 package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker
 
 import com.agorapulse.micronaut.amazon.awssdk.kinesis.KinesisService
-import io.micronaut.context.ApplicationContext
+import io.micronaut.context.annotation.Property
+import io.micronaut.test.annotation.MicronautTest
 import io.reactivex.Flowable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import org.testcontainers.containers.localstack.LocalStackContainer
-import org.testcontainers.spock.Testcontainers
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
-import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
-import software.amazon.awssdk.core.SdkSystemSetting
-import software.amazon.awssdk.http.Protocol
-import software.amazon.awssdk.http.SdkHttpConfigurationOption
-import software.amazon.awssdk.http.async.SdkAsyncHttpClient
-import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient
-import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.kinesis.KinesisAsyncClient
-import software.amazon.awssdk.services.kinesis.KinesisClient
-import software.amazon.awssdk.utils.AttributeMap
-import spock.lang.AutoCleanup
-import spock.lang.Shared
 import spock.lang.Specification
-import spock.util.environment.RestoreSystemProperties
 
+import javax.inject.Inject
 import java.util.concurrent.TimeUnit
-
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.DYNAMODB
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.CLOUDWATCH
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.KINESIS
 
 /**
  * Tests for Kinesis related annotations - client and listener.
@@ -57,8 +35,19 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
 @SuppressWarnings('ClassStartsWithBlankLine')
 
 // tag::testcontainers-header[]
-@Testcontainers                                                                         // <1>
-@RestoreSystemProperties                                                                // <2>
+@MicronautTest
+@Property(name = 'localstack.services', value = 'cloudwatch,dynamodb,kinesis')
+@Property(name = 'aws.kinesis.application.name', value = APP_NAME)
+@Property(name = 'aws.kinesis.worker.id', value = 'abcdef')
+@Property(name = 'aws.kinesis.stream', value = TEST_STREAM)
+@Property(name = 'aws.kinesis.listener.stream', value = TEST_STREAM)
+@Property(name = 'aws.kinesis.listener.failover-time-millis', value = '1000')
+@Property(name = 'aws.kinesis.listener.shard-sync-interval-millis', value = '1000')
+@Property(name = 'aws.kinesis.listener.idle-time-between-reads-in-millis', value = '1000')
+@Property(name = 'aws.kinesis.listener.parent-shard-poll-interval-millis', value = '1000')
+@Property(name = 'aws.kinesis.listener.timeout-in-seconds', value = '1000')
+@Property(name = 'aws.kinesis.listener.retry-get-records-in-seconds', value = '1000')
+@Property(name = 'aws.kinesis.listener.metrics-level', value = 'NONE')
 class KinesisAnnotationsSpec extends Specification {
 // end::testcontainers-header[]
 
@@ -66,105 +55,14 @@ class KinesisAnnotationsSpec extends Specification {
     private static final String TEST_STREAM = 'TestStream'
     private static final String APP_NAME = 'AppName'
 
-    @Shared LocalStackContainer localstack = new LocalStackContainer()                  // <3>
-        .withServices(KINESIS, DYNAMODB, CLOUDWATCH)
-
-    @AutoCleanup ApplicationContext context                                             // <4>
-
-    @SuppressWarnings(['AbcMetric', 'UnnecessaryObjectReferences'])
-    void setup() {
-        // disable CBOR (not supported by Kinelite)
-        System.setProperty(SdkSystemSetting.CBOR_ENABLED.property(), 'false')           // <5>
-        System.setProperty('aws.region', 'eu-west-1')
-
-        StaticCredentialsProvider credentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(
-            localstack.accessKey, localstack.secretKey
-        ))
-
-        SdkAsyncHttpClient asyncClient = NettyNioAsyncHttpClient
-            .builder()
-            .protocol(Protocol.HTTP1_1)
-            .buildWithDefaults(
-                AttributeMap
-                    .builder()
-                    .put(
-                        SdkHttpConfigurationOption.TRUST_ALL_CERTIFICATES,
-                        Boolean.TRUE
-                    )
-                    .build()
-            )
-
-        DynamoDbAsyncClient dynamoAsync = DynamoDbAsyncClient                            // <6>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(DYNAMODB))
-            .credentialsProvider(credentialsProvider)
-            .region(Region.EU_WEST_1)
-            .httpClient(asyncClient)
-            .build()
-
-        DynamoDbClient dynamo = DynamoDbClient
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(DYNAMODB))
-            .credentialsProvider(credentialsProvider)
-            .region(Region.EU_WEST_1)
-            .build()
-
-        KinesisAsyncClient kinesisAsync = KinesisAsyncClient                             // <7>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(KINESIS))
-            .credentialsProvider(credentialsProvider)
-            .region(Region.EU_WEST_1)
-            .httpClient(asyncClient)
-            .build()
-
-        KinesisClient kinesis = KinesisClient
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(KINESIS))
-            .credentialsProvider(credentialsProvider)
-            .region(Region.EU_WEST_1)
-            .build()
-
-        CloudWatchAsyncClient amazonCloudWatch = CloudWatchAsyncClient
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(CLOUDWATCH))
-            .credentialsProvider(credentialsProvider)
-            .region(Region.EU_WEST_1)
-            .httpClient(asyncClient)
-            .build()
-
-        context = ApplicationContext.builder().properties(                              // <8>
-            'aws.kinesis.application.name': APP_NAME,
-            'aws.kinesis.stream': TEST_STREAM,
-            'aws.kinesis.listener.stream': TEST_STREAM,
-            'aws.kinesis.listener.failoverTimeMillis': '1000',
-            'aws.kinesis.listener.shardSyncIntervalMillis': '1000',
-            'aws.kinesis.listener.idleTimeBetweenReadsInMillis': '1000',
-            'aws.kinesis.listener.parentShardPollIntervalMillis': '1000',
-            'aws.kinesis.listener.timeoutInSeconds': '1000',
-            'aws.kinesis.listener.retryGetRecordsInSeconds': '1000'
-        ).build()
-        context.registerSingleton(KinesisClient, kinesis)
-        context.registerSingleton(KinesisAsyncClient, kinesisAsync)
-        context.registerSingleton(DynamoDbClient, dynamo)
-        context.registerSingleton(DynamoDbAsyncClient, dynamoAsync)
-        context.registerSingleton(CloudWatchAsyncClient, amazonCloudWatch)
-        context.registerSingleton(AwsCredentialsProvider, credentialsProvider)
-        context.start()
-    }
-    // end::testcontainers-setup[]
-
-    void cleanup() {
-        System.clearProperty(SdkSystemSetting.CBOR_ENABLED.property())
-        System.clearProperty('aws.region')
-    }
+    @Inject KinesisService service
+    @Inject KinesisListenerTester tester
+    @Inject DefaultClient client
+    @Inject WorkerStateListener listener
 
     // tag::testcontainers-test[]
     void 'kinesis listener is executed'() {
         when:
-            KinesisService service = context.getBean(KinesisService)                    // <9>
-            KinesisListenerTester tester = context.getBean(KinesisListenerTester)       // <10>
-            DefaultClient client = context.getBean(DefaultClient)                       // <11>
-
             service.createStream()
             service.waitForActive()
 
@@ -177,8 +75,6 @@ class KinesisAnnotationsSpec extends Specification {
             subscription.dispose()
         then:
             allTestEventsReceived(tester)
-        cleanup:
-            context.getBean(KinesisListenerMethodProcessor).close()
     }
     // end::testcontainers-test[]
 
@@ -251,7 +147,6 @@ class KinesisAnnotationsSpec extends Specification {
 
     @SuppressWarnings('SystemErrPrint')
     private void waitForWorkerReady(int retries, int waitMillis) throws InterruptedException {
-        WorkerStateListener listener = context.getBean(WorkerStateListener)
         for (int i = 0; i < retries; i++) {
             if (!listener.isReady(TEST_STREAM)) {
                 Thread.sleep(waitMillis)

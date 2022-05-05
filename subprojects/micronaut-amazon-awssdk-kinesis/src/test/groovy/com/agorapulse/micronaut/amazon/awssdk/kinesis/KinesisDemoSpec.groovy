@@ -17,61 +17,21 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.kinesis
 
-import io.micronaut.context.ApplicationContext
-import org.testcontainers.containers.localstack.LocalStackContainer
-import org.testcontainers.spock.Testcontainers
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
-import software.amazon.awssdk.core.SdkSystemSetting
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.services.kinesis.KinesisClient
+import io.micronaut.test.annotation.MicronautTest
 import software.amazon.awssdk.services.kinesis.model.CreateStreamResponse
-import spock.lang.AutoCleanup
 import spock.lang.Retry
-import spock.lang.Shared
 import spock.lang.Specification
-import spock.util.environment.RestoreSystemProperties
 
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.KINESIS
+import javax.inject.Inject
 
 /**
  * Tests for kinesis service.
  */
-// tag::testcontainers-spec[]
-@Testcontainers                                                                         // <1>
-@RestoreSystemProperties                                                                // <2>
+// tag::spec[]
+@MicronautTest                                                                          // <1>
 class KinesisDemoSpec extends Specification {
 
-    @Shared
-    LocalStackContainer localstack = new LocalStackContainer().withServices(KINESIS)    // <3>
-
-    @AutoCleanup ApplicationContext context                                             // <4>
-
-    KinesisService service
-
-    void setup() {
-        // disable CBOR (not supported by Kinelite)
-        System.setProperty(SdkSystemSetting.CBOR_ENABLED.property(), 'false')           // <5>
-
-        KinesisClient kinesis = KinesisClient                                           // <6>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(KINESIS))
-            .credentialsProvider(
-                StaticCredentialsProvider.create(
-                    AwsBasicCredentials.create(
-                        localstack.accessKey, localstack.secretKey
-                    )
-                )
-            )
-            .region(Region.EU_WEST_1)
-            .build()
-
-        context = ApplicationContext.builder().build()                                  // <7>
-        context.registerSingleton(KinesisClient, kinesis)
-        context.start()
-
-        service = context.getBean(KinesisService)                                       // <8>
-    }
+    @Inject KinesisService service                                                      // <2>
 
     @Retry
     void 'new default stream'() {
@@ -82,4 +42,4 @@ class KinesisDemoSpec extends Specification {
     }
 
 }
-// end::testcontainers-spec[]
+// end::spec[]

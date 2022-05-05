@@ -17,13 +17,9 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.s3
 
-import io.micronaut.context.ApplicationContext
+import io.micronaut.context.annotation.Property
+import io.micronaut.test.annotation.MicronautTest
 import io.reactivex.Flowable
-import org.testcontainers.containers.localstack.LocalStackContainer
-import org.testcontainers.spock.Testcontainers
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
-import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectAclResponse
 import software.amazon.awssdk.services.s3.model.GetObjectResponse
@@ -32,12 +28,12 @@ import software.amazon.awssdk.services.s3.model.S3Object
 import software.amazon.awssdk.services.s3.model.Tag
 import software.amazon.awssdk.services.s3.model.Tagging
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
-import spock.lang.AutoCleanup
-import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
 import spock.lang.TempDir
 import spock.lang.Unroll
+
+import javax.inject.Inject
 
 /**
  * Tests for SimpleStorageService based on Testcontainers.
@@ -45,7 +41,8 @@ import spock.lang.Unroll
 @SuppressWarnings('NoJavaUtilDate')
 @Stepwise
 // tag::header[]
-@Testcontainers                                                                         // <1>
+@MicronautTest                                                                          // <1>
+@Property(name = 'aws.s3.bucket', value = MY_BUCKET)                                    // <2>
 class SimpleStorageServiceSpec extends Specification {
 
     // end::header[]
@@ -60,47 +57,10 @@ class SimpleStorageServiceSpec extends Specification {
 
     @TempDir File tmp
 
+    @Inject S3Client amazonS3
+    @Inject S3Presigner presigner
     // tag::setup[]
-    @AutoCleanup ApplicationContext context                                             // <2>
-    @AutoCleanup S3Client amazonS3
-    @AutoCleanup S3Presigner presigner
-
-    @Shared LocalStackContainer localstack = new LocalStackContainer()                  // <3>
-        .withServices(LocalStackContainer.Service.S3)
-
-    SimpleStorageService service
-
-    void setup() {
-        amazonS3 = S3Client                                                             // <4>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.S3))
-            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.accessKey, localstack.secretKey
-            )))
-            .region(Region.of(localstack.region))
-            .build()
-
-        presigner = S3Presigner                                                         // <5>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.S3))
-            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.accessKey, localstack.secretKey
-            )))
-            .region(Region.of(localstack.region))
-            .build()
-        context = ApplicationContext                                                    // <6>
-            .builder(
-                'aws.s3.bucket': MY_BUCKET,
-                'aws.s3.region': 'eu-west-1'
-            )
-            .build()
-
-        context.registerSingleton(S3Client, amazonS3)
-        context.registerSingleton(S3Presigner, presigner)
-        context.start()
-
-        service = context.getBean(SimpleStorageService)                                 // <7>
-    }
+    @Inject SimpleStorageService service                                                // <3>
     // end::setup[]
 
     void 'new bucket'() {

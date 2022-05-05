@@ -17,59 +17,34 @@
  */
 package com.agorapulse.micronaut.aws.sns
 
-import com.amazonaws.services.sns.AmazonSNS
-import com.amazonaws.services.sns.AmazonSNSClient
-import io.micronaut.context.ApplicationContext
-import org.testcontainers.containers.localstack.LocalStackContainer
-import org.testcontainers.spock.Testcontainers
-import spock.lang.AutoCleanup
+import io.micronaut.context.annotation.Property
+import io.micronaut.test.annotation.MicronautTest
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
 
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.SNS
+import javax.inject.Inject
 
 /**
  * Tests for simple notification service.
  */
 @Stepwise
 // tag::testcontainers-header[]
-@Testcontainers                                                                         // <1>
+@MicronautTest
+@Property(name = 'aws.sns.topic', value = TEST_TOPIC)
 class SimpleNotificationServiceSpec extends Specification {
 
 // end::testcontainers-header[]
 
     private static final String TEST_TOPIC = 'TestTopic'
 
-    // tag::testcontainers-fields[]
-    @Shared LocalStackContainer localstack = new LocalStackContainer()                  // <2>
-        .withServices(SNS)
-
-    @AutoCleanup ApplicationContext context                                             // <3>
-
-    SimpleNotificationService service
+    @Inject SimpleNotificationService service
     // end::testcontainers-fields[]
 
     @Shared String endpointArn
     @Shared String platformApplicationArn
     @Shared String subscriptionArn
     @Shared String topicArn
-
-    // tag::testcontainers-setup[]
-    void setup() {
-        AmazonSNS sns = AmazonSNSClient                                                 // <4>
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(SNS))
-            .withCredentials(localstack.defaultCredentialsProvider)
-            .build()
-
-        context = ApplicationContext.builder('aws.sns.topic', TEST_TOPIC).build()       // <5>
-        context.registerSingleton(AmazonSNS, sns)
-        context.start()
-
-        service = context.getBean(SimpleNotificationService)                            // <6>
-    }
-    // end::testcontainers-setup[]
 
     void 'new topic'() {
         when:

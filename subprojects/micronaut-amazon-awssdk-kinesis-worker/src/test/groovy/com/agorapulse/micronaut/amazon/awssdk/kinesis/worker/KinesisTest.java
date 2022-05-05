@@ -18,120 +18,55 @@
 package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker;
 
 import com.agorapulse.micronaut.amazon.awssdk.kinesis.KinesisService;
-import io.micronaut.context.ApplicationContext;
+import io.micronaut.context.annotation.Property;
+import io.micronaut.test.annotation.MicronautTest;
 import io.reactivex.Flowable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import org.junit.*;
-import org.mockito.Mockito;
-import org.testcontainers.containers.localstack.LocalStackContainer;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.core.SdkSystemSetting;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
-import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
-import software.amazon.awssdk.services.kinesis.KinesisAsyncClient;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
-import java.util.Map;
+import javax.inject.Inject;
 import java.util.concurrent.TimeUnit;
 
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.DYNAMODB;
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.KINESIS;
-
 // tag::testcontainers-header[]
+@MicronautTest
+@Property(name = "localstack.services", value = "cloudwatch,dynamodb,kinesis")
+@Property(name = "aws.kinesis.application.name", value = KinesisTest.APP_NAME)
+@Property(name = "aws.kinesis.worker.id", value = "abcdef")
+@Property(name = "aws.kinesis.stream", value = KinesisTest.TEST_STREAM)
+@Property(name = "aws.kinesis.listener.stream", value = KinesisTest.TEST_STREAM)
+@Property(name = "aws.kinesis.listener.failover-time-millis", value = "1000")
+@Property(name = "aws.kinesis.listener.shard-sync-interval-millis", value = "1000")
+@Property(name = "aws.kinesis.listener.idle-time-between-reads-in-millis", value = "1000")
+@Property(name = "aws.kinesis.listener.parent-shard-poll-interval-millis", value = "1000")
+@Property(name = "aws.kinesis.listener.timeout-in-seconds", value = "1000")
+@Property(name = "aws.kinesis.listener.retry-get-records-in-seconds", value = "1000")
+@Property(name = "aws.kinesis.listener.metrics-level", value = "NONE")
 public class KinesisTest {
 // end::testcontainers-header[]
 
-    private static final String TEST_STREAM = "MyStream";
+    public static final String APP_NAME = "TestApp";
+    public static final String TEST_STREAM = "MyStream";
 
-    @Rule
-    public Retry retry = new Retry(10);
-
-    // tag::testcontainers-setup[]
-    public ApplicationContext context;                                                  // <1>
-
-    @Rule
-    public LocalStackContainer localstack = new LocalStackContainer()                   // <2>
-        .withServices(DYNAMODB, KINESIS);
-
-    @Before
-    public void setup() {
-        System.setProperty(SdkSystemSetting.CBOR_ENABLED.property(), "false");          // <3>
-        System.setProperty("aws.region", "eu-west-1");
-
-        StaticCredentialsProvider credentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(
-            localstack.getAccessKey(), localstack.getSecretKey()
-        ));
-
-        DynamoDbAsyncClient dynamo = DynamoDbAsyncClient                                // <4>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(DYNAMODB))
-            .credentialsProvider(credentialsProvider)
-            .region(Region.EU_WEST_1)
-            .build();
-
-        KinesisAsyncClient kinesis = KinesisAsyncClient                                 // <5>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(KINESIS))
-            .credentialsProvider(credentialsProvider)
-            .region(Region.EU_WEST_1)
-            .build();
-
-        CloudWatchAsyncClient cloudWatch = Mockito.mock(CloudWatchAsyncClient.class);
-
-        Map<String, Object> properties = new HashMap<>();                               // <6>
-        properties.put("aws.kinesis.application.name", "TestApp");
-        properties.put("aws.kinesis.stream", TEST_STREAM);
-        properties.put("aws.kinesis.listener.stream", TEST_STREAM);
-
-        // you can set other custom client configuration properties
-        properties.put("aws.kinesis.listener.failoverTimeMillis", "1000");
-        properties.put("aws.kinesis.listener.shardSyncIntervalMillis", "1000");
-        properties.put("aws.kinesis.listener.idleTimeBetweenReadsInMillis", "1000");
-        properties.put("aws.kinesis.listener.parentShardPollIntervalMillis", "1000");
-        properties.put("aws.kinesis.listener.timeoutInSeconds", "1000");
-        properties.put("aws.kinesis.listener.retryGetRecordsInSeconds", "1000");
-        properties.put("aws.kinesis.listener.metricsLevel", "NONE");
-
-
-        context = ApplicationContext.builder(properties).build();                       // <7>
-        context.registerSingleton(KinesisAsyncClient.class, kinesis);
-        context.registerSingleton(DynamoDbAsyncClient.class, dynamo);
-        context.registerSingleton(CloudWatchAsyncClient.class, cloudWatch);
-        context.registerSingleton(AwsCredentialsProvider.class, credentialsProvider);
-        context.start();
-    }
-
-    @After
-    public void cleanup() {
-        System.clearProperty("com.amazonaws.sdk.disableCbor");                          // <8>
-        System.clearProperty("aws.region");
-        if (context != null) {
-            context.close();                                                            // <9>
-        }
-    }
-    // end::testcontainers-setup[]
+    @Inject KinesisService service;
+    @Inject KinesisListenerTester tester;
+    @Inject DefaultClient client;
+    @Inject WorkerStateListener listener;
 
     // tag::testcontainers-test[]
     @Test
     public void testJavaService() throws InterruptedException {
-        KinesisService service = context.getBean(KinesisService.class);                 // <10>
-        KinesisListenerTester tester = context.getBean(KinesisListenerTester.class);    // <11>
-        DefaultClient client = context.getBean(DefaultClient.class);                    // <12>
-
         service.createStream();
         service.waitForActive();
 
-        waitForWorkerReady(300, 100);
+        waitForWorkerReady(1200, 100);
         Disposable subscription = publishEventsAsync(tester, client);
         waitForRecievedMessages(tester, 300, 100);
 
         subscription.dispose();
 
-        Assert.assertTrue(allTestEventsReceived(tester));
+        Assertions.assertTrue(allTestEventsReceived(tester));
     }
     // end::testcontainers-test[]
 
@@ -144,7 +79,6 @@ public class KinesisTest {
     }
 
     private void waitForWorkerReady(int retries, int waitMillis) throws InterruptedException {
-        WorkerStateListener listener = context.getBean(WorkerStateListener.class);
         for (int i = 0; i < retries; i++) {
             if (!listener.isReady(TEST_STREAM)) {
                 Thread.sleep(waitMillis);

@@ -22,21 +22,17 @@ import com.agorapulse.micronaut.aws.dynamodb.annotation.Scan
 import com.agorapulse.micronaut.aws.dynamodb.annotation.Service
 import com.agorapulse.micronaut.aws.dynamodb.annotation.Update
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
 import com.amazonaws.services.dynamodbv2.model.CreateTableResult
-import io.micronaut.context.ApplicationContext
+import io.micronaut.test.annotation.MicronautTest
 import io.reactivex.Flowable
 import org.joda.time.DateTime
-import org.testcontainers.containers.localstack.LocalStackContainer
-import org.testcontainers.spock.Testcontainers
-import spock.lang.AutoCleanup
-import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
 
+import javax.inject.Inject
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -52,47 +48,28 @@ import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*          
     'NoWildcardImports',
     'UnnecessaryObjectReferences',
 ])
-// tag::testcontainers-header[]
 @Stepwise
-@Testcontainers                                                                         // <1>
+// tag::header[]
+@MicronautTest                                                                          // <1>
 class DefaultDynamoDBServiceSpec extends Specification {
 
-// end::testcontainers-header[]
+// end::header[]
 
     private static final DateTime REFERENCE_DATE = new DateTime(1358487600000)
     private static final Instant REFERENCE_INSTANT = Instant.ofEpochMilli(1358487600000)
 
-    // tag::testcontainers-setup[]
-    @AutoCleanup ApplicationContext context                                             // <2>
-
-    @Shared LocalStackContainer localstack = new LocalStackContainer()                  // <3>
-        .withServices(LocalStackContainer.Service.DYNAMODB)
+    @Inject AmazonDynamoDB amazonDynamoDB
+    @Inject IDynamoDBMapper mapper
+    @Inject DynamoDBItemDBService itemService
+    // tag::setup[]
+    @Inject DynamoDBServiceProvider provider                                            // <2>
 
     DynamoDBService<DynamoDBEntity> s
-    AmazonDynamoDB amazonDynamoDB
-    IDynamoDBMapper mapper
 
     void setup() {
-        amazonDynamoDB = AmazonDynamoDBClient                                           // <4>
-            .builder()
-            .withEndpointConfiguration(
-                localstack.getEndpointConfiguration(LocalStackContainer.Service.DYNAMODB)
-            )
-            .withCredentials(
-                localstack.defaultCredentialsProvider
-            )
-            .build()
-
-        mapper = new DynamoDBMapper(amazonDynamoDB)
-
-        context = ApplicationContext.builder().build()
-        context.registerSingleton(AmazonDynamoDB, amazonDynamoDB)                       // <5>
-        context.registerSingleton(IDynamoDBMapper, mapper)                              // <6>
-        context.start()
-
-        DynamoDBServiceProvider provider = context.getBean(DynamoDBServiceProvider)     // <7>
-        s = provider.findOrCreate(DynamoDBEntity)                                       // <8>
+        s = provider.findOrCreate(DynamoDBEntity)                                       // <3>
     }
+    // end::setup[]
 
     // end::testcontainers-setup[]
 
@@ -289,7 +266,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
     @SuppressWarnings('AbcMetric')
     void 'service introduction works'() {
         given:
-            DynamoDBItemDBService s = context.getBean(DynamoDBItemDBService)
+            DynamoDBItemDBService s = itemService
         expect:
             s.get('1', '1')
             s.load('1', '1')
@@ -346,7 +323,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
     void 'count many items'() {
         when:
             String parentKey = '2001'
-            DynamoDBItemDBService s = context.getBean(DynamoDBItemDBService)
+            DynamoDBItemDBService s = itemService
             s.saveAll((1..101).collect { new DynamoDBEntity(parentId: parentKey, id: "$it") })
         then:
             s.count(parentKey) == 101

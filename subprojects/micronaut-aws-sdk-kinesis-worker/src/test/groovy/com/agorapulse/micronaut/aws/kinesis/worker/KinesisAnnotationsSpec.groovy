@@ -18,28 +18,16 @@
 package com.agorapulse.micronaut.aws.kinesis.worker
 
 import com.agorapulse.micronaut.aws.kinesis.KinesisService
-import com.amazonaws.auth.AWSCredentialsProvider
-import com.amazonaws.services.cloudwatch.AmazonCloudWatch
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
-import com.amazonaws.services.kinesis.AmazonKinesis
-import com.amazonaws.services.kinesis.AmazonKinesisClient
-import io.micronaut.context.ApplicationContext
+import io.micronaut.context.annotation.Property
+import io.micronaut.test.annotation.MicronautTest
 import io.reactivex.Flowable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import org.testcontainers.containers.localstack.LocalStackContainer
-import org.testcontainers.spock.Testcontainers
-import spock.lang.AutoCleanup
 import spock.lang.Requires
-import spock.lang.Shared
 import spock.lang.Specification
-import spock.util.environment.RestoreSystemProperties
 
+import javax.inject.Inject
 import java.util.concurrent.TimeUnit
-
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.DYNAMODB
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.KINESIS
 
 /**
  * Tests for Kinesis related annotations - client and listener.
@@ -48,76 +36,37 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
 @SuppressWarnings('ClassStartsWithBlankLine')
 // TODO remove once fixed
 @Requires({ System.getenv('CI') != 'true' })
-
 // tag::testcontainers-header[]
-@Testcontainers                                                                         // <1>
-@RestoreSystemProperties                                                                // <2>
+@MicronautTest
+@Property(name = 'localstack.services', value = 'cloudwatch,dynamodb,kinesis')
+@Property(name = 'aws.kinesis.application.name', value = APP_NAME)
+@Property(name = 'aws.kinesis.stream', value = TEST_STREAM)
+@Property(name = 'aws.kinesis.listener.stream', value = TEST_STREAM)
+@Property(name = 'aws.kinesis.listener.failover-time-millis', value = '1000')
+@Property(name = 'aws.kinesis.listener.shard-sync-interval-millis', value = '1000')
+@Property(name = 'aws.kinesis.listener.idle-time-between-reads-in-millis', value = '1000')
+@Property(name = 'aws.kinesis.listener.parent-shard-poll-interval-millis', value = '1000')
+@Property(name = 'aws.kinesis.listener.timeout-in-seconds', value = '1000')
+@Property(name = 'aws.kinesis.listener.retry-get-records-in-seconds', value = '1000')
+@Property(name = 'aws.kinesis.listener.metrics-level', value = 'NONE')
 class KinesisAnnotationsSpec extends Specification {
 // end::testcontainers-header[]
 
-    // tag::testcontainers-setup[]
     private static final String TEST_STREAM = 'TestStream'
     private static final String APP_NAME = 'AppName'
 
-    @Shared LocalStackContainer localstack = new LocalStackContainer()                  // <3>
-        .withServices(KINESIS, DYNAMODB)
-
-    @AutoCleanup ApplicationContext context                                             // <4>
-
-    void setup() {
-        System.setProperty('com.amazonaws.sdk.disableCbor', 'true')                     // <5>
-        System.setProperty('aws.region', 'eu-west-1')
-
-        AmazonDynamoDB dynamo = AmazonDynamoDBClient                                    // <6>
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(DYNAMODB))
-            .withCredentials(localstack.defaultCredentialsProvider)
-            .build()
-
-        AmazonKinesis kinesis = AmazonKinesisClient                                     // <7>
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(KINESIS))
-            .withCredentials(localstack.defaultCredentialsProvider)
-            .build()
-
-        AmazonCloudWatch amazonCloudWatch = Mock(AmazonCloudWatch)
-
-        context = ApplicationContext.builder().properties(                              // <8>
-            'aws.kinesis.application.name': APP_NAME,
-            'aws.kinesis.stream': TEST_STREAM,
-            'aws.kinesis.listener.stream': TEST_STREAM,
-            'aws.kinesis.listener.failoverTimeMillis': '1000',
-            'aws.kinesis.listener.shardSyncIntervalMillis': '1000',
-            'aws.kinesis.listener.idleTimeBetweenReadsInMillis': '1000',
-            'aws.kinesis.listener.parentShardPollIntervalMillis': '1000',
-            'aws.kinesis.listener.timeoutInSeconds': '1000',
-            'aws.kinesis.listener.retryGetRecordsInSeconds': '1000',
-            'aws.kinesis.listener.metricsLevel': 'NONE',
-        ).build()
-        context.registerSingleton(AmazonKinesis, kinesis)
-        context.registerSingleton(AmazonDynamoDB, dynamo)
-        context.registerSingleton(AmazonCloudWatch, amazonCloudWatch)
-        context.registerSingleton(AWSCredentialsProvider, localstack.defaultCredentialsProvider)
-        context.start()
-    }
-    // end::testcontainers-setup[]
-
-    void cleanup() {
-        System.clearProperty('com.amazonaws.sdk.disableCbor')
-        System.clearProperty('aws.region')
-    }
+    @Inject KinesisService service
+    @Inject KinesisListenerTester tester
+    @Inject DefaultClient client
+    @Inject WorkerStateListener listener
 
     // tag::testcontainers-test[]
     void 'kinesis listener is executed'() {
         when:
-            KinesisService service = context.getBean(KinesisService)                    // <9>
-            KinesisListenerTester tester = context.getBean(KinesisListenerTester)       // <10>
-            DefaultClient client = context.getBean(DefaultClient)                       // <11>
-
             service.createStream()
             service.waitForActive()
 
-            waitForWorkerReady(300, 100)
+            waitForWorkerReady(1200, 100)
 
             Disposable subscription = publishEventAsync(tester, client)
 
@@ -198,7 +147,6 @@ class KinesisAnnotationsSpec extends Specification {
 
     @SuppressWarnings('SystemErrPrint')
     private void waitForWorkerReady(int retries, int waitMillis) throws InterruptedException {
-        WorkerStateListener listener = context.getBean(WorkerStateListener)
         for (int i = 0; i < retries; i++) {
             if (!listener.isReady(TEST_STREAM)) {
                 Thread.sleep(waitMillis)

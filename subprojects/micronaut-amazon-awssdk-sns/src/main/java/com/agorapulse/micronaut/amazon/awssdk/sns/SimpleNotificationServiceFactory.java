@@ -21,11 +21,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.context.annotation.EachBean;
 import io.micronaut.context.annotation.Factory;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
 import software.amazon.awssdk.services.sns.SnsAsyncClient;
+import software.amazon.awssdk.services.sns.SnsAsyncClientBuilder;
 import software.amazon.awssdk.services.sns.SnsClient;
 
 import javax.inject.Singleton;
+import java.util.Optional;
 
 @Factory
 public class SimpleNotificationServiceFactory {
@@ -47,11 +50,13 @@ public class SimpleNotificationServiceFactory {
     SnsAsyncClient snsAsyncClient(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
-        SimpleNotificationServiceConfiguration configuration
+        SimpleNotificationServiceConfiguration configuration,
+        Optional<SdkAsyncHttpClient> httpClient
     ) {
-        return configuration.configure(SnsAsyncClient.builder(), awsRegionProvider)
-            .credentialsProvider(credentialsProvider)
-            .build();
+        SnsAsyncClientBuilder builder = SnsAsyncClient.builder().credentialsProvider(credentialsProvider);
+        configuration.configure(builder, awsRegionProvider);
+        httpClient.ifPresent(builder::httpClient);
+        return builder.build();
     }
 
 

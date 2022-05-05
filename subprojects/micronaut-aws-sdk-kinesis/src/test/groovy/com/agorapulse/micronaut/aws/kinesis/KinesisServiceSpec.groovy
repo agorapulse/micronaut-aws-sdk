@@ -17,8 +17,6 @@
  */
 package com.agorapulse.micronaut.aws.kinesis
 
-import com.amazonaws.services.kinesis.AmazonKinesis
-import com.amazonaws.services.kinesis.AmazonKinesisClient
 import com.amazonaws.services.kinesis.model.CreateStreamResult
 import com.amazonaws.services.kinesis.model.DeleteStreamResult
 import com.amazonaws.services.kinesis.model.DescribeStreamResult
@@ -30,20 +28,21 @@ import com.amazonaws.services.kinesis.model.Record
 import com.amazonaws.services.kinesis.model.Shard
 import com.amazonaws.services.kinesis.model.SplitShardResult
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.testcontainers.containers.localstack.LocalStackContainer
-import org.testcontainers.spock.Testcontainers
+import io.micronaut.context.annotation.Property
+import io.micronaut.test.annotation.MicronautTest
 import spock.lang.Retry
-import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
-import spock.util.environment.RestoreSystemProperties
+
+import javax.inject.Inject
 
 /**
  * Tests for kinesis service.
  */
 @Stepwise
-@Testcontainers
-@RestoreSystemProperties
+@MicronautTest
+@Property(name = 'aws.kinesis.stream', value = STREAM)
+@Property(name = 'aws.kinesis.consumer-filter-key', value = 'test_')
 class KinesisServiceSpec extends Specification {
 
     private static final String STREAM = 'STREAM'
@@ -52,25 +51,7 @@ class KinesisServiceSpec extends Specification {
     private static final ObjectMapper MAPPER = new ObjectMapper()
     private static final int SHARD_COUNT = 2
 
-    @Shared
-    LocalStackContainer localstack = new LocalStackContainer()
-        .withServices(LocalStackContainer.Service.KINESIS)
-
-    AmazonKinesis kinesis
-    KinesisService service
-
-    void setup() {
-        // disable CBOR (not supported by Kinelite)
-        System.setProperty('com.amazonaws.sdk.disableCbor', 'true')
-
-        kinesis = AmazonKinesisClient
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(LocalStackContainer.Service.KINESIS))
-            .withCredentials(localstack.defaultCredentialsProvider)
-            .build()
-
-        service = new DefaultKinesisService(kinesis, new DefaultKinesisConfiguration(stream: STREAM, consumerFilterKey: 'test_'), MAPPER)
-    }
+    @Inject KinesisService service
 
     void 'new default stream'() {
         when:

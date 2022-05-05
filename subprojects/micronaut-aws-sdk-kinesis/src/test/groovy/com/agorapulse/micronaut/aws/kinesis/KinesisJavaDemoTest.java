@@ -17,55 +17,22 @@
  */
 package com.agorapulse.micronaut.aws.kinesis;
 
-import com.amazonaws.services.kinesis.AmazonKinesis;
-import com.amazonaws.services.kinesis.AmazonKinesisClient;
-import io.micronaut.context.ApplicationContext;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.testcontainers.containers.localstack.LocalStackContainer;
+import io.micronaut.test.annotation.MicronautTest;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertNotNull;
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.KINESIS;
+import javax.inject.Inject;
 
-// tag::testcontainers-spec[]
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+// tag::spec[]
+@MicronautTest                                                                          // <1>
 public class KinesisJavaDemoTest {
 
-    @Rule
-    public LocalStackContainer localstack = new LocalStackContainer()                   // <1>
-        .withServices(KINESIS);
-
-    public ApplicationContext context;                                                  // <2>
-    public KinesisService service;
-
-    @Before
-    public void setup() {
-        System.setProperty("com.amazonaws.sdk.disableCbor", "false");                   // <2>
-
-        AmazonKinesis kinesis = AmazonKinesisClient                                     // <3>
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(KINESIS))
-            .withCredentials(localstack.getDefaultCredentialsProvider())
-            .build();
-
-        context = ApplicationContext.builder().build();
-        context.registerSingleton(AmazonKinesis.class, kinesis);                        // <4>
-        context.start();
-
-        service = context.getBean(KinesisService.class);                                // <5>
-    }
-
-    @After
-    public void cleanup() {
-        if (context != null) {
-            context.close();                                                            // <6>
-        }
-    }
+    @Inject KinesisService service;                                                     // <2>
 
     @Test
     public void testJavaService() {
         assertNotNull(service.createStream("TestStream"));
     }
 }
-// end::testcontainers-spec[]
+// end::spec[]

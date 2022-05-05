@@ -1,0 +1,3 @@
+localstack:
+  services: s3
+  shared: true

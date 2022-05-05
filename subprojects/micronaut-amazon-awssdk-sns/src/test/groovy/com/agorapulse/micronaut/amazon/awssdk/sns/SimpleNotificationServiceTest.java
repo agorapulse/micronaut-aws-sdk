@@ -17,75 +17,36 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.sns;
 
-import io.micronaut.context.ApplicationContext;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.testcontainers.containers.localstack.LocalStackContainer;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.sns.SnsClient;
+import io.micronaut.context.annotation.Property;
+import io.micronaut.test.annotation.MicronautTest;
+import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue;
 import software.amazon.awssdk.services.sns.model.Topic;
 
+import javax.inject.Inject;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import static com.agorapulse.micronaut.amazon.awssdk.sns.SimpleNotificationService.PlatformType.GCM;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+// tag::header[]
+@MicronautTest                                                                          // <1>
+@Property(name = "aws.sns.topic", value = SimpleNotificationServiceTest.TEST_TOPIC)     // <2>
 public class SimpleNotificationServiceTest {
 
-    private static final String TEST_TOPIC = "TestTopic";
+    // end::header[]
+    public static final String TEST_TOPIC = "TestTopic";
+
     private static final String EMAIL = "vlad@agorapulse.com";
     private static final String DEVICE_TOKEN = "DEVICE-TOKEN";
     private static final String API_KEY = "API-KEY";
     private static final String DATA = "Vlad";
     private static final String PHONE_NUMBER = "+420999888777";
 
-    // tag::testcontainers-setup[]
-    public ApplicationContext context;                                                  // <1>
-
-    public SimpleNotificationService service;
-
-    @Rule
-    public LocalStackContainer localstack = new LocalStackContainer()                   // <2>
-        .withServices(LocalStackContainer.Service.SNS);
-
-    @Before
-    public void setup() {
-        SnsClient amazonSNS = SnsClient                                                 // <3>
-            .builder()
-            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.SNS))
-            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
-                localstack.getAccessKey(), localstack.getSecretKey()
-            )))
-            .region(Region.of(localstack.getRegion()))
-            .build();
-
-
-        Map<String, Object> properties = new HashMap<>();                               // <4>
-        properties.put("aws.sns.topic", TEST_TOPIC);
-
-
-        context = ApplicationContext.builder(properties).build();                       // <5>
-        context.registerSingleton(SnsClient.class, amazonSNS);
-        context.start();
-
-        service = context.getBean(SimpleNotificationService.class);
-    }
-
-    @After
-    public void cleanup() {
-        if (context != null) {
-            context.close();                                                            // <6>
-        }
-    }
-    // end::testcontainers-setup[]
+    // tag::setup[]
+    @Inject SimpleNotificationService service;                                          // <3>
+    // end::setup[]
 
     @Test
     public void testWorkingWithTopics() {

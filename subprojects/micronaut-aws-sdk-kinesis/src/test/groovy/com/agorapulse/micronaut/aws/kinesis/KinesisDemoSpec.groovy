@@ -17,51 +17,21 @@
  */
 package com.agorapulse.micronaut.aws.kinesis
 
-import com.amazonaws.services.kinesis.AmazonKinesis
-import com.amazonaws.services.kinesis.AmazonKinesisClient
 import com.amazonaws.services.kinesis.model.CreateStreamResult
-import io.micronaut.context.ApplicationContext
-import org.testcontainers.containers.localstack.LocalStackContainer
-import org.testcontainers.spock.Testcontainers
-import spock.lang.AutoCleanup
+import io.micronaut.test.annotation.MicronautTest
 import spock.lang.Retry
-import spock.lang.Shared
 import spock.lang.Specification
-import spock.util.environment.RestoreSystemProperties
 
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.KINESIS
+import javax.inject.Inject
 
 /**
  * Tests for kinesis service.
  */
-// tag::testcontainers-spec[]
-@Testcontainers                                                                         // <1>
-@RestoreSystemProperties                                                                // <2>
+// tag::spec[]
+@MicronautTest                                                                          // <1>
 class KinesisDemoSpec extends Specification {
 
-    @Shared
-    LocalStackContainer localstack = new LocalStackContainer().withServices(KINESIS)    // <3>
-
-    @AutoCleanup ApplicationContext context                                             // <4>
-
-    KinesisService service
-
-    void setup() {
-        // disable CBOR (not supported by Kinelite)
-        System.setProperty('com.amazonaws.sdk.disableCbor', 'false')                    // <5>
-
-        AmazonKinesis kinesis = AmazonKinesisClient                                     // <6>
-            .builder()
-            .withEndpointConfiguration(localstack.getEndpointConfiguration(KINESIS))
-            .withCredentials(localstack.defaultCredentialsProvider)
-            .build()
-
-        context = ApplicationContext.builder().build()
-        context.registerSingleton(AmazonKinesis, kinesis)                               // <7>
-        context.start()
-
-        service = context.getBean(KinesisService)                                       // <8>
-    }
+    @Inject KinesisService service                                                      // <2>
 
     @Retry
     void 'new default stream'() {
@@ -72,4 +42,4 @@ class KinesisDemoSpec extends Specification {
     }
 
 }
-// end::testcontainers-spec[]
+// end::spec[]
