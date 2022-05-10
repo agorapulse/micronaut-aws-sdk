@@ -12,6 +12,7 @@ This library provides two approaches to work with Simple Queue Service queues:
 [source,indent=0,role="primary",subs='verbatim,attributes']
 .Gradle (AWS SDK 2.x)
 ----
+annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-sqs-annotation-processor:{project-version}'
 implementation 'com.agorapulse:micronaut-amazon-awssdk-sqs:{project-version}'
 ----
 
@@ -28,6 +29,7 @@ implementation 'com.agorapulse:micronaut-amazon-awssdk-sqs:{project-version}'
 [source,indent=0,role="secondary",subs='verbatim,attributes']
 .Gradle (AWS SDK 1.x)
 ----
+annotationProcessor 'com.agorapulse:micronaut-aws-sdk-sqs-annotation-processor:{project-version}'
 implementation 'com.agorapulse:micronaut-aws-sdk-sqs:{project-version}'
 ----
 

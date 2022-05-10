@@ -13,6 +13,7 @@ This library provides two approaches to work with DynamoDB tables and entities:
 [source,indent=0,role="primary",subs='verbatim,attributes']
 .Gradle (AWS SDK 2.x)
 ----
+annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-dynamodb-annotation-processor:{project-version}'
 implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb:{project-version}'
 ----
 
@@ -29,6 +30,7 @@ implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb:{project-version
 [source,indent=0,role="secondary",subs='verbatim,attributes']
 .Gradle (AWS SDK 1.x)
 ----
+annotationProcessor 'com.agorapulse:micronaut-aws-sdk-dynamodb-annotation-processor:{project-version}'
 implementation 'com.agorapulse:micronaut-aws-sdk-dynamodb:{project-version}'
 ----
 
