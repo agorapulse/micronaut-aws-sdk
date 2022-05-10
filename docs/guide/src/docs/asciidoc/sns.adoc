@@ -12,6 +12,7 @@ This library provides two approaches to work with Simple Notification Service to
 [source,indent=0,role="primary",subs='verbatim,attributes']
 .Gradle (AWS SDK 2.x)
 ----
+annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-sns-annotation-processor:{project-version}'
 implementation 'com.agorapulse:micronaut-amazon-awssdk-sns:{project-version}'
 ----
 
@@ -28,6 +29,7 @@ implementation 'com.agorapulse:micronaut-amazon-awssdk-sns:{project-version}'
 [source,indent=0,role="secondary",subs='verbatim,attributes']
 .Gradle (AWS SDK 1.x)
 ----
+annotationProcessor 'com.agorapulse:micronaut-aws-sdk-sns-annotation-processor:{project-version}'
 implementation 'com.agorapulse:micronaut-aws-sdk-sns:{project-version}'
 ----
 

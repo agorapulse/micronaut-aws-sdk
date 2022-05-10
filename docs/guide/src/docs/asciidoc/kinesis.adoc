@@ -14,6 +14,7 @@ This library provides three approaches to work with Kinesis streams:
 .Gradle (AWS SDK 2.x)
 ----
 // for Kinesis client
+annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-kinesis-annotation-processor:{project-version
 implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis:{project-version}'
 
 // for Kinesis listener
@@ -41,6 +42,7 @@ implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:{project-v
 .Gradle (AWS SDK 1.x)
 ----
 // for Kinesis client
+annotationProcessor 'com.agorapulse:micronaut-aws-sdk-kinesis-annotation-processor:{project-version}'
 implementation 'com.agorapulse:micronaut-aws-sdk-kinesis:{project-version}'
 // for Kinesis listener
 implementation 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:{project-version}'
