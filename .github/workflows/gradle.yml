@@ -36,11 +36,12 @@ jobs:
           - 'migrateImports check -PmicronautVersion=3.2.1 -PspockVersion=2.0-groovy-3.0 -PgroovyVersion=3.0.9 --scan'
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-java@v2
+      - name: Setup Java 8
+        uses: actions/setup-java@v3
         with:
-          java-version: '8'
-          distribution: zulu
-          cache: 'gradle'
+          distribution: corretto
+          java-version: 8
+          cache: gradle
       - uses: eskatos/gradle-command-action@v2
         with:
           arguments: ${{ matrix.versions }}
