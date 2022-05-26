@@ -19,7 +19,6 @@ package com.agorapulse.micronaut.aws.sns.annotation;
 
 import com.agorapulse.micronaut.aws.sns.NotificationClientIntroduction;
 import com.agorapulse.micronaut.aws.util.ConfigurationUtil;
-import groovy.transform.Undefined;
 import io.micronaut.aop.Introduction;
 import io.micronaut.context.annotation.Type;
 
@@ -44,7 +43,7 @@ public @interface NotificationClient {
     /**
      * @return default topic for this client which overrides the one from the configuration
      */
-    String topic() default Undefined.STRING;
+    String topic() default "";
 
     class Constants {
         public static final String TOPIC = "topic";

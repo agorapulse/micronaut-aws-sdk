@@ -20,7 +20,6 @@ package com.agorapulse.micronaut.aws.sqs.annotation;
 
 import com.agorapulse.micronaut.aws.sqs.QueueClientIntroduction;
 import com.agorapulse.micronaut.aws.util.ConfigurationUtil;
-import groovy.transform.Undefined;
 import io.micronaut.aop.Introduction;
 import io.micronaut.context.annotation.Type;
 
@@ -45,7 +44,7 @@ public @interface QueueClient {
     /**
      * @return the default name of the queue overriding the one from the configuration
      */
-    String queue() default Undefined.STRING;
+    String queue() default "";
 
 
     /**
@@ -56,7 +55,7 @@ public @interface QueueClient {
     /**
      * @return the default message group id for fifo queues
      */
-    String group() default Undefined.STRING;
+    String group() default "";
 
     final class Constants {
         public static final String QUEUE = "queue";

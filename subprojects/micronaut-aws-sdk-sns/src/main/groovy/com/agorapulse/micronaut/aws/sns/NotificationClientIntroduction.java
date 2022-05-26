@@ -24,13 +24,13 @@ import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.model.NotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import groovy.transform.Undefined;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.context.BeanContext;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.type.Argument;
+import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.qualifiers.Qualifiers;
 
 import javax.inject.Singleton;
@@ -48,7 +48,7 @@ public class NotificationClientIntroduction implements MethodInterceptor<Object,
     private static final String ATTRIBUTES = "attributes";
     private static final String NUMBER = "number";
 
-    private static final Function<String, Optional<String>> EMPTY_IF_UNDEFINED = (String s) -> Undefined.STRING.equals(s) ? Optional.empty() : Optional.of(s);
+    private static final Function<String, Optional<String>> EMPTY_IF_UNDEFINED = (String s) -> StringUtils.isEmpty(s) ? Optional.empty() : Optional.of(s);
 
     private static class PublishingArguments {
         Argument<?> message;

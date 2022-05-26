@@ -22,13 +22,13 @@ import com.agorapulse.micronaut.amazon.awssdk.sqs.annotation.Queue;
 import com.agorapulse.micronaut.amazon.awssdk.sqs.annotation.QueueClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import groovy.transform.Undefined;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.context.BeanContext;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.type.Argument;
+import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.qualifiers.Qualifiers;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException;
@@ -45,7 +45,7 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
     private static final String GROUP = "group";
     private static final String DELAY = "delay";
 
-    private static final Function<String, Optional<String>> EMPTY_IF_UNDEFINED = (String s) -> Undefined.STRING.equals(s) ? Optional.empty() : Optional.of(s);
+    private static final Function<String, Optional<String>> EMPTY_IF_UNDEFINED = (String s) -> StringUtils.isEmpty(s) ? Optional.empty() : Optional.of(s);
     private static final Function<Integer, Optional<Integer>> EMPTY_IF_ZERO = (Integer i) -> i == 0 ? Optional.empty() : Optional.of(i);
 
     private static class QueueArguments {
