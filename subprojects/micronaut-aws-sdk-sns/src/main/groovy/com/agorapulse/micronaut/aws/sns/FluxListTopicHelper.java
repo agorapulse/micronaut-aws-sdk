@@ -20,30 +20,29 @@ package com.agorapulse.micronaut.aws.sns;
 import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.model.ListTopicsResult;
 import com.amazonaws.services.sns.model.Topic;
-import io.reactivex.Emitter;
-import io.reactivex.Flowable;
-import io.reactivex.functions.BiFunction;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.SynchronousSink;
 
+import java.util.Collections;
 import java.util.List;
 
-public class FlowableListTopicHelper {
+public class FluxListTopicHelper {
 
 
-    static Flowable<Topic> generateTopics(AmazonSNS client) {
-        return Flowable.generate(client::listTopics, new BiFunction<ListTopicsResult, Emitter<List<Topic>>, ListTopicsResult>() {
-            @Override
-            public ListTopicsResult apply(ListTopicsResult listTopicsResult, Emitter<List<Topic>> topicEmitter) {
-                topicEmitter.onNext(listTopicsResult.getTopics());
+    static Flux<Topic> generateTopics(AmazonSNS client) {
+        return Flux.generate(client::listTopics, (ListTopicsResult listTopicsResult, SynchronousSink<List<Topic>> topicEmitter) -> {
+                topicEmitter.next(listTopicsResult.getTopics());
 
                 if (listTopicsResult.getNextToken() != null) {
                     return client.listTopics(listTopicsResult.getNextToken());
                 }
 
-                topicEmitter.onComplete();
+                topicEmitter.complete();
 
-                return null;
-            }
-        }).flatMap(Flowable::fromIterable);
+                ListTopicsResult empty = new ListTopicsResult();
+                empty.setTopics(Collections.emptyList());
+                return empty;
+        }).flatMap(Flux::fromIterable);
     }
 
 }

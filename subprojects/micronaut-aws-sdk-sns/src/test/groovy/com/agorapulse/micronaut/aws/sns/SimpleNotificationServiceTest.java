@@ -21,6 +21,7 @@ import com.amazonaws.services.sns.model.Topic;
 import io.micronaut.context.annotation.Property;
 import io.micronaut.test.annotation.MicronautTest;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
 
 import javax.inject.Inject;
 import java.util.Collections;
@@ -49,9 +50,9 @@ public class SimpleNotificationServiceTest {
         // tag::new-topic[]
         String topicArn = service.createTopic(TEST_TOPIC);                              // <1>
 
-        Topic found = service.listTopics().filter(t ->                                  // <2>
+        Topic found = Flux.from(service.listTopics()).filter(t ->                       // <2>
             t.getTopicArn().endsWith(TEST_TOPIC)
-        ).blockingFirst();
+        ).blockFirst();
         // end::new-topic[]
 
         assertNotNull(found);
@@ -76,9 +77,9 @@ public class SimpleNotificationServiceTest {
         // tag::delete-topic[]
         service.deleteTopic(topicArn);                                                  // <1>
 
-        Long zero = service.listTopics().filter(t ->                                    // <2>
+        Long zero = Flux.from(service.listTopics()).filter(t ->                         // <2>
             t.getTopicArn().endsWith(TEST_TOPIC)
-        ).count().blockingGet();
+        ).count().block();
         // end::delete-topic[]
 
         assertEquals(Long.valueOf(0), zero);

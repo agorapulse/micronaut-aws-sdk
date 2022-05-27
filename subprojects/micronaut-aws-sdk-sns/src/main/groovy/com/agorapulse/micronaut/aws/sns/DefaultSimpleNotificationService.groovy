@@ -22,10 +22,11 @@ import com.amazonaws.services.sns.model.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
-import io.reactivex.Flowable
-import io.reactivex.functions.Predicate
+import org.reactivestreams.Publisher
+import reactor.core.publisher.Flux
 
 import java.util.concurrent.ConcurrentHashMap
+import java.util.function.Predicate
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -285,8 +286,8 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
         }
     }
 
-    Flowable<Topic> listTopics() {
-        return FlowableListTopicHelper.generateTopics(client)
+    Publisher<Topic> listTopics() {
+        return FluxListTopicHelper.generateTopics(client)
     }
 
     private static String checkNotEmpty(String arn, String errorMessage) {
@@ -351,7 +352,7 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
             return namesToArn[nameOrArn]
         }
 
-        listTopics().takeUntil({ Topic topic -> topic.topicArn.endsWith(":$nameOrArn") } as Predicate<Topic>).subscribe { Topic topic ->
+        Flux.from(listTopics()).takeUntil({ Topic topic -> topic.topicArn.endsWith(":$nameOrArn") } as Predicate<Topic>).subscribe { Topic topic ->
             String topicName = topic.topicArn.substring(topic.topicArn.lastIndexOf(':') + 1)
             namesToArn[topicName] = topic.topicArn
         }

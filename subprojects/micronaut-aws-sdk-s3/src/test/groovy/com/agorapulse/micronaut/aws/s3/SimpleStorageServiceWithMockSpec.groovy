@@ -38,6 +38,7 @@ import com.amazonaws.services.s3.transfer.model.UploadResult
 import groovy.transform.CompileDynamic
 import io.micronaut.http.MediaType
 import io.micronaut.http.multipart.PartData
+import reactor.core.publisher.Flux
 import spock.lang.Specification
 import spock.lang.TempDir
 import spock.lang.Unroll
@@ -414,7 +415,7 @@ class SimpleStorageServiceWithMockSpec extends Specification {
 
     void 'list objects'() {
         when:
-            ObjectListing listing = service.listObjects().blockingFirst()
+            ObjectListing listing = Flux.from(service.listObjects()).blockFirst()
         then:
             listing.bucketName == BUCKET_NAME
 

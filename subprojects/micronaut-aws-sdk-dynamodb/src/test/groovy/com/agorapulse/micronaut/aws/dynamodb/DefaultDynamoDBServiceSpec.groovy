@@ -27,8 +27,9 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
 import com.amazonaws.services.dynamodbv2.model.CreateTableResult
 import io.micronaut.test.annotation.MicronautTest
-import io.reactivex.Flowable
 import org.joda.time.DateTime
+import org.reactivestreams.Publisher
+import reactor.core.publisher.Flux
 import spock.lang.Specification
 import spock.lang.Stepwise
 
@@ -292,17 +293,17 @@ class DefaultDynamoDBServiceSpec extends Specification {
             s.countByDates('1', REFERENCE_DATE.minusDays(1).toDate(), REFERENCE_DATE.plusDays(2).toDate()) == 2
             s.countByDates('3', REFERENCE_DATE.plusDays(9).toDate(), REFERENCE_DATE.plusDays(20).toDate()) == 1
 
-            s.query('1').count().blockingGet() == 2
-            s.query('1', '1').count().blockingGet() == 1
-            s.queryByRangeIndex('1', 'bar').count().blockingGet() == 1
-            s.queryByRangeIndex('1', 'bar').blockingSingle().parentId == null // projection
-            s.queryByRangeIndex('1', 'bar').blockingSingle().rangeIndex == 'bar' // projection
-            s.queryByDates('1', REFERENCE_DATE.minusDays(1).toDate(), REFERENCE_DATE.plusDays(2).toDate()).count().blockingGet() == 2
-            s.queryByDatesWithLimit('1', REFERENCE_DATE.minusDays(1).toDate(), REFERENCE_DATE.plusDays(2).toDate(), 1).count().blockingGet() == 1
-            s.queryByDates('3', REFERENCE_DATE.plusDays(9).toDate(), REFERENCE_DATE.plusDays(20).toDate()).count().blockingGet() == 1
+            toList(s.query('1')).size() == 2
+            toList(s.query('1', '1')).size() == 1
+            toList(s.queryByRangeIndex('1', 'bar')).size() == 1
+            toList(s.queryByRangeIndex('1', 'bar')).first().parentId == null // projection
+            toList(s.queryByRangeIndex('1', 'bar')).first().rangeIndex == 'bar' // projection
+            toList(s.queryByDates('1', REFERENCE_DATE.minusDays(1).toDate(), REFERENCE_DATE.plusDays(2).toDate())).size() == 2
+            toList(s.queryByDatesWithLimit('1', REFERENCE_DATE.minusDays(1).toDate(), REFERENCE_DATE.plusDays(2).toDate(), 1)).size() == 1
+            toList(s.queryByDates('3', REFERENCE_DATE.plusDays(9).toDate(), REFERENCE_DATE.plusDays(20).toDate())).size() == 1
 
-            s.scanAllByRangeIndex('bar').count().blockingGet() == 4
-            s.scanAllByRangeIndexWithLimit('bar', 2).count().blockingGet() == 2
+            toList(s.scanAllByRangeIndex('bar')).size() == 4
+            toList(s.scanAllByRangeIndexWithLimit('bar', 2)).size() == 2
 
             s.increment('1001', '1')
             s.increment('1001', '1')
@@ -363,6 +364,10 @@ class DefaultDynamoDBServiceSpec extends Specification {
             ]) == 0
     }
 
+    private static <T> List<T> toList(Publisher<T> publisher) {
+        return Flux.from(publisher).collectList().block()
+    }
+
 }
 
 // tag::service-all[]
@@ -404,8 +409,8 @@ interface DynamoDBItemDBService {
     })
     int countByDates(String hashKey, Date after, Date before)
 
-    Flowable<DynamoDBEntity> query(String hashKey)
-    Flowable<DynamoDBEntity> query(String hashKey, String rangeKey)
+    Publisher<DynamoDBEntity> query(String hashKey)
+    Publisher<DynamoDBEntity> query(String hashKey, String rangeKey)
 
     // tag::sample-queries[]
     @Query({                                                                            // <3>
@@ -419,7 +424,7 @@ interface DynamoDBItemDBService {
             }
         }
     })
-    Flowable<DynamoDBEntity> queryByRangeIndex(String hashKey, String rangeKey)         // <8>
+    Publisher<DynamoDBEntity> queryByRangeIndex(String hashKey, String rangeKey)        // <8>
     // end::sample-queries[]
 
     @Query({
@@ -428,7 +433,7 @@ interface DynamoDBItemDBService {
             range { between DynamoDBEntity.DATE_INDEX, after, before }
         }
     })
-    Flowable<DynamoDBEntity> queryByDates(String hashKey, Date after, Date before)
+    Publisher<DynamoDBEntity> queryByDates(String hashKey, Date after, Date before)
 
     @Query({
         query(DynamoDBEntity) {
@@ -437,7 +442,7 @@ interface DynamoDBItemDBService {
             limit max
         }
     })
-    Flowable<DynamoDBEntity> queryByDatesWithLimit(String hashKey, Date after, Date before, int max)
+    Publisher<DynamoDBEntity> queryByDatesWithLimit(String hashKey, Date after, Date before, int max)
 
     void delete(DynamoDBEntity entity)
     void delete(String hashKey, String rangeKey)
@@ -490,7 +495,7 @@ interface DynamoDBItemDBService {
             }
         }
     })
-    Flowable<DynamoDBEntity> scanAllByRangeIndex(String foo)                            // <5>
+    Publisher<DynamoDBEntity> scanAllByRangeIndex(String foo)                           // <5>
     // end::sample-scan[]
 
     @Scan({
@@ -501,7 +506,7 @@ interface DynamoDBItemDBService {
             limit max
         }
     })
-    Flowable<DynamoDBEntity> scanAllByRangeIndexWithLimit(String foo, int max)
+    Publisher<DynamoDBEntity> scanAllByRangeIndexWithLimit(String foo, int max)
 
 // tag::service-footer[]
 

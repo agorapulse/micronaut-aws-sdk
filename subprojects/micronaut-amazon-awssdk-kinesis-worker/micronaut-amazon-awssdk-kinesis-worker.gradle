@@ -27,4 +27,5 @@ dependencies {
 
     testImplementation project(':micronaut-amazon-awssdk-integration-testing')
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation "io.projectreactor:reactor-core:$projectReactorVersion"
 }

@@ -30,6 +30,7 @@ import com.amazonaws.services.kinesis.model.SplitShardResult
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.micronaut.context.annotation.Property
 import io.micronaut.test.annotation.MicronautTest
+import reactor.core.publisher.Flux
 import spock.lang.Retry
 import spock.lang.Specification
 import spock.lang.Stepwise
@@ -111,7 +112,7 @@ class KinesisServiceSpec extends Specification {
 
             Shard shard = service.getShard(result.shardId)
         when:
-            Record record = service.getShardOldestRecord(shard).blockingGet()
+            Record record = Flux.from(service.getShardOldestRecord(shard)).blockFirst()
         then:
             record
             shard
@@ -131,7 +132,7 @@ class KinesisServiceSpec extends Specification {
         when:
             PutRecordsResultEntry firstRecord = result.records.first()
             Shard shard = service.getShard(firstRecord.shardId)
-            Record record = service.getShardRecordAtSequenceNumber(shard, firstRecord.sequenceNumber).blockingGet()
+            Record record = Flux.from(service.getShardRecordAtSequenceNumber(shard, firstRecord.sequenceNumber)).blockFirst()
         then:
             record
             shard

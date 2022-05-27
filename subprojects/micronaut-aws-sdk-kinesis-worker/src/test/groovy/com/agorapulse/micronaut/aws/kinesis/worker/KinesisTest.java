@@ -20,14 +20,13 @@ package com.agorapulse.micronaut.aws.kinesis.worker;
 import com.agorapulse.micronaut.aws.kinesis.KinesisService;
 import io.micronaut.context.annotation.Property;
 import io.micronaut.test.annotation.MicronautTest;
-import io.reactivex.Flowable;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import reactor.core.Disposable;
+import reactor.core.publisher.Flux;
 
 import javax.inject.Inject;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 // tag::testcontainers-header[]
 @MicronautTest
@@ -91,8 +90,8 @@ public class KinesisTest {
     }
 
     private Disposable publishEventsAsync(KinesisListenerTester tester, DefaultClient client) {
-        return Flowable
-            .interval(100, TimeUnit.MILLISECONDS, Schedulers.io())
+        return Flux
+            .interval(Duration.ofMillis(100))
             .takeWhile(t ->
                 !allTestEventsReceived(tester)
             )

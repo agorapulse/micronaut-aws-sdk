@@ -27,8 +27,10 @@ import com.amazonaws.services.s3.transfer.Upload
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import io.micronaut.http.multipart.PartData
-import io.reactivex.Flowable
 import org.apache.commons.codec.digest.DigestUtils
+import org.reactivestreams.Publisher
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 /**
  * Default implementation of the simple storage service.
@@ -214,16 +216,16 @@ class DefaultSimpleStorageService implements SimpleStorageService {
     boolean deleteFiles(String bucketName, String prefix) {
         assert prefix.tokenize('/').size() >= 2, 'Multiple delete are only allowed in sub/sub directories'
 
-        Flowable<Boolean> results = listObjects(bucketName, prefix).flatMap {
-            Flowable.fromIterable(it.objectSummaries)
+        Flux<Boolean> results = Flux.from(listObjects(bucketName, prefix)).flatMap {
+            Flux.fromIterable(it.objectSummaries)
         } map {
             deleteFile(bucketName, it.key)
         }
 
-        return results.onErrorReturn {
+        return results.onErrorResume {
             log.warn "Exception deleting objects in $bucketName/$prefix", it
-            return false
-        }.blockingIterable().every()
+            return Mono.just(false)
+        }.filter { !it }.count().block() == 0
     }
 
     /**
@@ -278,8 +280,8 @@ class DefaultSimpleStorageService implements SimpleStorageService {
      * @param prefix
      * @return
      */
-    Flowable<ObjectListing> listObjects(String bucketName, String prefix) {
-        return FlowableObjectListingHelper.generate(client, bucketName, prefix)
+    Publisher<ObjectListing> listObjects(String bucketName, String prefix) {
+        return FluxObjectListingHelper.generate(client, bucketName, prefix)
     }
 
     /**

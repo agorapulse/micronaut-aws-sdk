@@ -20,6 +20,7 @@ package com.agorapulse.micronaut.aws.s3
 import com.amazonaws.services.s3.model.ObjectMetadata
 import io.micronaut.context.annotation.Property
 import io.micronaut.test.annotation.MicronautTest
+import reactor.core.publisher.Flux
 import spock.lang.Specification
 import spock.lang.Stepwise
 import spock.lang.TempDir
@@ -70,7 +71,7 @@ class SimpleStorageServiceSpec extends Specification {
 
     void 'upload content'() {
         expect:
-            service.listObjectSummaries('foo').count().blockingGet() == 0
+            Flux.from(service.listObjectSummaries('foo')).count().block() == 0
         when:
             service.storeInputStream(
                 KEY,
@@ -82,7 +83,7 @@ class SimpleStorageServiceSpec extends Specification {
                 )
             )
         then:
-            service.listObjectSummaries('foo').blockingFirst().key == KEY
+            Flux.from(service.listObjectSummaries('foo')).blockFirst().key == KEY
     }
 
     void 'generate presigned URL'() {

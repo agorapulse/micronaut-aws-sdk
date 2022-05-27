@@ -18,9 +18,11 @@
 package com.agorapulse.micronaut.amazon.awssdk.s3;
 
 import io.micronaut.http.multipart.PartData;
-import io.reactivex.Flowable;
+import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.exception.SdkClientException;
@@ -93,14 +95,17 @@ public class DefaultSimpleStorageService implements SimpleStorageService {
             throw new IllegalArgumentException("Multiple delete are only allowed in sub/sub directories: " + prefix);
         }
 
-        Flowable<Boolean> results = listObjectSummaries(bucketName, prefix)
+        return Flux.from(listObjectSummaries(bucketName, prefix))
             .map(o -> deleteFile(bucketName, o.key()))
-            .onErrorReturn(e -> {
-                LOGGER.warn(String.format("Exception deleting objects in %s/%s", bucketName, prefix), e);
-                return false;
-            });
-
-        return results.filter(r -> !r).count().blockingGet() == 0;
+            .onErrorResume(throwable -> {
+                LOGGER.warn(String.format("Exception deleting objects in %s/%s", bucketName, prefix), throwable);
+                return Mono.just(false);
+            })
+            .filter(r -> !r)
+            .count()
+            .blockOptional()
+            .map(Long::intValue)
+            .orElse(0) == 0;
     }
 
     @Override
@@ -137,8 +142,8 @@ public class DefaultSimpleStorageService implements SimpleStorageService {
     }
 
     @Override
-    public Flowable<ListObjectsV2Response> listObjects(String bucketName, String prefix) {
-        return Flowable.fromIterable(s3.listObjectsV2Paginator(b -> b.bucket(bucketName).prefix(prefix)));
+    public Publisher<ListObjectsV2Response> listObjects(String bucketName, String prefix) {
+        return Flux.fromIterable(s3.listObjectsV2Paginator(b -> b.bucket(bucketName).prefix(prefix)));
     }
 
     @Override

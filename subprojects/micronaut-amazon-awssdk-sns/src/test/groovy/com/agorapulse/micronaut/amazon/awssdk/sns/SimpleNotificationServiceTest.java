@@ -20,6 +20,7 @@ package com.agorapulse.micronaut.amazon.awssdk.sns;
 import io.micronaut.context.annotation.Property;
 import io.micronaut.test.annotation.MicronautTest;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue;
 import software.amazon.awssdk.services.sns.model.Topic;
 
@@ -53,9 +54,9 @@ public class SimpleNotificationServiceTest {
         // tag::new-topic[]
         String topicArn = service.createTopic(TEST_TOPIC);                              // <1>
 
-        Topic found = service.listTopics().filter(t ->                                  // <2>
+        Topic found = Flux.from(service.listTopics()).filter(t ->                       // <2>
             t.topicArn().endsWith(TEST_TOPIC)
-        ).blockingFirst();
+        ).blockFirst();
         // end::new-topic[]
 
         assertNotNull(found);
@@ -80,9 +81,9 @@ public class SimpleNotificationServiceTest {
         // tag::delete-topic[]
         service.deleteTopic(topicArn);                                                  // <1>
 
-        Long zero = service.listTopics().filter(t ->                                    // <2>
+        Long zero = Flux.from(service.listTopics()).filter(t ->                         // <2>
             t.topicArn().endsWith(TEST_TOPIC)
-        ).count().blockingGet();
+        ).count().block();
         // end::delete-topic[]
 
         assertEquals(Long.valueOf(0), zero);

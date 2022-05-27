@@ -19,7 +19,8 @@ package com.agorapulse.micronaut.amazon.awssdk.s3
 
 import io.micronaut.context.annotation.Property
 import io.micronaut.test.annotation.MicronautTest
-import io.reactivex.Flowable
+import org.reactivestreams.Publisher
+import reactor.core.publisher.Flux
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectAclResponse
 import software.amazon.awssdk.services.s3.model.GetObjectResponse
@@ -100,7 +101,7 @@ class SimpleStorageServiceSpec extends Specification {
 
     void 'upload content'() {
         expect:
-            service.listObjectSummaries('foo').count().blockingGet() == 0
+            !blocking(service.listObjectSummaries('foo'))?.size()
         when:
             service.storeInputStream(KEY, new ByteArrayInputStream(SAMPLE_CONTENT.bytes)) {
                 contentLength SAMPLE_CONTENT.size()
@@ -109,7 +110,7 @@ class SimpleStorageServiceSpec extends Specification {
             }
 
         then:
-            service.listObjectSummaries('foo').blockingFirst().key() == KEY
+            blocking(service.listObjectSummaries('foo')).key() == KEY
 
         when:
             service.storeInputStream(OTHER_BUCKET, KEY, new ByteArrayInputStream(SAMPLE_CONTENT.bytes)) {
@@ -119,7 +120,7 @@ class SimpleStorageServiceSpec extends Specification {
             }
 
         then:
-            service.listObjectSummaries(OTHER_BUCKET, 'foo').blockingFirst().key() == KEY
+            blocking(service.listObjectSummaries(OTHER_BUCKET, 'foo')).key() == KEY
     }
 
     void 'upload multipart'() {
@@ -127,7 +128,7 @@ class SimpleStorageServiceSpec extends Specification {
             service.storeMultipartFile('mix/multi', new MockPartData('Hello')) {
                 acl ObjectCannedACL.PUBLIC_READ
             }
-            S3Object object = service.listObjectSummaries('mix').blockingFirst()
+            S3Object object = blocking(service.listObjectSummaries('mix'))
         then:
             object
             object.size() == 5
@@ -138,7 +139,7 @@ class SimpleStorageServiceSpec extends Specification {
             service.storeMultipartFile(OTHER_BUCKET, 'mix/multi', new MockPartData('Hello')) {
                 acl ObjectCannedACL.PUBLIC_READ
             }
-            S3Object object = service.listObjectSummaries(OTHER_BUCKET, 'mix').blockingFirst()
+            S3Object object = blocking(service.listObjectSummaries(OTHER_BUCKET, 'mix'))
         then:
             object
             object.size() == 5
@@ -236,7 +237,7 @@ class SimpleStorageServiceSpec extends Specification {
             !service.deleteFiles(NO_SUCH_BUCKET, 'mix')
             service.getObjectSummary('mix')
             service.deleteFiles('mix')
-            service.listObjectSummaries('mix').count().blockingGet() == 0
+            !blocking(service.listObjectSummaries('mix'))
         when:
             service.deleteFiles(NO_SUCH_BUCKET, 'mix/foo/bar/baz')
         then:
@@ -265,10 +266,10 @@ class SimpleStorageServiceSpec extends Specification {
         given:
             service.deleteFiles('')
         expect:
-            service.listObjectSummaries().count().blockingGet() == 0
-            service.listObjects().flatMap { r ->
-                Flowable.fromIterable(r.contents())
-            }.count().blockingGet() == 0
+            !blocking(service.listObjectSummaries())
+            !blocking(Flux.from(service.listObjects()).flatMap { r ->
+                Flux.fromIterable(r.contents())
+            })
         when:
             service.deleteBucket()
         then:
@@ -280,6 +281,10 @@ class SimpleStorageServiceSpec extends Specification {
             !service.exists(MY_BUCKET, KEY)
             !service.storeInputStream(KEY, new ByteArrayInputStream('Hello'.bytes))
             !service.storeMultipartFile(KEY, new MockPartData('Foo'))
+    }
+
+    private static <T> T blocking(Publisher<T> publisher) {
+        return Flux.from(publisher).blockFirst()
     }
 
 }

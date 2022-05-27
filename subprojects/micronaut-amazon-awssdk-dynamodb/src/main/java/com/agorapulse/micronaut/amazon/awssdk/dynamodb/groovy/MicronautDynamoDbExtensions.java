@@ -18,12 +18,16 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.groovy;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.DynamoDbService;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.*;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.FilterConditionCollector;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.KeyConditionCollector;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.QueryBuilder;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ScanBuilder;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder;
 import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
 import groovy.transform.stc.ClosureParams;
 import groovy.transform.stc.FromString;
-import io.reactivex.Flowable;
+import org.reactivestreams.Publisher;
 import software.amazon.awssdk.services.dynamodb.model.ReturnValue;
 import space.jasan.support.groovy.closure.ConsumerWithDelegate;
 import space.jasan.support.groovy.closure.FunctionWithDelegate;
@@ -273,7 +277,7 @@ public class MicronautDynamoDbExtensions {
         return self.configure(ConsumerWithDelegate.create(configurer));
     }
 
-    public static <T> Flowable<T> query(
+    public static <T> Publisher<T> query(
         DynamoDbService<T> service,
         @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.QueryBuilder<T>", strategy = Closure.DELEGATE_FIRST)
         @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.QueryBuilder<T>")
@@ -282,7 +286,7 @@ public class MicronautDynamoDbExtensions {
         return service.query(ConsumerWithDelegate.create(query));
     }
 
-    public static <T> Flowable<T> scan(
+    public static <T> Publisher<T> scan(
         DynamoDbService<T> service,
         @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ScanBuilder<T>", strategy = Closure.DELEGATE_FIRST)
         @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ScanBuilder<T>")
@@ -302,7 +306,7 @@ public class MicronautDynamoDbExtensions {
 
     public static <T, N> int updateAll(
         DynamoDbService<T> service,
-        Flowable<T> items,
+        Publisher<T> items,
         @DelegatesTo(type = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T, T>", strategy = Closure.DELEGATE_FIRST)
         @ClosureParams(value = FromString.class, options = "com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder<T, T>")
             Closure<UpdateBuilder<T, N>> update

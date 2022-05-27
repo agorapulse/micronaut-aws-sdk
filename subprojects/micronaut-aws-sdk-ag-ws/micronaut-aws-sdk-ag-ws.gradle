@@ -26,6 +26,7 @@ dependencies {
     testImplementation group: 'com.stehno.ersatz', name: 'ersatz', version: '1.9.0'
     testImplementation "space.jasan:groovy-closure-support:$closureSupportVersion"
     testImplementation group: 'io.undertow', name: 'undertow-core', version: '2.0.13.Final'
+    testImplementation "io.projectreactor:reactor-core:$projectReactorVersion"
     testRuntimeOnly 'io.micronaut:micronaut-http-server-netty'
     testRuntimeOnly 'io.micronaut:micronaut-function-web'
 }

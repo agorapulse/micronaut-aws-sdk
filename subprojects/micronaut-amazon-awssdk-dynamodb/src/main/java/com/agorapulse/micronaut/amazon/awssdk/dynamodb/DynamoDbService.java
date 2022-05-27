@@ -24,7 +24,7 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedUpdate;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.QueryBuilder;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ScanBuilder;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder;
-import io.reactivex.Flowable;
+import org.reactivestreams.Publisher;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 
@@ -59,14 +59,14 @@ public interface DynamoDbService<T> {
      * @param query the query
      * @return the items matching the given query
      */
-    Flowable<T> query(DetachedQuery<T> query);
+    Publisher<T> query(DetachedQuery<T> query);
 
     /**
      * Defines the query using the query builder and returns the items matching the query.
      * @param query the query definition
      * @return the items matching the given query
      */
-    default Flowable<T> query(Consumer<QueryBuilder<T>> query) {
+    default Publisher<T> query(Consumer<QueryBuilder<T>> query) {
         return query(Builders.query(query));
     }
 
@@ -75,27 +75,27 @@ public interface DynamoDbService<T> {
      * @param scan the scan
      * @return the items matching the scan
      */
-    Flowable<T> scan(DetachedScan<T> scan);
+    Publisher<T> scan(DetachedScan<T> scan);
 
     /**
      * Defines the scan (non-index query) using the scan builder and returns the items matching the scan.
      * @param scan the scan definition
      * @return the items matching the scan
      */
-    default Flowable<T> scan(Consumer<ScanBuilder<T>> scan) {
+    default Publisher<T> scan(Consumer<ScanBuilder<T>> scan) {
         return scan(Builders.scan(scan));
     }
 
     /**
      * Finds all the items for given partition key.
      *
-     * If the sort key is present it either returns {@link Flowable} with single item or an empty one.
+     * If the sort key is present it either returns {@link Publisher} with single item or an empty one.
      *
      * @param partitionKey the partition key
      * @param sortKey the sort key
      * @return flowable of all items with given partition key and sort key (if present)
      */
-    Flowable<T> findAll(Object partitionKey, @Nullable Object sortKey);
+    Publisher<T> findAll(Object partitionKey, @Nullable Object sortKey);
 
     /**
      * Finds all the items for given partition key.
@@ -103,7 +103,7 @@ public interface DynamoDbService<T> {
      * @param partitionKey the partition key
      * @return flowable of all items with given partition key
      */
-    default Flowable<T> findAll(Object partitionKey) {
+    default Publisher<T> findAll(Object partitionKey) {
         return findAll(partitionKey, null);
     }
 
@@ -123,15 +123,15 @@ public interface DynamoDbService<T> {
         return update(Builders.update(update));
     }
 
-    int updateAll(Flowable<T> items, UpdateBuilder<T, ?> update);
+    int updateAll(Publisher<T> items, UpdateBuilder<T, ?> update);
 
-    default <R> int updateAll(Flowable<T> items, Function<UpdateBuilder<T, T>, UpdateBuilder<T, R>> update) {
+    default <R> int updateAll(Publisher<T> items, Function<UpdateBuilder<T, T>, UpdateBuilder<T, R>> update) {
         return updateAll(items, Builders.update(update));
     }
 
     T save(T entity);
 
-    Flowable<T> saveAll(Flowable<T> itemsToSave);
+    Publisher<T> saveAll(Publisher<T> itemsToSave);
 
     T delete(Object partitionKey, @Nullable Object sortKey);
 
@@ -139,11 +139,11 @@ public interface DynamoDbService<T> {
 
     T delete(Key key);
 
-    int deleteAll(Flowable<T> items);
+    int deleteAll(Publisher<T> items);
 
     T get(Object partitionKey, Object sortKey);
 
-    Flowable<T> getAll(Object partitionKey, Flowable<?> sortKeys);
+    Publisher<T> getAll(Object partitionKey, Publisher<?> sortKeys);
 
     T get(Key key);
 

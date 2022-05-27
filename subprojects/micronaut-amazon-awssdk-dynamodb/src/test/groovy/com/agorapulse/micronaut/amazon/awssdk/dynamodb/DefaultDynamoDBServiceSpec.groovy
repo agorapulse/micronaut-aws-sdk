@@ -22,7 +22,8 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Scan
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Service
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Update
 import io.micronaut.test.annotation.MicronautTest
-import io.reactivex.Flowable
+import org.reactivestreams.Publisher
+import reactor.core.publisher.Flux
 import spock.lang.Specification
 import spock.lang.Stepwise
 
@@ -129,7 +130,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
                 new DynamoDBEntity(parentId: '3', id: '1', rangeIndex: 'foo', number: 5, date: Date.from(REFERENCE_DATE.plus(7, ChronoUnit.DAYS))),
                 new DynamoDBEntity(parentId: '3', id: '2', rangeIndex: 'bar', number: 6, date: Date.from(REFERENCE_DATE.plus(14, ChronoUnit.DAYS)))
             )
-            service.saveAll(Flowable.fromArray(
+            service.saveAll(Flux.fromArray(
                 new DynamoDBEntity(parentId: '4', id: '1', rangeIndex: 'boo', number: 5, date: Date.from(REFERENCE_DATE.plus(7, ChronoUnit.DAYS))),
                 new DynamoDBEntity(parentId: '4', id: '2', rangeIndex: 'far', number: 6, date: Date.from(REFERENCE_DATE.plus(14, ChronoUnit.DAYS)))
             ))
@@ -228,7 +229,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
             playbook.verifyAndForget()
 
         when:
-            service.query('1').count().blockingGet() == 2
+            Flux.from(service.query('1')).count().block() == 2
         then:
             playbook.verifyAndForget(
                 'POST_LOAD:1:1:foo:1',
@@ -236,67 +237,67 @@ class DefaultDynamoDBServiceSpec extends Specification {
             )
 
         expect:
-            service.query('1', '1').count().blockingGet() == 1
-            service.queryByRangeIndex('1', 'bar').count().blockingGet() == 1
-            service.queryByRangeIndex('1', 'bar').blockingSingle().parentId == null // projection
-            service.queryByRangeIndex('1', 'bar').blockingSingle().rangeIndex == 'bar' // projection
-            !service.queryByRangeIndex('1', 'bar').blockingSingle().number
+            Flux.from(service.query('1', '1')).count().block() == 1
+            Flux.from(service.queryByRangeIndex('1', 'bar')).count().block() == 1
+            Flux.from(service.queryByRangeIndex('1', 'bar')).blockFirst().parentId == null // projection
+            Flux.from(service.queryByRangeIndex('1', 'bar')).blockFirst().rangeIndex == 'bar' // projection
+            !Flux.from(service.queryByRangeIndex('1', 'bar')).blockFirst().number
 
-            service.queryByDates(
+            Flux.from(service.queryByDates(
                 '1',
                 Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)),
                 Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS))
-            ).count().blockingGet() == 2
+            )).count().block() == 2
 
-            service.queryByDatesWithLimit(
+            Flux.from(service.queryByDatesWithLimit(
                 '1',
                 Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)),
                 Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS)),
                 1
-            ).count().blockingGet() == 1
+            )).count().block() == 1
 
-            service.queryByDates(
+            Flux.from(service.queryByDates(
                 '3',
                 Date.from(REFERENCE_DATE.plus(9, ChronoUnit.DAYS)),
                 Date.from(REFERENCE_DATE.plus(20, ChronoUnit.DAYS))
-            ).count().blockingGet() == 1
+            )).count().block() == 1
 
-            service.queryByDates(
+            Flux.from(service.queryByDates(
                 '3',
                 Date.from(REFERENCE_DATE.plus(9, ChronoUnit.DAYS)),
                 Date.from(REFERENCE_DATE.plus(20, ChronoUnit.DAYS))
-            ).blockingFirst().number
+            )).blockFirst().number
 
-            service.queryByPrefix('1', 'b').toList().blockingGet().size() == 1
-            service.queryBySizeAndContains('1', 3, 'a').toList().blockingGet().size() == 1
-            service.queryBySizeLe('1', 3).toList().blockingGet().size() == 2
-            service.queryBySizeLt('1', 3).toList().blockingGet().size() == 0
-            service.queryBySizeGe('1', 3).toList().blockingGet().size() == 2
-            service.queryBySizeGt('1', 3).toList().blockingGet().size() == 0
-            service.queryBySizeNe('1', 3).toList().blockingGet().size() == 0
-            service.queryByLe('1', '1').toList().blockingGet().size() == 1
-            service.queryByLt('1', '1').toList().blockingGet().size() == 0
-            service.queryByGe('1', '1').toList().blockingGet().size() == 2
-            service.queryByGt('1', '1').toList().blockingGet().size() == 1
-            service.queryByBetween('1', '0', '5').toList().blockingGet().size() == 2
-            service.queryByIdPrefix('1', '1').toList().blockingGet().size() == 1
-            service.queryByNe('1', 'foo').toList().blockingGet().size() == 1
-            service.queryInList('1', 'foo', 'bar').toList().blockingGet().size() == 2
+            Flux.from(service.queryByPrefix('1', 'b')).collectList().block().size() == 1
+            Flux.from(service.queryBySizeAndContains('1', 3, 'a')).collectList().block().size() == 1
+            Flux.from(service.queryBySizeLe('1', 3)).collectList().block().size() == 2
+            Flux.from(service.queryBySizeLt('1', 3)).collectList().block().size() == 0
+            Flux.from(service.queryBySizeGe('1', 3)).collectList().block().size() == 2
+            Flux.from(service.queryBySizeGt('1', 3)).collectList().block().size() == 0
+            Flux.from(service.queryBySizeNe('1', 3)).collectList().block().size() == 0
+            Flux.from(service.queryByLe('1', '1')).collectList().block().size() == 1
+            Flux.from(service.queryByLt('1', '1')).collectList().block().size() == 0
+            Flux.from(service.queryByGe('1', '1')).collectList().block().size() == 2
+            Flux.from(service.queryByGt('1', '1')).collectList().block().size() == 1
+            Flux.from(service.queryByBetween('1', '0', '5')).collectList().block().size() == 2
+            Flux.from(service.queryByIdPrefix('1', '1')).collectList().block().size() == 1
+            Flux.from(service.queryByNe('1', 'foo')).collectList().block().size() == 1
+            Flux.from(service.queryInList('1', 'foo', 'bar')).collectList().block().size() == 2
 
             dbs.countUsingQuery {
                 partitionKey '1'
                 index DynamoDBEntity.DATE_INDEX
                 range { between Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS)) }
             } == 2
-            dbs.query {
+            Flux.from(dbs.query {
                 partitionKey '1'
                 index DynamoDBEntity.DATE_INDEX
                 range { between Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS)) }
-            }.toList().blockingGet().size() == 2
+            }).collectList().block().size() == 2
 
         when:
             playbook.forget()
-            service.scanAllByRangeIndex('bar').count().blockingGet() == 4
+            Flux.from(service.scanAllByRangeIndex('bar')).count().block() == 4
         then:
             playbook.verifyAndForget(
                 'POST_LOAD:null:null:bar:0',
@@ -306,7 +307,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
             )
 
         expect:
-            service.scanAllByRangeIndex('foo').count().blockingGet() == 8
+            Flux.from(service.scanAllByRangeIndex('foo')).count().block() == 8
             service.countAllByRangeIndexNotEqual('bar') == 10
             service.countComplex('bar') == 4
             service.countBetween('a', 'z') == 14
@@ -318,14 +319,14 @@ class DefaultDynamoDBServiceSpec extends Specification {
                 }
             } == 10
 
-            dbs.scan {
+            Flux.from(dbs.scan {
                 filter {
                     eq DynamoDBEntity.RANGE_INDEX, 'foo'
                 }
                 only {
                     rangeIndex
                 }
-            }.toList().blockingGet().size() == 8
+            }).collectList().block().size() == 8
 
         when:
             List<DynamoDBEntity> scannedPage = service.scanAllByRangeIndexWithLimit('bar', 2, null)
@@ -462,7 +463,7 @@ interface DynamoDBItemDBService {
     DynamoDBEntity save(DynamoDBEntity entity)
     List<DynamoDBEntity> saveAll(DynamoDBEntity... entities)
     List<DynamoDBEntity> saveAll(Iterable<DynamoDBEntity> entities)
-    List<DynamoDBEntity> saveAll(Flowable<DynamoDBEntity> entities)
+    List<DynamoDBEntity> saveAll(Publisher<DynamoDBEntity> entities)
 
     int count(String hashKey)
     int count(String hashKey, String rangeKey)
@@ -487,8 +488,8 @@ interface DynamoDBItemDBService {
     })
     int countByDates(String hashKey, Date after, Date before)
 
-    Flowable<DynamoDBEntity> query(String hashKey)
-    Flowable<DynamoDBEntity> query(String hashKey, String rangeKey)
+    Publisher<DynamoDBEntity> query(String hashKey)
+    Publisher<DynamoDBEntity> query(String hashKey, String rangeKey)
 
     // tag::sample-queries[]
     @Query({                                                                            // <3>
@@ -503,7 +504,7 @@ interface DynamoDBItemDBService {
             }
         }
     })
-    Flowable<DynamoDBEntity> queryByRangeIndex(String hashKey, String rangeKey)         // <8>
+    Publisher<DynamoDBEntity> queryByRangeIndex(String hashKey, String rangeKey)        // <8>
     // end::sample-queries[]
 
     @Query({
@@ -513,7 +514,7 @@ interface DynamoDBItemDBService {
             range { between after, before }
         }
     })
-    Flowable<DynamoDBEntity> queryByDates(String hashKey, Date after, Date before)
+    Publisher<DynamoDBEntity> queryByDates(String hashKey, Date after, Date before)
 
     @Query({
         query(DynamoDBEntity) {
@@ -522,7 +523,7 @@ interface DynamoDBItemDBService {
             range { beginsWith prefix }
         }
     })
-    Flowable<DynamoDBEntity> queryByPrefix(String hashKey, String prefix)
+    Publisher<DynamoDBEntity> queryByPrefix(String hashKey, String prefix)
 
     @Query({
         query(DynamoDBEntity) {
@@ -530,7 +531,7 @@ interface DynamoDBItemDBService {
             filter { inList DynamoDBEntity.RANGE_INDEX, values }
         }
     })
-    Flowable<DynamoDBEntity> queryInList(String hashKey, String... values)
+    Publisher<DynamoDBEntity> queryInList(String hashKey, String... values)
 
     @Query({
         query(DynamoDBEntity) {
@@ -543,7 +544,7 @@ interface DynamoDBItemDBService {
             }
         }
     })
-    Flowable<DynamoDBEntity> queryBySizeAndContains(String hashKey, int size, String substring)
+    Publisher<DynamoDBEntity> queryBySizeAndContains(String hashKey, int size, String substring)
 
     @Query({
         query(DynamoDBEntity) {
@@ -595,7 +596,7 @@ interface DynamoDBItemDBService {
             }
         }
     })
-    Flowable<DynamoDBEntity> queryBySizeNe(String hashKey, int size)
+    Publisher<DynamoDBEntity> queryBySizeNe(String hashKey, int size)
 
     @Query({
         query(DynamoDBEntity) {
@@ -607,7 +608,7 @@ interface DynamoDBItemDBService {
             }
         }
     })
-    Flowable<DynamoDBEntity> queryBySizeLe(String hashKey, int size)
+    Publisher<DynamoDBEntity> queryBySizeLe(String hashKey, int size)
 
     @Query({
         query(DynamoDBEntity) {
@@ -619,7 +620,7 @@ interface DynamoDBItemDBService {
             }
         }
     })
-    Flowable<DynamoDBEntity> queryBySizeLt(String hashKey, int size)
+    Publisher<DynamoDBEntity> queryBySizeLt(String hashKey, int size)
 
     @Query({
         query(DynamoDBEntity) {
@@ -631,7 +632,7 @@ interface DynamoDBItemDBService {
             }
         }
     })
-    Flowable<DynamoDBEntity> queryBySizeGe(String hashKey, int size)
+    Publisher<DynamoDBEntity> queryBySizeGe(String hashKey, int size)
 
     @Query({
         query(DynamoDBEntity) {
@@ -643,7 +644,7 @@ interface DynamoDBItemDBService {
             }
         }
     })
-    Flowable<DynamoDBEntity> queryBySizeGt(String hashKey, int size)
+    Publisher<DynamoDBEntity> queryBySizeGt(String hashKey, int size)
 
     @Query({
         query(DynamoDBEntity) {
@@ -655,7 +656,7 @@ interface DynamoDBItemDBService {
             }
         }
     })
-    Flowable<DynamoDBEntity> queryByNe(String hashKey, String value)
+    Publisher<DynamoDBEntity> queryByNe(String hashKey, String value)
 
     @Query({
         query(DynamoDBEntity) {
@@ -665,7 +666,7 @@ interface DynamoDBItemDBService {
             }
         }
     })
-    Flowable<DynamoDBEntity> queryByLe(String hashKey, String value)
+    Publisher<DynamoDBEntity> queryByLe(String hashKey, String value)
 
     @Query({
         query(DynamoDBEntity) {
@@ -675,7 +676,7 @@ interface DynamoDBItemDBService {
             }
         }
     })
-    Flowable<DynamoDBEntity> queryByLt(String hashKey, String value)
+    Publisher<DynamoDBEntity> queryByLt(String hashKey, String value)
 
     @Query({
         query(DynamoDBEntity) {
@@ -686,7 +687,7 @@ interface DynamoDBItemDBService {
             }
         }
     })
-    Flowable<DynamoDBEntity> queryByGe(String hashKey, String value)
+    Publisher<DynamoDBEntity> queryByGe(String hashKey, String value)
 
     @Query({
         query(DynamoDBEntity) {
@@ -697,7 +698,7 @@ interface DynamoDBItemDBService {
             }
         }
     })
-    Flowable<DynamoDBEntity> queryByGt(String hashKey, String value)
+    Publisher<DynamoDBEntity> queryByGt(String hashKey, String value)
 
     @Query({
         query(DynamoDBEntity) {
@@ -708,7 +709,7 @@ interface DynamoDBItemDBService {
             }
         }
     })
-    Flowable<DynamoDBEntity> queryByBetween(String hashKey, String lo, String hi)
+    Publisher<DynamoDBEntity> queryByBetween(String hashKey, String lo, String hi)
 
     @Query({
         query(DynamoDBEntity) {
@@ -719,7 +720,7 @@ interface DynamoDBItemDBService {
             }
         }
     })
-    Flowable<DynamoDBEntity> queryByIdPrefix(String hashKey, String prefix)
+    Publisher<DynamoDBEntity> queryByIdPrefix(String hashKey, String prefix)
 
     @Query({
         query(DynamoDBEntity) {
@@ -729,7 +730,7 @@ interface DynamoDBItemDBService {
             limit max
         }
     })
-    Flowable<DynamoDBEntity> queryByDatesWithLimit(String hashKey, Date after, Date before, int max)
+    Publisher<DynamoDBEntity> queryByDatesWithLimit(String hashKey, Date after, Date before, int max)
 
     void delete(DynamoDBEntity entity)
     void delete(String hashKey, String rangeKey)
@@ -855,7 +856,7 @@ interface DynamoDBItemDBService {
             }
         }
     })
-    Flowable<DynamoDBEntity> scanAllByRangeIndex(String foo)                            // <5>
+    Publisher<DynamoDBEntity> scanAllByRangeIndex(String foo)                           // <5>
     // end::sample-scan[]
 
     @Scan({

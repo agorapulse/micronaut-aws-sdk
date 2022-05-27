@@ -22,6 +22,7 @@ dependencies {
 
     implementation project(':micronaut-aws-sdk-core')
     implementation "space.jasan:groovy-closure-support:$closureSupportVersion"
+    implementation "io.projectreactor:reactor-core:$projectReactorVersion"
 
     testImplementation project(':micronaut-amazon-awssdk-integration-testing')
     testImplementation "com.agorapulse:dru-client-dynamodb:${druVersion}"

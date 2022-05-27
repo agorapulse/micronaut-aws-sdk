@@ -25,7 +25,7 @@ import com.agorapulse.micronaut.aws.dynamodb.builder.Builders;
 import com.agorapulse.micronaut.aws.dynamodb.builder.DetachedQuery;
 import com.agorapulse.micronaut.aws.dynamodb.builder.DetachedScan;
 import com.agorapulse.micronaut.aws.dynamodb.builder.DetachedUpdate;
-import io.reactivex.Flowable;
+import org.reactivestreams.Publisher;
 
 import java.util.Date;
 import java.util.List;
@@ -126,13 +126,13 @@ public interface DynamoDBEntityService {
     @Query(BetweenDateIndex.class)
     int countByDates(String hashKey, Date after, Date before);
 
-    Flowable<DynamoDBEntity> query(String hashKey);
+    Publisher<DynamoDBEntity> query(String hashKey);
 
-    Flowable<DynamoDBEntity> query(String hashKey, String rangeKey);
+    Publisher<DynamoDBEntity> query(String hashKey, String rangeKey);
 
     // tag::sample-query[]
     @Query(EqRangeProjection.class)                                                     // <7>
-    Flowable<DynamoDBEntity> queryByRangeIndex(String hashKey, String rangeKey);        // <8>
+    Publisher<DynamoDBEntity> queryByRangeIndex(String hashKey, String rangeKey);       // <8>
     // end::sample-query[]
 
     @Query(BetweenDateIndex.class)
@@ -158,7 +158,7 @@ public interface DynamoDBEntityService {
 
     // tag::sample-scan[]
     @Scan(EqRangeScan.class)                                                            // <5>
-    Flowable<DynamoDBEntity> scanAllByRangeIndex(String foo);                           // <6>
+    Publisher<DynamoDBEntity> scanAllByRangeIndex(String foo);                          // <6>
     // end::sample-scan[]
 
 // tag::footer[]

@@ -19,11 +19,12 @@ package com.agorapulse.micronaut.amazon.awssdk.sns;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.reactivex.Emitter;
-import io.reactivex.Flowable;
-import io.reactivex.functions.BiFunction;
+import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.SynchronousSink;
+import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sns.model.CreatePlatformEndpointRequest;
 import software.amazon.awssdk.services.sns.model.DeleteEndpointResponse;
@@ -113,18 +114,23 @@ public class DefaultSimpleNotificationService implements SimpleNotificationServi
     }
 
     @Override
-    public Flowable<Topic> listTopics() {
-        return Flowable.generate(client::listTopics, (BiFunction<ListTopicsResponse, Emitter<List<Topic>>, ListTopicsResponse>) (listTopicsResult, topicEmitter) -> {
-            topicEmitter.onNext(listTopicsResult.topics());
+    public Publisher<Topic> listTopics() {
+        return Flux.generate(client::listTopics, (ListTopicsResponse listTopicsResult, SynchronousSink<List<Topic>> sink) -> {
+            sink.next(listTopicsResult.topics());
 
             if (listTopicsResult.nextToken() != null) {
-                return client.listTopics(r -> r.nextToken(listTopicsResult.nextToken()));
+                try {
+                    return client.listTopics(r -> r.nextToken(listTopicsResult.nextToken()));
+
+                } catch (SdkClientException e) {
+                    sink.error(e);
+                }
             }
 
-            topicEmitter.onComplete();
+            sink.complete();
 
-            return null;
-        }).flatMap(Flowable::fromIterable);
+            return ListTopicsResponse.builder().build();
+        }).flatMap(Flux::fromIterable);
     }
 
     @Override
@@ -291,7 +297,7 @@ public class DefaultSimpleNotificationService implements SimpleNotificationServi
             return namesToArn.get(nameOrArn);
         }
 
-        listTopics()
+        Flux.from(listTopics())
             .takeUntil((Topic topic) -> topic.topicArn().endsWith(":" + nameOrArn))
             .subscribe(topic -> {
                 String topicName = topic.topicArn().substring(topic.topicArn().lastIndexOf(':') + 1);

@@ -17,7 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.sns;
 
-import io.reactivex.Flowable;
+import org.reactivestreams.Publisher;
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue;
 import software.amazon.awssdk.services.sns.model.Topic;
 
@@ -104,7 +104,7 @@ public interface SimpleNotificationService {
     /**
      * @return flowable iterating through all the topics available
      */
-    Flowable<Topic> listTopics();
+    Publisher<Topic> listTopics();
 
     /**
      * Deletes given topic.

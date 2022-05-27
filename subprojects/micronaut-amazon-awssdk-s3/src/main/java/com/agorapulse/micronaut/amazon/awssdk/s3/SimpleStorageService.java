@@ -18,7 +18,8 @@
 package com.agorapulse.micronaut.amazon.awssdk.s3;
 
 import io.micronaut.http.multipart.PartData;
-import io.reactivex.Flowable;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -181,7 +182,7 @@ public interface SimpleStorageService {
      * @param prefix the common prefix of the object being fetched
      * @return the list of all objects available as flowable of ObjectListing which each contains list of objects.
      */
-    Flowable<ListObjectsV2Response> listObjects(String bucketName, String prefix);
+    Publisher<ListObjectsV2Response> listObjects(String bucketName, String prefix);
 
     /**
      * Returns the flowable of ObjectListing which each contains list of objects.
@@ -191,7 +192,7 @@ public interface SimpleStorageService {
      * @param prefix the common prefix of the object being fetched
      * @return the flowable of ObjectListing which each contains list of objects
      */
-    default Flowable<ListObjectsV2Response> listObjects(String prefix) {
+    default Publisher<ListObjectsV2Response> listObjects(String prefix) {
         return listObjects(getDefaultBucketName(), prefix);
     }
 
@@ -202,7 +203,7 @@ public interface SimpleStorageService {
      *
      * @return the flowable of ObjectListing which each contains list of objects
      */
-    default Flowable<ListObjectsV2Response> listObjects() {
+    default Publisher<ListObjectsV2Response> listObjects() {
         return listObjects("");
     }
 
@@ -213,8 +214,8 @@ public interface SimpleStorageService {
      * @param prefix the common prefix of the object being fetched
      * @return the flowable of object summaries
      */
-    default Flowable<S3Object> listObjectSummaries(String bucketName, String prefix) {
-        return listObjects(bucketName, prefix).flatMap(l -> Flowable.fromIterable(l.contents()));
+    default Publisher<S3Object> listObjectSummaries(String bucketName, String prefix) {
+        return Flux.from(listObjects(bucketName, prefix)).flatMap(l -> Flux.fromIterable(l.contents()));
     }
 
     /**
@@ -254,7 +255,7 @@ public interface SimpleStorageService {
      * @return the object summary of an object
      */
     default S3Object getObjectSummary(String bucketName, String key) {
-        return listObjectSummaries(bucketName, key).blockingFirst();
+        return Flux.from(listObjectSummaries(bucketName, key)).blockFirst();
     }
 
     /**
@@ -263,7 +264,7 @@ public interface SimpleStorageService {
      * @param prefix the common prefix of the object being fetched
      * @return the flowable of object summaries
      */
-    default Flowable<S3Object> listObjectSummaries(String prefix) {
+    default Publisher<S3Object> listObjectSummaries(String prefix) {
         return listObjectSummaries(getDefaultBucketName(), prefix);
     }
 
@@ -272,7 +273,7 @@ public interface SimpleStorageService {
      *
      * @return the flowable of object summaries
      */
-    default Flowable<S3Object> listObjectSummaries() {
+    default Publisher<S3Object> listObjectSummaries() {
         return listObjectSummaries("");
     }
 
