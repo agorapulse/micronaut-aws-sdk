@@ -37,6 +37,9 @@ public interface DynamoDBEntityNoRangeService {
     DynamoDBEntityNoRange get(@PartitionKey String parentId);
     DynamoDBEntityNoRange save(DynamoDBEntityNoRange entity);
     Flowable<DynamoDBEntityNoRange> saveAll(DynamoDBEntityNoRange... entities);
+
+    Flowable<DynamoDBEntityNoRange> saveAll(Flowable<DynamoDBEntityNoRange> entities);
+
     Flux<DynamoDBEntityNoRange> saveAll(Iterable<DynamoDBEntityNoRange> entities);
 
     int count(String hashKey);

@@ -18,6 +18,7 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb
 
 import io.micronaut.test.annotation.MicronautTest
+import io.reactivex.Flowable
 import spock.lang.Specification
 
 import javax.inject.Inject
@@ -37,10 +38,10 @@ class DefaultDynamoDBServiceNoRangeSpec extends Specification {
             service.saveAll([
                 new DynamoDBEntityNoRange(parentId: '3'),
                 new DynamoDBEntityNoRange(parentId: '4')])
-            service.saveAll(
+            service.saveAll(Flowable.just(
                 new DynamoDBEntityNoRange(parentId: '5'),
                 new DynamoDBEntityNoRange(parentId: '6')
-            )
+            ))
 
         then:
             noExceptionThrown()
