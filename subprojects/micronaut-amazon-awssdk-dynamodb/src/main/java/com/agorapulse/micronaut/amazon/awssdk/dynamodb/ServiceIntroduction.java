@@ -99,11 +99,14 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> Flux<T> toPublisher(Class<T> type, Argument<?> itemArgument, Map<String, MutableArgumentValue<?>> params) {
+    private static <T> Publisher<T> toPublisher(Class<T> type, Argument<?> itemArgument, Map<String, MutableArgumentValue<?>> params) {
         Object item = params.get(itemArgument.getName()).getValue();
 
         if (Publishers.isConvertibleToPublisher(itemArgument.getType()) && type.isAssignableFrom(itemArgument.getTypeParameters()[0].getType())) {
-            return Publishers.convertPublisher(item, Flux.class);
+            if (Publisher.class.isAssignableFrom(itemArgument.getType())) {
+                return (Publisher<T>) item;
+            }
+            return Publishers.convertPublisher(item, Publisher.class);
         }
 
         if (itemArgument.getType().isArray() && type.isAssignableFrom(itemArgument.getType().getComponentType())) {
