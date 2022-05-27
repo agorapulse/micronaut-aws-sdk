@@ -26,5 +26,7 @@ dependencies {
 
     testImplementation project(':micronaut-amazon-awssdk-integration-testing')
     testImplementation "com.agorapulse:dru-client-dynamodb:${druVersion}"
-    testImplementation 'io.micronaut.rxjava2:micronaut-rxjava2'
+    if (micronautVersion.startsWith('3')) {
+        testImplementation 'io.micronaut.rxjava2:micronaut-rxjava2'
+    }
 }

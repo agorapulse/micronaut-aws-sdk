@@ -162,9 +162,6 @@ subprojects { Project subproject ->
         implementation 'io.micronaut:micronaut-inject'
         implementation 'io.micronaut:micronaut-runtime'
 
-        // Micronaut 3.x Compatibilty
-        implementation 'io.reactivex.rxjava2:rxjava:2.2.10'
-
 
         compileOnly 'io.micronaut:micronaut-inject-java'
 
