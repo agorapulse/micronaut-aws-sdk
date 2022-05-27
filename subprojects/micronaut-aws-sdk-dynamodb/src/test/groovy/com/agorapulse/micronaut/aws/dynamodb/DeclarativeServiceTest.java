@@ -69,8 +69,8 @@ public class DeclarativeServiceTest {
         assertEquals(1, Flux.from(s.queryByRangeIndex("1", "bar")).count().block().intValue());
         assertNull(Flux.from(s.queryByRangeIndex("1", "bar")).blockFirst().parentId);
         assertEquals("bar", Flux.from(s.queryByRangeIndex("1", "bar")).blockFirst().rangeIndex);
-        assertEquals(2, s.queryByDates("1", REFERENCE_DATE.minusDays(1).toDate(), REFERENCE_DATE.plusDays(2).toDate()).size());
-        assertEquals(1, s.queryByDates("3", REFERENCE_DATE.plusDays(9).toDate(), REFERENCE_DATE.plusDays(20).toDate()).size());
+        assertEquals(2, s.queryByDates("1", REFERENCE_DATE.minusDays(1).toDate(), REFERENCE_DATE.plusDays(2).toDate()).count().blockingGet());
+        assertEquals(1, s.queryByDates("3", REFERENCE_DATE.plusDays(9).toDate(), REFERENCE_DATE.plusDays(20).toDate()).count().blockingGet());
 
         assertEquals(2, Flux.from(s.scanAllByRangeIndex("bar")).count().block().intValue());
 

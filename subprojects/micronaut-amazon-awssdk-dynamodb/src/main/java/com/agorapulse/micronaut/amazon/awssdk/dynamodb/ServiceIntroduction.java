@@ -32,6 +32,7 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.core.annotation.AnnotationValue;
+import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.type.MutableArgumentValue;
 import org.reactivestreams.Publisher;
@@ -40,7 +41,6 @@ import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 
 import javax.inject.Singleton;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -159,7 +159,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
                 return service.updateAll(queryResult, update);
             }
 
-            return publisherOrList(queryResult, context.getReturnType().getType());
+            return publisherOrIterable(queryResult, context.getReturnType().getType());
         }
 
         if (context.getTargetMethod().isAnnotationPresent(Scan.class)) {
@@ -180,7 +180,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
                 return service.updateAll(scanResult, update);
             }
 
-            return publisherOrList(scanResult, context.getReturnType().getType());
+            return publisherOrIterable(scanResult, context.getReturnType().getType());
         }
 
         if (context.getTargetMethod().isAnnotationPresent(Update.class)) {
@@ -198,7 +198,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             if (methodName.startsWith("count")) {
                 return service.count(partitionAndSort.getPartitionValue(context.getParameters()), partitionAndSort.getSortValue(context.getParameters()));
             }
-            return publisherOrList(
+            return publisherOrIterable(
                 service.findAll(partitionAndSort.getPartitionValue(context.getParameters()), partitionAndSort.getSortValue(context.getParameters())),
                 context.getReturnType().getType()
             );
@@ -207,11 +207,12 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         throw new UnsupportedOperationException("Cannot implement method " + context.getExecutableMethod().getTargetMethod());
     }
 
-    private Object publisherOrList(Publisher<?> result, Class<?> type) {
-        if (List.class.isAssignableFrom(type)) {
-            return Flux.from(result).collectList().blockOptional().orElse(Collections.emptyList());
+    private Object publisherOrIterable(Publisher<?> result, Class<?> type) {
+        if (Publishers.isConvertibleToPublisher(type)) {
+            return Publishers.convertPublisher(result, type);
         }
-        return result;
+
+        return Flux.from(result).collectList().blockOptional().orElse(Collections.emptyList());
     }
 
     private <T> Object handleSave(DynamoDbService<T> service, MethodInvocationContext<Object, Object> context) {
@@ -226,10 +227,10 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         Publisher<T> items = toPublisher(service.getItemType(), itemArgument, params);
 
         if (itemArgument.getType().isArray() || Iterable.class.isAssignableFrom(itemArgument.getType()) || Publisher.class.isAssignableFrom(itemArgument.getType())) {
-            return publisherOrList(service.saveAll(items), context.getReturnType().getType());
+            return publisherOrIterable(service.saveAll(items), context.getReturnType().getType());
         }
 
-        return service.save(Flux.from(items).blockFirst());
+        return service.save((T) params.get(itemArgument.getName()).getValue());
     }
 
     private <T> Object handleDelete(DynamoDbService<T> service, MethodInvocationContext<Object, Object> context) {
@@ -279,7 +280,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
                 || Publisher.class.isAssignableFrom(partitionAndSort.sortKey.getType())
         ) {
             Publisher<T> all = service.getAll(partitionValue, partitionAndSort.getSortAttributeValues(params));
-            return publisherOrList(all, context.getReturnType().getType());
+            return publisherOrIterable(all, context.getReturnType().getType());
         }
 
         return service.get(partitionValue, partitionAndSort.getSortValue(params));

@@ -24,6 +24,8 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Update;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.Builders;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedQuery;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedUpdate;
+import io.reactivex.Flowable;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.Map;
@@ -34,8 +36,8 @@ public interface DynamoDBEntityNoRangeService {
 
     DynamoDBEntityNoRange get(@PartitionKey String parentId);
     DynamoDBEntityNoRange save(DynamoDBEntityNoRange entity);
-    List<DynamoDBEntityNoRange> saveAll(DynamoDBEntityNoRange... entities);
-    List<DynamoDBEntityNoRange> saveAll(Iterable<DynamoDBEntityNoRange> entities);
+    Flowable<DynamoDBEntityNoRange> saveAll(DynamoDBEntityNoRange... entities);
+    Flux<DynamoDBEntityNoRange> saveAll(Iterable<DynamoDBEntityNoRange> entities);
 
     int count(String hashKey);
 

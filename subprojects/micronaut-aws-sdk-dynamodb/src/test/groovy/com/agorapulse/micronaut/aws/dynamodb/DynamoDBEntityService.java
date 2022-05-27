@@ -25,6 +25,7 @@ import com.agorapulse.micronaut.aws.dynamodb.builder.Builders;
 import com.agorapulse.micronaut.aws.dynamodb.builder.DetachedQuery;
 import com.agorapulse.micronaut.aws.dynamodb.builder.DetachedScan;
 import com.agorapulse.micronaut.aws.dynamodb.builder.DetachedUpdate;
+import io.reactivex.Flowable;
 import org.reactivestreams.Publisher;
 
 import java.util.Date;
@@ -136,7 +137,7 @@ public interface DynamoDBEntityService {
     // end::sample-query[]
 
     @Query(BetweenDateIndex.class)
-    List<DynamoDBEntity> queryByDates(String hashKey, Date after, Date before);
+    Flowable<DynamoDBEntity> queryByDates(String hashKey, Date after, Date before);
 
     void delete(DynamoDBEntity entity);
 

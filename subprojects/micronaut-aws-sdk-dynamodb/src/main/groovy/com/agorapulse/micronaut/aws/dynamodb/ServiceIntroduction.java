@@ -30,6 +30,7 @@ import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.annotation.AnnotationValue;
+import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.type.MutableArgumentValue;
 import org.reactivestreams.Publisher;
@@ -110,7 +111,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
                 return service.deleteAllByConditions(criteria.resolveExpression(mapper), Collections.emptyMap());
             }
 
-            return publisherOrList(criteria.query(mapper), context.getReturnType().getType());
+            return publisherOrIterable(criteria.query(mapper), context.getReturnType().getType());
         }
 
         if (context.getTargetMethod().isAnnotationPresent(Update.class)) {
@@ -126,7 +127,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
                 return criteria.count(mapper);
             }
 
-            return publisherOrList(criteria.scan(mapper), context.getReturnType().getType());
+            return publisherOrIterable(criteria.scan(mapper), context.getReturnType().getType());
         }
 
         if (methodName.startsWith("count")) {
@@ -138,17 +139,17 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         }
 
         if (methodName.startsWith("query") || methodName.startsWith("findAll") || methodName.startsWith("list")) {
-            return publisherOrList(simpleHashAndRangeQuery(type, context).query(mapper), context.getReturnType().getType());
+            return publisherOrIterable(simpleHashAndRangeQuery(type, context).query(mapper), context.getReturnType().getType());
         }
 
         throw new UnsupportedOperationException("Cannot implement method " + context.getExecutableMethod());
     }
 
-    private Object publisherOrList(Publisher result, Class type) {
-        if (List.class.isAssignableFrom(type)) {
-            return Flux.from(result).collectList().block();
+    private Object publisherOrIterable(Publisher result, Class type) {
+        if (Publishers.isConvertibleToPublisher(type)) {
+            return Publishers.convertPublisher(result, type);
         }
-        return result;
+        return Flux.from(result).collectList().block();
     }
 
     private <T> T evaluateAnnotationType(Class<? extends Function<Map<String, Object>, T>> updateDefinitionType, MethodInvocationContext<Object, Object> context) {
