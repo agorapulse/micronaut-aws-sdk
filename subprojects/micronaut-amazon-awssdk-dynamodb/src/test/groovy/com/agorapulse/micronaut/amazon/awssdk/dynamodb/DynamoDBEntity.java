@@ -17,15 +17,18 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.PartitionKey;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Projection;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert.LegacyAttributeConverterProvider;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondaryPartitionKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondarySortKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SortKey;
+import io.micronaut.core.annotation.Introspected;
 import software.amazon.awssdk.services.dynamodb.model.ProjectionType;
 
 import java.util.Date;
 import java.util.Objects;
 
-@DynamoDbBean(converterProviders = LegacyAttributeConverterProvider.class)
+@Introspected
 public class DynamoDBEntity implements PlaybookAware {
 
     public static final String DATE_INDEX = "date";
@@ -38,7 +41,7 @@ public class DynamoDBEntity implements PlaybookAware {
     private Date date;
     private Integer number = 0;
 
-    @DynamoDbPartitionKey
+    @PartitionKey
     public String getParentId() {
         return parentId;
     }
@@ -47,7 +50,7 @@ public class DynamoDBEntity implements PlaybookAware {
         this.parentId = parentId;
     }
 
-    @DynamoDbSortKey
+    @SortKey
     public String getId() {
         return id;
     }
@@ -56,7 +59,7 @@ public class DynamoDBEntity implements PlaybookAware {
         this.id = id;
     }
 
-    @DynamoDbSecondarySortKey(indexNames = RANGE_INDEX)
+    @SecondarySortKey(indexNames = RANGE_INDEX)
     public String getRangeIndex() {
         return rangeIndex;
     }
@@ -66,7 +69,7 @@ public class DynamoDBEntity implements PlaybookAware {
     }
 
     @Projection(ProjectionType.ALL)
-    @DynamoDbSecondarySortKey(indexNames = DATE_INDEX)
+    @SecondarySortKey(indexNames = DATE_INDEX)
     public Date getDate() {
         return date;
     }
@@ -84,7 +87,7 @@ public class DynamoDBEntity implements PlaybookAware {
     }
 
     @Projection(ProjectionType.ALL)
-    @DynamoDbSecondaryPartitionKey(indexNames = GLOBAL_INDEX)
+    @SecondaryPartitionKey(indexNames = GLOBAL_INDEX)
     public String getGlobalIndex() {
         return parentId + ":" + id;
     }

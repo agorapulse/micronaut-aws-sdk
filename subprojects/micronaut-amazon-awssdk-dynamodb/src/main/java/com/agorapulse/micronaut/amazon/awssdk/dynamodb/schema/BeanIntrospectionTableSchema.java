@@ -23,6 +23,7 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.RangeKey;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondaryPartitionKey;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondarySortKey;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SortKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert.LegacyAttributeConverterProvider;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.beans.BeanIntrospection;
 import io.micronaut.core.beans.BeanIntrospector;
@@ -32,7 +33,6 @@ import software.amazon.awssdk.annotations.SdkPublicApi;
 import software.amazon.awssdk.annotations.ThreadSafe;
 import software.amazon.awssdk.enhanced.dynamodb.AttributeConverter;
 import software.amazon.awssdk.enhanced.dynamodb.AttributeConverterProvider;
-import software.amazon.awssdk.enhanced.dynamodb.DefaultAttributeConverterProvider;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.EnhancedType;
 import software.amazon.awssdk.enhanced.dynamodb.EnhancedTypeDocumentConfiguration;
@@ -210,7 +210,11 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         StaticTableSchema.Builder<T> builder = StaticTableSchema.builder(beanClass).newItemSupplier(introspection::instantiate);
 
         Optional<AnnotationValue<DynamoDbBean>> optionalDynamoDbBean = introspection.findAnnotation(DynamoDbBean.class);
-        optionalDynamoDbBean.ifPresent(dynamoDbBean -> builder.attributeConverterProviders(createConverterProvidersFromAnnotation(beanClass, dynamoDbBean)));
+        if (optionalDynamoDbBean.isPresent()) {
+            builder.attributeConverterProviders(createConverterProvidersFromAnnotation(beanClass, optionalDynamoDbBean.get()));
+        } else {
+            builder.attributeConverterProviders(new LegacyAttributeConverterProvider());
+        }
 
         List<StaticAttribute<T, ?>> attributes = introspection.getBeanProperties().stream()
             .filter(p -> isMappableProperty(beanClass, p))
@@ -259,7 +263,7 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
     private static List<AttributeConverterProvider> createConverterProvidersFromAnnotation(Class<?> beanClass, AnnotationValue<DynamoDbBean> dynamoDbBean) {
         Class<? extends AttributeConverterProvider>[] providerClasses = (Class<? extends AttributeConverterProvider>[]) dynamoDbBean.classValues("converterProviders");
         if (providerClasses.length == 0) {
-            providerClasses = new Class[] {DefaultAttributeConverterProvider.class};
+            providerClasses = new Class[] {LegacyAttributeConverterProvider.class};
         }
 
         return Arrays.stream(providerClasses)
