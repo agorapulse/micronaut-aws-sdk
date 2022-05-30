@@ -17,11 +17,18 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.*;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondaryPartitionKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondarySortKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.Builders;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedQuery;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedScan;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedUpdate;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbEvent;
 import io.micronaut.context.event.ApplicationEventPublisher;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.beans.BeanIntrospection;
+import io.micronaut.core.beans.BeanProperty;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
@@ -41,6 +48,7 @@ import software.amazon.awssdk.services.dynamodb.model.Projection;
 import software.amazon.awssdk.services.dynamodb.model.ProjectionType;
 
 import javax.annotation.Nullable;
+import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
@@ -290,16 +298,12 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
                 return;
             }
 
-            AnnotationValue<DynamoDbSecondarySortKey> secondaryIndex = p.getAnnotation(DynamoDbSecondarySortKey.class);
             Collection<String> indexNames = new ArrayList<>();
-            if (secondaryIndex != null) {
-                indexNames.addAll(Arrays.asList(secondaryIndex.stringValues("indexNames")));
-            }
 
-            AnnotationValue<DynamoDbSecondaryPartitionKey> secondaryGlobalIndex = p.getAnnotation(DynamoDbSecondaryPartitionKey.class);
-            if (secondaryGlobalIndex != null) {
-                indexNames.addAll(Arrays.asList(secondaryGlobalIndex.stringValues("indexNames")));
-            }
+            indexNames.addAll(collectIndicesFromAnnotation(p, DynamoDbSecondarySortKey.class));
+            indexNames.addAll(collectIndicesFromAnnotation(p, SecondarySortKey.class));
+            indexNames.addAll(collectIndicesFromAnnotation(p, DynamoDbSecondaryPartitionKey.class));
+            indexNames.addAll(collectIndicesFromAnnotation(p, SecondaryPartitionKey.class));
 
             if (indexNames.isEmpty()) {
                 return;
@@ -312,6 +316,10 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
         });
 
         return types;
+    }
+
+    private List<String> collectIndicesFromAnnotation(BeanProperty<T, Object> p, Class<? extends Annotation> indexAnnotationClass) {
+        return p.findAnnotation(indexAnnotationClass).map(anno -> Arrays.asList(anno.stringValues("indexNames"))).orElse(Collections.emptyList());
     }
 
     private T postLoad(T i) {

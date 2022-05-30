@@ -23,5 +23,7 @@ dependencies {
     implementation "space.jasan:groovy-closure-support:$closureSupportVersion"
     implementation "io.projectreactor:reactor-core:$projectReactorVersion"
 
+    testAnnotationProcessor project(':micronaut-amazon-awssdk-dynamodb-annotation-processor')
+    testImplementation project(':micronaut-amazon-awssdk-dynamodb-annotation-processor')
     testImplementation project(':micronaut-amazon-awssdk-integration-testing')
 }

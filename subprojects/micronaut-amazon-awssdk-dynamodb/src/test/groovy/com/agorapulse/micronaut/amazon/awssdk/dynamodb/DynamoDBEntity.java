@@ -19,14 +19,12 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Projection;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert.LegacyAttributeConverterProvider;
-import io.micronaut.core.annotation.Introspected;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 import software.amazon.awssdk.services.dynamodb.model.ProjectionType;
 
 import java.util.Date;
 import java.util.Objects;
 
-@Introspected
 @DynamoDbBean(converterProviders = LegacyAttributeConverterProvider.class)
 public class DynamoDBEntity implements PlaybookAware {
 

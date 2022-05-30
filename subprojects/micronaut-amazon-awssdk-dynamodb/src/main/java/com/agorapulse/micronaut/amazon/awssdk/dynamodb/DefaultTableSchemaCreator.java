@@ -17,6 +17,8 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.schema.BeanIntrospectionTableSchema;
+import io.micronaut.core.beans.BeanIntrospector;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.BeanTableSchema;
 
@@ -27,6 +29,9 @@ public class DefaultTableSchemaCreator implements TableSchemaCreator {
 
     @Override
     public <T> TableSchema<T> create(Class<T> entity) {
+        if (BeanIntrospector.SHARED.findIntrospection(entity).isPresent()) {
+            return BeanIntrospectionTableSchema.create(entity);
+        }
         return BeanTableSchema.create(entity);
     }
 

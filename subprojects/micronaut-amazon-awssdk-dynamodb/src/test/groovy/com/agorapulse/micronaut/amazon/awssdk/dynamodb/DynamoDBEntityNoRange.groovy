@@ -15,26 +15,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation;
+package com.agorapulse.micronaut.amazon.awssdk.dynamodb
 
-import software.amazon.awssdk.services.dynamodb.model.ProjectionType;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.PartitionKey
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondaryPartitionKey
+import groovy.transform.CompileStatic
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+@DynamoDbBean
+@CompileStatic
+class DynamoDBEntityNoRange {
 
-/**
- * Projection type hint for generated indices.
- */
-@Inherited
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE, ElementType.FIELD })
-public @interface Projection {
+    public static final String GLOBAL_INDEX = 'globalIndex'
 
-    ProjectionType value();
+    @PartitionKey String parentId
+
+    Integer number = 0
+
+    @SecondaryPartitionKey(indexNames = GLOBAL_INDEX)
+    String getGlobalIndex() {
+        return "$parentId:1"
+    }
 
 }

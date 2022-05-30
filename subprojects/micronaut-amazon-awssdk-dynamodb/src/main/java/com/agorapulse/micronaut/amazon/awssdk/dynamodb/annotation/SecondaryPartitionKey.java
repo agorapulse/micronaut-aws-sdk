@@ -20,17 +20,18 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation;
 import java.lang.annotation.*;
 
 /**
- * Annotates hash key.
+ * Annotates secondary partition index
  *
- * This annotation is not required if the name of the argument contains word <code>hash</code> or <code>partition</code>.
- *
- * This annotation can be used a replacement of <code>{@link software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey}</code>
+ * This annotation can be used a replacement of <code>{@link software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey}</code>
  * on fields.
  *
- * @deprecated use @{@link PartitionKey} instead
  */
 @Inherited
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.PARAMETER, ElementType.ANNOTATION_TYPE, ElementType.FIELD, ElementType.METHOD})
-public @interface HashKey { }
+@Target({ElementType.ANNOTATION_TYPE, ElementType.FIELD, ElementType.METHOD})
+public @interface SecondaryPartitionKey {
+
+    String[] indexNames();
+
+}
