@@ -19,20 +19,28 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb.schema
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.DynamoDBEntity
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.DynamoDBEntityNoRange
+import io.micronaut.context.BeanContext
+import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.MetaTableSchemaCache
 import spock.lang.Specification
 
 class BeanIntrospectionTableSchemaSpec extends Specification {
 
+    MetaTableSchemaCache cache = new MetaTableSchemaCache()
+
+    BeanContext context = Mock {
+        findBean(_) >> Optional.empty()
+    }
+
     void 'read table schema for groovy class'() {
         when:
-            BeanIntrospectionTableSchema<DynamoDBEntityNoRange> schema = BeanIntrospectionTableSchema.create(DynamoDBEntityNoRange)
+            BeanIntrospectionTableSchema<DynamoDBEntityNoRange> schema = BeanIntrospectionTableSchema.create(DynamoDBEntityNoRange, context, cache)
         then:
             schema.attributeNames().size() == 3
     }
 
     void 'verify converters'() {
         when:
-            BeanIntrospectionTableSchema<DynamoDBEntity> schema = BeanIntrospectionTableSchema.create(DynamoDBEntity)
+            BeanIntrospectionTableSchema<DynamoDBEntity> schema = BeanIntrospectionTableSchema.create(DynamoDBEntity, context, cache)
         then:
             schema.itemToMap(new DynamoDBEntity(date: new Date()), ['date']).get('date').s()
     }

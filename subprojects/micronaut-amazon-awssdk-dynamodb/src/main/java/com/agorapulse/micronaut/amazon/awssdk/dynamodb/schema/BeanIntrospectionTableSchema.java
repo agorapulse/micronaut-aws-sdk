@@ -24,6 +24,7 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondaryParti
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondarySortKey;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SortKey;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert.LegacyAttributeConverterProvider;
+import io.micronaut.context.BeanContext;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.beans.BeanIntrospection;
 import io.micronaut.core.beans.BeanIntrospector;
@@ -33,7 +34,6 @@ import software.amazon.awssdk.annotations.SdkPublicApi;
 import software.amazon.awssdk.annotations.ThreadSafe;
 import software.amazon.awssdk.enhanced.dynamodb.AttributeConverter;
 import software.amazon.awssdk.enhanced.dynamodb.AttributeConverterProvider;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.EnhancedType;
 import software.amazon.awssdk.enhanced.dynamodb.EnhancedTypeDocumentConfiguration;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
@@ -147,35 +147,20 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         super(staticTableSchema);
     }
 
-    /**
-     * Scans a bean class and builds a {@link BeanIntrospectionTableSchema} from it that can be used with the
-     * {@link DynamoDbEnhancedClient}.
-     * <p>
-     * Creating an {@link BeanIntrospectionTableSchema} is a moderately expensive operation, and should be performed sparingly. This is
-     * usually done once at application startup.
-     *
-     * @param beanClass The bean class to build the table schema from.
-     * @param <T>       The bean class type.
-     * @return An initialized {@link BeanIntrospectionTableSchema}
-     */
-    public static <T> BeanIntrospectionTableSchema<T> create(Class<T> beanClass) {
-        return create(beanClass, new MetaTableSchemaCache());
-    }
-
-    private static <T> BeanIntrospectionTableSchema<T> create(Class<T> beanClass, MetaTableSchemaCache metaTableSchemaCache) {
+    public static <T> BeanIntrospectionTableSchema<T> create(Class<T> beanClass, BeanContext context, MetaTableSchemaCache metaTableSchemaCache) {
         debugLog(beanClass, () -> "Creating bean schema");
         // Fetch or create a new reference to this yet-to-be-created TableSchema in the cache
         MetaTableSchema<T> metaTableSchema = metaTableSchemaCache.getOrCreate(beanClass);
 
         BeanIntrospectionTableSchema<T> newTableSchema =
-            new BeanIntrospectionTableSchema<>(createStaticTableSchema(beanClass, metaTableSchemaCache));
+            new BeanIntrospectionTableSchema<>(createStaticTableSchema(beanClass, context, metaTableSchemaCache));
         metaTableSchema.initialize(newTableSchema);
         return newTableSchema;
     }
 
     // Called when creating an immutable TableSchema recursively. Utilizes the MetaTableSchema cache to stop infinite
     // recursion
-    static <T> TableSchema<T> recursiveCreate(Class<T> beanClass, MetaTableSchemaCache metaTableSchemaCache) {
+    static <T> TableSchema<T> recursiveCreate(Class<T> beanClass, BeanContext context, MetaTableSchemaCache metaTableSchemaCache) {
         Optional<MetaTableSchema<T>> metaTableSchema = metaTableSchemaCache.get(beanClass);
 
         // If we get a cache hit...
@@ -191,11 +176,12 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         }
 
         // Otherwise: cache doesn't know about this class; create a new one from scratch
-        return create(beanClass);
+        return create(beanClass, context, metaTableSchemaCache);
 
     }
 
     private static <T> StaticTableSchema<T> createStaticTableSchema(Class<T> beanClass,
+                                                                    BeanContext beanContext,
                                                                     MetaTableSchemaCache metaTableSchemaCache) {
         Optional<BeanIntrospection<T>> introspectionOptional = BeanIntrospector.SHARED.findIntrospection(beanClass);
 
@@ -211,14 +197,14 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
 
         Optional<AnnotationValue<DynamoDbBean>> optionalDynamoDbBean = introspection.findAnnotation(DynamoDbBean.class);
         if (optionalDynamoDbBean.isPresent()) {
-            builder.attributeConverterProviders(createConverterProvidersFromAnnotation(beanClass, optionalDynamoDbBean.get()));
+            builder.attributeConverterProviders(createConverterProvidersFromAnnotation(beanClass, optionalDynamoDbBean.get(), beanContext));
         } else {
             builder.attributeConverterProviders(new LegacyAttributeConverterProvider());
         }
 
         List<StaticAttribute<T, ?>> attributes = introspection.getBeanProperties().stream()
             .filter(p -> isMappableProperty(beanClass, p))
-            .map(propertyDescriptor -> extractAttributeFromProperty(beanClass, metaTableSchemaCache, builder, propertyDescriptor))
+            .map(propertyDescriptor -> extractAttributeFromProperty(beanClass, metaTableSchemaCache, builder, propertyDescriptor, beanContext))
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
@@ -227,12 +213,18 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         return builder.build();
     }
 
-    private static <T, P> StaticAttribute<T, P> extractAttributeFromProperty(Class<T> beanClass, MetaTableSchemaCache metaTableSchemaCache, StaticTableSchema.Builder<T> builder, BeanProperty<T, P> propertyDescriptor) {
+    private static <T, P> StaticAttribute<T, P> extractAttributeFromProperty(
+        Class<T> beanClass,
+        MetaTableSchemaCache metaTableSchemaCache,
+        StaticTableSchema.Builder<T> builder,
+        BeanProperty<T, P> propertyDescriptor,
+        BeanContext beanContext
+    ) {
         Optional<AnnotationValue<DynamoDbFlatten>> dynamoDbFlatten = propertyDescriptor.findAnnotation(DynamoDbFlatten.class);
 
         if (dynamoDbFlatten.isPresent()) {
             builder.flatten(
-                BeanIntrospectionTableSchema.create(propertyDescriptor.getType()),
+                BeanIntrospectionTableSchema.create(propertyDescriptor.getType(), beanContext, metaTableSchemaCache),
                 propertyDescriptor::get,
                 propertyDescriptor::set
             );
@@ -240,9 +232,9 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         } else {
             AttributeConfiguration attributeConfiguration = resolveAttributeConfiguration(propertyDescriptor);
 
-            StaticAttribute.Builder<T, P> attributeBuilder = staticAttributeBuilder(propertyDescriptor, beanClass, metaTableSchemaCache, attributeConfiguration);
+            StaticAttribute.Builder<T, P> attributeBuilder = staticAttributeBuilder(propertyDescriptor, beanClass, metaTableSchemaCache, attributeConfiguration, beanContext);
 
-            createAttributeConverterFromAnnotation(propertyDescriptor).ifPresent(attributeBuilder::attributeConverter);
+            createAttributeConverterFromAnnotation(propertyDescriptor, beanContext).ifPresent(attributeBuilder::attributeConverter);
 
             addTagsToAttribute(attributeBuilder, propertyDescriptor);
             return attributeBuilder.build();
@@ -260,15 +252,15 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
     }
 
     @SuppressWarnings("unchecked")
-    private static List<AttributeConverterProvider> createConverterProvidersFromAnnotation(Class<?> beanClass, AnnotationValue<DynamoDbBean> dynamoDbBean) {
+    private static List<AttributeConverterProvider> createConverterProvidersFromAnnotation(Class<?> beanClass, AnnotationValue<DynamoDbBean> dynamoDbBean, BeanContext beanContext) {
         Class<? extends AttributeConverterProvider>[] providerClasses = (Class<? extends AttributeConverterProvider>[]) dynamoDbBean.classValues("converterProviders");
         if (providerClasses.length == 0) {
-            providerClasses = new Class[] {LegacyAttributeConverterProvider.class};
+            providerClasses = new Class[]{LegacyAttributeConverterProvider.class};
         }
 
         return Arrays.stream(providerClasses)
             .peek(c -> debugLog(beanClass, () -> "Adding Converter: " + c.getTypeName()))
-            .map(c -> (AttributeConverterProvider) newObjectSupplierForClass(c).get())
+            .map(c -> (AttributeConverterProvider) fromContextOrNew(c, beanContext).get())
             .collect(Collectors.toList());
     }
 
@@ -276,15 +268,17 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         BeanProperty<T, P> propertyDescriptor,
         Class<T> beanClass,
         MetaTableSchemaCache metaTableSchemaCache,
-        AttributeConfiguration attributeConfiguration
+        AttributeConfiguration attributeConfiguration,
+        BeanContext beanContext
     ) {
         Argument<P> propertyType = propertyDescriptor.asArgument();
-        EnhancedType<P> propertyTypeToken = convertTypeToEnhancedType(propertyType, metaTableSchemaCache, attributeConfiguration);
+        EnhancedType<P> propertyTypeToken = convertTypeToEnhancedType(propertyType, metaTableSchemaCache, attributeConfiguration, beanContext);
         return StaticAttribute.builder(beanClass, propertyTypeToken)
             .name(attributeNameForProperty(propertyDescriptor))
             .getter(propertyDescriptor::get)
             // secondary indices can be read only
-            .setter(propertyDescriptor.isReadOnly() ? (bean, value) -> { } : propertyDescriptor::set);
+            .setter(propertyDescriptor.isReadOnly() ? (bean, value) -> {
+            } : propertyDescriptor::set);
     }
 
     /**
@@ -298,13 +292,14 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
     private static <T> EnhancedType<T> convertTypeToEnhancedType(
         Argument<T> type,
         MetaTableSchemaCache metaTableSchemaCache,
-        AttributeConfiguration attributeConfiguration
+        AttributeConfiguration attributeConfiguration,
+        BeanContext beanContext
     ) {
         if (List.class.equals(type.getType())) {
-            EnhancedType<?> enhancedType = convertTypeToEnhancedType(type.getTypeParameters()[0], metaTableSchemaCache, attributeConfiguration);
+            EnhancedType<?> enhancedType = convertTypeToEnhancedType(type.getTypeParameters()[0], metaTableSchemaCache, attributeConfiguration, beanContext);
             return (EnhancedType<T>) EnhancedType.listOf(enhancedType);
         } else if (Map.class.equals(type.getType())) {
-            EnhancedType<?> enhancedType = convertTypeToEnhancedType(type.getTypeParameters()[1], metaTableSchemaCache, attributeConfiguration);
+            EnhancedType<?> enhancedType = convertTypeToEnhancedType(type.getTypeParameters()[1], metaTableSchemaCache, attributeConfiguration, beanContext);
             return (EnhancedType<T>) EnhancedType.mapOf(EnhancedType.of(type.getTypeParameters()[0]), enhancedType);
         }
 
@@ -317,7 +312,7 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         if (type.isAnnotationPresent(DynamoDbBean.class)) {
             return EnhancedType.documentOf(
                 clazz,
-                BeanIntrospectionTableSchema.recursiveCreate(clazz, metaTableSchemaCache),
+                BeanIntrospectionTableSchema.recursiveCreate(clazz, beanContext, metaTableSchemaCache),
                 attrConfiguration
             );
         }
@@ -327,11 +322,12 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
 
     @SuppressWarnings("unchecked")
     private static <T, P> Optional<AttributeConverter<P>> createAttributeConverterFromAnnotation(
-        BeanProperty<T, P> propertyDescriptor
+        BeanProperty<T, P> propertyDescriptor,
+        BeanContext beanContext
     ) {
         return propertyDescriptor.findAnnotation(DynamoDbConvertedBy.class)
             .flatMap(AnnotationValue::classValue)
-            .map(clazz -> (AttributeConverter<P>) newObjectSupplierForClass(clazz).get());
+            .map(clazz -> (AttributeConverter<P>) fromContextOrNew(clazz, beanContext).get());
     }
 
     /**
@@ -341,7 +337,7 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
      * of the class that tag has been annotated with passing in the original property annotation as an argument.
      */
     private static <T> void addTagsToAttribute(StaticAttribute.Builder<?, ?> attributeBuilder,
-                                           BeanProperty<T, ?> propertyDescriptor) {
+                                               BeanProperty<T, ?> propertyDescriptor) {
 
         propertyDescriptor.findAnnotation(DynamoDbUpdateBehavior.class)
             .flatMap(anno -> anno.enumValue(UpdateBehavior.class))
@@ -358,7 +354,7 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
                     .ifPresent(indexNames ->
                         attributeBuilder.addTag(StaticAttributeTags.secondaryPartitionKey(Arrays.asList(indexNames)))
                     );
-             }else if (SECONDARY_SORT_KEYS_ANNOTATIONS.contains(name)) {
+            } else if (SECONDARY_SORT_KEYS_ANNOTATIONS.contains(name)) {
                 propertyDescriptor.findAnnotation(name)
                     .map(anno -> anno.stringValues("indexNames"))
                     .ifPresent(indexNames ->
@@ -368,7 +364,17 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         });
     }
 
-    private static <R> Supplier<R> newObjectSupplierForClass(Class<R> clazz) {
+    private static <R> Supplier<R> fromContextOrNew(Class<R> clazz, BeanContext beanContext) {
+        Optional<R> optionalBean = beanContext.findBean(clazz);
+        if (optionalBean.isPresent()) {
+            return optionalBean::get;
+        }
+
+        Optional<BeanIntrospection<R>> optionalBeanIntrospection = BeanIntrospector.SHARED.findIntrospection(clazz);
+        if (optionalBeanIntrospection.isPresent()) {
+            return optionalBeanIntrospection.get()::instantiate;
+        }
+
         try {
             Constructor<R> constructor = clazz.getConstructor();
             debugLog(clazz, () -> "Constructor: " + constructor);
