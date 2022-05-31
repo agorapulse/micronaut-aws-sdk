@@ -33,11 +33,11 @@ public class Builders {
 
     private static final int DEFAULT_QUERY_LIMIT = 20;
 
-    enum Sort {
+    public enum Sort {
         ASC, DESC
     }
 
-    enum Read {
+    public enum Read {
         READ
     }
 

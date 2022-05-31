@@ -139,6 +139,8 @@ allprojects {
 subprojects { Project subproject ->
     if (subproject.name == 'guide' || subproject.name == 'micronaut-aws-sdk-dependencies') return
 
+    if (subproject.name.contains('kotlin')) return
+
     apply plugin: 'groovy'
     apply plugin: 'java-library'
     apply plugin: 'micronaut-compatibility'
