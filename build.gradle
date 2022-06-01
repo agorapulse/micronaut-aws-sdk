@@ -136,10 +136,16 @@ allprojects {
     }
 }
 
+project(':micronaut-aws-sdk-bom').apply(plugin: 'java-platform')
+
 subprojects { Project subproject ->
-    if (subproject.name == 'guide' || subproject.name == 'micronaut-aws-sdk-dependencies') return
+    if (subproject.name == 'guide' || subproject.name == 'micronaut-aws-sdk-dependencies'|| subproject.name == 'micronaut-aws-sdk-bom') return
 
     apply plugin: 'micronaut-compatibility'
+
+    if (subproject.name.startsWith('micronaut')) {
+        project(':micronaut-aws-sdk-bom').dependencies.constraints.api subproject
+    }
 
     if (subproject.name.contains('kotlin')) return
 
