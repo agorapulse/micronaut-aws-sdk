@@ -43,6 +43,8 @@ implementation 'com.agorapulse:micronaut-aws-sdk-sns:{project-version}'
 </dependency>
 ----
 
+NOTE: For Kotlin use `kapt` instead of `annotationProcessor` configuration.
+
 ==== Configuration
 No configuration is required but some of the configuration properties may be useful for you.
 
@@ -205,7 +207,7 @@ You need to add following dependencies into your build file:
 [source,indent=0,role="primary",subs='verbatim,attributes']
 .Gradle
 ----
-implementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:{project-version}'
+testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:{project-version}'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']

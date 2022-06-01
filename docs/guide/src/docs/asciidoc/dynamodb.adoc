@@ -53,6 +53,8 @@ implementation 'com.agorapulse:micronaut-aws-sdk-dynamodb:{project-version}'
 </dependency>
 ----
 
+NOTE: For Kotlin use `kapt` instead of `annotationProcessor` configuration.
+
 ==== Entity Class
 
 The entity class is a class which instances represent the items in DynamoDB.
@@ -992,7 +994,7 @@ You need to add following dependencies into your build file:
 [source,indent=0,role="primary",subs='verbatim,attributes']
 .Gradle
 ----
-implementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:{project-version}'
+testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:{project-version}'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']
