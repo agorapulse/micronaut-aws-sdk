@@ -18,7 +18,8 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeConversionHelper;
-import io.reactivex.Flowable;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.MappedTableResource;
@@ -37,8 +38,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
-import static io.reactivex.Flowable.fromIterable;
 
 /**
  * Default implementation of the query builder.
@@ -101,14 +100,14 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
     @Override
     public int count(DynamoDbTable<T> mapper, AttributeConversionHelper attributeConversionHelper) {
         // TODO: use select
-        return scan(mapper, attributeConversionHelper).count().blockingGet().intValue();
+        return Flux.from(scan(mapper, attributeConversionHelper)).count().blockOptional().map(Long::intValue).orElse(0);
     }
 
     @Override
-    public Flowable<T> scan(DynamoDbTable<T> mapper, AttributeConversionHelper attributeConversionHelper) {
+    public Publisher<T> scan(DynamoDbTable<T> mapper, AttributeConversionHelper attributeConversionHelper) {
         ScanEnhancedRequest request = resolveRequest(mapper, attributeConversionHelper);
         SdkIterable<Page<T>> iterable = this.__index == null ? mapper.scan(request) : mapper.index(__index).scan(request);
-        Flowable<T> results = fromIterable(iterable).flatMap(p -> fromIterable(p.items()));
+        Flux<T> results = Flux.fromIterable(iterable).flatMap(p -> Flux.fromIterable(p.items()));
         if (__max < Integer.MAX_VALUE) {
             return results.take(__max);
         }

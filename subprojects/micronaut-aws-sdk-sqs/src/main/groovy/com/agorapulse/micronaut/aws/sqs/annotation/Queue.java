@@ -17,8 +17,6 @@
  */
 package com.agorapulse.micronaut.aws.sqs.annotation;
 
-import groovy.transform.Undefined;
-
 import java.lang.annotation.*;
 
 
@@ -45,6 +43,6 @@ public @interface Queue {
     /**
      * @return the default message group id for fifo queues
      */
-    String group() default Undefined.STRING;
+    String group() default "";
 
 }

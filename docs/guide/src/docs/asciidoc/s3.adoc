@@ -151,7 +151,7 @@ You need to add following dependencies into your build file:
 [source,indent=0,role="primary",subs='verbatim,attributes']
 .Gradle
 ----
-implementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:{project-version}'
+testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:{project-version}'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']

@@ -21,6 +21,7 @@ dependencies {
     implementation project(':micronaut-amazon-awssdk-core')
     implementation "space.jasan:groovy-closure-support:$closureSupportVersion"
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    implementation "io.projectreactor:reactor-core:$projectReactorVersion"
 
     testImplementation project(':micronaut-amazon-awssdk-integration-testing')
 }

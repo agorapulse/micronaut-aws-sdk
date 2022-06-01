@@ -19,15 +19,17 @@ package com.agorapulse.micronaut.aws.apigateway.ws;
 
 import com.agorapulse.micronaut.aws.apigateway.ws.event.WebSocketRequest;
 import com.agorapulse.micronaut.aws.apigateway.ws.event.WebSocketResponse;
+import io.micronaut.core.async.annotation.SingleResult;
 import io.micronaut.function.client.FunctionClient;
-import io.reactivex.Single;
+import org.reactivestreams.Publisher;
 
 import javax.inject.Named;
 
 @FunctionClient
 interface LambdaEchoClient {
 
+    @SingleResult
     @Named("lambda-echo")
-    Single<WebSocketResponse> lambdaEcho(WebSocketRequest event);
+    Publisher<WebSocketResponse> lambdaEcho(WebSocketRequest event);
 
 }

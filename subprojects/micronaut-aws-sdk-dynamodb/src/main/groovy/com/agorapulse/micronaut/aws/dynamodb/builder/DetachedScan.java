@@ -19,7 +19,7 @@ package com.agorapulse.micronaut.aws.dynamodb.builder;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
-import io.reactivex.Flowable;
+import org.reactivestreams.Publisher;
 
 /**
  * An interface for scans which can be executed using supplied mapper.
@@ -32,7 +32,7 @@ public interface DetachedScan<T> {
      * @param mapper DynamoDB mapper
      * @return flowable of entities found for the current scan
      */
-    Flowable<T> scan(IDynamoDBMapper mapper);
+    Publisher<T> scan(IDynamoDBMapper mapper);
 
     /**
      * Counts entities satisfying given scan using provided mapper.

@@ -136,12 +136,21 @@ allprojects {
     }
 }
 
+project(':micronaut-aws-sdk-bom').apply(plugin: 'java-platform')
+
 subprojects { Project subproject ->
-    if (subproject.name == 'guide' || subproject.name == 'micronaut-aws-sdk-dependencies') return
+    if (subproject.name == 'guide' || subproject.name == 'micronaut-aws-sdk-dependencies'|| subproject.name == 'micronaut-aws-sdk-bom') return
+
+    apply plugin: 'micronaut-compatibility'
+
+    if (subproject.name.startsWith('micronaut')) {
+        project(':micronaut-aws-sdk-bom').dependencies.constraints.api subproject
+    }
+
+    if (subproject.name.contains('kotlin')) return
 
     apply plugin: 'groovy'
     apply plugin: 'java-library'
-    apply plugin: 'micronaut-compatibility'
 
     dependencies {
         annotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
@@ -161,9 +170,6 @@ subprojects { Project subproject ->
 
         implementation 'io.micronaut:micronaut-inject'
         implementation 'io.micronaut:micronaut-runtime'
-
-        // Micronaut 3.x Compatibilty
-        implementation 'io.reactivex.rxjava2:rxjava:2.2.10'
 
 
         compileOnly 'io.micronaut:micronaut-inject-java'

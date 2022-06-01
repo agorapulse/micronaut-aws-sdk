@@ -32,13 +32,15 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.core.annotation.AnnotationValue;
+import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.type.MutableArgumentValue;
-import io.reactivex.Flowable;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 
 import javax.inject.Singleton;
-import java.util.List;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -68,8 +70,8 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             return sortKey == null ? null : params.get(sortKey.getName()).getValue();
         }
 
-        Flowable<?> getSortAttributeValues(Map<String, MutableArgumentValue<?>> params) {
-            return sortKey == null ? Flowable.empty() : toFlowable(Object.class, sortKey, params);
+        Publisher<?> getSortAttributeValues(Map<String, MutableArgumentValue<?>> params) {
+            return sortKey == null ? Flux.empty() : toPublisher(Object.class, sortKey, params);
         }
 
     }
@@ -97,22 +99,25 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> Flowable<T> toFlowable(Class<T> type, Argument<?> itemArgument, Map<String, MutableArgumentValue<?>> params) {
+    private static <T> Publisher<T> toPublisher(Class<T> type, Argument<?> itemArgument, Map<String, MutableArgumentValue<?>> params) {
         Object item = params.get(itemArgument.getName()).getValue();
 
+        if (Publishers.isConvertibleToPublisher(itemArgument.getType()) && type.isAssignableFrom(itemArgument.getTypeParameters()[0].getType())) {
+            if (Publisher.class.isAssignableFrom(itemArgument.getType())) {
+                return (Publisher<T>) item;
+            }
+            return Publishers.convertPublisher(item, Publisher.class);
+        }
+
         if (itemArgument.getType().isArray() && type.isAssignableFrom(itemArgument.getType().getComponentType())) {
-            return Flowable.fromArray((T[])item);
+            return Flux.fromArray((T[])item);
         }
 
         if (Iterable.class.isAssignableFrom(itemArgument.getType()) && type.isAssignableFrom(itemArgument.getTypeParameters()[0].getType())) {
-            return Flowable.fromIterable((Iterable<T>) item);
+            return Flux.fromIterable((Iterable<T>) item);
         }
 
-        if (Flowable.class.isAssignableFrom(itemArgument.getType()) && type.isAssignableFrom(itemArgument.getTypeParameters()[0].getType())) {
-            return (Flowable<T>) item;
-        }
-
-        return Flowable.just((T) item);
+        return Flux.just((T) item);
     }
 
     @SuppressWarnings("unchecked")
@@ -147,7 +152,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
                 return service.count(criteria);
             }
 
-            Flowable<T> queryResult = service.query(criteria);
+            Publisher<T> queryResult = service.query(criteria);
             if (methodName.startsWith("delete")) {
                 return service.deleteAll(queryResult);
             }
@@ -157,7 +162,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
                 return service.updateAll(queryResult, update);
             }
 
-            return flowableOrList(queryResult, context.getReturnType().getType());
+            return publisherOrIterable(queryResult, context.getReturnType().getType());
         }
 
         if (context.getTargetMethod().isAnnotationPresent(Scan.class)) {
@@ -167,7 +172,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
                 return service.count(criteria);
             }
 
-            Flowable<T> scanResult = service.scan(criteria);
+            Publisher<T> scanResult = service.scan(criteria);
 
             if (methodName.startsWith("delete")) {
                 return service.deleteAll(scanResult);
@@ -178,7 +183,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
                 return service.updateAll(scanResult, update);
             }
 
-            return flowableOrList(scanResult, context.getReturnType().getType());
+            return publisherOrIterable(scanResult, context.getReturnType().getType());
         }
 
         if (context.getTargetMethod().isAnnotationPresent(Update.class)) {
@@ -196,7 +201,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             if (methodName.startsWith("count")) {
                 return service.count(partitionAndSort.getPartitionValue(context.getParameters()), partitionAndSort.getSortValue(context.getParameters()));
             }
-            return flowableOrList(
+            return publisherOrIterable(
                 service.findAll(partitionAndSort.getPartitionValue(context.getParameters()), partitionAndSort.getSortValue(context.getParameters())),
                 context.getReturnType().getType()
             );
@@ -205,11 +210,12 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         throw new UnsupportedOperationException("Cannot implement method " + context.getExecutableMethod().getTargetMethod());
     }
 
-    private Object flowableOrList(Flowable<?> result, Class<?> type) {
-        if (List.class.isAssignableFrom(type)) {
-            return result.toList().blockingGet();
+    private Object publisherOrIterable(Publisher<?> result, Class<?> type) {
+        if (Publishers.isConvertibleToPublisher(type)) {
+            return Publishers.convertPublisher(result, type);
         }
-        return result;
+
+        return Flux.from(result).collectList().blockOptional().orElse(Collections.emptyList());
     }
 
     private <T> Object handleSave(DynamoDbService<T> service, MethodInvocationContext<Object, Object> context) {
@@ -221,13 +227,13 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         }
 
         Argument<?> itemArgument = args[0];
-        Flowable<T> items = toFlowable(service.getItemType(), itemArgument, params);
+        Publisher<T> items = toPublisher(service.getItemType(), itemArgument, params);
 
-        if (itemArgument.getType().isArray() || Iterable.class.isAssignableFrom(itemArgument.getType()) || Flowable.class.isAssignableFrom(itemArgument.getType())) {
-            return flowableOrList(service.saveAll(items), context.getReturnType().getType());
+        if (itemArgument.getType().isArray() || Iterable.class.isAssignableFrom(itemArgument.getType()) || Publisher.class.isAssignableFrom(itemArgument.getType())) {
+            return publisherOrIterable(service.saveAll(items), context.getReturnType().getType());
         }
 
-        return service.save(items.blockingFirst());
+        return service.save((T) params.get(itemArgument.getName()).getValue());
     }
 
     private <T> Object handleDelete(DynamoDbService<T> service, MethodInvocationContext<Object, Object> context) {
@@ -236,14 +242,14 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
 
         if (args.length == 1) {
             Argument<?> itemArgument = args[0];
-            Flowable<T> items = toFlowable(service.getItemType(), itemArgument, params);
+            Publisher<T> items = toPublisher(service.getItemType(), itemArgument, params);
 
-            if (itemArgument.getType().isArray() || Iterable.class.isAssignableFrom(itemArgument.getType()) || Flowable.class.isAssignableFrom(itemArgument.getType())) {
+            if (itemArgument.getType().isArray() || Iterable.class.isAssignableFrom(itemArgument.getType()) || Publisher.class.isAssignableFrom(itemArgument.getType())) {
                 return service.deleteAll(items);
             }
 
             if (service.getItemType().isAssignableFrom(itemArgument.getType())) {
-                return service.delete(items.blockingFirst());
+                return service.delete(Flux.from(items).blockFirst());
             }
         }
 
@@ -274,10 +280,10 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         if (
             partitionAndSort.sortKey.getType().isArray()
                 || Iterable.class.isAssignableFrom(partitionAndSort.sortKey.getType())
-                || Flowable.class.isAssignableFrom(partitionAndSort.sortKey.getType())
+                || Publisher.class.isAssignableFrom(partitionAndSort.sortKey.getType())
         ) {
-            Flowable<T> all = service.getAll(partitionValue, partitionAndSort.getSortAttributeValues(params));
-            return flowableOrList(all, context.getReturnType().getType());
+            Publisher<T> all = service.getAll(partitionValue, partitionAndSort.getSortAttributeValues(params));
+            return publisherOrIterable(all, context.getReturnType().getType());
         }
 
         return service.get(partitionValue, partitionAndSort.getSortValue(params));

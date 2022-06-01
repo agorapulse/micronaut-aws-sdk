@@ -17,13 +17,11 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert;
 
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.ConvertedBy;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.PartitionKey;
 import io.micronaut.core.annotation.Introspected;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbConvertedBy;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 
 @Introspected
-@DynamoDbBean
 public class EntityExample {
 
     private String id;
@@ -36,7 +34,7 @@ public class EntityExample {
         this.data = data;
     }
 
-    @DynamoDbPartitionKey
+    @PartitionKey
     public String getId() {
         return id;
     }
@@ -45,7 +43,7 @@ public class EntityExample {
         this.id = id;
     }
 
-    @DynamoDbConvertedBy(value = CompressedStringConverter.class)
+    @ConvertedBy(value = CompressedStringConverter.class)
     public String getData() {
         return data;
     }

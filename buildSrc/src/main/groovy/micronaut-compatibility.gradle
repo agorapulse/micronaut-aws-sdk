@@ -69,8 +69,10 @@ pluginManager.withPlugin('java') {
         File javaTestSources = project.file('src/test/java')
         File groovySources = project.file('src/main/groovy')
         File groovyTestSources = project.file('src/test/groovy')
+        File kotlinSources = project.file('src/main/kotlin')
+        File kotlinTestSources = project.file('src/test/kotlin')
 
-        List<File> dirs = [javaSources, javaTestSources, groovySources, groovyTestSources]
+        List<File> dirs = [javaSources, javaTestSources, groovySources, groovyTestSources, kotlinSources, kotlinTestSources]
 
         for (File dir in dirs) {
             if (dir.exists()) {

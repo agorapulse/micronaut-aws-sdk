@@ -24,13 +24,13 @@ import com.agorapulse.micronaut.amazon.awssdk.kinesis.annotation.SequenceNumber;
 import com.agorapulse.micronaut.amazon.awssdk.kinesis.annotation.Stream;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import groovy.transform.Undefined;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.context.BeanContext;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.type.Argument;
+import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.qualifiers.Qualifiers;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kinesis.model.PutRecordResponse;
@@ -91,7 +91,7 @@ public class KinesisClientIntroduction implements MethodInterceptor<Object, Obje
             streamName = streamAnnotationValue.getRequiredValue(String.class);
         }
 
-        if (streamName == null || Undefined.STRING.equals(streamName)) {
+        if (streamName == null || StringUtils.isEmpty(streamName)) {
             streamName = service.getDefaultStreamName();
         }
 

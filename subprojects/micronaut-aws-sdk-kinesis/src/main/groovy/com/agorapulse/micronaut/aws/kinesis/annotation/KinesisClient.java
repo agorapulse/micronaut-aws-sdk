@@ -19,7 +19,6 @@ package com.agorapulse.micronaut.aws.kinesis.annotation;
 
 import com.agorapulse.micronaut.aws.kinesis.KinesisClientIntroduction;
 import com.agorapulse.micronaut.aws.util.ConfigurationUtil;
-import groovy.transform.Undefined;
 import io.micronaut.aop.Introduction;
 import io.micronaut.context.annotation.Type;
 
@@ -47,7 +46,7 @@ public @interface KinesisClient {
     /**
      * @return the default name of the string overriding the one from the configuration
      */
-    String stream() default Undefined.STRING;
+    String stream() default "";
 
     final class Constants {
         public static final String STREAM = "stream";

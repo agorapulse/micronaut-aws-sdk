@@ -17,7 +17,11 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.schema.BeanIntrospectionTableSchema;
+import io.micronaut.context.BeanContext;
+import io.micronaut.core.beans.BeanIntrospector;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.MetaTableSchemaCache;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.BeanTableSchema;
 
 import javax.inject.Singleton;
@@ -25,8 +29,18 @@ import javax.inject.Singleton;
 @Singleton
 public class DefaultTableSchemaCreator implements TableSchemaCreator {
 
+    private final MetaTableSchemaCache cache = new MetaTableSchemaCache();
+    private final BeanContext context;
+
+    public DefaultTableSchemaCreator(BeanContext context) {
+        this.context = context;
+    }
+
     @Override
     public <T> TableSchema<T> create(Class<T> entity) {
+        if (BeanIntrospector.SHARED.findIntrospection(entity).isPresent()) {
+            return BeanIntrospectionTableSchema.create(entity, context, cache);
+        }
         return BeanTableSchema.create(entity);
     }
 

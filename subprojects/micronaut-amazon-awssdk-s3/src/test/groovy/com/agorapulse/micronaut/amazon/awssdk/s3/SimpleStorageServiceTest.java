@@ -19,10 +19,11 @@ package com.agorapulse.micronaut.amazon.awssdk.s3;
 
 import io.micronaut.context.annotation.Property;
 import io.micronaut.test.annotation.MicronautTest;
-import io.reactivex.Flowable;
 import org.codehaus.groovy.runtime.ResourceGroovyMethods;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 import javax.inject.Inject;
@@ -71,8 +72,8 @@ public class SimpleStorageServiceTest {
 
         assertTrue(service.exists(TEXT_FILE_PATH));                                     // <2>
 
-        Flowable<S3Object> summaries = service.listObjectSummaries("foo");              // <3>
-        assertEquals(Long.valueOf(0L), summaries.count().blockingGet());
+        Publisher<S3Object> summaries = service.listObjectSummaries("foo");             // <3>
+        assertEquals(Long.valueOf(0L), Flux.from(summaries).count().block());
         // end::store-file[]
 
         // CHECKSTYLE:OFF
@@ -87,8 +88,8 @@ public class SimpleStorageServiceTest {
             }
         );
 
-        Flowable<S3Object> fooSummaries = service.listObjectSummaries("foo");           // <2>
-        assertEquals(KEY, fooSummaries.blockingFirst().key());
+        Publisher<S3Object> fooSummaries = service.listObjectSummaries("foo");        // <2>
+        assertEquals(KEY, Flux.from(fooSummaries).blockFirst().key());
         // end::store-input-stream[]
         // CHECKSTYLE:ON
 

@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Mono;
 
 import static org.mockito.Mockito.*;
 
@@ -79,7 +80,7 @@ public class LambdaEchoJavaTest {
                 new RequestContext().withEventType(EventType.CONNECT).withConnectionId(CONNECTION_ID)
             );
 
-        WebSocketResponse response = client.lambdaEcho(request).blockingGet();
+        WebSocketResponse response = Mono.from(client.lambdaEcho(request)).block();
 
         Assertions.assertEquals(Integer.valueOf(200), response.getStatusCode());
 
@@ -93,7 +94,7 @@ public class LambdaEchoJavaTest {
                 new RequestContext().withEventType(EventType.DISCONNECT).withConnectionId(CONNECTION_ID)
             );
 
-        WebSocketResponse response = client.lambdaEcho(request).blockingGet();
+        WebSocketResponse response = Mono.from(client.lambdaEcho(request)).block();
 
         Assertions.assertEquals(Integer.valueOf(200), response.getStatusCode());
 
@@ -108,7 +109,7 @@ public class LambdaEchoJavaTest {
                 new RequestContext().withEventType(EventType.MESSAGE).withConnectionId(CONNECTION_ID)
             );
 
-        WebSocketResponse response = client.lambdaEcho(request).blockingGet();
+        WebSocketResponse response = Mono.from(client.lambdaEcho(request)).block();
 
         Assertions.assertEquals(Integer.valueOf(200), response.getStatusCode());
 

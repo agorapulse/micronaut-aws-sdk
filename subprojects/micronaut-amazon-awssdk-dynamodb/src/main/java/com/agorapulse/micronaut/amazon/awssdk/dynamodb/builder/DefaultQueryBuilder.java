@@ -19,7 +19,8 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeConversionHelper;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.conditional.QueryConditionalFactory;
-import io.reactivex.Flowable;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.MappedTableResource;
@@ -38,8 +39,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
-import static io.reactivex.Flowable.fromIterable;
 
 /**
  * Default implementation of the query builder.
@@ -124,14 +123,14 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     @Override
     public int count(DynamoDbTable<T> mapper, AttributeConversionHelper attributeConversionHelper) {
         // TODO: use select
-        return query(mapper, attributeConversionHelper).count().blockingGet().intValue();
+        return Flux.from(query(mapper, attributeConversionHelper)).count().blockOptional().map(Long::intValue).orElse(0);
     }
 
     @Override
-    public Flowable<T> query(DynamoDbTable<T> mapper, AttributeConversionHelper attributeConversionHelper) {
+    public Publisher<T> query(DynamoDbTable<T> mapper, AttributeConversionHelper attributeConversionHelper) {
         QueryEnhancedRequest request = resolveRequest(mapper, attributeConversionHelper);
         SdkIterable<Page<T>> iterable = this.__index == null ? mapper.query(request) : mapper.index(__index).query(request);
-        Flowable<T> results = fromIterable(iterable).flatMap(p -> fromIterable(p.items()));
+        Flux<T> results = Flux.fromIterable(iterable).flatMap(p -> Flux.fromIterable(p.items()));
         if (__max < Integer.MAX_VALUE) {
             return results.take(__max);
         }

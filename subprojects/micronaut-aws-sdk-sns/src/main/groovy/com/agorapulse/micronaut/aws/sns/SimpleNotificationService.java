@@ -18,7 +18,7 @@
 package com.agorapulse.micronaut.aws.sns;
 
 import com.amazonaws.services.sns.model.Topic;
-import io.reactivex.Flowable;
+import org.reactivestreams.Publisher;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -104,7 +104,7 @@ public interface SimpleNotificationService {
     /**
      * @return flowable iterating through all the topics available
      */
-    Flowable<Topic> listTopics();
+    Publisher<Topic> listTopics();
 
     /**
      * Deletes given topic.

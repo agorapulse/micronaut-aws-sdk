@@ -17,12 +17,20 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.*;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondaryPartitionKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondarySortKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.Builders;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedQuery;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedScan;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedUpdate;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbEvent;
 import io.micronaut.context.event.ApplicationEventPublisher;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.beans.BeanIntrospection;
-import io.reactivex.Flowable;
+import io.micronaut.core.beans.BeanProperty;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
@@ -40,13 +48,8 @@ import software.amazon.awssdk.services.dynamodb.model.Projection;
 import software.amazon.awssdk.services.dynamodb.model.ProjectionType;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.lang.annotation.Annotation;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -90,18 +93,18 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
     }
 
     @Override
-    public Flowable<T> query(DetachedQuery<T> query) {
-        return query.query(table, attributeConversionHelper).map(this::postLoad);
+    public Publisher<T> query(DetachedQuery<T> query) {
+        return Flux.from(query.query(table, attributeConversionHelper)).map(this::postLoad);
     }
 
     @Override
-    public Flowable<T> scan(DetachedScan<T> scan) {
-        return scan.scan(table, attributeConversionHelper).map(this::postLoad);
+    public Publisher<T> scan(DetachedScan<T> scan) {
+        return Flux.from(scan.scan(table, attributeConversionHelper)).map(this::postLoad);
     }
 
     @Override
-    public Flowable<T> findAll(Object partitionKey, Object sortKey) {
-        return simplePartitionAndSort(partitionKey, sortKey).query(table, attributeConversionHelper).map(this::postLoad);
+    public Publisher<T> findAll(Object partitionKey, Object sortKey) {
+        return Flux.from(simplePartitionAndSort(partitionKey, sortKey).query(table, attributeConversionHelper)).map(this::postLoad);
     }
 
     @Override
@@ -110,7 +113,7 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
     }
 
     @Override
-    public int updateAll(Flowable<T> items, UpdateBuilder<T, ?> update) {
+    public int updateAll(Publisher<T> items, UpdateBuilder<T, ?> update) {
         // there is no batch update API, we can do batch updates in transaction but in that case it would cause
         // doubling the writes
 
@@ -119,7 +122,7 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
 
         AtomicInteger counter = new AtomicInteger();
 
-        items.map(this::postLoad).subscribe(entity -> {
+        Flux.from(items).map(this::postLoad).subscribe(entity -> {
             introspection.getProperty(tableMetadata.primaryPartitionKey()).ifPresent(p -> update.partitionKey(p.get(entity)));
             tableMetadata.primarySortKey().flatMap(introspection::getProperty).ifPresent(p -> update.sortKey(p.get(entity)));
 
@@ -140,19 +143,19 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
     }
 
     @Override
-    public Flowable<T> saveAll(Flowable<T> itemsToSave) {
+    public Publisher<T> saveAll(Publisher<T> itemsToSave) {
         List<T> saved = new ArrayList<>();
-        List<T> unprocessed = itemsToSave.buffer(BATCH_SIZE).map(batchItems -> enhancedClient.batchWriteItem(b -> {
+        List<T> unprocessed = Flux.from(itemsToSave).buffer(BATCH_SIZE).map(batchItems -> enhancedClient.batchWriteItem(b -> {
             b.writeBatches(batchItems.stream().map(i -> {
                 publisher.publishEvent(DynamoDbEvent.prePersist(i));
                 saved.add(i);
                 return WriteBatch.builder(table.tableSchema().itemType().rawClass()).mappedTableResource(table).addPutItem(i).build();
             }).collect(Collectors.toList()));
-        })).flatMap(r -> Flowable.fromIterable(r.unprocessedPutItemsForTable(table))).toList().blockingGet();
+        })).flatMap(r -> Flux.fromIterable(r.unprocessedPutItemsForTable(table))).collectList().blockOptional().orElse(Collections.emptyList());
 
         if (unprocessed.isEmpty()) {
             saved.forEach(i -> publisher.publishEvent(DynamoDbEvent.postPersist(i)));
-            return Flowable.fromIterable(saved);
+            return Flux.fromIterable(saved);
         }
 
         throw new IllegalArgumentException("Following items couldn't be saved:" + unprocessed.stream().map(Object::toString).collect(Collectors.joining(", ")));
@@ -181,17 +184,17 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
     }
 
     @Override
-    public int deleteAll(Flowable<T> items) {
+    public int deleteAll(Publisher<T> items) {
         TableSchema<T> tableSchema = table.tableSchema();
         List<T> deleted = new ArrayList<>();
-        List<Key> unprocessed = items.buffer(BATCH_SIZE).map(batchItems -> enhancedClient.batchWriteItem(b -> {
+        List<Key> unprocessed = Flux.from(items).buffer(BATCH_SIZE).map(batchItems -> enhancedClient.batchWriteItem(b -> {
             b.writeBatches(batchItems.stream().map(i -> {
                     publisher.publishEvent(DynamoDbEvent.preRemove(i));
                     deleted.add(i);
                     return WriteBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(table).addDeleteItem(i).build();
                 }
             ).collect(Collectors.toList()));
-        })).flatMap(r -> Flowable.fromIterable(r.unprocessedDeleteItemsForTable(table))).toList().blockingGet();
+        })).flatMap(r -> Flux.fromIterable(r.unprocessedDeleteItemsForTable(table))).collectList().blockOptional().orElse(Collections.emptyList());
 
         if (unprocessed.isEmpty()) {
             deleted.forEach(i -> publisher.publishEvent(DynamoDbEvent.postRemove(i)));
@@ -209,7 +212,7 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
     }
 
     @Override
-    public Flowable<T> getAll(Object partitionKey, Flowable<?> sortKeys) {
+    public Publisher<T> getAll(Object partitionKey, Publisher<?> sortKeys) {
         return doWithKeys(partitionKey, sortKeys, this::getAll);
     }
 
@@ -275,13 +278,13 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
         });
     }
 
-    private Flowable<T> getAll(AttributeValue hashKey, Flowable<AttributeValue> rangeKeys) {
+    private Publisher<T> getAll(AttributeValue hashKey, Publisher<AttributeValue> rangeKeys) {
         TableSchema<T> tableSchema = table.tableSchema();
-        return rangeKeys.buffer(BATCH_SIZE).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> {
+        return Flux.from(rangeKeys).buffer(BATCH_SIZE).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> {
             b.readBatches(batchRangeKeys.stream().map(k ->
                 ReadBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(table).addGetItem(Key.builder().partitionValue(hashKey).sortValue(k).build()).build()
             ).collect(Collectors.toList()));
-        })).flatMap(r -> Flowable.fromIterable(r.resultsForTable(table)).map(this::postLoad));
+        })).flatMap(r -> Flux.fromIterable(r.resultsForTable(table)).map(this::postLoad));
     }
 
     private Map<String, ProjectionType> getProjectionTypes() {
@@ -295,16 +298,12 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
                 return;
             }
 
-            AnnotationValue<DynamoDbSecondarySortKey> secondaryIndex = p.getAnnotation(DynamoDbSecondarySortKey.class);
             Collection<String> indexNames = new ArrayList<>();
-            if (secondaryIndex != null) {
-                indexNames.addAll(Arrays.asList(secondaryIndex.stringValues("indexNames")));
-            }
 
-            AnnotationValue<DynamoDbSecondaryPartitionKey> secondaryGlobalIndex = p.getAnnotation(DynamoDbSecondaryPartitionKey.class);
-            if (secondaryGlobalIndex != null) {
-                indexNames.addAll(Arrays.asList(secondaryGlobalIndex.stringValues("indexNames")));
-            }
+            indexNames.addAll(collectIndicesFromAnnotation(p, DynamoDbSecondarySortKey.class));
+            indexNames.addAll(collectIndicesFromAnnotation(p, SecondarySortKey.class));
+            indexNames.addAll(collectIndicesFromAnnotation(p, DynamoDbSecondaryPartitionKey.class));
+            indexNames.addAll(collectIndicesFromAnnotation(p, SecondaryPartitionKey.class));
 
             if (indexNames.isEmpty()) {
                 return;
@@ -317,6 +316,10 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
         });
 
         return types;
+    }
+
+    private List<String> collectIndicesFromAnnotation(BeanProperty<T, Object> p, Class<? extends Annotation> indexAnnotationClass) {
+        return p.findAnnotation(indexAnnotationClass).map(anno -> Arrays.asList(anno.stringValues("indexNames"))).orElse(Collections.emptyList());
     }
 
     private T postLoad(T i) {
@@ -342,11 +345,11 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
         );
     }
 
-    private <R> Flowable<R> doWithKeys(Object partitionKey, Flowable<?> sortKeys, BiFunction<AttributeValue, Flowable<AttributeValue>, Flowable<R>> function) {
+    private <R> Publisher<R> doWithKeys(Object partitionKey, Publisher<?> sortKeys, BiFunction<AttributeValue, Publisher<AttributeValue>, Publisher<R>> function) {
         String hashKeyName = table.tableSchema().tableMetadata().primaryPartitionKey();
         AttributeValue partitionKeyValue = attributeConversionHelper.convert(table, hashKeyName, partitionKey);
 
         Optional<String> sortKeyName = table.tableSchema().tableMetadata().primarySortKey();
-        return function.apply(partitionKeyValue, sortKeys.map(key -> attributeConversionHelper.convert(table, sortKeyName.get(), key)));
+        return function.apply(partitionKeyValue, Flux.from(sortKeys).map(key -> attributeConversionHelper.convert(table, sortKeyName.get(), key)));
     }
 }

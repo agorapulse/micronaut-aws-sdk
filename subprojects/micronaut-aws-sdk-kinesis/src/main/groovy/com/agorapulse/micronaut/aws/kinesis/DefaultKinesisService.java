@@ -22,17 +22,19 @@ import com.amazonaws.services.kinesis.model.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.core.util.StringUtils;
-import io.reactivex.Emitter;
-import io.reactivex.Flowable;
-import io.reactivex.functions.BiFunction;
+import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.SynchronousSink;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -131,24 +133,23 @@ class DefaultKinesisService implements KinesisService {
     }
 
     @Override
-    public Flowable<Record> getShardRecords(String streamName, Shard shard, ShardIteratorType shardIteratorType, String startingSequenceNumber, int batchLimit) {
-        return Flowable.generate(() -> {
-            GetShardIteratorRequest getShardIteratorRequest = new GetShardIteratorRequest()
-                .withStreamName(streamName)
-                .withShardId(shard.getShardId())
-                .withShardIteratorType(shardIteratorType.toString());
-            if (shardIteratorType == ShardIteratorType.AFTER_SEQUENCE_NUMBER || shardIteratorType == ShardIteratorType.AT_SEQUENCE_NUMBER) {
-                if (startingSequenceNumber == null || startingSequenceNumber.length() == 0) {
-                    throw new IllegalArgumentException("Starting sequence number must not be null!");
+    public Publisher<Record> getShardRecords(String streamName, Shard shard, ShardIteratorType shardIteratorType, String startingSequenceNumber, int batchLimit) {
+        return Flux
+            .generate(() -> {
+                GetShardIteratorRequest getShardIteratorRequest = new GetShardIteratorRequest()
+                    .withStreamName(streamName)
+                    .withShardId(shard.getShardId())
+                    .withShardIteratorType(shardIteratorType.toString());
+                if (shardIteratorType == ShardIteratorType.AFTER_SEQUENCE_NUMBER || shardIteratorType == ShardIteratorType.AT_SEQUENCE_NUMBER) {
+                    if (startingSequenceNumber == null || startingSequenceNumber.length() == 0) {
+                        throw new IllegalArgumentException("Starting sequence number must not be null!");
+                    }
+                    getShardIteratorRequest.withStartingSequenceNumber(Objects.requireNonNull(startingSequenceNumber));
                 }
-                getShardIteratorRequest.withStartingSequenceNumber(Objects.requireNonNull(startingSequenceNumber));
-            }
 
-            GetShardIteratorResult getShardIteratorResult = client.getShardIterator(getShardIteratorRequest);
-            return getShardIteratorResult.getShardIterator();
-        }, new BiFunction<String, Emitter<List<Record>>, String>() {
-            @Override
-            public String apply(String shardIterator, Emitter<List<Record>> recordEmitter) throws Exception {
+                GetShardIteratorResult getShardIteratorResult = client.getShardIterator(getShardIteratorRequest);
+                return getShardIteratorResult.getShardIterator();
+            }, (String shardIterator, SynchronousSink<List<Record>> sink) -> {
                 GetRecordsRequest getRecordsRequest = new GetRecordsRequest().withShardIterator(shardIterator);
 
                 if (batchLimit > 0) {
@@ -159,14 +160,19 @@ class DefaultKinesisService implements KinesisService {
 
                 List<Record> records = getRecordsResult.getRecords();
                 if (records.isEmpty()) {
-                    // TODO: is there better way how to wait?
-                    Thread.sleep(DEFAULT_GET_RECORDS_WAIT);
                     return shardIterator;
                 }
-                recordEmitter.onNext(records);
+                sink.next(records);
                 return getRecordsResult.getNextShardIterator();
-            }
-        }).flatMap(Flowable::fromIterable);
+            })
+            .delayUntil(records -> {
+                if (records.isEmpty()) {
+                    return Mono.just(records).delayElement(Duration.ofMillis(DEFAULT_GET_RECORDS_WAIT));
+                }
+
+                return Mono.just(records);
+            })
+            .flatMap(Flux::fromIterable);
     }
 
     @Override

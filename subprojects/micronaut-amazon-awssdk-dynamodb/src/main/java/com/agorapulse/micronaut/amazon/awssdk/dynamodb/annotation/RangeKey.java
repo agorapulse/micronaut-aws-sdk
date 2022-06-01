@@ -24,10 +24,13 @@ import java.lang.annotation.*;
  *
  * This annotation is not required if the name of the argument contains word <code>range</code> or <code>sort</code>.
  *
+ * This annotation can be used a replacement of <code>{@link software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey}</code>
+ * on fields.
+ *
  * @deprecated use @{@link SortKey} instead
  */
 @Inherited
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.PARAMETER, ElementType.ANNOTATION_TYPE})
+@Target({ElementType.PARAMETER, ElementType.ANNOTATION_TYPE, ElementType.FIELD, ElementType.METHOD})
 public @interface RangeKey { }

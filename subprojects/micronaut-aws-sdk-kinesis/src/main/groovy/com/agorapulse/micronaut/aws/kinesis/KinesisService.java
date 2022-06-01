@@ -18,8 +18,9 @@
 package com.agorapulse.micronaut.aws.kinesis;
 
 import com.amazonaws.services.kinesis.model.*;
-import io.reactivex.Flowable;
-import io.reactivex.Maybe;
+import io.micronaut.core.async.annotation.SingleResult;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 
 import java.util.Collections;
 import java.util.List;
@@ -132,8 +133,9 @@ public interface KinesisService {
      * @param shard the shard to be used
      * @return
      */
-    default Maybe<Record> getShardOldestRecord(String streamName, Shard shard) {
-        return getShardRecords(streamName, shard, ShardIteratorType.TRIM_HORIZON, "", 1).take(1).singleElement();
+    @SingleResult
+    default Publisher<Record> getShardOldestRecord(String streamName, Shard shard) {
+        return Flux.from(getShardRecords(streamName, shard, ShardIteratorType.TRIM_HORIZON, "", 1)).take(1).singleOrEmpty();
     }
 
     /**
@@ -141,7 +143,8 @@ public interface KinesisService {
      * @param shard the shard to be used
      * @return
      */
-    default Maybe<Record> getShardOldestRecord(Shard shard) {
+    @SingleResult
+    default Publisher<Record> getShardOldestRecord(Shard shard) {
         return getShardOldestRecord(getDefaultStreamName(), shard);
     }
 
@@ -152,8 +155,9 @@ public interface KinesisService {
      * @param sequenceNumber
      * @return
      */
-    default Maybe<Record> getShardRecordAtSequenceNumber(String streamName, Shard shard, String sequenceNumber) {
-        return getShardRecords(streamName, shard, ShardIteratorType.AT_SEQUENCE_NUMBER, sequenceNumber, 1).take(1).singleElement();
+    @SingleResult
+    default Publisher<Record> getShardRecordAtSequenceNumber(String streamName, Shard shard, String sequenceNumber) {
+        return Flux.from(getShardRecords(streamName, shard, ShardIteratorType.AT_SEQUENCE_NUMBER, sequenceNumber, 1)).take(1).singleOrEmpty();
     }
 
     /**
@@ -162,7 +166,8 @@ public interface KinesisService {
      * @param sequenceNumber
      * @return
      */
-    default Maybe<Record> getShardRecordAtSequenceNumber(Shard shard, String sequenceNumber) {
+    @SingleResult
+    default Publisher<Record> getShardRecordAtSequenceNumber(Shard shard, String sequenceNumber) {
         return getShardRecordAtSequenceNumber(getDefaultStreamName(), shard, sequenceNumber);
     }
 
@@ -181,7 +186,7 @@ public interface KinesisService {
      * @param batchLimit
      * @return
      */
-    Flowable<Record> getShardRecords(String streamName, Shard shard, ShardIteratorType shardIteratorType, String startingSequenceNumber, int batchLimit);
+    Publisher<Record> getShardRecords(String streamName, Shard shard, ShardIteratorType shardIteratorType, String startingSequenceNumber, int batchLimit);
 
     /**
      *
@@ -191,7 +196,7 @@ public interface KinesisService {
      * @param startingSequenceNumber
      * @return
      */
-    default Flowable<Record> getShardRecords(String streamName, Shard shard, ShardIteratorType shardIteratorType, String startingSequenceNumber) {
+    default Publisher<Record> getShardRecords(String streamName, Shard shard, ShardIteratorType shardIteratorType, String startingSequenceNumber) {
         return getShardRecords(streamName, shard, shardIteratorType, startingSequenceNumber, 0);
     }
 
@@ -203,7 +208,7 @@ public interface KinesisService {
      * @param batchLimit
      * @return
      */
-    default Flowable<Record> getShardRecords(Shard shard, ShardIteratorType shardIteratorType, String startingSequenceNumber, int batchLimit) {
+    default Publisher<Record> getShardRecords(Shard shard, ShardIteratorType shardIteratorType, String startingSequenceNumber, int batchLimit) {
         return getShardRecords(getDefaultStreamName(), shard, shardIteratorType, startingSequenceNumber, batchLimit);
     }
 
@@ -214,7 +219,7 @@ public interface KinesisService {
      * @param startingSequenceNumber
      * @return
      */
-    default Flowable<Record> getShardRecords(Shard shard, ShardIteratorType shardIteratorType, String startingSequenceNumber) {
+    default Publisher<Record> getShardRecords(Shard shard, ShardIteratorType shardIteratorType, String startingSequenceNumber) {
         return getShardRecords(getDefaultStreamName(), shard, shardIteratorType, startingSequenceNumber, 0);
     }
 
@@ -226,7 +231,7 @@ public interface KinesisService {
      * @param batchLimit
      * @return
      */
-    default Flowable<Record> listShardRecordsAfterSequenceNumber(String streamName, Shard shard, String startingSequenceNumber, int batchLimit) {
+    default Publisher<Record> listShardRecordsAfterSequenceNumber(String streamName, Shard shard, String startingSequenceNumber, int batchLimit) {
         return getShardRecords(streamName, shard, ShardIteratorType.AFTER_SEQUENCE_NUMBER, startingSequenceNumber, batchLimit);
     }
 
@@ -237,7 +242,7 @@ public interface KinesisService {
      * @param startingSequenceNumber
      * @return
      */
-    default Flowable<Record> listShardRecordsAfterSequenceNumber(String streamName, Shard shard, String startingSequenceNumber) {
+    default Publisher<Record> listShardRecordsAfterSequenceNumber(String streamName, Shard shard, String startingSequenceNumber) {
         return getShardRecords(streamName, shard, ShardIteratorType.AFTER_SEQUENCE_NUMBER, startingSequenceNumber, 0);
     }
 
@@ -248,7 +253,7 @@ public interface KinesisService {
      * @param batchLimit
      * @return
      */
-    default Flowable<Record> listShardRecordsAfterSequenceNumber(Shard shard, String startingSequenceNumber, int batchLimit) {
+    default Publisher<Record> listShardRecordsAfterSequenceNumber(Shard shard, String startingSequenceNumber, int batchLimit) {
         return listShardRecordsAfterSequenceNumber(getDefaultStreamName(), shard, startingSequenceNumber, batchLimit);
     }
 
@@ -258,7 +263,7 @@ public interface KinesisService {
      * @param startingSequenceNumber
      * @return
      */
-    default Flowable<Record> listShardRecordsAfterSequenceNumber(Shard shard, String startingSequenceNumber) {
+    default Publisher<Record> listShardRecordsAfterSequenceNumber(Shard shard, String startingSequenceNumber) {
         return listShardRecordsAfterSequenceNumber(getDefaultStreamName(), shard, startingSequenceNumber, 0);
     }
 
@@ -269,7 +274,7 @@ public interface KinesisService {
      * @param batchLimit
      * @return
      */
-    default Flowable<Record> listShardRecordsFromHorizon(String streamName, Shard shard, int batchLimit) {
+    default Publisher<Record> listShardRecordsFromHorizon(String streamName, Shard shard, int batchLimit) {
         return getShardRecords(streamName, shard, ShardIteratorType.TRIM_HORIZON, "", batchLimit);
     }
     /**
@@ -278,7 +283,7 @@ public interface KinesisService {
      * @param shard the shard to be used
      * @return
      */
-    default Flowable<Record> listShardRecordsFromHorizon(String streamName, Shard shard) {
+    default Publisher<Record> listShardRecordsFromHorizon(String streamName, Shard shard) {
         return getShardRecords(streamName, shard, ShardIteratorType.TRIM_HORIZON, "", 0);
     }
 
@@ -288,7 +293,7 @@ public interface KinesisService {
      * @param batchLimit
      * @return
      */
-    default Flowable<Record> listShardRecordsFromHorizon(Shard shard, int batchLimit) {
+    default Publisher<Record> listShardRecordsFromHorizon(Shard shard, int batchLimit) {
         return listShardRecordsFromHorizon(getDefaultStreamName(), shard, batchLimit);
     }
     /**
@@ -296,7 +301,7 @@ public interface KinesisService {
      * @param shard the shard to be used
      * @return
      */
-    default Flowable<Record> listShardRecordsFromHorizon(Shard shard) {
+    default Publisher<Record> listShardRecordsFromHorizon(Shard shard) {
         return listShardRecordsFromHorizon(getDefaultStreamName(), shard, 0);
     }
 

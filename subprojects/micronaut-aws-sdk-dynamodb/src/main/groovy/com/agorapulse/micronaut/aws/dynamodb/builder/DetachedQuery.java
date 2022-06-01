@@ -19,7 +19,7 @@ package com.agorapulse.micronaut.aws.dynamodb.builder;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
-import io.reactivex.Flowable;
+import org.reactivestreams.Publisher;
 
 /**
  * An interface for queries which can be executed using supplied mapper.
@@ -32,7 +32,7 @@ public interface DetachedQuery<T> {
      * @param mapper DynamoDB mapper
      * @return flowable of entities found for the current query
      */
-    Flowable<T> query(IDynamoDBMapper mapper);
+    Publisher<T> query(IDynamoDBMapper mapper);
 
     /**
      * Counts entities satisfying given query using provided mapper.

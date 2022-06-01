@@ -21,6 +21,7 @@ package com.agorapulse.micronaut.aws.dynamodb;
 import io.micronaut.test.annotation.MicronautTest;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
 
 import javax.inject.Inject;
 import java.util.Arrays;
@@ -63,15 +64,15 @@ public class DeclarativeServiceTest {
         assertEquals(2, s.countByDates("1", REFERENCE_DATE.minusDays(1).toDate(), REFERENCE_DATE.plusDays(2).toDate()));
         assertEquals(1, s.countByDates("3", REFERENCE_DATE.plusDays(9).toDate(), REFERENCE_DATE.plusDays(20).toDate()));
 
-        assertEquals(2, s.query("1").count().blockingGet().intValue());
-        assertEquals(1, s.query("1", "1").count().blockingGet().intValue());
-        assertEquals(1, s.queryByRangeIndex("1", "bar").count().blockingGet().intValue());
-        assertNull(s.queryByRangeIndex("1", "bar").blockingSingle().parentId);
-        assertEquals("bar", s.queryByRangeIndex("1", "bar").blockingSingle().rangeIndex);
-        assertEquals(2, s.queryByDates("1", REFERENCE_DATE.minusDays(1).toDate(), REFERENCE_DATE.plusDays(2).toDate()).size());
-        assertEquals(1, s.queryByDates("3", REFERENCE_DATE.plusDays(9).toDate(), REFERENCE_DATE.plusDays(20).toDate()).size());
+        assertEquals(2, Flux.from(s.query("1")).count().block().intValue());
+        assertEquals(1, Flux.from(s.query("1", "1")).count().block().intValue());
+        assertEquals(1, Flux.from(s.queryByRangeIndex("1", "bar")).count().block().intValue());
+        assertNull(Flux.from(s.queryByRangeIndex("1", "bar")).blockFirst().parentId);
+        assertEquals("bar", Flux.from(s.queryByRangeIndex("1", "bar")).blockFirst().rangeIndex);
+        assertEquals(2, s.queryByDates("1", REFERENCE_DATE.minusDays(1).toDate(), REFERENCE_DATE.plusDays(2).toDate()).count().blockingGet());
+        assertEquals(1, s.queryByDates("3", REFERENCE_DATE.plusDays(9).toDate(), REFERENCE_DATE.plusDays(20).toDate()).count().blockingGet());
 
-        assertEquals(2, s.scanAllByRangeIndex("bar").count().blockingGet().intValue());
+        assertEquals(2, Flux.from(s.scanAllByRangeIndex("bar")).count().block().intValue());
 
         s.increment("1", "1");
         s.increment("1", "1");

@@ -20,6 +20,7 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
 import io.micronaut.test.annotation.MicronautTest;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
 
 import javax.inject.Inject;
 import java.time.Instant;
@@ -68,11 +69,11 @@ public class DeclarativeServiceTest {
         assertEquals(2, s.countByDates("1", Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS))));
         assertEquals(1, s.countByDates("3", Date.from(REFERENCE_DATE.plus(9, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(20, ChronoUnit.DAYS))));
 
-        assertEquals(2, s.query("1").count().blockingGet().intValue());
-        assertEquals(1, s.query("1", "1").count().blockingGet().intValue());
-        assertEquals(1, s.queryByRangeIndex("1", "bar").count().blockingGet().intValue());
-        assertNull(s.queryByRangeIndex("1", "bar").blockingSingle().getParentId());
-        assertEquals("bar", s.queryByRangeIndex("1", "bar").blockingSingle().getRangeIndex());
+        assertEquals(2, Flux.from(s.query("1")).count().block().intValue());
+        assertEquals(1, Flux.from(s.query("1", "1")).count().block().intValue());
+        assertEquals(1, Flux.from(s.queryByRangeIndex("1", "bar")).count().block().intValue());
+        assertNull(Flux.from(s.queryByRangeIndex("1", "bar")).blockFirst().getParentId());
+        assertEquals("bar", Flux.from(s.queryByRangeIndex("1", "bar")).blockFirst().getRangeIndex());
 
         List<DynamoDBEntity> byDates = s.queryByDates("1", Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS)));
         assertEquals(2, byDates.size());
@@ -80,7 +81,7 @@ public class DeclarativeServiceTest {
 
         assertEquals(1, s.queryByDates("3", Date.from(REFERENCE_DATE.plus(9, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(20, ChronoUnit.DAYS))).size());
 
-        assertEquals(2, s.scanAllByRangeIndex("bar").count().blockingGet().intValue());
+        assertEquals(2, Flux.from(s.scanAllByRangeIndex("bar")).count().block().intValue());
 
         s.increment("1", "1");
         s.increment("1", "1");

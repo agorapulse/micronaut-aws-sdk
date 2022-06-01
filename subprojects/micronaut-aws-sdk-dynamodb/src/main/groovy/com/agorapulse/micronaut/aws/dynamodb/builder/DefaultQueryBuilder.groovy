@@ -25,7 +25,8 @@ import com.amazonaws.services.dynamodbv2.model.Condition
 import com.amazonaws.services.dynamodbv2.model.ConditionalOperator
 import groovy.transform.CompileStatic
 import groovy.transform.PackageScope
-import io.reactivex.Flowable
+import org.reactivestreams.Publisher
+import reactor.core.publisher.Flux
 
 import java.util.function.BiConsumer
 import java.util.function.Consumer
@@ -116,8 +117,8 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     }
 
     @Override
-    Flowable<T> query(IDynamoDBMapper mapper) {
-        Flowable<T> results = FlowableQueryResultHelper.generate(metadata.itemClass, mapper, resolveExpression(mapper))
+    Publisher<T> query(IDynamoDBMapper mapper) {
+        Flux<T> results = FluxQueryResultHelper.generate(metadata.itemClass, mapper, resolveExpression(mapper))
         if (max < Integer.MAX_VALUE) {
             return results.take(max)
         }

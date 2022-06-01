@@ -19,7 +19,7 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.*;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.*;
-import io.reactivex.Flowable;
+import org.reactivestreams.Publisher;
 
 import java.util.Date;
 import java.util.List;
@@ -81,9 +81,9 @@ public interface DynamoDBEntityService {
     @Query(BetweenDateIndex.class)
     int countByDates(String hashKey, Date after, Date before);
 
-    Flowable<DynamoDBEntity> query(String hashKey);
+    Publisher<DynamoDBEntity> query(String hashKey);
 
-    Flowable<DynamoDBEntity> query(String hashKey, String rangeKey);
+    Publisher<DynamoDBEntity> query(String hashKey, String rangeKey);
 
     // tag::sample-query-class[]
     class EqRangeProjection implements QueryFunction<DynamoDBEntity> {                  // <2>
@@ -100,7 +100,7 @@ public interface DynamoDBEntityService {
     // end::sample-query-class[]
     // tag::sample-query[]
     @Query(EqRangeProjection.class)                                                     // <6>
-    Flowable<DynamoDBEntity> queryByRangeIndex(String hashKey, String rangeKey);        // <7>
+    Publisher<DynamoDBEntity> queryByRangeIndex(String hashKey, String rangeKey);       // <7>
     // end::sample-query[]
 
     @Query(BetweenDateIndex.class)
@@ -174,7 +174,7 @@ public interface DynamoDBEntityService {
     // end::sample-scan-class[]
     // tag::sample-scan[]
     @Scan(EqRangeScan.class)                                                            // <4>
-    Flowable<DynamoDBEntity> scanAllByRangeIndex(String foo);                           // <5>
+    Publisher<DynamoDBEntity> scanAllByRangeIndex(String foo);                          // <5>
     // end::sample-scan[]
 
 // tag::footer[]

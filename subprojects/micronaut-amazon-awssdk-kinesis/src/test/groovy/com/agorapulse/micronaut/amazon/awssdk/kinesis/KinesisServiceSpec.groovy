@@ -20,6 +20,7 @@ package com.agorapulse.micronaut.amazon.awssdk.kinesis
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.micronaut.context.annotation.Property
 import io.micronaut.test.annotation.MicronautTest
+import reactor.core.publisher.Flux
 import software.amazon.awssdk.services.kinesis.KinesisClient
 import software.amazon.awssdk.services.kinesis.model.CreateStreamResponse
 import software.amazon.awssdk.services.kinesis.model.DeleteStreamResponse
@@ -115,7 +116,7 @@ class KinesisServiceSpec extends Specification {
 
             Shard shard = service.getShard(result.shardId())
         when:
-            Record record = service.getShardOldestRecord(shard).blockingGet()
+            Record record = Flux.from(service.getShardOldestRecord(shard)).blockFirst()
         then:
             record
             shard
@@ -135,7 +136,7 @@ class KinesisServiceSpec extends Specification {
         when:
             PutRecordsResultEntry firstRecord = result.records().first()
             Shard shard = service.getShard(firstRecord.shardId())
-            Record record = service.getShardRecordAtSequenceNumber(shard, firstRecord.sequenceNumber()).blockingGet()
+            Record record = Flux.from(service.getShardRecordAtSequenceNumber(shard, firstRecord.sequenceNumber())).blockFirst()
         then:
             record
             shard

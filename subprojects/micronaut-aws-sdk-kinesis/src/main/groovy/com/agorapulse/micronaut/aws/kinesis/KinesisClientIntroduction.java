@@ -28,13 +28,13 @@ import com.amazonaws.services.kinesis.model.PutRecordsRequestEntry;
 import com.amazonaws.services.kinesis.model.ResourceNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import groovy.transform.Undefined;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.context.BeanContext;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.type.Argument;
+import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.qualifiers.Qualifiers;
 
 import javax.inject.Singleton;
@@ -88,7 +88,7 @@ public class KinesisClientIntroduction implements MethodInterceptor<Object, Obje
             streamName = streamAnnotationValue.getRequiredValue(String.class);
         }
 
-        if (streamName == null || Undefined.STRING.equals(streamName)) {
+        if (streamName == null || StringUtils.isEmpty(streamName)) {
             streamName = service.getDefaultStreamName();
         }
 

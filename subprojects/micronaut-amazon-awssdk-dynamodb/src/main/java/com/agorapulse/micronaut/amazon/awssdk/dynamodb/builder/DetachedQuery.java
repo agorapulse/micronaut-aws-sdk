@@ -18,7 +18,7 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeConversionHelper;
-import io.reactivex.Flowable;
+import org.reactivestreams.Publisher;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.MappedTableResource;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
@@ -34,7 +34,7 @@ public interface DetachedQuery<T> {
      * @param mapper DynamoDB mapper
      * @return flowable of entities found for the current query
      */
-    Flowable<T> query(DynamoDbTable<T> mapper, AttributeConversionHelper attributeConversionHelper);
+    Publisher<T> query(DynamoDbTable<T> mapper, AttributeConversionHelper attributeConversionHelper);
 
     /**
      * Counts entities satisfying given query using provided mapper.

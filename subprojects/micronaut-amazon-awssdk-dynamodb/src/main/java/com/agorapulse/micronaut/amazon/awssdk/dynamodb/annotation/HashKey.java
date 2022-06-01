@@ -24,10 +24,13 @@ import java.lang.annotation.*;
  *
  * This annotation is not required if the name of the argument contains word <code>hash</code> or <code>partition</code>.
  *
+ * This annotation can be used a replacement of <code>{@link software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey}</code>
+ * on fields.
+ *
  * @deprecated use @{@link PartitionKey} instead
  */
 @Inherited
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.PARAMETER, ElementType.ANNOTATION_TYPE})
+@Target({ElementType.PARAMETER, ElementType.ANNOTATION_TYPE, ElementType.FIELD, ElementType.METHOD})
 public @interface HashKey { }

@@ -1,1 +1,2 @@
+com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.remap.DynamoDbBeanAnnotationRemapper
 com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.remap.ServiceAnnotationRemapper

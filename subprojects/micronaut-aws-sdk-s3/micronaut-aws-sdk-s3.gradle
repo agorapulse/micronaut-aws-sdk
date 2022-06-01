@@ -18,6 +18,7 @@
 dependencies {
     api 'com.amazonaws:aws-java-sdk-s3'
     implementation project(':micronaut-aws-sdk-core')
+    implementation "io.projectreactor:reactor-core:$projectReactorVersion"
 
     testImplementation project(':micronaut-amazon-awssdk-integration-testing')
 }

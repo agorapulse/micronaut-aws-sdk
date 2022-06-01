@@ -22,8 +22,6 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperTableModel;
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.model.*;
-import groovy.transform.CompileStatic;
-import groovy.transform.PackageScope;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +29,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-@CompileStatic
-@PackageScope
 class DefaultUpdateBuilder<T> implements UpdateBuilder<T> {
 
     private static class Update {
