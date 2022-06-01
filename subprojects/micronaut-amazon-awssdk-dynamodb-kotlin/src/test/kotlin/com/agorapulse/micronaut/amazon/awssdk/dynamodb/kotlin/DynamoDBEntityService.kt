@@ -23,7 +23,7 @@ import java.util.*
 
 // tag::all[]
 // tag::header[]
-@Service(value = DynamoDBEntity::class, tableName = "DynamoDBJava") // <1>
+@Service(value = DynamoDBEntity::class, tableName = "DynamoDBJava")                     // <1>
 interface DynamoDBEntityService {
     // end::header[]
 
@@ -64,8 +64,7 @@ interface DynamoDBEntityService {
     fun query(hashKey: String?, rangeKey: String?): Publisher<DynamoDBEntity?>?
 
     // tag::sample-query-class[]
-    class EqRangeProjection : QueryFunction<DynamoDBEntity>({ args: Map<String, Any> ->
-        // <2>
+    class EqRangeProjection : QueryFunction<DynamoDBEntity>({ args: Map<String, Any> -> // <2>
         partitionKey(args["hashKey"]) // <3>
         index(DynamoDBEntity.RANGE_INDEX)
         sortKey { eq(args["rangeKey"]) } // <4>
@@ -74,9 +73,8 @@ interface DynamoDBEntityService {
 
     // end::sample-query-class[]
     // tag::sample-query[]
-    @Query(EqRangeProjection::class)
-    fun  // <6>
-        queryByRangeIndex(hashKey: String?, rangeKey: String?): Publisher<DynamoDBEntity?>? // <7>
+    @Query(EqRangeProjection::class)                                                    // <6>
+    fun queryByRangeIndex(hashKey: String, rangeKey: String): Publisher<DynamoDBEntity> // <7>
 
     // end::sample-query[]
     @Query(BetweenDateIndex::class)
@@ -107,18 +105,17 @@ interface DynamoDBEntityService {
     fun deleteByDates(hashKey: String?, after: Date?, before: Date?): Int
 
     // tag::sample-update-class[]
-    class IncrementNumber : UpdateFunction<DynamoDBEntity, Int>({ args: Map<String, Any> ->
-        partitionKey(args["hashKey"]) // <3>
-        sortKey(args["rangeKey"]) // <4>
-        add("number", 1) // <5>
-        returnUpdatedNew(DynamoDBEntity::number) // <6>
+    class IncrementNumber : UpdateFunction<DynamoDBEntity, Int>({ args: Map<String, Any> ->// <2>
+        partitionKey(args["hashKey"])                                                   // <3>
+        sortKey(args["rangeKey"])                                                       // <4>
+        add("number", 1)                                                                // <5>
+        returnUpdatedNew(DynamoDBEntity::number)                                        // <6>
     })
 
     // end::sample-update-class[]
     // tag::sample-update[]
-    @Update(IncrementNumber::class)
-    fun  // <7>
-        increment(hashKey: String?, rangeKey: String?): Number? // <8>
+    @Update(IncrementNumber::class)                                                     // <7>
+    fun increment(hashKey: String, rangeKey: String): Number                            // <8>
 
     // end::sample-update[]
     class DecrementNumber : UpdateFunction<DynamoDBEntity, Int>({ args: Map<String, Any> ->
@@ -132,19 +129,17 @@ interface DynamoDBEntityService {
     fun decrement(hashKey: String?, rangeKey: String?): Number?
 
     // tag::sample-scan-class[]
-    class EqRangeScan : ScanFunction<DynamoDBEntity>({ args: Map<String, Any> ->
-        // <2>
+    class EqRangeScan : ScanFunction<DynamoDBEntity>({ args: Map<String, Any> ->        // <2>
         filter {
-            eq(DynamoDBEntity.RANGE_INDEX, args["foo"])
+            eq(DynamoDBEntity.RANGE_INDEX, args["foo"])                                 // <3>
         }
 
     })
 
     // end::sample-scan-class[]
     // tag::sample-scan[]
-    @Scan(EqRangeScan::class)
-    fun  // <4>
-        scanAllByRangeIndex(foo: String?): Publisher<DynamoDBEntity?>? // <5>
+    @Scan(EqRangeScan::class)                                                           // <4>
+    fun scanAllByRangeIndex(foo: String): Publisher<DynamoDBEntity>                     // <5>
     // end::sample-scan[]
     // tag::footer[]
 }

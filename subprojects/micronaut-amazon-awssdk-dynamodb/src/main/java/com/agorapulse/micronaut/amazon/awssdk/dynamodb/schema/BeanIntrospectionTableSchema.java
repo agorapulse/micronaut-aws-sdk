@@ -17,14 +17,10 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.schema;
 
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.HashKey;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.PartitionKey;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.RangeKey;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondaryPartitionKey;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondarySortKey;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SortKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.*;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert.LegacyAttributeConverterProvider;
 import io.micronaut.context.BeanContext;
+import io.micronaut.core.annotation.AnnotationMetadataProvider;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.beans.BeanIntrospection;
 import io.micronaut.core.beans.BeanIntrospector;
@@ -44,7 +40,6 @@ import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.ObjectConstructo
 import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticTableSchema;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.UpdateBehavior;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.WrappedTableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.BeanTableSchemaAttributeTag;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
@@ -60,6 +55,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecon
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbUpdateBehavior;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -142,6 +138,10 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         SecondarySortKey.class.getName(),
         DynamoDbSecondarySortKey.class.getName()
     );
+    private static final List<String> UPDATE_BEHAVIOUR_ANNOTATIONS = Arrays.asList(
+        UpdateBehavior.class.getName(),
+        DynamoDbUpdateBehavior.class.getName()
+    );
 
     private BeanIntrospectionTableSchema(StaticTableSchema<T> staticTableSchema) {
         super(staticTableSchema);
@@ -220,7 +220,7 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         BeanProperty<T, P> propertyDescriptor,
         BeanContext beanContext
     ) {
-        Optional<AnnotationValue<DynamoDbFlatten>> dynamoDbFlatten = propertyDescriptor.findAnnotation(DynamoDbFlatten.class);
+        Optional<AnnotationValue<Annotation>> dynamoDbFlatten = findAnnotation(propertyDescriptor, DynamoDbFlatten.class, Flatten.class);
 
         if (dynamoDbFlatten.isPresent()) {
             builder.flatten(
@@ -242,8 +242,8 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
     }
 
     private static <T> AttributeConfiguration resolveAttributeConfiguration(BeanProperty<T, ?> propertyDescriptor) {
-        boolean shouldPreserveEmptyObject = propertyDescriptor.isAnnotationPresent(DynamoDbPreserveEmptyObject.class);
-        boolean shouldIgnoreNulls = propertyDescriptor.isAnnotationPresent(DynamoDbIgnoreNulls.class);
+        boolean shouldPreserveEmptyObject = findAnnotation(propertyDescriptor, DynamoDbPreserveEmptyObject.class, PreserveEmptyObjects.class).isPresent();
+        boolean shouldIgnoreNulls = findAnnotation(propertyDescriptor, DynamoDbIgnoreNulls.class, IgnoreNulls.class).isPresent();
 
         return AttributeConfiguration.builder()
             .preserveEmptyObject(shouldPreserveEmptyObject)
@@ -325,7 +325,7 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         BeanProperty<T, P> propertyDescriptor,
         BeanContext beanContext
     ) {
-        return propertyDescriptor.findAnnotation(DynamoDbConvertedBy.class)
+        return findAnnotation(propertyDescriptor, DynamoDbConvertedBy.class, ConvertedBy.class)
             .flatMap(AnnotationValue::classValue)
             .map(clazz -> (AttributeConverter<P>) fromContextOrNew(clazz, beanContext).get());
     }
@@ -339,29 +339,23 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
     private static <T> void addTagsToAttribute(StaticAttribute.Builder<?, ?> attributeBuilder,
                                                BeanProperty<T, ?> propertyDescriptor) {
 
-        propertyDescriptor.findAnnotation(DynamoDbUpdateBehavior.class)
-            .flatMap(anno -> anno.enumValue(UpdateBehavior.class))
-            .ifPresent(behavior -> attributeBuilder.addTag(StaticAttributeTags.updateBehavior(behavior)));
+        findAnnotation(propertyDescriptor, UPDATE_BEHAVIOUR_ANNOTATIONS)
+            .flatMap(anno -> anno.enumValue(Enum.class))
+            .ifPresent(behavior -> attributeBuilder.addTag(StaticAttributeTags.updateBehavior(software.amazon.awssdk.enhanced.dynamodb.mapper.UpdateBehavior.valueOf(behavior.name()))));
 
-        propertyDescriptor.getAnnotationNames().forEach(name -> {
-            if (PARTITION_KEYS_ANNOTATIONS.contains(name)) {
-                attributeBuilder.addTag(StaticAttributeTags.primaryPartitionKey());
-            } else if (SORT_KEYS_ANNOTATIONS.contains(name)) {
-                attributeBuilder.addTag(StaticAttributeTags.primarySortKey());
-            } else if (SECONDARY_PARTITION_KEYS_ANNOTATIONS.contains(name)) {
-                propertyDescriptor.findAnnotation(name)
-                    .map(anno -> anno.stringValues("indexNames"))
-                    .ifPresent(indexNames ->
-                        attributeBuilder.addTag(StaticAttributeTags.secondaryPartitionKey(Arrays.asList(indexNames)))
-                    );
-            } else if (SECONDARY_SORT_KEYS_ANNOTATIONS.contains(name)) {
-                propertyDescriptor.findAnnotation(name)
-                    .map(anno -> anno.stringValues("indexNames"))
-                    .ifPresent(indexNames ->
-                        attributeBuilder.addTag(StaticAttributeTags.secondarySortKey(Arrays.asList(indexNames)))
-                    );
-            }
-        });
+        findAnnotation(propertyDescriptor, PARTITION_KEYS_ANNOTATIONS)
+            .ifPresent(anno -> attributeBuilder.addTag(StaticAttributeTags.primaryPartitionKey()));
+
+        findAnnotation(propertyDescriptor, SORT_KEYS_ANNOTATIONS)
+            .ifPresent(anno -> attributeBuilder.addTag(StaticAttributeTags.primarySortKey()));
+
+        findAnnotation(propertyDescriptor, SECONDARY_PARTITION_KEYS_ANNOTATIONS)
+            .map(anno -> anno.stringValues("indexNames"))
+            .ifPresent(indexNames -> attributeBuilder.addTag(StaticAttributeTags.secondaryPartitionKey(Arrays.asList(indexNames))));
+
+        findAnnotation(propertyDescriptor, SECONDARY_SORT_KEYS_ANNOTATIONS)
+            .map(anno -> anno.stringValues("indexNames"))
+            .ifPresent(indexNames -> attributeBuilder.addTag(StaticAttributeTags.secondarySortKey(Arrays.asList(indexNames))));
     }
 
     private static <R> Supplier<R> fromContextOrNew(Class<R> clazz, BeanContext beanContext) {
@@ -386,9 +380,9 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
     }
 
     private static <T> String attributeNameForProperty(BeanProperty<T, ?> propertyDescriptor) {
-        return propertyDescriptor.findAnnotation(DynamoDbAttribute.class)
+        return findAnnotation(propertyDescriptor, DynamoDbAttribute.class, Attribute.class)
             .flatMap(AnnotationValue::stringValue)
-            .orElse(propertyDescriptor.getName());
+            .orElseGet(propertyDescriptor::getName);
     }
 
     private static <T> boolean isMappableProperty(Class<T> beanClass, BeanProperty<T, ?> propertyDescriptor) {
@@ -408,6 +402,11 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
             return false;
         }
 
+        if (propertyDescriptor.isAnnotationPresent(Ignore.class)) {
+            debugLog(beanClass, () -> "Ignoring bean property " + propertyDescriptor.getName() + " because it is ignored.");
+            return false;
+        }
+
         return true;
     }
 
@@ -419,6 +418,27 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
 
     private static void debugLog(Class<?> beanClass, Supplier<String> logMessage) {
         BEAN_LOGGER.debug(() -> beanClass.getTypeName() + " - " + logMessage.get());
+    }
+
+    private static Optional<AnnotationValue<Annotation>> findAnnotation(AnnotationMetadataProvider source, Class<? extends Annotation>... annotationClasses) {
+        for (Class<? extends Annotation> annotationName : annotationClasses) {
+            @SuppressWarnings("unchecked")
+            Optional<AnnotationValue<Annotation>> maybeAnno = source.findAnnotation((Class<Annotation>) annotationName);
+            if (maybeAnno.isPresent()) {
+                return maybeAnno;
+            }
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<AnnotationValue<Annotation>> findAnnotation(AnnotationMetadataProvider source, Iterable<String> annotationNames) {
+        for (String annotationName : annotationNames) {
+            Optional<AnnotationValue<Annotation>> maybeAnno = source.findAnnotation(annotationName);
+            if (maybeAnno.isPresent()) {
+                return maybeAnno;
+            }
+        }
+        return Optional.empty();
     }
 }
 

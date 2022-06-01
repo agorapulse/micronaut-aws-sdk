@@ -28,7 +28,7 @@ import software.amazon.awssdk.services.dynamodb.model.ProjectionType;
 import java.util.Date;
 import java.util.Objects;
 
-@Introspected
+@Introspected                                                                           // <1>
 public class DynamoDBEntity implements PlaybookAware {
 
     public static final String DATE_INDEX = "date";
@@ -41,7 +41,7 @@ public class DynamoDBEntity implements PlaybookAware {
     private Date date;
     private Integer number = 0;
 
-    @PartitionKey
+    @PartitionKey                                                                       // <2>
     public String getParentId() {
         return parentId;
     }
@@ -50,7 +50,7 @@ public class DynamoDBEntity implements PlaybookAware {
         this.parentId = parentId;
     }
 
-    @SortKey
+    @SortKey                                                                            // <3>
     public String getId() {
         return id;
     }
@@ -59,7 +59,7 @@ public class DynamoDBEntity implements PlaybookAware {
         this.id = id;
     }
 
-    @SecondarySortKey(indexNames = RANGE_INDEX)
+    @SecondarySortKey(indexNames = RANGE_INDEX)                                         // <4>
     public String getRangeIndex() {
         return rangeIndex;
     }
@@ -68,7 +68,7 @@ public class DynamoDBEntity implements PlaybookAware {
         this.rangeIndex = rangeIndex;
     }
 
-    @Projection(ProjectionType.ALL)
+    @Projection(ProjectionType.ALL)                                                     // <5>
     @SecondarySortKey(indexNames = DATE_INDEX)
     public Date getDate() {
         return date;
@@ -87,13 +87,9 @@ public class DynamoDBEntity implements PlaybookAware {
     }
 
     @Projection(ProjectionType.ALL)
-    @SecondaryPartitionKey(indexNames = GLOBAL_INDEX)
+    @SecondaryPartitionKey(indexNames = GLOBAL_INDEX)                                   // <6>
     public String getGlobalIndex() {
         return parentId + ":" + id;
-    }
-
-    public void setGlobalIndex(String globalIndex) {
-        // ignore
     }
 
     //CHECKSTYLE:OFF

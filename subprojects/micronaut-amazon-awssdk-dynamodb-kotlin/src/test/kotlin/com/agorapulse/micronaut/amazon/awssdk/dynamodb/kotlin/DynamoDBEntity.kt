@@ -22,25 +22,25 @@ import io.micronaut.core.annotation.Introspected
 import software.amazon.awssdk.services.dynamodb.model.ProjectionType
 import java.util.*
 
-@Introspected
+@Introspected                                                                           // <1>
 class DynamoDBEntity {
 
-    @PartitionKey
+    @PartitionKey                                                                       // <2>
     var parentId: String? = null
 
-    @SortKey
+    @SortKey                                                                            // <3>
     var id: String? = null
 
-    @SecondarySortKey(indexNames = [RANGE_INDEX])
+    @SecondarySortKey(indexNames = [RANGE_INDEX])                                       // <4>
     var rangeIndex: String? = null
 
-    @SecondarySortKey(indexNames = [DATE_INDEX])
+    @SecondarySortKey(indexNames = [DATE_INDEX])                                        // <5>
     @Projection(ProjectionType.ALL)
     var date: Date? = null
 
     var number = 0
 
-    @SecondaryPartitionKey(indexNames = [GLOBAL_INDEX])
+    @SecondaryPartitionKey(indexNames = [GLOBAL_INDEX])                                 // <6>
     @Projection(ProjectionType.ALL)
     fun getGlobalIndex(): String {
         return "$parentId:$id"

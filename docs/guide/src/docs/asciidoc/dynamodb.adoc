@@ -15,11 +15,20 @@ This library provides two approaches to work with DynamoDB tables and entities:
 ----
 annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-dynamodb-annotation-processor:{project-version}'
 implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb:{project-version}'
+
+// for Kotlin Query DSL
+implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb-kotlin:{project-version}'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']
 .Maven (AWS SDK 2.x)
 ----
+<dependency>
+    <groupId>com.agorapulse</groupId>
+    <artifactId>micronaut-amazon-awssdk-dynamodb</artifactId>
+    <version>{project-version}</version>
+</dependency>
+<!-- for Kotlin Query DSL -->
 <dependency>
     <groupId>com.agorapulse</groupId>
     <artifactId>micronaut-amazon-awssdk-dynamodb</artifactId>
@@ -43,6 +52,53 @@ implementation 'com.agorapulse:micronaut-aws-sdk-dynamodb:{project-version}'
     <version>{project-version}</version>
 </dependency>
 ----
+
+==== Entity Class
+
+The entity class is a class which instances represent the items in DynamoDB.
+
+For AWS SDK v2 you don't need to use the https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/enhanced/dynamodb/mapper/annotations/package-summary.html[native annotations] but
+you fill their counterparts in `com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation` package. The only requirements is that
+the class needs to be annotated either with `@Introspected` or `@DynamoDbBean`.
+
+
+
+[source,groovy,indent=0,options="nowrap",role="primary"]
+.Groovy
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/dynamodb/groovy/DynamoDBEntity.groovy[lines=19..-1]
+----
+<1> The entity must be annotated with `@Introspected` or `@DynamoDBBean`
+<2> The entity must provide the partition key using `@ParitionKey` annotation
+<3> The sort key is optional
+<4> The secondary indices are generated automatically if not present
+<5> If the secondary indices are generated then the projection type must be specified (the default is KEYS_ONLY)
+<6> The secondary indices can be read only if you derive them from the other attributes
+
+
+[source,java,indent=0,options="nowrap",role="secondary"]
+.Java
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/dynamodb/DynamoDBEntity.java[lines=19..-1]
+----
+<1> The entity must be annotated with `@Introspected` or `@DynamoDBBean`
+<2> The entity must provide the partition key using `@ParitionKey` annotation
+<3> The sort key is optional
+<4> The secondary indices are generated automatically if not present
+<5> If the secondary indices are generated then the projection type must be specified (the default is KEYS_ONLY)
+<6> The secondary indices can be read only if you derive them from the other attributes
+
+[source,kotlin,indent=0,options="nowrap",role="secondary"]
+.Kotlin
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntity.kt[lines=19..-1]
+----
+<1> The entity must be annotated with `@Introspected` or `@DynamoDBBean`
+<2> The entity must provide the partition key using `@ParitionKey` annotation
+<3> The sort key is optional
+<4> The secondary indices are generated automatically if not present
+<5> If the secondary indices are generated then the projection type must be specified (the default is KEYS_ONLY)
+<6> The secondary indices can be read only if you derive them from the other attributes
 
 ==== Declarative Services with `@Service`
 
@@ -292,6 +348,123 @@ public interface DynamoDBEntityService {
 }
 ----
 
+
+[source,kotlin,indent=0,options="nowrap",role="secondary"]
+.Kotlin
+----
+@Service(value = DynamoDBEntity::class, tableName = "DynamoDBJava")
+interface DynamoDBEntityService {
+
+    fun sget(@PartitionKey parentId: String, @SortKey id: String): DynamoDBEntity
+
+    fun load(@PartitionKey parentId: String, @SortKey id: String): DynamoDBEntity
+
+    fun getAll(hash: String, rangeKeys: List<String>): List<DynamoDBEntity>
+
+    fun getAll(hash: String, vararg rangeKeys: String): List<DynamoDBEntity>
+
+    fun loadAll(hash: String, rangeKeys: List<String>): List<DynamoDBEntity>
+
+    fun loadAll(hash: String, vararg rangeKeys: String): List<DynamoDBEntity>
+
+    fun save(entity: DynamoDBEntity): DynamoDBEntity
+
+    fun saveAll(vararg entities: DynamoDBEntity): List<DynamoDBEntity?>?
+
+    fun saveAll(entities: Iterable<DynamoDBEntity>): List<DynamoDBEntity>
+
+    fun count(hashKey: String): Int
+
+    fun count(hashKey: String, rangeKey: String): Int
+
+    class EqRangeIndex : QueryFunction<DynamoDBEntity>({ args: Map<String, Any> ->
+        partitionKey(args.get("hashKey"))
+        index(DynamoDBEntity.RANGE_INDEX)
+        sortKey {
+            eq(args["rangeKey"])
+        }
+    })
+
+    @Query(EqRangeIndex::class)
+    fun countByRangeIndex(hashKey: String, rangeKey: String): Int
+
+    class BetweenDateIndex : QueryFunction<DynamoDBEntity>({ args: Map<String, Any> ->
+        index(DynamoDBEntity.DATE_INDEX)
+        partitionKey(args["hashKey"])
+        sortKey { between(args["after"], args["before"]) }
+        page(1)
+    })
+
+    @Query(BetweenDateIndex::class)
+    fun countByDates(hashKey: String, after: Date, before: Date): Int
+
+    fun query(hashKey: String): Publisher<DynamoDBEntity>
+    fun query(hashKey: String, rangeKey: String): Publisher<DynamoDBEntity>
+
+    class EqRangeProjection : QueryFunction<DynamoDBEntity>({ args: Map<String, Any> ->
+        partitionKey(args["hashKey"])
+        index(DynamoDBEntity.RANGE_INDEX)
+        sortKey { eq(args["rangeKey"]) }
+        only(DynamoDBEntity.RANGE_INDEX)
+    })
+    @Query(EqRangeProjection::class)
+    fun queryByRangeIndex(hashKey: String, rangeKey: String): Publisher<DynamoDBEntity>
+
+    @Query(BetweenDateIndex::class)
+    fun queryByDates(hashKey: String, after: Date, before: Date): List<DynamoDBEntity>
+
+    class BetweenDateIndexScroll : QueryFunction<DynamoDBEntity>({ args: Map<String, Any> ->
+        index(DynamoDBEntity.DATE_INDEX)
+        partitionKey(args["hashKey"])
+        lastEvaluatedKey(args["lastEvaluatedKey"])
+        sortKey { between(args["after"], args["before"]) }
+    })
+
+    @Query(BetweenDateIndexScroll::class)
+    fun queryByDatesScroll(
+        hashKey: String,
+        after: Date,
+        before: Date,
+        lastEvaluatedKey: DynamoDBEntity
+    ): List<DynamoDBEntity>
+
+    fun delete(entity: DynamoDBEntity)
+    fun delete(hashKey: String, rangeKey: String)
+
+    @Query(EqRangeIndex::class)
+    fun deleteByRangeIndex(hashKey: String, rangeKey: String): Int
+
+    @Query(BetweenDateIndex::class)
+    fun deleteByDates(hashKey: String, after: Date, before: Date): Int
+    class IncrementNumber : UpdateFunction<DynamoDBEntity, Int>({ args: Map<String, Any> ->
+        partitionKey(args["hashKey"])
+        sortKey(args["rangeKey"])
+        add("number", 1)
+        returnUpdatedNew(DynamoDBEntity::number)
+    })
+
+    @Update(IncrementNumber::class)
+    fun increment(hashKey: String, rangeKey: String): Number
+    class DecrementNumber : UpdateFunction<DynamoDBEntity, Int>({ args: Map<String, Any> ->
+        partitionKey(args["hashKey"])
+        sortKey(args["rangeKey"])
+        add("number", -1)
+        returnUpdatedNew(DynamoDBEntity::number)
+    })
+
+    @Update(DecrementNumber::class)
+    fun decrement(hashKey: String, rangeKey: String): Number
+    class EqRangeScan : ScanFunction<DynamoDBEntity>({ args: Map<String, Any> ->
+        filter {
+            eq(DynamoDBEntity.RANGE_INDEX, args["foo"])
+        }
+
+    })
+    @Scan(EqRangeScan::class)
+    fun scanAllByRangeIndex(foo: String): Publisher<DynamoDBEntity>
+}
+----
+
 The following table summarizes the supported method signatures:
 
 .Basic Service Methods
@@ -426,6 +599,28 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy
 <6> `@Query` annotation accepts a class which implements `Function<Map<String, Object>, DetachedQuery>`
 <7> The arguments have no special meaning but you can use them in the query using `arguments` map. The method must return either `Publisher` or `List` of entities.
 
+
+[source,kotlin,indent=0,options="nowrap",role="secondary"]
+.Kotlin
+
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=header]
+
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=sample-query-class]
+
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=sample-query]
+
+}
+----
+<1> Annotate an interface with `@Service` with the type of the entity as its `value`
+<2> Create class that extends `com.agorapulse.micronaut.amazon.awssdk.dynamodb.kotlin.QueryFunction` and use the DSL constructor
+<3> Specify a partition key with `partitionKey` method and method's `hashKey` argument
+<4> Specify some range key criteria with the method's `rangeKey` argument (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
+<5> Only `rangeIndex` property will be populated in the entities returned
+<6> `@Query` annotation accepts a class which implements `Function<Map<String, Object>, DetachedQuery>`
+<7> The arguments have no special meaning but you can use them in the query using `arguments` map. The method must return either `Publisher` or `List` of entities.
+
+
 [source,groovy,indent=0,options="nowrap",role="secondary"]
 .Groovy  (AWS SDK 1.x)
 ----
@@ -477,6 +672,23 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy
 include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/dynamodb/DynamoDBEntityService.java[tags=sample-scan-class]
 
 include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/dynamodb/DynamoDBEntityService.java[tags=sample-scan]
+
+}
+----
+<1> Annotate an interface with `@Service` with the type of the entity as its `value`
+<2> Define class which implements `ScanFunction`
+<3> Specify some filter criteria with the method's `foo` argument (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
+<4> `@Scan` annotation accepts a class which implements `Function<Map<String, Object>, DetachedScan>`
+<5> The arguments have no special meaning but you can use them in the scan definition. The method must return either `Publisher` or `List` of entities.
+
+[source,kotlin,indent=0,options="nowrap",role="secondary"]
+.Kotlin
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=header]
+
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=sample-scan-class]
+
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=sample-scan]
 
 }
 ----
@@ -547,6 +759,27 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy
 <6> Specify what should be returned from the method (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html[UpdateBuilder] for full reference).
 <7> `@Update` annotation accepts a class which implements `Function<Map<String, Object>, DetachedUpdate>`
 <8> The arguments have no special meaning but you can use them in the scan definition. The method's return value depends on the value returned from `returnUpdatedNew` mapper.
+
+[source,kotlin,indent=0,options="nowrap",role="secondary"]
+.Kotlin
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=header]
+
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=sample-update-class]
+
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=sample-update]
+
+}
+----
+<1> Annotate an interface with `@Service` with the type of the entity as its `value`
+<2> Define class which extends `com.agorapulse.micronaut.amazon.awssdk.dynamodb.kotlin.UpdateFunction` and use the DSL constructor
+<3> Specify a partition key with `partitionKey` method and method's `hashKey` argument
+<4> Specify a sort key with `sortKey` method and method's `rangeKey` argument
+<5> Specify update operation - increment `number` attribute (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html[UpdateBuilder] for full reference). You may have multiple update operations.
+<6> Specify what should be returned from the method (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html[UpdateBuilder] for full reference).
+<7> `@Update` annotation accepts a class which implements `Function<Map<String, Object>, DetachedUpdate>`
+<8> The arguments have no special meaning, but you can use them in the scan definition. The method's return value depends on the value returned from `returnUpdatedNew` mapper.
+
 
 [source,groovy,indent=0,options="nowrap",role="secondary"]
 .Groovy  (AWS SDK 1.x)
