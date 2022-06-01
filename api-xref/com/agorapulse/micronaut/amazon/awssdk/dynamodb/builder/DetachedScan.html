@@ -26,7 +26,7 @@
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>  <strong class="jxr_keyword">package</strong> com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 <a class="jxr_linenumber" name="L19" href="#L19">19</a>  
 <a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeConversionHelper;
-<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> io.reactivex.Flowable;
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> org.reactivestreams.Publisher;
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> software.amazon.awssdk.enhanced.dynamodb.MappedTableResource;
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
@@ -42,7 +42,7 @@
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  <em class="jxr_javadoccomment">     * @param mapper DynamoDB mapper</em>
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  <em class="jxr_javadoccomment">     * @return flowable of entities found for the current scan</em>
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>  <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L37" href="#L37">37</a>      Flowable&lt;T&gt; scan(DynamoDbTable&lt;T&gt; mapper, <a name="AttributeConversionHelper" href="../../../../../../../com/agorapulse/micronaut/amazon/awssdk/dynamodb/AttributeConversionHelper.html#AttributeConversionHelper">AttributeConversionHelper</a> attributeConversionHelper);
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>      Publisher&lt;T&gt; scan(DynamoDbTable&lt;T&gt; mapper, <a name="AttributeConversionHelper" href="../../../../../../../com/agorapulse/micronaut/amazon/awssdk/dynamodb/AttributeConversionHelper.html#AttributeConversionHelper">AttributeConversionHelper</a> attributeConversionHelper);
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>  
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>      <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L40" href="#L40">40</a>  <em class="jxr_javadoccomment">     * Counts entities satisfying given scan using provided mapper.</em>

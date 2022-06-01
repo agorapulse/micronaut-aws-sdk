@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/docs.css?v=1.7.3-micronaut-3.0" />
+<link rel="stylesheet" href="css/docs.css?v=2.0.0-micronaut-3.0" />
 <style>
 .hidden {
     display: none;
@@ -93,7 +93,7 @@ $(addBlockSwitches);
 <h1>Set of useful libraries for Micronaut</h1>
 <div class="details">
 <span id="author" class="author">Vladimir Orany</span><br>
-<span id="revnumber">version 1.7.3-micronaut-3.0</span>
+<span id="revnumber">version 2.0.0-micronaut-3.0</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -104,6 +104,7 @@ $(addBlockSwitches);
 <li><a href="#_dynamodb">1.2. DynamoDB</a>
 <ul class="sectlevel4">
 <li><a href="#_installation_2">Installation</a></li>
+<li><a href="#_entity_class">Entity Class</a></li>
 <li><a href="#_declarative_services_with_service">Declarative Services with <code>@Service</code></a></li>
 <li><a href="#_dynamodb_service">DynamoDB Service</a></li>
 <li><a href="#_dynamodb_accelerator_dax">DynamoDB Accelerator (DAX)</a></li>
@@ -381,8 +382,11 @@ For AWS SDK 1.x use artefacts starting with <code>micrnoaut-aws-sdk</code>. Thes
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-dynamodb-annotation-processor:1.7.3-micronaut-3.0'
-implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb:1.7.3-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-dynamodb-annotation-processor:2.0.0-micronaut-3.0'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb:2.0.0-micronaut-3.0'
+
+// for Kotlin Query DSL
+implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb-kotlin:2.0.0-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -391,15 +395,21 @@ implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb:1.7.3-micronaut-
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;1.7.3-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;2.0.0-micronaut-3.0&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;!-- for Kotlin Query DSL --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
+    &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
+    &lt;version&gt;2.0.0-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-aws-sdk-dynamodb-annotation-processor:1.7.3-micronaut-3.0'
-implementation 'com.agorapulse:micronaut-aws-sdk-dynamodb:1.7.3-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-aws-sdk-dynamodb-annotation-processor:2.0.0-micronaut-3.0'
+implementation 'com.agorapulse:micronaut-aws-sdk-dynamodb:2.0.0-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -408,9 +418,309 @@ implementation 'com.agorapulse:micronaut-aws-sdk-dynamodb:1.7.3-micronaut-3.0'</
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;1.7.3-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;2.0.0-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+For Kotlin use <code>kapt</code> instead of <code>annotationProcessor</code> configuration.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_entity_class"><a class="anchor" href="#_entity_class"></a>Entity Class</h5>
+<div class="paragraph">
+<p>The entity class is a class which instances represent the items in DynamoDB.</p>
+</div>
+<div class="paragraph">
+<p>For AWS SDK v2 you don&#8217;t need to use the <a href="https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/enhanced/dynamodb/mapper/annotations/package-summary.html">native annotations</a> but
+you fill their counterparts in <code>com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation</code> package. The only requirements is that
+the class needs to be annotated either with <code>@Introspected</code> or <code>@DynamoDbBean</code>.</p>
+</div>
+<div class="listingblock primary">
+<div class="title">Groovy</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="groovy">import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.PartitionKey
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Projection
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondaryPartitionKey
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondarySortKey
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SortKey
+import groovy.transform.Canonical
+import groovy.transform.CompileStatic
+import io.micronaut.core.annotation.Introspected
+import software.amazon.awssdk.services.dynamodb.model.ProjectionType
+
+@Canonical
+@Introspected                                                                           <i class="conum" data-value="1"></i><b>(1)</b>
+@CompileStatic
+class DynamoDBEntity {
+
+    public static final String DATE_INDEX = 'date'
+    public static final String RANGE_INDEX = 'rangeIndex'
+    public static final String GLOBAL_INDEX = 'globalIndex'
+
+    @PartitionKey String parentId                                                       <i class="conum" data-value="2"></i><b>(2)</b>
+    @SortKey String id                                                                  <i class="conum" data-value="3"></i><b>(3)</b>
+
+    @SecondarySortKey(indexNames = RANGE_INDEX)                                         <i class="conum" data-value="4"></i><b>(4)</b>
+    String rangeIndex
+
+    @Projection(ProjectionType.ALL)                                                     <i class="conum" data-value="5"></i><b>(5)</b>
+    @SecondarySortKey(indexNames = DATE_INDEX)
+    Date date
+
+    Integer number = 0
+
+    @Projection(ProjectionType.ALL)
+    @SecondaryPartitionKey(indexNames = GLOBAL_INDEX)                                   <i class="conum" data-value="6"></i><b>(6)</b>
+    String getGlobalIndex() {
+        return "$parentId:$id"
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The entity must be annotated with <code>@Introspected</code> or <code>@DynamoDBBean</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The entity must provide the partition key using <code>@ParitionKey</code> annotation</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The sort key is optional</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>The secondary indices are generated automatically if not present</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>If the secondary indices are generated then the projection type must be specified (the default is KEYS_ONLY)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>The secondary indices can be read only if you derive them from the other attributes</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Java</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="java">import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.PartitionKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Projection;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondaryPartitionKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondarySortKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SortKey;
+import io.micronaut.core.annotation.Introspected;
+import software.amazon.awssdk.services.dynamodb.model.ProjectionType;
+
+import java.util.Date;
+import java.util.Objects;
+
+@Introspected                                                                           <i class="conum" data-value="1"></i><b>(1)</b>
+public class DynamoDBEntity implements PlaybookAware {
+
+    public static final String DATE_INDEX = "date";
+    public static final String RANGE_INDEX = "rangeIndex";
+    public static final String GLOBAL_INDEX = "globalIndex";
+
+    private String parentId;
+    private String id;
+    private String rangeIndex;
+    private Date date;
+    private Integer number = 0;
+
+    @PartitionKey                                                                       <i class="conum" data-value="2"></i><b>(2)</b>
+    public String getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(String parentId) {
+        this.parentId = parentId;
+    }
+
+    @SortKey                                                                            <i class="conum" data-value="3"></i><b>(3)</b>
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    @SecondarySortKey(indexNames = RANGE_INDEX)                                         <i class="conum" data-value="4"></i><b>(4)</b>
+    public String getRangeIndex() {
+        return rangeIndex;
+    }
+
+    public void setRangeIndex(String rangeIndex) {
+        this.rangeIndex = rangeIndex;
+    }
+
+    @Projection(ProjectionType.ALL)                                                     <i class="conum" data-value="5"></i><b>(5)</b>
+    @SecondarySortKey(indexNames = DATE_INDEX)
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public Integer getNumber() {
+        return number;
+    }
+
+    public void setNumber(Integer number) {
+        this.number = number;
+    }
+
+    @Projection(ProjectionType.ALL)
+    @SecondaryPartitionKey(indexNames = GLOBAL_INDEX)                                   <i class="conum" data-value="6"></i><b>(6)</b>
+    public String getGlobalIndex() {
+        return parentId + ":" + id;
+    }
+
+    //CHECKSTYLE:OFF
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DynamoDBEntity that = (DynamoDBEntity) o;
+        return Objects.equals(parentId, that.parentId) &amp;&amp;
+            Objects.equals(id, that.id) &amp;&amp;
+            Objects.equals(rangeIndex, that.rangeIndex) &amp;&amp;
+            Objects.equals(date, that.date) &amp;&amp;
+            Objects.equals(number, that.number);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(parentId, id, rangeIndex, date, number);
+    }
+
+    @Override
+    public String toString() {
+        return "DynamoDBEntity{" +
+            "parentId='" + parentId + '\'' +
+            ", id='" + id + '\'' +
+            ", rangeIndex='" + rangeIndex + '\'' +
+            ", date=" + date +
+            ", number=" + number +
+            '}';
+    }
+    //CHECKSTYLE:ON
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The entity must be annotated with <code>@Introspected</code> or <code>@DynamoDBBean</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The entity must provide the partition key using <code>@ParitionKey</code> annotation</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The sort key is optional</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>The secondary indices are generated automatically if not present</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>If the secondary indices are generated then the projection type must be specified (the default is KEYS_ONLY)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>The secondary indices can be read only if you derive them from the other attributes</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Kotlin</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="kotlin">import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.*
+import io.micronaut.core.annotation.Introspected
+import software.amazon.awssdk.services.dynamodb.model.ProjectionType
+import java.util.*
+
+@Introspected                                                                           <i class="conum" data-value="1"></i><b>(1)</b>
+class DynamoDBEntity {
+
+    @PartitionKey                                                                       <i class="conum" data-value="2"></i><b>(2)</b>
+    var parentId: String? = null
+
+    @SortKey                                                                            <i class="conum" data-value="3"></i><b>(3)</b>
+    var id: String? = null
+
+    @SecondarySortKey(indexNames = [RANGE_INDEX])                                       <i class="conum" data-value="4"></i><b>(4)</b>
+    var rangeIndex: String? = null
+
+    @SecondarySortKey(indexNames = [DATE_INDEX])                                        <i class="conum" data-value="5"></i><b>(5)</b>
+    @Projection(ProjectionType.ALL)
+    var date: Date? = null
+
+    var number = 0
+
+    @SecondaryPartitionKey(indexNames = [GLOBAL_INDEX])                                 <i class="conum" data-value="6"></i><b>(6)</b>
+    @Projection(ProjectionType.ALL)
+    fun getGlobalIndex(): String {
+        return "$parentId:$id"
+    }
+
+    companion object {
+        const val DATE_INDEX = "date"
+        const val RANGE_INDEX = "rangeIndex"
+        const val GLOBAL_INDEX = "globalIndex"
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The entity must be annotated with <code>@Introspected</code> or <code>@DynamoDBBean</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The entity must provide the partition key using <code>@ParitionKey</code> annotation</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The sort key is optional</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>The secondary indices are generated automatically if not present</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>If the secondary indices are generated then the projection type must be specified (the default is KEYS_ONLY)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>The secondary indices can be read only if you derive them from the other attributes</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect4">
@@ -486,8 +796,8 @@ interface DynamoDBItemDBService {
     })
     int countByDates(String hashKey, Date after, Date before)
 
-    Flowable&lt;DynamoDBEntity&gt; query(String hashKey)
-    Flowable&lt;DynamoDBEntity&gt; query(String hashKey, String rangeKey)
+    Publisher&lt;DynamoDBEntity&gt; query(String hashKey)
+    Publisher&lt;DynamoDBEntity&gt; query(String hashKey, String rangeKey)
 
     @Query({
         query(DynamoDBEntity) {
@@ -500,7 +810,7 @@ interface DynamoDBItemDBService {
             }
         }
     })
-    Flowable&lt;DynamoDBEntity&gt; queryByRangeIndex(String hashKey, String rangeKey)
+    Publisher&lt;DynamoDBEntity&gt; queryByRangeIndex(String hashKey, String rangeKey)
 
     @Query({
         query(DynamoDBEntity) {
@@ -558,7 +868,7 @@ interface DynamoDBItemDBService {
             }
         }
     })
-    Flowable&lt;DynamoDBEntity&gt; scanAllByRangeIndex(String foo)
+    Publisher&lt;DynamoDBEntity&gt; scanAllByRangeIndex(String foo)
 
 }</code></pre>
 </div>
@@ -651,12 +961,12 @@ public interface DynamoDBEntityService {
     @Query(BetweenDateIndex.class)
     int countByDates(String hashKey, Date after, Date before);
 
-    Flowable&lt;DynamoDBEntity&gt; query(String hashKey);
+    Publisher&lt;DynamoDBEntity&gt; query(String hashKey);
 
-    Flowable&lt;DynamoDBEntity&gt; query(String hashKey, String rangeKey);
+    Publisher&lt;DynamoDBEntity&gt; query(String hashKey, String rangeKey);
 
     @Query(EqRangeProjection.class)
-    Flowable&lt;DynamoDBEntity&gt; queryByRangeIndex(String hashKey, String rangeKey);
+    Publisher&lt;DynamoDBEntity&gt; queryByRangeIndex(String hashKey, String rangeKey);
 
     @Query(BetweenDateIndex.class)
     List&lt;DynamoDBEntity&gt; queryByDates(String hashKey, Date after, Date before);
@@ -678,8 +988,124 @@ public interface DynamoDBEntityService {
     Number decrement(String hashKey, String rangeKey);
 
     @Scan(EqRangeScan.class)
-    Flowable&lt;DynamoDBEntity&gt; scanAllByRangeIndex(String foo);
+    Publisher&lt;DynamoDBEntity&gt; scanAllByRangeIndex(String foo);
 
+}</code></pre>
+</div>
+</div>
+<div class="listingblock secondary">
+<div class="title">Kotlin</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="kotlin">@Service(value = DynamoDBEntity::class, tableName = "DynamoDBJava")
+interface DynamoDBEntityService {
+
+    fun sget(@PartitionKey parentId: String, @SortKey id: String): DynamoDBEntity
+
+    fun load(@PartitionKey parentId: String, @SortKey id: String): DynamoDBEntity
+
+    fun getAll(hash: String, rangeKeys: List&lt;String&gt;): List&lt;DynamoDBEntity&gt;
+
+    fun getAll(hash: String, vararg rangeKeys: String): List&lt;DynamoDBEntity&gt;
+
+    fun loadAll(hash: String, rangeKeys: List&lt;String&gt;): List&lt;DynamoDBEntity&gt;
+
+    fun loadAll(hash: String, vararg rangeKeys: String): List&lt;DynamoDBEntity&gt;
+
+    fun save(entity: DynamoDBEntity): DynamoDBEntity
+
+    fun saveAll(vararg entities: DynamoDBEntity): List&lt;DynamoDBEntity?&gt;?
+
+    fun saveAll(entities: Iterable&lt;DynamoDBEntity&gt;): List&lt;DynamoDBEntity&gt;
+
+    fun count(hashKey: String): Int
+
+    fun count(hashKey: String, rangeKey: String): Int
+
+    class EqRangeIndex : QueryFunction&lt;DynamoDBEntity&gt;({ args: Map&lt;String, Any&gt; -&gt;
+        partitionKey(args.get("hashKey"))
+        index(DynamoDBEntity.RANGE_INDEX)
+        sortKey {
+            eq(args["rangeKey"])
+        }
+    })
+
+    @Query(EqRangeIndex::class)
+    fun countByRangeIndex(hashKey: String, rangeKey: String): Int
+
+    class BetweenDateIndex : QueryFunction&lt;DynamoDBEntity&gt;({ args: Map&lt;String, Any&gt; -&gt;
+        index(DynamoDBEntity.DATE_INDEX)
+        partitionKey(args["hashKey"])
+        sortKey { between(args["after"], args["before"]) }
+        page(1)
+    })
+
+    @Query(BetweenDateIndex::class)
+    fun countByDates(hashKey: String, after: Date, before: Date): Int
+
+    fun query(hashKey: String): Publisher&lt;DynamoDBEntity&gt;
+    fun query(hashKey: String, rangeKey: String): Publisher&lt;DynamoDBEntity&gt;
+
+    class EqRangeProjection : QueryFunction&lt;DynamoDBEntity&gt;({ args: Map&lt;String, Any&gt; -&gt;
+        partitionKey(args["hashKey"])
+        index(DynamoDBEntity.RANGE_INDEX)
+        sortKey { eq(args["rangeKey"]) }
+        only(DynamoDBEntity.RANGE_INDEX)
+    })
+    @Query(EqRangeProjection::class)
+    fun queryByRangeIndex(hashKey: String, rangeKey: String): Publisher&lt;DynamoDBEntity&gt;
+
+    @Query(BetweenDateIndex::class)
+    fun queryByDates(hashKey: String, after: Date, before: Date): List&lt;DynamoDBEntity&gt;
+
+    class BetweenDateIndexScroll : QueryFunction&lt;DynamoDBEntity&gt;({ args: Map&lt;String, Any&gt; -&gt;
+        index(DynamoDBEntity.DATE_INDEX)
+        partitionKey(args["hashKey"])
+        lastEvaluatedKey(args["lastEvaluatedKey"])
+        sortKey { between(args["after"], args["before"]) }
+    })
+
+    @Query(BetweenDateIndexScroll::class)
+    fun queryByDatesScroll(
+        hashKey: String,
+        after: Date,
+        before: Date,
+        lastEvaluatedKey: DynamoDBEntity
+    ): List&lt;DynamoDBEntity&gt;
+
+    fun delete(entity: DynamoDBEntity)
+    fun delete(hashKey: String, rangeKey: String)
+
+    @Query(EqRangeIndex::class)
+    fun deleteByRangeIndex(hashKey: String, rangeKey: String): Int
+
+    @Query(BetweenDateIndex::class)
+    fun deleteByDates(hashKey: String, after: Date, before: Date): Int
+    class IncrementNumber : UpdateFunction&lt;DynamoDBEntity, Int&gt;({ args: Map&lt;String, Any&gt; -&gt;
+        partitionKey(args["hashKey"])
+        sortKey(args["rangeKey"])
+        add("number", 1)
+        returnUpdatedNew(DynamoDBEntity::number)
+    })
+
+    @Update(IncrementNumber::class)
+    fun increment(hashKey: String, rangeKey: String): Number
+    class DecrementNumber : UpdateFunction&lt;DynamoDBEntity, Int&gt;({ args: Map&lt;String, Any&gt; -&gt;
+        partitionKey(args["hashKey"])
+        sortKey(args["rangeKey"])
+        add("number", -1)
+        returnUpdatedNew(DynamoDBEntity::number)
+    })
+
+    @Update(DecrementNumber::class)
+    fun decrement(hashKey: String, rangeKey: String): Number
+    class EqRangeScan : ScanFunction&lt;DynamoDBEntity&gt;({ args: Map&lt;String, Any&gt; -&gt;
+        filter {
+            eq(DynamoDBEntity.RANGE_INDEX, args["foo"])
+        }
+
+    })
+    @Scan(EqRangeScan::class)
+    fun scanAllByRangeIndex(foo: String): Publisher&lt;DynamoDBEntity&gt;
 }</code></pre>
 </div>
 </div>
@@ -740,12 +1166,12 @@ public interface DynamoDBEntityService {
 <td class="tableblock halign-left valign-top"><p class="tableblock">Deletes an item which can be specified with hash key and optional range key. See <a href="#_advanced_queries">Advanced Queries</a> for advanced use cases</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Flowable&lt;T&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Publisher&lt;T&gt;</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>list*</code></p>
 <p class="tableblock"><code>findAll*</code></p>
 <p class="tableblock"><code>query*</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Entity or Hash key and optional range key annotated with <code>@HashKey</code> and <code>@RangeKey</code> if the argument name does not contain word <code>hash</code> or <code>range</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Flowable&lt;DynamoDBEntity&gt; query(String hashKey)</code></p>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Publisher&lt;DynamoDBEntity&gt; query(String hashKey)</code></p>
 <p class="tableblock">    <code>List&lt;DynamoDBEntity&gt; query(String hashKey, String rangeKey)</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Queries for all entities with given hash key and/or range key.</p></td>
 </tr>
@@ -810,7 +1236,7 @@ interface DynamoDBItemDBService {
             }
         }
     })
-    Flowable&lt;DynamoDBEntity&gt; queryByRangeIndex(String hashKey, String rangeKey)         <i class="conum" data-value="8"></i><b>(8)</b>
+    Publisher&lt;DynamoDBEntity&gt; queryByRangeIndex(String hashKey, String rangeKey)        <i class="conum" data-value="8"></i><b>(8)</b>
 
 }</code></pre>
 </div>
@@ -847,7 +1273,7 @@ interface DynamoDBItemDBService {
 </tr>
 <tr>
 <td><i class="conum" data-value="8"></i><b>8</b></td>
-<td>The arguments have no special meaning but you can use them in the query. The method must return either <code>Flowable</code> or <code>List</code> of entities.</td>
+<td>The arguments have no special meaning but you can use them in the query. The method must return either <code>Publisher</code> or <code>List</code> of entities.</td>
 </tr>
 </table>
 </div>
@@ -870,7 +1296,7 @@ public interface DynamoDBEntityService {
     }
 
     @Query(EqRangeProjection.class)                                                     <i class="conum" data-value="6"></i><b>(6)</b>
-    Flowable&lt;DynamoDBEntity&gt; queryByRangeIndex(String hashKey, String rangeKey);        <i class="conum" data-value="7"></i><b>(7)</b>
+    Publisher&lt;DynamoDBEntity&gt; queryByRangeIndex(String hashKey, String rangeKey);       <i class="conum" data-value="7"></i><b>(7)</b>
 
 }</code></pre>
 </div>
@@ -903,7 +1329,60 @@ public interface DynamoDBEntityService {
 </tr>
 <tr>
 <td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>The arguments have no special meaning but you can use them in the query using <code>arguments</code> map. The method must return either <code>Flowable</code> or <code>List</code> of entities.</td>
+<td>The arguments have no special meaning but you can use them in the query using <code>arguments</code> map. The method must return either <code>Publisher</code> or <code>List</code> of entities.</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Kotlin</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="kotlin">@Service(value = DynamoDBEntity::class, tableName = "DynamoDBJava")                     <i class="conum" data-value="1"></i><b>(1)</b>
+interface DynamoDBEntityService {
+
+    class EqRangeProjection : QueryFunction&lt;DynamoDBEntity&gt;({ args: Map&lt;String, Any&gt; -&gt; <i class="conum" data-value="2"></i><b>(2)</b>
+        partitionKey(args["hashKey"]) <i class="conum" data-value="3"></i><b>(3)</b>
+        index(DynamoDBEntity.RANGE_INDEX)
+        sortKey { eq(args["rangeKey"]) } <i class="conum" data-value="4"></i><b>(4)</b>
+        only(DynamoDBEntity.RANGE_INDEX) <i class="conum" data-value="5"></i><b>(5)</b>
+    })
+
+
+    @Query(EqRangeProjection::class)                                                    <i class="conum" data-value="6"></i><b>(6)</b>
+    fun queryByRangeIndex(hashKey: String, rangeKey: String): Publisher&lt;DynamoDBEntity&gt; <i class="conum" data-value="7"></i><b>(7)</b>
+
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Annotate an interface with <code>@Service</code> with the type of the entity as its <code>value</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Create class that extends <code>com.agorapulse.micronaut.amazon.awssdk.dynamodb.kotlin.QueryFunction</code> and use the DSL constructor</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Specify a partition key with <code>partitionKey</code> method and method&#8217;s <code>hashKey</code> argument</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Specify some range key criteria with the method&#8217;s <code>rangeKey</code> argument (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html">RangeConditionCollector</a> for full reference)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Only <code>rangeIndex</code> property will be populated in the entities returned</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td><code>@Query</code> annotation accepts a class which implements <code>Function&lt;Map&lt;String, Object&gt;, DetachedQuery&gt;</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>The arguments have no special meaning but you can use them in the query using <code>arguments</code> map. The method must return either <code>Publisher</code> or <code>List</code> of entities.</td>
 </tr>
 </table>
 </div>
@@ -926,7 +1405,7 @@ interface DynamoDBItemDBService {
             }
         }
     })
-    Flowable&lt;DynamoDBEntity&gt; queryByRangeIndex(String hashKey, String rangeKey)         <i class="conum" data-value="8"></i><b>(8)</b>
+    Publisher&lt;DynamoDBEntity&gt; queryByRangeIndex(String hashKey, String rangeKey)        <i class="conum" data-value="8"></i><b>(8)</b>
 
 }</code></pre>
 </div>
@@ -963,7 +1442,7 @@ interface DynamoDBItemDBService {
 </tr>
 <tr>
 <td><i class="conum" data-value="8"></i><b>8</b></td>
-<td>The arguments have no special meaning but you can use them in the query. The method must return either <code>Flowable</code> or <code>List</code> of entities.</td>
+<td>The arguments have no special meaning but you can use them in the query. The method must return either <code>Publisher</code> or <code>List</code> of entities.</td>
 </tr>
 </table>
 </div>
@@ -1004,7 +1483,7 @@ interface DynamoDBItemDBService {
             }
         }
     })
-    Flowable&lt;DynamoDBEntity&gt; scanAllByRangeIndex(String foo)                            <i class="conum" data-value="5"></i><b>(5)</b>
+    Publisher&lt;DynamoDBEntity&gt; scanAllByRangeIndex(String foo)                           <i class="conum" data-value="5"></i><b>(5)</b>
 
 
 }</code></pre>
@@ -1030,7 +1509,7 @@ interface DynamoDBItemDBService {
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>The arguments have no special meaning but you can use them in the scan definition. The method must return either <code>Flowable</code> or <code>List</code> of entities.</td>
+<td>The arguments have no special meaning but you can use them in the scan definition. The method must return either <code>Publisher</code> or <code>List</code> of entities.</td>
 </tr>
 </table>
 </div>
@@ -1052,7 +1531,7 @@ public interface DynamoDBEntityService {
     }
 
     @Scan(EqRangeScan.class)                                                            <i class="conum" data-value="4"></i><b>(4)</b>
-    Flowable&lt;DynamoDBEntity&gt; scanAllByRangeIndex(String foo);                           <i class="conum" data-value="5"></i><b>(5)</b>
+    Publisher&lt;DynamoDBEntity&gt; scanAllByRangeIndex(String foo);                          <i class="conum" data-value="5"></i><b>(5)</b>
 
 }</code></pre>
 </div>
@@ -1077,7 +1556,51 @@ public interface DynamoDBEntityService {
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>The arguments have no special meaning but you can use them in the scan definition. The method must return either <code>Flowable</code> or <code>List</code> of entities.</td>
+<td>The arguments have no special meaning but you can use them in the scan definition. The method must return either <code>Publisher</code> or <code>List</code> of entities.</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Kotlin</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="kotlin">@Service(value = DynamoDBEntity::class, tableName = "DynamoDBJava")                     <i class="conum" data-value="1"></i><b>(1)</b>
+interface DynamoDBEntityService {
+
+    class EqRangeScan : ScanFunction&lt;DynamoDBEntity&gt;({ args: Map&lt;String, Any&gt; -&gt;        <i class="conum" data-value="2"></i><b>(2)</b>
+        filter {
+            eq(DynamoDBEntity.RANGE_INDEX, args["foo"])                                 <i class="conum" data-value="3"></i><b>(3)</b>
+        }
+
+    })
+
+
+    @Scan(EqRangeScan::class)                                                           <i class="conum" data-value="4"></i><b>(4)</b>
+    fun scanAllByRangeIndex(foo: String): Publisher&lt;DynamoDBEntity&gt;                     <i class="conum" data-value="5"></i><b>(5)</b>
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Annotate an interface with <code>@Service</code> with the type of the entity as its <code>value</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Define class which implements <code>ScanFunction</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Specify some filter criteria with the method&#8217;s <code>foo</code> argument (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html">RangeConditionCollector</a> for full reference)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td><code>@Scan</code> annotation accepts a class which implements <code>Function&lt;Map&lt;String, Object&gt;, DetachedScan&gt;</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>The arguments have no special meaning but you can use them in the scan definition. The method must return either <code>Publisher</code> or <code>List</code> of entities.</td>
 </tr>
 </table>
 </div>
@@ -1098,7 +1621,7 @@ interface DynamoDBItemDBService {
             }
         }
     })
-    Flowable&lt;DynamoDBEntity&gt; scanAllByRangeIndex(String foo)                            <i class="conum" data-value="5"></i><b>(5)</b>
+    Publisher&lt;DynamoDBEntity&gt; scanAllByRangeIndex(String foo)                           <i class="conum" data-value="5"></i><b>(5)</b>
 
 
 }</code></pre>
@@ -1124,7 +1647,7 @@ interface DynamoDBItemDBService {
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>The arguments have no special meaning but you can use them in the scan definition. The method must return either <code>Flowable</code> or <code>List</code> of entities.</td>
+<td>The arguments have no special meaning but you can use them in the scan definition. The method must return either <code>Publisher</code> or <code>List</code> of entities.</td>
 </tr>
 </table>
 </div>
@@ -1251,6 +1774,63 @@ public interface DynamoDBEntityService {
 <tr>
 <td><i class="conum" data-value="8"></i><b>8</b></td>
 <td>The arguments have no special meaning but you can use them in the scan definition. The method&#8217;s return value depends on the value returned from <code>returnUpdatedNew</code> mapper.</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Kotlin</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="kotlin">@Service(value = DynamoDBEntity::class, tableName = "DynamoDBJava")                     <i class="conum" data-value="1"></i><b>(1)</b>
+interface DynamoDBEntityService {
+
+    class IncrementNumber : UpdateFunction&lt;DynamoDBEntity, Int&gt;({ args: Map&lt;String, Any&gt; -&gt;<i class="conum" data-value="2"></i><b>(2)</b>
+        partitionKey(args["hashKey"])                                                   <i class="conum" data-value="3"></i><b>(3)</b>
+        sortKey(args["rangeKey"])                                                       <i class="conum" data-value="4"></i><b>(4)</b>
+        add("number", 1)                                                                <i class="conum" data-value="5"></i><b>(5)</b>
+        returnUpdatedNew(DynamoDBEntity::number)                                        <i class="conum" data-value="6"></i><b>(6)</b>
+    })
+
+
+    @Update(IncrementNumber::class)                                                     <i class="conum" data-value="7"></i><b>(7)</b>
+    fun increment(hashKey: String, rangeKey: String): Number                            <i class="conum" data-value="8"></i><b>(8)</b>
+
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Annotate an interface with <code>@Service</code> with the type of the entity as its <code>value</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Define class which extends <code>com.agorapulse.micronaut.amazon.awssdk.dynamodb.kotlin.UpdateFunction</code> and use the DSL constructor</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Specify a partition key with <code>partitionKey</code> method and method&#8217;s <code>hashKey</code> argument</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Specify a sort key with <code>sortKey</code> method and method&#8217;s <code>rangeKey</code> argument</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Specify update operation - increment <code>number</code> attribute (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference). You may have multiple update operations.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Specify what should be returned from the method (see <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html">UpdateBuilder</a> for full reference).</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td><code>@Update</code> annotation accepts a class which implements <code>Function&lt;Map&lt;String, Object&gt;, DetachedUpdate&gt;</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>The arguments have no special meaning, but you can use them in the scan definition. The method&#8217;s return value depends on the value returned from <code>returnUpdatedNew</code> mapper.</td>
 </tr>
 </table>
 </div>
@@ -1658,7 +2238,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:1.7.3-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:2.0.0-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -1667,7 +2247,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;1.7.3-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;2.0.0-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1798,10 +2378,10 @@ public class DeclarativeServiceTest {
 <div class="content">
 <pre class="prettyprint highlight"><code>// for Kinesis client
 annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-kinesis-annotation-processor:{project-version
-implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis:1.7.3-micronaut-3.0'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis:2.0.0-micronaut-3.0'
 
 // for Kinesis listener
-implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:1.7.3-micronaut-3.0'</code></pre>
+implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:2.0.0-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -1811,13 +2391,13 @@ implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:1.7.3-micr
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-kinesis&lt;/artifactId&gt;
-    &lt;version&gt;1.7.3-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;2.0.0-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;!-- for Kinesis listener --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-kinesis-worker&lt;/artifactId&gt;
-    &lt;version&gt;1.7.3-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;2.0.0-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1825,10 +2405,10 @@ implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:1.7.3-micr
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code>// for Kinesis client
-annotationProcessor 'com.agorapulse:micronaut-aws-sdk-kinesis-annotation-processor:1.7.3-micronaut-3.0'
-implementation 'com.agorapulse:micronaut-aws-sdk-kinesis:1.7.3-micronaut-3.0'
+annotationProcessor 'com.agorapulse:micronaut-aws-sdk-kinesis-annotation-processor:2.0.0-micronaut-3.0'
+implementation 'com.agorapulse:micronaut-aws-sdk-kinesis:2.0.0-micronaut-3.0'
 // for Kinesis listener
-implementation 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:1.7.3-micronaut-3.0'</code></pre>
+implementation 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:2.0.0-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -1838,15 +2418,27 @@ implementation 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:1.7.3-micronaut-
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-kinesis&lt;/artifactId&gt;
-    &lt;version&gt;1.7.3-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;2.0.0-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;!-- for Kinesis listener --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-kinesis-worker&lt;/artifactId&gt;
-    &lt;version&gt;1.7.3-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;2.0.0-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+For Kotlin use <code>kapt</code> instead of <code>annotationProcessor</code> configuration.
+</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect4">
@@ -2557,7 +3149,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:1.7.3-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:2.0.0-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2566,7 +3158,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;1.7.3-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;2.0.0-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2672,7 +3264,7 @@ public class KinesisJavaDemoTest {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-s3:1.7.3-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-s3:2.0.0-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2681,14 +3273,14 @@ public class KinesisJavaDemoTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-s3&lt;/artifactId&gt;
-    &lt;version&gt;1.7.3-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;2.0.0-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-s3:1.7.3-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-s3:2.0.0-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2697,7 +3289,7 @@ public class KinesisJavaDemoTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-s3&lt;/artifactId&gt;
-    &lt;version&gt;1.7.3-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;2.0.0-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2779,8 +3371,8 @@ service.storeFile(TEXT_FILE_PATH, sampleContent);                               
 
 assertTrue(service.exists(TEXT_FILE_PATH));                                     <i class="conum" data-value="2"></i><b>(2)</b>
 
-Flowable&lt;S3Object&gt; summaries = service.listObjectSummaries("foo");              <i class="conum" data-value="3"></i><b>(3)</b>
-assertEquals(Long.valueOf(0L), summaries.count().blockingGet());</code></pre>
+Publisher&lt;S3Object&gt; summaries = service.listObjectSummaries("foo");             <i class="conum" data-value="3"></i><b>(3)</b>
+assertEquals(Long.valueOf(0L), Flux.from(summaries).count().block());</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2808,8 +3400,8 @@ service.storeFile(TEXT_FILE_PATH, sampleContent);                               
 
 assertTrue(service.exists(TEXT_FILE_PATH));                                     <i class="conum" data-value="2"></i><b>(2)</b>
 
-Flowable&lt;S3ObjectSummary&gt; summaries = service.listObjectSummaries("foo");       <i class="conum" data-value="3"></i><b>(3)</b>
-assertEquals(Long.valueOf(0L), summaries.count().blockingGet());</code></pre>
+Publisher&lt;S3ObjectSummary&gt; summaries = service.listObjectSummaries("foo");      <i class="conum" data-value="3"></i><b>(3)</b>
+assertEquals(Long.valueOf(0L), Flux.from(summaries).count().block());</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2841,8 +3433,8 @@ assertEquals(Long.valueOf(0L), summaries.count().blockingGet());</code></pre>
     }
 );
 
-Flowable&lt;S3Object&gt; fooSummaries = service.listObjectSummaries("foo");           <i class="conum" data-value="2"></i><b>(2)</b>
-assertEquals(KEY, fooSummaries.blockingFirst().key());</code></pre>
+Publisher&lt;S3Object&gt; fooSummaries = service.listObjectSummaries("foo");        <i class="conum" data-value="2"></i><b>(2)</b>
+assertEquals(KEY, Flux.from(fooSummaries).blockFirst().key());</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2866,8 +3458,8 @@ assertEquals(KEY, fooSummaries.blockingFirst().key());</code></pre>
     buildMetadata()
 );
 
-Flowable&lt;S3ObjectSummary&gt; fooSummaries = service.listObjectSummaries("foo");    <i class="conum" data-value="2"></i><b>(2)</b>
-assertEquals(KEY, fooSummaries.blockingFirst().getKey());</code></pre>
+Publisher&lt;S3ObjectSummary&gt; fooSummaries = service.listObjectSummaries("foo");   <i class="conum" data-value="2"></i><b>(2)</b>
+assertEquals(KEY, Flux.from(fooSummaries).blockFirst().getKey());</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2981,7 +3573,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:1.7.3-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:2.0.0-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2990,7 +3582,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;1.7.3-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;2.0.0-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3098,7 +3690,7 @@ public class SimpleStorageServiceTest {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-ses:1.7.3-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-ses:2.0.0-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3107,14 +3699,14 @@ public class SimpleStorageServiceTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-ses&lt;/artifactId&gt;
-    &lt;version&gt;1.7.3-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;2.0.0-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-ses:1.7.3-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-ses:2.0.0-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3123,7 +3715,7 @@ public class SimpleStorageServiceTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-ses&lt;/artifactId&gt;
-    &lt;version&gt;1.7.3-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;2.0.0-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3301,8 +3893,8 @@ for the full reference.</p>
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-sns-annotation-processor:1.7.3-micronaut-3.0'
-implementation 'com.agorapulse:micronaut-amazon-awssdk-sns:1.7.3-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-sns-annotation-processor:2.0.0-micronaut-3.0'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-sns:2.0.0-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3311,15 +3903,15 @@ implementation 'com.agorapulse:micronaut-amazon-awssdk-sns:1.7.3-micronaut-3.0'<
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-sns&lt;/artifactId&gt;
-    &lt;version&gt;1.7.3-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;2.0.0-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-aws-sdk-sns-annotation-processor:1.7.3-micronaut-3.0'
-implementation 'com.agorapulse:micronaut-aws-sdk-sns:1.7.3-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-aws-sdk-sns-annotation-processor:2.0.0-micronaut-3.0'
+implementation 'com.agorapulse:micronaut-aws-sdk-sns:2.0.0-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3328,9 +3920,21 @@ implementation 'com.agorapulse:micronaut-aws-sdk-sns:1.7.3-micronaut-3.0'</code>
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sns&lt;/artifactId&gt;
-    &lt;version&gt;1.7.3-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;2.0.0-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+For Kotlin use <code>kapt</code> instead of <code>annotationProcessor</code> configuration.
+</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect4">
@@ -3596,9 +4200,9 @@ You should always use <code>@Named</code> qualifier when injecting <code>SimpleN
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="java">String topicArn = service.createTopic(TEST_TOPIC);                              <i class="conum" data-value="1"></i><b>(1)</b>
 
-Topic found = service.listTopics().filter(t -&gt;                                  <i class="conum" data-value="2"></i><b>(2)</b>
+Topic found = Flux.from(service.listTopics()).filter(t -&gt;                       <i class="conum" data-value="2"></i><b>(2)</b>
     t.topicArn().endsWith(TEST_TOPIC)
-).blockingFirst();</code></pre>
+).blockFirst();</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -3618,9 +4222,9 @@ Topic found = service.listTopics().filter(t -&gt;                               
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="java">String topicArn = service.createTopic(TEST_TOPIC);                              <i class="conum" data-value="1"></i><b>(1)</b>
 
-Topic found = service.listTopics().filter(t -&gt;                                  <i class="conum" data-value="2"></i><b>(2)</b>
+Topic found = Flux.from(service.listTopics()).filter(t -&gt;                       <i class="conum" data-value="2"></i><b>(2)</b>
     t.getTopicArn().endsWith(TEST_TOPIC)
-).blockingFirst();</code></pre>
+).blockFirst();</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -3670,9 +4274,9 @@ service.unsubscribeTopic(subArn);                                               
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="java">service.deleteTopic(topicArn);                                                  <i class="conum" data-value="1"></i><b>(1)</b>
 
-Long zero = service.listTopics().filter(t -&gt;                                    <i class="conum" data-value="2"></i><b>(2)</b>
+Long zero = Flux.from(service.listTopics()).filter(t -&gt;                         <i class="conum" data-value="2"></i><b>(2)</b>
     t.topicArn().endsWith(TEST_TOPIC)
-).count().blockingGet();</code></pre>
+).count().block();</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -3692,9 +4296,9 @@ Long zero = service.listTopics().filter(t -&gt;                                 
 <div class="content">
 <pre class="prettyprint highlight nowrap"><code data-lang="java">service.deleteTopic(topicArn);                                                  <i class="conum" data-value="1"></i><b>(1)</b>
 
-Long zero = service.listTopics().filter(t -&gt;                                    <i class="conum" data-value="2"></i><b>(2)</b>
+Long zero = Flux.from(service.listTopics()).filter(t -&gt;                         <i class="conum" data-value="2"></i><b>(2)</b>
     t.getTopicArn().endsWith(TEST_TOPIC)
-).count().blockingGet();</code></pre>
+).count().block();</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -3810,7 +4414,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:1.7.3-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:2.0.0-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3819,7 +4423,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;1.7.3-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;2.0.0-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3943,8 +4547,8 @@ public class SimpleNotificationServiceTest {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-sqs-annotation-processor:1.7.3-micronaut-3.0'
-implementation 'com.agorapulse:micronaut-amazon-awssdk-sqs:1.7.3-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-sqs-annotation-processor:2.0.0-micronaut-3.0'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-sqs:2.0.0-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3953,15 +4557,15 @@ implementation 'com.agorapulse:micronaut-amazon-awssdk-sqs:1.7.3-micronaut-3.0'<
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-sqs&lt;/artifactId&gt;
-    &lt;version&gt;1.7.3-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;2.0.0-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-aws-sdk-sqs-annotation-processor:1.7.3-micronaut-3.0'
-implementation 'com.agorapulse:micronaut-aws-sdk-sqs:1.7.3-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-aws-sdk-sqs-annotation-processor:2.0.0-micronaut-3.0'
+implementation 'com.agorapulse:micronaut-aws-sdk-sqs:2.0.0-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3970,9 +4574,21 @@ implementation 'com.agorapulse:micronaut-aws-sdk-sqs:1.7.3-micronaut-3.0'</code>
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sqs&lt;/artifactId&gt;
-    &lt;version&gt;1.7.3-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;2.0.0-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+For Kotlin use <code>kapt</code> instead of <code>annotationProcessor</code> configuration.
+</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect4">
@@ -4450,7 +5066,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:1.7.3-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:2.0.0-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4459,7 +5075,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;1.7.3-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;2.0.0-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4567,7 +5183,7 @@ public class SimpleQueueServiceTest {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-sts:1.7.3-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-sts:2.0.0-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4576,14 +5192,14 @@ public class SimpleQueueServiceTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-sts&lt;/artifactId&gt;
-    &lt;version&gt;1.7.3-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;2.0.0-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-sts:1.7.3-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-sts:2.0.0-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4592,7 +5208,7 @@ public class SimpleQueueServiceTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sts&lt;/artifactId&gt;
-    &lt;version&gt;1.7.3-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;2.0.0-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4666,7 +5282,7 @@ Use this part of the library with caution. Using WebSockets with API Gateway can
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-ag-ws:1.7.3-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-ag-ws:2.0.0-micronaut-3.0'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4675,7 +5291,7 @@ Use this part of the library with caution. Using WebSockets with API Gateway can
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-ag-ws&lt;/artifactId&gt;
-    &lt;version&gt;1.7.3-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;2.0.0-micronaut-3.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -5143,8 +5759,8 @@ your Lambda function&#8217;s role must have following permissions (preferably co
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 1.7.3-micronaut-3.0<br>
-Last updated 2022-05-10 13:43:57 UTC
+Version 2.0.0-micronaut-3.0<br>
+Last updated 2022-06-01 10:08:37 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">

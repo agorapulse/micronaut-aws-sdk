@@ -55,13 +55,16 @@ RangeKey.java
 <a name="24"><font color="#808080">24</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*</font><br />
 <a name="25"><font color="#808080">25</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*&nbsp;This&nbsp;annotation&nbsp;is&nbsp;not&nbsp;required&nbsp;if&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;argument&nbsp;contains&nbsp;word&nbsp;</font><font color="#008000">&lt;code&gt;</font><font color="#008000">range</font><font color="#008000">&lt;/code&gt;&nbsp;</font><font color="#008000">or&nbsp;</font><font color="#008000">&lt;code&gt;</font><font color="#008000">sort</font><font color="#008000">&lt;/code&gt;</font><font color="#008000">.</font><br />
 <a name="26"><font color="#808080">26</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*</font><br />
-<a name="27"><font color="#808080">27</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*&nbsp;</font><font color="#005500">@deprecated&nbsp;</font><font color="#008000">use&nbsp;@</font><font color="#008000">{@link&nbsp;SortKey}&nbsp;</font><font color="#008000">instead</font><br />
-<a name="28"><font color="#808080">28</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*/</font><br />
-<a name="29"><font color="#808080">29</font>&nbsp;</a><font color="#646464">@Inherited</font><br />
-<a name="30"><font color="#808080">30</font>&nbsp;</a><font color="#646464">@Documented</font><br />
-<a name="31"><font color="#808080">31</font>&nbsp;</a><font color="#646464">@Retention</font><font color="#000000">(</font><font color="#000000">RetentionPolicy.RUNTIME</font><font color="#000000">)</font><br />
-<a name="32"><font color="#808080">32</font>&nbsp;</a><font color="#646464">@Target</font><font color="#000000">({</font><font color="#000000">ElementType.PARAMETER,&nbsp;ElementType.ANNOTATION_TYPE</font><font color="#000000">})</font><br />
-<a name="33"><font color="#808080">33</font>&nbsp;</a><font color="#0000c0"><b>public&nbsp;@interface&nbsp;</b></font><font color="#000000">RangeKey&nbsp;</font><font color="#000000">{&nbsp;}</font></code>
+<a name="27"><font color="#808080">27</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*&nbsp;This&nbsp;annotation&nbsp;can&nbsp;be&nbsp;used&nbsp;a&nbsp;replacement&nbsp;of&nbsp;</font><font color="#008000">&lt;code&gt;</font><font color="#008000">{@link&nbsp;software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey}</font><font color="#008000">&lt;/code&gt;</font><br />
+<a name="28"><font color="#808080">28</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*&nbsp;on&nbsp;fields.</font><br />
+<a name="29"><font color="#808080">29</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*</font><br />
+<a name="30"><font color="#808080">30</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*&nbsp;</font><font color="#005500">@deprecated&nbsp;</font><font color="#008000">use&nbsp;@</font><font color="#008000">{@link&nbsp;SortKey}&nbsp;</font><font color="#008000">instead</font><br />
+<a name="31"><font color="#808080">31</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*/</font><br />
+<a name="32"><font color="#808080">32</font>&nbsp;</a><font color="#646464">@Inherited</font><br />
+<a name="33"><font color="#808080">33</font>&nbsp;</a><font color="#646464">@Documented</font><br />
+<a name="34"><font color="#808080">34</font>&nbsp;</a><font color="#646464">@Retention</font><font color="#000000">(</font><font color="#000000">RetentionPolicy.RUNTIME</font><font color="#000000">)</font><br />
+<a name="35"><font color="#808080">35</font>&nbsp;</a><font color="#646464">@Target</font><font color="#000000">({</font><font color="#000000">ElementType.PARAMETER,&nbsp;ElementType.ANNOTATION_TYPE,&nbsp;ElementType.FIELD,&nbsp;ElementType.METHOD</font><font color="#000000">})</font><br />
+<a name="36"><font color="#808080">36</font>&nbsp;</a><font color="#0000c0"><b>public&nbsp;@interface&nbsp;</b></font><font color="#000000">RangeKey&nbsp;</font><font color="#000000">{&nbsp;}</font></code>
     
    </td>
   <!-- end source code -->

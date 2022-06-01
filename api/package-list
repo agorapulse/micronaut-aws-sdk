@@ -9,6 +9,7 @@ com.agorapulse.micronaut.amazon.awssdk.dynamodb.conditional
 com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert
 com.agorapulse.micronaut.amazon.awssdk.dynamodb.events
 com.agorapulse.micronaut.amazon.awssdk.dynamodb.groovy
+com.agorapulse.micronaut.amazon.awssdk.dynamodb.schema
 com.agorapulse.micronaut.amazon.awssdk.dynamodb.util
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v1

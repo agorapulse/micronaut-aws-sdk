@@ -50,7 +50,7 @@ DetachedQuery.java
 <a name="19"><font color="#808080">19</font>&nbsp;</a><font color="#ffffff"></font><br />
 <a name="20"><font color="#808080">20</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;</font><br />
 <a name="21"><font color="#808080">21</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;</font><br />
-<a name="22"><font color="#808080">22</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">io.reactivex.Flowable;</font><br />
+<a name="22"><font color="#808080">22</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">org.reactivestreams.Publisher;</font><br />
 <a name="23"><font color="#808080">23</font>&nbsp;</a><font color="#ffffff"></font><br />
 <a name="24"><font color="#808080">24</font>&nbsp;</a><font color="#008000">/**</font><br />
 <a name="25"><font color="#808080">25</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*&nbsp;An&nbsp;interface&nbsp;for&nbsp;queries&nbsp;which&nbsp;can&nbsp;be&nbsp;executed&nbsp;using&nbsp;supplied&nbsp;mapper.</font><br />
@@ -63,7 +63,7 @@ DetachedQuery.java
 <a name="32"><font color="#808080">32</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#008000">*&nbsp;</font><font color="#005500">@param&nbsp;</font><font color="#008000">mapper&nbsp;DynamoDB&nbsp;mapper</font><br />
 <a name="33"><font color="#808080">33</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#008000">*&nbsp;</font><font color="#005500">@return&nbsp;</font><font color="#008000">flowable&nbsp;of&nbsp;entities&nbsp;found&nbsp;for&nbsp;the&nbsp;current&nbsp;query</font><br />
 <a name="34"><font color="#808080">34</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#008000">*/</font><br />
-<a name="35"><font color="#808080">35</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">Flowable&lt;T&gt;&nbsp;query</font><font color="#000000">(</font><font color="#000000">IDynamoDBMapper&nbsp;mapper</font><font color="#000000">)</font><font color="#000000">;</font><br />
+<a name="35"><font color="#808080">35</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">Publisher&lt;T&gt;&nbsp;query</font><font color="#000000">(</font><font color="#000000">IDynamoDBMapper&nbsp;mapper</font><font color="#000000">)</font><font color="#000000">;</font><br />
 <a name="36"><font color="#808080">36</font>&nbsp;</a><font color="#ffffff"></font><br />
 <a name="37"><font color="#808080">37</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#008000">/**</font><br />
 <a name="38"><font color="#808080">38</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#008000">*&nbsp;Counts&nbsp;entities&nbsp;satisfying&nbsp;given&nbsp;query&nbsp;using&nbsp;provided&nbsp;mapper.</font><br />

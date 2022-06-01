@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html><head>
-<title>com/agorapulse/micronaut/aws/sns/FlowableListTopicHelper.java</title>
+<title>com/agorapulse/micronaut/aws/sns/FluxListTopicHelper.java</title>
   <style type="text/css">
     <!--code { font-family: Courier New, Courier; font-size: 10pt; margin: 0px; }-->
   </style>
@@ -19,7 +19,7 @@
     <td colspan="2">
      <center><font size="+2">
       <code><b>
-FlowableListTopicHelper.java
+FluxListTopicHelper.java
       </b></code>
      </font></center>
     </td>
@@ -51,33 +51,32 @@ FlowableListTopicHelper.java
 <a name="20"><font color="#808080">20</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">com.amazonaws.services.sns.AmazonSNS;</font><br />
 <a name="21"><font color="#808080">21</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">com.amazonaws.services.sns.model.ListTopicsResult;</font><br />
 <a name="22"><font color="#808080">22</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">com.amazonaws.services.sns.model.Topic;</font><br />
-<a name="23"><font color="#808080">23</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">io.reactivex.Emitter;</font><br />
-<a name="24"><font color="#808080">24</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">io.reactivex.Flowable;</font><br />
-<a name="25"><font color="#808080">25</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">io.reactivex.functions.BiFunction;</font><br />
-<a name="26"><font color="#808080">26</font>&nbsp;</a><font color="#ffffff"></font><br />
+<a name="23"><font color="#808080">23</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">reactor.core.publisher.Flux;</font><br />
+<a name="24"><font color="#808080">24</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">reactor.core.publisher.SynchronousSink;</font><br />
+<a name="25"><font color="#808080">25</font>&nbsp;</a><font color="#ffffff"></font><br />
+<a name="26"><font color="#808080">26</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">java.util.Collections;</font><br />
 <a name="27"><font color="#808080">27</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">java.util.List;</font><br />
 <a name="28"><font color="#808080">28</font>&nbsp;</a><font color="#ffffff"></font><br />
-<a name="29"><font color="#808080">29</font>&nbsp;</a><font color="#0000c0"><b>public&nbsp;class&nbsp;</b></font><font color="#000000">FlowableListTopicHelper&nbsp;</font><font color="#000000">{</font><br />
+<a name="29"><font color="#808080">29</font>&nbsp;</a><font color="#0000c0"><b>public&nbsp;class&nbsp;</b></font><font color="#000000">FluxListTopicHelper&nbsp;</font><font color="#000000">{</font><br />
 <a name="30"><font color="#808080">30</font>&nbsp;</a><font color="#ffffff"></font><br />
 <a name="31"><font color="#808080">31</font>&nbsp;</a><font color="#ffffff"></font><br />
-<a name="32"><font color="#808080">32</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>static&nbsp;</b></font><font color="#000000">Flowable&lt;Topic&gt;&nbsp;generateTopics</font><font color="#000000">(</font><font color="#000000">AmazonSNS&nbsp;client</font><font color="#000000">)&nbsp;{</font><br />
-<a name="33"><font color="#808080">33</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>return&nbsp;</b></font><font color="#000000">Flowable.generate</font><font color="#000000">(</font><font color="#000000">client::listTopics,&nbsp;</font><font color="#0000c0"><b>new&nbsp;</b></font><font color="#000000">BiFunction&lt;ListTopicsResult,&nbsp;Emitter&lt;List&lt;Topic&gt;&gt;,&nbsp;ListTopicsResult&gt;</font><font color="#000000">()&nbsp;{</font><br />
-<a name="34"><font color="#808080">34</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#646464">@Override</font><br />
-<a name="35"><font color="#808080">35</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>public&nbsp;</b></font><font color="#000000">ListTopicsResult&nbsp;apply</font><font color="#000000">(</font><font color="#000000">ListTopicsResult&nbsp;listTopicsResult,&nbsp;Emitter&lt;List&lt;Topic&gt;&gt;&nbsp;topicEmitter</font><font color="#000000">)&nbsp;{</font><br />
-<a name="36"><font color="#808080">36</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">topicEmitter.onNext</font><font color="#000000">(</font><font color="#000000">listTopicsResult.getTopics</font><font color="#000000">())</font><font color="#000000">;</font><br />
-<a name="37"><font color="#808080">37</font>&nbsp;</a><font color="#ffffff"></font><br />
-<a name="38"><font color="#808080">38</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>if&nbsp;</b></font><font color="#000000">(</font><font color="#000000">listTopicsResult.getNextToken</font><font color="#000000">()&nbsp;</font><font color="#000000">!=&nbsp;</font><font color="#0000c0"><b>null</b></font><font color="#000000">)&nbsp;{</font><br />
-<a name="39"><font color="#808080">39</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>return&nbsp;</b></font><font color="#000000">client.listTopics</font><font color="#000000">(</font><font color="#000000">listTopicsResult.getNextToken</font><font color="#000000">())</font><font color="#000000">;</font><br />
-<a name="40"><font color="#808080">40</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
+<a name="32"><font color="#808080">32</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>static&nbsp;</b></font><font color="#000000">Flux&lt;Topic&gt;&nbsp;generateTopics</font><font color="#000000">(</font><font color="#000000">AmazonSNS&nbsp;client</font><font color="#000000">)&nbsp;{</font><br />
+<a name="33"><font color="#808080">33</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>return&nbsp;</b></font><font color="#000000">Flux.generate</font><font color="#000000">(</font><font color="#000000">client::listTopics,&nbsp;</font><font color="#000000">(</font><font color="#000000">ListTopicsResult&nbsp;listTopicsResult,&nbsp;SynchronousSink&lt;List&lt;Topic&gt;&gt;&nbsp;topicEmitter</font><font color="#000000">)&nbsp;</font><font color="#000000">-&gt;&nbsp;</font><font color="#000000">{</font><br />
+<a name="34"><font color="#808080">34</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">topicEmitter.next</font><font color="#000000">(</font><font color="#000000">listTopicsResult.getTopics</font><font color="#000000">())</font><font color="#000000">;</font><br />
+<a name="35"><font color="#808080">35</font>&nbsp;</a><font color="#ffffff"></font><br />
+<a name="36"><font color="#808080">36</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>if&nbsp;</b></font><font color="#000000">(</font><font color="#000000">listTopicsResult.getNextToken</font><font color="#000000">()&nbsp;</font><font color="#000000">!=&nbsp;</font><font color="#0000c0"><b>null</b></font><font color="#000000">)&nbsp;{</font><br />
+<a name="37"><font color="#808080">37</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>return&nbsp;</b></font><font color="#000000">client.listTopics</font><font color="#000000">(</font><font color="#000000">listTopicsResult.getNextToken</font><font color="#000000">())</font><font color="#000000">;</font><br />
+<a name="38"><font color="#808080">38</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
+<a name="39"><font color="#808080">39</font>&nbsp;</a><font color="#ffffff"></font><br />
+<a name="40"><font color="#808080">40</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">topicEmitter.complete</font><font color="#000000">()</font><font color="#000000">;</font><br />
 <a name="41"><font color="#808080">41</font>&nbsp;</a><font color="#ffffff"></font><br />
-<a name="42"><font color="#808080">42</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">topicEmitter.onComplete</font><font color="#000000">()</font><font color="#000000">;</font><br />
-<a name="43"><font color="#808080">43</font>&nbsp;</a><font color="#ffffff"></font><br />
-<a name="44"><font color="#808080">44</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>return&nbsp;null</b></font><font color="#000000">;</font><br />
-<a name="45"><font color="#808080">45</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
-<a name="46"><font color="#808080">46</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">})</font><font color="#000000">.flatMap</font><font color="#000000">(</font><font color="#000000">Flowable::fromIterable</font><font color="#000000">)</font><font color="#000000">;</font><br />
-<a name="47"><font color="#808080">47</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
-<a name="48"><font color="#808080">48</font>&nbsp;</a><font color="#ffffff"></font><br />
-<a name="49"><font color="#808080">49</font>&nbsp;</a><font color="#000000">}</font></code>
+<a name="42"><font color="#808080">42</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">ListTopicsResult&nbsp;empty&nbsp;=&nbsp;</font><font color="#0000c0"><b>new&nbsp;</b></font><font color="#000000">ListTopicsResult</font><font color="#000000">()</font><font color="#000000">;</font><br />
+<a name="43"><font color="#808080">43</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">empty.setTopics</font><font color="#000000">(</font><font color="#000000">Collections.emptyList</font><font color="#000000">())</font><font color="#000000">;</font><br />
+<a name="44"><font color="#808080">44</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>return&nbsp;</b></font><font color="#000000">empty;</font><br />
+<a name="45"><font color="#808080">45</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">})</font><font color="#000000">.flatMap</font><font color="#000000">(</font><font color="#000000">Flux::fromIterable</font><font color="#000000">)</font><font color="#000000">;</font><br />
+<a name="46"><font color="#808080">46</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
+<a name="47"><font color="#808080">47</font>&nbsp;</a><font color="#ffffff"></font><br />
+<a name="48"><font color="#808080">48</font>&nbsp;</a><font color="#000000">}</font></code>
     
    </td>
   <!-- end source code -->

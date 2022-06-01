@@ -48,7 +48,7 @@ SimpleNotificationService.java
 <a name="17"><font color="#808080">017</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*/</font><br />
 <a name="18"><font color="#808080">018</font>&nbsp;</a><font color="#0000c0"><b>package&nbsp;</b></font><font color="#000000">com.agorapulse.micronaut.amazon.awssdk.sns;</font><br />
 <a name="19"><font color="#808080">019</font>&nbsp;</a><font color="#ffffff"></font><br />
-<a name="20"><font color="#808080">020</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">io.reactivex.Flowable;</font><br />
+<a name="20"><font color="#808080">020</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">org.reactivestreams.Publisher;</font><br />
 <a name="21"><font color="#808080">021</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">software.amazon.awssdk.services.sns.model.MessageAttributeValue;</font><br />
 <a name="22"><font color="#808080">022</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">software.amazon.awssdk.services.sns.model.Topic;</font><br />
 <a name="23"><font color="#808080">023</font>&nbsp;</a><font color="#ffffff"></font><br />
@@ -135,7 +135,7 @@ SimpleNotificationService.java
 <a name="104"><font color="#808080">104</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#008000">/**</font><br />
 <a name="105"><font color="#808080">105</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#008000">*&nbsp;</font><font color="#005500">@return&nbsp;</font><font color="#008000">flowable&nbsp;iterating&nbsp;through&nbsp;all&nbsp;the&nbsp;topics&nbsp;available</font><br />
 <a name="106"><font color="#808080">106</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#008000">*/</font><br />
-<a name="107"><font color="#808080">107</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">Flowable&lt;Topic&gt;&nbsp;listTopics</font><font color="#000000">()</font><font color="#000000">;</font><br />
+<a name="107"><font color="#808080">107</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">Publisher&lt;Topic&gt;&nbsp;listTopics</font><font color="#000000">()</font><font color="#000000">;</font><br />
 <a name="108"><font color="#808080">108</font>&nbsp;</a><font color="#ffffff"></font><br />
 <a name="109"><font color="#808080">109</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#008000">/**</font><br />
 <a name="110"><font color="#808080">110</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#008000">*&nbsp;Deletes&nbsp;given&nbsp;topic.</font><br />

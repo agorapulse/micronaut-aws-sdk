@@ -32,13 +32,16 @@
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_javadoccomment"> *</em>
 <a class="jxr_linenumber" name="L25" href="#L25">25</a>  <em class="jxr_javadoccomment"> * This annotation is not required if the name of the argument contains word &lt;code&gt;hash&lt;/code&gt; or &lt;code&gt;partition&lt;/code&gt;.</em>
 <a class="jxr_linenumber" name="L26" href="#L26">26</a>  <em class="jxr_javadoccomment"> *</em>
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <em class="jxr_javadoccomment"> * @deprecated use @{@link PartitionKey} instead</em>
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <em class="jxr_javadoccomment"> */</em>
-<a class="jxr_linenumber" name="L29" href="#L29">29</a>  @Inherited
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>  @Documented
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>  @Retention(RetentionPolicy.RUNTIME)
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  @Target({ElementType.PARAMETER, ElementType.ANNOTATION_TYPE})
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">public</strong> @<strong class="jxr_keyword">interface</strong> HashKey { }
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <em class="jxr_javadoccomment"> * This annotation can be used a replacement of &lt;code&gt;{@link software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey}&lt;/code&gt;</em>
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <em class="jxr_javadoccomment"> * on fields.</em>
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <em class="jxr_javadoccomment"> * @deprecated use @{@link PartitionKey} instead</em>
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  @Inherited
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  @Documented
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  @Retention(RetentionPolicy.RUNTIME)
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  @Target({ElementType.PARAMETER, ElementType.ANNOTATION_TYPE, ElementType.FIELD, ElementType.METHOD})
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">public</strong> @<strong class="jxr_keyword">interface</strong> HashKey { }
 </pre>
 <hr/>
 <div id="footer"></div>
