@@ -154,7 +154,9 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
 
         BeanIntrospectionTableSchema<T> newTableSchema =
             new BeanIntrospectionTableSchema<>(createStaticTableSchema(beanClass, context, metaTableSchemaCache));
-        metaTableSchema.initialize(newTableSchema);
+        if (!metaTableSchema.isInitialized()) {
+            metaTableSchema.initialize(newTableSchema);
+        }
         return newTableSchema;
     }
 
