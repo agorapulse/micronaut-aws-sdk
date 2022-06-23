@@ -21,7 +21,7 @@ jobs:
         distribution: corretto
         java-version: 8
         cache: gradle
-    - uses: eskatos/gradle-command-action@v1
+    - uses: gradle/gradle-command-action@v2
       with:
         arguments: check --stacktrace
         gradle-version: rc
