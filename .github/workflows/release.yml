@@ -33,19 +33,19 @@ jobs:
       - name: Release Micronaut 1.x
         env:
           SIGNING_SECRET_KEY_PATH: ${{ steps.write_file.outputs.filePath }}
-        uses: eskatos/gradle-command-action@v2
+        uses: gradle/gradle-command-action@v2
         with:
           arguments: -x groovydoc publishToSonatype closeAndReleaseSonatypeStagingRepository -Pversion=${{ steps.version.outputs.tag }}-micronaut-1.0 -Prelease=true --stacktrace
       - name: Release Micronaut 2.x
         env:
           SIGNING_SECRET_KEY_PATH: ${{ steps.write_file.outputs.filePath }}
-        uses: eskatos/gradle-command-action@v2
+        uses: gradle/gradle-command-action@v2
         with:
           arguments: -x groovydoc publishToSonatype closeAndReleaseSonatypeStagingRepository -Pversion=${{ steps.version.outputs.tag }}-micronaut-2.0 -Prelease=true --stacktrace -PmicronautVersion=2.5.13 -PspockVersion=2.0-groovy-3.0 -PgroovyVersion=3.0.9
       - name: Release Micronaut 3.x
         env:
           SIGNING_SECRET_KEY_PATH: ${{ steps.write_file.outputs.filePath }}
-        uses: eskatos/gradle-command-action@v2
+        uses: gradle/gradle-command-action@v2
         with:
           arguments: migrateImports gitPublishPush -x groovydoc publishToSonatype closeAndReleaseSonatypeStagingRepository -Pversion=${{ steps.version.outputs.tag }}-micronaut-3.0 -Prelease=true --stacktrace -PmicronautVersion=3.2.3 -PspockVersion=2.0-groovy-3.0 -PgroovyVersion=3.0.9 -Dorg.ajoberstar.grgit.auth.username=${{ secrets.AGORAPULSE_BOT_PERSONAL_TOKEN }}
   ping:
