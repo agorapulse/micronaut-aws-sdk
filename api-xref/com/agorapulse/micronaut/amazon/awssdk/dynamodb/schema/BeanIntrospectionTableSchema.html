@@ -309,149 +309,150 @@
 <a class="jxr_linenumber" name="L301" href="#L301">301</a>             EnhancedType&lt;?&gt; enhancedType = convertTypeToEnhancedType(type.getTypeParameters()[0], metaTableSchemaCache, attributeConfiguration, beanContext);
 <a class="jxr_linenumber" name="L302" href="#L302">302</a>             <strong class="jxr_keyword">return</strong> (EnhancedType&lt;T&gt;) EnhancedType.listOf(enhancedType);
 <a class="jxr_linenumber" name="L303" href="#L303">303</a>         } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (Map.<strong class="jxr_keyword">class</strong>.equals(type.getType())) {
-<a class="jxr_linenumber" name="L304" href="#L304">304</a>             EnhancedType&lt;?&gt; enhancedType = convertTypeToEnhancedType(type.getTypeParameters()[1], metaTableSchemaCache, attributeConfiguration, beanContext);
-<a class="jxr_linenumber" name="L305" href="#L305">305</a>             <strong class="jxr_keyword">return</strong> (EnhancedType&lt;T&gt;) EnhancedType.mapOf(EnhancedType.of(type.getTypeParameters()[0]), enhancedType);
-<a class="jxr_linenumber" name="L306" href="#L306">306</a>         }
-<a class="jxr_linenumber" name="L307" href="#L307">307</a> 
-<a class="jxr_linenumber" name="L308" href="#L308">308</a>         Class&lt;T&gt; clazz = type.getType();
-<a class="jxr_linenumber" name="L309" href="#L309">309</a> 
-<a class="jxr_linenumber" name="L310" href="#L310">310</a>         Consumer&lt;EnhancedTypeDocumentConfiguration.Builder&gt; attrConfiguration = b -&gt; b
-<a class="jxr_linenumber" name="L311" href="#L311">311</a>             .preserveEmptyObject(attributeConfiguration.preserveEmptyObject())
-<a class="jxr_linenumber" name="L312" href="#L312">312</a>             .ignoreNulls(attributeConfiguration.ignoreNulls());
-<a class="jxr_linenumber" name="L313" href="#L313">313</a> 
-<a class="jxr_linenumber" name="L314" href="#L314">314</a>         <strong class="jxr_keyword">if</strong> (type.isAnnotationPresent(DynamoDbBean.<strong class="jxr_keyword">class</strong>)) {
-<a class="jxr_linenumber" name="L315" href="#L315">315</a>             <strong class="jxr_keyword">return</strong> EnhancedType.documentOf(
-<a class="jxr_linenumber" name="L316" href="#L316">316</a>                 clazz,
-<a class="jxr_linenumber" name="L317" href="#L317">317</a>                 BeanIntrospectionTableSchema.recursiveCreate(clazz, beanContext, metaTableSchemaCache),
-<a class="jxr_linenumber" name="L318" href="#L318">318</a>                 attrConfiguration
-<a class="jxr_linenumber" name="L319" href="#L319">319</a>             );
-<a class="jxr_linenumber" name="L320" href="#L320">320</a>         }
-<a class="jxr_linenumber" name="L321" href="#L321">321</a> 
-<a class="jxr_linenumber" name="L322" href="#L322">322</a>         <strong class="jxr_keyword">return</strong> EnhancedType.of(clazz);
-<a class="jxr_linenumber" name="L323" href="#L323">323</a>     }
-<a class="jxr_linenumber" name="L324" href="#L324">324</a> 
-<a class="jxr_linenumber" name="L325" href="#L325">325</a>     @SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
-<a class="jxr_linenumber" name="L326" href="#L326">326</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> &lt;T, P&gt; Optional&lt;AttributeConverter&lt;P&gt;&gt; createAttributeConverterFromAnnotation(
-<a class="jxr_linenumber" name="L327" href="#L327">327</a>         BeanProperty&lt;T, P&gt; propertyDescriptor,
-<a class="jxr_linenumber" name="L328" href="#L328">328</a>         BeanContext beanContext
-<a class="jxr_linenumber" name="L329" href="#L329">329</a>     ) {
-<a class="jxr_linenumber" name="L330" href="#L330">330</a>         <strong class="jxr_keyword">return</strong> findAnnotation(propertyDescriptor, DynamoDbConvertedBy.<strong class="jxr_keyword">class</strong>, ConvertedBy.<strong class="jxr_keyword">class</strong>)
-<a class="jxr_linenumber" name="L331" href="#L331">331</a>             .flatMap(AnnotationValue::classValue)
-<a class="jxr_linenumber" name="L332" href="#L332">332</a>             .map(clazz -&gt; (AttributeConverter&lt;P&gt;) fromContextOrNew(clazz, beanContext).get());
-<a class="jxr_linenumber" name="L333" href="#L333">333</a>     }
-<a class="jxr_linenumber" name="L334" href="#L334">334</a> 
-<a class="jxr_linenumber" name="L335" href="#L335">335</a>     <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L336" href="#L336">336</a> <em class="jxr_javadoccomment">     * This method scans all the annotations on a property and looks for a meta-annotation of</em>
-<a class="jxr_linenumber" name="L337" href="#L337">337</a> <em class="jxr_javadoccomment">     * {@link BeanTableSchemaAttributeTag}. If the meta-annotation is found, it attempts to create</em>
-<a class="jxr_linenumber" name="L338" href="#L338">338</a> <em class="jxr_javadoccomment">     * an annotation tag based on a standard named static method</em>
-<a class="jxr_linenumber" name="L339" href="#L339">339</a> <em class="jxr_javadoccomment">     * of the class that tag has been annotated with passing in the original property annotation as an argument.</em>
-<a class="jxr_linenumber" name="L340" href="#L340">340</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L341" href="#L341">341</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> &lt;T&gt; <strong class="jxr_keyword">void</strong> addTagsToAttribute(StaticAttribute.Builder&lt;?, ?&gt; attributeBuilder,
-<a class="jxr_linenumber" name="L342" href="#L342">342</a>                                                BeanProperty&lt;T, ?&gt; propertyDescriptor) {
-<a class="jxr_linenumber" name="L343" href="#L343">343</a> 
-<a class="jxr_linenumber" name="L344" href="#L344">344</a>         findAnnotation(propertyDescriptor, UPDATE_BEHAVIOUR_ANNOTATIONS)
-<a class="jxr_linenumber" name="L345" href="#L345">345</a>             .flatMap(anno -&gt; anno.enumValue(Enum.<strong class="jxr_keyword">class</strong>))
-<a class="jxr_linenumber" name="L346" href="#L346">346</a>             .ifPresent(behavior -&gt; attributeBuilder.addTag(StaticAttributeTags.updateBehavior(software.amazon.awssdk.enhanced.dynamodb.mapper.UpdateBehavior.valueOf(behavior.name()))));
-<a class="jxr_linenumber" name="L347" href="#L347">347</a> 
-<a class="jxr_linenumber" name="L348" href="#L348">348</a>         findAnnotation(propertyDescriptor, PARTITION_KEYS_ANNOTATIONS)
-<a class="jxr_linenumber" name="L349" href="#L349">349</a>             .ifPresent(anno -&gt; attributeBuilder.addTag(StaticAttributeTags.primaryPartitionKey()));
-<a class="jxr_linenumber" name="L350" href="#L350">350</a> 
-<a class="jxr_linenumber" name="L351" href="#L351">351</a>         findAnnotation(propertyDescriptor, SORT_KEYS_ANNOTATIONS)
-<a class="jxr_linenumber" name="L352" href="#L352">352</a>             .ifPresent(anno -&gt; attributeBuilder.addTag(StaticAttributeTags.primarySortKey()));
-<a class="jxr_linenumber" name="L353" href="#L353">353</a> 
-<a class="jxr_linenumber" name="L354" href="#L354">354</a>         findAnnotation(propertyDescriptor, SECONDARY_PARTITION_KEYS_ANNOTATIONS)
-<a class="jxr_linenumber" name="L355" href="#L355">355</a>             .map(anno -&gt; anno.stringValues(<span class="jxr_string">"indexNames"</span>))
-<a class="jxr_linenumber" name="L356" href="#L356">356</a>             .ifPresent(indexNames -&gt; attributeBuilder.addTag(StaticAttributeTags.secondaryPartitionKey(Arrays.asList(indexNames))));
-<a class="jxr_linenumber" name="L357" href="#L357">357</a> 
-<a class="jxr_linenumber" name="L358" href="#L358">358</a>         findAnnotation(propertyDescriptor, SECONDARY_SORT_KEYS_ANNOTATIONS)
-<a class="jxr_linenumber" name="L359" href="#L359">359</a>             .map(anno -&gt; anno.stringValues(<span class="jxr_string">"indexNames"</span>))
-<a class="jxr_linenumber" name="L360" href="#L360">360</a>             .ifPresent(indexNames -&gt; attributeBuilder.addTag(StaticAttributeTags.secondarySortKey(Arrays.asList(indexNames))));
-<a class="jxr_linenumber" name="L361" href="#L361">361</a>     }
-<a class="jxr_linenumber" name="L362" href="#L362">362</a> 
-<a class="jxr_linenumber" name="L363" href="#L363">363</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> &lt;R&gt; Supplier&lt;R&gt; fromContextOrNew(Class&lt;R&gt; clazz, BeanContext beanContext) {
-<a class="jxr_linenumber" name="L364" href="#L364">364</a>         Optional&lt;R&gt; optionalBean = beanContext.findBean(clazz);
-<a class="jxr_linenumber" name="L365" href="#L365">365</a>         <strong class="jxr_keyword">if</strong> (optionalBean.isPresent()) {
-<a class="jxr_linenumber" name="L366" href="#L366">366</a>             <strong class="jxr_keyword">return</strong> optionalBean::get;
-<a class="jxr_linenumber" name="L367" href="#L367">367</a>         }
-<a class="jxr_linenumber" name="L368" href="#L368">368</a> 
-<a class="jxr_linenumber" name="L369" href="#L369">369</a>         Optional&lt;BeanIntrospection&lt;R&gt;&gt; optionalBeanIntrospection = BeanIntrospector.SHARED.findIntrospection(clazz);
-<a class="jxr_linenumber" name="L370" href="#L370">370</a>         <strong class="jxr_keyword">if</strong> (optionalBeanIntrospection.isPresent()) {
-<a class="jxr_linenumber" name="L371" href="#L371">371</a>             <strong class="jxr_keyword">return</strong> optionalBeanIntrospection.get()::instantiate;
-<a class="jxr_linenumber" name="L372" href="#L372">372</a>         }
-<a class="jxr_linenumber" name="L373" href="#L373">373</a> 
-<a class="jxr_linenumber" name="L374" href="#L374">374</a>         <strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L375" href="#L375">375</a>             Constructor&lt;R&gt; constructor = clazz.getConstructor();
-<a class="jxr_linenumber" name="L376" href="#L376">376</a>             debugLog(clazz, () -&gt; <span class="jxr_string">"Constructor: "</span> + constructor);
-<a class="jxr_linenumber" name="L377" href="#L377">377</a>             <strong class="jxr_keyword">return</strong> ObjectConstructor.create(clazz, constructor);
-<a class="jxr_linenumber" name="L378" href="#L378">378</a>         } <strong class="jxr_keyword">catch</strong> (NoSuchMethodException e) {
-<a class="jxr_linenumber" name="L379" href="#L379">379</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(
-<a class="jxr_linenumber" name="L380" href="#L380">380</a>                 String.format(<span class="jxr_string">"Class '%s' appears to have no default constructor thus cannot be used with the BeanTableSchema"</span>, clazz), e);
-<a class="jxr_linenumber" name="L381" href="#L381">381</a>         }
-<a class="jxr_linenumber" name="L382" href="#L382">382</a>     }
-<a class="jxr_linenumber" name="L383" href="#L383">383</a> 
-<a class="jxr_linenumber" name="L384" href="#L384">384</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> &lt;T&gt; String attributeNameForProperty(BeanProperty&lt;T, ?&gt; propertyDescriptor) {
-<a class="jxr_linenumber" name="L385" href="#L385">385</a>         <strong class="jxr_keyword">return</strong> findAnnotation(propertyDescriptor, DynamoDbAttribute.<strong class="jxr_keyword">class</strong>, Attribute.<strong class="jxr_keyword">class</strong>)
-<a class="jxr_linenumber" name="L386" href="#L386">386</a>             .flatMap(AnnotationValue::stringValue)
-<a class="jxr_linenumber" name="L387" href="#L387">387</a>             .orElseGet(propertyDescriptor::getName);
-<a class="jxr_linenumber" name="L388" href="#L388">388</a>     }
-<a class="jxr_linenumber" name="L389" href="#L389">389</a> 
-<a class="jxr_linenumber" name="L390" href="#L390">390</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> &lt;T&gt; <strong class="jxr_keyword">boolean</strong> isMappableProperty(Class&lt;T&gt; beanClass, BeanProperty&lt;T, ?&gt; propertyDescriptor) {
-<a class="jxr_linenumber" name="L391" href="#L391">391</a> 
-<a class="jxr_linenumber" name="L392" href="#L392">392</a>         <strong class="jxr_keyword">if</strong> (propertyDescriptor.isWriteOnly()) {
-<a class="jxr_linenumber" name="L393" href="#L393">393</a>             debugLog(beanClass, () -&gt; <span class="jxr_string">"Ignoring bean property "</span> + propertyDescriptor.getName() + <span class="jxr_string">" because it is write only."</span>);
-<a class="jxr_linenumber" name="L394" href="#L394">394</a>             <strong class="jxr_keyword">return</strong> false;
-<a class="jxr_linenumber" name="L395" href="#L395">395</a>         }
-<a class="jxr_linenumber" name="L396" href="#L396">396</a> 
-<a class="jxr_linenumber" name="L397" href="#L397">397</a>         <strong class="jxr_keyword">if</strong> (propertyDescriptor.isReadOnly()) {
-<a class="jxr_linenumber" name="L398" href="#L398">398</a>             debugLog(beanClass, () -&gt; <span class="jxr_string">"Ignoring bean property "</span> + propertyDescriptor.getName() + <span class="jxr_string">" because it is read only."</span>);
-<a class="jxr_linenumber" name="L399" href="#L399">399</a>             <strong class="jxr_keyword">return</strong> isSecondaryIndex(propertyDescriptor);
-<a class="jxr_linenumber" name="L400" href="#L400">400</a>         }
-<a class="jxr_linenumber" name="L401" href="#L401">401</a> 
-<a class="jxr_linenumber" name="L402" href="#L402">402</a>         <strong class="jxr_keyword">if</strong> (propertyDescriptor.isAnnotationPresent(DynamoDbIgnore.<strong class="jxr_keyword">class</strong>)) {
-<a class="jxr_linenumber" name="L403" href="#L403">403</a>             debugLog(beanClass, () -&gt; <span class="jxr_string">"Ignoring bean property "</span> + propertyDescriptor.getName() + <span class="jxr_string">" because it is ignored."</span>);
-<a class="jxr_linenumber" name="L404" href="#L404">404</a>             <strong class="jxr_keyword">return</strong> false;
-<a class="jxr_linenumber" name="L405" href="#L405">405</a>         }
-<a class="jxr_linenumber" name="L406" href="#L406">406</a> 
-<a class="jxr_linenumber" name="L407" href="#L407">407</a>         <strong class="jxr_keyword">if</strong> (propertyDescriptor.isAnnotationPresent(Ignore.<strong class="jxr_keyword">class</strong>)) {
-<a class="jxr_linenumber" name="L408" href="#L408">408</a>             debugLog(beanClass, () -&gt; <span class="jxr_string">"Ignoring bean property "</span> + propertyDescriptor.getName() + <span class="jxr_string">" because it is ignored."</span>);
-<a class="jxr_linenumber" name="L409" href="#L409">409</a>             <strong class="jxr_keyword">return</strong> false;
-<a class="jxr_linenumber" name="L410" href="#L410">410</a>         }
-<a class="jxr_linenumber" name="L411" href="#L411">411</a> 
-<a class="jxr_linenumber" name="L412" href="#L412">412</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L413" href="#L413">413</a>     }
-<a class="jxr_linenumber" name="L414" href="#L414">414</a> 
-<a class="jxr_linenumber" name="L415" href="#L415">415</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> &lt;T&gt; <strong class="jxr_keyword">boolean</strong> isSecondaryIndex(BeanProperty&lt;T, ?&gt; propertyDescriptor) {
-<a class="jxr_linenumber" name="L416" href="#L416">416</a>         <strong class="jxr_keyword">return</strong> propertyDescriptor.getAnnotationNames().stream().anyMatch(name -&gt;
-<a class="jxr_linenumber" name="L417" href="#L417">417</a>             SECONDARY_PARTITION_KEYS_ANNOTATIONS.contains(name) || SECONDARY_SORT_KEYS_ANNOTATIONS.contains(name)
-<a class="jxr_linenumber" name="L418" href="#L418">418</a>         );
-<a class="jxr_linenumber" name="L419" href="#L419">419</a>     }
-<a class="jxr_linenumber" name="L420" href="#L420">420</a> 
-<a class="jxr_linenumber" name="L421" href="#L421">421</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> debugLog(Class&lt;?&gt; beanClass, Supplier&lt;String&gt; logMessage) {
-<a class="jxr_linenumber" name="L422" href="#L422">422</a>         BEAN_LOGGER.debug(() -&gt; beanClass.getTypeName() + <span class="jxr_string">" - "</span> + logMessage.get());
-<a class="jxr_linenumber" name="L423" href="#L423">423</a>     }
-<a class="jxr_linenumber" name="L424" href="#L424">424</a> 
-<a class="jxr_linenumber" name="L425" href="#L425">425</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Optional&lt;AnnotationValue&lt;Annotation&gt;&gt; findAnnotation(AnnotationMetadataProvider source, Class&lt;? <strong class="jxr_keyword">extends</strong> Annotation&gt;... annotationClasses) {
-<a class="jxr_linenumber" name="L426" href="#L426">426</a>         <strong class="jxr_keyword">for</strong> (Class&lt;? <strong class="jxr_keyword">extends</strong> Annotation&gt; annotationName : annotationClasses) {
-<a class="jxr_linenumber" name="L427" href="#L427">427</a>             @SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
-<a class="jxr_linenumber" name="L428" href="#L428">428</a>             Optional&lt;AnnotationValue&lt;Annotation&gt;&gt; maybeAnno = source.findAnnotation((Class&lt;Annotation&gt;) annotationName);
-<a class="jxr_linenumber" name="L429" href="#L429">429</a>             <strong class="jxr_keyword">if</strong> (maybeAnno.isPresent()) {
-<a class="jxr_linenumber" name="L430" href="#L430">430</a>                 <strong class="jxr_keyword">return</strong> maybeAnno;
-<a class="jxr_linenumber" name="L431" href="#L431">431</a>             }
-<a class="jxr_linenumber" name="L432" href="#L432">432</a>         }
-<a class="jxr_linenumber" name="L433" href="#L433">433</a>         <strong class="jxr_keyword">return</strong> Optional.empty();
-<a class="jxr_linenumber" name="L434" href="#L434">434</a>     }
-<a class="jxr_linenumber" name="L435" href="#L435">435</a> 
-<a class="jxr_linenumber" name="L436" href="#L436">436</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Optional&lt;AnnotationValue&lt;Annotation&gt;&gt; findAnnotation(AnnotationMetadataProvider source, Iterable&lt;String&gt; annotationNames) {
-<a class="jxr_linenumber" name="L437" href="#L437">437</a>         <strong class="jxr_keyword">for</strong> (String annotationName : annotationNames) {
-<a class="jxr_linenumber" name="L438" href="#L438">438</a>             Optional&lt;AnnotationValue&lt;Annotation&gt;&gt; maybeAnno = source.findAnnotation(annotationName);
-<a class="jxr_linenumber" name="L439" href="#L439">439</a>             <strong class="jxr_keyword">if</strong> (maybeAnno.isPresent()) {
-<a class="jxr_linenumber" name="L440" href="#L440">440</a>                 <strong class="jxr_keyword">return</strong> maybeAnno;
-<a class="jxr_linenumber" name="L441" href="#L441">441</a>             }
-<a class="jxr_linenumber" name="L442" href="#L442">442</a>         }
-<a class="jxr_linenumber" name="L443" href="#L443">443</a>         <strong class="jxr_keyword">return</strong> Optional.empty();
-<a class="jxr_linenumber" name="L444" href="#L444">444</a>     }
-<a class="jxr_linenumber" name="L445" href="#L445">445</a> }
-<a class="jxr_linenumber" name="L446" href="#L446">446</a> 
+<a class="jxr_linenumber" name="L304" href="#L304">304</a>             EnhancedType&lt;?&gt; keyType = convertTypeToEnhancedType(type.getTypeVariable(<span class="jxr_string">"K"</span>).orElseThrow(() -&gt; <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"Missing key type"</span>)), metaTableSchemaCache, attributeConfiguration, beanContext);
+<a class="jxr_linenumber" name="L305" href="#L305">305</a>             EnhancedType&lt;?&gt; valueType = convertTypeToEnhancedType(type.getTypeVariable(<span class="jxr_string">"V"</span>).orElseThrow(() -&gt; <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"Missing value type"</span>)), metaTableSchemaCache, attributeConfiguration, beanContext);
+<a class="jxr_linenumber" name="L306" href="#L306">306</a>             <strong class="jxr_keyword">return</strong> (EnhancedType&lt;T&gt;) EnhancedType.mapOf(keyType, valueType);
+<a class="jxr_linenumber" name="L307" href="#L307">307</a>         }
+<a class="jxr_linenumber" name="L308" href="#L308">308</a> 
+<a class="jxr_linenumber" name="L309" href="#L309">309</a>         Class&lt;T&gt; clazz = type.getType();
+<a class="jxr_linenumber" name="L310" href="#L310">310</a> 
+<a class="jxr_linenumber" name="L311" href="#L311">311</a>         Consumer&lt;EnhancedTypeDocumentConfiguration.Builder&gt; attrConfiguration = b -&gt; b
+<a class="jxr_linenumber" name="L312" href="#L312">312</a>             .preserveEmptyObject(attributeConfiguration.preserveEmptyObject())
+<a class="jxr_linenumber" name="L313" href="#L313">313</a>             .ignoreNulls(attributeConfiguration.ignoreNulls());
+<a class="jxr_linenumber" name="L314" href="#L314">314</a> 
+<a class="jxr_linenumber" name="L315" href="#L315">315</a>         <strong class="jxr_keyword">if</strong> (type.isAnnotationPresent(DynamoDbBean.<strong class="jxr_keyword">class</strong>)) {
+<a class="jxr_linenumber" name="L316" href="#L316">316</a>             <strong class="jxr_keyword">return</strong> EnhancedType.documentOf(
+<a class="jxr_linenumber" name="L317" href="#L317">317</a>                 clazz,
+<a class="jxr_linenumber" name="L318" href="#L318">318</a>                 BeanIntrospectionTableSchema.recursiveCreate(clazz, beanContext, metaTableSchemaCache),
+<a class="jxr_linenumber" name="L319" href="#L319">319</a>                 attrConfiguration
+<a class="jxr_linenumber" name="L320" href="#L320">320</a>             );
+<a class="jxr_linenumber" name="L321" href="#L321">321</a>         }
+<a class="jxr_linenumber" name="L322" href="#L322">322</a> 
+<a class="jxr_linenumber" name="L323" href="#L323">323</a>         <strong class="jxr_keyword">return</strong> EnhancedType.of(clazz);
+<a class="jxr_linenumber" name="L324" href="#L324">324</a>     }
+<a class="jxr_linenumber" name="L325" href="#L325">325</a> 
+<a class="jxr_linenumber" name="L326" href="#L326">326</a>     @SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
+<a class="jxr_linenumber" name="L327" href="#L327">327</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> &lt;T, P&gt; Optional&lt;AttributeConverter&lt;P&gt;&gt; createAttributeConverterFromAnnotation(
+<a class="jxr_linenumber" name="L328" href="#L328">328</a>         BeanProperty&lt;T, P&gt; propertyDescriptor,
+<a class="jxr_linenumber" name="L329" href="#L329">329</a>         BeanContext beanContext
+<a class="jxr_linenumber" name="L330" href="#L330">330</a>     ) {
+<a class="jxr_linenumber" name="L331" href="#L331">331</a>         <strong class="jxr_keyword">return</strong> findAnnotation(propertyDescriptor, DynamoDbConvertedBy.<strong class="jxr_keyword">class</strong>, ConvertedBy.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="L332" href="#L332">332</a>             .flatMap(AnnotationValue::classValue)
+<a class="jxr_linenumber" name="L333" href="#L333">333</a>             .map(clazz -&gt; (AttributeConverter&lt;P&gt;) fromContextOrNew(clazz, beanContext).get());
+<a class="jxr_linenumber" name="L334" href="#L334">334</a>     }
+<a class="jxr_linenumber" name="L335" href="#L335">335</a> 
+<a class="jxr_linenumber" name="L336" href="#L336">336</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L337" href="#L337">337</a> <em class="jxr_javadoccomment">     * This method scans all the annotations on a property and looks for a meta-annotation of</em>
+<a class="jxr_linenumber" name="L338" href="#L338">338</a> <em class="jxr_javadoccomment">     * {@link BeanTableSchemaAttributeTag}. If the meta-annotation is found, it attempts to create</em>
+<a class="jxr_linenumber" name="L339" href="#L339">339</a> <em class="jxr_javadoccomment">     * an annotation tag based on a standard named static method</em>
+<a class="jxr_linenumber" name="L340" href="#L340">340</a> <em class="jxr_javadoccomment">     * of the class that tag has been annotated with passing in the original property annotation as an argument.</em>
+<a class="jxr_linenumber" name="L341" href="#L341">341</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L342" href="#L342">342</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> &lt;T&gt; <strong class="jxr_keyword">void</strong> addTagsToAttribute(StaticAttribute.Builder&lt;?, ?&gt; attributeBuilder,
+<a class="jxr_linenumber" name="L343" href="#L343">343</a>                                                BeanProperty&lt;T, ?&gt; propertyDescriptor) {
+<a class="jxr_linenumber" name="L344" href="#L344">344</a> 
+<a class="jxr_linenumber" name="L345" href="#L345">345</a>         findAnnotation(propertyDescriptor, UPDATE_BEHAVIOUR_ANNOTATIONS)
+<a class="jxr_linenumber" name="L346" href="#L346">346</a>             .flatMap(anno -&gt; anno.enumValue(Enum.<strong class="jxr_keyword">class</strong>))
+<a class="jxr_linenumber" name="L347" href="#L347">347</a>             .ifPresent(behavior -&gt; attributeBuilder.addTag(StaticAttributeTags.updateBehavior(software.amazon.awssdk.enhanced.dynamodb.mapper.UpdateBehavior.valueOf(behavior.name()))));
+<a class="jxr_linenumber" name="L348" href="#L348">348</a> 
+<a class="jxr_linenumber" name="L349" href="#L349">349</a>         findAnnotation(propertyDescriptor, PARTITION_KEYS_ANNOTATIONS)
+<a class="jxr_linenumber" name="L350" href="#L350">350</a>             .ifPresent(anno -&gt; attributeBuilder.addTag(StaticAttributeTags.primaryPartitionKey()));
+<a class="jxr_linenumber" name="L351" href="#L351">351</a> 
+<a class="jxr_linenumber" name="L352" href="#L352">352</a>         findAnnotation(propertyDescriptor, SORT_KEYS_ANNOTATIONS)
+<a class="jxr_linenumber" name="L353" href="#L353">353</a>             .ifPresent(anno -&gt; attributeBuilder.addTag(StaticAttributeTags.primarySortKey()));
+<a class="jxr_linenumber" name="L354" href="#L354">354</a> 
+<a class="jxr_linenumber" name="L355" href="#L355">355</a>         findAnnotation(propertyDescriptor, SECONDARY_PARTITION_KEYS_ANNOTATIONS)
+<a class="jxr_linenumber" name="L356" href="#L356">356</a>             .map(anno -&gt; anno.stringValues(<span class="jxr_string">"indexNames"</span>))
+<a class="jxr_linenumber" name="L357" href="#L357">357</a>             .ifPresent(indexNames -&gt; attributeBuilder.addTag(StaticAttributeTags.secondaryPartitionKey(Arrays.asList(indexNames))));
+<a class="jxr_linenumber" name="L358" href="#L358">358</a> 
+<a class="jxr_linenumber" name="L359" href="#L359">359</a>         findAnnotation(propertyDescriptor, SECONDARY_SORT_KEYS_ANNOTATIONS)
+<a class="jxr_linenumber" name="L360" href="#L360">360</a>             .map(anno -&gt; anno.stringValues(<span class="jxr_string">"indexNames"</span>))
+<a class="jxr_linenumber" name="L361" href="#L361">361</a>             .ifPresent(indexNames -&gt; attributeBuilder.addTag(StaticAttributeTags.secondarySortKey(Arrays.asList(indexNames))));
+<a class="jxr_linenumber" name="L362" href="#L362">362</a>     }
+<a class="jxr_linenumber" name="L363" href="#L363">363</a> 
+<a class="jxr_linenumber" name="L364" href="#L364">364</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> &lt;R&gt; Supplier&lt;R&gt; fromContextOrNew(Class&lt;R&gt; clazz, BeanContext beanContext) {
+<a class="jxr_linenumber" name="L365" href="#L365">365</a>         Optional&lt;R&gt; optionalBean = beanContext.findBean(clazz);
+<a class="jxr_linenumber" name="L366" href="#L366">366</a>         <strong class="jxr_keyword">if</strong> (optionalBean.isPresent()) {
+<a class="jxr_linenumber" name="L367" href="#L367">367</a>             <strong class="jxr_keyword">return</strong> optionalBean::get;
+<a class="jxr_linenumber" name="L368" href="#L368">368</a>         }
+<a class="jxr_linenumber" name="L369" href="#L369">369</a> 
+<a class="jxr_linenumber" name="L370" href="#L370">370</a>         Optional&lt;BeanIntrospection&lt;R&gt;&gt; optionalBeanIntrospection = BeanIntrospector.SHARED.findIntrospection(clazz);
+<a class="jxr_linenumber" name="L371" href="#L371">371</a>         <strong class="jxr_keyword">if</strong> (optionalBeanIntrospection.isPresent()) {
+<a class="jxr_linenumber" name="L372" href="#L372">372</a>             <strong class="jxr_keyword">return</strong> optionalBeanIntrospection.get()::instantiate;
+<a class="jxr_linenumber" name="L373" href="#L373">373</a>         }
+<a class="jxr_linenumber" name="L374" href="#L374">374</a> 
+<a class="jxr_linenumber" name="L375" href="#L375">375</a>         <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L376" href="#L376">376</a>             Constructor&lt;R&gt; constructor = clazz.getConstructor();
+<a class="jxr_linenumber" name="L377" href="#L377">377</a>             debugLog(clazz, () -&gt; <span class="jxr_string">"Constructor: "</span> + constructor);
+<a class="jxr_linenumber" name="L378" href="#L378">378</a>             <strong class="jxr_keyword">return</strong> ObjectConstructor.create(clazz, constructor);
+<a class="jxr_linenumber" name="L379" href="#L379">379</a>         } <strong class="jxr_keyword">catch</strong> (NoSuchMethodException e) {
+<a class="jxr_linenumber" name="L380" href="#L380">380</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(
+<a class="jxr_linenumber" name="L381" href="#L381">381</a>                 String.format(<span class="jxr_string">"Class '%s' appears to have no default constructor thus cannot be used with the BeanTableSchema"</span>, clazz), e);
+<a class="jxr_linenumber" name="L382" href="#L382">382</a>         }
+<a class="jxr_linenumber" name="L383" href="#L383">383</a>     }
+<a class="jxr_linenumber" name="L384" href="#L384">384</a> 
+<a class="jxr_linenumber" name="L385" href="#L385">385</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> &lt;T&gt; String attributeNameForProperty(BeanProperty&lt;T, ?&gt; propertyDescriptor) {
+<a class="jxr_linenumber" name="L386" href="#L386">386</a>         <strong class="jxr_keyword">return</strong> findAnnotation(propertyDescriptor, DynamoDbAttribute.<strong class="jxr_keyword">class</strong>, Attribute.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="L387" href="#L387">387</a>             .flatMap(AnnotationValue::stringValue)
+<a class="jxr_linenumber" name="L388" href="#L388">388</a>             .orElseGet(propertyDescriptor::getName);
+<a class="jxr_linenumber" name="L389" href="#L389">389</a>     }
+<a class="jxr_linenumber" name="L390" href="#L390">390</a> 
+<a class="jxr_linenumber" name="L391" href="#L391">391</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> &lt;T&gt; <strong class="jxr_keyword">boolean</strong> isMappableProperty(Class&lt;T&gt; beanClass, BeanProperty&lt;T, ?&gt; propertyDescriptor) {
+<a class="jxr_linenumber" name="L392" href="#L392">392</a> 
+<a class="jxr_linenumber" name="L393" href="#L393">393</a>         <strong class="jxr_keyword">if</strong> (propertyDescriptor.isWriteOnly()) {
+<a class="jxr_linenumber" name="L394" href="#L394">394</a>             debugLog(beanClass, () -&gt; <span class="jxr_string">"Ignoring bean property "</span> + propertyDescriptor.getName() + <span class="jxr_string">" because it is write only."</span>);
+<a class="jxr_linenumber" name="L395" href="#L395">395</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L396" href="#L396">396</a>         }
+<a class="jxr_linenumber" name="L397" href="#L397">397</a> 
+<a class="jxr_linenumber" name="L398" href="#L398">398</a>         <strong class="jxr_keyword">if</strong> (propertyDescriptor.isReadOnly()) {
+<a class="jxr_linenumber" name="L399" href="#L399">399</a>             debugLog(beanClass, () -&gt; <span class="jxr_string">"Ignoring bean property "</span> + propertyDescriptor.getName() + <span class="jxr_string">" because it is read only."</span>);
+<a class="jxr_linenumber" name="L400" href="#L400">400</a>             <strong class="jxr_keyword">return</strong> isSecondaryIndex(propertyDescriptor);
+<a class="jxr_linenumber" name="L401" href="#L401">401</a>         }
+<a class="jxr_linenumber" name="L402" href="#L402">402</a> 
+<a class="jxr_linenumber" name="L403" href="#L403">403</a>         <strong class="jxr_keyword">if</strong> (propertyDescriptor.isAnnotationPresent(DynamoDbIgnore.<strong class="jxr_keyword">class</strong>)) {
+<a class="jxr_linenumber" name="L404" href="#L404">404</a>             debugLog(beanClass, () -&gt; <span class="jxr_string">"Ignoring bean property "</span> + propertyDescriptor.getName() + <span class="jxr_string">" because it is ignored."</span>);
+<a class="jxr_linenumber" name="L405" href="#L405">405</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L406" href="#L406">406</a>         }
+<a class="jxr_linenumber" name="L407" href="#L407">407</a> 
+<a class="jxr_linenumber" name="L408" href="#L408">408</a>         <strong class="jxr_keyword">if</strong> (propertyDescriptor.isAnnotationPresent(Ignore.<strong class="jxr_keyword">class</strong>)) {
+<a class="jxr_linenumber" name="L409" href="#L409">409</a>             debugLog(beanClass, () -&gt; <span class="jxr_string">"Ignoring bean property "</span> + propertyDescriptor.getName() + <span class="jxr_string">" because it is ignored."</span>);
+<a class="jxr_linenumber" name="L410" href="#L410">410</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L411" href="#L411">411</a>         }
+<a class="jxr_linenumber" name="L412" href="#L412">412</a> 
+<a class="jxr_linenumber" name="L413" href="#L413">413</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L414" href="#L414">414</a>     }
+<a class="jxr_linenumber" name="L415" href="#L415">415</a> 
+<a class="jxr_linenumber" name="L416" href="#L416">416</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> &lt;T&gt; <strong class="jxr_keyword">boolean</strong> isSecondaryIndex(BeanProperty&lt;T, ?&gt; propertyDescriptor) {
+<a class="jxr_linenumber" name="L417" href="#L417">417</a>         <strong class="jxr_keyword">return</strong> propertyDescriptor.getAnnotationNames().stream().anyMatch(name -&gt;
+<a class="jxr_linenumber" name="L418" href="#L418">418</a>             SECONDARY_PARTITION_KEYS_ANNOTATIONS.contains(name) || SECONDARY_SORT_KEYS_ANNOTATIONS.contains(name)
+<a class="jxr_linenumber" name="L419" href="#L419">419</a>         );
+<a class="jxr_linenumber" name="L420" href="#L420">420</a>     }
+<a class="jxr_linenumber" name="L421" href="#L421">421</a> 
+<a class="jxr_linenumber" name="L422" href="#L422">422</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> debugLog(Class&lt;?&gt; beanClass, Supplier&lt;String&gt; logMessage) {
+<a class="jxr_linenumber" name="L423" href="#L423">423</a>         BEAN_LOGGER.debug(() -&gt; beanClass.getTypeName() + <span class="jxr_string">" - "</span> + logMessage.get());
+<a class="jxr_linenumber" name="L424" href="#L424">424</a>     }
+<a class="jxr_linenumber" name="L425" href="#L425">425</a> 
+<a class="jxr_linenumber" name="L426" href="#L426">426</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Optional&lt;AnnotationValue&lt;Annotation&gt;&gt; findAnnotation(AnnotationMetadataProvider source, Class&lt;? <strong class="jxr_keyword">extends</strong> Annotation&gt;... annotationClasses) {
+<a class="jxr_linenumber" name="L427" href="#L427">427</a>         <strong class="jxr_keyword">for</strong> (Class&lt;? <strong class="jxr_keyword">extends</strong> Annotation&gt; annotationName : annotationClasses) {
+<a class="jxr_linenumber" name="L428" href="#L428">428</a>             @SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
+<a class="jxr_linenumber" name="L429" href="#L429">429</a>             Optional&lt;AnnotationValue&lt;Annotation&gt;&gt; maybeAnno = source.findAnnotation((Class&lt;Annotation&gt;) annotationName);
+<a class="jxr_linenumber" name="L430" href="#L430">430</a>             <strong class="jxr_keyword">if</strong> (maybeAnno.isPresent()) {
+<a class="jxr_linenumber" name="L431" href="#L431">431</a>                 <strong class="jxr_keyword">return</strong> maybeAnno;
+<a class="jxr_linenumber" name="L432" href="#L432">432</a>             }
+<a class="jxr_linenumber" name="L433" href="#L433">433</a>         }
+<a class="jxr_linenumber" name="L434" href="#L434">434</a>         <strong class="jxr_keyword">return</strong> Optional.empty();
+<a class="jxr_linenumber" name="L435" href="#L435">435</a>     }
+<a class="jxr_linenumber" name="L436" href="#L436">436</a> 
+<a class="jxr_linenumber" name="L437" href="#L437">437</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Optional&lt;AnnotationValue&lt;Annotation&gt;&gt; findAnnotation(AnnotationMetadataProvider source, Iterable&lt;String&gt; annotationNames) {
+<a class="jxr_linenumber" name="L438" href="#L438">438</a>         <strong class="jxr_keyword">for</strong> (String annotationName : annotationNames) {
+<a class="jxr_linenumber" name="L439" href="#L439">439</a>             Optional&lt;AnnotationValue&lt;Annotation&gt;&gt; maybeAnno = source.findAnnotation(annotationName);
+<a class="jxr_linenumber" name="L440" href="#L440">440</a>             <strong class="jxr_keyword">if</strong> (maybeAnno.isPresent()) {
+<a class="jxr_linenumber" name="L441" href="#L441">441</a>                 <strong class="jxr_keyword">return</strong> maybeAnno;
+<a class="jxr_linenumber" name="L442" href="#L442">442</a>             }
+<a class="jxr_linenumber" name="L443" href="#L443">443</a>         }
+<a class="jxr_linenumber" name="L444" href="#L444">444</a>         <strong class="jxr_keyword">return</strong> Optional.empty();
+<a class="jxr_linenumber" name="L445" href="#L445">445</a>     }
+<a class="jxr_linenumber" name="L446" href="#L446">446</a> }
+<a class="jxr_linenumber" name="L447" href="#L447">447</a> 
 </pre>
 <hr/>
 <div id="footer"></div>
