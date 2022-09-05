@@ -26,6 +26,9 @@ import io.micronaut.core.annotation.Introspected;
 import software.amazon.awssdk.services.dynamodb.model.ProjectionType;
 
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Introspected                                                                           // <1>
@@ -40,6 +43,8 @@ public class DynamoDBEntity implements PlaybookAware {
     private String rangeIndex;
     private Date date;
     private Integer number = 0;
+
+    private Map<String, List<String>> mapProperty = new LinkedHashMap<>();
 
     @PartitionKey                                                                       // <2>
     public String getParentId() {
@@ -92,6 +97,14 @@ public class DynamoDBEntity implements PlaybookAware {
         return parentId + ":" + id;
     }
 
+    public Map<String, List<String>> getMapProperty() {
+        return mapProperty;
+    }
+
+    public void setMapProperty(Map<String, List<String>> mapProperty) {
+        this.mapProperty = mapProperty;
+    }
+
     //CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
@@ -102,12 +115,13 @@ public class DynamoDBEntity implements PlaybookAware {
             Objects.equals(id, that.id) &&
             Objects.equals(rangeIndex, that.rangeIndex) &&
             Objects.equals(date, that.date) &&
-            Objects.equals(number, that.number);
+            Objects.equals(number, that.number) &&
+            Objects.equals(mapProperty, that.mapProperty);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(parentId, id, rangeIndex, date, number);
+        return Objects.hash(parentId, id, rangeIndex, date, number, mapProperty);
     }
 
     @Override
@@ -118,6 +132,7 @@ public class DynamoDBEntity implements PlaybookAware {
             ", rangeIndex='" + rangeIndex + '\'' +
             ", date=" + date +
             ", number=" + number +
+            ", mapProperty=" + mapProperty +
             '}';
     }
     //CHECKSTYLE:ON

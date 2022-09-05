@@ -40,6 +40,8 @@ class DynamoDBEntity {
 
     var number = 0
 
+    var map: Map<String, List<String>>? = null
+
     @SecondaryPartitionKey(indexNames = [GLOBAL_INDEX])                                 // <6>
     @Projection(ProjectionType.ALL)
     fun getGlobalIndex(): String {
