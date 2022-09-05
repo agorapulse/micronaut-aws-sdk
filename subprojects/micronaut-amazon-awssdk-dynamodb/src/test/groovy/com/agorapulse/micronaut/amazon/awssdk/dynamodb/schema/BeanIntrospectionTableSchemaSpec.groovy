@@ -18,9 +18,11 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.schema
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.DynamoDBEntity
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.DynamoDBEntityMapProperty
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.DynamoDBEntityNoRange
 import io.micronaut.context.BeanContext
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.MetaTableSchemaCache
+import spock.lang.PendingFeature
 import spock.lang.Specification
 
 class BeanIntrospectionTableSchemaSpec extends Specification {
@@ -31,11 +33,31 @@ class BeanIntrospectionTableSchemaSpec extends Specification {
         findBean(_) >> Optional.empty()
     }
 
+    void 'read table schema for java class'() {
+        when:
+            BeanIntrospectionTableSchema<DynamoDBEntity> schema = BeanIntrospectionTableSchema.create(DynamoDBEntity, context, cache)
+        then:
+            schema.attributeNames().size() == 7
+    }
+
     void 'read table schema for groovy class'() {
         when:
             BeanIntrospectionTableSchema<DynamoDBEntityNoRange> schema = BeanIntrospectionTableSchema.create(DynamoDBEntityNoRange, context, cache)
         then:
             schema.attributeNames().size() == 3
+    }
+
+    /**
+     * The introspection for Groovy types does not read the type information beyond the first level. For example,
+     * while having <code>Map<String, List<String></code> property then the map type parameters
+     * are read but the list parameter is not and defaults to <code>Object</code>
+     */
+    @PendingFeature
+    void 'read table schema for groovy class with map property'() {
+        when:
+            BeanIntrospectionTableSchema<DynamoDBEntityMapProperty> schema = BeanIntrospectionTableSchema.create(DynamoDBEntityMapProperty, context, cache)
+        then:
+            schema.attributeNames().size() == 4
     }
 
     void 'verify converters'() {

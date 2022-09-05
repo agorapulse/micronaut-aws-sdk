@@ -301,8 +301,9 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
             EnhancedType<?> enhancedType = convertTypeToEnhancedType(type.getTypeParameters()[0], metaTableSchemaCache, attributeConfiguration, beanContext);
             return (EnhancedType<T>) EnhancedType.listOf(enhancedType);
         } else if (Map.class.equals(type.getType())) {
-            EnhancedType<?> enhancedType = convertTypeToEnhancedType(type.getTypeParameters()[1], metaTableSchemaCache, attributeConfiguration, beanContext);
-            return (EnhancedType<T>) EnhancedType.mapOf(EnhancedType.of(type.getTypeParameters()[0]), enhancedType);
+            EnhancedType<?> keyType = convertTypeToEnhancedType(type.getTypeVariable("K").orElseThrow(() -> new IllegalArgumentException("Missing key type")), metaTableSchemaCache, attributeConfiguration, beanContext);
+            EnhancedType<?> valueType = convertTypeToEnhancedType(type.getTypeVariable("V").orElseThrow(() -> new IllegalArgumentException("Missing value type")), metaTableSchemaCache, attributeConfiguration, beanContext);
+            return (EnhancedType<T>) EnhancedType.mapOf(keyType, valueType);
         }
 
         Class<T> clazz = type.getType();
