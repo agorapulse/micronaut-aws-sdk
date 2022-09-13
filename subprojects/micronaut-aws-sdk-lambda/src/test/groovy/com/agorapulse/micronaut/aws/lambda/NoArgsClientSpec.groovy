@@ -15,19 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.aws
+package com.agorapulse.micronaut.aws.lambda
 
-import groovy.transform.CompileStatic
+import io.micronaut.test.annotation.MicronautTest
 
-import javax.annotation.Nullable
+import javax.inject.Inject
 
-/**
- * Default region and endpoint configuration.
- */
-@CompileStatic
-class DefaultRegionAndEndpointConfiguration implements RegionAndEndpointConfiguration {
+@MicronautTest
+class NoArgsClientSpec extends AbstractClientSpec {
 
-    @Nullable String region
-    @Nullable String endpoint
+    @Inject NoArgsClient client
+
+    void 'execute function code'() {
+        expect:
+            client.hello().message == 'Hello undefined'
+    }
 
 }

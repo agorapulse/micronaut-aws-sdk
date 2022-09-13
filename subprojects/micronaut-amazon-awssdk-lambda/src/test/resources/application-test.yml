@@ -1,0 +1,9 @@
+localstack:
+  services: lambda
+  shared: true
+
+aws:
+  lambda:
+    functions:
+      hello:
+        function: HelloFunction
