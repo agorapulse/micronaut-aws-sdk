@@ -19,9 +19,9 @@ package com.agorapulse.micronaut.amazon.awssdk.lambda;
 
 import com.agorapulse.micronaut.amazon.awssdk.lambda.annotation.LambdaClient;
 
-@LambdaClient("hello")
+@LambdaClient("hello")                                                                  // <1>
 public interface HelloConfigurationClient {
 
-    HelloResponse hello(String name);
+    HelloResponse hello(String name);                                                   // <2>
 
 }

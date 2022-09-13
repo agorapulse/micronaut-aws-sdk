@@ -21,14 +21,14 @@ import io.micronaut.test.annotation.MicronautTest
 
 import javax.inject.Inject
 
-@MicronautTest
+@MicronautTest                                                                          // <1>
 class HelloClientSpec extends AbstractClientSpec {
 
-    @Inject HelloClient client
+    @Inject HelloClient client                                                          // <2>
 
     void 'execute function code'() {
         expect:
-            client.hello('Vlad').message == 'Hello Vlad'
+            client.hello('Vlad').message == 'Hello Vlad'                                // <3>
     }
 
 }

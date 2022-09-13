@@ -175,7 +175,8 @@ class KinesisServiceSpec extends Specification {
 
     void 'merge shards'() {
         when:
-            MergeShardsResponse result = service.mergeShards(service.listShards()[0].shardId(), service.listShards()[1].shardId())
+            List<Shard> shards = service.listShards()
+            MergeShardsResponse result = service.mergeShards(shards[0].shardId(), shards[1].shardId())
         then:
             result
     }

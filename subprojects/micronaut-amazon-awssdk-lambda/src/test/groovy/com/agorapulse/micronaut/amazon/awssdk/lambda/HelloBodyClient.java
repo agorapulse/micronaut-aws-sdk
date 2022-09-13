@@ -20,9 +20,9 @@ package com.agorapulse.micronaut.amazon.awssdk.lambda;
 import com.agorapulse.micronaut.amazon.awssdk.lambda.annotation.Body;
 import com.agorapulse.micronaut.amazon.awssdk.lambda.annotation.LambdaClient;
 
-@LambdaClient(function = "HelloFunction")
+@LambdaClient(function = "HelloFunction")                                               // <1>
 public interface HelloBodyClient {
 
-    HelloResponse hello(@Body HelloRequest request);
+    HelloResponse hello(@Body HelloRequest request);                                    // <2>
 
 }
