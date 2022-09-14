@@ -46,6 +46,8 @@ abstract class KinesisClientConfiguration {
     @NotEmpty
     String stream
 
+    String consumerFilterKey = ''
+
     String tableName = ''
     String kinesisEndpoint
     String dynamoDBEndpoint
@@ -87,13 +89,14 @@ abstract class KinesisClientConfiguration {
     long listShardsBackoffTimeInMillis = DEFAULT_LIST_SHARDS_BACKOFF_TIME_IN_MILLIS
     int maxListShardsRetryAttempts = DEFAULT_MAX_LIST_SHARDS_RETRY_ATTEMPTS
 
-    protected KinesisClientConfiguration(String applicationName, String workerId) {
+    protected KinesisClientConfiguration(String applicationName, String workerId, String consumerFilterKey) {
         this.applicationName = applicationName
         if (workerId) {
             this.workerId = workerId
         } else {
             this.workerId = "${InetAddress.localHost.canonicalHostName}:${UUID.randomUUID()}"
         }
+        this.consumerFilterKey = consumerFilterKey
     }
 
     KinesisClientLibConfiguration getKinesisClientLibConfiguration(
@@ -146,6 +149,10 @@ abstract class KinesisClientConfiguration {
 
         if (tableName) {
             configuration.withTableName(tableName)
+        } else if (consumerFilterKey) {
+            configuration.withTableName(consumerFilterKey + '_' + stream)
+        } else {
+            configuration.withTableName(stream)
         }
 
         if (timeoutInSeconds) {
