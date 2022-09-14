@@ -45,23 +45,25 @@
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>      <strong class="jxr_keyword">public</strong> <a name="DefaultKinesisClientConfiguration" href="../../../../../../../com/agorapulse/micronaut/amazon/awssdk/kinesis/worker/DefaultKinesisClientConfiguration.html#DefaultKinesisClientConfiguration">DefaultKinesisClientConfiguration</a>(
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>          @Value(<span class="jxr_string">"${aws.kinesis.application.name}"</span>) Optional&lt;String&gt; applicationName,
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>          @Value(<span class="jxr_string">"${aws.kinesis.worker.id}"</span>) Optional&lt;String&gt; workerId,
-<a class="jxr_linenumber" name="L40" href="#L40">40</a>          ApplicationConfiguration applicationConfiguration
-<a class="jxr_linenumber" name="L41" href="#L41">41</a>      ) {
-<a class="jxr_linenumber" name="L42" href="#L42">42</a>          <strong class="jxr_keyword">super</strong>(
-<a class="jxr_linenumber" name="L43" href="#L43">43</a>              applicationName.orElseGet(() -&gt; applicationConfiguration.getName().orElseThrow(() -&gt;
-<a class="jxr_linenumber" name="L44" href="#L44">44</a>                  <strong class="jxr_keyword">new</strong> IllegalStateException(<span class="jxr_string">"Missing application name. Please, set either micronaut.application.name or aws.kinesis.application.name"</span>)
-<a class="jxr_linenumber" name="L45" href="#L45">45</a>              )),
-<a class="jxr_linenumber" name="L46" href="#L46">46</a>              workerId.orElseGet(() -&gt; {
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>                  <strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>                      <strong class="jxr_keyword">return</strong> InetAddress.getLocalHost().getCanonicalHostName() + <span class="jxr_string">":"</span> + UUID.randomUUID();
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>                  } <strong class="jxr_keyword">catch</strong> (UnknownHostException e) {
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>                      <strong class="jxr_keyword">return</strong> <span class="jxr_string">"unknown:"</span> + UUID.randomUUID();
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>                  }
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>              })
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>          );
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>      }
-<a class="jxr_linenumber" name="L55" href="#L55">55</a>  
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>  }
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>          @Value(<span class="jxr_string">"${aws.kinesis.consumer-filter-key}"</span>) Optional&lt;String&gt; consumerFilterKey,
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>          ApplicationConfiguration applicationConfiguration
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>      ) {
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>          <strong class="jxr_keyword">super</strong>(
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>              applicationName.orElseGet(() -&gt; applicationConfiguration.getName().orElseThrow(() -&gt;
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>                  <strong class="jxr_keyword">new</strong> IllegalStateException(<span class="jxr_string">"Missing application name. Please, set either micronaut.application.name or aws.kinesis.application.name"</span>)
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>              )),
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>              workerId.orElseGet(() -&gt; {
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>                  <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>                      <strong class="jxr_keyword">return</strong> InetAddress.getLocalHost().getCanonicalHostName() + <span class="jxr_string">":"</span> + UUID.randomUUID();
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>                  } <strong class="jxr_keyword">catch</strong> (UnknownHostException e) {
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>                      <strong class="jxr_keyword">return</strong> <span class="jxr_string">"unknown:"</span> + UUID.randomUUID();
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>                  }
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>              }),
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>              consumerFilterKey.orElse(<span class="jxr_string">""</span>)
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>          );
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>      }
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  }
 </pre>
 <hr/>
 <div id="footer"></div>

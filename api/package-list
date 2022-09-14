@@ -16,6 +16,7 @@ com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v1
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v1.cloudwatch
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v1.dynamodb
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v1.kinesis
+com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v1.lambda
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v1.s3
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v1.ses
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v1.sns
@@ -25,6 +26,7 @@ com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v2
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v2.cloudwatch
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v2.dynamodb
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v2.kinesis
+com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v2.lambda
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v2.s3
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v2.ses
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v2.sns
@@ -35,6 +37,9 @@ com.agorapulse.micronaut.amazon.awssdk.kinesis.annotation
 com.agorapulse.micronaut.amazon.awssdk.kinesis.annotation.remap
 com.agorapulse.micronaut.amazon.awssdk.kinesis.worker
 com.agorapulse.micronaut.amazon.awssdk.kinesis.worker.annotation
+com.agorapulse.micronaut.amazon.awssdk.lambda
+com.agorapulse.micronaut.amazon.awssdk.lambda.annotation
+com.agorapulse.micronaut.amazon.awssdk.lambda.annotation.remap
 com.agorapulse.micronaut.amazon.awssdk.s3
 com.agorapulse.micronaut.amazon.awssdk.s3.groovy
 com.agorapulse.micronaut.amazon.awssdk.ses
@@ -60,6 +65,9 @@ com.agorapulse.micronaut.aws.kinesis.annotation
 com.agorapulse.micronaut.aws.kinesis.annotation.remap
 com.agorapulse.micronaut.aws.kinesis.worker
 com.agorapulse.micronaut.aws.kinesis.worker.annotation
+com.agorapulse.micronaut.aws.lambda
+com.agorapulse.micronaut.aws.lambda.annotation
+com.agorapulse.micronaut.aws.lambda.annotation.remap
 com.agorapulse.micronaut.aws.s3
 com.agorapulse.micronaut.aws.ses
 com.agorapulse.micronaut.aws.sns
