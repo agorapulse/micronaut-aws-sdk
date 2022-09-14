@@ -37,6 +37,7 @@ public class DefaultKinesisClientConfiguration extends KinesisClientConfiguratio
     public DefaultKinesisClientConfiguration(
         @Value("${aws.kinesis.application.name}") Optional<String> applicationName,
         @Value("${aws.kinesis.worker.id}") Optional<String> workerId,
+        @Value("${aws.kinesis.consumer-filter-key}") Optional<String> consumerFilterKey,
         ApplicationConfiguration applicationConfiguration
     ) {
         super(
@@ -49,7 +50,8 @@ public class DefaultKinesisClientConfiguration extends KinesisClientConfiguratio
                 } catch (UnknownHostException e) {
                     return "unknown:" + UUID.randomUUID();
                 }
-            })
+            }),
+            consumerFilterKey.orElse("")
         );
     }
 

@@ -50,6 +50,7 @@ public abstract class KinesisClientConfiguration {
     @NotEmpty private final String workerId;
     @NotEmpty private String stream;
 
+    private String consumerFilterKey = "";
     private String tableName;
     private String kinesisEndpoint;
     private String dynamoDBEndpoint;
@@ -72,9 +73,10 @@ public abstract class KinesisClientConfiguration {
 
     private Optional<Long> logWarningForTaskAfterMillis = Optional.empty();
 
-    protected KinesisClientConfiguration(@Nonnull String applicationName, @Nonnull  String workerId) {
+    protected KinesisClientConfiguration(@Nonnull String applicationName, @Nonnull  String workerId, String consumerFilterKey) {
         this.applicationName = applicationName;
         this.workerId = workerId;
+        this.consumerFilterKey = consumerFilterKey;
     }
 
     protected ConfigsBuilder getConfigsBuilder(
@@ -95,6 +97,10 @@ public abstract class KinesisClientConfiguration {
 
         if (StringUtils.isNotEmpty(tableName)) {
             builder.tableName(tableName);
+        } else if (StringUtils.isNotEmpty(consumerFilterKey)) {
+            builder.tableName(consumerFilterKey + "_" + stream);
+        } else {
+            builder.tableName(stream);
         }
 
         if (failoverTimeMillis != DEFAULT_FAILOVER_TIME_MILLIS) {
@@ -162,6 +168,10 @@ public abstract class KinesisClientConfiguration {
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
+    }
+
+    public void setConsumerFilterKey(String consumerFilterKey) {
+        this.consumerFilterKey = consumerFilterKey;
     }
 
     public void setKinesisEndpoint(String kinesisEndpoint) {
