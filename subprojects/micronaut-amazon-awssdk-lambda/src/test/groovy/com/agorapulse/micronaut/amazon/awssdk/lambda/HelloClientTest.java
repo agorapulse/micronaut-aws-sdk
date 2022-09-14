@@ -20,7 +20,7 @@ import java.nio.file.Files;
 @MicronautTest                                                                          // <1>
 public class HelloClientTest {
 
-    private static final Fixt fixt = Fixt.create(AbstractClientSpec.class);             // <2>
+    private static final Fixt FIXT = Fixt.create(AbstractClientSpec.class);             // <2>
 
     @TempDir private File tmp;
     @Inject private LambdaClient lambda;                                                // <3>
@@ -50,7 +50,7 @@ public class HelloClientTest {
         File functionDir = new File(tmp, "HelloFunction");
         functionDir.mkdirs();
 
-        fixt.copyTo("HelloFunction", functionDir);
+        FIXT.copyTo("HelloFunction", functionDir);
 
         File functionArchive = new File(tmp, "function.zip");
         ZipUtil.pack(functionDir, functionArchive);
