@@ -13,6 +13,7 @@ jobs:
       SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
       SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
       SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+      DEPLOYER_PASSWORD: ${{ secrets.DEPLOYER_PASSWORD }}
     steps:
       - uses: actions/checkout@v2
       - name: Setup Java 8
@@ -35,19 +36,19 @@ jobs:
           SIGNING_SECRET_KEY_PATH: ${{ steps.write_file.outputs.filePath }}
         uses: eskatos/gradle-command-action@v2
         with:
-          arguments: -x groovydoc publishToSonatype closeAndReleaseSonatypeStagingRepository -Pversion=${{ steps.version.outputs.tag }}-micronaut-1.0 -Prelease=true --stacktrace
+          arguments: -x groovydoc publish closeAndReleaseSonatypeStagingRepository -Pversion=${{ steps.version.outputs.tag }}-micronaut-1.0 -Prelease=true --stacktrace
       - name: Release Micronaut 2.x
         env:
           SIGNING_SECRET_KEY_PATH: ${{ steps.write_file.outputs.filePath }}
         uses: eskatos/gradle-command-action@v2
         with:
-          arguments: -x groovydoc publishToSonatype closeAndReleaseSonatypeStagingRepository -Pversion=${{ steps.version.outputs.tag }}-micronaut-2.0 -Prelease=true --stacktrace -PmicronautVersion=2.5.13 -PspockVersion=2.0-groovy-3.0 -PgroovyVersion=3.0.9
+          arguments: -x groovydoc publish closeAndReleaseSonatypeStagingRepository -Pversion=${{ steps.version.outputs.tag }}-micronaut-2.0 -Prelease=true --stacktrace -PmicronautVersion=2.5.13 -PspockVersion=2.0-groovy-3.0 -PgroovyVersion=3.0.9
       - name: Release Micronaut 3.x
         env:
           SIGNING_SECRET_KEY_PATH: ${{ steps.write_file.outputs.filePath }}
         uses: eskatos/gradle-command-action@v2
         with:
-          arguments: migrateImports gitPublishPush -x groovydoc publishToSonatype closeAndReleaseSonatypeStagingRepository -Pversion=${{ steps.version.outputs.tag }}-micronaut-3.0 -Prelease=true --stacktrace -PmicronautVersion=3.2.3 -PspockVersion=2.0-groovy-3.0 -PgroovyVersion=3.0.9 -Dorg.ajoberstar.grgit.auth.username=${{ secrets.AGORAPULSE_BOT_PERSONAL_TOKEN }}
+          arguments: migrateImports gitPublishPush -x groovydoc publish closeAndReleaseSonatypeStagingRepository -Pversion=${{ steps.version.outputs.tag }}-micronaut-3.0 -Prelease=true --stacktrace -PmicronautVersion=3.2.3 -PspockVersion=2.0-groovy-3.0 -PgroovyVersion=3.0.9 -Dorg.ajoberstar.grgit.auth.username=${{ secrets.AGORAPULSE_BOT_PERSONAL_TOKEN }}
   ping:
     name: Notify Upstream Repositories
     runs-on: ubuntu-latest
