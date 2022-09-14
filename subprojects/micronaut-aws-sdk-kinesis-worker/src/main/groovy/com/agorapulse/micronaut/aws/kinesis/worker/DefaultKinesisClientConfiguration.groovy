@@ -37,9 +37,10 @@ class DefaultKinesisClientConfiguration extends KinesisClientConfiguration {
 
     DefaultKinesisClientConfiguration(
         @Value('${aws.kinesis.application.name:}') String applicationName,
-        @Value('${aws.kinesis.worker.id:}') String workerId
+        @Value('${aws.kinesis.worker.id:}') String workerId,
+        @Value('${aws.kinesis.consumer-filter-key:}') String consumerFilterKey
     ) {
-        super(applicationName, workerId)
+        super(applicationName, workerId, consumerFilterKey)
     }
 
 }
