@@ -125,7 +125,7 @@ class SimpleNotificationServiceSpec extends Specification {
             service.registerIosSandboxDevice('ANOTHER-IOS-SANDBOX-TOKEN')
     }
 
-    @PendingFeature(reason = 'Needs to be tested with real SNS')
+    @PendingFeature (reason = 'Needs to be tested with real SNS')
     void 'register iOS sandbox device with the same token'() {
         expect:
             iosSandboxEndpointArn == service.createPlatformEndpoint(configuration.iosSandbox.arn, 'IOS-SANDBOX-TOKEN')
@@ -187,7 +187,6 @@ class SimpleNotificationServiceSpec extends Specification {
             noExceptionThrown()
     }
 
-    @PendingFeature
     void 'validate unregistered device'() {
         expect:
             service.validateAndroidDevice(androidEndpointArn, 'ANDROID-TOKEN')

@@ -27,7 +27,7 @@ import javax.inject.Inject;
 import java.util.Collections;
 import java.util.Map;
 
-import static com.agorapulse.micronaut.aws.sns.SimpleNotificationService.PlatformType.GCM;
+import static com.agorapulse.micronaut.aws.sns.SimpleNotificationService.PlatformType.APNS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -91,7 +91,7 @@ public class SimpleNotificationServiceTest {
         // tag::applications[]
         String appArn = service.createPlatformApplication(                              // <1>
             "my-app",
-            GCM,
+            APNS,
             null,
             API_KEY
         );
@@ -100,7 +100,7 @@ public class SimpleNotificationServiceTest {
 
         String jsonMessage = "{\"data\", \"{\"foo\": \"some bar\"}\", \"notification\", \"{\"title\": \"some title\", \"body\": \"some body\"}\"}";
 
-        String msgId = service.sendNotification(endpoint, GCM, jsonMessage);            // <3>
+        String msgId = service.sendNotification(endpoint, APNS, jsonMessage);           // <3>
 
         service.validateDeviceToken(appArn, endpoint, DEVICE_TOKEN, DATA);              // <4>
 

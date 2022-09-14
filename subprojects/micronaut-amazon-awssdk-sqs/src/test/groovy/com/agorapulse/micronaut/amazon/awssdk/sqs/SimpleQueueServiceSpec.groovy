@@ -70,7 +70,7 @@ class SimpleQueueServiceSpec extends Specification {
             messages.first().messageId() == msgId
 
         when:
-            service.deleteMessage(msgId)
+            service.deleteMessage(messages.first().receiptHandle())
         then:
             !service.receiveMessages()
 

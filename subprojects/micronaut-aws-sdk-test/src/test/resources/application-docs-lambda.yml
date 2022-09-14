@@ -1,0 +1,5 @@
+aws:
+  lambda:
+    functions:
+      hello:                                                                          # <1>
+        function: HelloFunction                                                       # <2>

@@ -173,9 +173,14 @@ class KinesisServiceSpec extends Specification {
             service.listShards().size() == SHARD_COUNT * 2
     }
 
+    @Retry(
+        count = 10,
+        delay = 100
+    )
     void 'merge shards'() {
         when:
-            MergeShardsResponse result = service.mergeShards(service.listShards()[0].shardId(), service.listShards()[1].shardId())
+            List<Shard> shards = service.listShards()
+            MergeShardsResponse result = service.mergeShards(shards[2].shardId(), shards[3].shardId())
         then:
             result
     }

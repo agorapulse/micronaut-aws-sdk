@@ -1,0 +1,126 @@
+=== Lambda
+
+> With AWS Lambda, you can run code without provisioning or managing servers. You pay only for the compute time that you consume—there's no charge when your code isn't running.
+
+This library provides support for function invocation using `@LambdaClient` introduction.
+
+==== Installation
+
+[source,indent=0,role="primary",subs='verbatim,attributes']
+.Gradle (AWS SDK 2.x)
+----
+implementation 'com.agorapulse:micronaut-amazon-awssdk-lambda:{project-version}'
+----
+
+[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
+.Maven (AWS SDK 2.x)
+----
+<dependency>
+    <groupId>com.agorapulse</groupId>
+    <artifactId>micronaut-amazon-awssdk-lambda</artifactId>
+    <version>{project-version}</version>
+</dependency>
+----
+
+[source,indent=0,role="secondary",subs='verbatim,attributes']
+.Gradle (AWS SDK 1.x)
+----
+implementation 'com.agorapulse:micronaut-aws-sdk-lambda:{project-version}'
+----
+
+[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
+.Maven (AWS SDK 1.x)
+----
+<dependency>
+    <groupId>com.agorapulse</groupId>
+    <artifactId>micronaut-aws-sdk-lambda</artifactId>
+    <version>{project-version}</version>
+</dependency>
+----
+
+==== Configuration
+
+You can configure the function name in the configuration
+
+[source,yaml,indent=0,options="nowrap"]
+.application.yml
+----
+include::{root-dir}/subprojects/micronaut-aws-sdk-test/src/test/resources/application-docs-lambda.yml[]
+----
+<1> The name of the configuration to be used with the interface such as  `@LambdaClient("hello")`
+<2> The name of the function to execute
+
+==== Invocation using `@LambdaClient`
+
+If you place `LambdaClient` annotation on the interface then any of its methods will invoke the function. Methods that return `void` will be invoked with `Event` invocation type - the client won't wait until the invocation is finished.
+
+NOTE: For AWS SDK 2.x, use packages starting `com.agorapulse.micronaut.amazon.awssdk.lambda`.
+
+NOTE: For AWS SDK 1.x, use packages starting `com.agorapulse.micronaut.aws.sdk.lambda`.
+
+
+The following example shows typical Lambda client interface:
+
+[source,java,indent=0,options="nowrap"]
+.Lambda Client using Configuration
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-lambda/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/lambda/HelloConfigurationClient.java[lines=18..-1]
+----
+<1> This `@LambdaClient` will be invoked against function defined in `aws.lambda.functions.hello.function` property
+<2> The function will be invoked with an object containing the property `name` with the actual argument
+
+[source,java,indent=0,options="nowrap"]
+.Lambda Client with Body
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-lambda/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/lambda/HelloBodyClient.java[lines=18..-1]
+----
+<1> You can specify the name of the function directly in the annotation using `function` property
+<2> You can use `@Body` annotation to use the whole argument object as a payload of the function
+
+==== Testing
+
+You can very easily create a Lambda function locally with https://www.testcontainers.org/[Testcontainers] and https://localstack.cloud/[LocalStack] using `micronaut-amazon-awssdk-integration-testing` module.
+
+You need to add following dependencies into your build file:
+
+[source,indent=0,role="primary",subs='verbatim,attributes']
+.Gradle
+----
+testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:{project-version}'
+----
+
+[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
+.Maven
+----
+<dependency>
+    <groupId>com.agorapulse</groupId>
+    <artifactId>micronaut-amazon-awssdk-dynamodb</artifactId>
+    <version>{project-version}</version>
+</dependency>
+----
+
+Then you can set up your tests like this:
+
+[source,java,indent=0]
+.Lambda Test
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-lambda/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/lambda/HelloClientTest.java[lines=18..-1]
+----
+<1> Annotate the specification with `@MicronautTest` to let Micronaut handle the application context lifecycle
+<2> `Fixt` is used to organize the function fixture
+<3> The `LambdaClient` (for v1 `AWSLambda`) is populated automatically pointing to the Localstack test container
+<4> The function client can be injected as well
+<5> The function is created in Localstack if not present yet
+<6> The function is invoked
+<7> The result of the invocation is compared to the expected value
+
+[TIP]
+====
+You can save time creating the new Localstack container by sharing it between the tests.
+
+[source,yaml]
+.application-test.yml
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-s3/src/test/resources/application-test.yml[]
+----
+====

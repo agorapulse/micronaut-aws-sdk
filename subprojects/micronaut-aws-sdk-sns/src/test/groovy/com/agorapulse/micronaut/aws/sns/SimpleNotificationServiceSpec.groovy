@@ -19,6 +19,7 @@ package com.agorapulse.micronaut.aws.sns
 
 import io.micronaut.context.annotation.Property
 import io.micronaut.test.annotation.MicronautTest
+import spock.lang.PendingFeature
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
@@ -88,6 +89,9 @@ class SimpleNotificationServiceSpec extends Specification {
             endpointArn == newEndpointArn
     }
 
+    @PendingFeature(
+        reason = 'GCM moved int Firebase Console, latest Localstack fails with "Invalid parameter: Attributes Reason: Platform credentials are invalid"'
+    )
     void 'publish direct'() {
         when:
             String messageId = service.sendAndroidAppNotification(endpointArn, [message: 'Hello'], 'key')

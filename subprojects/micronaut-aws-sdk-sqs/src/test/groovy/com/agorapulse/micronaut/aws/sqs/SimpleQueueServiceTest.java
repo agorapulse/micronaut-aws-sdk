@@ -65,7 +65,7 @@ public class SimpleQueueServiceTest {
         assertEquals(msgId, first.getMessageId());
         assertEquals(1, messages.size());
 
-        service.deleteMessage(msgId);                                                   // <4>
+        service.deleteMessage(first.getReceiptHandle());                                // <4>
         // end::messages[]
 
         List<Message> nextMessages = service.receiveMessages();
