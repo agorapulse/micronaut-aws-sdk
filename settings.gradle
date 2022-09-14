@@ -33,6 +33,9 @@ pluginManagement {
 buildscript {
     repositories {
         gradlePluginPortal()
+        maven {
+            url 'https://agorapulse.jfrog.io/agorapulse/gradle-plugins-releases-local/'
+        }
     }
     dependencies {
         classpath "org.kordamp.gradle:settings-gradle-plugin:$kordampVersion"
@@ -42,6 +45,7 @@ buildscript {
         }
         classpath 'org.ajoberstar.grgit:grgit-core:4.0.1'
         classpath "io.github.gradle-nexus:publish-plugin:1.0.0"
+        classpath "com.agorapulse.gradle:internal-maven-publish:$agorapulseGradlePluginsVersion"
     }
 }
 
@@ -66,6 +70,12 @@ apply plugin: 'org.kordamp.gradle.settings'
 
 projects {
     directories = ['subprojects', 'examples', 'docs', 'benchmarks']
+
+    plugins {
+        dir('subproject') {
+            id 'com.agorapulse.gradle:internal-maven-publish'
+        }
+    }
 }
 
 rootProject.name = 'micronaut-aws-sdk'
