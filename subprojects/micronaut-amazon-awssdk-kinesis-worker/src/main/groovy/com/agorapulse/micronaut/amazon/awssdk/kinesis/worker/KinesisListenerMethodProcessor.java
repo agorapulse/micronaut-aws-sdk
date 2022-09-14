@@ -17,15 +17,18 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker;
 
+import com.agorapulse.micronaut.amazon.awssdk.kinesis.Event;
 import com.agorapulse.micronaut.amazon.awssdk.kinesis.worker.annotation.KinesisListener;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.context.BeanContext;
 import io.micronaut.context.annotation.Requires;
+import io.micronaut.context.annotation.Value;
 import io.micronaut.context.event.ApplicationEventListener;
 import io.micronaut.context.event.ShutdownEvent;
 import io.micronaut.context.exceptions.NoSuchBeanException;
 import io.micronaut.context.processor.ExecutableMethodProcessor;
 import io.micronaut.core.type.Argument;
+import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.BeanDefinition;
 import io.micronaut.inject.ExecutableMethod;
 import io.micronaut.inject.qualifiers.Qualifiers;
@@ -102,17 +105,30 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
         private final Object bean;
         private final ObjectMapper mapper;
 
-        EventListener(ExecutableMethod method, Object bean, ObjectMapper mapper) {
+        private final String consumerFilterKey;
+
+        EventListener(ExecutableMethod method, Object bean, ObjectMapper mapper, String consumerFilterKey) {
             this.method = method;
             this.bean = bean;
             this.mapper = mapper;
+            this.consumerFilterKey = consumerFilterKey;
         }
 
         @Override
         public void accept(String s, KinesisClientRecord record) {
             Class type = method.getArguments()[0].getType();
             try {
-                method.invoke(bean, mapper.readValue(s, type));
+                Object event = mapper.readValue(s, type);
+
+                if (event instanceof Event && StringUtils.isNotEmpty(consumerFilterKey)) {
+                    String eventKey = ((Event) event).getConsumerFilterKey();
+                    if (!consumerFilterKey.equals(eventKey)) {
+                        LOGGER.info("Ignoring event because expected consumer filter key {} is not equal to the event's filter key {}: {}", consumerFilterKey, eventKey, s);
+                        return;
+                    }
+                }
+
+                method.invoke(bean, event);
             } catch (IOException e) {
                 throw new IllegalArgumentException("Failed to unmarshall string " + s + " as type " + type);
             }
@@ -146,12 +162,20 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
     private final ObjectMapper objectMapper;
     private final KinesisWorkerFactory kinesisWorkerFactory;
 
+    private final String consumerFilterKey;
+
     private final ConcurrentHashMap<String, KinesisWorker> workers = new ConcurrentHashMap<>();
 
-    public KinesisListenerMethodProcessor(BeanContext beanContext, ObjectMapper objectMapper, KinesisWorkerFactory kinesisWorkerFactory) {
+    public KinesisListenerMethodProcessor(
+        BeanContext beanContext,
+        ObjectMapper objectMapper,
+        KinesisWorkerFactory kinesisWorkerFactory,
+        @Value("${aws.kinesis.consumer-filter-key:}") String consumerFilterKey
+    ) {
         this.beanContext = beanContext;
         this.objectMapper = objectMapper;
         this.kinesisWorkerFactory = kinesisWorkerFactory;
+        this.consumerFilterKey = consumerFilterKey;
     }
 
     @Override
@@ -236,7 +260,7 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
             return new RecordListener(method, bean);
         }
 
-        return new EventListener(method, bean, objectMapper);
+        return new EventListener(method, bean, objectMapper, consumerFilterKey);
     }
 
 }
