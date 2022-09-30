@@ -39,6 +39,7 @@ public class AwsConfiguration {
             EnvironmentVariableCredentialsProvider.create(),
             SystemPropertyCredentialsProvider.create(),
             ProfileCredentialsProvider.create(),
+            ContainerCredentialsProvider.builder().build(),
             InstanceProfileCredentialsProvider.create()
         );
     }
