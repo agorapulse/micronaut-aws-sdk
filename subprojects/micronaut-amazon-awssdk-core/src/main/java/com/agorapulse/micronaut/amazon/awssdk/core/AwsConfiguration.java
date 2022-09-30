@@ -38,6 +38,7 @@ public class AwsConfiguration {
             EnvironmentAwsCredentialsProvider.create(environment),
             EnvironmentVariableCredentialsProvider.create(),
             SystemPropertyCredentialsProvider.create(),
+            ContainerCredentialsProvider.builder().build(),
             ProfileCredentialsProvider.create(),
             InstanceProfileCredentialsProvider.create()
         );
