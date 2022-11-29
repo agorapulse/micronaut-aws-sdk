@@ -109,7 +109,7 @@ public class LambdaClientIntroduction implements MethodInterceptor<Object, Objec
 
             InvokeResponse response = service.invoke(request);
 
-            if (response.statusCode() >= 400) {
+            if (response.statusCode() >= 400 || StringUtils.isNotEmpty(response.functionError())) {
                 throw new LambdaClientException(response);
             }
 
