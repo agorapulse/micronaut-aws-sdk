@@ -1,3 +1,5 @@
 localstack:
   services: s3
   shared: true
+  env:
+    DEBUG: 1

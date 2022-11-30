@@ -20,18 +20,22 @@ package com.agorapulse.micronaut.amazon.awssdk.itest.localstack;
 import io.micronaut.context.annotation.ConfigurationProperties;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @ConfigurationProperties("localstack")
 public class LocalstackContainerConfiguration {
 
     // taken from LocalstackContainer defaults which are private constants
     private String image = "localstack/localstack";
-    private String tag = "1.1.0";
+    private String tag = "1.2.0";
 
     private List<String> services = new ArrayList<>();
 
     private boolean shared;
+
+    private Map<String, String> env = new HashMap<>();
 
     public String getImage() {
         return image;
@@ -63,5 +67,13 @@ public class LocalstackContainerConfiguration {
 
     public void setShared(boolean shared) {
         this.shared = shared;
+    }
+
+    public Map<String, String> getEnv() {
+        return env;
+    }
+
+    public void setEnv(Map<String, String> env) {
+        this.env = env;
     }
 }
