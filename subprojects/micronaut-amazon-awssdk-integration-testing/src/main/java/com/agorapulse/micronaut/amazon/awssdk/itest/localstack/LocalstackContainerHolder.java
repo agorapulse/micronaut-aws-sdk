@@ -88,7 +88,9 @@ public class LocalstackContainerHolder implements Closeable {
         startLock.lock();
         LOGGER.info("Starting Localstack container {}:{} for services {}", configuration.getImage(), configuration.getTag(), enabledServices);
         DockerImageName dockerImageName = DockerImageName.parse(configuration.getImage()).withTag(configuration.getTag());
-        LocalStackContainer container = new LocalStackContainer(dockerImageName).withServices(enabledServices.toArray(new LocalStackContainer.Service[0]));
+        LocalStackContainer container = new LocalStackContainer(dockerImageName)
+            .withServices(enabledServices.toArray(new LocalStackContainer.Service[0]))
+            .withEnv(configuration.getEnv());
         container.start();
         LOGGER.info("Started Localstack container {}:{} for services {}", configuration.getImage(), configuration.getTag(), enabledServices);
         startLock.unlock();
