@@ -31,6 +31,8 @@ import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.qualifiers.Qualifiers;
 import io.micronaut.jackson.JacksonConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.lambda.model.InvocationType;
 import software.amazon.awssdk.services.lambda.model.InvokeRequest;
@@ -38,12 +40,15 @@ import software.amazon.awssdk.services.lambda.model.InvokeResponse;
 
 import javax.inject.Singleton;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Function;
 
 @Singleton
 @Requires(classes = software.amazon.awssdk.services.lambda.LambdaClient.class)
 public class LambdaClientIntroduction implements MethodInterceptor<Object, Object> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LambdaClientIntroduction.class);
 
     private static final Function<String, Optional<String>> EMPTY_IF_UNDEFINED = (String s) -> StringUtils.isEmpty(s) ? Optional.empty() : Optional.of(s);
 
@@ -82,29 +87,35 @@ public class LambdaClientIntroduction implements MethodInterceptor<Object, Objec
             functionName = configuration.getFunction();
         }
 
-        return doIntercept(context, service, functionName);
+        return doIntercept(context, service, functionName, configuration.getTimeout());
     }
 
     @SuppressWarnings("rawtypes")
-    private Object doIntercept(MethodInvocationContext<Object, Object> context, software.amazon.awssdk.services.lambda.LambdaClient service, String functionName) {
+    private Object doIntercept(MethodInvocationContext<Object, Object> context, software.amazon.awssdk.services.lambda.LambdaClient service, String functionName, Duration timeout) {
         Argument[] arguments = context.getArguments();
 
         if (arguments.length == 1 && context.getArguments()[0].isAnnotationPresent(Body.class)) {
-            return invokeFunction(context, service, functionName, context.getParameterValues()[0]);
+            return invokeFunction(context, service, functionName, timeout, context.getParameterValues()[0]);
         }
 
-        return invokeFunction(context, service, functionName, context.getParameterValueMap());
+        return invokeFunction(context, service, functionName, timeout, context.getParameterValueMap());
     }
 
-    private Object invokeFunction(MethodInvocationContext<Object, Object> context, software.amazon.awssdk.services.lambda.LambdaClient service, String functionName, Object requestObject) {
+    private Object invokeFunction(MethodInvocationContext<Object, Object> context, software.amazon.awssdk.services.lambda.LambdaClient service, String functionName, Duration timeout, Object requestObject) {
         try {
             boolean event = void.class.equals(context.getReturnType().getType());
+            String payload = objectMapper.writeValueAsString(requestObject);
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Invoking function {} with a payload {}", functionName, payload);
+            }
 
             InvokeRequest request = InvokeRequest
                 .builder()
                 .functionName(functionName)
-                .payload(SdkBytes.fromUtf8String(objectMapper.writeValueAsString(requestObject)))
+                .payload(SdkBytes.fromUtf8String(payload))
                 .invocationType(event ? InvocationType.EVENT : InvocationType.REQUEST_RESPONSE)
+                .overrideConfiguration(r -> r.apiCallTimeout(timeout))
                 .build();
 
             InvokeResponse response = service.invoke(request);
@@ -119,6 +130,11 @@ public class LambdaClientIntroduction implements MethodInterceptor<Object, Objec
             }
 
             JavaType javaType = JacksonConfiguration.constructType(context.getReturnType().asArgument(), objectMapper.getTypeFactory());
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Response from the function {} is {}", functionName, new String(response.payload().asByteArray()));
+            }
+
             return objectMapper.readValue(response.payload().asByteArray(), javaType);
         } catch (IOException e) {
             throw new IllegalArgumentException("Cannot invoke function " + functionName, e);

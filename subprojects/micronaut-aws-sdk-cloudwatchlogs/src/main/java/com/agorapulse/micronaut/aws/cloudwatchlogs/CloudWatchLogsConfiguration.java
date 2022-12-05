@@ -15,31 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.aws.lambda;
+package com.agorapulse.micronaut.aws.cloudwatchlogs;
 
 import com.agorapulse.micronaut.aws.DefaultRegionAndEndpointConfiguration;
+import com.agorapulse.micronaut.aws.util.ConfigurationUtil;
+import com.amazonaws.services.logs.AWSLogsClient;
+import io.micronaut.context.annotation.ConfigurationProperties;
+import io.micronaut.context.annotation.Primary;
+import io.micronaut.context.annotation.Requires;
 
-import java.time.Duration;
+import javax.inject.Named;
 
-public abstract class LambdaConfiguration extends DefaultRegionAndEndpointConfiguration {
+/**
+ * Default simple storage service configuration.
+ */
+@Primary
+@Named(ConfigurationUtil.DEFAULT_CONFIGURATION_NAME)
+@ConfigurationProperties("aws.cloudwatchlogs")
+@Requires(classes = AWSLogsClient.class)
+public class CloudWatchLogsConfiguration extends DefaultRegionAndEndpointConfiguration {
 
-    private String function;
-
-    private Duration timeout = Duration.ofSeconds(30);
-
-    public String getFunction() {
-        return function;
-    }
-
-    public void setFunction(String function) {
-        this.function = function;
-    }
-
-    public Duration getTimeout() {
-        return timeout;
-    }
-
-    public void setTimeout(Duration timeout) {
-        this.timeout = timeout;
-    }
 }

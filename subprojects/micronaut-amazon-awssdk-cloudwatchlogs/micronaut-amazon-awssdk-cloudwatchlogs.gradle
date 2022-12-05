@@ -15,31 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.aws.lambda;
-
-import com.agorapulse.micronaut.aws.DefaultRegionAndEndpointConfiguration;
-
-import java.time.Duration;
-
-public abstract class LambdaConfiguration extends DefaultRegionAndEndpointConfiguration {
-
-    private String function;
-
-    private Duration timeout = Duration.ofSeconds(30);
-
-    public String getFunction() {
-        return function;
-    }
-
-    public void setFunction(String function) {
-        this.function = function;
-    }
-
-    public Duration getTimeout() {
-        return timeout;
-    }
-
-    public void setTimeout(Duration timeout) {
-        this.timeout = timeout;
-    }
+dependencies {
+    api 'software.amazon.awssdk:cloudwatchlogs'
+    implementation project(':micronaut-amazon-awssdk-core')
+    testImplementation 'io.micronaut:micronaut-inject'
 }

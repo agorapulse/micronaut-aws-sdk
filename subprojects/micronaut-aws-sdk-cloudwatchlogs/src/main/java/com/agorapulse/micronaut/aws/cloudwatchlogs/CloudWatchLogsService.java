@@ -15,31 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.aws.lambda;
+package com.agorapulse.micronaut.aws.cloudwatchlogs;
 
-import com.agorapulse.micronaut.aws.DefaultRegionAndEndpointConfiguration;
+import com.amazonaws.services.logs.model.OutputLogEvent;
 
-import java.time.Duration;
+import java.util.stream.Stream;
 
-public abstract class LambdaConfiguration extends DefaultRegionAndEndpointConfiguration {
+/**
+ * Simple service to read CloudWatch Logs.
+ */
+public interface CloudWatchLogsService {
 
-    private String function;
+    /**
+     * Get stream of the latest log events.
+     * @param logGroup the name of the log group
+     * @return a stream of the latest log events
+     */
+    Stream<OutputLogEvent> getLogEvents(String logGroup);
 
-    private Duration timeout = Duration.ofSeconds(30);
-
-    public String getFunction() {
-        return function;
-    }
-
-    public void setFunction(String function) {
-        this.function = function;
-    }
-
-    public Duration getTimeout() {
-        return timeout;
-    }
-
-    public void setTimeout(Duration timeout) {
-        this.timeout = timeout;
-    }
 }
