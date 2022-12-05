@@ -33,7 +33,7 @@ class VoidClientSpec extends AbstractClientSpec {
         then:
             noExceptionThrown()
 
-            logsService.contains('/aws/lambda/HelloFunction','hello')
+            logsService.contains('/aws/lambda/HelloFunction', 'hello')
     }
 
 }
