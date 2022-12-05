@@ -1,4 +1,5 @@
 com.agorapulse.micronaut.amazon.awssdk.cloudwatch
+com.agorapulse.micronaut.amazon.awssdk.cloudwatchlogs
 com.agorapulse.micronaut.amazon.awssdk.core
 com.agorapulse.micronaut.amazon.awssdk.core.util
 com.agorapulse.micronaut.amazon.awssdk.dynamodb
@@ -14,6 +15,7 @@ com.agorapulse.micronaut.amazon.awssdk.dynamodb.util
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v1
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v1.cloudwatch
+com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v1.cloudwatchlogs
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v1.dynamodb
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v1.kinesis
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v1.lambda
@@ -24,6 +26,7 @@ com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v1.sqs
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v1.sts
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v2
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v2.cloudwatch
+com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v2.cloudwatchlogs
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v2.dynamodb
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v2.kinesis
 com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v2.lambda
@@ -56,6 +59,7 @@ com.agorapulse.micronaut.aws
 com.agorapulse.micronaut.aws.apigateway.ws
 com.agorapulse.micronaut.aws.apigateway.ws.event
 com.agorapulse.micronaut.aws.cloudwatch
+com.agorapulse.micronaut.aws.cloudwatchlogs
 com.agorapulse.micronaut.aws.dynamodb
 com.agorapulse.micronaut.aws.dynamodb.annotation
 com.agorapulse.micronaut.aws.dynamodb.annotation.remap
