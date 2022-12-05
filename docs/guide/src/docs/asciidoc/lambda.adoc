@@ -113,6 +113,19 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-lambda/src/test/groovy/c
 <5> The function is created in Localstack if not present yet
 <6> The function is invoked
 <7> The result of the invocation is compared to the expected value
+<8> Set the Micronaut environment for the AWS Lambda function
+
+[CAUTION]
+====
+If your Lambda function under test itself integrates with some other AWS services then you need to set them up in Localstack and set the endpoints correctly to point to the Localstack mocks.
+
+[source,yaml]
+.application-itest.yml
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-lambda/src/test/resources/application-itest.yml[]
+----
+<1> Use `LOCALSTACK_HOSTNAME` environment variable to access the DynamoDB mock
+====
 
 [TIP]
 ====

@@ -21,6 +21,7 @@ dependencies {
     implementation "software.amazon.awssdk:netty-nio-client:$kinesisClientV2Version"
 
     compileOnly project(':micronaut-amazon-awssdk-cloudwatch')
+    compileOnly project(':micronaut-amazon-awssdk-cloudwatchlogs')
     compileOnly project(':micronaut-amazon-awssdk-core')
     compileOnly project(':micronaut-amazon-awssdk-dynamodb')
     compileOnly project(':micronaut-amazon-awssdk-lambda')
@@ -32,6 +33,7 @@ dependencies {
     compileOnly project(':micronaut-amazon-awssdk-sts')
 
     compileOnly project(':micronaut-aws-sdk-cloudwatch')
+    compileOnly project(':micronaut-aws-sdk-cloudwatchlogs')
     compileOnly project(':micronaut-aws-sdk-core')
     compileOnly project(':micronaut-aws-sdk-dynamodb')
     compileOnly project(':micronaut-aws-sdk-lambda')

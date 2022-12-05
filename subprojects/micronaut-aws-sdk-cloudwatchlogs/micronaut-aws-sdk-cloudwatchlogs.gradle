@@ -16,12 +16,9 @@
  * limitations under the License.
  */
 dependencies {
-    api 'software.amazon.awssdk:lambda'
+    api 'com.amazonaws:aws-java-sdk-logs'
 
-    implementation project(':micronaut-amazon-awssdk-core')
+    implementation project(':micronaut-aws-sdk-core')
 
-    testImplementation project(':micronaut-amazon-awssdk-integration-testing')
-    testImplementation project(':micronaut-amazon-awssdk-cloudwatchlogs')
-    testImplementation 'org.zeroturnaround:zt-zip:1.15'
-    testImplementation 'com.agorapulse.testing:fixt:0.2.3'
+    testImplementation 'io.micronaut:micronaut-inject'
 }

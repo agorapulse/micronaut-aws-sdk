@@ -16,5 +16,6 @@
  * limitations under the License.
  */
 exports.handler =  async function(event, context) {
+  console.log("Hello from hello function")
   return { "message" : "Hello " + event.name }
 }

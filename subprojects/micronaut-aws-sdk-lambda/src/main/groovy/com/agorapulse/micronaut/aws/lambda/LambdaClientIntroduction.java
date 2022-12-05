@@ -35,16 +35,21 @@ import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.qualifiers.Qualifiers;
 import io.micronaut.jackson.JacksonConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Function;
 
 @Singleton
 @Requires(classes = AWSLambda.class)
 public class LambdaClientIntroduction implements MethodInterceptor<Object, Object> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LambdaClientIntroduction.class);
 
     private static final Function<String, Optional<String>> EMPTY_IF_UNDEFINED = (String s) -> StringUtils.isEmpty(s) ? Optional.empty() : Optional.of(s);
 
@@ -83,30 +88,39 @@ public class LambdaClientIntroduction implements MethodInterceptor<Object, Objec
             functionName = configuration.getFunction();
         }
 
-        return doIntercept(context, service, functionName);
+        return doIntercept(context, service, functionName, configuration.getTimeout());
     }
 
     @SuppressWarnings("rawtypes")
-    private Object doIntercept(MethodInvocationContext<Object, Object> context, AWSLambda service, String functionName) {
+    private Object doIntercept(MethodInvocationContext<Object, Object> context, AWSLambda service, String functionName, Duration timeout) {
         Argument[] arguments = context.getArguments();
 
         if (arguments.length == 1 && context.getArguments()[0].isAnnotationPresent(Body.class)) {
-            return invokeFunction(context, service, functionName, context.getParameterValues()[0]);
+            return invokeFunction(context, service, functionName, timeout, context.getParameterValues()[0]);
         }
 
-        return invokeFunction(context, service, functionName, context.getParameterValueMap());
+        return invokeFunction(context, service, functionName, timeout, context.getParameterValueMap());
     }
 
-    private Object invokeFunction(MethodInvocationContext<Object, Object> context, AWSLambda service, String functionName, Object requestObject) {
+    private Object invokeFunction(MethodInvocationContext<Object, Object> context, AWSLambda service, String functionName, Duration timeout, Object requestObject) {
         try {
             boolean event = void.class.equals(context.getReturnType().getType());
 
+            byte[] payload = objectMapper.writeValueAsBytes(requestObject);
+
             InvokeRequest request = new InvokeRequest()
                 .withFunctionName(functionName)
-                .withPayload(ByteBuffer.wrap(objectMapper.writeValueAsBytes(requestObject)));
+                .withPayload(ByteBuffer.wrap(payload));
+
+            request.withSdkRequestTimeout((int) timeout.toMillis());
 
             if (event) {
                 request.withInvocationType(InvocationType.Event);
+            }
+
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Invoking function {} with a payload {}", functionName, new String(payload));
             }
 
             InvokeResult response = service.invoke(request);
@@ -121,6 +135,11 @@ public class LambdaClientIntroduction implements MethodInterceptor<Object, Objec
             }
 
             JavaType javaType = JacksonConfiguration.constructType(context.getReturnType().asArgument(), objectMapper.getTypeFactory());
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Response from the function {} is {}", functionName, new String(response.getPayload().array()));
+            }
+
             return objectMapper.readValue(response.getPayload().array(), javaType);
         } catch (IOException e) {
             throw new IllegalArgumentException("Cannot invoke function " + functionName, e);

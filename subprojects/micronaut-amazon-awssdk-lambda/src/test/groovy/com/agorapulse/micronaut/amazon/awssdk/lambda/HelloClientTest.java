@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.Collections;
 
 @MicronautTest                                                                          // <1>
 public class HelloClientTest {
@@ -76,6 +77,9 @@ public class HelloClientTest {
             .runtime(Runtime.NODEJS16_X)
             .role("HelloRole")
             .handler("index.handler")
+            .environment(e ->
+                e.variables(Collections.singletonMap("MICRONAUT_ENVIRONMENTS", "itest"))//<8>
+            )
             .code(code -> {
                 try {
                     InputStream archiveStream = Files.newInputStream(functionArchive.toPath());

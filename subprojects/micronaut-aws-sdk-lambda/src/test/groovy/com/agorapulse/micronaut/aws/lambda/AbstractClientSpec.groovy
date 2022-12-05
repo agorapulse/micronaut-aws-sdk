@@ -20,6 +20,7 @@ package com.agorapulse.micronaut.aws.lambda
 import com.agorapulse.testing.fixt.Fixt
 import com.amazonaws.services.lambda.AWSLambda
 import com.amazonaws.services.lambda.model.CreateFunctionRequest
+import com.amazonaws.services.lambda.model.Environment
 import com.amazonaws.services.lambda.model.FunctionCode
 import com.amazonaws.services.lambda.model.Runtime
 import groovy.transform.CompileStatic
@@ -69,6 +70,7 @@ abstract class AbstractClientSpec extends Specification {
             .withRole('HelloRole')
             .withHandler('index.handler')
             .withCode(new FunctionCode().withZipFile(ByteBuffer.wrap(functionArchive.bytes)))
+            .withEnvironment(new Environment(variables: [MICRONAUT_ENVIRONMENTS: 'itest']))
 
         lambda.createFunction(request)
     }

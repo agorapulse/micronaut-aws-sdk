@@ -65,6 +65,7 @@ abstract class AbstractClientSpec extends Specification {
               .role('HelloRole')
               .handler('index.handler')
               .code { it.zipFile(SdkBytes.fromByteArray(functionArchive.bytes)) }
+              .environment { it.variables(MICRNOAUT_ENVIRONMENT: 'itest') }
               .build()
         }
     }

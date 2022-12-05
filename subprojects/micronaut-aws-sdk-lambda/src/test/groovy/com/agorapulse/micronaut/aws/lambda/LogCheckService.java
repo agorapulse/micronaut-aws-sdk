@@ -15,13 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-dependencies {
-    api 'software.amazon.awssdk:lambda'
+package com.agorapulse.micronaut.aws.lambda;
 
-    implementation project(':micronaut-amazon-awssdk-core')
+import com.agorapulse.micronaut.aws.cloudwatchlogs.CloudWatchLogsService;
 
-    testImplementation project(':micronaut-amazon-awssdk-integration-testing')
-    testImplementation project(':micronaut-amazon-awssdk-cloudwatchlogs')
-    testImplementation 'org.zeroturnaround:zt-zip:1.15'
-    testImplementation 'com.agorapulse.testing:fixt:0.2.3'
+import javax.inject.Singleton;
+
+@Singleton
+public class LogCheckService {
+
+    private final CloudWatchLogsService logsService;                                    // <1>
+
+    public LogCheckService(CloudWatchLogsService logsService) {
+        this.logsService = logsService;
+    }
+
+    public boolean contains(String logGroup, String text) {
+        return logsService.getLogEvents(logGroup)
+            .anyMatch(e -> e.getMessage().contains(text));                              // <2>
+    }
+
 }

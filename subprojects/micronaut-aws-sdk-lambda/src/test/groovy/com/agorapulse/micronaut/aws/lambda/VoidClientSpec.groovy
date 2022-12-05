@@ -25,12 +25,15 @@ import javax.inject.Inject
 class VoidClientSpec extends AbstractClientSpec {
 
     @Inject VoidClient client
+    @Inject LogCheckService logsService
 
     void 'execute function code'() {
         when:
             client.hello(new HelloRequest(name: 'Vlad'))
         then:
             noExceptionThrown()
+
+            logsService.contains('/aws/lambda/HelloFunction', 'hello')
     }
 
 }

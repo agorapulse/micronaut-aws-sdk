@@ -28,6 +28,7 @@ dependencies {
 
     constraints {
         api "com.amazonaws:aws-java-sdk-cloudwatch:$project.awsSdkVersion"
+        api "com.amazonaws:aws-java-sdk-logs:$project.awsSdkVersion"
         api "com.amazonaws:aws-java-sdk-core:$project.awsSdkVersion"
         api "com.amazonaws:aws-java-sdk-dynamodb:$project.awsSdkVersion"
         api "com.amazonaws:aws-java-sdk-kms:$project.awsSdkVersion"
@@ -43,6 +44,7 @@ dependencies {
         api "software.amazon.awssdk:core:$project.awsSdk2Version"
         api "software.amazon.awssdk:aws-core:$project.awsSdk2Version"
         api "software.amazon.awssdk:cloudwatch:$project.awsSdk2Version"
+        api "software.amazon.awssdk:cloudwatchlogs:$project.awsSdk2Version"
         api "software.amazon.awssdk:dynamodb:$project.awsSdk2Version"
         api "software.amazon.awssdk:dynamodb-enhanced:$project.awsSdk2Version"
         api "software.amazon.awssdk:kms:$project.awsSdk2Version"

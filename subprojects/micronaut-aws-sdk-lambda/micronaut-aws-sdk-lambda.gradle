@@ -21,6 +21,7 @@ dependencies {
     implementation project(':micronaut-aws-sdk-core')
 
     testImplementation project(':micronaut-amazon-awssdk-integration-testing')
+    testImplementation project(':micronaut-aws-sdk-cloudwatchlogs')
     testImplementation 'org.zeroturnaround:zt-zip:1.15'
     testImplementation 'com.agorapulse.testing:fixt:0.2.3'
 }

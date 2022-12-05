@@ -15,13 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-dependencies {
-    api 'software.amazon.awssdk:lambda'
+package com.agorapulse.micronaut.aws.cloudwatchlogs;
 
-    implementation project(':micronaut-amazon-awssdk-core')
+import com.amazonaws.services.logs.model.OutputLogEvent;
 
-    testImplementation project(':micronaut-amazon-awssdk-integration-testing')
-    testImplementation project(':micronaut-amazon-awssdk-cloudwatchlogs')
-    testImplementation 'org.zeroturnaround:zt-zip:1.15'
-    testImplementation 'com.agorapulse.testing:fixt:0.2.3'
+import java.util.stream.Stream;
+
+/**
+ * Simple service to read CloudWatch Logs.
+ */
+public interface CloudWatchLogsService {
+
+    /**
+     * Get stream of the latest log events.
+     * @param logGroup the name of the log group
+     * @return a stream of the latest log events
+     */
+    Stream<OutputLogEvent> getLogEvents(String logGroup);
+
 }
