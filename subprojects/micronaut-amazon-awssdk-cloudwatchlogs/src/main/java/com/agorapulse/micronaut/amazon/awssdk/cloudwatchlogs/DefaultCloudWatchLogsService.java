@@ -17,9 +17,11 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.cloudwatchlogs;
 
+import io.micronaut.retry.annotation.Retryable;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
 import software.amazon.awssdk.services.cloudwatchlogs.model.LogStream;
 import software.amazon.awssdk.services.cloudwatchlogs.model.OutputLogEvent;
+import software.amazon.awssdk.services.cloudwatchlogs.model.ResourceNotFoundException;
 
 import javax.inject.Singleton;
 import java.util.List;
@@ -35,6 +37,7 @@ public class DefaultCloudWatchLogsService implements CloudWatchLogsService {
     }
 
     @Override
+    @Retryable(includes = ResourceNotFoundException.class)
     public Stream<OutputLogEvent> getLogEvents(String logGroup) {
         List<LogStream> logStreams = cloudWatchLogsClient
             .describeLogStreams(streams -> streams.logGroupName(logGroup))
