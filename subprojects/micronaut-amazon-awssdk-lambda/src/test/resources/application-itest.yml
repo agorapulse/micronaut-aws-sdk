@@ -1,0 +1,3 @@
+aws:
+  dynamodb:
+    endpoint: http://${LOCALSTACK_HOSTNAME}:4566                                        # <1>

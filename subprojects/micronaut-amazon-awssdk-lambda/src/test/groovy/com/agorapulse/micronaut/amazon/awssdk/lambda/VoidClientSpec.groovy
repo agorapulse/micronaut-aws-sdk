@@ -17,9 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.lambda
 
-import com.agorapulse.micronaut.amazon.awssdk.cloudwatchlogs.CloudWatchLogsService
 import io.micronaut.test.annotation.MicronautTest
-import software.amazon.awssdk.services.cloudwatchlogs.model.OutputLogEvent
 
 import javax.inject.Inject
 
@@ -27,7 +25,7 @@ import javax.inject.Inject
 class VoidClientSpec extends AbstractClientSpec {
 
     @Inject VoidClient client
-    @Inject CloudWatchLogsService cloudWatchLogsService
+    @Inject LogCheckService logsService
 
     void 'execute function code'() {
         when:
@@ -35,9 +33,7 @@ class VoidClientSpec extends AbstractClientSpec {
         then:
             noExceptionThrown()
 
-            cloudWatchLogsService.getLogEvents('/aws/lambda/HelloFunction').anyMatch { OutputLogEvent event ->
-                event.message().contains('hello')
-            }
+            logsService.contains('/aws/lambda/HelloFunction','hello')
     }
 
 }

@@ -15,25 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.aws.lambda
+package com.agorapulse.micronaut.aws.lambda;
 
-import io.micronaut.test.annotation.MicronautTest
+import com.agorapulse.micronaut.aws.cloudwatchlogs.CloudWatchLogsService;
 
-import javax.inject.Inject
+import javax.inject.Singleton;
 
-@MicronautTest
-class VoidClientSpec extends AbstractClientSpec {
+@Singleton
+public class LogCheckService {
 
-    @Inject VoidClient client
-    @Inject LogCheckService logsService
+    private final CloudWatchLogsService logsService;                                    // <1>
 
-    void 'execute function code'() {
-        when:
-            client.hello(new HelloRequest(name: 'Vlad'))
-        then:
-            noExceptionThrown()
+    public LogCheckService(CloudWatchLogsService logsService) {
+        this.logsService = logsService;
+    }
 
-            logsService.contains('/aws/lambda/HelloFunction','hello')
+    public boolean contains(String logGroup, String text) {
+        return logsService.getLogEvents(logGroup)
+            .anyMatch(e -> e.getMessage().contains(text));                              // <2>
     }
 
 }

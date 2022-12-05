@@ -1,0 +1,82 @@
+=== CloudWatch Logs
+
+This library provides support for reading the latest CloudWatch Logs for given log group, usually when testing Lambda
+functions.
+
+==== Installation
+
+[source,indent=0,role="primary",subs='verbatim,attributes']
+.Gradle (AWS SDK 2.x)
+----
+implementation 'com.agorapulse:micronaut-amazon-awssdk-cloudwatchlogs:{project-version}'
+----
+
+[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
+.Maven (AWS SDK 2.x)
+----
+<dependency>
+    <groupId>com.agorapulse</groupId>
+    <artifactId>micronaut-amazon-awssdk-cloudwatchlogs</artifactId>
+    <version>{project-version}</version>
+</dependency>
+----
+
+[source,indent=0,role="secondary",subs='verbatim,attributes']
+.Gradle (AWS SDK 1.x)
+----
+implementation 'com.agorapulse:micronaut-aws-sdk-cloudwatchlogs:{project-version}'
+----
+
+[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
+.Maven (AWS SDK 1.x)
+----
+<dependency>
+    <groupId>com.agorapulse</groupId>
+    <artifactId>micronaut-aws-sdk-cloudwatchlogs</artifactId>
+    <version>{project-version}</version>
+</dependency>
+----
+
+==== CloudWatch Logs Service
+
+There is a bean `CloudWatchLogsService` which can be used to read the latest log events.
+
+[source,java,indent=0,options="nowrap",role="primary"]
+.Reading the Latest Log Events (AWS SDK 2.x)
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-lambda/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/lambda/LogCheckService.java[lines=18..-1]
+----
+<1> Inject `@CloudWatchLogsService` into the bean
+<2> use `getLogEvents(String) obtain a stream of the latest log events
+
+[source,java,indent=0,options="nowrap",role="secondary"]
+.Reading the Latest Log Events (AWS SDK 1.x)
+----
+include::{root-dir}/subprojects/micronaut-aws-sdk-lambda/src/test/groovy/com/agorapulse/micronaut/aws/lambda/LogCheckService.java[lines=18..-1]
+----
+<1> Inject `@CloudWatchLogsService` into the bean
+<2> use `getLogEvents(String) obtain a stream of the latest log events
+
+
+
+==== Testing
+
+You can very easily create a Lambda function locally with https://www.testcontainers.org/[Testcontainers] and https://localstack.cloud/[LocalStack] using `micronaut-amazon-awssdk-integration-testing` module.
+
+You need to add following dependencies into your build file to get the service connected to Localstack automatically:
+
+[source,indent=0,role="primary",subs='verbatim,attributes']
+.Gradle
+----
+testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:{project-version}'
+----
+
+[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
+.Maven
+----
+<dependency>
+    <groupId>com.agorapulse</groupId>
+    <artifactId>micronaut-amazon-awssdk-integration-testing</artifactId>
+    <version>{project-version}</version>
+</dependency>
+----
