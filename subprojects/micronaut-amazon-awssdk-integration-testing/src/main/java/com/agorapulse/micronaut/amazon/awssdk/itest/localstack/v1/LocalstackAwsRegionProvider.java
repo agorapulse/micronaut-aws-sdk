@@ -17,7 +17,6 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v1;
 
-import com.agorapulse.micronaut.amazon.awssdk.itest.localstack.LocalstackContainerHolder;
 import com.agorapulse.micronaut.aws.SafeAwsRegionProviderChain;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.regions.AwsRegionProvider;

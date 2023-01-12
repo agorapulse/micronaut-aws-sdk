@@ -17,8 +17,6 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.itest.localstack;
 
-import io.micronaut.context.annotation.ConfigurationProperties;
-
 import java.util.HashMap;
 import java.util.Map;
 
