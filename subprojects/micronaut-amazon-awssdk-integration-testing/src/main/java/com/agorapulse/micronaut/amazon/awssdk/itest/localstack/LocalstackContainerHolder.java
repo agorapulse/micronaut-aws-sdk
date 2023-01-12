@@ -26,6 +26,7 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.io.Closeable;
 import java.net.URI;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
@@ -56,9 +57,9 @@ public class LocalstackContainerHolder implements Closeable {
         List<LocalstackContainerOverridesConfiguration> configationOverrides
     ) {
         this.configuration = configuration;
-        this.overrides = new EnumMap<>(
+        this.overrides = configationOverrides.isEmpty() ? Collections.emptyMap() : new EnumMap<LocalStackContainer.Service, LocalstackContainerOverridesConfiguration>(
             configationOverrides.stream().collect(Collectors.toMap(
-                conf -> LocalStackContainer.Service.valueOf(conf.getService()),
+                conf -> LocalStackContainer.Service.valueOf(conf.getService().toUpperCase()),
                 conf -> conf
             ))
         );
@@ -103,14 +104,14 @@ public class LocalstackContainerHolder implements Closeable {
                         SHARED_CONTAINERS.put(service, createAndStartGenericContainer(configurationOverride, service));
                     }
                     GenericContainer mock = SHARED_CONTAINERS.get(service);
-                    return URI.create("http://" + mock.getHost() + ":" + configurationOverride.getPort());
+                    return URI.create("http://" + mock.getHost() + ":" + mock.getMappedPort(configurationOverride.getPort()));
                 }
 
                 if (!containers.containsKey(service)) {
                     containers.put(service, createAndStartGenericContainer(configurationOverride, service));
                 }
                 GenericContainer mock = containers.get(service);
-                return URI.create("http://" + mock.getHost() + ":" + configurationOverride.getPort());
+                return URI.create("http://" + mock.getHost() + ":" + mock.getMappedPort(configurationOverride.getPort()));
             } else {
                 LOGGER.warn(
                     "Configuration for overring service {} is not valid. Please, specify image, tag and port. Image: {}, Tag: {}, Port: {}",
@@ -158,7 +159,7 @@ public class LocalstackContainerHolder implements Closeable {
         }
         LOGGER.info("Starting container {}:{} for service {}", configuration.getImage(), tag, service);
         DockerImageName dockerImageName = DockerImageName.parse(configuration.getImage()).withTag(tag);
-        GenericContainer container = new GenericContainer(dockerImageName).withEnv(configuration.getEnv());
+        GenericContainer container = new GenericContainer(dockerImageName).withEnv(configuration.getEnv()).withExposedPorts(configuration.getPort());
         container.start();
         LOGGER.info("Started container {}:{} for service {}", configuration.getImage(), tag, service);
         startLock.unlock();

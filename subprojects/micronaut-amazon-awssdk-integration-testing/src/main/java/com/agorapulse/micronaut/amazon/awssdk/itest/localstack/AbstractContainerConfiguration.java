@@ -22,8 +22,7 @@ import io.micronaut.context.annotation.ConfigurationProperties;
 import java.util.HashMap;
 import java.util.Map;
 
-@ConfigurationProperties("localstack")
-public class AbstractContainerConfiguration {
+public abstract class AbstractContainerConfiguration {
 
     private String image;
     private String tag;
