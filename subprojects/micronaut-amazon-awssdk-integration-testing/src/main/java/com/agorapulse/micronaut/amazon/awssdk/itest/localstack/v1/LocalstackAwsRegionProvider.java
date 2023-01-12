@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2018-2022 Agorapulse.
+ * Copyright 2018-2023 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,14 +31,8 @@ import javax.inject.Singleton;
 @Replaces(SafeAwsRegionProviderChain.class)
 public class LocalstackAwsRegionProvider extends AwsRegionProvider {
 
-    private final LocalstackContainerHolder holder;
-
-    public LocalstackAwsRegionProvider(LocalstackContainerHolder holder) {
-        this.holder = holder;
-    }
-
     @Override
     public String getRegion() throws SdkClientException {
-        return holder.requireRunningContainer().getRegion();
+        return "us-east-1";
     }
 }
