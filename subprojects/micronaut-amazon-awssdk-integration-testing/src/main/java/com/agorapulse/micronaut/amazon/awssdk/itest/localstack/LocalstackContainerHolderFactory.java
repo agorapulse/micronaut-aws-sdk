@@ -30,6 +30,7 @@ import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient;
 import software.amazon.awssdk.utils.AttributeMap;
 
 import javax.inject.Singleton;
+import java.util.List;
 
 @Factory
 @Replaces(AwsConfiguration.class)
@@ -39,8 +40,11 @@ public class LocalstackContainerHolderFactory {
     @Primary
     @Singleton
     @Bean(preDestroy = "close")
-    public LocalstackContainerHolder localstackContainerHolder(LocalstackContainerConfiguration configuration) {
-        return new LocalstackContainerHolder(configuration);
+    public LocalstackContainerHolder localstackContainerHolder(
+        LocalstackContainerConfiguration configuration,
+        List<LocalstackContainerOverridesConfiguration> overrides
+    ) {
+        return new LocalstackContainerHolder(configuration, overrides);
     }
 
     @Primary
