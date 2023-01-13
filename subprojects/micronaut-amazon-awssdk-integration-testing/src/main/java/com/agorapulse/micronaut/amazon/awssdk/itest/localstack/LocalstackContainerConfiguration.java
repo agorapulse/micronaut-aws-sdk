@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2018-2022 Agorapulse.
+ * Copyright 2018-2023 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,38 +20,20 @@ package com.agorapulse.micronaut.amazon.awssdk.itest.localstack;
 import io.micronaut.context.annotation.ConfigurationProperties;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @ConfigurationProperties("localstack")
-public class LocalstackContainerConfiguration {
+public class LocalstackContainerConfiguration extends AbstractContainerConfiguration {
 
-    // taken from LocalstackContainer defaults which are private constants
-    private String image = "localstack/localstack";
-    private String tag = "1.3.0";
+    public static final String DEFAULT_IMAGE = "localstack/localstack";
+    public static final String DEFAULT_TAG = "1.3.0";
+
+    public LocalstackContainerConfiguration() {
+        setImage(DEFAULT_IMAGE);
+        setTag(DEFAULT_TAG);
+    }
 
     private List<String> services = new ArrayList<>();
-
-    private boolean shared;
-
-    private Map<String, String> env = new HashMap<>();
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public String getTag() {
-        return tag;
-    }
-
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
 
     public List<String> getServices() {
         return services;
@@ -61,19 +43,4 @@ public class LocalstackContainerConfiguration {
         this.services = services;
     }
 
-    public boolean isShared() {
-        return shared;
-    }
-
-    public void setShared(boolean shared) {
-        this.shared = shared;
-    }
-
-    public Map<String, String> getEnv() {
-        return env;
-    }
-
-    public void setEnv(Map<String, String> env) {
-        this.env = env;
-    }
 }

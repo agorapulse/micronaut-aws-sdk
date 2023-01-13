@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2018-2022 Agorapulse.
+ * Copyright 2018-2023 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,8 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v2;
 
-import com.agorapulse.micronaut.amazon.awssdk.itest.localstack.LocalstackContainerHolder;
 import io.micronaut.context.annotation.Primary;
 import io.micronaut.context.annotation.Replaces;
-import org.testcontainers.containers.localstack.LocalStackContainer;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
@@ -33,17 +31,10 @@ import javax.inject.Singleton;
 @Replaces(AwsCredentialsProviderChain.class)
 public class LocalstackAwsCredentialsProvider implements AwsCredentialsProvider {
 
-    private final LocalstackContainerHolder holder;
-
-    public LocalstackAwsCredentialsProvider(LocalstackContainerHolder holder) {
-        this.holder = holder;
-    }
-
     @Override
     public AwsCredentials resolveCredentials() {
-        LocalStackContainer localstack = holder.requireRunningContainer();
         return AwsBasicCredentials.create(
-            localstack.getAccessKey(), localstack.getSecretKey()
+            "accesskey", "secretkey"
         );
     }
 

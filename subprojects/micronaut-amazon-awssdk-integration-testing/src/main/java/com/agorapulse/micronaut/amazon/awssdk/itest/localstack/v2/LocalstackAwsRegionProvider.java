@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2018-2022 Agorapulse.
+ * Copyright 2018-2023 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v2;
 
-import com.agorapulse.micronaut.amazon.awssdk.itest.localstack.LocalstackContainerHolder;
 import io.micronaut.context.annotation.Primary;
 import io.micronaut.context.annotation.Replaces;
 import software.amazon.awssdk.regions.Region;
@@ -31,15 +30,9 @@ import javax.inject.Singleton;
 @Replaces(AwsRegionProviderChain.class)
 public class LocalstackAwsRegionProvider implements AwsRegionProvider {
 
-    private final LocalstackContainerHolder holder;
-
-    public LocalstackAwsRegionProvider(LocalstackContainerHolder holder) {
-        this.holder = holder;
-    }
-
     @Override
     public Region getRegion() {
-        return Region.of(holder.requireRunningContainer().getRegion());
+        return Region.US_EAST_1;
     }
 
 }

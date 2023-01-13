@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2018-2022 Agorapulse.
+ * Copyright 2018-2023 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient;
 import software.amazon.awssdk.utils.AttributeMap;
 
 import javax.inject.Singleton;
+import java.util.List;
 
 @Factory
 @Replaces(AwsConfiguration.class)
@@ -39,8 +40,11 @@ public class LocalstackContainerHolderFactory {
     @Primary
     @Singleton
     @Bean(preDestroy = "close")
-    public LocalstackContainerHolder localstackContainerHolder(LocalstackContainerConfiguration configuration) {
-        return new LocalstackContainerHolder(configuration);
+    public LocalstackContainerHolder localstackContainerHolder(
+        LocalstackContainerConfiguration configuration,
+        List<LocalstackContainerOverridesConfiguration> overrides
+    ) {
+        return new LocalstackContainerHolder(configuration, overrides);
     }
 
     @Primary

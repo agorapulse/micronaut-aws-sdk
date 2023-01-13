@@ -1049,4 +1049,20 @@ You can save time creating the new Localstack container by sharing it between th
 ----
 include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/resources/application-test.yml[]
 ----
+
+Alternatively you can use different container than Localstack, for example Amazon DynamoDB Local container.
+
+[source,yaml]
+.application-test.yml
+----
+localstack:
+  containers:
+    dynamodb:
+      image: amazon/dynamodb-local
+      tag: 1.20.0
+      port: 8000
+      shared: true
+  services: dynamodb
+----
+
 ====

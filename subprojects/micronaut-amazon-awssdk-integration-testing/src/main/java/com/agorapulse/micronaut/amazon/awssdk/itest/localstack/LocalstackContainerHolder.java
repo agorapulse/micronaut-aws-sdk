@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2018-2022 Agorapulse.
+ * Copyright 2018-2023 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,22 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.itest.localstack;
 
+import io.micronaut.core.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import java.io.Closeable;
 import java.net.URI;
+import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -33,20 +40,34 @@ import java.util.stream.Collectors;
 public class LocalstackContainerHolder implements Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalstackContainerHolder.class);
+    private static final Map<LocalStackContainer.Service, GenericContainer> SHARED_CONTAINERS = new ConcurrentHashMap<>();
 
     private static LocalStackContainer sharedContainer;
+
 
     private final Lock startLock = new ReentrantLock();
     private final Set<LocalStackContainer.Service> enabledServices = new HashSet<>();
     private final LocalstackContainerConfiguration configuration;
+    private final Map<LocalStackContainer.Service, LocalstackContainerOverridesConfiguration> overrides;
     private LocalStackContainer container;
+    private final Map<LocalStackContainer.Service, GenericContainer> containers = new ConcurrentHashMap<>();
 
-    public LocalstackContainerHolder(LocalstackContainerConfiguration configuration) {
+    public LocalstackContainerHolder(
+        LocalstackContainerConfiguration configuration,
+        List<LocalstackContainerOverridesConfiguration> configationOverrides
+    ) {
         this.configuration = configuration;
+        this.overrides = configationOverrides.isEmpty() ? Collections.emptyMap() : new EnumMap<LocalStackContainer.Service, LocalstackContainerOverridesConfiguration>(
+            configationOverrides.stream().collect(Collectors.toMap(
+                conf -> LocalStackContainer.Service.valueOf(conf.getService().toUpperCase()),
+                conf -> conf
+            ))
+        );
         this.enabledServices.addAll(
             configuration.getServices().stream()
                 .map(String::toUpperCase)
                 .map(LocalStackContainer.Service::valueOf)
+                .filter(s -> !this.overrides.containsKey(s))
                 .collect(Collectors.toList())
         );
     }
@@ -57,7 +78,7 @@ public class LocalstackContainerHolder implements Closeable {
     }
 
     public URI getEndpointOverride(LocalStackContainer.Service service) {
-        return requireRunningContainer().getEndpointOverride(service);
+        return requireRunningContainer(service);
     }
 
     @Override
@@ -67,24 +88,56 @@ public class LocalstackContainerHolder implements Closeable {
             container.close();
             LOGGER.info("Closed Localstack container {}:{} for services {}", configuration.getImage(), configuration.getTag(), enabledServices);
         }
+        containers.forEach((service, genericContainer) -> {
+            LOGGER.info("Closing container {} for service {}", genericContainer.getImage(), service);
+            container.close();
+            LOGGER.info("Closed container {} for service {}", genericContainer.getImage(), service);
+        });
     }
 
-    public LocalStackContainer requireRunningContainer() {
+    public URI requireRunningContainer(LocalStackContainer.Service service) {
+        LocalstackContainerOverridesConfiguration configurationOverride = overrides.get(service);
+        if (configurationOverride != null) {
+            if (configurationOverride.isValid()) {
+                if (configurationOverride.isShared()) {
+                    if (!SHARED_CONTAINERS.containsKey(service)) {
+                        SHARED_CONTAINERS.put(service, createAndStartGenericContainer(configurationOverride, service));
+                    }
+                    GenericContainer mock = SHARED_CONTAINERS.get(service);
+                    return URI.create("http://" + mock.getHost() + ":" + mock.getMappedPort(configurationOverride.getPort()));
+                }
+
+                if (!containers.containsKey(service)) {
+                    containers.put(service, createAndStartGenericContainer(configurationOverride, service));
+                }
+                GenericContainer mock = containers.get(service);
+                return URI.create("http://" + mock.getHost() + ":" + mock.getMappedPort(configurationOverride.getPort()));
+            } else {
+                LOGGER.warn(
+                    "Configuration for overring service {} is not valid. Please, specify image, tag and port. Image: {}, Tag: {}, Port: {}",
+                    configurationOverride.getService(),
+                    configurationOverride.getImage(),
+                    configurationOverride.getTag(),
+                    configurationOverride.getPort()
+                );
+            }
+        }
+
         if (configuration.isShared()) {
             if (sharedContainer == null) {
-                sharedContainer = createAndStartContainer();
+                sharedContainer = createAndStartLocalstackContainer();
             }
-            return sharedContainer;
+            return sharedContainer.getEndpointOverride(service);
         }
 
         if (container == null) {
-            container = createAndStartContainer();
+            container = createAndStartLocalstackContainer();
         }
 
-        return container;
+        return container.getEndpointOverride(service);
     }
 
-    private LocalStackContainer createAndStartContainer() {
+    private LocalStackContainer createAndStartLocalstackContainer() {
         startLock.lock();
         LOGGER.info("Starting Localstack container {}:{} for services {}", configuration.getImage(), configuration.getTag(), enabledServices);
         DockerImageName dockerImageName = DockerImageName.parse(configuration.getImage()).withTag(configuration.getTag());
@@ -93,6 +146,22 @@ public class LocalstackContainerHolder implements Closeable {
             .withEnv(configuration.getEnv());
         container.start();
         LOGGER.info("Started Localstack container {}:{} for services {}", configuration.getImage(), configuration.getTag(), enabledServices);
+        startLock.unlock();
+        return container;
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private GenericContainer createAndStartGenericContainer(LocalstackContainerOverridesConfiguration configuration, LocalStackContainer.Service service) {
+        startLock.lock();
+        String tag = configuration.getTag();
+        if (StringUtils.isEmpty(tag)) {
+            tag = "latest";
+        }
+        LOGGER.info("Starting container {}:{} for service {}", configuration.getImage(), tag, service);
+        DockerImageName dockerImageName = DockerImageName.parse(configuration.getImage()).withTag(tag);
+        GenericContainer container = new GenericContainer(dockerImageName).withEnv(configuration.getEnv()).withExposedPorts(configuration.getPort());
+        container.start();
+        LOGGER.info("Started container {}:{} for service {}", configuration.getImage(), tag, service);
         startLock.unlock();
         return container;
     }
