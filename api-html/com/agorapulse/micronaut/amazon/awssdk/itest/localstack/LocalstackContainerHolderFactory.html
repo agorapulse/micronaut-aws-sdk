@@ -32,7 +32,7 @@ LocalstackContainerHolderFactory.java
 <a name="1"><font color="#808080">01</font>&nbsp;</a><font color="#008000">/*</font><br />
 <a name="2"><font color="#808080">02</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*&nbsp;SPDX-License-Identifier:&nbsp;Apache-2.0</font><br />
 <a name="3"><font color="#808080">03</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*</font><br />
-<a name="4"><font color="#808080">04</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*&nbsp;Copyright&nbsp;2018-2022&nbsp;Agorapulse.</font><br />
+<a name="4"><font color="#808080">04</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*&nbsp;Copyright&nbsp;2018-2023&nbsp;Agorapulse.</font><br />
 <a name="5"><font color="#808080">05</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*</font><br />
 <a name="6"><font color="#808080">06</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*&nbsp;Licensed&nbsp;under&nbsp;the&nbsp;Apache&nbsp;License,&nbsp;Version&nbsp;2.0&nbsp;(the&nbsp;&#34;License&#34;);</font><br />
 <a name="7"><font color="#808080">07</font>&nbsp;</a><font color="#ffffff">&nbsp;</font><font color="#008000">*&nbsp;you&nbsp;may&nbsp;not&nbsp;use&nbsp;this&nbsp;file&nbsp;except&nbsp;in&nbsp;compliance&nbsp;with&nbsp;the&nbsp;License.</font><br />
@@ -61,38 +61,42 @@ LocalstackContainerHolderFactory.java
 <a name="30"><font color="#808080">30</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">software.amazon.awssdk.utils.AttributeMap;</font><br />
 <a name="31"><font color="#808080">31</font>&nbsp;</a><font color="#ffffff"></font><br />
 <a name="32"><font color="#808080">32</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">jakarta.inject.Singleton;</font><br />
-<a name="33"><font color="#808080">33</font>&nbsp;</a><font color="#ffffff"></font><br />
-<a name="34"><font color="#808080">34</font>&nbsp;</a><font color="#646464">@Factory</font><br />
-<a name="35"><font color="#808080">35</font>&nbsp;</a><font color="#646464">@Replaces</font><font color="#000000">(</font><font color="#000000">AwsConfiguration.</font><font color="#0000c0"><b>class</b></font><font color="#000000">)</font><br />
-<a name="36"><font color="#808080">36</font>&nbsp;</a><font color="#646464">@Requires</font><font color="#000000">(</font><font color="#000000">missingProperty&nbsp;=&nbsp;</font><font color="#990000">&#34;localstack.disabled&#34;</font><font color="#000000">)</font><br />
-<a name="37"><font color="#808080">37</font>&nbsp;</a><font color="#0000c0"><b>public&nbsp;class&nbsp;</b></font><font color="#000000">LocalstackContainerHolderFactory&nbsp;</font><font color="#000000">{</font><br />
-<a name="38"><font color="#808080">38</font>&nbsp;</a><font color="#ffffff"></font><br />
-<a name="39"><font color="#808080">39</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#646464">@Primary</font><br />
-<a name="40"><font color="#808080">40</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#646464">@Singleton</font><br />
-<a name="41"><font color="#808080">41</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#646464">@Bean</font><font color="#000000">(</font><font color="#000000">preDestroy&nbsp;=&nbsp;</font><font color="#990000">&#34;close&#34;</font><font color="#000000">)</font><br />
-<a name="42"><font color="#808080">42</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>public&nbsp;</b></font><font color="#000000">LocalstackContainerHolder&nbsp;localstackContainerHolder</font><font color="#000000">(</font><font color="#000000">LocalstackContainerConfiguration&nbsp;configuration</font><font color="#000000">)&nbsp;{</font><br />
-<a name="43"><font color="#808080">43</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>return&nbsp;new&nbsp;</b></font><font color="#000000">LocalstackContainerHolder</font><font color="#000000">(</font><font color="#000000">configuration</font><font color="#000000">)</font><font color="#000000">;</font><br />
-<a name="44"><font color="#808080">44</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
-<a name="45"><font color="#808080">45</font>&nbsp;</a><font color="#ffffff"></font><br />
-<a name="46"><font color="#808080">46</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#646464">@Primary</font><br />
-<a name="47"><font color="#808080">47</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#646464">@Singleton</font><br />
-<a name="48"><font color="#808080">48</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#646464">@Bean</font><font color="#000000">(</font><font color="#000000">preDestroy&nbsp;=&nbsp;</font><font color="#990000">&#34;close&#34;</font><font color="#000000">)</font><br />
-<a name="49"><font color="#808080">49</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>public&nbsp;</b></font><font color="#000000">SdkAsyncHttpClient&nbsp;client</font><font color="#000000">()&nbsp;{</font><br />
-<a name="50"><font color="#808080">50</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>return&nbsp;&nbsp;</b></font><font color="#000000">NettyNioAsyncHttpClient</font><br />
-<a name="51"><font color="#808080">51</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">.builder</font><font color="#000000">()</font><br />
-<a name="52"><font color="#808080">52</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">.protocol</font><font color="#000000">(</font><font color="#000000">Protocol.HTTP1_1</font><font color="#000000">)</font><br />
-<a name="53"><font color="#808080">53</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">.buildWithDefaults</font><font color="#000000">(</font><br />
-<a name="54"><font color="#808080">54</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">AttributeMap</font><br />
-<a name="55"><font color="#808080">55</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">.builder</font><font color="#000000">()</font><br />
-<a name="56"><font color="#808080">56</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">.put</font><font color="#000000">(</font><br />
-<a name="57"><font color="#808080">57</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">SdkHttpConfigurationOption.TRUST_ALL_CERTIFICATES,</font><br />
-<a name="58"><font color="#808080">58</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">Boolean.TRUE</font><br />
-<a name="59"><font color="#808080">59</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">)</font><br />
-<a name="60"><font color="#808080">60</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">.build</font><font color="#000000">()</font><br />
-<a name="61"><font color="#808080">61</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">)</font><font color="#000000">;</font><br />
-<a name="62"><font color="#808080">62</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
-<a name="63"><font color="#808080">63</font>&nbsp;</a><font color="#ffffff"></font><br />
-<a name="64"><font color="#808080">64</font>&nbsp;</a><font color="#000000">}</font></code>
+<a name="33"><font color="#808080">33</font>&nbsp;</a><font color="#0000c0"><b>import&nbsp;</b></font><font color="#000000">java.util.List;</font><br />
+<a name="34"><font color="#808080">34</font>&nbsp;</a><font color="#ffffff"></font><br />
+<a name="35"><font color="#808080">35</font>&nbsp;</a><font color="#646464">@Factory</font><br />
+<a name="36"><font color="#808080">36</font>&nbsp;</a><font color="#646464">@Replaces</font><font color="#000000">(</font><font color="#000000">AwsConfiguration.</font><font color="#0000c0"><b>class</b></font><font color="#000000">)</font><br />
+<a name="37"><font color="#808080">37</font>&nbsp;</a><font color="#646464">@Requires</font><font color="#000000">(</font><font color="#000000">missingProperty&nbsp;=&nbsp;</font><font color="#990000">&#34;localstack.disabled&#34;</font><font color="#000000">)</font><br />
+<a name="38"><font color="#808080">38</font>&nbsp;</a><font color="#0000c0"><b>public&nbsp;class&nbsp;</b></font><font color="#000000">LocalstackContainerHolderFactory&nbsp;</font><font color="#000000">{</font><br />
+<a name="39"><font color="#808080">39</font>&nbsp;</a><font color="#ffffff"></font><br />
+<a name="40"><font color="#808080">40</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#646464">@Primary</font><br />
+<a name="41"><font color="#808080">41</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#646464">@Singleton</font><br />
+<a name="42"><font color="#808080">42</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#646464">@Bean</font><font color="#000000">(</font><font color="#000000">preDestroy&nbsp;=&nbsp;</font><font color="#990000">&#34;close&#34;</font><font color="#000000">)</font><br />
+<a name="43"><font color="#808080">43</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>public&nbsp;</b></font><font color="#000000">LocalstackContainerHolder&nbsp;localstackContainerHolder</font><font color="#000000">(</font><br />
+<a name="44"><font color="#808080">44</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">LocalstackContainerConfiguration&nbsp;configuration,</font><br />
+<a name="45"><font color="#808080">45</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">List&lt;LocalstackContainerOverridesConfiguration&gt;&nbsp;overrides</font><br />
+<a name="46"><font color="#808080">46</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">)&nbsp;{</font><br />
+<a name="47"><font color="#808080">47</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>return&nbsp;new&nbsp;</b></font><font color="#000000">LocalstackContainerHolder</font><font color="#000000">(</font><font color="#000000">configuration,&nbsp;overrides</font><font color="#000000">)</font><font color="#000000">;</font><br />
+<a name="48"><font color="#808080">48</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
+<a name="49"><font color="#808080">49</font>&nbsp;</a><font color="#ffffff"></font><br />
+<a name="50"><font color="#808080">50</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#646464">@Primary</font><br />
+<a name="51"><font color="#808080">51</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#646464">@Singleton</font><br />
+<a name="52"><font color="#808080">52</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#646464">@Bean</font><font color="#000000">(</font><font color="#000000">preDestroy&nbsp;=&nbsp;</font><font color="#990000">&#34;close&#34;</font><font color="#000000">)</font><br />
+<a name="53"><font color="#808080">53</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>public&nbsp;</b></font><font color="#000000">SdkAsyncHttpClient&nbsp;client</font><font color="#000000">()&nbsp;{</font><br />
+<a name="54"><font color="#808080">54</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#0000c0"><b>return&nbsp;&nbsp;</b></font><font color="#000000">NettyNioAsyncHttpClient</font><br />
+<a name="55"><font color="#808080">55</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">.builder</font><font color="#000000">()</font><br />
+<a name="56"><font color="#808080">56</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">.protocol</font><font color="#000000">(</font><font color="#000000">Protocol.HTTP1_1</font><font color="#000000">)</font><br />
+<a name="57"><font color="#808080">57</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">.buildWithDefaults</font><font color="#000000">(</font><br />
+<a name="58"><font color="#808080">58</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">AttributeMap</font><br />
+<a name="59"><font color="#808080">59</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">.builder</font><font color="#000000">()</font><br />
+<a name="60"><font color="#808080">60</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">.put</font><font color="#000000">(</font><br />
+<a name="61"><font color="#808080">61</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">SdkHttpConfigurationOption.TRUST_ALL_CERTIFICATES,</font><br />
+<a name="62"><font color="#808080">62</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">Boolean.TRUE</font><br />
+<a name="63"><font color="#808080">63</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">)</font><br />
+<a name="64"><font color="#808080">64</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">.build</font><font color="#000000">()</font><br />
+<a name="65"><font color="#808080">65</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">)</font><font color="#000000">;</font><br />
+<a name="66"><font color="#808080">66</font>&nbsp;</a><font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
+<a name="67"><font color="#808080">67</font>&nbsp;</a><font color="#ffffff"></font><br />
+<a name="68"><font color="#808080">68</font>&nbsp;</a><font color="#000000">}</font></code>
     
    </td>
   <!-- end source code -->
