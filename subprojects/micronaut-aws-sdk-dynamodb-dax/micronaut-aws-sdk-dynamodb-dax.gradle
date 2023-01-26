@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2018-2023 Agorapulse.
+ * Copyright 2018-2022 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,6 @@
  * limitations under the License.
  */
 dependencies {
-    api 'com.amazonaws:aws-java-sdk-dynamodb'
-
-    implementation project(':micronaut-aws-sdk-core')
-    implementation "space.jasan:groovy-closure-support:$closureSupportVersion"
-    implementation "io.projectreactor:reactor-core:$projectReactorVersion"
-
-    testImplementation project(':micronaut-amazon-awssdk-integration-testing')
-    testImplementation "com.agorapulse:dru-client-dynamodb:${druVersion}"
-    if (micronautVersion.startsWith('3')) {
-        testImplementation 'io.micronaut.rxjava2:micronaut-rxjava2'
-    }
+    api project(':micronaut-aws-sdk-dynamodb')
+    api 'com.amazonaws:amazon-dax-client'
 }
