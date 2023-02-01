@@ -27,12 +27,14 @@ import reactor.core.publisher.SynchronousSink;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sns.model.CreatePlatformEndpointRequest;
+import software.amazon.awssdk.services.sns.model.CreateTopicRequest;
 import software.amazon.awssdk.services.sns.model.DeleteEndpointResponse;
 import software.amazon.awssdk.services.sns.model.GetEndpointAttributesResponse;
 import software.amazon.awssdk.services.sns.model.InvalidParameterException;
 import software.amazon.awssdk.services.sns.model.ListTopicsResponse;
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue;
 import software.amazon.awssdk.services.sns.model.NotFoundException;
+import software.amazon.awssdk.services.sns.model.PublishRequest;
 import software.amazon.awssdk.services.sns.model.SetEndpointAttributesResponse;
 import software.amazon.awssdk.services.sns.model.Topic;
 
@@ -110,7 +112,9 @@ public class DefaultSimpleNotificationService implements SimpleNotificationServi
     @Override
     public String createTopic(String topicName) {
         LOGGER.debug("Creating topic sns with name " + topicName);
-        return client.createTopic(b -> b.name(topicName)).topicArn();
+        return client.createTopic((CreateTopicRequest.Builder b) ->
+             b.name(topicName).attributes(Collections.singletonMap("FifoTopic", Boolean.toString(SimpleNotificationService.isFifoTopic(topicName))))
+        ).topicArn();
     }
 
     @Override
@@ -153,7 +157,19 @@ public class DefaultSimpleNotificationService implements SimpleNotificationServi
 
     @Override
     public String publishMessageToTopic(String topicArn, String subject, String message, Map<String, String> attributes) {
-        return client.publish(r -> r.topicArn(ensureTopicArn(topicArn)).message(message).subject(subject).messageAttributes(toAttributes(attributes))).messageId();
+        return client.publish(r -> r.topicArn(ensureTopicArn(topicArn))
+            .message(message)
+            .subject(subject)
+            .messageAttributes(toAttributes(attributes))
+        ).messageId();
+    }
+
+    @Override
+    public String publishRequest(String topicArn, Map<String, String> attributes, PublishRequest.Builder publishRequestBuilder) {
+        return client.publish(publishRequestBuilder.topicArn(ensureTopicArn(topicArn))
+            .messageAttributes(toAttributes(attributes))
+            .build()
+        ).messageId();
     }
 
     @Override

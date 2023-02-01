@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.micronaut.context.ApplicationContext
 import io.micronaut.inject.qualifiers.Qualifiers
 import software.amazon.awssdk.services.sns.model.NotFoundException
+import software.amazon.awssdk.services.sns.model.PublishRequest
 import spock.lang.AutoCleanup
 import spock.lang.Specification
 
@@ -39,6 +40,8 @@ class NotificationClientSpec extends Specification {
     private static final Map EMPTY_MAP = Collections.emptyMap()
     private static final String POGO_AS_JSON = new ObjectMapper().writeValueAsString(POGO)
     private static final String MESSAGE_ID = '1234567890'
+    private static final String MESSAGE_GROUP_ID = 'messageGroupId1'
+    private static final String MESSAGE_DEDUPLICATION_ID = 'messageDeduplicationId1'
 
     SimpleNotificationService defaultService = Mock(SimpleNotificationService) {
         getDefaultTopicNameOrArn() >> DEFAULT_TOPIC
@@ -182,6 +185,25 @@ class NotificationClientSpec extends Specification {
             messageId == MESSAGE_ID
 
             1 * defaultService.publishMessageToTopic(StreamClient.SOME_STREAM, null, POGO_AS_JSON, EMPTY_MAP) >> MESSAGE_ID
+    }
+
+    void 'can publish to fifo topic'() {
+        given:
+            TestFifoClient client = context.getBean(TestFifoClient)
+
+        when:
+            String messageId = client.publishFifoMessage(POGO, MESSAGE_GROUP_ID, MESSAGE_DEDUPLICATION_ID)
+
+        then:
+            1 * testService.publishRequest(TestFifoClient.TOPIC_NAME, EMPTY_MAP, _) >> { String topicArn,
+                Map<String, String> attributes,
+                PublishRequest.Builder publishRequestBuilder ->
+                    PublishRequest publishRequest = publishRequestBuilder.build()
+                    assert publishRequest.messageGroupId() == MESSAGE_GROUP_ID
+                    assert publishRequest.messageDeduplicationId() == MESSAGE_DEDUPLICATION_ID
+                    return MESSAGE_ID
+            }
+            messageId == MESSAGE_ID
     }
 
     void 'wrong sms method format'() {
