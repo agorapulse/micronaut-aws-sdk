@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.aws.sns;
 
+import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.Topic;
 import org.reactivestreams.Publisher;
 
@@ -47,6 +48,7 @@ public interface SimpleNotificationService {
     String PLATFORM_TYPE_ANDROID = "GCM";
     @Deprecated
     String PLATFORM_TYPE_AMAZON = "ADM";
+    String FIFO_SUFFIX = ".fifo";
 
     enum PlatformType {
         ADM,
@@ -246,6 +248,14 @@ public interface SimpleNotificationService {
      * @return the is of the message published
      */
     String publishMessageToTopic(String topicArn, String subject, String message, Map<String, String> attributes);
+
+    /**
+     * Publishes a request into the topic
+     * @param topicArn topic ARN or name
+     * @param attributes the message attributes
+     * @return the id of the message published
+     */
+    String publishRequest(String topicArn, Map<String, String> attributes, PublishRequest request);
 
     /**
      * Creates new platform application.
@@ -860,5 +870,14 @@ public interface SimpleNotificationService {
      */
     default String sendSMSMessage(String phoneNumber, String message) {
         return sendSMSMessage(phoneNumber, message, Collections.emptyMap());
+    }
+
+    /**
+     * Checks if the $topicName matches AWS requirements for FIFO topics
+     * @param topicName Name of the topic
+     * @return true if the $topicName ends with .fifo
+     */
+    static boolean isFifoTopic(String topicName) {
+        return topicName.endsWith(FIFO_SUFFIX);
     }
 }

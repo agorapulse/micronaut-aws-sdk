@@ -17,11 +17,14 @@
  */
 package com.agorapulse.micronaut.aws.sns;
 
+import com.agorapulse.micronaut.aws.sns.annotation.MessageDeduplicationId;
+import com.agorapulse.micronaut.aws.sns.annotation.MessageGroupId;
 import com.agorapulse.micronaut.aws.sns.annotation.NotificationClient;
 import com.agorapulse.micronaut.aws.sns.annotation.Topic;
 import com.agorapulse.micronaut.aws.util.ConfigurationUtil;
 import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.model.NotFoundException;
+import com.amazonaws.services.sns.model.PublishRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.aop.MethodInterceptor;
@@ -47,6 +50,8 @@ public class NotificationClientIntroduction implements MethodInterceptor<Object,
     private static final String SUBJECT = "subject";
     private static final String ATTRIBUTES = "attributes";
     private static final String NUMBER = "number";
+    private static final String MESSAGE_GROUP_ID = "messageGroupId";
+    private static final String MESSAGE_DEDUPLICATION_ID = "messageDeduplicationId";
 
     private static final Function<String, Optional<String>> EMPTY_IF_UNDEFINED = (String s) -> StringUtils.isEmpty(s) ? Optional.empty() : Optional.of(s);
 
@@ -54,6 +59,8 @@ public class NotificationClientIntroduction implements MethodInterceptor<Object,
         Argument<?> message;
         Argument<?> subject;
         Argument<?> attributes;
+        Argument<?> messageGroupId;
+        Argument<?> messageDeduplicationId;
 
         boolean isValid() {
             return message != null;
@@ -154,19 +161,36 @@ public class NotificationClientIntroduction implements MethodInterceptor<Object,
             Object message = params.get(publishingArguments.message.getName());
             Class<?> messageType = publishingArguments.message.getType();
 
+            String preparedMessage = "";
             if (CharSequence.class.isAssignableFrom(messageType)) {
-                return service.publishMessageToTopic(topicName, subject, message.toString(), attributes);
+                preparedMessage = message.toString();
+            } else {
+                preparedMessage = toJsonMessage(message);
             }
 
-            return publishJson(service, topicName, subject, message, attributes);
+            if (SimpleNotificationService.isFifoTopic(topicName)) {
+                PublishRequest publishRequest = new PublishRequest();
+                publishRequest.setSubject(subject);
+                publishRequest.setMessage(preparedMessage);
+
+                if (publishingArguments.messageGroupId != null) {
+                    publishRequest.setMessageGroupId((String) params.get(publishingArguments.messageGroupId.getName()));
+                }
+                if (publishingArguments.messageDeduplicationId != null) {
+                    publishRequest.setMessageDeduplicationId((String) params.get(publishingArguments.messageDeduplicationId.getName()));
+                }
+                return service.publishRequest(topicName, attributes, publishRequest);
+            } else {
+                return service.publishMessageToTopic(topicName, subject, preparedMessage, attributes);
+            }
         }
 
         throw new UnsupportedOperationException("Cannot implement method " + context.getExecutableMethod());
     }
 
-    private String publishJson(SimpleNotificationService service, String topic, String subject, Object message, Map<String, String> attributes) {
+    private String toJsonMessage(Object message) {
         try {
-            return service.publishMessageToTopic(topic, subject, objectMapper.writeValueAsString(message), attributes);
+            return objectMapper.writeValueAsString(message);
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException("Failed to marshal " + message + " to JSON", e);
         }
@@ -184,6 +208,12 @@ public class NotificationClientIntroduction implements MethodInterceptor<Object,
             if (Map.class.isAssignableFrom(argument.getType()) && (argument.getName().toLowerCase().contains(ATTRIBUTES) || names.message != null)) {
                 names.attributes = argument;
                 continue;
+            }
+            if (argument.getName().equalsIgnoreCase(MESSAGE_GROUP_ID) || argument.isAnnotationPresent(MessageGroupId.class)) {
+                names.messageGroupId = argument;
+            }
+            if (argument.getName().equalsIgnoreCase(MESSAGE_DEDUPLICATION_ID) || argument.isAnnotationPresent(MessageDeduplicationId.class)) {
+                names.messageDeduplicationId = argument;
             }
             names.message = argument;
         }

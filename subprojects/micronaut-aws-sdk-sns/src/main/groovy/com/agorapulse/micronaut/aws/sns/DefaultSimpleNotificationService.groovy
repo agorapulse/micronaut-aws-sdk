@@ -91,13 +91,12 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
         return checkNotEmpty(ensureTopicArn(configuration.topic), 'Default topic not set for the configuration')
     }
 
-    /**
-     * @param topicName
-     * @return
-     */
+    @Override
     String createTopic(String topicName) {
         log.debug("Creating topic sns with name $topicName")
-        return client.createTopic(new CreateTopicRequest(topicName)).topicArn
+        return client.createTopic(new CreateTopicRequest(topicName)
+                .withAttributes(Collections.singletonMap('FifoTopic', Boolean.toString(SimpleNotificationService.isFifoTopic(topicName))))
+        ).topicArn
     }
 
     /**
@@ -108,20 +107,21 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
         client.deleteTopic(new DeleteTopicRequest(ensureTopicArn(topicArn)))
     }
 
-    /**
-     * @param topicArn
-     * @param subject
-     * @param message
-     * @return
-     */
+    @Override
     String publishMessageToTopic(String topicArn, String subject, String message, Map<String, String> attributes) {
         PublishRequest request = new PublishRequest(ensureTopicArn(topicArn), message, subject)
-
-        attributes.each { Map.Entry<String, String> e ->
-            request.addMessageAttributesEntry e.key, new MessageAttributeValue().withDataType('String').withStringValue(e.value)
-        }
+                .withMessageGroupId(attributes.get('messageGroupId'))
+                .withMessageDeduplicationId(attributes.get('messageDeduplicationId'))
+        setRequestAttributes(request, attributes)
 
         return client.publish(request).messageId
+    }
+
+    @Override
+    String publishRequest(String topicArn, Map<String, String> attributes, PublishRequest request) {
+        request.topicArn = ensureTopicArn(topicArn)
+        setRequestAttributes(request, attributes)
+        return client.publish(request.withTopicArn(ensureTopicArn(topicArn))).messageId
     }
 
     /**
@@ -295,6 +295,17 @@ class DefaultSimpleNotificationService implements SimpleNotificationService {
             throw new IllegalStateException(errorMessage)
         }
         return arn
+    }
+
+    /**
+     * Set PublishRequest message attributes for each element in the attributes map
+     * @param request Publish request to be set
+     * @param attributes Attributes being set
+     */
+    private void setRequestAttributes(PublishRequest request, Map<String, String> attributes) {
+        attributes.each { Map.Entry<String, String> e ->
+            request.addMessageAttributesEntry e.key, new MessageAttributeValue().withDataType('String').withStringValue(e.value)
+        }
     }
 
     @Deprecated

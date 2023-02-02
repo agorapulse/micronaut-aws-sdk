@@ -19,6 +19,7 @@ package com.agorapulse.micronaut.amazon.awssdk.sns;
 
 import org.reactivestreams.Publisher;
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue;
+import software.amazon.awssdk.services.sns.model.PublishRequest;
 import software.amazon.awssdk.services.sns.model.Topic;
 
 import java.net.MalformedURLException;
@@ -47,6 +48,7 @@ public interface SimpleNotificationService {
     String PLATFORM_TYPE_ANDROID = "GCM";
     @Deprecated
     String PLATFORM_TYPE_AMAZON = "ADM";
+    String FIFO_SUFFIX = ".fifo";
 
     enum PlatformType {
         ADM,
@@ -230,7 +232,7 @@ public interface SimpleNotificationService {
      * @param topicArn topic ARN or name
      * @param subject subject of the message (ignored by most of the protocols)
      * @param message the message
-     * @return the is of the message published
+     * @return the id of the message published
      */
     default String publishMessageToTopic(String topicArn, String subject, String message) {
         return publishMessageToTopic(topicArn, subject, message, Collections.emptyMap());
@@ -242,9 +244,17 @@ public interface SimpleNotificationService {
      * @param subject subject of the message (ignored by most of the protocols)
      * @param message the message
      * @param attributes the message attributes
-     * @return the is of the message published
+     * @return the id of the message published
      */
     String publishMessageToTopic(String topicArn, String subject, String message, Map<String, String> attributes);
+
+    /**
+     * Builds and Publishes a request into the topic
+     * @param topicArn topic ARN or name
+     * @param attributes the message attributes
+     * @return the id of the message published
+     */
+    String publishRequest(String topicArn, Map<String, String> attributes, PublishRequest.Builder publishRequestBuilder);
 
     /**
      * Creates new platform application.
@@ -859,5 +869,14 @@ public interface SimpleNotificationService {
      */
     default String sendSMSMessage(String phoneNumber, String message) {
         return sendSMSMessage(phoneNumber, message, Collections.emptyMap());
+    }
+
+    /**
+     * Checks if the $topicName matches AWS requirements for FIFO topics
+     * @param topicName Name of the topic
+     * @return true if the $topicName ends with .fifo
+     */
+    static boolean isFifoTopic(String topicName) {
+        return topicName.endsWith(FIFO_SUFFIX);
     }
 }

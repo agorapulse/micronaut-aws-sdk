@@ -20,26 +20,9 @@ package com.agorapulse.micronaut.amazon.awssdk.sns;
 import com.agorapulse.micronaut.amazon.awssdk.sns.annotation.MessageDeduplicationId;
 import com.agorapulse.micronaut.amazon.awssdk.sns.annotation.MessageGroupId;
 import com.agorapulse.micronaut.amazon.awssdk.sns.annotation.NotificationClient;
-import com.agorapulse.micronaut.amazon.awssdk.sns.annotation.Topic;
 
-import java.util.Map;
+@NotificationClient(value = "test", topic = TestFifoClient.TOPIC_NAME) interface TestFifoClient {
 
-@NotificationClient // <1>
-interface DefaultClient {
-
-    String OTHER_TOPIC = "OtherTopic";
-
-    @Topic("OtherTopic") String publishMessageToDifferentTopic(Pogo pogo); // <2>
-
-    String publishMessage(Pogo message); // <3>
-    String publishMessage(Pogo message, @MessageGroupId String groupId, @MessageDeduplicationId String deduplicationId); // <4>
-    String publishMessage(String subject, Pogo message); // <5>
-    String publishMessage(String subject, Pogo message, Map<String, String> attributes);
-    String publishMessage(String message); // <6>
-    String publishMessage(String subject, String message);
-    String publishMessage(String subject, String message, Map<String, String> attributes);
-
-    String sendSMS(String phoneNumber, String message); // <7>
-    String sendSms(String phoneNumber, String message, Map attributes); // <8>
-
+    String TOPIC_NAME = "testFifoTopic.fifo";
+    String publishFifoMessage(Pogo message, @MessageGroupId String groupId, @MessageDeduplicationId String deduplicationId);
 }

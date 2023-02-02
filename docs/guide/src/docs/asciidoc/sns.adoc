@@ -81,10 +81,11 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/
 <1> `@NotificationClient` annotation makes the interface a SNS client
 <2> You can specify to which topic is the message published using `@Topic` annotation
 <3> You can publish any object which can be converted into JSON.
-<4> You can add additional subject to published message (only useful for few protocols, e.g. email)
-<5> You can publish a string message
-<6> You can send SMS using the word `SMS` in the name of the method. One argument must be phone number and its name must contain the word `number`
-<7> You can provide additional attributes for the SMS message
+<4> For FIFO Topics the annotations `@MessageGroupId` and `@MessageDeduplicationId` can be added on method parameters to forward these attributes when publishing
+<5> You can add additional subject to published message (only useful for few protocols, e.g. email)
+<6> You can publish a string message
+<7> You can send SMS using the word `SMS` in the name of the method. One argument must be phone number and its name must contain the word `number`
+<8> You can provide additional attributes for the SMS message
 
 [source,java,indent=0,options="nowrap",role="secondary"]
 .Publishing String Records (AWS SDK 1.x)
