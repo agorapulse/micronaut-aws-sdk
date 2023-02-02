@@ -17,26 +17,29 @@
  */
 package com.agorapulse.micronaut.aws.sns;
 
+import com.agorapulse.micronaut.aws.sns.annotation.MessageDeduplicationId;
+import com.agorapulse.micronaut.aws.sns.annotation.MessageGroupId;
 import com.agorapulse.micronaut.aws.sns.annotation.NotificationClient;
 import com.agorapulse.micronaut.aws.sns.annotation.Topic;
-
 import java.util.Map;
 
-@NotificationClient                                                                     // <1>
+@NotificationClient                                                                             // <1>
 interface DefaultClient {
 
     String OTHER_TOPIC = "OtherTopic";
 
-    @Topic("OtherTopic") String publishMessageToDifferentTopic(Pogo pogo);              // <2>
+    @Topic("OtherTopic") String publishMessageToDifferentTopic(Pogo pogo);                      // <2>
 
-    String publishMessage(Pogo message);                                                // <3>
-    String publishMessage(String subject, Pogo message);                                // <4>
+    String publishMessage(Pogo message);                                                        // <3>
+    String publishMessage(Pogo message, @MessageGroupId String groupId, @MessageDeduplicationId String deduplicationId); // <4>
+    String publishMessage(String subject, Pogo message);                                        // <5>
     String publishMessage(String subject, Pogo message, Map<String, String> attributes);
-    String publishMessage(String message);                                              // <5>
+    String publishMessage(String message);                                                      // <6>
     String publishMessage(String subject, String message);
     String publishMessage(String subject, String message, Map<String, String> attributes);
 
-    String sendSMS(String phoneNumber, String message);                                 // <6>
-    String sendSms(String phoneNumber, String message, Map attributes);                 // <7>
+    String sendSMS(String phoneNumber, String message);                                         // <7>
+    String sendSms(String phoneNumber, String message, Map attributes);                         // <8>
 
 }
+

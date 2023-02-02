@@ -170,7 +170,7 @@ class NotificationClientSpec extends Specification {
             1 * defaultService.publishMessageToTopic(StreamClient.SOME_STREAM, null, POGO_AS_JSON, EMPTY_MAP) >> MESSAGE_ID
     }
 
-    void 'can publish to fifo topic'() {
+    void 'can publish pojo to fifo topic'() {
         given:
         TestFifoClient client = context.getBean(TestFifoClient)
 
@@ -179,10 +179,11 @@ class NotificationClientSpec extends Specification {
 
         then:
         1 * testService.publishRequest(TestFifoClient.TOPIC_NAME, EMPTY_MAP, _) >> { String topicArn,
-                                                                                    Map<String, String> attributes,
-                                                                                    PublishRequest publishRequest ->
+                                                                                     Map<String, String> attributes,
+                                                                                     PublishRequest publishRequest ->
             assert publishRequest.messageGroupId == MESSAGE_GROUP_ID
             assert publishRequest.messageDeduplicationId ==  MESSAGE_DEDUPLICATION_ID
+            assert publishRequest.message == POGO_AS_JSON
             return MESSAGE_ID
         }
         messageId == MESSAGE_ID
