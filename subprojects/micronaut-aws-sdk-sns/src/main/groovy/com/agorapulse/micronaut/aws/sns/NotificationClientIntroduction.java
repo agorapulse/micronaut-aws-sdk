@@ -211,9 +211,11 @@ public class NotificationClientIntroduction implements MethodInterceptor<Object,
             }
             if (argument.getName().equalsIgnoreCase(MESSAGE_GROUP_ID) || argument.isAnnotationPresent(MessageGroupId.class)) {
                 names.messageGroupId = argument;
+                continue;
             }
             if (argument.getName().equalsIgnoreCase(MESSAGE_DEDUPLICATION_ID) || argument.isAnnotationPresent(MessageDeduplicationId.class)) {
                 names.messageDeduplicationId = argument;
+                continue;
             }
             names.message = argument;
         }

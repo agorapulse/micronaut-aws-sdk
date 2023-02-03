@@ -196,11 +196,12 @@ class NotificationClientSpec extends Specification {
 
         then:
             1 * testService.publishRequest(TestFifoClient.TOPIC_NAME, EMPTY_MAP, _) >> { String topicArn,
-                Map<String, String> attributes,
-                PublishRequest.Builder publishRequestBuilder ->
-                    PublishRequest publishRequest = publishRequestBuilder.build()
+                                                                                         Map<String, String> attributes,
+                                                                                         PublishRequest.Builder publishRequestBuilder ->
+                    PublishRequest publishRequest = publishRequestBuilder.build() as PublishRequest
                     assert publishRequest.messageGroupId() == MESSAGE_GROUP_ID
                     assert publishRequest.messageDeduplicationId() == MESSAGE_DEDUPLICATION_ID
+                    assert publishRequest.message() == POGO_AS_JSON
                     return MESSAGE_ID
             }
             messageId == MESSAGE_ID
