@@ -30,5 +30,6 @@ import javax.validation.constraints.NotEmpty
 abstract class SimpleStorageServiceConfiguration extends DefaultRegionAndEndpointConfiguration {
 
     @NotEmpty String bucket = ''
+    Boolean pathStyleAccessEnabled
 
 }
