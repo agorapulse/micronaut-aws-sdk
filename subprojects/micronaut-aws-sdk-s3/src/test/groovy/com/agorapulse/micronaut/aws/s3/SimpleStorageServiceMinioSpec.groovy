@@ -48,7 +48,7 @@ class SimpleStorageServiceMinioSpec extends SimpleStorageServiceSpec implements 
     Map<String, String> getProperties() {
         MINIO_CONTAINER.start()
         return [
-            'aws.s3.endpoint':"http://$MINIO_CONTAINER.host:$MINIO_CONTAINER.firstMappedPort",
+            'aws.s3.endpoint':"http://$MINIO_CONTAINER.host:$MINIO_CONTAINER.firstMappedPort"
         ]
     }
 
