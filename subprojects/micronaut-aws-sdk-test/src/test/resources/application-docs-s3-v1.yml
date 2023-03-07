@@ -1,0 +1,9 @@
+aws:
+  s3:
+    region: sa-east-1
+    bucket: MyBucket                                                                    # <1>
+    path-style-access-enabled: true                                                     # <2>
+
+    buckets:                                                                            # <3>
+      test:                                                                             # <4>
+        bucket: TestBucket
