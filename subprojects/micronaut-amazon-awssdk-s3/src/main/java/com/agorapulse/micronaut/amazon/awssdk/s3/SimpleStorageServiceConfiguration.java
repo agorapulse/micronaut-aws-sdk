@@ -34,7 +34,16 @@ public abstract class SimpleStorageServiceConfiguration extends DefaultRegionAnd
         this.bucket = bucket;
     }
 
+    public Boolean getForcePathStyle() {
+        return forcePathStyle;
+    }
+
+    public void setForcePathStyle(Boolean forcePathStyle) {
+        this.forcePathStyle = forcePathStyle;
+    }
+
     @NotEmpty
     private String bucket = "";
+    private Boolean forcePathStyle;
 
 }

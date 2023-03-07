@@ -25,6 +25,7 @@ import software.amazon.awssdk.regions.providers.AwsRegionProvider;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3AsyncClientBuilder;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import javax.inject.Singleton;
@@ -42,6 +43,7 @@ public class SimpleStorageServiceFactory {
     ) {
         return configuration.configure(S3Client.builder(), awsRegionProvider)
             .credentialsProvider(credentialsProvider)
+            .forcePathStyle(configuration.getForcePathStyle())
             .build();
     }
     @Singleton
@@ -51,10 +53,14 @@ public class SimpleStorageServiceFactory {
         AwsRegionProvider awsRegionProvider,
         SimpleStorageServiceConfiguration configuration
     ) {
-
-        return configuration.configure(S3Presigner.builder(), awsRegionProvider)
-            .credentialsProvider(credentialsProvider)
-            .build();
+        S3Presigner.Builder builder = configuration.configure(S3Presigner.builder(), awsRegionProvider)
+            .credentialsProvider(credentialsProvider);
+        if (configuration.getForcePathStyle() != null) {
+            builder.serviceConfiguration(S3Configuration.builder()
+                .pathStyleAccessEnabled(configuration.getForcePathStyle())
+                .build());
+        }
+        return builder.build();
     }
 
     @Singleton
@@ -65,7 +71,9 @@ public class SimpleStorageServiceFactory {
         SimpleStorageServiceConfiguration configuration,
         Optional<SdkAsyncHttpClient> httpClient
     ) {
-        S3AsyncClientBuilder builder = S3AsyncClient.builder().credentialsProvider(credentialsProvider);
+        S3AsyncClientBuilder builder = S3AsyncClient.builder()
+            .forcePathStyle(configuration.getForcePathStyle())
+            .credentialsProvider(credentialsProvider);
         httpClient.ifPresent(builder::httpClient);
         configuration.configure(builder, awsRegionProvider);
         return builder.build();

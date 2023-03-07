@@ -32,22 +32,23 @@ class SimpleStorageServiceMinioSpec extends SimpleStorageServiceSpec implements 
 
     private static final int MINIO_PORT = 9000
 
+    private static final GenericContainer MINIO_CONTAINER = new GenericContainer<>('minio/minio:latest')
+        .withCommand('server /data')
+        .withEnv([
+            MINIO_ACCESS_KEY:'accesskey',
+            MINIO_SECRET_KEY:'secretkey'
+        ])
+        .withExposedPorts(MINIO_PORT)
+        .waitingFor(new HttpWaitStrategy()
+            .forPath('/minio/health/ready')
+            .forPort(MINIO_PORT)
+            .withStartupTimeout(Duration.ofSeconds(10)))
+
     @Override
     Map<String, String> getProperties() {
-        GenericContainer minioContainer = new GenericContainer<>('minio/minio:latest')
-            .withCommand('server /data')
-            .withEnv([
-                MINIO_ACCESS_KEY:'accesskey',
-                MINIO_SECRET_KEY:'secretkey'
-            ])
-            .withExposedPorts(MINIO_PORT)
-            .waitingFor(new HttpWaitStrategy()
-                .forPath('/minio/health/ready')
-                .forPort(MINIO_PORT)
-                .withStartupTimeout(Duration.ofSeconds(10)))
-        minioContainer.start()
+        MINIO_CONTAINER.start()
         return [
-            'aws.s3.endpoint':"http://$minioContainer.host:$minioContainer.firstMappedPort",
+            'aws.s3.endpoint':"http://$MINIO_CONTAINER.host:$MINIO_CONTAINER.firstMappedPort",
         ]
     }
 
