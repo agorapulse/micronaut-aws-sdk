@@ -42,6 +42,7 @@ public class SimpleStorageServiceFactory {
     ) {
         return configuration.configure(AmazonS3ClientBuilder.standard(), awsRegionProvider)
             .withCredentials(credentialsProvider)
+            .withPathStyleAccessEnabled(configuration.getPathStyleAccessEnabled())
             .withClientConfiguration(clientConfiguration.getClientConfiguration())
             .build();
     }

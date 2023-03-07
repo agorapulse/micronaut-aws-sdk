@@ -34,7 +34,41 @@ public abstract class SimpleStorageServiceConfiguration extends DefaultRegionAnd
         this.bucket = bucket;
     }
 
+    /**
+     * @return <core>true</core> if the path-style access should be used
+     */
+    public Boolean getForcePathStyle() {
+        return forcePathStyle;
+    }
+
+    /**
+     * @param forcePathStyle <core>true</core> if the path-style access should be used
+     */
+    public void setForcePathStyle(Boolean forcePathStyle) {
+        this.forcePathStyle = forcePathStyle;
+    }
+
+    /**
+     * @return <core>true</core> if the path-style access should be used
+     * @deprecated use {@link #getForcePathStyle()} instead
+     */
+    @Deprecated
+    public Boolean getPathStyleAccessEnabled() {
+        return forcePathStyle;
+    }
+
+    /**
+     *
+     * @param forcePathStyle <core>true</core> if the path-style access should be used
+     * @deprecated use {@link #setForcePathStyle(Boolean)} instead
+     */
+    @Deprecated
+    public void setPathStyleAccessEnabled(Boolean forcePathStyle) {
+        this.forcePathStyle = forcePathStyle;
+    }
+
     @NotEmpty
     private String bucket = "";
+    private Boolean forcePathStyle;
 
 }

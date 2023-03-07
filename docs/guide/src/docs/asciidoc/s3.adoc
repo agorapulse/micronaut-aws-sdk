@@ -43,15 +43,26 @@ implementation 'com.agorapulse:micronaut-aws-sdk-s3:{project-version}'
 You can store the name of the bucket in the configuration using `aws.s3.bucket` property. You can create additional configurations
 by providing 'aws.s3.buckets' configuration map.
 
-
-[source,yaml,indent=0,options="nowrap"]
-.application.yml
+[source,yaml,indent=0,role="primary",options="nowrap"]
+.application.yml (AWS SDK 2.x)
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk-test/src/test/resources/application-docs-s3.yml[]
+include::{root-dir}/subprojects/micronaut-aws-sdk-test/src/test/resources/application-docs-s3-v2.yml[]
 ----
 <1> You can define default bucket for the service
-<2> You can define multiple configurations
-<3> Each of the configuration can be access using `@Named('test') SimpleStorageService` qualifier
+<2> Force path style URL usage
+<3> You can define multiple configurations
+<4> Each of the configuration can be access using `@Named('test') SimpleStorageService` qualifier
+
+[source,yaml,indent=0,role="secondary",options="nowrap"]
+.application.yml (AWS SDK 1.x)
+----
+include::{root-dir}/subprojects/micronaut-aws-sdk-test/src/test/resources/application-docs-s3-v1.yml[]
+----
+<1> You can define default bucket for the service
+<2> Force path style URL usage
+<3> You can define multiple configurations
+<4> Each of the configuration can be access using `@Named('test') SimpleStorageService` qualifier
+
 
 ==== Simple Storage Service
 
