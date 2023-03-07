@@ -36,7 +36,7 @@ class SimpleStorageServiceMinioSpec extends SimpleStorageServiceSpec implements 
         .withCommand('server /data')
         .withEnv([
             MINIO_ACCESS_KEY:'accesskey',
-            MINIO_SECRET_KEY:'secretkey'
+            MINIO_SECRET_KEY:'secretkey',
         ])
         .withExposedPorts(MINIO_PORT)
         .waitingFor(new HttpWaitStrategy()
