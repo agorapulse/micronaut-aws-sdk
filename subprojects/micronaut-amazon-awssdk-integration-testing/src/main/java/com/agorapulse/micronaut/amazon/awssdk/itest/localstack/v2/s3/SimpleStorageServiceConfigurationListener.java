@@ -44,6 +44,7 @@ public class SimpleStorageServiceConfigurationListener implements BeanCreatedEve
             return conf;
         }
         conf.setEndpoint(holder.getEndpointOverride(LocalStackContainer.Service.S3).toString());
+        conf.setForcePathStyle(true);
         return conf;
     }
 
