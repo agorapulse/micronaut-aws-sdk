@@ -17,6 +17,9 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.itest.localstack;
 
+import io.micronaut.core.convert.format.MapFormat;
+import io.micronaut.core.naming.conventions.StringConvention;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,7 +58,7 @@ public abstract class AbstractContainerConfiguration {
         return env;
     }
 
-    public void setEnv(Map<String, String> env) {
+    public void setEnv(@MapFormat(keyFormat = StringConvention.RAW) Map<String, String> env) {
         this.env = env;
     }
 }
