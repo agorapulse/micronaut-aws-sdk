@@ -1,3 +1,8 @@
 localstack:
   services: sqs
   shared: true
+
+  aws:
+    sqs:
+      tags:
+        domain: Agorapulse

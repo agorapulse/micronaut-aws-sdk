@@ -111,6 +111,10 @@ public class DefaultSimpleQueueService implements SimpleQueueService {
             createQueueRequest.attributes(attributes);
         }
 
+        if (configuration.getTags() != null && !configuration.getTags().isEmpty()) {
+            createQueueRequest.tags(configuration.getTags());
+        }
+
         String queueUrl = client.createQueue(createQueueRequest.build()).queueUrl();
 
         LOGGER.debug("Queue created (queueUrl={})", queueUrl);

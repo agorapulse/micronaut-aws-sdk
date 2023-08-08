@@ -19,6 +19,8 @@ package com.agorapulse.micronaut.aws.sqs;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class QueueConfiguration implements Cloneable {
     public QueueConfiguration withQueue(String queue) {
@@ -113,6 +115,14 @@ public class QueueConfiguration implements Cloneable {
         this.visibilityTimeout = visibilityTimeout;
     }
 
+    public Map<String, String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Map<String, String> tags) {
+        this.tags = tags;
+    }
+
     private String queue = "";
     private boolean fifo;
 
@@ -131,4 +141,6 @@ public class QueueConfiguration implements Cloneable {
     @Min(0L)
     @Max(43200L)
     private Integer visibilityTimeout = 30;
+
+    private Map<String, String> tags = new LinkedHashMap<>();
 }
