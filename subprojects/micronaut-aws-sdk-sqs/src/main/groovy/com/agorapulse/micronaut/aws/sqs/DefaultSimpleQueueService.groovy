@@ -94,6 +94,11 @@ class DefaultSimpleQueueService implements SimpleQueueService {
         if (configuration.fifo || configuration.queue.endsWith('.fifo')) {
             createQueueRequest.attributes['FifoQueue'] = 'true'
         }
+
+        if (configuration.tags) {
+            createQueueRequest.tags = configuration.tags
+        }
+
         String queueUrl = client.createQueue(createQueueRequest).queueUrl
         log.debug "Queue created (queueUrl=$queueUrl)"
         addQueue(queueUrl)
