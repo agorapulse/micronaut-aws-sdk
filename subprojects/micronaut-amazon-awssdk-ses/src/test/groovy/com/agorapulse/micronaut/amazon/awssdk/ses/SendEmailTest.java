@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.Mockito.mock;
@@ -55,6 +56,8 @@ public class SendEmailTest {
 
         Files.write(file.toPath(), Collections.singletonList("not a real PDF"));
         String filepath = file.getCanonicalPath();
+        Map<String, String> mapOfTags = new HashMap<>();
+        mapOfTags.put("myTagKey", "myTagValue");
 
         // tag::builder[]
         EmailDeliveryStatus status = service.send(e ->                                  // <1>
@@ -62,7 +65,7 @@ public class SendEmailTest {
                 .from("subscribe@groovycalamari.com")                                   // <3>
                 .to("me@sergiodelamo.com")                                              // <4>
                 .htmlBody("<p>This is an example body</p>")                             // <5>
-                .tags(Map.of("myTagKey", "myTagValue"))                         // <6>
+                .tags(mapOfTags)                                                        // <6>
                 .attachment(a ->                                                        // <7>
                     a.filepath(filepath)                                                // <8>
                         .filename("test.pdf")                                           // <9>
