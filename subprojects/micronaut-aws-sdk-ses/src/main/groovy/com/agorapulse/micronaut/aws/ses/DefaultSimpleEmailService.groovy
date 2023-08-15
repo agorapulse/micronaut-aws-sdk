@@ -191,13 +191,13 @@ class DefaultSimpleEmailService implements SimpleEmailService {
     }
 
     private List<MessageTag> getTags(TransactionalEmail email) {
-        if (!email.getTags()) {
-            return null
+        if (!email.tags) {
+            return []
         }
-        return email.getTags().collect { entry ->
+        return email.tags.collect { entry ->
             new MessageTag()
-                .withName(entry.getKey())
-                .withValue(entry.getValue())
+                .withName(entry.key)
+                .withValue(entry.value)
         }
     }
 

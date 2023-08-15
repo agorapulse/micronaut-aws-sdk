@@ -42,6 +42,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -190,7 +191,7 @@ public class DefaultSimpleEmailService implements SimpleEmailService {
 
     private List<MessageTag> getCustomTags(TransactionalEmail email) {
         if (email.getTags() == null || email.getTags().isEmpty()) {
-            return null;
+            return Collections.emptyList();
         }
         return email.getTags().entrySet().stream()
             .map(entry -> MessageTag.builder()
