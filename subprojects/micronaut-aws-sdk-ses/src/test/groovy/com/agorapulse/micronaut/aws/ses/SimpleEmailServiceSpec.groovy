@@ -41,12 +41,15 @@ class SimpleEmailServiceSpec extends Specification {
     ))
 
     void "test transactionalEmailWithClosure"() {
+        given:
+        Map<String, String> customTags = [key1: 'value1', key2: 'value2']
         when:
         TransactionalEmail transactionalEmail = SimpleEmailService.email {
             subject 'Hi Paul'
             from 'subscribe@groovycalamari.com'
             to 'me@sergiodelamo.com'
             htmlBody '<p>This is an example body</p>'
+            tags customTags
             attachment {
                 filename 'test.pdf'
                 filepath '/tmp/test.pdf'
@@ -61,6 +64,7 @@ class SimpleEmailServiceSpec extends Specification {
         transactionalEmail.htmlBody == '<p>This is an example body</p>'
         transactionalEmail.from == 'subscribe@groovycalamari.com'
         transactionalEmail.recipients == ['me@sergiodelamo.com']
+        transactionalEmail.tags == [key1: 'value1', key2: 'value2']
         transactionalEmail.attachments.size() == 1
         transactionalEmail.attachments.first().filename == 'test.pdf'
         transactionalEmail.attachments.first().filepath == '/tmp/test.pdf'
@@ -79,6 +83,7 @@ class SimpleEmailServiceSpec extends Specification {
             htmlBody '<p>This is an example body</p>'
             to 'me@sergiodelamo.com'
             from 'subscribe@groovycalamari.com'
+            tags customTags
             attachment {
                 filepath f.absolutePath
             }
@@ -90,6 +95,7 @@ class SimpleEmailServiceSpec extends Specification {
         transactionalEmail.htmlBody == '<p>This is an example body</p>'
         transactionalEmail.from == 'subscribe@groovycalamari.com'
         transactionalEmail.recipients == ['me@sergiodelamo.com']
+        transactionalEmail.tags == [key1: 'value1', key2: 'value2']
         transactionalEmail.attachments.size() == 1
         transactionalEmail.attachments.first().filename == 'groovylogo.png'
         transactionalEmail.attachments.first().filepath == f.absolutePath

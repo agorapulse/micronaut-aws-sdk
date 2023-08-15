@@ -55,11 +55,12 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-ses/src/test/groovy/com/
 <3> Define the from address
 <4> Define one or more recipients
 <5> Define HTML body (alternatively you can declare plain text body as well)
-<6> Build an attachment
-<7> Define the location of the file to be sent
-<8> Define the file name (optional - deduced from the file)
-<9> Define the mime type (usually optional - deduced from the file)
-<10> Define the description of the file (optional)
+<6> Define tags for the email, they will be included in SES events
+<7> Build an attachment
+<8> Define the location of the file to be sent
+<9> Define the file name (optional - deduced from the file)
+<10> Define the mime type (usually optional - deduced from the file)
+<11> Define the description of the file (optional)
 
 
 [source,java,indent=0,options="nowrap",role="secondary"]
@@ -72,11 +73,12 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-ses/src/test/groovy/com/
 <3> Define the from address
 <4> Define one or more recipients
 <5> Define HTML body (alternatively you can declare plain text body as well)
-<6> Build an attachment
-<7> Define the location of the file to be sent
-<8> Define the file name (optional - deduced from the file)
-<9> Define the mime type (usually optional - deduced from the file)
-<10> Define the description of the file (optional)
+<6> Define tags for the email, they will be included in SES events
+<7> Build an attachment
+<8> Define the location of the file to be sent
+<9> Define the file name (optional - deduced from the file)
+<10> Define the mime type (usually optional - deduced from the file)
+<11> Define the description of the file (optional)
 
 Please, see
 https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/amazon/awsses/SimpleEmailService.html[SimpleEmailService AWS SDK 2.x]

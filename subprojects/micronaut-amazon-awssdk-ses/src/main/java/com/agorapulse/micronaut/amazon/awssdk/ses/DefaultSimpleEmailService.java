@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.ses.SesClient;
+import software.amazon.awssdk.services.ses.model.MessageTag;
 import software.amazon.awssdk.services.ses.model.SendEmailRequest;
 import software.amazon.awssdk.services.ses.model.SendRawEmailRequest;
 
@@ -41,8 +42,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import static javax.mail.Message.RecipientType.TO;
 
@@ -155,7 +158,9 @@ public class DefaultSimpleEmailService implements SimpleEmailService {
         SendRawEmailRequest rawEmailRequest = SendRawEmailRequest.builder()
             .rawMessage(b -> b.data(SdkBytes.fromByteArray(outputStream.toByteArray())))
             .destinations(email.getRecipients())
-            .source(Optional.ofNullable(email.getFrom()).orElseGet(() -> configuration.getSourceEmail().orElse(null))).build();
+            .source(Optional.ofNullable(email.getFrom()).orElseGet(() -> configuration.getSourceEmail().orElse(null)))
+            .tags(getCustomTags(email))
+            .build();
 
         return handleSend(email, () -> client.sendRawEmail(rawEmailRequest));
     }
@@ -178,7 +183,20 @@ public class DefaultSimpleEmailService implements SimpleEmailService {
             builder.replyToAddresses(email.getReplyTo());
         }
 
+        builder.tags(getCustomTags(email));
+
         return handleSend(email, () -> client.sendEmail(builder.build()));
+    }
+
+    private List<MessageTag> getCustomTags(TransactionalEmail email) {
+        if (email.getTags() == null || email.getTags().isEmpty()) {
+            return null;
+        }
+        return email.getTags().entrySet().stream()
+            .map(entry -> MessageTag.builder()
+                .name(entry.getKey())
+                .value(entry.getValue()).build())
+            .collect(Collectors.toList());
     }
 
 }

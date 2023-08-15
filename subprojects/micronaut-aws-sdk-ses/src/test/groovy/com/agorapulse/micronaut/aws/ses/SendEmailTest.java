@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Collections;
+import java.util.Map;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -62,11 +63,12 @@ public class SendEmailTest {
                 .from("subscribe@groovycalamari.com")                                   // <3>
                 .to("me@sergiodelamo.com")                                              // <4>
                 .htmlBody("<p>This is an example body</p>")                             // <5>
-                .attachment(a ->                                                        // <6>
-                    a.filepath(filepath)                                                // <7>
-                        .filename("test.pdf")                                           // <8>
-                        .mimeType("application/pdf")                                    // <9>
-                        .description("An example pdf")                                  // <10>
+                .tags(Map.of("myTagKey", "myTagValue"))                         // <6>
+                .attachment(a ->                                                        // <7>
+                    a.filepath(filepath)                                                // <8>
+                        .filename("test.pdf")                                           // <9>
+                        .mimeType("application/pdf")                                    // <10>
+                        .description("An example pdf")                                  // <11>
                 )
         );
         // end::builder[]

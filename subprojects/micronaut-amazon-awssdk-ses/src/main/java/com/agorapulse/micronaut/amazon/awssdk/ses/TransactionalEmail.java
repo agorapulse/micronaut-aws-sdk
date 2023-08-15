@@ -20,7 +20,9 @@ package com.agorapulse.micronaut.amazon.awssdk.ses;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -32,6 +34,7 @@ public class TransactionalEmail {
     private String subject = "";
     private String htmlBody = "<html><body></body></html>";
     private String replyTo = "";
+    private Map<String, String> tags = new HashMap<>();
 
     private final List<String> recipients = new ArrayList<>();
     private final List<TransactionalEmailAttachment> attachments = new ArrayList<>();
@@ -76,6 +79,11 @@ public class TransactionalEmail {
         return this;
     }
 
+    public TransactionalEmail tags(Map<String, String> customTags) {
+        this.tags = customTags;
+        return this;
+    }
+
     public String getFrom() {
         return from;
     }
@@ -100,6 +108,10 @@ public class TransactionalEmail {
         return Collections.unmodifiableList(attachments);
     }
 
+    public Map<String, String> getTags() {
+        return tags;
+    }
+
     // CHECKSTYLE:OFF
     @Override
     public String toString() {
@@ -110,6 +122,7 @@ public class TransactionalEmail {
             ", replyTo='" + replyTo + '\'' +
             ", recipients=" + recipients +
             ", attachments=" + attachments +
+            ", tags=" + tags +
             '}';
     }
     // CHECKSTYLE:ON
