@@ -46,6 +46,7 @@ class SendEmailSpec extends Specification {
             file.createNewFile()
             file.text = 'not a real PDF'
             String thePath = file.canonicalPath
+            Map<String, String> mapOfTags = [myTagKey: 'myTagValue']
         when:
             // tag::builder[]
             EmailDeliveryStatus status = service.send {                                 // <1>
@@ -53,11 +54,12 @@ class SendEmailSpec extends Specification {
                 from 'subscribe@groovycalamari.com'                                     // <3>
                 to 'me@sergiodelamo.com'                                                // <4>
                 htmlBody '<p>This is an example body</p>'                               // <5>
-                attachment {                                                            // <6>
-                    filepath thePath                                                    // <7>
-                    filename 'test.pdf'                                                 // <8>
-                    mimeType 'application/pdf'                                          // <9>
-                    description 'An example pdf'                                        // <10>
+                tags mapOfTags                                                               // <6>
+                attachment {                                                            // <7>
+                    filepath thePath                                                    // <8>
+                    filename 'test.pdf'                                                 // <9>
+                    mimeType 'application/pdf'                                          // <10>
+                    description 'An example pdf'                                        // <11>
                 }
             }
             // end::builder[]
