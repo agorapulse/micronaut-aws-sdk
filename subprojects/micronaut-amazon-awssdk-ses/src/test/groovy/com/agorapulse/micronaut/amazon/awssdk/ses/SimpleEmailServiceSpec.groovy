@@ -29,7 +29,7 @@ import spock.lang.Subject
 /**
  * Tests for simple email service.
  */
-@SuppressWarnings(['AbcMetric', 'JavaIoPackageAccess'])
+@SuppressWarnings(['AbcMetric', 'JavaIoPackageAccess', 'UnnecessaryObjectReferences'])
 class SimpleEmailServiceSpec extends Specification {
 
     SesClient simpleEmailService = Mock(SesClient)
@@ -52,6 +52,7 @@ class SimpleEmailServiceSpec extends Specification {
             from 'subscribe@groovycalamari.com'
             to 'me@sergiodelamo.com'
             htmlBody '<p>This is an example body</p>'
+            configurationSetName 'configuration-set'
             tags customTags
             attachment {
                 filename 'test.pdf'
@@ -67,6 +68,7 @@ class SimpleEmailServiceSpec extends Specification {
         transactionalEmail.htmlBody == '<p>This is an example body</p>'
         transactionalEmail.from == 'subscribe@groovycalamari.com'
         transactionalEmail.recipients == ['me@sergiodelamo.com']
+        transactionalEmail.configurationSetName == 'configuration-set'
         transactionalEmail.tags == [key1: 'value1', key2: 'value2']
         transactionalEmail.attachments.size() == 1
         transactionalEmail.attachments.first().filename == 'test.pdf'
@@ -86,6 +88,7 @@ class SimpleEmailServiceSpec extends Specification {
             htmlBody '<p>This is an example body</p>'
             to 'me@sergiodelamo.com'
             from 'subscribe@groovycalamari.com'
+            configurationSetName 'configuration-set'
             tags customTags
             attachment {
                 filepath f.absolutePath
@@ -98,6 +101,7 @@ class SimpleEmailServiceSpec extends Specification {
         transactionalEmail.htmlBody == '<p>This is an example body</p>'
         transactionalEmail.from == 'subscribe@groovycalamari.com'
         transactionalEmail.recipients == ['me@sergiodelamo.com']
+        transactionalEmail.configurationSetName == 'configuration-set'
         transactionalEmail.tags == [key1: 'value1', key2: 'value2']
         transactionalEmail.attachments.size() == 1
         transactionalEmail.attachments.first().filename == 'groovylogo.png'

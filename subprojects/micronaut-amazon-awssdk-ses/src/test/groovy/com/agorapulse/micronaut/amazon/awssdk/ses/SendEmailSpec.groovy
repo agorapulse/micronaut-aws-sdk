@@ -51,12 +51,13 @@ class SendEmailSpec extends Specification {
                 from 'subscribe@groovycalamari.com'                                     // <3>
                 to 'me@sergiodelamo.com'                                                // <4>
                 htmlBody '<p>This is an example body</p>'                               // <5>
-                tags mapOfTags                                                               // <6>
-                attachment {                                     // <7>
-                    filepath thePath                                                         // <8>
-                    filename 'test.pdf'                                              // <9>
-                    mimeType 'application/pdf'                                          // <10>
-                    description 'An example pdf'                                        // <11>
+                configurationSetName 'configuration-set'                                // <6>
+                tags mapOfTags                                                          // <7>
+                attachment {                                                            // <8>
+                    filepath thePath                                                    // <9>
+                    filename 'test.pdf'                                                 // <10>
+                    mimeType 'application/pdf'                                          // <11>
+                    description 'An example pdf'                                        // <12>
                 }
             }
             // end::builder[]
