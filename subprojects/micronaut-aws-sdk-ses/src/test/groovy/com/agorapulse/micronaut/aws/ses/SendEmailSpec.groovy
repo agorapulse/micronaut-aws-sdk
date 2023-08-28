@@ -54,7 +54,7 @@ class SendEmailSpec extends Specification {
                 from 'subscribe@groovycalamari.com'                                     // <3>
                 to 'me@sergiodelamo.com'                                                // <4>
                 htmlBody '<p>This is an example body</p>'                               // <5>
-            configurationSetName 'configuration-set'                                    // <6>
+                configurationSetName 'configuration-set'                                    // <6>
                 tags mapOfTags                                                              // <7>
                 attachment {                                                                // <8>
                     filepath thePath                                                        // <9>
