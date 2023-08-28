@@ -29,7 +29,7 @@ import spock.lang.Subject
 /**
  * Tests for simple email service.
  */
-@SuppressWarnings(['AbcMetric', 'JavaIoPackageAccess'])
+@SuppressWarnings(['AbcMetric', 'JavaIoPackageAccess', 'UnnecessaryObjectReferences'])
 class SimpleEmailServiceSpec extends Specification {
 
     SesClient simpleEmailService = Mock(SesClient)
