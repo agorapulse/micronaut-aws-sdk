@@ -150,6 +150,7 @@ class DefaultSimpleEmailService implements SimpleEmailService {
         rawEmailRequest.destinations = email.recipients
         rawEmailRequest.source = email.from ?: configuration.sourceEmail.orElse(null)
         rawEmailRequest.tags = getTags(email)
+        rawEmailRequest.configurationSetName = email.configurationSetName
 
         return handleSend(email) {
             client.sendRawEmail(rawEmailRequest)
@@ -185,6 +186,7 @@ class DefaultSimpleEmailService implements SimpleEmailService {
             if (email.replyTo) {
                 sendEmailRequest.replyToAddresses = singletonList(email.replyTo)
             }
+            sendEmailRequest.configurationSetName = email.configurationSetName
             sendEmailRequest.tags = getTags(email)
             client.sendEmail(sendEmailRequest)
         }

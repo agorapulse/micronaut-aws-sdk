@@ -34,6 +34,7 @@ public class TransactionalEmail {
     private String subject = "";
     private String htmlBody = "<html><body></body></html>";
     private String replyTo = "";
+    private String configurationSetName = "";
     private Map<String, String> tags = new HashMap<>();
 
     private final List<String> recipients = new ArrayList<>();
@@ -79,6 +80,11 @@ public class TransactionalEmail {
         return this;
     }
 
+    public TransactionalEmail configurationSetName(String str) {
+        this.configurationSetName = str;
+        return this;
+    }
+
     public TransactionalEmail tags(Map<String, String> customTags) {
         this.tags = customTags;
         return this;
@@ -108,6 +114,10 @@ public class TransactionalEmail {
         return Collections.unmodifiableList(attachments);
     }
 
+    public String getConfigurationSetName() {
+        return configurationSetName;
+    }
+
     public Map<String, String> getTags() {
         return tags;
     }
@@ -122,6 +132,7 @@ public class TransactionalEmail {
             ", replyTo='" + replyTo + '\'' +
             ", recipients=" + recipients +
             ", attachments=" + attachments +
+            ", configurationSetName=" + configurationSetName +
             ", tags=" + tags +
             '}';
     }
