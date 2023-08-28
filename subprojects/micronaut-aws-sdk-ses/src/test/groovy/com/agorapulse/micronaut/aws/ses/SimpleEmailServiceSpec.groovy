@@ -65,6 +65,8 @@ class SimpleEmailServiceSpec extends Specification {
         transactionalEmail.htmlBody == '<p>This is an example body</p>'
         transactionalEmail.from == 'subscribe@groovycalamari.com'
         transactionalEmail.recipients == ['me@sergiodelamo.com']
+        transactionalEmail.configurationSetName == 'configuration-set'
+        transactionalEmail.tags == [key1: 'value1', key2: 'value2']
         transactionalEmail.attachments.size() == 1
         transactionalEmail.attachments.first().filename == 'test.pdf'
         transactionalEmail.attachments.first().filepath == '/tmp/test.pdf'
