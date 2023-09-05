@@ -161,6 +161,7 @@ public class DefaultSimpleEmailService implements SimpleEmailService {
             .destinations(email.getRecipients())
             .source(Optional.ofNullable(email.getFrom()).orElseGet(() -> configuration.getSourceEmail().orElse(null)))
             .tags(getCustomTags(email))
+            .configurationSetName(email.getConfigurationSetName())
             .build();
 
         return handleSend(email, () -> client.sendRawEmail(rawEmailRequest));
@@ -183,8 +184,8 @@ public class DefaultSimpleEmailService implements SimpleEmailService {
         if (email.getReplyTo() != null && email.getReplyTo().length() > 0) {
             builder.replyToAddresses(email.getReplyTo());
         }
-
         builder.tags(getCustomTags(email));
+        builder.configurationSetName(email.getConfigurationSetName());
 
         return handleSend(email, () -> client.sendEmail(builder.build()));
     }
