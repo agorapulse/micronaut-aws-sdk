@@ -181,7 +181,7 @@ public class DefaultSimpleEmailService implements SimpleEmailService {
             })
             .source(Optional.ofNullable(email.getFrom()).orElseGet(() -> configuration.getSourceEmail().orElse(null)));
 
-        if (email.getReplyTo() != null && !email.getReplyTo().isBlank()) {
+        if (email.getReplyTo() != null && email.getReplyTo().length() > 0) {
             builder.replyToAddresses(email.getReplyTo());
         }
         builder.tags(getCustomTags(email));
