@@ -169,46 +169,47 @@
 <a class="jxr_linenumber" name="L161" href="#L161">161</a>             .destinations(email.getRecipients())
 <a class="jxr_linenumber" name="L162" href="#L162">162</a>             .source(Optional.ofNullable(email.getFrom()).orElseGet(() -&gt; configuration.getSourceEmail().orElse(<strong class="jxr_keyword">null</strong>)))
 <a class="jxr_linenumber" name="L163" href="#L163">163</a>             .tags(getCustomTags(email))
-<a class="jxr_linenumber" name="L164" href="#L164">164</a>             .build();
-<a class="jxr_linenumber" name="L165" href="#L165">165</a> 
-<a class="jxr_linenumber" name="L166" href="#L166">166</a>         <strong class="jxr_keyword">return</strong> handleSend(email, () -&gt; client.sendRawEmail(rawEmailRequest));
-<a class="jxr_linenumber" name="L167" href="#L167">167</a>     }
-<a class="jxr_linenumber" name="L168" href="#L168">168</a> 
-<a class="jxr_linenumber" name="L169" href="#L169">169</a>     <strong class="jxr_keyword">private</strong> <a name="EmailDeliveryStatus" href="../../../../../../com/agorapulse/micronaut/amazon/awssdk/ses/EmailDeliveryStatus.html#EmailDeliveryStatus">EmailDeliveryStatus</a> sendWithoutAttachments(<a name="TransactionalEmail" href="../../../../../../com/agorapulse/micronaut/amazon/awssdk/ses/TransactionalEmail.html#TransactionalEmail">TransactionalEmail</a> email) {
-<a class="jxr_linenumber" name="L170" href="#L170">170</a>         SendEmailRequest.Builder builder = SendEmailRequest.builder()
-<a class="jxr_linenumber" name="L171" href="#L171">171</a>             .destination(b -&gt; b.toAddresses(email.getRecipients()))
-<a class="jxr_linenumber" name="L172" href="#L172">172</a>             .message(b -&gt; {
-<a class="jxr_linenumber" name="L173" href="#L173">173</a>                 b.subject(c -&gt; c.data(
-<a class="jxr_linenumber" name="L174" href="#L174">174</a>                         configuration.getSubjectPrefix().isPresent()
-<a class="jxr_linenumber" name="L175" href="#L175">175</a>                         ? configuration.getSubjectPrefix().get() + <span class="jxr_string">" "</span> + email.getSubject()
-<a class="jxr_linenumber" name="L176" href="#L176">176</a>                         : email.getSubject()
-<a class="jxr_linenumber" name="L177" href="#L177">177</a>                     )
-<a class="jxr_linenumber" name="L178" href="#L178">178</a>                 );
-<a class="jxr_linenumber" name="L179" href="#L179">179</a>                 b.body(body -&gt; body.html(c -&gt; c.data(email.getHtmlBody())));
-<a class="jxr_linenumber" name="L180" href="#L180">180</a>             })
-<a class="jxr_linenumber" name="L181" href="#L181">181</a>             .source(Optional.ofNullable(email.getFrom()).orElseGet(() -&gt; configuration.getSourceEmail().orElse(<strong class="jxr_keyword">null</strong>)));
-<a class="jxr_linenumber" name="L182" href="#L182">182</a> 
-<a class="jxr_linenumber" name="L183" href="#L183">183</a>         <strong class="jxr_keyword">if</strong> (email.getReplyTo() != <strong class="jxr_keyword">null</strong> &amp;&amp; email.getReplyTo().length() &gt; 0) {
-<a class="jxr_linenumber" name="L184" href="#L184">184</a>             builder.replyToAddresses(email.getReplyTo());
-<a class="jxr_linenumber" name="L185" href="#L185">185</a>         }
-<a class="jxr_linenumber" name="L186" href="#L186">186</a> 
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>             .configurationSetName(email.getConfigurationSetName())
+<a class="jxr_linenumber" name="L165" href="#L165">165</a>             .build();
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> 
+<a class="jxr_linenumber" name="L167" href="#L167">167</a>         <strong class="jxr_keyword">return</strong> handleSend(email, () -&gt; client.sendRawEmail(rawEmailRequest));
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>     }
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> 
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>     <strong class="jxr_keyword">private</strong> <a name="EmailDeliveryStatus" href="../../../../../../com/agorapulse/micronaut/amazon/awssdk/ses/EmailDeliveryStatus.html#EmailDeliveryStatus">EmailDeliveryStatus</a> sendWithoutAttachments(<a name="TransactionalEmail" href="../../../../../../com/agorapulse/micronaut/amazon/awssdk/ses/TransactionalEmail.html#TransactionalEmail">TransactionalEmail</a> email) {
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>         SendEmailRequest.Builder builder = SendEmailRequest.builder()
+<a class="jxr_linenumber" name="L172" href="#L172">172</a>             .destination(b -&gt; b.toAddresses(email.getRecipients()))
+<a class="jxr_linenumber" name="L173" href="#L173">173</a>             .message(b -&gt; {
+<a class="jxr_linenumber" name="L174" href="#L174">174</a>                 b.subject(c -&gt; c.data(
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>                         configuration.getSubjectPrefix().isPresent()
+<a class="jxr_linenumber" name="L176" href="#L176">176</a>                         ? configuration.getSubjectPrefix().get() + <span class="jxr_string">" "</span> + email.getSubject()
+<a class="jxr_linenumber" name="L177" href="#L177">177</a>                         : email.getSubject()
+<a class="jxr_linenumber" name="L178" href="#L178">178</a>                     )
+<a class="jxr_linenumber" name="L179" href="#L179">179</a>                 );
+<a class="jxr_linenumber" name="L180" href="#L180">180</a>                 b.body(body -&gt; body.html(c -&gt; c.data(email.getHtmlBody())));
+<a class="jxr_linenumber" name="L181" href="#L181">181</a>             })
+<a class="jxr_linenumber" name="L182" href="#L182">182</a>             .source(Optional.ofNullable(email.getFrom()).orElseGet(() -&gt; configuration.getSourceEmail().orElse(<strong class="jxr_keyword">null</strong>)));
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> 
+<a class="jxr_linenumber" name="L184" href="#L184">184</a>         <strong class="jxr_keyword">if</strong> (email.getReplyTo() != <strong class="jxr_keyword">null</strong> &amp;&amp; email.getReplyTo().length() &gt; 0) {
+<a class="jxr_linenumber" name="L185" href="#L185">185</a>             builder.replyToAddresses(email.getReplyTo());
+<a class="jxr_linenumber" name="L186" href="#L186">186</a>         }
 <a class="jxr_linenumber" name="L187" href="#L187">187</a>         builder.tags(getCustomTags(email));
-<a class="jxr_linenumber" name="L188" href="#L188">188</a> 
-<a class="jxr_linenumber" name="L189" href="#L189">189</a>         <strong class="jxr_keyword">return</strong> handleSend(email, () -&gt; client.sendEmail(builder.build()));
-<a class="jxr_linenumber" name="L190" href="#L190">190</a>     }
-<a class="jxr_linenumber" name="L191" href="#L191">191</a> 
-<a class="jxr_linenumber" name="L192" href="#L192">192</a>     <strong class="jxr_keyword">private</strong> List&lt;MessageTag&gt; getCustomTags(<a name="TransactionalEmail" href="../../../../../../com/agorapulse/micronaut/amazon/awssdk/ses/TransactionalEmail.html#TransactionalEmail">TransactionalEmail</a> email) {
-<a class="jxr_linenumber" name="L193" href="#L193">193</a>         <strong class="jxr_keyword">if</strong> (email.getTags() == <strong class="jxr_keyword">null</strong> || email.getTags().isEmpty()) {
-<a class="jxr_linenumber" name="L194" href="#L194">194</a>             <strong class="jxr_keyword">return</strong> Collections.emptyList();
-<a class="jxr_linenumber" name="L195" href="#L195">195</a>         }
-<a class="jxr_linenumber" name="L196" href="#L196">196</a>         <strong class="jxr_keyword">return</strong> email.getTags().entrySet().stream()
-<a class="jxr_linenumber" name="L197" href="#L197">197</a>             .map(entry -&gt; MessageTag.builder()
-<a class="jxr_linenumber" name="L198" href="#L198">198</a>                 .name(entry.getKey())
-<a class="jxr_linenumber" name="L199" href="#L199">199</a>                 .value(entry.getValue()).build())
-<a class="jxr_linenumber" name="L200" href="#L200">200</a>             .collect(Collectors.toList());
-<a class="jxr_linenumber" name="L201" href="#L201">201</a>     }
-<a class="jxr_linenumber" name="L202" href="#L202">202</a> 
-<a class="jxr_linenumber" name="L203" href="#L203">203</a> }
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>         builder.configurationSetName(email.getConfigurationSetName());
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> 
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>         <strong class="jxr_keyword">return</strong> handleSend(email, () -&gt; client.sendEmail(builder.build()));
+<a class="jxr_linenumber" name="L191" href="#L191">191</a>     }
+<a class="jxr_linenumber" name="L192" href="#L192">192</a> 
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>     <strong class="jxr_keyword">private</strong> List&lt;MessageTag&gt; getCustomTags(<a name="TransactionalEmail" href="../../../../../../com/agorapulse/micronaut/amazon/awssdk/ses/TransactionalEmail.html#TransactionalEmail">TransactionalEmail</a> email) {
+<a class="jxr_linenumber" name="L194" href="#L194">194</a>         <strong class="jxr_keyword">if</strong> (email.getTags() == <strong class="jxr_keyword">null</strong> || email.getTags().isEmpty()) {
+<a class="jxr_linenumber" name="L195" href="#L195">195</a>             <strong class="jxr_keyword">return</strong> Collections.emptyList();
+<a class="jxr_linenumber" name="L196" href="#L196">196</a>         }
+<a class="jxr_linenumber" name="L197" href="#L197">197</a>         <strong class="jxr_keyword">return</strong> email.getTags().entrySet().stream()
+<a class="jxr_linenumber" name="L198" href="#L198">198</a>             .map(entry -&gt; MessageTag.builder()
+<a class="jxr_linenumber" name="L199" href="#L199">199</a>                 .name(entry.getKey())
+<a class="jxr_linenumber" name="L200" href="#L200">200</a>                 .value(entry.getValue()).build())
+<a class="jxr_linenumber" name="L201" href="#L201">201</a>             .collect(Collectors.toList());
+<a class="jxr_linenumber" name="L202" href="#L202">202</a>     }
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> 
+<a class="jxr_linenumber" name="L204" href="#L204">204</a> }
 </pre>
 <hr/>
 <div id="footer"></div>
