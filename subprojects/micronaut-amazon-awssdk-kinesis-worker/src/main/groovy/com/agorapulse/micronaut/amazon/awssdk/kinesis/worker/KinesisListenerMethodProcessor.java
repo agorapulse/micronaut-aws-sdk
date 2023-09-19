@@ -44,9 +44,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 @Singleton
-@Requires(
-    property = "aws.kinesis"
-)
+@Requires(property = "aws.kinesis")
+@Requires(property = "aws.kinesis.listener.enabled", value = StringUtils.TRUE, defaultValue = StringUtils.TRUE)
 public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor<KinesisListener>, ApplicationEventListener<ShutdownEvent>, Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KinesisListenerMethodProcessor.class);
