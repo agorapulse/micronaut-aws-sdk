@@ -48,6 +48,7 @@ import java.util.function.BiConsumer;
     property = "aws.kinesis",
     classes = KinesisClientLibConfiguration.class
 )
+@Requires(property = "aws.kinesis.listener.enabled", value = StringUtils.TRUE, defaultValue = StringUtils.TRUE)
 public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor<KinesisListener>, ApplicationEventListener<ShutdownEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KinesisListener.class);
