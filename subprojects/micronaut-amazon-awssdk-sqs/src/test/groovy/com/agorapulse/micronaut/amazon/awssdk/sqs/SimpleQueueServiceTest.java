@@ -40,7 +40,7 @@ public class SimpleQueueServiceTest {
     public static final String TEST_QUEUE = "TestQueueJava";
 
     private static final String DATA = "Hello World";
-    private static final Map<String, String> DATA_BATCH = new HashMap<>() {
+    private static final Map<String, String> DATA_BATCH = new HashMap<String, String>() {
         {
             put("1", "Hello World");
             put("2", "It's sunny today");
