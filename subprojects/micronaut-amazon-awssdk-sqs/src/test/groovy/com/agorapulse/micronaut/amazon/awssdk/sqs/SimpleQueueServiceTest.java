@@ -24,7 +24,6 @@ import software.amazon.awssdk.services.sqs.model.Message;
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -121,7 +120,7 @@ public class SimpleQueueServiceTest {
         assertEquals(3, msgsIds.size());
 
         List<Message> messages = service.receiveMessages(3);
-        assertEquals(3, messages.size());// <2>
+        assertEquals(3, messages.size()); // <2>
         Message first = messages.get(0);
         Message second = messages.get(1);
         Message third = messages.get(2);
