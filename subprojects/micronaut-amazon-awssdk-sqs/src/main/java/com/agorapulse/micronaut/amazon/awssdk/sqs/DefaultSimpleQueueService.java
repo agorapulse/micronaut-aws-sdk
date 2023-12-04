@@ -291,6 +291,67 @@ public class DefaultSimpleQueueService implements SimpleQueueService {
         return messageId;
     }
 
+    /**
+     *
+     * @param queueName the name of the queue
+     * @param messagesList the list of the messages bodies with their  Ids
+     * @param delaySeconds the delay in seconds
+     * @param groupIds list of group ids with messages Ids for FIFO queues
+     * @return
+     */
+    public List<String> sendMessages(String queueName, Map<String, String> messagesList, int delaySeconds, Map<String, String> groupIds) {
+        String queueUrl = getQueueUrl(queueName);
+
+        SendMessageBatchRequest.Builder request = SendMessageBatchRequest.builder().queueUrl(queueUrl);
+        List<SendMessageBatchRequestEntry> entries = new ArrayList<>();
+        for (Map.Entry<String, String> messageBody : messagesList.entrySet()) {
+            SendMessageBatchRequestEntry.Builder entry = SendMessageBatchRequestEntry.builder()
+                .id(messageBody.getKey())
+                .messageBody(messageBody.getValue());
+            if (delaySeconds > 0) {
+                entry.delaySeconds(delaySeconds);
+            }
+            if (groupIds != null && groupIds.containsKey(messageBody.getKey())) {
+                entry.messageGroupId(groupIds.get(messageBody.getKey()));
+            }
+           entries.add(entry.build());
+        }
+
+        request.entries(entries);
+
+        List<String> messagesIds = client.sendMessageBatch(request.build()).successful().stream()
+            .map(SendMessageBatchResultEntry::messageId).collect(Collectors.toList());
+        LOGGER.debug("Messages sent (messagesIds={})", messagesIds);
+        return messagesIds;
+    }
+
+    /**
+     * @param queueName
+     * @param messagesList
+     * @return
+     */
+    public List<String> sendMessages(String queueName, Map<String, String> messagesList, Consumer<SendMessageBatchRequest.Builder> messageConfiguration) {
+        String queueUrl = getQueueUrl(queueName);
+
+        SendMessageBatchRequest.Builder request = SendMessageBatchRequest.builder().queueUrl(queueUrl);
+        List<SendMessageBatchRequestEntry> entries = new ArrayList<>();
+        for (Map.Entry<String, String> messageBody : messagesList.entrySet()) {
+            SendMessageBatchRequestEntry.Builder entry = SendMessageBatchRequestEntry.builder()
+                .id(messageBody.getKey())
+                .messageBody(messageBody.getValue());
+            entries.add(entry.build());
+        }
+
+        request.entries(entries);
+
+        messageConfiguration.accept(request);
+
+        List<String> messagesIds = client.sendMessageBatch(request.build()).successful().stream()
+            .map(SendMessageBatchResultEntry::messageId).collect(Collectors.toList());
+        LOGGER.debug("Messages sent (messagesIds={})", messagesIds);
+        return messagesIds;
+    }
+
     void assertDefaultQueueName() {
         if (StringUtils.isEmpty(configuration.getQueue())) {
             throw new IllegalStateException("Queue not configured");

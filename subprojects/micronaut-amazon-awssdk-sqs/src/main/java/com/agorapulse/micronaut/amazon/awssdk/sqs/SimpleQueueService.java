@@ -19,6 +19,7 @@ package com.agorapulse.micronaut.amazon.awssdk.sqs;
 
 import software.amazon.awssdk.services.sqs.model.Message;
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
+import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 
 import java.util.List;
@@ -288,4 +289,84 @@ public interface SimpleQueueService {
      * @return message id
      */
     String sendMessage(String queueName, String messageBody, Consumer<SendMessageRequest.Builder> messageConfiguration);
+
+    /**
+     * Send list of messages immediately
+     * @param queueName the name of the queue
+     * @param messagesList the list of the messages bodies
+     * @return the message id of the message sent
+     */
+    default List<String> sendMessages(String queueName, Map<String, String> messagesList) {
+        return sendMessages(queueName, messagesList, 0);
+    }
+
+    /**
+     * Send list of messages with given delay.
+     * @param queueName the name of the queue
+     * @param messagesList the list of the messages bodies with their  Ids
+     * @param delaySeconds the delay in seconds
+     * @param groupIds list of group ids with messages Ids for FIFO queues
+     * @return the message id of the message sent
+     */
+    List<String> sendMessages(String queueName, Map<String, String> messagesList, int delaySeconds, Map<String, String> groupIds);
+
+    /**
+     * Send list of messages with given delay.
+     * @param queueName the name of the queue
+     * @param messagesList the bodies of the messages with their Ids
+     * @param delaySeconds the delay in seconds
+     * @return the message id of the message sent
+     */
+    default List<String> sendMessages(String queueName, Map<String, String> messagesList, int delaySeconds) {
+        return sendMessages(queueName, messagesList, delaySeconds, null);
+    }
+
+    /**
+     * Send list of messages in default queue immediately
+     * @param messagesList the bodies of the messages with their Ids
+     * @return the message id of the message sent
+     */
+    default List<String> sendMessages(Map<String, String> messagesList) {
+        return sendMessages(getDefaultQueueName(), messagesList);
+    }
+
+    /**
+     * Send message in the default queue with given delay.
+     * @param messagesList the bodies of the messages with their Ids
+     * @param delaySeconds the delay in seconds
+     * @return the message id of the message sent
+     */
+    default List<String> sendMessages(Map<String, String> messagesList, int delaySeconds) {
+        return sendMessages(getDefaultQueueName(), messagesList, delaySeconds);
+    }
+
+    /**
+     * Send message with given delay.
+     * @param messagesList the bodies of the messages with their Ids
+     * @param delaySeconds the delay in seconds
+     * @param groupIds list of group ids with messages Ids for FIFO queues
+     * @return the message id of the message sent
+     */
+    default List<String> sendMessages(Map<String, String> messagesList, int delaySeconds, Map<String, String> groupIds) {
+        return sendMessages(getDefaultQueueName(), messagesList, delaySeconds, groupIds);
+    }
+
+    /**
+     * Sends message with additional configuration into the default queue.
+     * @param messagesList the bodies of the messages with their Ids
+     * @param messageConfiguration additional configuration
+     * @return message id
+     */
+    default List<String> sendMessages(Map<String, String> messagesList, Consumer<SendMessageBatchRequest.Builder> messageConfiguration) {
+        return sendMessages(getDefaultQueueName(), messagesList, messageConfiguration);
+    }
+
+    /**
+     * Sends message with additional configuration into the given queue.
+     * @param queueName name of the queue
+     * @param messagesList the bodies of the messages with their Ids
+     * @param messageConfiguration additional configuration
+     * @return message id
+     */
+    List<String> sendMessages(String queueName, Map<String, String> messagesList, Consumer<SendMessageBatchRequest.Builder> messageConfiguration);
 }

@@ -26,6 +26,9 @@ import groovy.transform.stc.FromString;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import space.jasan.support.groovy.closure.ConsumerWithDelegate;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Amazon SQS services
  *
@@ -69,4 +72,39 @@ public class SimpleQueueServiceExtensions {
         return self.sendMessage(queueName, messageBody, ConsumerWithDelegate.create(messageConfiguration));
     }
 
+    /**
+     * Sends messages with additional configuration into the default queue.
+     *
+     * @param messagesList          the list of the messages bodies with their  Ids
+     * @param messageConfiguration additional configuration
+     * @return message id
+     */
+    public static List<String> sendMessages(
+        SimpleQueueService self,
+        Map<String, String> messagesList,
+        @DelegatesTo(value = SendMessageRequest.Builder.class, strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.sqs.model.SendMessageRequest.Builder")
+        Closure<?> messageConfiguration
+    ) {
+        return self.sendMessages(self.getDefaultQueueName(), messagesList, ConsumerWithDelegate.create(messageConfiguration));
+    }
+
+    /**
+     * Sends messages with additional configuration into the given queue.
+     *
+     * @param queueName            name of the queue
+     * @param messagesList          the list of the messages bodies with their  Ids
+     * @param messageConfiguration additional configuration
+     * @return message id
+     */
+    public static List<String>  sendMessages(
+        SimpleQueueService self,
+        String queueName,
+        Map<String, String> messagesList,
+        @DelegatesTo(value = SendMessageRequest.Builder.class, strategy = Closure.DELEGATE_FIRST)
+        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.sqs.model.SendMessageRequest.Builder")
+        Closure<?> messageConfiguration
+    ) {
+        return self.sendMessages(queueName, messagesList, ConsumerWithDelegate.create(messageConfiguration));
+    }
 }
