@@ -298,17 +298,17 @@ public class DefaultSimpleQueueService implements SimpleQueueService {
     /**
      *
      * @param queueName the name of the queue
-     * @param messagesList the list of the messages bodies with their  Ids
+     * @param messagesByIds the list of the messages bodies with their  Ids
      * @param delaySeconds the delay in seconds
      * @param groupIds list of group ids with messages Ids for FIFO queues
      * @return
      */
-    public List<String> sendMessages(String queueName, Map<String, String> messagesList, int delaySeconds, Map<String, String> groupIds) {
+    public List<String> sendMessages(String queueName, Map<String, String> messagesByIds, int delaySeconds, Map<String, String> groupIds) {
         String queueUrl = getQueueUrl(queueName);
 
         SendMessageBatchRequest.Builder request = SendMessageBatchRequest.builder().queueUrl(queueUrl);
         List<SendMessageBatchRequestEntry> entries = new ArrayList<>();
-        for (Map.Entry<String, String> messageBody : messagesList.entrySet()) {
+        for (Map.Entry<String, String> messageBody : messagesByIds.entrySet()) {
             SendMessageBatchRequestEntry.Builder entry = SendMessageBatchRequestEntry.builder()
                 .id(messageBody.getKey())
                 .messageBody(messageBody.getValue());
@@ -331,15 +331,15 @@ public class DefaultSimpleQueueService implements SimpleQueueService {
 
     /**
      * @param queueName
-     * @param messagesList
+     * @param messagesByIds
      * @return
      */
-    public List<String> sendMessages(String queueName, Map<String, String> messagesList, Consumer<SendMessageBatchRequest.Builder> messageConfiguration) {
+    public List<String> sendMessages(String queueName, Map<String, String> messagesByIds, Consumer<SendMessageBatchRequest.Builder> messageConfiguration) {
         String queueUrl = getQueueUrl(queueName);
 
         SendMessageBatchRequest.Builder request = SendMessageBatchRequest.builder().queueUrl(queueUrl);
         List<SendMessageBatchRequestEntry> entries = new ArrayList<>();
-        for (Map.Entry<String, String> messageBody : messagesList.entrySet()) {
+        for (Map.Entry<String, String> messageBody : messagesByIds.entrySet()) {
             SendMessageBatchRequestEntry.Builder entry = SendMessageBatchRequestEntry.builder()
                 .id(messageBody.getKey())
                 .messageBody(messageBody.getValue());

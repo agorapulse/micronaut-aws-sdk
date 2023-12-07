@@ -18,9 +18,11 @@
 package com.agorapulse.micronaut.amazon.awssdk.sqs;
 
 import com.agorapulse.micronaut.amazon.awssdk.core.util.ConfigurationUtil;
+import com.agorapulse.micronaut.amazon.awssdk.sqs.annotation.Batch;
 import com.agorapulse.micronaut.amazon.awssdk.sqs.annotation.Queue;
 import com.agorapulse.micronaut.amazon.awssdk.sqs.annotation.QueueClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
@@ -34,6 +36,7 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException;
 
 import javax.inject.Singleton;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -43,10 +46,12 @@ import java.util.function.Function;
 public class QueueClientIntroduction implements MethodInterceptor<Object, Object> {
 
     private static final String GROUP = "group";
+    private static final String GROUPS = "groups";
     private static final String DELAY = "delay";
 
     private static final Function<String, Optional<String>> EMPTY_IF_UNDEFINED = (String s) -> StringUtils.isEmpty(s) ? Optional.empty() : Optional.of(s);
     private static final Function<Integer, Optional<Integer>> EMPTY_IF_ZERO = (Integer i) -> i == 0 ? Optional.empty() : Optional.of(i);
+    ObjectMapper mapper = new ObjectMapper();
 
     private static class QueueArguments {
         Argument<?> message;
@@ -55,6 +60,17 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
 
         boolean isValid() {
             return message != null;
+        }
+
+    }
+
+    private static class BatchArguments {
+        Argument<?> messages;
+        Argument<?> delay;
+        Argument<?> groups;
+
+        boolean isValid() {
+            return messages != null;
         }
 
     }
@@ -87,7 +103,13 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
 
         AnnotationValue<Queue> queueAnnotationValue = context.getAnnotation(Queue.class);
 
-        if (queueAnnotationValue != null) {
+        AnnotationValue<Batch> batchAnnotationValue = context.getAnnotation(Batch.class);
+
+        if (batchAnnotationValue != null) {
+            queueName = batchAnnotationValue.getRequiredValue(String.class);
+            group = batchAnnotationValue.get(QueueClient.Constants.GROUP, String.class).flatMap(EMPTY_IF_UNDEFINED).orElse(group);
+            delay = batchAnnotationValue.get(QueueClient.Constants.DELAY, Integer.class).flatMap(EMPTY_IF_ZERO).orElse(delay);
+        } else if (queueAnnotationValue != null) {
             queueName = queueAnnotationValue.getRequiredValue(String.class);
             group = queueAnnotationValue.get(QueueClient.Constants.GROUP, String.class).flatMap(EMPTY_IF_UNDEFINED).orElse(group);
             delay = queueAnnotationValue.get(QueueClient.Constants.DELAY, Integer.class).flatMap(EMPTY_IF_ZERO).orElse(delay);
@@ -98,7 +120,11 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
         }
 
         try {
-            return doIntercept(context, service, queueName, group, delay);
+            if (batchAnnotationValue != null) {
+                return doInterceptBatch(context, service, queueName, delay);
+            }else {
+                return doIntercept(context, service, queueName, group, delay);
+            }
         } catch (QueueDoesNotExistException ignored) {
             service.createQueue(queueName);
             return doIntercept(context, service, queueName, group, delay);
@@ -145,6 +171,46 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
         throw new UnsupportedOperationException("Cannot implement method " + context.getExecutableMethod());
     }
 
+    private Object doInterceptBatch(MethodInvocationContext<Object, Object> context, SimpleQueueService service, String queueName, Integer delay) {
+        Argument[] arguments = context.getArguments();
+        Map<String, String> groups = new HashMap<>();
+        Map<String, String> messages = new HashMap<>();
+        Map<String, Object> params = context.getParameterValueMap();
+
+        if (arguments.length == 1 && context.getMethodName().startsWith("delete")) {
+            service.deleteMessage(queueName, String.valueOf(params.get(arguments[0].getName())));
+            return null;
+        }
+
+        if (arguments.length >= 1 && arguments.length <= 3) {
+            BatchArguments batchArguments = findBatchArguments(arguments);
+
+
+            if (batchArguments.delay != null) {
+                Object delayParameter = params.get(batchArguments.delay.getName());
+                delay = ((Number)delayParameter).intValue();
+            }
+
+            if (batchArguments.groups != null) {
+                Object groupParameter = params.get(batchArguments.groups.getName());
+                groups = objectMapper.convertValue(groupParameter, new TypeReference<Map<String, String>>() {});
+            } else {
+                groups = null;
+            }
+
+            Object messagesparameter = params.get(batchArguments.messages.getName());
+
+            if (messagesparameter instanceof Map<?,?>) {
+                messages = mapper.convertValue(messagesparameter, new TypeReference<Map<String, String>>() {});
+                return service.sendMessages(queueName, messages, delay, groups);
+            }
+
+            return sendJson(service, queueName, messagesparameter, delay, null);
+        }
+
+        throw new UnsupportedOperationException("Cannot implement method " + context.getExecutableMethod());
+    }
+
     private String sendJson(SimpleQueueService service, String queueName, Object message, int delay, String group) {
         try {
             return service.sendMessage(queueName, objectMapper.writeValueAsString(message), delay, group);
@@ -170,6 +236,28 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
 
         if (!names.isValid()) {
             throw new UnsupportedOperationException("Method needs to have at least one argument which name does not contain group or delay");
+        }
+
+        return names;
+    }
+
+    private BatchArguments findBatchArguments(Argument[] arguments) {
+        BatchArguments names = new BatchArguments();
+
+        for (Argument<?> argument : arguments) {
+            if (argument.getName().toLowerCase().contains(GROUPS)) {
+                names.groups = argument;
+                continue;
+            }
+            if (argument.getName().toLowerCase().contains(DELAY) || Number.class.isAssignableFrom(argument.getType())) {
+                names.delay = argument;
+                continue;
+            }
+            names.messages = argument;
+        }
+
+        if (!names.isValid()) {
+            throw new UnsupportedOperationException("Method needs to have at least one argument which name does not contain groups or delay containing a map of messages by their Ids");
         }
 
         return names;

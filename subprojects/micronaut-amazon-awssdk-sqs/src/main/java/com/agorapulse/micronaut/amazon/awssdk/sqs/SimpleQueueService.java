@@ -293,80 +293,80 @@ public interface SimpleQueueService {
     /**
      * Send list of messages immediately
      * @param queueName the name of the queue
-     * @param messagesList the list of the messages bodies
+     * @param messagesByIds the list of the messages bodies
      * @return the message id of the message sent
      */
-    default List<String> sendMessages(String queueName, Map<String, String> messagesList) {
-        return sendMessages(queueName, messagesList, 0);
+    default List<String> sendMessages(String queueName, Map<String, String> messagesByIds) {
+        return sendMessages(queueName, messagesByIds, 0);
     }
 
     /**
      * Send list of messages with given delay.
      * @param queueName the name of the queue
-     * @param messagesList the list of the messages bodies with their  Ids
+     * @param messagesByIds the list of the messages bodies with their  Ids
      * @param delaySeconds the delay in seconds
      * @param groupIds list of group ids with messages Ids for FIFO queues
      * @return the message id of the message sent
      */
-    List<String> sendMessages(String queueName, Map<String, String> messagesList, int delaySeconds, Map<String, String> groupIds);
+    List<String> sendMessages(String queueName, Map<String, String> messagesByIds, int delaySeconds, Map<String, String> groupIds);
 
     /**
      * Send list of messages with given delay.
      * @param queueName the name of the queue
-     * @param messagesList the bodies of the messages with their Ids
+     * @param messagesByIds the bodies of the messages with their Ids
      * @param delaySeconds the delay in seconds
      * @return the message id of the message sent
      */
-    default List<String> sendMessages(String queueName, Map<String, String> messagesList, int delaySeconds) {
-        return sendMessages(queueName, messagesList, delaySeconds, null);
+    default List<String> sendMessages(String queueName, Map<String, String> messagesByIds, int delaySeconds) {
+        return sendMessages(queueName, messagesByIds, delaySeconds, null);
     }
 
     /**
      * Send list of messages in default queue immediately
-     * @param messagesList the bodies of the messages with their Ids
+     * @param messagesByIds the bodies of the messages with their Ids
      * @return the message id of the message sent
      */
-    default List<String> sendMessages(Map<String, String> messagesList) {
-        return sendMessages(getDefaultQueueName(), messagesList);
+    default List<String> sendMessages(Map<String, String> messagesByIds) {
+        return sendMessages(getDefaultQueueName(), messagesByIds);
     }
 
     /**
      * Send message in the default queue with given delay.
-     * @param messagesList the bodies of the messages with their Ids
+     * @param messagesByIds the bodies of the messages with their Ids
      * @param delaySeconds the delay in seconds
      * @return the message id of the message sent
      */
-    default List<String> sendMessages(Map<String, String> messagesList, int delaySeconds) {
-        return sendMessages(getDefaultQueueName(), messagesList, delaySeconds);
+    default List<String> sendMessages(Map<String, String> messagesByIds, int delaySeconds) {
+        return sendMessages(getDefaultQueueName(), messagesByIds, delaySeconds);
     }
 
     /**
      * Send message with given delay.
-     * @param messagesList the bodies of the messages with their Ids
+     * @param messagesByIds the bodies of the messages with their Ids
      * @param delaySeconds the delay in seconds
      * @param groupIds list of group ids with messages Ids for FIFO queues
      * @return the message id of the message sent
      */
-    default List<String> sendMessages(Map<String, String> messagesList, int delaySeconds, Map<String, String> groupIds) {
-        return sendMessages(getDefaultQueueName(), messagesList, delaySeconds, groupIds);
+    default List<String> sendMessages(Map<String, String> messagesByIds, int delaySeconds, Map<String, String> groupIds) {
+        return sendMessages(getDefaultQueueName(), messagesByIds, delaySeconds, groupIds);
     }
 
     /**
      * Sends message with additional configuration into the default queue.
-     * @param messagesList the bodies of the messages with their Ids
+     * @param messagesByIds the bodies of the messages with their Ids
      * @param messageConfiguration additional configuration
      * @return message id
      */
-    default List<String> sendMessages(Map<String, String> messagesList, Consumer<SendMessageBatchRequest.Builder> messageConfiguration) {
-        return sendMessages(getDefaultQueueName(), messagesList, messageConfiguration);
+    default List<String> sendMessages(Map<String, String> messagesByIds, Consumer<SendMessageBatchRequest.Builder> messageConfiguration) {
+        return sendMessages(getDefaultQueueName(), messagesByIds, messageConfiguration);
     }
 
     /**
      * Sends message with additional configuration into the given queue.
      * @param queueName name of the queue
-     * @param messagesList the bodies of the messages with their Ids
+     * @param messagesByIds the bodies of the messages with their Ids
      * @param messageConfiguration additional configuration
      * @return message id
      */
-    List<String> sendMessages(String queueName, Map<String, String> messagesList, Consumer<SendMessageBatchRequest.Builder> messageConfiguration);
+    List<String> sendMessages(String queueName, Map<String, String> messagesByIds, Consumer<SendMessageBatchRequest.Builder> messageConfiguration);
 }
