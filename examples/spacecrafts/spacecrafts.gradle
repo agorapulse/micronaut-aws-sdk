@@ -18,10 +18,6 @@
 import com.amazonaws.services.lambda.model.Runtime
 import jp.classmethod.aws.gradle.lambda.AWSLambdaMigrateFunctionTask
 
-config {
-    publishing { enabled = false }
-}
-
 buildscript {
     repositories {
         maven {
@@ -33,8 +29,16 @@ buildscript {
     }
 }
 
+plugins {
+    id 'io.micronaut.minimal.library' version "$micronautGradlePluginVersion"
+}
+
 apply from: '../gradle/lambda.gradle'
 apply plugin: 'jp.classmethod.aws.lambda'
+
+config {
+    publishing { enabled = false }
+}
 
 dependencies {
     implementation project(':micronaut-aws-sdk-dynamodb')

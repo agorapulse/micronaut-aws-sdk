@@ -152,18 +152,20 @@ subprojects { Project subproject ->
     apply plugin: 'groovy'
     apply plugin: 'java-library'
 
-    dependencies {
-        annotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
-        api platform(project(':micronaut-aws-sdk-dependencies'))
+    micronaut {
+        importMicronautPlatorm = true
+        testRuntime 'spock'
+    }
 
-        annotationProcessor 'io.micronaut:micronaut-inject-java'
+    dependencies {
+        api platform(project(':micronaut-aws-sdk-dependencies'))
 
         // Groovy
         if (subproject.name.startsWith('micronaut-amazon-awssdk')) {
-            compileOnly "org.codehaus.groovy:groovy:$groovyVersion"
-            testImplementation "org.codehaus.groovy:groovy:$groovyVersion"
+            compileOnly "org.apache.groovy:groovy:$groovyVersion"
+            testImplementation "org.apace.groovy:groovy:$groovyVersion"
         } else {
-            implementation "org.codehaus.groovy:groovy:$groovyVersion"
+            implementation "org.apache.groovy:groovy:$groovyVersion"
             implementation micronautMigratedDependency('micronaut-runtime-groovy')
             compileOnly 'io.micronaut:micronaut-inject-groovy'
         }
@@ -172,22 +174,13 @@ subprojects { Project subproject ->
         implementation 'io.micronaut:micronaut-runtime'
 
 
-        compileOnly 'io.micronaut:micronaut-inject-java'
-
-        testAnnotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
         testAnnotationProcessor 'io.micronaut:micronaut-inject-java'
 
-        testImplementation platform("io.micronaut:micronaut-bom:$micronautVersion")
         testImplementation 'io.micronaut:micronaut-inject-groovy'
 
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
         testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 
-        testImplementation("org.spockframework:spock-core:$spockVersion") {
-            exclude group: 'org.codehaus.groovy', module: 'groovy-all'
-        }
-        testImplementation 'cglib:cglib-nodep:3.2.0'
-        testImplementation 'org.objenesis:objenesis:1.2'
 
         testCompileOnly 'com.agorapulse:remember:0.4.2'
 

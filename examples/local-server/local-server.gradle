@@ -15,8 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-apply plugin: "application"
-apply plugin: "com.github.johnrengelman.shadow"
+plugins {
+    id 'io.micronaut.minimal.application' version "$micronautGradlePluginVersion"
+}
 
 config {
     publishing { enabled = false }
@@ -34,13 +35,5 @@ dependencies {
     testImplementation "com.agorapulse:gru-http:$gruVersion"
 }
 
-
-shadowJar {
-    mergeServiceFiles()
-}
-
-runShadow {
-    systemProperties 'micronaut.environments': 'dev'
-}
 
 mainClassName = "com.agorapulse.micronaut.http.examples.Application"
