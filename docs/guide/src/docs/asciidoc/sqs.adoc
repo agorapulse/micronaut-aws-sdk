@@ -92,6 +92,8 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-sqs/src/test/groovy/com/
 <7> You can publish a string with custom FIFO queue group
 <8> You can publish a string with custom delay and FIFO queue group
 <9> You can delete published message using the message ID if the
+<10> You can specify the messages argument as a batch using `@Batch` annotation - the batch must be a map of message id to message body that can be of any type
+<11>> You can specify the mapping of the messages to the groups by specifying the `groups` argument of type `Map<String, String>` - the map must be a map of message id to group name
 
 [source,java,indent=0,options="nowrap",role="secondary"]
 .Publishing String Records (AWS SDK 1.x)
