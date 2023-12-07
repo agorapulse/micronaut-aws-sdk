@@ -200,7 +200,7 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
 
             Object messagesparameter = params.get(batchArguments.messages.getName());
 
-            if (messagesparameter instanceof Map<?,?>) {
+            if (messagesparameter instanceof Map<?, ?>) {
                 messages = mapper.convertValue(messagesparameter, new TypeReference<Map<String, String>>() {});
                 return service.sendMessages(queueName, messages, delay, groups);
             }
