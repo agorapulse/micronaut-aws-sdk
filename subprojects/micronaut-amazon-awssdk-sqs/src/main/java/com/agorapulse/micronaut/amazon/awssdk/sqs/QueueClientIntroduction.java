@@ -22,13 +22,13 @@ import com.agorapulse.micronaut.amazon.awssdk.sqs.annotation.Batch;
 import com.agorapulse.micronaut.amazon.awssdk.sqs.annotation.Queue;
 import com.agorapulse.micronaut.amazon.awssdk.sqs.annotation.QueueClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.context.BeanContext;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.annotation.AnnotationValue;
+import io.micronaut.core.convert.ConversionService;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.qualifiers.Qualifiers;
@@ -54,23 +54,15 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
     ObjectMapper mapper = new ObjectMapper();
 
     private static class QueueArguments {
+
         Argument<?> message;
         Argument<?> delay;
         Argument<?> group;
 
-        boolean isValid() {
-            return message != null;
-        }
-
-    }
-
-    private static class BatchArguments {
-        Argument<?> messages;
-        Argument<?> delay;
         Argument<?> groups;
 
         boolean isValid() {
-            return messages != null;
+            return message != null;
         }
 
     }
@@ -103,13 +95,7 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
 
         AnnotationValue<Queue> queueAnnotationValue = context.getAnnotation(Queue.class);
 
-        AnnotationValue<Batch> batchAnnotationValue = context.getAnnotation(Batch.class);
-
-        if (batchAnnotationValue != null) {
-            queueName = batchAnnotationValue.getRequiredValue(String.class);
-            group = batchAnnotationValue.get(QueueClient.Constants.GROUP, String.class).flatMap(EMPTY_IF_UNDEFINED).orElse(group);
-            delay = batchAnnotationValue.get(QueueClient.Constants.DELAY, Integer.class).flatMap(EMPTY_IF_ZERO).orElse(delay);
-        } else if (queueAnnotationValue != null) {
+        if (queueAnnotationValue != null) {
             queueName = queueAnnotationValue.getRequiredValue(String.class);
             group = queueAnnotationValue.get(QueueClient.Constants.GROUP, String.class).flatMap(EMPTY_IF_UNDEFINED).orElse(group);
             delay = queueAnnotationValue.get(QueueClient.Constants.DELAY, Integer.class).flatMap(EMPTY_IF_ZERO).orElse(delay);
@@ -120,11 +106,7 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
         }
 
         try {
-            if (batchAnnotationValue != null) {
-                return doInterceptBatch(context, service, queueName, delay);
-            }else {
-                return doIntercept(context, service, queueName, group, delay);
-            }
+            return doIntercept(context, service, queueName, group, delay);
         } catch (QueueDoesNotExistException ignored) {
             service.createQueue(queueName);
             return doIntercept(context, service, queueName, group, delay);
@@ -142,16 +124,21 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
 
         if (arguments.length >= 1 && arguments.length <= 3) {
             QueueArguments queueArguments = findArguments(arguments);
-
+            Map<String, String> groups = new HashMap<>();
 
             if (queueArguments.delay != null) {
                 Object delayParameter = params.get(queueArguments.delay.getName());
-                delay = ((Number)delayParameter).intValue();
+                delay = ((Number) delayParameter).intValue();
             }
 
             if (queueArguments.group != null) {
                 Object groupParameter = params.get(queueArguments.group.getName());
                 group = String.valueOf(groupParameter);
+            }
+
+            if (queueArguments.groups != null) {
+                Object groupsParameter = params.get(queueArguments.groups.getName());
+                groups = ConversionService.SHARED.convert(groupsParameter, Argument.mapOf(String.class, String.class)).orElseGet(HashMap::new);
             }
 
             Object message = params.get(queueArguments.message.getName());
@@ -165,50 +152,30 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
                 return service.sendMessage(queueName, new String((byte[]) message), delay, group);
             }
 
+            if (Map.class.isAssignableFrom(messageType) && queueArguments.message.isAnnotationPresent(Batch.class)) {
+                return sendBatch(service, queueName, message, queueArguments.message.getTypeParameters()[1], delay, groups);
+            }
+
             return sendJson(service, queueName, message, delay, group);
         }
 
         throw new UnsupportedOperationException("Cannot implement method " + context.getExecutableMethod());
     }
 
-    private Object doInterceptBatch(MethodInvocationContext<Object, Object> context, SimpleQueueService service, String queueName, Integer delay) {
-        Argument[] arguments = context.getArguments();
-        Map<String, String> groups = new HashMap<>();
-        Map<String, String> messages = new HashMap<>();
-        Map<String, Object> params = context.getParameterValueMap();
-
-        if (arguments.length == 1 && context.getMethodName().startsWith("delete")) {
-            service.deleteMessage(queueName, String.valueOf(params.get(arguments[0].getName())));
-            return null;
+    @SuppressWarnings("unchecked")
+    private Object sendBatch(SimpleQueueService service, String queueName, Object messagesByIds, Argument<?> messagesByIdsArgument, Integer delay, Map<String, String> groups) {
+        if (messagesByIdsArgument.equalsType(Argument.STRING)) {
+            return service.sendMessages(queueName, (Map<String, String>) messagesByIds, delay, groups);
         }
-
-        if (arguments.length >= 1 && arguments.length <= 3) {
-            BatchArguments batchArguments = findBatchArguments(arguments);
-
-
-            if (batchArguments.delay != null) {
-                Object delayParameter = params.get(batchArguments.delay.getName());
-                delay = ((Number)delayParameter).intValue();
-            }
-
-            if (batchArguments.groups != null) {
-                Object groupParameter = params.get(batchArguments.groups.getName());
-                groups = objectMapper.convertValue(groupParameter, new TypeReference<Map<String, String>>() {});
-            } else {
-                groups = null;
-            }
-
-            Object messagesparameter = params.get(batchArguments.messages.getName());
-
-            if (messagesparameter instanceof Map<?, ?>) {
-                messages = mapper.convertValue(messagesparameter, new TypeReference<Map<String, String>>() {});
-                return service.sendMessages(queueName, messages, delay, groups);
-            }
-
-            return sendJson(service, queueName, messagesparameter, delay, null);
-        }
-
-        throw new UnsupportedOperationException("Cannot implement method " + context.getExecutableMethod());
+        Map<String, String> converted = ((Map<String, Object>) messagesByIds).entrySet().stream()
+            .collect(HashMap::new, (m, e) -> {
+                try {
+                    m.put(e.getKey(), objectMapper.writeValueAsString(e.getValue()));
+                } catch (JsonProcessingException ex) {
+                    throw new IllegalArgumentException("Cannot convert value " + e.getValue() + " to JSON");
+                }
+            }, HashMap::putAll);
+        return service.sendMessages(queueName, converted, delay, groups);
     }
 
     private String sendJson(SimpleQueueService service, String queueName, Object message, int delay, String group) {
@@ -223,14 +190,19 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
         QueueArguments names = new QueueArguments();
 
         for (Argument<?> argument : arguments) {
-            if (argument.getName().toLowerCase().contains(GROUP)) {
+            if (argument.getName().toLowerCase().contains(GROUPS)) {
+                names.groups = argument;
+                continue;
+            } else if (argument.getName().toLowerCase().contains(GROUP)) {
                 names.group = argument;
                 continue;
             }
+
             if (argument.getName().toLowerCase().contains(DELAY) || Number.class.isAssignableFrom(argument.getType())) {
                 names.delay = argument;
                 continue;
             }
+
             names.message = argument;
         }
 
@@ -241,25 +213,4 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
         return names;
     }
 
-    private BatchArguments findBatchArguments(Argument[] arguments) {
-        BatchArguments names = new BatchArguments();
-
-        for (Argument<?> argument : arguments) {
-            if (argument.getName().toLowerCase().contains(GROUPS)) {
-                names.groups = argument;
-                continue;
-            }
-            if (argument.getName().toLowerCase().contains(DELAY) || Number.class.isAssignableFrom(argument.getType())) {
-                names.delay = argument;
-                continue;
-            }
-            names.messages = argument;
-        }
-
-        if (!names.isValid()) {
-            throw new UnsupportedOperationException("Method needs to have at least one argument which name does not contain groups or delay containing a map of messages by their Ids");
-        }
-
-        return names;
-    }
 }

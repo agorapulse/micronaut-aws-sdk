@@ -83,7 +83,7 @@ public class SimpleQueueServiceExtensions {
         SimpleQueueService self,
         Map<String, String> messagesList,
         @DelegatesTo(value = SendMessageRequest.Builder.class, strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.sqs.model.SendMessageRequest.Builder")
+        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.sqs.model.SendMessageBatchRequest")
         Closure<?> messageConfiguration
     ) {
         return self.sendMessages(self.getDefaultQueueName(), messagesList, ConsumerWithDelegate.create(messageConfiguration));
@@ -102,7 +102,7 @@ public class SimpleQueueServiceExtensions {
         String queueName,
         Map<String, String> messagesList,
         @DelegatesTo(value = SendMessageRequest.Builder.class, strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.sqs.model.SendMessageRequest.Builder")
+        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.sqs.model.SendMessageBatchRequest")
         Closure<?> messageConfiguration
     ) {
         return self.sendMessages(queueName, messagesList, ConsumerWithDelegate.create(messageConfiguration));

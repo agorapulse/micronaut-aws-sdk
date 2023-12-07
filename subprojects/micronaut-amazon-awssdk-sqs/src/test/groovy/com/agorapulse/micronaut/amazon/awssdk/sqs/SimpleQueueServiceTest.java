@@ -97,24 +97,21 @@ public class SimpleQueueServiceTest {
 
     @Test
     public void testBatchMessagesWithQueue() {
-        // tag::new-queue[]
-        String queueUrl = service.createQueue(TEST_QUEUE);                              // <1>
+        String queueUrl = service.createQueue(TEST_QUEUE);
 
-        assertTrue(service.listQueueUrls().contains(queueUrl));                         // <2>
-        // end::new-queue[]
+        assertTrue(service.listQueueUrls().contains(queueUrl));
 
         assertNotNull(queueUrl);
 
-        // tag::describe-queue[]
         Map<QueueAttributeName, String> queueAttributes = service
-            .getQueueAttributes(TEST_QUEUE);                                            // <1>
+            .getQueueAttributes(TEST_QUEUE);
 
         assertEquals("0", queueAttributes
-            .get(QueueAttributeName.DELAY_SECONDS));                                    // <2>
-        // end::describe-queue[]
+            .get(QueueAttributeName.DELAY_SECONDS));
 
-        // tag::messages[]
+        // tag::send-messages[]
         List<String> msgsIds = service.sendMessages(DATA_BATCH);                                       // <1>
+        // end::send-messages[]
 
         assertNotNull(msgsIds);
         assertEquals(3, msgsIds.size());
@@ -125,28 +122,25 @@ public class SimpleQueueServiceTest {
         Message second = messages.get(1);
         Message third = messages.get(2);
 
-        assertEquals(DATA_BATCH.get("1"), first.body());                                               // <3>
+        assertEquals(DATA_BATCH.get("1"), first.body());
         assertEquals(msgsIds.get(0), first.messageId());
         service.deleteMessage(first.receiptHandle());
 
-        assertEquals(DATA_BATCH.get("2"), second.body());                                               // <3>
+        assertEquals(DATA_BATCH.get("2"), second.body());
         assertEquals(msgsIds.get(1), second.messageId());
         service.deleteMessage(second.receiptHandle());
 
-        assertEquals(DATA_BATCH.get("3"), third.body());                                               // <3>
+        assertEquals(DATA_BATCH.get("3"), third.body());
         assertEquals(msgsIds.get(2), third.messageId());
         service.deleteMessage(third.receiptHandle());
-        // end::messages[]
 
         List<Message> nextMessages = service.receiveMessages();
 
         assertEquals(0, nextMessages.size());
 
-        // tag::delete-queue[]
-        service.deleteQueue(TEST_QUEUE);                                                // <1>
+        service.deleteQueue(TEST_QUEUE);
 
-        assertFalse(service.listQueueUrls().contains(queueUrl));                        // <2>
-        // end::delete-queue[]
+        assertFalse(service.listQueueUrls().contains(queueUrl));
     }
 
 }

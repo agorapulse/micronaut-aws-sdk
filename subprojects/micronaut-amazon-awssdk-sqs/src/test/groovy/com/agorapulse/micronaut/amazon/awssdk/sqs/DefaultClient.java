@@ -17,8 +17,11 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.sqs;
 
+import com.agorapulse.micronaut.amazon.awssdk.sqs.annotation.Batch;
 import com.agorapulse.micronaut.amazon.awssdk.sqs.annotation.Queue;
 import com.agorapulse.micronaut.amazon.awssdk.sqs.annotation.QueueClient;
+
+import java.util.Map;
 
 @QueueClient                                                                            // <1>
 interface DefaultClient {
@@ -39,6 +42,12 @@ interface DefaultClient {
     String sendMessage(String record, int delay, String group);                         // <8>
 
     void deleteMessage(String messageId);                                               // <9>
+
+    void sendAll(
+        @Batch Map<String, Pogo> messagesById,                                          // <10>
+        int delay,
+        Map<String, String> groups                                                      // <11>
+    );
 
     String OTHER_QUEUE = "OtherQueue";
 }

@@ -175,4 +175,18 @@ class QueueClientSpec extends Specification {
             1 * defaultService.sendMessage(SomeClient.SOME_QUEUE, marshalledPogo, DELAY, null) >> ID
     }
 
+    void 'can send batch'() {
+        given:
+            DefaultClient client = context.getBean(DefaultClient)
+        when:
+            client.sendAll(one: POGO, two: POGO, DELAY, [one: 'first-queue', two: 'second-queue'])
+        then:
+            1 * defaultService.sendMessages(
+                DEFAULT_QUEUE_NAME,
+                [one: marshalledPogo, two: marshalledPogo],
+                DELAY,
+                [one: 'first-queue', two: 'second-queue'],
+            ) >> [ID, ID + 2]
+    }
+
 }

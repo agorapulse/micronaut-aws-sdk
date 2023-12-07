@@ -26,28 +26,13 @@ import java.lang.annotation.Target;
 
 
 /**
- * Declares the name of the queue to publish messages.
+ * Must be used on a parameter of a method annotated with {@link QueueClient} to indicate that the parameter is a batch of messages.
+ *
+ * The parameter must be of type {@link java.util.Map} with string keys and values of any type. If the values are not strings
+ * then the values are converted to JSON using {@link com.fasterxml.jackson.databind.ObjectMapper}.
  */
 @Inherited
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD})
-public @interface Batch {
-
-    /**
-     * @return the name of the queue to publish new messages.
-     */
-    String value();
-
-
-    /**
-     * @return default delay for the messages published
-     */
-    int delay() default 0;
-
-    /**
-     * @return the default message group id for fifo queues
-     */
-    String group() default "";
-
-}
+@Target({ElementType.ANNOTATION_TYPE, ElementType.PARAMETER})
+public @interface Batch { }
