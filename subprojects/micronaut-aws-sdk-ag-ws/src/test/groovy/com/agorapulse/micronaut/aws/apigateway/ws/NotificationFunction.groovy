@@ -21,7 +21,7 @@ import com.amazonaws.AmazonClientException
 import com.amazonaws.services.lambda.runtime.events.SNSEvent
 import groovy.transform.Field
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @Inject @Field MessageSender sender                                                     // <1>
 

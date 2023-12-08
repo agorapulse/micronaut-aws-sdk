@@ -18,10 +18,10 @@
 package com.agorapulse.micronaut.amazon.awssdk.itest.localstack
 
 import io.micronaut.context.annotation.Property
-import io.micronaut.test.annotation.MicronautTest
+import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import spock.lang.Specification
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MicronautTest
 @Property(name = 'localstack.env.DEBUG', value = '1')

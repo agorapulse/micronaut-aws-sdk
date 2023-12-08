@@ -26,7 +26,7 @@ import io.micronaut.context.event.BeanCreatedEventListener;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import software.amazon.awssdk.core.SdkSystemSetting;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.io.Closeable;
 
 @Singleton

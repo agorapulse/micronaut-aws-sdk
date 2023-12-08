@@ -20,7 +20,7 @@ package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker;
 import io.micronaut.context.event.ApplicationEventListener;
 import software.amazon.kinesis.coordinator.WorkerStateChangeListener;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 

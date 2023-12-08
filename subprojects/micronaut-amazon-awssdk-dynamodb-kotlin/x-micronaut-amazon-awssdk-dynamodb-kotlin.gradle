@@ -16,25 +16,21 @@
  * limitations under the License.
  */
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.6.21'
-    id 'org.jetbrains.kotlin.kapt' version '1.6.21'
-    id 'org.jetbrains.kotlin.plugin.allopen' version '1.6.21'
+    id 'org.jetbrains.kotlin.jvm'               version "$kotlinVersion"
+    id 'org.jetbrains.kotlin.plugin.allopen'    version "$kotlinVersion"
+    id 'com.google.devtools.ksp'                version '1.9.21-1.0.15'
 }
-
 
 dependencies {
     api project(':micronaut-amazon-awssdk-dynamodb')
 
-    kapt platform("io.micronaut:micronaut-bom:$micronautVersion")
     api platform(project(':micronaut-aws-sdk-dependencies'))
 
-    kapt 'io.micronaut:micronaut-inject-java'
-    kapt project(':micronaut-amazon-awssdk-dynamodb-annotation-processor')
+    ksp project(':micronaut-amazon-awssdk-dynamodb-annotation-processor')
 
     implementation 'io.micronaut:micronaut-inject'
     implementation 'io.micronaut:micronaut-runtime'
 
-    kaptTest 'io.micronaut:micronaut-inject-java'
     testImplementation 'io.micronaut.test:micronaut-test-junit5'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.1'

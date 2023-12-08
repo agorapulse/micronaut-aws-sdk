@@ -17,12 +17,12 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.kinesis
 
-import io.micronaut.test.annotation.MicronautTest
+import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import software.amazon.awssdk.services.kinesis.model.CreateStreamResponse
 import spock.lang.Retry
 import spock.lang.Specification
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /**
  * Tests for kinesis service.

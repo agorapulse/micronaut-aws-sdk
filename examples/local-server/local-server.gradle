@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 plugins {
-    id 'io.micronaut.minimal.application' version "$micronautGradlePluginVersion"
+    id 'io.micronaut.minimal.application'
 }
 
 config {

@@ -17,7 +17,7 @@
  */
 package com.agorapulse.micronaut.aws;
 
-import javax.annotation.Nullable;
+import io.micronaut.core.annotation.Nullable;
 
 /**
  * Default region and endpoint configuration.

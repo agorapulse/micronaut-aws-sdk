@@ -29,13 +29,13 @@ import com.amazonaws.services.kinesis.model.Shard
 import com.amazonaws.services.kinesis.model.SplitShardResult
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.micronaut.context.annotation.Property
-import io.micronaut.test.annotation.MicronautTest
+import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import reactor.core.publisher.Flux
 import spock.lang.Retry
 import spock.lang.Specification
 import spock.lang.Stepwise
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /**
  * Tests for kinesis service.

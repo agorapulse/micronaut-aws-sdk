@@ -30,7 +30,7 @@ buildscript {
 }
 
 plugins {
-    id 'io.micronaut.minimal.library' version "$micronautGradlePluginVersion"
+    id 'io.micronaut.minimal.library'
 }
 
 apply from: '../gradle/lambda.gradle'

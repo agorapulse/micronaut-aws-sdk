@@ -33,13 +33,11 @@ pluginManagement {
 
 buildscript {
     repositories {
+        mavenCentral()
         gradlePluginPortal()
-        maven {
-            url 'https://agorapulse.jfrog.io/agorapulse/gradle-plugins-releases-local/'
-        }
     }
     dependencies {
-        classpath "com.agorapulse.gradle:internal-maven-publish:$agorapulseGradlePluginsVersion"
+        classpath("io.micronaut.gradle:micronaut-minimal-plugin:$micronautGradlePluginVersion")
     }
 }
 
@@ -51,6 +49,7 @@ plugins {
 
 gradleEnterprise {
     buildScan {
+        publishAlways()
         termsOfServiceUrl = "https://gradle.com/terms-of-service"
         termsOfServiceAgree = "yes"
 
@@ -62,12 +61,11 @@ gradleEnterprise {
 
 
 projects {
-    directories = ['subprojects', 'examples', 'docs', 'benchmarks']
+    directories = ['subprojects', 'examples', 'docs', 'benchmarks', 'platforms']
 
     plugins {
-        dir('subproject') {
+        dir('subprojects') {
             id 'io.micronaut.minimal.library'
-            id 'com.agorapulse.gradle:internal-maven-publish'
         }
     }
 }

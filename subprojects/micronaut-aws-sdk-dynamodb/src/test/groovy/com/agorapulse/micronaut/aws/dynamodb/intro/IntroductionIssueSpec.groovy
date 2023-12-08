@@ -24,7 +24,7 @@ import io.micronaut.context.ApplicationContext
 import spock.lang.AutoCleanup
 import spock.lang.Specification
 
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 
 /**
  * Tests that guarantees that more than one DynamoDB service can be injected into the service which was previously

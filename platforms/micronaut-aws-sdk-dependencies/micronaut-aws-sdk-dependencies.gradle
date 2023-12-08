@@ -24,8 +24,6 @@ javaPlatform {
 }
 
 dependencies {
-    api platform("io.micronaut:micronaut-bom:$micronautVersion")
-
     constraints {
         api "com.amazonaws:aws-java-sdk-cloudwatch:$project.awsSdkVersion"
         api "com.amazonaws:aws-java-sdk-logs:$project.awsSdkVersion"
