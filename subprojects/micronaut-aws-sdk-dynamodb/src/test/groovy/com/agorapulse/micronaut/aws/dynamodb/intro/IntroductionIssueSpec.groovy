@@ -17,11 +17,12 @@
  */
 package com.agorapulse.micronaut.aws.dynamodb.intro
 
-import com.agorapulse.dru.Dru
-import com.agorapulse.dru.dynamodb.persistence.DynamoDB
-import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
+import com.agorapulse.micronaut.aws.dynamodb.DynamoDBService
+import com.agorapulse.micronaut.aws.dynamodb.DynamoDBServiceProvider
+import groovy.transform.CompileStatic
 import io.micronaut.context.ApplicationContext
-import spock.lang.AutoCleanup
+import io.micronaut.test.extensions.spock.annotation.MicronautTest
+import jakarta.inject.Inject
 import spock.lang.Specification
 
 import jakarta.inject.Singleton
@@ -32,21 +33,18 @@ import jakarta.inject.Singleton
  *
  * @see https://github.com/micronaut-projects/micronaut-core/issues/1851
  */
+@MicronautTest
 class IntroductionIssueSpec extends Specification {
 
-    @AutoCleanup ApplicationContext context
-
-    @AutoCleanup Dru dru = Dru.steal(this)
-
-    IDynamoDBMapper mapper = DynamoDB.createMapper(dru)
+    @Inject ApplicationContext context
+    @Inject DynamoDBServiceProvider serviceProvider
 
     void setup() {
-        dru.add(new IntroProblemEntity(hashKey: 'hash1'))
-        dru.add(new IntroProblemEntity2(hashKey: 'hash2'))
+        DynamoDBService<IntroProblemEntity> first = serviceProvider.findOrCreate(IntroProblemEntity)
+        first.save(new IntroProblemEntity('hash1'))
 
-        context = ApplicationContext.builder().build()
-        context.registerSingleton(IDynamoDBMapper, mapper)
-        context.start()
+        DynamoDBService<IntroProblemEntity2> second = serviceProvider.findOrCreate(IntroProblemEntity2)
+        second.save(new IntroProblemEntity2(hashKey: 'hash2'))
     }
 
     void 'can inject two data services'() {
@@ -61,6 +59,7 @@ class IntroductionIssueSpec extends Specification {
 }
 
 @Singleton
+@CompileStatic
 class Injected {
 
     final IntroProblemEntity2DBService introProblemEntity2DBService

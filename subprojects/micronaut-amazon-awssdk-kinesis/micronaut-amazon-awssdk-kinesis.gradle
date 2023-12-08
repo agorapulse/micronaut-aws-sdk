@@ -16,7 +16,10 @@
  * limitations under the License.
  */
 dependencies {
+    annotationProcessor 'io.micronaut.validation:micronaut-validation-processor'
     api 'software.amazon.awssdk:kinesis'
+
+    implementation 'io.micronaut.validation:micronaut-validation'
 
     implementation project(':micronaut-amazon-awssdk-core')
     implementation "space.jasan:groovy-closure-support:$closureSupportVersion"

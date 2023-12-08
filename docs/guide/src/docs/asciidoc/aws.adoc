@@ -14,7 +14,6 @@ Provided integrations:
 * <<Simple Notification Service (SNS)>>
 * <<Simple Queue Service (SQS)>>
 * <<Security Token Service (STS)>>
-* <<WebSockets for API Gateway>>
 
 NOTE: <<Micronaut for API Gateway Proxy>> is handled separately in its own library.
 
@@ -60,8 +59,6 @@ include::{includedir}/sns.adoc[]
 include::{includedir}/sqs.adoc[]
 
 include::{includedir}/sts.adoc[]
-
-include::{includedir}/websockets.adoc[]
 
 === Configuration
 

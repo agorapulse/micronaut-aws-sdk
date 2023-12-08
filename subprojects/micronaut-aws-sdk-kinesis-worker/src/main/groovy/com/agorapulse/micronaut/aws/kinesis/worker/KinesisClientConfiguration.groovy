@@ -25,8 +25,8 @@ import com.amazonaws.services.kinesis.clientlibrary.lib.worker.SimpleRecordsFetc
 import com.amazonaws.services.kinesis.metrics.interfaces.MetricsLevel
 import groovy.transform.CompileStatic
 
-import javax.validation.constraints.Min
-import javax.validation.constraints.NotEmpty
+import jakarta.validation.constraints.Min
+import jakarta.validation.constraints.NotEmpty
 
 import static com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration.*
 

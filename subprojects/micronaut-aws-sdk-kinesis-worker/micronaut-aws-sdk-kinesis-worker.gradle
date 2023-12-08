@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 dependencies {
+    annotationProcessor 'io.micronaut.validation:micronaut-validation-processor'
     api group: 'com.amazonaws', name: 'amazon-kinesis-client', version: kinesisClientV1Version
 
     implementation project(':micronaut-aws-sdk-core')
@@ -23,6 +24,7 @@ dependencies {
     implementation project(':micronaut-aws-sdk-cloudwatch')
     implementation project(':micronaut-aws-sdk-dynamodb')
 
+    implementation 'io.micronaut.validation:micronaut-validation'
 
     testImplementation project(':micronaut-amazon-awssdk-integration-testing')
     testImplementation "org.mockito:mockito-core:$mockitoVersion"

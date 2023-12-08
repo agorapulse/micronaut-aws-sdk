@@ -17,4 +17,5 @@
  */
 dependencies {
     api 'software.amazon.awssdk:dynamodb-enhanced'
+    api 'io.micronaut:micronaut-inject-java'
 }

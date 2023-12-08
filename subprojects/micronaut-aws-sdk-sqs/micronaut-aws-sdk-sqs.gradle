@@ -16,10 +16,12 @@
  * limitations under the License.
  */
 dependencies {
+    annotationProcessor 'io.micronaut.validation:micronaut-validation-processor'
     api 'com.amazonaws:aws-java-sdk-sns'
 
     implementation project(':micronaut-aws-sdk-core')
     implementation "space.jasan:groovy-closure-support:$closureSupportVersion"
+    implementation 'io.micronaut.validation:micronaut-validation'
 
     testImplementation project(':micronaut-amazon-awssdk-integration-testing')
 }

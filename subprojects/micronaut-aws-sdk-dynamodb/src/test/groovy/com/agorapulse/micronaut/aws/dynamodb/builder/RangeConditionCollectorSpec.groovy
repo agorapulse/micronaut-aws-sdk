@@ -17,19 +17,20 @@
  */
 package com.agorapulse.micronaut.aws.dynamodb.builder
 
-import com.agorapulse.dru.Dru
-import com.agorapulse.dru.dynamodb.persistence.DynamoDB
 import com.agorapulse.micronaut.aws.dynamodb.DynamoDBEntity
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
 import com.amazonaws.services.dynamodbv2.model.ComparisonOperator
 import com.amazonaws.services.dynamodbv2.model.Condition
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.FromString
+import io.micronaut.test.extensions.spock.annotation.MicronautTest
+import jakarta.inject.Inject
 import spock.lang.Specification
 
 /**
  * Tests for creating conditions.
  */
+@MicronautTest
 @SuppressWarnings([
     'AbcMetric',
     'UnnecessaryGetter',
@@ -39,7 +40,7 @@ class RangeConditionCollectorSpec extends Specification {
     private static final String ARG_1 = 'foo'
     private static final String ARG_2 = 'bar'
 
-    IDynamoDBMapper mapper = DynamoDB.createMapper(Dru.steal(this))
+    @Inject IDynamoDBMapper mapper
 
     void 'range conditions created'() {
         when:

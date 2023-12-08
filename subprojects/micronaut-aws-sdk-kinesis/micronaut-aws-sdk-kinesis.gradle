@@ -16,9 +16,11 @@
  * limitations under the License.
  */
 dependencies {
+    annotationProcessor 'io.micronaut.validation:micronaut-validation-processor'
     api 'com.amazonaws:aws-java-sdk-kinesis'
     implementation project(':micronaut-aws-sdk-core')
     implementation "io.projectreactor:reactor-core:$projectReactorVersion"
+    implementation 'io.micronaut.validation:micronaut-validation'
 
     testImplementation project(':micronaut-amazon-awssdk-integration-testing')
 }

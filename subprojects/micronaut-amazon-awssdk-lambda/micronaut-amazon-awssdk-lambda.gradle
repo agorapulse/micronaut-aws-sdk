@@ -19,6 +19,7 @@ dependencies {
     api 'software.amazon.awssdk:lambda'
 
     implementation project(':micronaut-amazon-awssdk-core')
+    implementation 'io.micronaut:micronaut-jackson-databind'
 
     testImplementation project(':micronaut-amazon-awssdk-integration-testing')
     testImplementation project(':micronaut-amazon-awssdk-cloudwatchlogs')

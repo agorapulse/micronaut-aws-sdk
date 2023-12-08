@@ -189,8 +189,6 @@ subprojects { Project subproject ->
         testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 
 
-        testCompileOnly 'com.agorapulse:remember:0.4.2'
-
         testImplementation 'io.micronaut.test:micronaut-test-junit5'
         testImplementation 'io.micronaut.test:micronaut-test-spock'
 
