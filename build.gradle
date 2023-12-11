@@ -98,6 +98,9 @@ config {
             autoLinks {
                 enabled = false
             }
+            aggregate {
+                enabled = false
+            }
         }
         groovydoc {
             enabled = false

@@ -20,7 +20,7 @@ package com.agorapulse.micronaut.aws.kinesis
 import com.agorapulse.micronaut.aws.DefaultRegionAndEndpointConfiguration
 import groovy.transform.CompileStatic
 
-import jakarta.validation.constraints.NotEmpty
+import jakarta.validation.constraints.Size
 
 /**
  * Default Kinesis configuration, published with <code>default</code> named qualifier.
@@ -29,7 +29,7 @@ import jakarta.validation.constraints.NotEmpty
 @SuppressWarnings('AbstractClassWithoutAbstractMethod')
 abstract class KinesisConfiguration extends DefaultRegionAndEndpointConfiguration {
 
-    @NotEmpty String stream = ''
+    @Size(min = 1) String stream = ''
 
     String consumerFilterKey = ''
 

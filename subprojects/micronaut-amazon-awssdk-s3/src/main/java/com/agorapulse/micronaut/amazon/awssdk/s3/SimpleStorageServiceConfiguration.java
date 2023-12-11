@@ -19,7 +19,7 @@ package com.agorapulse.micronaut.amazon.awssdk.s3;
 
 import com.agorapulse.micronaut.amazon.awssdk.core.DefaultRegionAndEndpointConfiguration;
 
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 
 /**
  * Default simple storage service configuration.
@@ -67,7 +67,7 @@ public abstract class SimpleStorageServiceConfiguration extends DefaultRegionAnd
         this.forcePathStyle = forcePathStyle;
     }
 
-    @NotEmpty
+    @Size(min = 1)
     private String bucket = "";
     private Boolean forcePathStyle;
 

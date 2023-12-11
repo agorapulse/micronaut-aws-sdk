@@ -41,9 +41,11 @@ class IntroductionIssueSpec extends Specification {
 
     void setup() {
         DynamoDBService<IntroProblemEntity> first = serviceProvider.findOrCreate(IntroProblemEntity)
+        first.createTable()
         first.save(new IntroProblemEntity('hash1'))
 
         DynamoDBService<IntroProblemEntity2> second = serviceProvider.findOrCreate(IntroProblemEntity2)
+        second.createTable()
         second.save(new IntroProblemEntity2(hashKey: 'hash2'))
     }
 

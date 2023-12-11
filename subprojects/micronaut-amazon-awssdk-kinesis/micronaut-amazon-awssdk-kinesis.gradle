@@ -20,6 +20,7 @@ dependencies {
     api 'software.amazon.awssdk:kinesis'
 
     implementation 'io.micronaut.validation:micronaut-validation'
+    implementation 'io.micronaut:micronaut-jackson-databind'
 
     implementation project(':micronaut-amazon-awssdk-core')
     implementation "space.jasan:groovy-closure-support:$closureSupportVersion"
