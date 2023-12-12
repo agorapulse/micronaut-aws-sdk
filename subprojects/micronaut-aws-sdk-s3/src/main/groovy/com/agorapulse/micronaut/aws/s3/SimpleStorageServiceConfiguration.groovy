@@ -19,7 +19,6 @@ package com.agorapulse.micronaut.aws.s3
 
 import com.agorapulse.micronaut.aws.DefaultRegionAndEndpointConfiguration
 import groovy.transform.CompileStatic
-
 import jakarta.validation.constraints.Size
 
 /**
@@ -29,7 +28,7 @@ import jakarta.validation.constraints.Size
 @SuppressWarnings('AbstractClassWithoutAbstractMethod')
 abstract class SimpleStorageServiceConfiguration extends DefaultRegionAndEndpointConfiguration {
 
-    @Size(min = 1) String bucket = ''
+    @Size(min = 1) String bucket
     Boolean pathStyleAccessEnabled
 
 }

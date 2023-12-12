@@ -29,7 +29,7 @@ import jakarta.validation.constraints.Size
 @SuppressWarnings('AbstractClassWithoutAbstractMethod')
 abstract class KinesisConfiguration extends DefaultRegionAndEndpointConfiguration {
 
-    @Size(min = 1) String stream = ''
+    @Size(min = 1) String stream
 
     String consumerFilterKey = ''
 

@@ -68,7 +68,7 @@ public abstract class SimpleStorageServiceConfiguration extends DefaultRegionAnd
     }
 
     @Size(min = 1)
-    private String bucket = "";
+    private String bucket;
     private Boolean forcePathStyle;
 
 }
