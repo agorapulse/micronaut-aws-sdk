@@ -42,7 +42,7 @@ abstract class AbstractClientSpec extends Specification {
         prepareHelloFunction()
     }
 
-    @SuppressWarnings('ImplicitClosureParameter')
+    @SuppressWarnings(['ImplicitClosureParameter', 'BusyWait'])
     private void prepareHelloFunction() {
         boolean alreadyExists = lambda.listFunctions().functions().any {
             it.functionName() == 'HelloFunction'

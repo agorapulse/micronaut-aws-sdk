@@ -419,7 +419,7 @@ class SimpleStorageServiceWithMockSpec extends Specification {
         then:
             listing.bucketName == BUCKET_NAME
 
-            1 * client.listObjects(BUCKET_NAME, '' ) >> new ObjectListing(bucketName: BUCKET_NAME)
+            1 * client.listObjects(BUCKET_NAME, '') >> new ObjectListing(bucketName: BUCKET_NAME)
     }
 
     void 'store multipart'() {

@@ -18,8 +18,30 @@
 package com.agorapulse.micronaut.aws.dynamodb
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.datamodeling.*
-import com.amazonaws.services.dynamodbv2.model.*
+import com.amazonaws.services.dynamodbv2.datamodeling.ArgumentMarshaller
+import com.amazonaws.services.dynamodbv2.datamodeling.ArgumentUnmarshaller
+import com.amazonaws.services.dynamodbv2.datamodeling.ConversionSchema
+import com.amazonaws.services.dynamodbv2.datamodeling.ConversionSchemas
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable
+import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
+import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList
+import com.amazonaws.services.dynamodbv2.datamodeling.QueryResultPage
+import com.amazonaws.services.dynamodbv2.model.AttributeAction
+import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import com.amazonaws.services.dynamodbv2.model.AttributeValueUpdate
+import com.amazonaws.services.dynamodbv2.model.ComparisonOperator
+import com.amazonaws.services.dynamodbv2.model.Condition
+import com.amazonaws.services.dynamodbv2.model.CreateTableRequest
+import com.amazonaws.services.dynamodbv2.model.CreateTableResult
+import com.amazonaws.services.dynamodbv2.model.DescribeTableResult
+import com.amazonaws.services.dynamodbv2.model.GlobalSecondaryIndex
+import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput
+import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException
+import com.amazonaws.services.dynamodbv2.model.UpdateItemRequest
+import com.amazonaws.services.dynamodbv2.model.UpdateItemResult
 import groovy.transform.CompileDynamic
 import groovy.transform.PackageScope
 import groovy.util.logging.Slf4j
@@ -47,7 +69,7 @@ import java.time.format.DateTimeFormatter
 class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> {
 
     private static final ConversionSchema GROOVY_AWARE_CONVERSION_SCHEMA = ConversionSchemas
-        .v2CompatibleBuilder("v2CompatibileConversationSchemaWithGroovyAwareness")
+        .v2CompatibleBuilder('v2CompatibileConversationSchemaWithGroovyAwareness')
         .addFirstType(
             MetaClass,
             new ArgumentMarshaller() {
@@ -67,7 +89,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
 
                 @Override
                 Object unmarshall(AttributeValue value) throws ParseException {
-                    throw new ParseException("Cannot unmarshall MetaClass", 0)
+                    throw new ParseException('Cannot unmarshall MetaClass', 0)
                 }
 
             }
