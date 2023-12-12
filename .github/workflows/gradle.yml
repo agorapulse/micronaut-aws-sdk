@@ -35,4 +35,4 @@ jobs:
           cache: gradle
       - uses: gradle/gradle-build-action@v2
         with:
-          arguments: check coveralls
+          arguments: check coveralls --parallel
