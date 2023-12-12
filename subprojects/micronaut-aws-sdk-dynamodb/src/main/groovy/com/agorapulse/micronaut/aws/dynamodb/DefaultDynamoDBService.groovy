@@ -41,6 +41,7 @@ import com.amazonaws.services.dynamodbv2.model.DescribeTableResult
 import com.amazonaws.services.dynamodbv2.model.GlobalSecondaryIndex
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput
 import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException
+import com.amazonaws.services.dynamodbv2.model.ReturnValue
 import com.amazonaws.services.dynamodbv2.model.UpdateItemRequest
 import com.amazonaws.services.dynamodbv2.model.UpdateItemResult
 import groovy.transform.CompileDynamic
