@@ -21,6 +21,7 @@ import com.agorapulse.micronaut.aws.dynamodb.DynamoDBService;
 import com.agorapulse.micronaut.aws.dynamodb.DynamoDBServiceProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
@@ -121,8 +122,8 @@ public class CompressedEntityDynamoDbBenchmark {
             localstack.start();
 
             return AmazonDynamoDBClient.builder()
-                .withEndpointConfiguration(localstack.getEndpointConfiguration(DYNAMODB))
-                .withCredentials(localstack.getDefaultCredentialsProvider())
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(localstack.getEndpointOverride(DYNAMODB).toString(), localstack.getRegion()))
+                .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(localstack.getAccessKey(), localstack.getSecretKey())))
                 .build();
         }
 
@@ -159,7 +160,7 @@ public class CompressedEntityDynamoDbBenchmark {
         final Map<String, Object> properties = new HashMap<>();
         if (!useAws) {
             properties.put("aws.dynamodb.region", localstack.getRegion());
-            properties.put("aws.dynamodb.endpoint", localstack.getEndpointConfiguration(DYNAMODB).getServiceEndpoint());
+            properties.put("aws.dynamodb.endpoint", localstack.getEndpointOverride(DYNAMODB));
         } else {
             properties.put("aws.dynamodb.region", "eu-west-1");
         }
