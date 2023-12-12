@@ -140,7 +140,7 @@ public class CompressedEntityDynamoDbBenchmark {
         final Map<String, Object> properties = new HashMap<>();
         if (!useAws) {
             properties.put("aws.dynamodb.region", localstack.getRegion());
-            properties.put("aws.dynamodb.endpoint", localstack.getEndpointConfiguration(DYNAMODB).getServiceEndpoint());
+            properties.put("aws.dynamodb.endpoint", localstack.getEndpointOverride(DYNAMODB));
         } else {
             properties.put("aws.dynamodb.region", "eu-west-1");
         }
