@@ -34,7 +34,7 @@ class SimpleStorageServiceConfigurationSpec extends Specification {
             context = ApplicationContext.run()
         then:
             context.getBeanDefinitions(SimpleStorageService).size() == 1
-            context.getBean(SimpleStorageServiceConfiguration).bucket == ''
+            context.getBean(SimpleStorageServiceConfiguration).bucket == null
     }
 
     void 'configure single service'() {

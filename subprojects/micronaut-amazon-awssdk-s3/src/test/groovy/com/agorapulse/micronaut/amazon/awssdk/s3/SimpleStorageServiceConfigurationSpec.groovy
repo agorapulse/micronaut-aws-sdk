@@ -41,7 +41,7 @@ class SimpleStorageServiceConfigurationSpec extends Specification {
             context.getBeanDefinitions(S3Client).size() == 1
             context.getBeanDefinitions(S3AsyncClient).size() == 1
             context.getBeanDefinitions(S3Presigner).size() == 1
-            context.getBean(SimpleStorageServiceConfiguration).bucket == ''
+            context.getBean(SimpleStorageServiceConfiguration).bucket == null
     }
 
     void 'configure single service'() {

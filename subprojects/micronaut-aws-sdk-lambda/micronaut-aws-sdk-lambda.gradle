@@ -25,4 +25,6 @@ dependencies {
     testImplementation project(':micronaut-aws-sdk-cloudwatchlogs')
     testImplementation 'org.zeroturnaround:zt-zip:1.15'
     testImplementation 'com.agorapulse.testing:fixt:0.2.3'
+
+    testRuntimeOnly('org.yaml:snakeyaml')
 }

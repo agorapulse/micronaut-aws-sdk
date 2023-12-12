@@ -240,8 +240,8 @@ class SimpleStorageServiceWithMockSpec extends Specification {
 
     void "Storing file"() {
         given:
-            File file = Mock(File)
             String path = 'filePrefix.txt'
+            File file = new File(path)
 
         when:
             String url = service.storeFile(path, file)
@@ -253,8 +253,8 @@ class SimpleStorageServiceWithMockSpec extends Specification {
 
     void "Storing file exception"() {
         given:
-            File file = Mock(File)
             String path = 'filePrefix.txt'
+            File file = new File(path)
 
         when:
             String url = service.storeFile(path, file)

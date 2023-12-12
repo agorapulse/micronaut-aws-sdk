@@ -48,13 +48,13 @@ class SimpleStorageServiceSpec extends Specification {
 
     // end::header[]
 
-    private static final String KEY = 'foo/bar.baz'
-    private static final String UPLOAD_KEY = 'foo/foo.two'
-    private static final String MY_BUCKET = 'testbucket'
-    private static final String OTHER_BUCKET = 'otherbucket'
-    private static final String SAMPLE_CONTENT = 'hello world!'
-    private static final Date TOMORROW = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000)
-    private static final String NO_SUCH_BUCKET = 'no-such-bucket'
+    protected static final String KEY = 'foo/bar.baz'
+    protected static final String UPLOAD_KEY = 'foo/foo.two'
+    protected static final String MY_BUCKET = 'testbucket'
+    protected static final String OTHER_BUCKET = 'otherbucket'
+    protected static final String SAMPLE_CONTENT = 'hello world!'
+    protected static final Date TOMORROW = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000)
+    protected static final String NO_SUCH_BUCKET = 'no-such-bucket'
 
     @TempDir File tmp
 

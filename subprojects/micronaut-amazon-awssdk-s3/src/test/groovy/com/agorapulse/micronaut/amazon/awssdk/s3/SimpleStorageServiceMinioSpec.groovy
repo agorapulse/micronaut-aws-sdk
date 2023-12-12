@@ -28,6 +28,7 @@ import java.time.Duration
  * Tests for SimpleStorageService based on Testcontainers with Minio server.
  */
 @Property(name = 'aws.s3.force-path-style', value = 'true')
+@Property(name = 'aws.s3.bucket', value = MY_BUCKET)
 class SimpleStorageServiceMinioSpec extends SimpleStorageServiceSpec implements TestPropertyProvider {
 
     private static final int MINIO_PORT = 9000
