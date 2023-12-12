@@ -23,7 +23,7 @@ dependencies {
     implementation project(':micronaut-amazon-awssdk-dynamodb')
 
     jmhAnnotationProcessor "io.micronaut:micronaut-inject-java:$micronautVersion"
-    jmhAnnotationProcessor "io.micronaut:micronaut-validation:$micronautVersion"
+    jmhAnnotationProcessor "io.micronaut.validation:micronaut-validation:$micronautVersion"
     jmhRuntimeOnly "io.micronaut:micronaut-core:$micronautVersion"
 
     // AWS SDK v1 needed to satisfy compilation with Testcontainers Localstack module
