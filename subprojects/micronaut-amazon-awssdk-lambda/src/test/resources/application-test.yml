@@ -1,6 +1,9 @@
 localstack:
   services: lambda
   shared: true
+  env:
+    PROVIDER_OVERRIDE_LAMBDA: asf
+    DEBUG: 1
 
 aws:
   lambda:

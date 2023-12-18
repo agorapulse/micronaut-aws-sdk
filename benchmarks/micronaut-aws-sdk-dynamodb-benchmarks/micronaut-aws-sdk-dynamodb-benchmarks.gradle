@@ -23,7 +23,7 @@ dependencies {
     implementation project(':micronaut-aws-sdk-dynamodb')
 
     jmhAnnotationProcessor "io.micronaut:micronaut-inject-java:$micronautVersion"
-    jmhAnnotationProcessor "io.micronaut:micronaut-validation:$micronautVersion"
+    jmhAnnotationProcessor "io.micronaut.validation:micronaut-validation:$micronautVersion"
     jmhRuntimeOnly "io.micronaut:micronaut-core:$micronautVersion"
     jmhImplementation project(':micronaut-aws-sdk-dynamodb')
 

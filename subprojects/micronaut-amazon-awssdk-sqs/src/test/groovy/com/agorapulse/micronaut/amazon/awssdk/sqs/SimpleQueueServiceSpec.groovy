@@ -18,14 +18,14 @@
 package com.agorapulse.micronaut.amazon.awssdk.sqs
 
 import io.micronaut.context.annotation.Property
-import io.micronaut.test.annotation.MicronautTest
+import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import software.amazon.awssdk.services.sqs.model.Message
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName
 import spock.lang.Retry
 import spock.lang.Specification
 import spock.lang.Stepwise
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /**
  * Tests for simple queue service.

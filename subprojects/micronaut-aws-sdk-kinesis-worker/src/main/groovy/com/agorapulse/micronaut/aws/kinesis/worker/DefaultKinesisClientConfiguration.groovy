@@ -23,7 +23,7 @@ import io.micronaut.context.annotation.ConfigurationProperties
 import io.micronaut.context.annotation.Requires
 import io.micronaut.context.annotation.Value
 
-import javax.inject.Named
+import jakarta.inject.Named
 
 /**
  * Default configuration for Kinesis listener.

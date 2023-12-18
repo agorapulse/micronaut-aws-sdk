@@ -23,8 +23,8 @@ import com.agorapulse.micronaut.amazon.awssdk.sqs.QueueClientIntroduction;
 import io.micronaut.aop.Introduction;
 import io.micronaut.context.annotation.Type;
 
-import javax.inject.Scope;
-import javax.inject.Singleton;
+import jakarta.inject.Scope;
+import jakarta.inject.Singleton;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

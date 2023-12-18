@@ -240,8 +240,8 @@ class SimpleStorageServiceWithMockSpec extends Specification {
 
     void "Storing file"() {
         given:
-            File file = Mock(File)
             String path = 'filePrefix.txt'
+            File file = new File(path)
 
         when:
             String url = service.storeFile(path, file)
@@ -253,8 +253,8 @@ class SimpleStorageServiceWithMockSpec extends Specification {
 
     void "Storing file exception"() {
         given:
-            File file = Mock(File)
             String path = 'filePrefix.txt'
+            File file = new File(path)
 
         when:
             String url = service.storeFile(path, file)
@@ -419,7 +419,7 @@ class SimpleStorageServiceWithMockSpec extends Specification {
         then:
             listing.bucketName == BUCKET_NAME
 
-            1 * client.listObjects(BUCKET_NAME, '' ) >> new ObjectListing(bucketName: BUCKET_NAME)
+            1 * client.listObjects(BUCKET_NAME, '') >> new ObjectListing(bucketName: BUCKET_NAME)
     }
 
     void 'store multipart'() {

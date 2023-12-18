@@ -24,7 +24,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import io.micronaut.context.annotation.Primary;
 import io.micronaut.context.annotation.Replaces;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Primary
 @Singleton

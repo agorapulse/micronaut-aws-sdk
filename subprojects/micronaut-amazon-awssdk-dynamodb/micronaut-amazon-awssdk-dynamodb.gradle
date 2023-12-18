@@ -26,7 +26,5 @@ dependencies {
     testAnnotationProcessor project(':micronaut-amazon-awssdk-dynamodb-annotation-processor')
     testImplementation project(':micronaut-amazon-awssdk-dynamodb-annotation-processor')
     testImplementation project(':micronaut-amazon-awssdk-integration-testing')
-    if (micronautVersion.startsWith('3')) {
-        testImplementation 'io.micronaut.rxjava2:micronaut-rxjava2'
-    }
+    testImplementation 'io.micronaut.rxjava2:micronaut-rxjava2'
 }

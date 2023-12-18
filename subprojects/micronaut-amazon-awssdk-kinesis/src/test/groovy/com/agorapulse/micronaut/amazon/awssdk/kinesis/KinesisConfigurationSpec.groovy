@@ -34,7 +34,7 @@ class KinesisConfigurationSpec extends Specification {
             context = ApplicationContext.run()
         then:
             context.getBeanDefinitions(KinesisService).size() == 1
-            context.getBean(KinesisConfiguration).stream == ''
+            context.getBean(KinesisConfiguration).stream == null
     }
 
     void 'configure single service'() {

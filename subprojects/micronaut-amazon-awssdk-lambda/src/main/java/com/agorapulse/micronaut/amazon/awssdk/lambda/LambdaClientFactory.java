@@ -28,7 +28,7 @@ import software.amazon.awssdk.services.lambda.LambdaAsyncClient;
 import software.amazon.awssdk.services.lambda.LambdaAsyncClientBuilder;
 import software.amazon.awssdk.services.lambda.LambdaClient;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.Optional;
 
 @Factory

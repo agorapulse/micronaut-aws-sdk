@@ -18,14 +18,39 @@
 package com.agorapulse.micronaut.aws.dynamodb
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.datamodeling.*
-import com.amazonaws.services.dynamodbv2.model.*
+import com.amazonaws.services.dynamodbv2.datamodeling.ArgumentMarshaller
+import com.amazonaws.services.dynamodbv2.datamodeling.ArgumentUnmarshaller
+import com.amazonaws.services.dynamodbv2.datamodeling.ConversionSchema
+import com.amazonaws.services.dynamodbv2.datamodeling.ConversionSchemas
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverterFactory
+import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
+import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList
+import com.amazonaws.services.dynamodbv2.datamodeling.QueryResultPage
+import com.amazonaws.services.dynamodbv2.model.AttributeAction
+import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import com.amazonaws.services.dynamodbv2.model.AttributeValueUpdate
+import com.amazonaws.services.dynamodbv2.model.ComparisonOperator
+import com.amazonaws.services.dynamodbv2.model.Condition
+import com.amazonaws.services.dynamodbv2.model.CreateTableRequest
+import com.amazonaws.services.dynamodbv2.model.CreateTableResult
+import com.amazonaws.services.dynamodbv2.model.DescribeTableResult
+import com.amazonaws.services.dynamodbv2.model.GlobalSecondaryIndex
+import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput
+import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException
+import com.amazonaws.services.dynamodbv2.model.ReturnValue
+import com.amazonaws.services.dynamodbv2.model.UpdateItemRequest
+import com.amazonaws.services.dynamodbv2.model.UpdateItemResult
 import groovy.transform.CompileDynamic
 import groovy.transform.PackageScope
 import groovy.util.logging.Slf4j
 import io.micronaut.core.naming.NameUtils
 
 import java.lang.reflect.Method
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.format.DateTimeFormatter
@@ -44,6 +69,34 @@ import java.time.format.DateTimeFormatter
 ])
 @CompileDynamic
 class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> {
+
+    private static final ConversionSchema GROOVY_AWARE_CONVERSION_SCHEMA = ConversionSchemas
+        .v2CompatibleBuilder('v2CompatibileConversationSchemaWithGroovyAwareness')
+        .addFirstType(
+            MetaClass,
+            new ArgumentMarshaller() {
+
+                @Override
+                AttributeValue marshall(Object obj) {
+                    return new AttributeValue().withNULL(true)
+                }
+
+            },
+            new ArgumentUnmarshaller() {
+
+                @Override
+                void typeCheck(AttributeValue value, Method setter) {
+                    // do nothing
+                }
+
+                @Override
+                Object unmarshall(AttributeValue value) throws ParseException {
+                    throw new ParseException('Cannot unmarshall MetaClass', 0)
+                }
+
+            }
+        )
+        .build()
 
     // Specific ranges ending with 'Index' are String concatenated indexes,
     // to keep ordering (ex.: createdByUserIdIndex=37641047|2011-02-21T17:15:23.000Z|2424353910)
@@ -66,8 +119,8 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
 
     static String serializeDate(Instant instant) {
         return DateTimeFormatter.ofPattern(SERIALIZED_DATE_FORMAT)
-            .withZone(TimeZone.getTimeZone(SERIALIZED_DATE_TIMEZONE).toZoneId())
-            .format(instant)
+                                .withZone(TimeZone.getTimeZone(SERIALIZED_DATE_TIMEZONE).toZoneId())
+                                .format(instant)
     }
 
     @CompileDynamic
@@ -252,11 +305,13 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      * @param settings
      * @return
      */
-    int deleteAll(Object hashKey,
-                  String rangeKeyName,
-                  Object rangeKeyValue,
-                  ComparisonOperator operator,
-                  Map settings) {
+    int deleteAll(
+        Object hashKey,
+        String rangeKeyName,
+        Object rangeKeyValue,
+        ComparisonOperator operator,
+        Map settings
+    ) {
         Map conditions = [(rangeKeyName): buildCondition(rangeKeyValue, operator)]
         return deleteAllByConditions(
             hashKey,
@@ -273,7 +328,12 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      * @param indexName
      * @return
      */
-    int deleteAllByConditions(Object hashKey, Map<String, Condition> rangeKeyConditions, Map querySettings, String indexName) {
+    int deleteAllByConditions(
+        Object hashKey,
+        Map<String, Condition> rangeKeyConditions,
+        Map querySettings,
+        String indexName
+    ) {
         Map settings = new LinkedHashMap(querySettings)
         if (!settings.containsKey(BATCH_ENABLED_KEY)) {
             settings.putAll((BATCH_ENABLED_KEY): true)
@@ -428,7 +488,13 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      * @param settings
      * @return
      */
-    QueryResultPage<TItemClass> query(Object hashKey, String rangeKeyName, Object rangeKeyValue, ComparisonOperator operator, Map settings) {
+    QueryResultPage<TItemClass> query(
+        Object hashKey,
+        String rangeKeyName,
+        Object rangeKeyValue,
+        ComparisonOperator operator,
+        Map settings
+    ) {
         if (rangeKeyValue == 'ANY' || !operator) {
             if (!rangeKeyName.endsWith(INDEX_NAME_SUFFIX)) {
                 rangeKeyName += INDEX_NAME_SUFFIX
@@ -455,7 +521,12 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      * @param settings
      * @return
      */
-    QueryResultPage<TItemClass> queryByConditions(Object hashKey, Map<String, Condition> rangeKeyConditions, Map settings, String indexName) {
+    QueryResultPage<TItemClass> queryByConditions(
+        Object hashKey,
+        Map<String, Condition> rangeKeyConditions,
+        Map settings,
+        String indexName
+    ) {
         DynamoDBQueryExpression query = buildQuery(hashKey, settings, rangeKeyConditions, indexName)
 
         long readCapacityUnit = 0
@@ -558,9 +629,22 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
             return itemsToSave
         }
 
+        DynamoDBMapperConfig config = settings.config
+            ? settings.config as DynamoDBMapperConfig
+            : DynamoDBMapperConfig.builder()
+                                  .withSaveBehavior(DynamoDBMapperConfig.SaveBehavior.UPDATE)
+                                  .withConsistentReads(DynamoDBMapperConfig.ConsistentReads.EVENTUAL)
+                                  .withPaginationLoadingStrategy(DynamoDBMapperConfig.PaginationLoadingStrategy.LAZY_LOADING)
+                                  .withTableNameResolver(DynamoDBMapperConfig.DefaultTableNameResolver.INSTANCE)
+                                  .withBatchWriteRetryStrategy(DynamoDBMapperConfig.DefaultBatchWriteRetryStrategy.INSTANCE)
+                                  .withBatchLoadRetryStrategy(DynamoDBMapperConfig.DefaultBatchLoadRetryStrategy.INSTANCE)
+                                  .withTypeConverterFactory(DynamoDBTypeConverterFactory.standard())
+                                  .withConversionSchema(GROOVY_AWARE_CONVERSION_SCHEMA)
+                                  .build()
+
         return itemsToSave.each {
             log.debug "Saving item in DynamoDB ${it}"
-            settings.config ? mapper.save(it, settings.config as DynamoDBMapperConfig) : mapper.save(it)
+            mapper.save(it, config)
         }
     }
 
@@ -602,7 +686,13 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      * @param action
      * @return
      */
-    UpdateItemResult updateItemAttribute(Object hashKey, Object rangeKey, String attributeName, Object attributeValue, AttributeAction action) {
+    UpdateItemResult updateItemAttribute(
+        Object hashKey,
+        Object rangeKey,
+        String attributeName,
+        Object attributeValue,
+        AttributeAction action
+    ) {
         Map<String, Object> key = [(hashKeyName): buildAttributeValue(hashKey)]
         if (rangeKey) {
             key[rangeKeyName] = buildAttributeValue(rangeKey)
@@ -647,8 +737,10 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      * @param maxAfterDate
      * @return
      */
-    static protected Map addMaxAfterDateCondition(Map params,
-                                                  Date maxAfterDate) {
+    static protected Map addMaxAfterDateCondition(
+        Map params,
+        Date maxAfterDate
+    ) {
         if (!params.containsKey(AFTER_KEY)) {
             params[AFTER_KEY] = maxAfterDate
         } else if (((Date) params[AFTER_KEY]).before(maxAfterDate)) {
@@ -692,8 +784,10 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      * @param operator
      * @return
      */
-    static protected Condition buildCondition(Object rangeKeyValue,
-                                              ComparisonOperator operator = ComparisonOperator.EQ) {
+    static protected Condition buildCondition(
+        Object rangeKeyValue,
+        ComparisonOperator operator = ComparisonOperator.EQ
+    ) {
         return new Condition()
             .withComparisonOperator(operator)
             .withAttributeValueList(buildAttributeValue(rangeKeyValue))
@@ -706,9 +800,11 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      * @param maxAfterDate
      * @return
      */
-    static protected Map buildDateConditions(String rangeKeyName,
-                                             Map<String, Date> rangeKeyDates,
-                                             Date maxAfterDate = null) {
+    static protected Map buildDateConditions(
+        String rangeKeyName,
+        Map<String, Date> rangeKeyDates,
+        Date maxAfterDate = null
+    ) {
         assert rangeKeyDates.keySet().any { it in [AFTER_KEY, BEFORE_KEY] }
         ComparisonOperator operator
         List attributeValueList = []
@@ -742,9 +838,11 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
      */
     @CompileDynamic
     @SuppressWarnings('Instanceof')
-    static protected DynamoDBQueryExpression buildQueryExpression(Object hashKeyName,
-                                                                  Object hashKey,
-                                                                  Map settings = [:]) {
+    static protected DynamoDBQueryExpression buildQueryExpression(
+        Object hashKeyName,
+        Object hashKey,
+        Map settings = [:]
+    ) {
         DynamoDBQueryExpression query = new DynamoDBQueryExpression()
         if (settings.containsKey('consistentRead')) {
             query.consistentRead = settings.consistentRead
@@ -786,7 +884,12 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
         } as Map
     }
 
-    private DynamoDBQueryExpression buildQuery(Object hashKey, Map settings, Map<String, Condition> rangeKeyConditions, String indexName) {
+    private DynamoDBQueryExpression buildQuery(
+        Object hashKey,
+        Map settings,
+        Map<String, Condition> rangeKeyConditions,
+        String indexName
+    ) {
         DynamoDBQueryExpression query = buildQueryExpression(hashKeyName, hashKey, settings)
         query.hashKeyValues = metadata.itemClass.newInstance((hashKeyName): hashKey)
         if (rangeKeyConditions) {

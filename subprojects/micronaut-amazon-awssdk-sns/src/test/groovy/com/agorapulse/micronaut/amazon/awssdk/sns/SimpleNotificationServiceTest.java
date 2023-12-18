@@ -18,13 +18,13 @@
 package com.agorapulse.micronaut.amazon.awssdk.sns;
 
 import io.micronaut.context.annotation.Property;
-import io.micronaut.test.annotation.MicronautTest;
+import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue;
 import software.amazon.awssdk.services.sns.model.Topic;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.Collections;
 import java.util.Map;
 

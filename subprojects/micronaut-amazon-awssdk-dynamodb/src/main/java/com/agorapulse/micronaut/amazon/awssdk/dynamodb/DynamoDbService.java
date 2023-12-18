@@ -28,7 +28,7 @@ import org.reactivestreams.Publisher;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 
-import javax.annotation.Nullable;
+import io.micronaut.core.annotation.Nullable;
 import java.util.function.Consumer;
 import java.util.function.Function;
 

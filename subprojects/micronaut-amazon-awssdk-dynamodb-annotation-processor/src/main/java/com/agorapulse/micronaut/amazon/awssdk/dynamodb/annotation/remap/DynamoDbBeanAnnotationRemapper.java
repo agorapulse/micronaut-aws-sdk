@@ -22,7 +22,7 @@ import io.micronaut.core.annotation.Introspected;
 import io.micronaut.inject.annotation.AnnotationRemapper;
 import io.micronaut.inject.visitor.VisitorContext;
 
-import javax.annotation.Nonnull;
+import io.micronaut.core.annotation.NonNull;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -32,13 +32,13 @@ public class DynamoDbBeanAnnotationRemapper implements AnnotationRemapper {
     private static final String PACKAGE_NAME = "software.amazon.awssdk.enhanced.dynamodb.mapper.annotations";
     private static final String ANNOTATION_NAME = PACKAGE_NAME + ".DynamoDbBean";
 
-    @Nonnull
+    @NonNull
     @Override
     public String getPackageName() {
         return PACKAGE_NAME;
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public List<AnnotationValue<?>> remap(AnnotationValue<?> annotation, VisitorContext visitorContext) {
         if (ANNOTATION_NAME.equals(annotation.getAnnotationName())) {

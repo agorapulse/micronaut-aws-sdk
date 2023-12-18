@@ -33,7 +33,7 @@ import io.micronaut.inject.qualifiers.Qualifiers;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;

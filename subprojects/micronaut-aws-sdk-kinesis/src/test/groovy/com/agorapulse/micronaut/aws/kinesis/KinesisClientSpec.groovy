@@ -299,14 +299,17 @@ class KinesisClientSpec extends Specification {
 
 }
 
-@KinesisClient('test') interface TestClient {
+@KinesisClient('test')
+interface TestClient {
 
     PutRecordResult putEvent(MyEvent event)
+
     void doWhatever(Object one, Object two, Object three, Object four)
 
 }
 
-@KinesisClient(stream = 'SomeStream') interface StreamClient {
+@KinesisClient(stream = 'SomeStream')
+interface StreamClient {
 
     public String SOME_STREAM = 'SomeStream'
 

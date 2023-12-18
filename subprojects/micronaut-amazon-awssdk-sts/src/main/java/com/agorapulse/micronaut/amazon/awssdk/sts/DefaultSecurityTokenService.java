@@ -22,7 +22,7 @@ import software.amazon.awssdk.services.sts.StsClient;
 import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
 import software.amazon.awssdk.services.sts.model.AssumeRoleResponse;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.function.Consumer;
 
 @Singleton

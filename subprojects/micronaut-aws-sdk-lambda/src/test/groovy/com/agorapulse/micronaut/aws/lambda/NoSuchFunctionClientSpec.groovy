@@ -18,9 +18,9 @@
 package com.agorapulse.micronaut.aws.lambda
 
 import com.amazonaws.SdkClientException
-import io.micronaut.test.annotation.MicronautTest
+import io.micronaut.test.extensions.spock.annotation.MicronautTest
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MicronautTest
 class NoSuchFunctionClientSpec extends AbstractClientSpec {

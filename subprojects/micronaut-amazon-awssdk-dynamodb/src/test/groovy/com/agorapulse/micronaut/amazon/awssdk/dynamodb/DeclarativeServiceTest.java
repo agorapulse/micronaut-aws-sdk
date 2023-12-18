@@ -18,11 +18,11 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
 
-import io.micronaut.test.annotation.MicronautTest;
+import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;

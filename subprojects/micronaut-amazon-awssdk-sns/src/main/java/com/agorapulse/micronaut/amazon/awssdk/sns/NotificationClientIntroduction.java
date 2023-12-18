@@ -34,7 +34,7 @@ import io.micronaut.inject.qualifiers.Qualifiers;
 import software.amazon.awssdk.services.sns.model.NotFoundException;
 import software.amazon.awssdk.services.sns.model.PublishRequest;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;

@@ -17,14 +17,14 @@
  */
 package com.agorapulse.micronaut.aws.dynamodb.builder
 
-import com.agorapulse.dru.Dru
-import com.agorapulse.dru.dynamodb.persistence.DynamoDB
 import com.agorapulse.micronaut.aws.dynamodb.DynamoDBEntity
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
+import io.micronaut.test.extensions.spock.annotation.MicronautTest
+import jakarta.inject.Inject
 import spock.lang.Specification
 
 import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*
@@ -32,11 +32,12 @@ import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*
 /**
  * Tests for builders.
  */
+@MicronautTest
 @CompileDynamic
 @SuppressWarnings('NoJavaUtilDate')
 class BuildersSpec extends Specification {
 
-    IDynamoDBMapper mapper = DynamoDB.createMapper(Dru.steal(this))
+    @Inject IDynamoDBMapper mapper
 
     void 'inconsistent desc query'() {
         when:

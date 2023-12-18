@@ -23,7 +23,7 @@ import io.micronaut.context.annotation.Primary;
 import io.micronaut.context.annotation.Requires;
 import software.amazon.awssdk.services.lambda.LambdaClient;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 /**
  * Default configuration for AWS Lambda

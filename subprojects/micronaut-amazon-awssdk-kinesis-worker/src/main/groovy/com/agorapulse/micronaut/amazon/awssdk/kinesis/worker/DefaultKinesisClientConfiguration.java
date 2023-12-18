@@ -21,7 +21,7 @@ import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.context.annotation.Value;
 import io.micronaut.runtime.ApplicationConfiguration;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Optional;

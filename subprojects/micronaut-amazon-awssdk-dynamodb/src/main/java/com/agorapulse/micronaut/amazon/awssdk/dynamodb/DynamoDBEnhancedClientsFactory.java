@@ -24,7 +24,7 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 /**
  * Factory class which provides

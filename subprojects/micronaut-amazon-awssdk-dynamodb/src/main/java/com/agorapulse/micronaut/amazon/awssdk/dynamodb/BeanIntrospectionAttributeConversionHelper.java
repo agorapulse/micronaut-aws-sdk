@@ -22,7 +22,7 @@ import io.micronaut.core.beans.BeanProperty;
 import software.amazon.awssdk.enhanced.dynamodb.MappedTableResource;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.Map;
 import java.util.stream.Collectors;
 

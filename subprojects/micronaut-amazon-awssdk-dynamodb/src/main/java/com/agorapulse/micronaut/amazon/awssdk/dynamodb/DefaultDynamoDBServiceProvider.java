@@ -21,7 +21,7 @@ import io.micronaut.context.event.ApplicationEventPublisher;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**

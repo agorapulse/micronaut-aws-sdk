@@ -21,19 +21,19 @@ import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.inject.annotation.AnnotationRemapper;
 import io.micronaut.inject.visitor.VisitorContext;
 
-import javax.annotation.Nonnull;
+import io.micronaut.core.annotation.NonNull;
 import java.util.Collections;
 import java.util.List;
 
 public class LambdaClientRemapper implements AnnotationRemapper {
 
-    @Nonnull
+    @NonNull
     @Override
     public String getPackageName() {
         return "com.agorapulse.micronaut.aws.lambda.annotation";
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public List<AnnotationValue<?>> remap(AnnotationValue<?> annotation, VisitorContext visitorContext) {
         return Collections.singletonList(annotation);

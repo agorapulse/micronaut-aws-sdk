@@ -26,7 +26,7 @@ import software.amazon.awssdk.services.ses.SesAsyncClient;
 import software.amazon.awssdk.services.ses.SesAsyncClientBuilder;
 import software.amazon.awssdk.services.ses.SesClient;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.Optional;
 
 @Factory

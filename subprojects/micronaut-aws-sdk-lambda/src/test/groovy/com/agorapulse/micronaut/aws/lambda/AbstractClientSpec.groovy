@@ -22,6 +22,7 @@ import com.amazonaws.services.lambda.AWSLambda
 import com.amazonaws.services.lambda.model.CreateFunctionRequest
 import com.amazonaws.services.lambda.model.Environment
 import com.amazonaws.services.lambda.model.FunctionCode
+import com.amazonaws.services.lambda.model.GetFunctionRequest
 import com.amazonaws.services.lambda.model.Runtime
 import groovy.transform.CompileStatic
 import org.zeroturnaround.zip.ZipUtil
@@ -29,7 +30,7 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.TempDir
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 import java.nio.ByteBuffer
 
 @SuppressWarnings('AbstractClassWithoutAbstractMethod')
@@ -46,7 +47,7 @@ abstract class AbstractClientSpec extends Specification {
     }
 
     @CompileStatic
-    @SuppressWarnings('ImplicitClosureParameter')
+    @SuppressWarnings(['ImplicitClosureParameter', 'BusyWait'])
     private void prepareHelloFunction() {
         boolean alreadyExists = lambda.listFunctions().functions.any {
             it.functionName == 'HelloFunction'
@@ -67,12 +68,16 @@ abstract class AbstractClientSpec extends Specification {
         CreateFunctionRequest request = new CreateFunctionRequest()
             .withFunctionName('HelloFunction')
             .withRuntime(Runtime.Nodejs16X)
-            .withRole('HelloRole')
+            .withRole('arn:aws:iam::123456789012:role/HelloRole')
             .withHandler('index.handler')
             .withCode(new FunctionCode().withZipFile(ByteBuffer.wrap(functionArchive.bytes)))
             .withEnvironment(new Environment(variables: [MICRONAUT_ENVIRONMENTS: 'itest']))
 
         lambda.createFunction(request)
+
+        while (lambda.getFunction(new GetFunctionRequest().withFunctionName('HelloFunction')).configuration.state != 'Active') {
+            Thread.sleep(100)
+        }
     }
 
 }

@@ -20,7 +20,7 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.*;
 import io.micronaut.context.event.ApplicationEventListener;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
