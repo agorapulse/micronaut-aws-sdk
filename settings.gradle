@@ -52,10 +52,6 @@ gradleEnterprise {
         publishAlways()
         termsOfServiceUrl = "https://gradle.com/terms-of-service"
         termsOfServiceAgree = "yes"
-
-        buildScanPublished { scan ->
-            file("scan-journal.log") << "${new Date()} - ${scan.buildScanId} - ${scan.buildScanUri}\n"
-        }
     }
 }
 

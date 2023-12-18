@@ -124,7 +124,6 @@ nexusPublishing {
 }
 
 allprojects {
-    apply from: rootProject.file('gradle/micronaut-compatibility.gradle')
     repositories {
         mavenCentral()
         maven { url 'https://repo.spring.io/release' }
@@ -142,8 +141,6 @@ project(':micronaut-aws-sdk-bom').apply(plugin: 'java-platform')
 subprojects { Project subproject ->
     if (subproject.name == 'guide' || subproject.name == 'micronaut-aws-sdk-dependencies'|| subproject.name == 'micronaut-aws-sdk-bom') return
 
-    apply plugin: 'micronaut-compatibility'
-
     if (subproject.name.startsWith('micronaut')) {
         project(':micronaut-aws-sdk-bom').dependencies.constraints.api subproject
     }
@@ -160,7 +157,7 @@ subprojects { Project subproject ->
             } else {
                 project.logger.lifecycle "No importMicronautPlatform property found for ${micronaut.dump()}"
             }
-            testRuntime 'spock2'
+            testRuntime 'spock'
             processing {
                 incremental false
             }
@@ -176,7 +173,7 @@ subprojects { Project subproject ->
             testImplementation "org.apache.groovy:groovy:$groovyVersion"
         } else {
             implementation "org.apache.groovy:groovy:$groovyVersion"
-            implementation micronautMigratedDependency('micronaut-runtime-groovy')
+            implementation 'io.micronaut.groovy:micronaut-runtime-groovy'
             compileOnly 'io.micronaut:micronaut-inject-groovy'
         }
 
