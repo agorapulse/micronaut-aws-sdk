@@ -35,7 +35,6 @@ import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeMultipart
 import javax.mail.util.ByteArrayDataSource
 import java.nio.ByteBuffer
-import java.nio.charset.StandardCharsets
 
 import static java.util.Collections.singletonList
 import static javax.mail.Message.RecipientType.*
