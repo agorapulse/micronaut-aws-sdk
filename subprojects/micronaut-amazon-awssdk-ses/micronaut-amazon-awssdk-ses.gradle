@@ -25,5 +25,4 @@ dependencies {
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation project(':micronaut-amazon-awssdk-integration-testing')
     testImplementation "com.agorapulse:gru-micronaut:$gruVersion"
-    testImplementation 'io.micronaut:micronaut-jackson-databind'
 }

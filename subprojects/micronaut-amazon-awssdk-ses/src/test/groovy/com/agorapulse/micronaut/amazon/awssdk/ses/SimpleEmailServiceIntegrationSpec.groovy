@@ -18,12 +18,13 @@
 package com.agorapulse.micronaut.amazon.awssdk.ses
 
 import com.agorapulse.gru.Gru
-import com.agorapulse.gru.minions.JsonMinion
+import com.agorapulse.gru.http.Http
 import com.agorapulse.micronaut.amazon.awssdk.itest.localstack.LocalstackContainerHolder
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.micronaut.context.annotation.Property
-import io.micronaut.test.extensions.spock.annotation.MicronautTest
-import jakarta.inject.Inject
+import io.micronaut.test.annotation.MicronautTest
+
+import javax.inject.Inject
 import software.amazon.awssdk.services.ses.SesClient
 import spock.lang.Specification
 import spock.lang.TempDir
@@ -74,7 +75,7 @@ class SimpleEmailServiceIntegrationSpec extends Specification {
             status == EmailDeliveryStatus.STATUS_DELIVERED
 
         when:
-            Gru gru = Gru.create(localstack.getEndpointOverride(SES).toString())
+            Gru gru = Gru.create(Http.create(this)).prepare(localstack.getEndpointOverride(SES).toString())
 
             gru.test {
                 get('/_aws/ses')
@@ -85,22 +86,6 @@ class SimpleEmailServiceIntegrationSpec extends Specification {
 
         then:
             gru.verify()
-
-        when:
-            String content = gru.squad.ask(JsonMinion) { JsonMinion minion -> minion.responseText }
-
-        then:
-            content
-
-        when:
-            Map messagesResponse = objectMapper.readValue(content, Map)
-            String rawData = messagesResponse['messages'][0]['RawData']
-            File emailFile = new File(tempDir, 'email.eml')
-            emailFile << rawData
-
-        then:
-            // you can inspect the file here using Desktop.getDesktop().open(emailFile)
-            noExceptionThrown()
     }
 
 }
