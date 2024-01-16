@@ -40,5 +40,6 @@ class SimpleEmailServiceConfiguration extends DefaultRegionAndEndpointConfigurat
 
     Optional<String> sourceEmail = Optional.empty()
     Optional<String> subjectPrefix = Optional.empty()
+    Optional<Boolean> useBase64EncodingForMultipartEmails = Optional.empty()
 
 }

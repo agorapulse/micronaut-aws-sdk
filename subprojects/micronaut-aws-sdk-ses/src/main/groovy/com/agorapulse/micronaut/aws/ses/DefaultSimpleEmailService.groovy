@@ -124,7 +124,9 @@ class DefaultSimpleEmailService implements SimpleEmailService {
 
         BodyPart p = new MimeBodyPart()
         p.setContent(email.htmlBody, 'text/html')
-        mimeMultipart.addBodyPart(p)
+        if (configuration.useBase64EncodingForMultipartEmails.orElse(false)) {
+            p.setHeader('Content-Transfer-Encoding', 'base64')
+        }
 
         for (TransactionalEmailAttachment attachment : email.attachments) {
             if (!MimeType.isMimeTypeSupported(attachment.mimeType)) {
