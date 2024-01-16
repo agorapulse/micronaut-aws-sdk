@@ -1,0 +1,11 @@
+{
+    "messages": [
+        {
+            "Id": "${json-unit:any-string}",
+            "Region": "us-east-1",
+            "Source": "subscribe@groovycalamari.com",
+            "RawData": "${json-unit:any-string}",
+            "Timestamp": "${json-unit:any-string}"
+        }
+    ]
+}

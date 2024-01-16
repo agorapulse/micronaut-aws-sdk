@@ -88,6 +88,19 @@ or
 https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/ses/SimpleEmailService.html[SimpleEmailService AWS SDK 1.x]
 for the full reference.
 
+==== Configuration
+You can configure the SES client using `aws.ses` prefix in your `application.yml` file.
+Use `aws.ses.use-base64-encoding-for-multipart-emails` to enable base64 encoding for HTML body of multipart emails.
+
+[source,yaml,indent=0,subs="attributes"]
+.application.yml
+----
+aws:
+    ses:
+        use-base64-encoding-for-multipart-emails: true
+----
+
+
 ==== Testing
 It is recommended just to mock the `SimpleEmailService` in your tests as it only contains single abstract method.
 

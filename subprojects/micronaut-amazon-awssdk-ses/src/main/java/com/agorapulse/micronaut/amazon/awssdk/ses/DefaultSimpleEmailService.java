@@ -136,6 +136,10 @@ public class DefaultSimpleEmailService implements SimpleEmailService {
 
         BodyPart p = new MimeBodyPart();
         p.setContent(email.getHtmlBody(), "text/html");
+        if (configuration.getUseBase64EncodingForMultipartEmails().orElse(false)) {
+            p.setHeader("Content-Transfer-Encoding", "base64");
+        }
+
         mimeMultipart.addBodyPart(p);
 
         for (TransactionalEmailAttachment attachment : email.getAttachments()) {

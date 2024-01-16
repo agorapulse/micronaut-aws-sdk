@@ -28,6 +28,8 @@ public class SimpleEmailServiceConfiguration extends DefaultRegionAndEndpointCon
     private Optional<String> sourceEmail = Optional.empty();
     private Optional<String> subjectPrefix = Optional.empty();
 
+    private Optional<Boolean> useBase64EncodingForMultipartEmails = Optional.empty();
+
     public Optional<String> getSourceEmail() {
         return sourceEmail;
     }
@@ -42,6 +44,14 @@ public class SimpleEmailServiceConfiguration extends DefaultRegionAndEndpointCon
 
     public void setSubjectPrefix(Optional<String> subjectPrefix) {
         this.subjectPrefix = subjectPrefix;
+    }
+
+    public Optional<Boolean> getUseBase64EncodingForMultipartEmails() {
+        return useBase64EncodingForMultipartEmails;
+    }
+
+    public void setUseBase64EncodingForMultipartEmails(Optional<Boolean> useBase64EncodingForMultipartEmails) {
+        this.useBase64EncodingForMultipartEmails = useBase64EncodingForMultipartEmails;
     }
 
 }

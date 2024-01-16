@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 dependencies {
-    implementation group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
+    api group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
     implementation 'com.amazonaws:aws-java-sdk-core'
     implementation "software.amazon.awssdk:netty-nio-client:$kinesisClientV2Version"
 
