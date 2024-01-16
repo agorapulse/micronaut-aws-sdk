@@ -35,6 +35,7 @@ import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeMultipart
 import javax.mail.util.ByteArrayDataSource
 import java.nio.ByteBuffer
+import java.nio.charset.StandardCharsets
 
 import static java.util.Collections.singletonList
 import static javax.mail.Message.RecipientType.*
@@ -122,9 +123,13 @@ class DefaultSimpleEmailService implements SimpleEmailService {
 
         MimeMultipart mimeMultipart = new MimeMultipart()
 
-        BodyPart p = new MimeBodyPart()
-        p.setContent(email.htmlBody, 'text/html')
-        mimeMultipart.addBodyPart(p)
+        BodyPart p = new MimeBodyPart();
+        if (configuration.getUseBase64EncodingForMultipartEmails().orElse(false)) {
+            p.setContent(Base64.getEncoder().encode(email.getHtmlBody().getBytes(StandardCharsets.UTF_8)), "text/html; charset=UTF-8");
+            p.setHeader("Content-Transfer-Encoding", "base64");
+        } else {
+            p.setContent(email.getHtmlBody(), "text/html");
+        }
 
         for (TransactionalEmailAttachment attachment : email.attachments) {
             if (!MimeType.isMimeTypeSupported(attachment.mimeType)) {

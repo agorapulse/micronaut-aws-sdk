@@ -42,6 +42,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -135,7 +136,13 @@ public class DefaultSimpleEmailService implements SimpleEmailService {
         MimeMultipart mimeMultipart = new MimeMultipart();
 
         BodyPart p = new MimeBodyPart();
-        p.setContent(email.getHtmlBody(), "text/html");
+        if (configuration.getUseBase64EncodingForMultipartEmails().orElse(false)) {
+            p.setContent(Base64.getEncoder().encode(email.getHtmlBody().getBytes(StandardCharsets.UTF_8)), "text/html; charset=UTF-8");
+            p.setHeader("Content-Transfer-Encoding", "base64");
+        } else {
+            p.setContent(email.getHtmlBody(), "text/html");
+        }
+
         mimeMultipart.addBodyPart(p);
 
         for (TransactionalEmailAttachment attachment : email.getAttachments()) {
