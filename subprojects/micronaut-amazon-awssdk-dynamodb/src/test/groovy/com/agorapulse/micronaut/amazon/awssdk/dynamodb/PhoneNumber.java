@@ -25,6 +25,7 @@ public class PhoneNumber {
         this.number = number;
     }
 
+    // CHECKSTYLE:OFF
     @Override
     public String toString() {
         return "PhoneNumber{" +

@@ -76,6 +76,7 @@ public class Person {
         this.hobbies = hobbies;
     }
 
+    // CHECKSTYLE:OFF
     @Override
     public String toString() {
         return "Person{" +

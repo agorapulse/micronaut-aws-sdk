@@ -48,6 +48,7 @@ public class Address {
         this.zipCode = zipCode;
     }
 
+    // CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
