@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/docs.css?v=2.1.12-micronaut-3.0" />
+<link rel="stylesheet" href="css/docs.css?v=3.0.3" />
 <style>
 .hidden {
     display: none;
@@ -93,7 +93,7 @@ $(addBlockSwitches);
 <h1>Set of useful libraries for Micronaut</h1>
 <div class="details">
 <span id="author" class="author">Vladimir Orany</span><br>
-<span id="revnumber">version 2.1.12-micronaut-3.0</span>
+<span id="revnumber">version 3.0.3</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -177,15 +177,7 @@ $(addBlockSwitches);
 <li><a href="#_testing_9">Testing</a></li>
 </ul>
 </li>
-<li><a href="#_websockets_for_api_gateway">1.11. WebSockets for API Gateway</a>
-<ul class="sectlevel4">
-<li><a href="#_installation_11">Installation</a></li>
-<li><a href="#_configuration_7">Configuration</a></li>
-<li><a href="#_usage">Usage</a></li>
-<li><a href="#_testing_10">Testing</a></li>
-</ul>
-</li>
-<li><a href="#_configuration_8">1.12. Configuration</a></li>
+<li><a href="#_configuration_7">1.11. Configuration</a></li>
 </ul>
 </li>
 <li><a href="#_micronaut_for_api_gateway_proxy">2. Micronaut for API Gateway Proxy</a></li>
@@ -228,7 +220,7 @@ $(addBlockSwitches);
 <div class="ulist">
 <ul>
 <li>
-<p><a href="#_aws_sdk_for_micronaut">AWS SDK for Micronaut</a> - integration for <a href="#_dynamodb">DynamoDB</a>, <a href="#_kinesis">Kinesis</a>, <a href="#_simple_storage_service_s3">Simple Storage Service (S3)</a>, <a href="#_simple_email_service_ses">Simple Email Service (SES)</a>, <a href="#_simple_notification_service_sns">Simple Notification Service (SNS)</a>,  <a href="#_simple_queue_service_sqs">Simple Queue Service (SQS)</a> and <a href="#_websockets_for_api_gateway">WebSockets for API Gateway</a></p>
+<p><a href="#_aws_sdk_for_micronaut">AWS SDK for Micronaut</a> - integration for <a href="#_dynamodb">DynamoDB</a>, <a href="#_kinesis">Kinesis</a>, <a href="#_simple_storage_service_s3">Simple Storage Service (S3)</a>, <a href="#_simple_email_service_ses">Simple Email Service (SES)</a>, <a href="#_simple_notification_service_sns">Simple Notification Service (SNS)</a>,  <a href="#_simple_queue_service_sqs">Simple Queue Service (SQS)</a> and <a href="#WebSockets for API Gateway">[WebSockets for API Gateway]</a></p>
 </li>
 <li>
 <p><a href="#_micronaut_for_api_gateway_proxy">Micronaut for API Gateway Proxy</a> - develop API Gateway Proxy Lambda functions using Micronaut HTTP server capabilities (currently superseded by
@@ -275,9 +267,6 @@ If you are <a href="https://github.com/agorapulse/grails-aws-sdk">Grails AWS SDK
 </li>
 <li>
 <p><a href="#_security_token_service_sts">Security Token Service (STS)</a></p>
-</li>
-<li>
-<p><a href="#_websockets_for_api_gateway">WebSockets for API Gateway</a></p>
 </li>
 </ul>
 </div>
@@ -388,7 +377,7 @@ functions.</p>
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-cloudwatchlogs:2.1.12-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-cloudwatchlogs:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -397,14 +386,14 @@ functions.</p>
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-cloudwatchlogs&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-cloudwatchlogs:2.1.12-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-cloudwatchlogs:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -413,7 +402,7 @@ functions.</p>
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-cloudwatchlogs&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -511,7 +500,7 @@ public class LogCheckService {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:2.1.12-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -520,7 +509,7 @@ public class LogCheckService {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-integration-testing&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -553,11 +542,11 @@ public class LogCheckService {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-dynamodb-annotation-processor:2.1.12-micronaut-3.0'
-implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb:2.1.12-micronaut-3.0'
+<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-dynamodb-annotation-processor:3.0.3'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb:3.0.3'
 
 // for Kotlin Query DSL
-implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb-kotlin:2.1.12-micronaut-3.0'</code></pre>
+implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb-kotlin:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -566,21 +555,21 @@ implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb-kotlin:2.1.12-mi
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;!-- for Kotlin Query DSL --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-aws-sdk-dynamodb-annotation-processor:2.1.12-micronaut-3.0'
-implementation 'com.agorapulse:micronaut-aws-sdk-dynamodb:2.1.12-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-aws-sdk-dynamodb-annotation-processor:3.0.3'
+implementation 'com.agorapulse:micronaut-aws-sdk-dynamodb:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -589,7 +578,7 @@ implementation 'com.agorapulse:micronaut-aws-sdk-dynamodb:2.1.12-micronaut-3.0'<
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2426,7 +2415,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:2.1.12-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2435,7 +2424,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2587,10 +2576,10 @@ public class DeclarativeServiceTest {
 <div class="content">
 <pre class="prettyprint highlight"><code>// for Kinesis client
 annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-kinesis-annotation-processor:{project-version
-implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis:2.1.12-micronaut-3.0'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis:3.0.3'
 
 // for Kinesis listener
-implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:2.1.12-micronaut-3.0'</code></pre>
+implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2600,13 +2589,13 @@ implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:2.1.12-mic
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-kinesis&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;!-- for Kinesis listener --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-kinesis-worker&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2614,10 +2603,10 @@ implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:2.1.12-mic
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code>// for Kinesis client
-annotationProcessor 'com.agorapulse:micronaut-aws-sdk-kinesis-annotation-processor:2.1.12-micronaut-3.0'
-implementation 'com.agorapulse:micronaut-aws-sdk-kinesis:2.1.12-micronaut-3.0'
+annotationProcessor 'com.agorapulse:micronaut-aws-sdk-kinesis-annotation-processor:3.0.3'
+implementation 'com.agorapulse:micronaut-aws-sdk-kinesis:3.0.3'
 // for Kinesis listener
-implementation 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:2.1.12-micronaut-3.0'</code></pre>
+implementation 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2627,13 +2616,13 @@ implementation 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:2.1.12-micronaut
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-kinesis&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;!-- for Kinesis listener --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-kinesis-worker&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3358,7 +3347,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:2.1.12-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3367,7 +3356,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3473,7 +3462,7 @@ public class KinesisJavaDemoTest {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-lambda:2.1.12-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-lambda:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3482,14 +3471,14 @@ public class KinesisJavaDemoTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-lambda&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-lambda:2.1.12-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-lambda:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3498,7 +3487,7 @@ public class KinesisJavaDemoTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-lambda&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3630,7 +3619,7 @@ public interface HelloBodyClient {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:2.1.12-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3639,7 +3628,7 @@ public interface HelloBodyClient {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3840,7 +3829,7 @@ public class HelloClientTest {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-s3:2.1.12-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-s3:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3849,14 +3838,14 @@ public class HelloClientTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-s3&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-s3:2.1.12-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-s3:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3865,7 +3854,7 @@ public class HelloClientTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-s3&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4188,7 +4177,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:2.1.12-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4197,7 +4186,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4307,7 +4296,7 @@ public class SimpleStorageServiceTest {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-ses:2.1.12-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-ses:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4316,14 +4305,14 @@ public class SimpleStorageServiceTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-ses&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-ses:2.1.12-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-ses:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4332,7 +4321,7 @@ public class SimpleStorageServiceTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-ses&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4545,8 +4534,8 @@ Use <code>aws.ses.use-base64-encoding-for-multipart-emails</code> to enable base
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-sns-annotation-processor:2.1.12-micronaut-3.0'
-implementation 'com.agorapulse:micronaut-amazon-awssdk-sns:2.1.12-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-sns-annotation-processor:3.0.3'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-sns:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4555,15 +4544,15 @@ implementation 'com.agorapulse:micronaut-amazon-awssdk-sns:2.1.12-micronaut-3.0'
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-sns&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-aws-sdk-sns-annotation-processor:2.1.12-micronaut-3.0'
-implementation 'com.agorapulse:micronaut-aws-sdk-sns:2.1.12-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-aws-sdk-sns-annotation-processor:3.0.3'
+implementation 'com.agorapulse:micronaut-aws-sdk-sns:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4572,7 +4561,7 @@ implementation 'com.agorapulse:micronaut-aws-sdk-sns:2.1.12-micronaut-3.0'</code
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sns&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -5075,7 +5064,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:2.1.12-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -5084,7 +5073,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -5208,8 +5197,8 @@ public class SimpleNotificationServiceTest {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-sqs-annotation-processor:2.1.12-micronaut-3.0'
-implementation 'com.agorapulse:micronaut-amazon-awssdk-sqs:2.1.12-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-sqs-annotation-processor:3.0.3'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-sqs:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -5218,15 +5207,15 @@ implementation 'com.agorapulse:micronaut-amazon-awssdk-sqs:2.1.12-micronaut-3.0'
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-sqs&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-aws-sdk-sqs-annotation-processor:2.1.12-micronaut-3.0'
-implementation 'com.agorapulse:micronaut-aws-sdk-sqs:2.1.12-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-aws-sdk-sqs-annotation-processor:3.0.3'
+implementation 'com.agorapulse:micronaut-aws-sdk-sqs:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -5235,7 +5224,7 @@ implementation 'com.agorapulse:micronaut-aws-sdk-sqs:2.1.12-micronaut-3.0'</code
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sqs&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -5727,7 +5716,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:2.1.12-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -5736,7 +5725,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -5849,7 +5838,7 @@ public class SimpleQueueServiceTest {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-sts:2.1.12-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-sts:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -5858,14 +5847,14 @@ public class SimpleQueueServiceTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-sts&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-sts:2.1.12-micronaut-3.0'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-sts:3.0.3'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -5874,7 +5863,7 @@ public class SimpleQueueServiceTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sts&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
+    &lt;version&gt;3.0.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -5919,438 +5908,7 @@ for the full reference.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_websockets_for_api_gateway"><a class="anchor" href="#_websockets_for_api_gateway"></a>1.11. WebSockets for API Gateway</h4>
-<div class="quoteblock">
-<blockquote>
-<div class="paragraph">
-<p>In a WebSocket API, the client and the server can both send messages to each other at any time. Backend servers can easily push data to connected users and devices, avoiding the need to implement complex polling mechanisms.</p>
-</div>
-</blockquote>
-</div>
-<div class="paragraph">
-<p>This library provides components for easy handling of incoming WebSocket proxied events as well as for sending
-messages back to the clients</p>
-</div>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-Use this part of the library with caution. Using WebSockets with API Gateway can be very expensive.
-</td>
-</tr>
-</table>
-</div>
-<div class="sect4">
-<h5 id="_installation_11"><a class="anchor" href="#_installation_11"></a>Installation</h5>
-<div class="listingblock primary">
-<div class="title">Gradle</div>
-<div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-ag-ws:2.1.12-micronaut-3.0'</code></pre>
-</div>
-</div>
-<div class="listingblock secondary">
-<div class="title">Maven</div>
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
-    &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
-    &lt;artifactId&gt;micronaut-aws-sdk-ag-ws&lt;/artifactId&gt;
-    &lt;version&gt;2.1.12-micronaut-3.0&lt;/version&gt;
-&lt;/dependency&gt;</code></pre>
-</div>
-</div>
-</div>
-<div class="sect4">
-<h5 id="_configuration_7"><a class="anchor" href="#_configuration_7"></a>Configuration</h5>
-<div class="paragraph">
-<p>No configuration is required but some of the configuration properties may be useful for you.</p>
-</div>
-<div class="listingblock">
-<div class="title">application.yml</div>
-<div class="content">
-<pre class="prettyprint highlight nowrap"><code data-lang="yaml">aws:
-  websocket:
-    region: sa-east-1
-    connections:
-      url: https://abcefgh.execute-api.eu-west-1.amazonaws.com/test/@connections        <i class="conum" data-value="1"></i><b>(1)</b>
-
-# Java Only
-micronaut:
-  function:
-    name: lambda-echo-java                                                              <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>You can specify the default connections URL for <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html">MessageSender</a></td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>If you are creating Java functions don&#8217;t forget to specify the function&#8217;s name for deployments</td>
-</tr>
-</table>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-<a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html">MessageSender</a> bean
-is only present in the context if <code>aws.websocket.connectins.url</code> configuration property is present.Use <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/apigateway/ws/MessageSenderFactory.html">MessageSenderFactory</a>
-If you want to create <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html">MessageSender</a>
-manually using URL which is not predefined.
-</td>
-</tr>
-</table>
-</div>
-</div>
-<div class="sect4">
-<h5 id="_usage"><a class="anchor" href="#_usage"></a>Usage</h5>
-<div class="paragraph">
-<p><a href="https://github.com/aws/aws-lambda-java-libs/tree/master/aws-lambda-java-events">AWS SDK Lambda Events library</a> does not contain the events dedicated to WebSocket API Gateway yet.
-You can use <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/apigateway/ws/WebSocketConnectionRequest.html">WebSocketConnectionRequest</a>
-as an argument to function handling connection and disconnection of the WebSocket and <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/apigateway/ws/WebSocketRequest.html">WebSocketRequest</a> for handling
-incoming messages.</p>
-</div>
-<div class="paragraph">
-<p><strong>The following examples assume that you have created function using <code>mn create-function</code> command.</strong></p>
-</div>
-<div class="paragraph">
-<p>The simplest example is a echo method can be used to handle all the incoming events and reply to the incoming messages and also
-publishes to SNS:</p>
-</div>
-<div class="listingblock primary">
-<div class="title">Groovy</div>
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">package com.agorapulse.micronaut.aws.apigateway.ws
-
-import com.agorapulse.micronaut.aws.apigateway.ws.event.EventType
-import com.agorapulse.micronaut.aws.apigateway.ws.event.WebSocketRequest
-import com.agorapulse.micronaut.aws.apigateway.ws.event.WebSocketResponse
-import groovy.transform.Field
-
-import jakarta.inject.Inject
-
-@Inject @Field MessageSenderFactory factory                                             <i class="conum" data-value="1"></i><b>(1)</b>
-@Inject @Field TestTopicPublisher publisher                                             <i class="conum" data-value="2"></i><b>(2)</b>
-
-WebSocketResponse lambdaEcho(WebSocketRequest event) {                                  <i class="conum" data-value="3"></i><b>(3)</b>
-    MessageSender sender = factory.create(event.requestContext)                         <i class="conum" data-value="4"></i><b>(4)</b>
-    String connectionId = event.requestContext.connectionId                             <i class="conum" data-value="5"></i><b>(5)</b>
-
-    switch (event.requestContext.eventType) {
-        case EventType.CONNECT:                                                         <i class="conum" data-value="6"></i><b>(6)</b>
-            // do nothing
-            break
-        case EventType.MESSAGE:                                                         <i class="conum" data-value="7"></i><b>(7)</b>
-            String message = "[$connectionId] ${event.body}"
-            sender.send(connectionId, message)
-            publisher.publishMessage(connectionId, message)
-            break
-        case EventType.DISCONNECT:                                                      <i class="conum" data-value="8"></i><b>(8)</b>
-            // do nothing
-            break
-    }
-
-    return WebSocketResponse.OK                                                         <i class="conum" data-value="9"></i><b>(9)</b>
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Factory to create <code>MessageSender</code> if we want to reply to the message immediately</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Service to publish to SNS to forward the message</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td><a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/apigateway/ws/WebSocketRequest.html">WebSocketRequest</a> can handle any incoming event</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Create <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html">MessageSender</a> for current client</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td><code>connectionId</code> is unique identifier of the client</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td><code>CONNECT</code> event signals new client has been connected</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
-<td><code>MESSAGE</code> event signals new incoming message</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="8"></i><b>8</b></td>
-<td><code>DISCONNECT</code> event signals client has been disconnected</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="9"></i><b>9</b></td>
-<td>The method must always return <code>WebSocketResponse.OK</code> to signal success</td>
-</tr>
-</table>
-</div>
-<div class="listingblock secondary">
-<div class="title">Java</div>
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="java">package com.agorapulse.micronaut.aws.apigateway.ws;
-
-import com.agorapulse.micronaut.aws.apigateway.ws.event.WebSocketRequest;
-import com.agorapulse.micronaut.aws.apigateway.ws.event.WebSocketResponse;
-import io.micronaut.function.FunctionBean;
-
-import java.util.function.Function;
-
-@FunctionBean("lambda-echo-java")
-public class LambdaEchoJava implements Function&lt;WebSocketRequest, WebSocketResponse&gt; {
-
-    private final MessageSenderFactory factory;                                         <i class="conum" data-value="1"></i><b>(1)</b>
-    private final TestTopicPublisher publisher;                                         <i class="conum" data-value="2"></i><b>(2)</b>
-
-    public LambdaEchoJava(MessageSenderFactory factory, TestTopicPublisher publisher) {
-        this.factory = factory;
-        this.publisher = publisher;
-    }
-
-    @Override
-    public WebSocketResponse apply(WebSocketRequest event) {                            <i class="conum" data-value="3"></i><b>(3)</b>
-        MessageSender sender = factory.create(event.getRequestContext());               <i class="conum" data-value="4"></i><b>(4)</b>
-        String connectionId = event.getRequestContext().getConnectionId();              <i class="conum" data-value="5"></i><b>(5)</b>
-
-        switch (event.getRequestContext().getEventType()) {
-            case CONNECT:                                                               <i class="conum" data-value="6"></i><b>(6)</b>
-                // do nothing
-                break;
-            case MESSAGE:                                                               <i class="conum" data-value="7"></i><b>(7)</b>
-                String message = "[" + connectionId + "] " + event.getBody();
-                sender.send(connectionId, message);
-                publisher.publishMessage(connectionId, message);
-                break;
-            case DISCONNECT:                                                            <i class="conum" data-value="8"></i><b>(8)</b>
-                // do nothing
-                break;
-        }
-
-        return WebSocketResponse.OK;                                                    <i class="conum" data-value="9"></i><b>(9)</b>
-    }
-
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Factory to create <code>MessageSender</code> if we want to reply to the message immediately</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Service to publish to SNS to forward the message</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td><a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/apigateway/ws/WebSocketRequest.html">WebSocketRequest</a> can handle any incoming event</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Create <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html">MessageSender</a> for current client</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td><code>connectionId</code> is unique identifier of the client</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td><code>CONNECT</code> event signals new client has been connected</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
-<td><code>MESSAGE</code> event signals new incoming message</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="8"></i><b>8</b></td>
-<td><code>DISCONNECT</code> event signals client has been disconnected</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="9"></i><b>9</b></td>
-<td>The method must always return <code>WebSocketResponse.OK</code> to signal success</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>Once the function is ready you can deploy the function to AWS Lambda and setup the new API Gateway with WebSocket API</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="images/new-websocket-api.png" alt="new websocket api">
-</div>
-<div class="title">Figure 1. Create new WebSocket API</div>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="images/new-websocket-route.png" alt="new websocket route">
-</div>
-<div class="title">Figure 2. Create WebSocket API Routes</div>
-</div>
-<div class="paragraph">
-<p>Another example is a simple AWS Lambda function to react to any of events supported by AWS Lambda and push to WebSocket clients.</p>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-There is no support for routing at the moment, but you can get the matched route from
-<code>event.requestContext.routeKey</code>.
-</td>
-</tr>
-</table>
-</div>
-<div class="listingblock primary">
-<div class="title">Groovy</div>
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="groovy">package com.agorapulse.micronaut.aws.apigateway.ws
-
-import com.amazonaws.AmazonClientException
-import com.amazonaws.services.lambda.runtime.events.SNSEvent
-import groovy.transform.Field
-
-import jakarta.inject.Inject
-
-@Inject @Field MessageSender sender                                                     <i class="conum" data-value="1"></i><b>(1)</b>
-
-void notify(SNSEvent event) {                                                           <i class="conum" data-value="2"></i><b>(2)</b>
-    event.records.each {
-        try {
-            sender.send(it.SNS.subject, "[SNS] $it.SNS.message")                        <i class="conum" data-value="3"></i><b>(3)</b>
-        } catch (AmazonClientException ignored) {
-            // can be gone                                                              <i class="conum" data-value="4"></i><b>(4)</b>
-        }
-    }
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td><code>MessageSender</code> can be injected if you specify <code>aws.websocket.connnections.url</code> configuration property</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>You can for example react on records published into Simple Notification Service</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Send message to the client (in previous example the <code>connectionId</code> was set to the <code>subject</code> of the SNS record)</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>If the client is already disconnected then <code>AmazonClientException</code> may occur</td>
-</tr>
-</table>
-</div>
-<div class="listingblock secondary">
-<div class="title">Java</div>
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="java">package com.agorapulse.micronaut.aws.apigateway.ws;
-
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.services.lambda.runtime.events.SNSEvent;
-import io.micronaut.function.FunctionBean;
-
-import java.util.function.Consumer;
-
-@FunctionBean("notification-handler")
-public class NotificationHandler implements Consumer&lt;SNSEvent&gt; {
-
-    private final MessageSender sender;                                                 <i class="conum" data-value="1"></i><b>(1)</b>
-
-    public NotificationHandler(MessageSender sender) {
-        this.sender = sender;
-    }
-
-    @Override
-    public void accept(SNSEvent event) {                                                <i class="conum" data-value="2"></i><b>(2)</b>
-        event.getRecords().forEach(it -&gt; {
-            try {
-                String connectionId = it.getSNS().getSubject();
-                String payload = "[SNS] " + it.getSNS().getMessage();
-                sender.send(connectionId, payload);                                     <i class="conum" data-value="3"></i><b>(3)</b>
-            } catch (AmazonClientException ignored) {
-                // can be gone                                                          <i class="conum" data-value="4"></i><b>(4)</b>
-            }
-        });
-    }
-
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td><code>MessageSender</code> can be injected if you specify <code>aws.websocket.connnections.url</code> configuration property</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>You can for example react on records published into Simple Notification Service</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Send message to the client (in previous example the <code>connectionId</code> was set to the <code>subject</code> of the SNS record)</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>If the client is already disconnected then <code>AmazonClientException</code> may occur</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>If you want to publish to the WebSockets using <a href="https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/apigateway/ws/MessageSender.html">MessageSender</a>
-your Lambda function&#8217;s role must have following permissions (preferably constrained just your API resource):</p>
-</div>
-<div class="listingblock">
-<div class="title">ExecuteApiFullAccess Policy</div>
-<div class="content">
-<pre class="prettyprint highlight"><code data-lang="JSON">{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "VisualEditor0",
-            "Effect": "Allow",
-            "Action": "execute-api:*",
-            "Resource": "*"
-        }
-    ]
-}</code></pre>
-</div>
-</div>
-</div>
-<div class="sect4">
-<h5 id="_testing_10"><a class="anchor" href="#_testing_10"></a>Testing</h5>
-<div class="paragraph">
-<p>You can very easily mock any of the interfaces. Create request event manually and follow
-<a href="http://guides.micronaut.io/micronaut-function-aws-lambda/guide/index.html#functiontests">the guide to test functions with Micronaut</a>.</p>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_configuration_8"><a class="anchor" href="#_configuration_8"></a>1.12. Configuration</h4>
+<h4 id="_configuration_7"><a class="anchor" href="#_configuration_7"></a>1.11. Configuration</h4>
 <div class="paragraph">
 <p>See the configuration sections for particular services.</p>
 </div>
@@ -6428,8 +5986,8 @@ your Lambda function&#8217;s role must have following permissions (preferably co
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 2.1.12-micronaut-3.0<br>
-Last updated 2024-01-16 15:33:18 UTC
+Version 3.0.3<br>
+Last updated 2024-03-15 12:13:50 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
