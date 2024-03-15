@@ -279,8 +279,7 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
             .name(attributeNameForProperty(propertyDescriptor))
             .getter(propertyDescriptor::get)
             // secondary indices can be read only
-            .setter(propertyDescriptor.isReadOnly() ? (bean, value) -> {
-            } : propertyDescriptor::set);
+            .setter(propertyDescriptor.isReadOnly() ? (bean, value) -> {} : propertyDescriptor::set);
     }
 
     /**
@@ -308,16 +307,19 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
 
         Class<T> clazz = type.getType();
 
-        Consumer<EnhancedTypeDocumentConfiguration.Builder> attrConfiguration = b -> b
-            .preserveEmptyObject(attributeConfiguration.preserveEmptyObject())
-            .ignoreNulls(attributeConfiguration.ignoreNulls());
+        if (clazz.getPackage() != null && !clazz.getPackage().getName().startsWith("java.")) {
+            Optional<BeanIntrospection<T>> introspection = BeanIntrospector.SHARED.findIntrospection(clazz);
+            if (introspection.isPresent() && introspection.get().isAnnotationPresent(DynamoDbBean.class)) {
+                Consumer<EnhancedTypeDocumentConfiguration.Builder> attrConfiguration = b -> b
+                    .preserveEmptyObject(attributeConfiguration.preserveEmptyObject())
+                    .ignoreNulls(attributeConfiguration.ignoreNulls());
 
-        if (type.isAnnotationPresent(DynamoDbBean.class)) {
-            return EnhancedType.documentOf(
-                clazz,
-                BeanIntrospectionTableSchema.recursiveCreate(clazz, beanContext, metaTableSchemaCache),
-                attrConfiguration
-            );
+                return EnhancedType.documentOf(
+                    clazz,
+                    BeanIntrospectionTableSchema.recursiveCreate(clazz, beanContext, metaTableSchemaCache),
+                    attrConfiguration
+                );
+            }
         }
 
         return EnhancedType.of(clazz);
