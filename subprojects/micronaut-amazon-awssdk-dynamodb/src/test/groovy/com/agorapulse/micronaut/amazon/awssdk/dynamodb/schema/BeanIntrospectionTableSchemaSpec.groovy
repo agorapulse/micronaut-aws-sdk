@@ -20,6 +20,7 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb.schema
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.DynamoDBEntity
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.DynamoDBEntityMapProperty
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.DynamoDBEntityNoRange
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.Person
 import io.micronaut.context.BeanContext
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.MetaTableSchemaCache
 import spock.lang.IgnoreIf
@@ -36,6 +37,13 @@ class BeanIntrospectionTableSchemaSpec extends Specification {
     void 'read table schema for java class'() {
         when:
             BeanIntrospectionTableSchema<DynamoDBEntity> schema = BeanIntrospectionTableSchema.create(DynamoDBEntity, context, cache)
+        then:
+            schema.attributeNames().size() == 7
+    }
+
+    void 'read table schema for java class with nested beans'() {
+        when:
+            BeanIntrospectionTableSchema<Person> schema = BeanIntrospectionTableSchema.create(Person, context, cache)
         then:
             schema.attributeNames().size() == 7
     }
