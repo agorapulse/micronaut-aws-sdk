@@ -198,9 +198,7 @@ class DefaultKinesisService implements KinesisService {
 
     @Override
     public PutRecordResult putEvent(String streamName, Event event, String sequenceNumberForOrdering) {
-        if (!StringUtils.isEmpty(configuration.getConsumerFilterKey())) {
-            event.setConsumerFilterKey(configuration.getConsumerFilterKey());
-        }
+        setConsumerFilterKeyIfEmpty(event, configuration.getConsumerFilterKey());
 
         try {
             return putRecord(streamName, event.getPartitionKey(), objectMapper.writeValueAsString(event), sequenceNumberForOrdering);
@@ -215,9 +213,7 @@ class DefaultKinesisService implements KinesisService {
             throw new IllegalArgumentException("Max put events size is " + MAX_PUT_RECORDS_SIZE);
         }
         return putRecords(streamName, events.stream().map(event -> {
-            if (!StringUtils.isEmpty(configuration.getConsumerFilterKey())) {
-                event.setConsumerFilterKey(configuration.getConsumerFilterKey());
-            }
+            setConsumerFilterKeyIfEmpty(event, configuration.getConsumerFilterKey());
 
             try {
                 ByteBuffer data = ByteBuffer.wrap(objectMapper.writeValueAsString(event).getBytes());
@@ -288,4 +284,10 @@ class DefaultKinesisService implements KinesisService {
     private final AmazonKinesis client;
     private final KinesisConfiguration configuration;
     private final ObjectMapper objectMapper;
+
+    private void setConsumerFilterKeyIfEmpty(Event event, String consumerFilterKey) {
+        if (StringUtils.isEmpty(event.getConsumerFilterKey()) && !StringUtils.isEmpty(consumerFilterKey)) {
+            event.setConsumerFilterKey(consumerFilterKey);
+        }
+    }
 }
