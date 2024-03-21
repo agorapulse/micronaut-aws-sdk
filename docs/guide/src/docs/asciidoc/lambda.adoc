@@ -137,3 +137,47 @@ You can save time creating the new Localstack container by sharing it between th
 include::{root-dir}/subprojects/micronaut-amazon-awssdk-s3/src/test/resources/application-test.yml[]
 ----
 ====
+
+==== Integration Testing
+
+You can very verify proper serialization and deserialization of the function arguments and results using `micronaut-amazon-awssdk-lambda-integration-testing` module.
+
+You need to add following dependencies into your build file:
+
+[source,indent=0,role="primary",subs='verbatim,attributes']
+.Gradle
+----
+testImplementation 'com.agorapulse:micronaut-amazon-awssdk-lambda-integration-testing:{project-version}'
+----
+
+[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
+.Maven
+----
+<dependency>
+    <groupId>com.agorapulse</groupId>
+    <artifactId>micronaut-amazon-awssdk-lambda-integration-testing</artifactId>
+    <version>{project-version}</version>
+</dependency>
+----
+
+You can use the `TestAwsLambdaRuntime` runner to test the function execution, including the serialization.
+
+[source,groovy,indent=0,options="nowrap",role="primary"]
+.Groovy
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-lambda-integration-testing/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/lambda/itest/TestAwsLambdaRuntimeSpec.groovy[lines=19..-1]
+----
+<1> Use `@MicronautTest` to let Micronaut handle the application context lifecycle
+<2> Inject the `TestAwsLambdaRuntime` runner
+<3> Use can mock any services as in any other Micronaut test
+<4> Use one of the methods to execute the function and verify the result
+
+[source,java,indent=0,options="nowrap",role="secondary"]
+.Java
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-lambda-integration-testing/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/lambda/itest/TestAwsLambdaRuntimeTest.java[lines=19..-1]
+----
+<1> Use `@MicronautTest` to let Micronaut handle the application context lifecycle
+<2> Inject the `TestAwsLambdaRuntime` runner
+<3> Use can mock any services as in any other Micronaut test
+<4> Use one of the methods to execute the function and verify the result
