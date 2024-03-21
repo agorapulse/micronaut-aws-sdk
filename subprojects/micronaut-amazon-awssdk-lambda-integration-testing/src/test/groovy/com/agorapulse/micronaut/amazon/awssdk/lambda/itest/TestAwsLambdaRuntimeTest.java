@@ -21,10 +21,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.test.annotation.MockBean;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import spock.lang.Specification;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
@@ -33,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @MicronautTest                                                                          // <1>
-public class TestAwsLambdaRuntimeTest extends Specification {
+public class TestAwsLambdaRuntimeTest {
 
     private static final String RESPONSE_TEXT = "olleH";
     private static final String REQUEST = "{ \"message\": \"Hello\" }";
