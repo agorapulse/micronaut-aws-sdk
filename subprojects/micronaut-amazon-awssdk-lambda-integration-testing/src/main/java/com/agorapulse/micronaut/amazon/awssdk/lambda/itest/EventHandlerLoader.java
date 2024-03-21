@@ -71,6 +71,7 @@ import static com.amazonaws.services.lambda.runtime.api.client.UserFault.trace;
 /**
  * This is a customized version of EventHandlerLoader from the AWS Lambda Java Runtime API Client that enabled easier testing of Lambda functions.
  */
+// CHECKSTYLE:OFF
 final class EventHandlerLoader {
     private static final byte[] _JsonNull = new byte[]{'n', 'u', 'l', 'l'};
 

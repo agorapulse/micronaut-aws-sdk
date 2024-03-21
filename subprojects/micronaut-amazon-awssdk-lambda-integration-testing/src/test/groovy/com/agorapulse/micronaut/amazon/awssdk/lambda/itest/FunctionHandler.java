@@ -18,7 +18,6 @@
 package com.agorapulse.micronaut.amazon.awssdk.lambda.itest;
 
 import io.micronaut.context.ApplicationContext;
-import io.micronaut.function.aws.MicronautRequestHandler;
 import io.micronaut.function.executor.FunctionInitializer;
 import jakarta.inject.Inject;
 
