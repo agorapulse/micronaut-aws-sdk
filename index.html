@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/docs.css?v=3.0.4" />
+<link rel="stylesheet" href="css/docs.css?v=3.0.5" />
 <style>
 .hidden {
     display: none;
@@ -93,7 +93,7 @@ $(addBlockSwitches);
 <h1>Set of useful libraries for Micronaut</h1>
 <div class="details">
 <span id="author" class="author">Vladimir Orany</span><br>
-<span id="revnumber">version 3.0.4</span>
+<span id="revnumber">version 3.0.5</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -134,6 +134,7 @@ $(addBlockSwitches);
 <li><a href="#_configuration_2">Configuration</a></li>
 <li><a href="#_invocation_using_lambdaclient">Invocation using <code>@LambdaClient</code></a></li>
 <li><a href="#_testing_4">Testing</a></li>
+<li><a href="#_integration_testing">Integration Testing</a></li>
 </ul>
 </li>
 <li><a href="#_simple_storage_service_s3">1.6. Simple Storage Service (S3)</a>
@@ -377,7 +378,7 @@ functions.</p>
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-cloudwatchlogs:3.0.4'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-cloudwatchlogs:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -386,14 +387,14 @@ functions.</p>
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-cloudwatchlogs&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-cloudwatchlogs:3.0.4'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-cloudwatchlogs:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -402,7 +403,7 @@ functions.</p>
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-cloudwatchlogs&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -500,7 +501,7 @@ public class LogCheckService {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:3.0.4'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -509,7 +510,7 @@ public class LogCheckService {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-integration-testing&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -542,11 +543,11 @@ public class LogCheckService {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-dynamodb-annotation-processor:3.0.4'
-implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb:3.0.4'
+<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-dynamodb-annotation-processor:3.0.5'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb:3.0.5'
 
 // for Kotlin Query DSL
-implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb-kotlin:3.0.4'</code></pre>
+implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb-kotlin:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -555,21 +556,21 @@ implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb-kotlin:3.0.4'</c
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;!-- for Kotlin Query DSL --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-aws-sdk-dynamodb-annotation-processor:3.0.4'
-implementation 'com.agorapulse:micronaut-aws-sdk-dynamodb:3.0.4'</code></pre>
+<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-aws-sdk-dynamodb-annotation-processor:3.0.5'
+implementation 'com.agorapulse:micronaut-aws-sdk-dynamodb:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -578,7 +579,7 @@ implementation 'com.agorapulse:micronaut-aws-sdk-dynamodb:3.0.4'</code></pre>
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2415,7 +2416,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:3.0.4'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2424,7 +2425,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2576,10 +2577,10 @@ public class DeclarativeServiceTest {
 <div class="content">
 <pre class="prettyprint highlight"><code>// for Kinesis client
 annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-kinesis-annotation-processor:{project-version
-implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis:3.0.4'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis:3.0.5'
 
 // for Kinesis listener
-implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:3.0.4'</code></pre>
+implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2589,13 +2590,13 @@ implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:3.0.4'</co
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-kinesis&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;!-- for Kinesis listener --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-kinesis-worker&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2603,10 +2604,10 @@ implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:3.0.4'</co
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
 <pre class="prettyprint highlight"><code>// for Kinesis client
-annotationProcessor 'com.agorapulse:micronaut-aws-sdk-kinesis-annotation-processor:3.0.4'
-implementation 'com.agorapulse:micronaut-aws-sdk-kinesis:3.0.4'
+annotationProcessor 'com.agorapulse:micronaut-aws-sdk-kinesis-annotation-processor:3.0.5'
+implementation 'com.agorapulse:micronaut-aws-sdk-kinesis:3.0.5'
 // for Kinesis listener
-implementation 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:3.0.4'</code></pre>
+implementation 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2616,13 +2617,13 @@ implementation 'com.agorapulse:micronaut-aws-sdk-kinesis-worker:3.0.4'</code></p
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-kinesis&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;!-- for Kinesis listener --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-kinesis-worker&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3347,7 +3348,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:3.0.4'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3356,7 +3357,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3462,7 +3463,7 @@ public class KinesisJavaDemoTest {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-lambda:3.0.4'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-lambda:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3471,14 +3472,14 @@ public class KinesisJavaDemoTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-lambda&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-lambda:3.0.4'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-lambda:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3487,7 +3488,7 @@ public class KinesisJavaDemoTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-lambda&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3619,7 +3620,7 @@ public interface HelloBodyClient {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:3.0.4'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3628,7 +3629,7 @@ public interface HelloBodyClient {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3811,6 +3812,216 @@ public class HelloClientTest {
 </table>
 </div>
 </div>
+<div class="sect4">
+<h5 id="_integration_testing"><a class="anchor" href="#_integration_testing"></a>Integration Testing</h5>
+<div class="paragraph">
+<p>You can very verify proper serialization and deserialization of the function arguments and results using <code>micronaut-amazon-awssdk-lambda-integration-testing</code> module.</p>
+</div>
+<div class="paragraph">
+<p>You need to add following dependencies into your build file:</p>
+</div>
+<div class="listingblock primary">
+<div class="title">Gradle</div>
+<div class="content">
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-lambda-integration-testing:3.0.5'</code></pre>
+</div>
+</div>
+<div class="listingblock secondary">
+<div class="title">Maven</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
+    &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
+    &lt;artifactId&gt;micronaut-amazon-awssdk-lambda-integration-testing&lt;/artifactId&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can use the <code>TestAwsLambdaRuntime</code> runner to test the function execution, including the serialization.</p>
+</div>
+<div class="listingblock primary">
+<div class="title">Groovy</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="groovy">import com.fasterxml.jackson.databind.ObjectMapper
+import io.micronaut.test.annotation.MockBean
+import io.micronaut.test.extensions.spock.annotation.MicronautTest
+import jakarta.inject.Inject
+import spock.lang.Specification
+
+@MicronautTest                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+class TestAwsLambdaRuntimeSpec extends Specification {
+
+    private static final String RESPONSE_TEXT = 'olleH'
+    private static final String REQUEST = '{ "message": "Hello" }'
+
+    @Inject ObjectMapper mapper
+
+    @Inject TestAwsLambdaRuntime aws                                                    <i class="conum" data-value="2"></i><b>(2)</b>
+
+    @MockBean(DefaultSomeService) SomeService someService() {                           <i class="conum" data-value="3"></i><b>(3)</b>
+        return Mock(SomeService) {
+            transform(_ as String) &gt;&gt; { String msg -&gt; msg.reverse() }
+        }
+    }
+
+    void 'handle request'() {                                                           <i class="conum" data-value="4"></i><b>(4)</b>
+        expect:
+            aws.handleRequest(PojoHandler, REQUEST).text == RESPONSE_TEXT
+            aws.handleRequest(PojoHandler, new ByteArrayInputStream(REQUEST.bytes)).text == RESPONSE_TEXT
+
+            aws.apply(FunctionHandler, REQUEST).text == RESPONSE_TEXT
+            aws.apply(FunctionHandler, new ByteArrayInputStream(REQUEST.bytes)).text == RESPONSE_TEXT
+
+            aws.&lt;Response&gt;invoke(PojoHandler.name, REQUEST).text == RESPONSE_TEXT
+            aws.&lt;Response&gt;invoke(PojoHandler.name, new ByteArrayInputStream(REQUEST.bytes)).text == RESPONSE_TEXT
+
+            aws.&lt;Response&gt;invoke(SimpleHandler.name + '::execute', REQUEST).text == RESPONSE_TEXT
+            aws.&lt;Response&gt;invoke(SimpleHandler.name + '::execute', REQUEST).text == RESPONSE_TEXT
+
+            mapper.readValue(aws.stream(PojoStreamHandler, REQUEST).toString(), Response).text == RESPONSE_TEXT
+            mapper.readValue(aws.stream(PojoStreamHandler, new ByteArrayInputStream(REQUEST.bytes)).toString(), Response).text == RESPONSE_TEXT
+
+            mapper.readValue(aws.stream(PojoStreamHandler.name, REQUEST).toString(), Response).text == RESPONSE_TEXT
+            mapper.readValue(aws.stream(PojoStreamHandler.name, new ByteArrayInputStream(REQUEST.bytes)).toString(), Response).text == RESPONSE_TEXT
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Use <code>@MicronautTest</code> to let Micronaut handle the application context lifecycle</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Inject the <code>TestAwsLambdaRuntime</code> runner</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Use can mock any services as in any other Micronaut test</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Use one of the methods to execute the function and verify the result</td>
+</tr>
+</table>
+</div>
+<div class="listingblock secondary">
+<div class="title">Java</div>
+<div class="content">
+<pre class="prettyprint highlight nowrap"><code data-lang="java">import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micronaut.test.annotation.MockBean;
+import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
+import jakarta.inject.Inject;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+
+@MicronautTest                                                                          <i class="conum" data-value="1"></i><b>(1)</b>
+public class TestAwsLambdaRuntimeTest {
+
+    private static final String RESPONSE_TEXT = "olleH";
+    private static final String REQUEST = "{ \"message\": \"Hello\" }";
+
+    @Inject ObjectMapper mapper;
+
+    @Inject TestAwsLambdaRuntime aws;                                                   <i class="conum" data-value="2"></i><b>(2)</b>
+
+    @MockBean(DefaultSomeService.class) SomeService someService() {                     <i class="conum" data-value="3"></i><b>(3)</b>
+        SomeService mock = Mockito.mock(SomeService.class);
+        when(mock.transform("Hello")).thenReturn(RESPONSE_TEXT);
+        return mock;
+    }
+
+    @Test
+    void handleRequest() throws Exception {                                             <i class="conum" data-value="4"></i><b>(4)</b>
+        assertEquals(
+            RESPONSE_TEXT,
+            aws.handleRequest(PojoHandler.class, REQUEST).getText()
+        );
+        assertEquals(
+            RESPONSE_TEXT,
+            aws.handleRequest(PojoHandler.class, new ByteArrayInputStream(REQUEST.getBytes(StandardCharsets.UTF_8))).getText()
+        );
+
+        assertEquals(
+            RESPONSE_TEXT,
+            aws.apply(FunctionHandler.class, REQUEST).getText()
+        );
+        assertEquals(
+            RESPONSE_TEXT,
+            aws.apply(FunctionHandler.class, new ByteArrayInputStream(REQUEST.getBytes(StandardCharsets.UTF_8))).getText()
+        );
+
+        assertEquals(
+            RESPONSE_TEXT,
+            aws.&lt;Response&gt;invoke(PojoHandler.class.getName(), REQUEST).getText()
+        );
+        assertEquals(
+            RESPONSE_TEXT,
+            aws.&lt;Response&gt;invoke(PojoHandler.class.getName(), new ByteArrayInputStream(REQUEST.getBytes(StandardCharsets.UTF_8))).getText()
+        );
+
+        assertEquals(
+            RESPONSE_TEXT,
+            aws.&lt;Response&gt;invoke(SimpleHandler.class.getName() + "::execute", REQUEST).getText()
+        );
+        assertEquals(
+            RESPONSE_TEXT,
+            aws.&lt;Response&gt;invoke(SimpleHandler.class.getName() + "::execute", REQUEST).getText()
+        );
+
+        assertEquals(
+            RESPONSE_TEXT,
+            mapper.readValue(aws.stream(PojoStreamHandler.class, REQUEST).toString(), Response.class).getText()
+        );
+        assertEquals(
+            RESPONSE_TEXT,
+            mapper.readValue(aws.stream(PojoStreamHandler.class, new ByteArrayInputStream(REQUEST.getBytes(StandardCharsets.UTF_8))).toString(), Response.class).getText()
+        );
+
+        assertEquals(
+            RESPONSE_TEXT,
+            mapper.readValue(aws.stream(PojoStreamHandler.class.getName(), REQUEST).toString(), Response.class).getText()
+        );
+        assertEquals(
+            RESPONSE_TEXT,
+            mapper.readValue(aws.stream(PojoStreamHandler.class.getName(), new ByteArrayInputStream(REQUEST.getBytes(StandardCharsets.UTF_8))).toString(), Response.class).getText()
+        );
+
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Use <code>@MicronautTest</code> to let Micronaut handle the application context lifecycle</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Inject the <code>TestAwsLambdaRuntime</code> runner</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Use can mock any services as in any other Micronaut test</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Use one of the methods to execute the function and verify the result</td>
+</tr>
+</table>
+</div>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_simple_storage_service_s3"><a class="anchor" href="#_simple_storage_service_s3"></a>1.6. Simple Storage Service (S3)</h4>
@@ -3829,7 +4040,7 @@ public class HelloClientTest {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-s3:3.0.4'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-s3:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3838,14 +4049,14 @@ public class HelloClientTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-s3&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-s3:3.0.4'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-s3:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3854,7 +4065,7 @@ public class HelloClientTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-s3&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4177,7 +4388,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:3.0.4'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4186,7 +4397,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4296,7 +4507,7 @@ public class SimpleStorageServiceTest {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-ses:3.0.4'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-ses:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4305,14 +4516,14 @@ public class SimpleStorageServiceTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-ses&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-ses:3.0.4'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-ses:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4321,7 +4532,7 @@ public class SimpleStorageServiceTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-ses&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4534,8 +4745,8 @@ Use <code>aws.ses.use-base64-encoding-for-multipart-emails</code> to enable base
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-sns-annotation-processor:3.0.4'
-implementation 'com.agorapulse:micronaut-amazon-awssdk-sns:3.0.4'</code></pre>
+<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-sns-annotation-processor:3.0.5'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-sns:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4544,15 +4755,15 @@ implementation 'com.agorapulse:micronaut-amazon-awssdk-sns:3.0.4'</code></pre>
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-sns&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-aws-sdk-sns-annotation-processor:3.0.4'
-implementation 'com.agorapulse:micronaut-aws-sdk-sns:3.0.4'</code></pre>
+<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-aws-sdk-sns-annotation-processor:3.0.5'
+implementation 'com.agorapulse:micronaut-aws-sdk-sns:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4561,7 +4772,7 @@ implementation 'com.agorapulse:micronaut-aws-sdk-sns:3.0.4'</code></pre>
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sns&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -5064,7 +5275,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:3.0.4'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -5073,7 +5284,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -5197,8 +5408,8 @@ public class SimpleNotificationServiceTest {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-sqs-annotation-processor:3.0.4'
-implementation 'com.agorapulse:micronaut-amazon-awssdk-sqs:3.0.4'</code></pre>
+<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-sqs-annotation-processor:3.0.5'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-sqs:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -5207,15 +5418,15 @@ implementation 'com.agorapulse:micronaut-amazon-awssdk-sqs:3.0.4'</code></pre>
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-sqs&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-aws-sdk-sqs-annotation-processor:3.0.4'
-implementation 'com.agorapulse:micronaut-aws-sdk-sqs:3.0.4'</code></pre>
+<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-aws-sdk-sqs-annotation-processor:3.0.5'
+implementation 'com.agorapulse:micronaut-aws-sdk-sqs:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -5224,7 +5435,7 @@ implementation 'com.agorapulse:micronaut-aws-sdk-sqs:3.0.4'</code></pre>
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sqs&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -5716,7 +5927,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:3.0.4'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -5725,7 +5936,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -5838,7 +6049,7 @@ public class SimpleQueueServiceTest {
 <div class="listingblock primary">
 <div class="title">Gradle (AWS SDK 2.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-sts:3.0.4'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-sts:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -5847,14 +6058,14 @@ public class SimpleQueueServiceTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-sts&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
 <div class="title">Gradle (AWS SDK 1.x)</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-sts:3.0.4'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-aws-sdk-sts:3.0.5'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -5863,7 +6074,7 @@ public class SimpleQueueServiceTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-aws-sdk-sts&lt;/artifactId&gt;
-    &lt;version&gt;3.0.4&lt;/version&gt;
+    &lt;version&gt;3.0.5&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -5986,8 +6197,8 @@ for the full reference.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 3.0.4<br>
-Last updated 2024-03-19 10:56:33 UTC
+Version 3.0.5<br>
+Last updated 2024-03-21 12:49:26 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
