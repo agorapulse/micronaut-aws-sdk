@@ -17,8 +17,10 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
+import io.micronaut.aws.sdk.v2.service.dynamodb.DynamoDbClientFactory;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
+import io.micronaut.context.annotation.Replaces;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
@@ -39,6 +41,7 @@ public class DynamoDBClientsFactory {
 
     @Bean(preDestroy = "close")
     @Singleton
+    @Replaces(bean = DynamoDbClient.class, factory = DynamoDbClientFactory.class)
     public DynamoDbClient dynamoDbClient(
         DynamoDBConfiguration configuration,
         AwsCredentialsProvider awsCredentialsProvider,
@@ -51,6 +54,7 @@ public class DynamoDBClientsFactory {
 
     @Bean(preDestroy = "close")
     @Singleton
+    @Replaces(bean = DynamoDbAsyncClient.class, factory = DynamoDbClientFactory.class)
     public DynamoDbAsyncClient dynamoDbAsyncClient(
         DynamoDBConfiguration configuration,
         AwsCredentialsProvider awsCredentialsProvider,
