@@ -17,8 +17,10 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.cloudwatchlogs;
 
+import io.micronaut.aws.sdk.v2.service.cloudwatchlogs.CloudwatchLogsClientFactory;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
+import io.micronaut.context.annotation.Replaces;
 import io.micronaut.context.annotation.Requires;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
@@ -39,8 +41,9 @@ import java.util.Optional;
 @Requires(classes = CloudWatchLogsClient.class)
 public class CloudWatchLogsFactory {
 
-    @Bean
+    @Bean(preDestroy = "close")
     @Singleton
+    @Replaces(bean = CloudWatchLogsClient.class, factory = CloudwatchLogsClientFactory.class)
     CloudWatchLogsClient cloudWatchLogs(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
@@ -52,8 +55,9 @@ public class CloudWatchLogsFactory {
     }
 
 
-    @Bean
+    @Bean(preDestroy = "close")
     @Singleton
+    @Replaces(bean = CloudWatchLogsAsyncClient.class, factory = CloudwatchLogsClientFactory.class)
     CloudWatchLogsAsyncClient cloudWatchAsync(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,

@@ -18,8 +18,10 @@
 package com.agorapulse.micronaut.amazon.awssdk.sns;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micronaut.aws.sdk.v2.service.sns.SnsClientFactory;
 import io.micronaut.context.annotation.EachBean;
 import io.micronaut.context.annotation.Factory;
+import io.micronaut.context.annotation.Replaces;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
@@ -35,6 +37,7 @@ public class SimpleNotificationServiceFactory {
 
     @Singleton
     @EachBean(SimpleNotificationServiceConfiguration.class)
+    @Replaces(factory = SnsClientFactory.class, bean = SnsClient.class)
     SnsClient snsClient(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
@@ -47,6 +50,7 @@ public class SimpleNotificationServiceFactory {
 
     @Singleton
     @EachBean(SimpleNotificationServiceConfiguration.class)
+    @Replaces(factory = SnsClientFactory.class, bean = SnsAsyncClient.class)
     SnsAsyncClient snsAsyncClient(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,

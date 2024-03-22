@@ -17,8 +17,10 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.sqs;
 
+import io.micronaut.aws.sdk.v2.service.sqs.SqsClientFactory;
 import io.micronaut.context.annotation.EachBean;
 import io.micronaut.context.annotation.Factory;
+import io.micronaut.context.annotation.Replaces;
 import io.micronaut.context.annotation.Requires;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
@@ -32,10 +34,12 @@ import java.util.Optional;
 
 @Factory
 @Requires(classes = SqsClient.class)
+
 public class SimpleQueueServiceFactory {
 
     @Singleton
     @EachBean(SimpleQueueServiceConfiguration.class)
+    @Replaces(bean = SqsClient.class, factory = SqsClientFactory.class)
     SqsClient sqsClient(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
@@ -48,6 +52,7 @@ public class SimpleQueueServiceFactory {
 
     @Singleton
     @EachBean(SimpleQueueServiceConfiguration.class)
+    @Replaces(bean = SqsAsyncClient.class, factory = SqsClientFactory.class)
     SqsAsyncClient sqsAsyncClient(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,

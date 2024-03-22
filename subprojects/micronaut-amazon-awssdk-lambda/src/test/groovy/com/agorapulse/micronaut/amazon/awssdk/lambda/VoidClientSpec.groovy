@@ -20,6 +20,7 @@ package com.agorapulse.micronaut.amazon.awssdk.lambda
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 
 import jakarta.inject.Inject
+import spock.util.concurrent.PollingConditions
 
 @MicronautTest
 class VoidClientSpec extends AbstractClientSpec {
@@ -28,12 +29,16 @@ class VoidClientSpec extends AbstractClientSpec {
     @Inject LogCheckService logsService
 
     void 'execute function code'() {
+        given:
+            PollingConditions conditions = new PollingConditions(timeout: 30)
         when:
             client.hello(new HelloRequest(name: 'Vlad'))
         then:
             noExceptionThrown()
 
-            logsService.contains('/aws/lambda/HelloFunction', 'hello')
+            conditions.eventually {
+                logsService.contains('/aws/lambda/HelloFunction', 'hello')
+            }
     }
 
 }

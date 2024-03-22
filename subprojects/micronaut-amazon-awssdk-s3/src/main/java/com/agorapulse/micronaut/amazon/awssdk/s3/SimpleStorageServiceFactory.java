@@ -17,8 +17,10 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.s3;
 
+import io.micronaut.aws.sdk.v2.service.s3.S3ClientFactory;
 import io.micronaut.context.annotation.EachBean;
 import io.micronaut.context.annotation.Factory;
+import io.micronaut.context.annotation.Replaces;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
@@ -36,6 +38,7 @@ public class SimpleStorageServiceFactory {
 
     @Singleton
     @EachBean(SimpleStorageServiceConfiguration.class)
+    @Replaces(bean = S3Client.class, factory = S3ClientFactory.class)
     public S3Client s3Client(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
@@ -65,6 +68,7 @@ public class SimpleStorageServiceFactory {
 
     @Singleton
     @EachBean(SimpleStorageServiceConfiguration.class)
+    @Replaces(bean = S3AsyncClient.class, factory = S3ClientFactory.class)
     public S3AsyncClient s3AsyncClient(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,

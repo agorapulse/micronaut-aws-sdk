@@ -17,8 +17,10 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.ses;
 
+import io.micronaut.aws.sdk.v2.service.ses.SesClientFactory;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
+import io.micronaut.context.annotation.Replaces;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
@@ -34,6 +36,7 @@ public class SimpleEmailServiceFactory {
 
     @Bean(preDestroy = "close")
     @Singleton
+    @Replaces(bean = SesClient.class, factory = SesClientFactory.class)
     public SesClient sesClient(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
@@ -46,6 +49,7 @@ public class SimpleEmailServiceFactory {
 
     @Bean(preDestroy = "close")
     @Singleton
+    @Replaces(bean = SesAsyncClient.class, factory = SesClientFactory.class)
     public SesAsyncClient sesAsyncClient(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
