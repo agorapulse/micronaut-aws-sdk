@@ -28,7 +28,7 @@ public class PojoHandler extends MicronautRequestHandler<Request, Response> {
     public PojoHandler() { }
 
     public PojoHandler(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
+        super(applicationContext);
     }
 
     public Response handleRequest(Request input) {
