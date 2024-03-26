@@ -35,6 +35,7 @@ import spock.lang.TempDir
 import spock.lang.Unroll
 
 import jakarta.inject.Inject
+import spock.util.concurrent.PollingConditions
 
 /**
  * Tests for SimpleStorageService based on Testcontainers.
@@ -147,6 +148,8 @@ class SimpleStorageServiceSpec extends Specification {
 
     @Unroll
     void 'move object created with canned acl #desiredAcl'() {
+        given:
+            PollingConditions conditions = new PollingConditions(timeout: 30)
         when:
             String newKey = 'mix/moved-' + desiredAcl
             String oldKey = 'mix/to-be-moved-' + desiredAcl
@@ -173,7 +176,9 @@ class SimpleStorageServiceSpec extends Specification {
                 .tagSet()
                 .any { it.key() == 'foo' && it.value() == 'bar' }
 
-            !service.exists(oldKey)
+            conditions.eventually {
+                !service.exists(oldKey)
+            }
 
         when:
             GetObjectAclResponse newAcls = amazonS3.getObjectAcl { it.bucket(MY_BUCKET).key(newKey) }
