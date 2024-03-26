@@ -197,7 +197,7 @@ subprojects { Project subproject ->
         testImplementation 'io.micronaut.test:micronaut-test-spock'
 
         testRuntimeOnly 'ch.qos.logback:logback-classic:1.2.3'
-        testRuntimeOnly 'org.yaml:snakeyaml:1.27'
+        testRuntimeOnly 'org.yaml:snakeyaml'
     }
 
     compileJava.options.compilerArgs += '-parameters'
