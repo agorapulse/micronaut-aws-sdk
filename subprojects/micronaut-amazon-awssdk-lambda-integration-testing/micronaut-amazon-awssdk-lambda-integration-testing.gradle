@@ -17,6 +17,10 @@
  */
 dependencies {
     api "com.amazonaws:aws-lambda-java-runtime-interface-client:$awsLambdaRuntimeVersion"
-    testImplementation 'io.micronaut:micronaut-function-aws'
+    if (micronautVersion.startsWith('1')) {
+        api 'io.micronaut:micronaut-function-aws'
+    } else {
+        api 'io.micronaut.aws:micronaut-function-aws'
+    }
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
 }
