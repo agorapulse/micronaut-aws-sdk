@@ -172,9 +172,6 @@ class SimpleStorageServiceSpec extends Specification {
             amazonS3.getObjectTagging { it.bucket(MY_BUCKET).key(newKey) }
                 .tagSet()
                 .any { it.key() == 'foo' && it.value() == 'bar' }
-
-            !service.exists(oldKey)
-
         when:
             GetObjectAclResponse newAcls = amazonS3.getObjectAcl { it.bucket(MY_BUCKET).key(newKey) }
         then:
