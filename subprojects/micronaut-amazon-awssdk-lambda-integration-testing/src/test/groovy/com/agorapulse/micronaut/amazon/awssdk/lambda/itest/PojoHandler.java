@@ -19,7 +19,7 @@ package com.agorapulse.micronaut.amazon.awssdk.lambda.itest;
 
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.function.aws.MicronautRequestHandler;
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 
 public class PojoHandler extends MicronautRequestHandler<Request, Response> {
 
@@ -28,7 +28,7 @@ public class PojoHandler extends MicronautRequestHandler<Request, Response> {
     public PojoHandler() { }
 
     public PojoHandler(ApplicationContext applicationContext) {
-        super(applicationContext);
+        this.applicationContext = applicationContext;
     }
 
     public Response handleRequest(Request input) {

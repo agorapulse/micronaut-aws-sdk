@@ -1,6 +1,8 @@
 localstack:
   services: lambda
   shared: true
+  env:
+    DEBUG: 1
 
 aws:
   lambda:

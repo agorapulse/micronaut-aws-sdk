@@ -25,7 +25,7 @@ import com.amazonaws.services.lambda.runtime.api.client.UserFault;
 import com.amazonaws.services.lambda.runtime.api.client.runtimeapi.dto.InvocationRequest;
 import com.amazonaws.services.lambda.runtime.serialization.PojoSerializer;
 import io.micronaut.context.ApplicationContext;
-import jakarta.inject.Singleton;
+import javax.inject.Singleton;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

@@ -19,7 +19,7 @@ package com.agorapulse.micronaut.amazon.awssdk.lambda.itest;
 
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.function.executor.FunctionInitializer;
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 
 public class SimpleHandler extends FunctionInitializer {
 

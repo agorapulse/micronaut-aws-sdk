@@ -17,7 +17,6 @@
  */
 dependencies {
     api "com.amazonaws:aws-lambda-java-runtime-interface-client:$awsLambdaRuntimeVersion"
-    testImplementation 'io.micronaut.aws:micronaut-function-aws'
-    testImplementation 'io.micronaut:micronaut-jackson-databind'
+    testImplementation 'io.micronaut:micronaut-function-aws'
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
 }

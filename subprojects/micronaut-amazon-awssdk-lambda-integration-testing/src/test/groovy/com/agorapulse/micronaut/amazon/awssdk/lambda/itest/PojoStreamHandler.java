@@ -22,7 +22,7 @@ import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.function.executor.FunctionInitializer;
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 
 import java.io.IOException;
 import java.io.InputStream;
