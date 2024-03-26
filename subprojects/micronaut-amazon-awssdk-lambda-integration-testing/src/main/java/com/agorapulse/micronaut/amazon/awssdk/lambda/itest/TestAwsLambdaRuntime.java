@@ -403,8 +403,7 @@ public class TestAwsLambdaRuntime {
             if (result == null) {
                 return new byte[0];
             }
-            return result.length == total ?
-                result : Arrays.copyOf(result, total);
+            return result.length == total ? result : Arrays.copyOf(result, total);
         }
 
         result = new byte[total];
