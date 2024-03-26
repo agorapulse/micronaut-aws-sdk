@@ -24,7 +24,7 @@ import software.amazon.awssdk.services.kinesis.KinesisAsyncClient;
 import software.amazon.kinesis.common.ConfigsBuilder;
 import software.amazon.kinesis.processor.ShardRecordProcessorFactory;
 
-import javax.annotation.Nonnull;
+import io.micronaut.core.annotation.NonNull;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import java.net.URI;
@@ -73,7 +73,7 @@ public abstract class KinesisClientConfiguration {
 
     private Optional<Long> logWarningForTaskAfterMillis = Optional.empty();
 
-    protected KinesisClientConfiguration(@Nonnull String applicationName, @Nonnull  String workerId, String consumerFilterKey) {
+    protected KinesisClientConfiguration(@NonNull String applicationName, @NonNull  String workerId, String consumerFilterKey) {
         this.applicationName = applicationName;
         this.workerId = workerId;
         this.consumerFilterKey = consumerFilterKey;

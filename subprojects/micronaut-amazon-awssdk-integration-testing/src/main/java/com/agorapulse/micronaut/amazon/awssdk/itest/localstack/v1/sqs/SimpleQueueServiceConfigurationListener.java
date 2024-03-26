@@ -24,7 +24,7 @@ import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.context.event.BeanCreatedEventListener;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Singleton
 @Requires(classes = SimpleQueueServiceConfiguration.class, beans = LocalstackContainerHolder.class)

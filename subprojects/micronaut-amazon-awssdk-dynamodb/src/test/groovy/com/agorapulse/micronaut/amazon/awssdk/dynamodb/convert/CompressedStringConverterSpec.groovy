@@ -20,7 +20,7 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.DynamoDBServiceProvider
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.DynamoDbService
 import groovy.util.logging.Slf4j
-import io.micronaut.test.annotation.MicronautTest
+import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import software.amazon.awssdk.enhanced.dynamodb.Key
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
@@ -29,7 +29,7 @@ import software.amazon.awssdk.services.dynamodb.model.GetItemResponse
 import spock.lang.Shared
 import spock.lang.Specification
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @Slf4j
 @MicronautTest

@@ -18,7 +18,7 @@
 package com.agorapulse.micronaut.amazon.awssdk.s3;
 
 import io.micronaut.context.annotation.Property;
-import io.micronaut.test.annotation.MicronautTest;
+import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.codehaus.groovy.runtime.ResourceGroovyMethods;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -26,7 +26,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;

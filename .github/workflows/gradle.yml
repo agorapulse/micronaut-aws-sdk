@@ -27,13 +27,6 @@ jobs:
       GRADLE_OPTS: "-Xmx6g -Xms4g"
       CI: true
       COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-    strategy:
-      fail-fast: false
-      matrix:
-        versions:
-          - 'check coveralls -PmicronautVersion=1.3.7 -PspockVersion=2.0-groovy-2.5 -PgroovyVersion=2.5.15 --scan'
-          - 'check -PmicronautVersion=2.5.13 -PspockVersion=2.0-groovy-3.0 -PgroovyVersion=3.0.9 --scan'
-          - 'migrateImports check -PmicronautVersion=3.2.1 -PspockVersion=2.0-groovy-3.0 -PgroovyVersion=3.0.9 --scan'
     steps:
       - uses: actions/checkout@v2
       - name: Setup Java 8
@@ -44,7 +37,7 @@ jobs:
           cache: gradle
       - uses: eskatos/gradle-command-action@v2
         with:
-          arguments: ${{ matrix.versions }}
+          arguments: check --scan
       - name: Show Build Scan
         if: always()
         run: cat scan-journal.log

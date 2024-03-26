@@ -36,7 +36,7 @@ import io.micronaut.core.type.MutableArgumentValue;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Function;

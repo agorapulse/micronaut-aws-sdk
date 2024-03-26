@@ -23,7 +23,7 @@ import io.micronaut.core.async.annotation.SingleResult;
 import io.micronaut.function.client.FunctionClient;
 import org.reactivestreams.Publisher;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 @FunctionClient
 interface LambdaEchoClient {

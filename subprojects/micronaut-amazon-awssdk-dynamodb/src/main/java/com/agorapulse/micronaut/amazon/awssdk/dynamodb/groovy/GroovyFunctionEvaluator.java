@@ -24,7 +24,7 @@ import groovy.lang.Closure;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.context.annotation.Requires;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.function.Function;

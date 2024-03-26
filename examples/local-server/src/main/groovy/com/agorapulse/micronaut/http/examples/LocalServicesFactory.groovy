@@ -33,7 +33,7 @@ import io.micronaut.context.annotation.Primary
 import io.micronaut.retry.annotation.Fallback
 
 import javax.annotation.PostConstruct
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 
 /**
  * Mock services for the example application.

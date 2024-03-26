@@ -19,13 +19,13 @@ package com.agorapulse.micronaut.aws.s3
 
 import com.amazonaws.services.s3.model.ObjectMetadata
 import io.micronaut.context.annotation.Property
-import io.micronaut.test.annotation.MicronautTest
+import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import reactor.core.publisher.Flux
 import spock.lang.Specification
 import spock.lang.Stepwise
 import spock.lang.TempDir
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /**
  * Tests for SimpleStorageService based on Testcontainers.

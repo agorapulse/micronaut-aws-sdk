@@ -39,7 +39,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.Collections;
 import java.util.Map;
 

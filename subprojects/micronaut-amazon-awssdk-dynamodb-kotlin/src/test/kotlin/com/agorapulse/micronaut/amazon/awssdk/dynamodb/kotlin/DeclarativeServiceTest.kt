@@ -17,14 +17,14 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.kotlin
 
-import io.micronaut.test.annotation.MicronautTest
+import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import reactor.core.publisher.Flux
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 // tag::header[]
 @MicronautTest // <1>

@@ -19,11 +19,11 @@ package com.agorapulse.micronaut.aws.sns;
 
 import com.amazonaws.services.sns.model.Topic;
 import io.micronaut.context.annotation.Property;
-import io.micronaut.test.annotation.MicronautTest;
+import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.Collections;
 import java.util.Map;
 

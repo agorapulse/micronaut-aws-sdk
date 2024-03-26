@@ -19,8 +19,8 @@ package com.agorapulse.micronaut.amazon.awssdk.lambda.itest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.test.annotation.MockBean;
-import io.micronaut.test.annotation.MicronautTest;
-import javax.inject.Inject;
+import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
+import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 

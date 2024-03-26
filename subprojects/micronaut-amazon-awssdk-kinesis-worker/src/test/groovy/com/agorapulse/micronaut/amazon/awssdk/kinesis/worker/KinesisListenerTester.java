@@ -20,7 +20,7 @@ package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker;
 import com.agorapulse.micronaut.amazon.awssdk.kinesis.worker.annotation.KinesisListener;
 import software.amazon.kinesis.retrieval.KinesisClientRecord;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 

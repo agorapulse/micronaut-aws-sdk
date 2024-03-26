@@ -19,7 +19,7 @@ package com.agorapulse.micronaut.aws.lambda;
 
 import com.agorapulse.micronaut.aws.cloudwatchlogs.CloudWatchLogsService;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class LogCheckService {

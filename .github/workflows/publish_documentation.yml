@@ -25,4 +25,4 @@ jobs:
       - name: Publish GitHub Pages
         uses: eskatos/gradle-command-action@v2
         with:
-          arguments: migrateImports gitPublishPush -x groovydoc -Pversion=${{ steps.latest_version.outputs.latest_tag }}-micronaut-3.0 -Prelease=true --stacktrace -PmicronautVersion=3.2.3 -PspockVersion=2.0-groovy-3.0 -PgroovyVersion=3.0.9 -Dorg.ajoberstar.grgit.auth.username=${{ secrets.AGORAPULSE_BOT_PERSONAL_TOKEN }}
+          arguments: gitPublishPush -x groovydoc -Pversion=${{ steps.latest_version.outputs.latest_tag }}-micronaut-3.0 -Prelease=true --scan -Dorg.ajoberstar.grgit.auth.username=${{ secrets.AGORAPULSE_BOT_PERSONAL_TOKEN }}

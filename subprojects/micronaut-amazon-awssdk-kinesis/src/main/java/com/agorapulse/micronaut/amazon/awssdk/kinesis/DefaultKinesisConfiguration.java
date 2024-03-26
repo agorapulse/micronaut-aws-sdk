@@ -23,7 +23,7 @@ import io.micronaut.context.annotation.Primary;
 import io.micronaut.context.annotation.Requires;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 /**
  * Default Kinesis configuration, published with <code>default</code> named qualifier.

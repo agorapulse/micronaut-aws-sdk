@@ -36,8 +36,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.kinesis.retrieval.KinesisClientRecord;
 
-import javax.inject.Qualifier;
-import javax.inject.Singleton;
+import jakarta.inject.Qualifier;
+import jakarta.inject.Singleton;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;

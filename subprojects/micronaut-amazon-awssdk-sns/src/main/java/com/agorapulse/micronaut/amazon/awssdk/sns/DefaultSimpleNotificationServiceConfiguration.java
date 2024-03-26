@@ -22,7 +22,7 @@ import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.context.annotation.Primary;
 import io.micronaut.context.env.Environment;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 /**
  * Default simple queue service configuration.

@@ -26,7 +26,7 @@ import io.micronaut.context.annotation.Requires
 
 import javax.activation.DataHandler
 import javax.activation.DataSource
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 import javax.mail.BodyPart
 import javax.mail.Session
 import javax.mail.internet.InternetAddress

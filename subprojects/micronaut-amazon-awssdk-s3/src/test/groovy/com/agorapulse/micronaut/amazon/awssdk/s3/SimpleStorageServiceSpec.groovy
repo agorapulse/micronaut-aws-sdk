@@ -18,7 +18,7 @@
 package com.agorapulse.micronaut.amazon.awssdk.s3
 
 import io.micronaut.context.annotation.Property
-import io.micronaut.test.annotation.MicronautTest
+import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import org.reactivestreams.Publisher
 import reactor.core.publisher.Flux
 import software.amazon.awssdk.services.s3.S3Client
@@ -34,7 +34,7 @@ import spock.lang.Stepwise
 import spock.lang.TempDir
 import spock.lang.Unroll
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /**
  * Tests for SimpleStorageService based on Testcontainers.

@@ -22,9 +22,9 @@ import com.agorapulse.gru.http.Http
 import com.agorapulse.micronaut.amazon.awssdk.itest.localstack.LocalstackContainerHolder
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.micronaut.context.annotation.Property
-import io.micronaut.test.annotation.MicronautTest
+import io.micronaut.test.extensions.spock.annotation.MicronautTest
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 import software.amazon.awssdk.services.ses.SesClient
 import spock.lang.Specification
 import spock.lang.TempDir

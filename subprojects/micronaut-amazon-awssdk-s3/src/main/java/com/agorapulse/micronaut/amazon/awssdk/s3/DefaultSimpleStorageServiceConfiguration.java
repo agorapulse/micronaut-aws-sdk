@@ -21,7 +21,7 @@ import com.agorapulse.micronaut.amazon.awssdk.core.util.ConfigurationUtil;
 import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.context.annotation.Primary;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 /**
  * Default simple storage service configuration.

@@ -24,7 +24,7 @@ import io.micronaut.context.annotation.Primary;
 import io.micronaut.context.annotation.Requires;
 import software.amazon.awssdk.services.sts.StsClient;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 /**
  * Default simple storage service configuration.

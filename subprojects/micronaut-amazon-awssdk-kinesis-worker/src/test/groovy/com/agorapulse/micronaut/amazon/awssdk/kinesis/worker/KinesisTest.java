@@ -19,13 +19,13 @@ package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker;
 
 import com.agorapulse.micronaut.amazon.awssdk.kinesis.KinesisService;
 import io.micronaut.context.annotation.Property;
-import io.micronaut.test.annotation.MicronautTest;
+import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.time.Duration;
 
 // tag::testcontainers-header[]

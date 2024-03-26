@@ -22,7 +22,7 @@ import com.agorapulse.micronaut.aws.apigateway.ws.event.WebSocketRequest
 import com.agorapulse.micronaut.aws.apigateway.ws.event.WebSocketResponse
 import groovy.transform.Field
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @Inject @Field MessageSenderFactory factory                                             // <1>
 @Inject @Field TestTopicPublisher publisher                                             // <2>

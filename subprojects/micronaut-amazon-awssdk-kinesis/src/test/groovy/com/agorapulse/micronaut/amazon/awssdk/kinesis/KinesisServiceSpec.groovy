@@ -19,7 +19,7 @@ package com.agorapulse.micronaut.amazon.awssdk.kinesis
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.micronaut.context.annotation.Property
-import io.micronaut.test.annotation.MicronautTest
+import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import reactor.core.publisher.Flux
 import software.amazon.awssdk.services.kinesis.KinesisClient
 import software.amazon.awssdk.services.kinesis.model.CreateStreamResponse
@@ -37,7 +37,7 @@ import spock.lang.Retry
 import spock.lang.Specification
 import spock.lang.Stepwise
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /**
  * Tests for kinesis service.

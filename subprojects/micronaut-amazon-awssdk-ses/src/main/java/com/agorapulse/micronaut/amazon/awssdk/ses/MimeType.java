@@ -17,7 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.ses;
 
-import javax.annotation.Nonnull;
+import io.micronaut.core.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -793,13 +793,13 @@ class MimeType {
         return !UNSUPPORTED_EXTENSIONS.contains(fileExtension(filename));
     }
 
-    @Nonnull
+    @NonNull
     static String fileExtension(final String filename) {
         int i = filename.lastIndexOf('.');
         return i < 0 ? "" : filename.substring(i);
     }
 
-    @Nonnull
+    @NonNull
     static String mimeTypeFromFilename(String filename) {
         return ALL_EXTENSIONS_TO_MIME_TYPES.getOrDefault(fileExtension(filename), Collections.emptyList()).stream().findFirst().orElse("");
     }

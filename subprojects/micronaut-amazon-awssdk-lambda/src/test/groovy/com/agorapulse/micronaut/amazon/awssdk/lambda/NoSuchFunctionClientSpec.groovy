@@ -17,10 +17,10 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.lambda
 
-import io.micronaut.test.annotation.MicronautTest
+import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import software.amazon.awssdk.core.exception.SdkException
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @MicronautTest
 class NoSuchFunctionClientSpec extends AbstractClientSpec {

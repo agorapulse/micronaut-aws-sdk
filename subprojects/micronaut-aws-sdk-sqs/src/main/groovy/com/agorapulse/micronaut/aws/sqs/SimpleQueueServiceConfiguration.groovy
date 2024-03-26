@@ -20,7 +20,7 @@ package com.agorapulse.micronaut.aws.sqs
 import com.agorapulse.micronaut.aws.RegionAndEndpointConfiguration
 import groovy.transform.CompileStatic
 
-import javax.annotation.Nullable
+import io.micronaut.core.annotation.Nullable
 
 /**
  * Default configuration for Simple Queue Service.

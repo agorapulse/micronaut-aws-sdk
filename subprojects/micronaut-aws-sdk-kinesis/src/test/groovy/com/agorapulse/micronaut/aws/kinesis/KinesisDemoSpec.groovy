@@ -18,11 +18,11 @@
 package com.agorapulse.micronaut.aws.kinesis
 
 import com.amazonaws.services.kinesis.model.CreateStreamResult
-import io.micronaut.test.annotation.MicronautTest
+import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import spock.lang.Retry
 import spock.lang.Specification
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /**
  * Tests for kinesis service.

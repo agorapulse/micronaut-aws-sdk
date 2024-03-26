@@ -21,13 +21,13 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Query
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Scan
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Service
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Update
-import io.micronaut.test.annotation.MicronautTest
+import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import org.reactivestreams.Publisher
 import reactor.core.publisher.Flux
 import spock.lang.Specification
 import spock.lang.Stepwise
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
