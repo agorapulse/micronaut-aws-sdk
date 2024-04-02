@@ -42,17 +42,12 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class DefaultSimpleStorageService implements SimpleStorageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSimpleStorageService.class);
-    private static final String ALL_USERS = "http://acs.amazonaws.com/groups/global/AllUsers";
-    private static final String AUTHENTICATED_USERS = "http://acs.amazonaws.com/groups/global/AuthenticatedUsers";
-    private static final String READ = "READ";
-
     private final S3Client s3;
     private final S3Presigner presigner;
     private final String defaultBucketName;
@@ -218,7 +213,6 @@ public class DefaultSimpleStorageService implements SimpleStorageService {
             GetObjectAclResponse acl = s3.getObjectAcl(b -> b.bucket(sourceBucketName).key(sourceKey));
             s3.putObjectAcl(b -> {
                 b.bucket(destinationBucketName).key(destinationKey).accessControlPolicy(p -> p.owner(acl.owner()).grants(acl.grants()));
-                extractCannedAcl(acl.grants()).ifPresent(b::acl);
             });
 
             s3.deleteObject(b -> b.bucket(sourceBucketName).key(sourceKey));
@@ -228,20 +222,6 @@ public class DefaultSimpleStorageService implements SimpleStorageService {
             LOGGER.error(String.format("Exception moving object %s/%s to %s/%s", sourceBucketName, sourceKey, destinationBucketName, destinationKey), e);
             return null;
         }
-    }
-
-    private static Optional<ObjectCannedACL> extractCannedAcl(List<Grant> grants) {
-        for (Grant grant : grants) {
-            if (READ.equals(grant.permissionAsString())) {
-                if (ALL_USERS.equals(grant.grantee().uri())) {
-                    return Optional.of(ObjectCannedACL.PUBLIC_READ);
-                }
-                if (AUTHENTICATED_USERS.equals(grant.grantee().uri())) {
-                    return Optional.of(ObjectCannedACL.AUTHENTICATED_READ);
-                }
-            }
-        }
-        return Optional.empty();
     }
 
 }

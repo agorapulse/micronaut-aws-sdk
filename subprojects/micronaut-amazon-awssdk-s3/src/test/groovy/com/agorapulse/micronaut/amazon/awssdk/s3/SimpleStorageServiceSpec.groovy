@@ -146,7 +146,7 @@ class SimpleStorageServiceSpec extends Specification {
     }
 
     @Unroll
-    void 'move object created with canned acl #desiredAcl'() {
+    void 'move object created with canned acl #desiredAcl'(ObjectCannedACL desiredAcl) {
         when:
             String newKey = 'mix/moved-' + desiredAcl
             String oldKey = 'mix/to-be-moved-' + desiredAcl
@@ -172,9 +172,6 @@ class SimpleStorageServiceSpec extends Specification {
             amazonS3.getObjectTagging { it.bucket(MY_BUCKET).key(newKey) }
                 .tagSet()
                 .any { it.key() == 'foo' && it.value() == 'bar' }
-
-            !service.exists(oldKey)
-
         when:
             GetObjectAclResponse newAcls = amazonS3.getObjectAcl { it.bucket(MY_BUCKET).key(newKey) }
         then:

@@ -23,4 +23,5 @@ dependencies {
     implementation "io.projectreactor:reactor-core:$projectReactorVersion"
 
     testImplementation project(':micronaut-amazon-awssdk-integration-testing')
+    testImplementation project(':micronaut-amazon-awssdk-sqs')
 }

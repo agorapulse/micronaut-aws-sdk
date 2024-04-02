@@ -19,14 +19,17 @@ package com.agorapulse.micronaut.amazon.awssdk.itest.localstack;
 
 import io.micronaut.context.annotation.ConfigurationProperties;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @ConfigurationProperties("localstack")
 public class LocalstackContainerConfiguration extends AbstractContainerConfiguration {
 
+    public static final Map<String, String> ALWAYS_PRESENT_ENV = Collections.singletonMap(
+        "SQS_ENDPOINT_STRATEGY", "dynamic"
+    );
+
     public static final String DEFAULT_IMAGE = "localstack/localstack";
-    public static final String DEFAULT_TAG = "1.3.0";
+    public static final String DEFAULT_TAG = "3.2.0";
 
     public LocalstackContainerConfiguration() {
         setImage(DEFAULT_IMAGE);
@@ -43,4 +46,10 @@ public class LocalstackContainerConfiguration extends AbstractContainerConfigura
         this.services = services;
     }
 
+    @Override
+    public Map<String, String> getEnv() {
+        Map<String, String> allEnv = new HashMap<>(super.getEnv());
+        ALWAYS_PRESENT_ENV.forEach(allEnv::putIfAbsent);
+        return allEnv;
+    }
 }
