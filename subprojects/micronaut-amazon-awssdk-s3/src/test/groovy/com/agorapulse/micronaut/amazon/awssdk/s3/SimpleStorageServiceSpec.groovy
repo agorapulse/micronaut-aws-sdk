@@ -146,7 +146,7 @@ class SimpleStorageServiceSpec extends Specification {
     }
 
     @Unroll
-    void 'move object created with canned acl #desiredAcl'() {
+    void 'move object created with canned acl #desiredAcl'(ObjectCannedACL desiredAcl) {
         when:
             String newKey = 'mix/moved-' + desiredAcl
             String oldKey = 'mix/to-be-moved-' + desiredAcl
