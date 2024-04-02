@@ -19,15 +19,12 @@ package com.agorapulse.micronaut.amazon.awssdk.itest.localstack;
 
 import io.micronaut.context.annotation.ConfigurationProperties;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @ConfigurationProperties("localstack")
 public class LocalstackContainerConfiguration extends AbstractContainerConfiguration {
 
-    public static final Map<String, String> ALWAYS_PRESENT_ENV = Map.of(
+    public static final Map<String, String> ALWAYS_PRESENT_ENV = Collections.singletonMap(
         "SQS_ENDPOINT_STRATEGY", "dynamic"
     );
 
