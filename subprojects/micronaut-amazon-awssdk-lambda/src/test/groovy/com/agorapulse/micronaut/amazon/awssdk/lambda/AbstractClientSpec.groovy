@@ -22,6 +22,7 @@ import org.zeroturnaround.zip.ZipUtil
 import software.amazon.awssdk.core.SdkBytes
 import software.amazon.awssdk.services.lambda.LambdaClient
 import software.amazon.awssdk.services.lambda.model.Runtime
+import software.amazon.awssdk.services.lambda.model.State
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.TempDir
@@ -41,7 +42,7 @@ abstract class AbstractClientSpec extends Specification {
         prepareHelloFunction()
     }
 
-    @SuppressWarnings('ImplicitClosureParameter')
+    @SuppressWarnings(['ImplicitClosureParameter', 'BusyWait'])
     private void prepareHelloFunction() {
         boolean alreadyExists = lambda.listFunctions().functions().any {
             it.functionName() == 'HelloFunction'
@@ -62,11 +63,15 @@ abstract class AbstractClientSpec extends Specification {
         lambda.createFunction {
             it.functionName('HelloFunction')
               .runtime(Runtime.NODEJS16_X)
-              .role('HelloRole')
+              .role('arn:aws:iam::123456789012:role/HelloRole')
               .handler('index.handler')
               .code { it.zipFile(SdkBytes.fromByteArray(functionArchive.bytes)) }
               .environment { it.variables(MICRNOAUT_ENVIRONMENT: 'itest') }
               .build()
+        }
+
+        while (lambda.getFunction { it.functionName('HelloFunction') }.configuration().state() != State.ACTIVE) {
+            Thread.sleep(100)
         }
     }
 
