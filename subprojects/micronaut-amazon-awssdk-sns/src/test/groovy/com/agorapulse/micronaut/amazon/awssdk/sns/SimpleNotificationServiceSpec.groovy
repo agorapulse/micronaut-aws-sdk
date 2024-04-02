@@ -17,9 +17,9 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.sns
 
+import com.agorapulse.micronaut.amazon.awssdk.sqs.SimpleQueueService
 import io.micronaut.context.annotation.Property
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
-import spock.lang.PendingFeature
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
@@ -37,11 +37,13 @@ import jakarta.inject.Inject
 @Property(name = 'aws.sns.ios-sandbox.arn', value = IOS_SANDBOX_APP_ARN)
 @Property(name = 'aws.sns.android.arn', value = ANDROID_APP_ARN)
 @Property(name = 'aws.sns.amazon.arn', value = AMAZON_APP_ARN)
+@Property(name = 'aws.sqs.queue', value = TEST_QUEUE)
 class SimpleNotificationServiceSpec extends Specification {
 
 // end::header[]
 
     private static final String TEST_TOPIC = 'TestTopic'
+    private static final String TEST_QUEUE = 'TestQueue'
     private static final String IOS_APP_ARN = 'arn:aws:sns:us-east-1:000000000000:app/APNS/IOS-APP'
     private static final String IOS_SANDBOX_APP_ARN = 'arn:aws:sns:us-east-1:000000000000:app/APNS_SANDBOX/IOS-APP'
     private static final String ANDROID_APP_ARN = 'arn:aws:sns:us-east-1:000000000000:app/GCM/ANDROID-APP'
@@ -51,6 +53,8 @@ class SimpleNotificationServiceSpec extends Specification {
     @Inject SimpleNotificationService service                                           // <3>
     // end::setup[]
     @Inject SimpleNotificationServiceConfiguration configuration
+
+    @Inject SimpleQueueService simpleQueueService
 
     @Shared String androidEndpointArn
     @Shared String amazonEndpointArn
@@ -64,6 +68,8 @@ class SimpleNotificationServiceSpec extends Specification {
         service.createIosApplication('IOS-APP', 'API-KEY', 'fake-cert', true)
         service.createAndroidApplication('ANDROID-APP', 'API-KEY')
         service.createAmazonApplication('AMAZON-APP', 'API-KEY', 'API-SECRET')
+
+        simpleQueueService.createQueue(TEST_QUEUE)
     }
 
     void 'new topic'() {
@@ -125,7 +131,6 @@ class SimpleNotificationServiceSpec extends Specification {
             service.registerIosSandboxDevice('ANOTHER-IOS-SANDBOX-TOKEN')
     }
 
-    @PendingFeature (reason = 'Needs to be tested with real SNS')
     void 'register iOS sandbox device with the same token'() {
         expect:
             iosSandboxEndpointArn == service.createPlatformEndpoint(configuration.iosSandbox.arn, 'IOS-SANDBOX-TOKEN')
@@ -208,7 +213,7 @@ class SimpleNotificationServiceSpec extends Specification {
 
     void 'subscribe to the queue'() {
         when:
-            subscriptionArn = service.subscribeTopicWithQueue(topicArn, 'fake-queue-arn')
+            subscriptionArn = service.subscribeTopicWithQueue(topicArn, simpleQueueService.getQueueArn(TEST_QUEUE))
         then:
             subscriptionArn
     }
