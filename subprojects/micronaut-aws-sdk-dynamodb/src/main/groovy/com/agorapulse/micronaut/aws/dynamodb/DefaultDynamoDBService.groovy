@@ -22,6 +22,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.ArgumentMarshaller
 import com.amazonaws.services.dynamodbv2.datamodeling.ArgumentUnmarshaller
 import com.amazonaws.services.dynamodbv2.datamodeling.ConversionSchema
 import com.amazonaws.services.dynamodbv2.datamodeling.ConversionSchemas
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIgnore
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
