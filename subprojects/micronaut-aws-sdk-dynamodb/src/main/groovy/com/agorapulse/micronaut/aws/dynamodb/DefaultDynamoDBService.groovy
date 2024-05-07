@@ -109,9 +109,7 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
             new ArgumentUnmarshaller() {
 
                 @Override
-                void typeCheck(AttributeValue value, Method setter) {
-
-                }
+                void typeCheck(AttributeValue value, Method setter) { }
 
                 @Override
                 Object unmarshall(AttributeValue value) throws ParseException {
