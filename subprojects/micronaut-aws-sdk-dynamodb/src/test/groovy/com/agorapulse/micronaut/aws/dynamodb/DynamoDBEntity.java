@@ -43,6 +43,9 @@ public class DynamoDBEntity {
 
     Integer number = 0;
 
+    @DynamoDBTypeConvertedEnum
+    State state = State.UNKNOWN;
+
     public String getParentId() {
         return parentId;
     }
@@ -90,6 +93,14 @@ public class DynamoDBEntity {
 
     public void setGlobalIndex(String globalIndex) {
         // ignore
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
     }
 
     //CHECKSTYLE:OFF

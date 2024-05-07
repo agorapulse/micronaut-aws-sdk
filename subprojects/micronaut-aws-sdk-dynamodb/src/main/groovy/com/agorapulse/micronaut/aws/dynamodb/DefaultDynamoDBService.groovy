@@ -97,6 +97,28 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
 
             }
         )
+        .addFirstType(Enum,
+            new ArgumentMarshaller() {
+
+                @Override
+                AttributeValue marshall(Object obj) {
+                    return obj == null ? null : new AttributeValue().withS(obj.toString())
+                }
+
+            },
+            new ArgumentUnmarshaller() {
+
+                @Override
+                void typeCheck(AttributeValue value, Method setter) { }
+
+                @Override
+                Object unmarshall(AttributeValue value) throws ParseException {
+                    // should not happen
+                    throw new IllegalStateException('Cannot unmarshall Enum, add @DynamoDBConvertedEnum annotation to the field')
+                }
+
+            }
+        )
         .build()
 
     // Specific ranges ending with 'Index' are String concatenated indexes,
