@@ -21,10 +21,13 @@ import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClientExtension;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 import jakarta.inject.Singleton;
+
+import java.util.List;
 
 /**
  * Factory class which provides
@@ -36,14 +39,14 @@ public class DynamoDBEnhancedClientsFactory {
 
     @Bean
     @Singleton
-    public DynamoDbEnhancedClient dynamoDbEnhancedClient(DynamoDbClient dynamoDbClient) {
-        return DynamoDbEnhancedClient.builder().dynamoDbClient(dynamoDbClient).build();
+    public DynamoDbEnhancedClient dynamoDbEnhancedClient(DynamoDbClient dynamoDbClient, List<DynamoDbEnhancedClientExtension> extensions) {
+        return DynamoDbEnhancedClient.builder().dynamoDbClient(dynamoDbClient).extensions(extensions).build();
     }
 
     @Bean
     @Singleton
-    public DynamoDbEnhancedAsyncClient dynamoDbEnhancedAsyncClient(DynamoDbAsyncClient dynamoDbAsyncClient) {
-        return DynamoDbEnhancedAsyncClient.builder().dynamoDbClient(dynamoDbAsyncClient).build();
+    public DynamoDbEnhancedAsyncClient dynamoDbEnhancedAsyncClient(DynamoDbAsyncClient dynamoDbAsyncClient, List<DynamoDbEnhancedClientExtension> extensions) {
+        return DynamoDbEnhancedAsyncClient.builder().dynamoDbClient(dynamoDbAsyncClient).extensions(extensions).build();
     }
 
 }
