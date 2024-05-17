@@ -564,6 +564,28 @@ Instead you can annotate any method with `@Query` annotation to make it
  * batch delete method if its name begins with `delete`
  * otherwise an advanced query method
 
+For DynamoDB v2 you can use `@Index`, `@Consistent` `@Descending` and `@Fitler` annotations to further customize the query without the need of creating a custom query class and use it with `@Query` annotation.
+
+[source,java,indent=0,options="nowrap"]
+.Advanced Query Annotations
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/dynamodb/DynamoDBEntityService.java[tags=advanced-query-methods]
+----
+<1> You can use `@Consistent` annotation to make the query consistent
+<2> You can use `@Descending` annotation to sort the results in descending order
+<3> You can use `@Index` annotation to specify the index to use to query the table
+<4> Any parameters that are not partition or sort keys are used as filter conditions
+<5> If the parameter is annotated with `@Nullable` then the filter condition is only applied when the parameter is not `null`
+<6> You can use `@Filter` annotation to specify the filter condition operator
+<7> You can use `@Filter` annotation to specify the attribute name
+<8> You can combine `@SortKey` and `@Filter` annotations to specify the sort key condition
+<9> Only`EQ`, `LE`, `LT`, `GE`, `GT`, `BETWEEN` and `BEGINS_WITH` operators are supported
+<10> You can also use `@Filter` annotation to specify the sort key name
+
+TIP: The operator `EQ` is used by default if `@Filter` annotation is not present. This makes it special and the service introduction tries to find the appropriate operation based on the actual value. For collections or arrays, `inList` operation is actually used. If the actual value is `null` then `isNull` operation is used. For other types, `eq` operation is used. For sort keys, `eq` operation is always used.
+
+For more complex queries you can use `@Query` annotation with a class implementing `QueryFunction` interface:
+
 [source,groovy,indent=0,options="nowrap",role="primary"]
 .Groovy (AWS SDK 2.x)
 ----
@@ -580,7 +602,6 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy
 <6> You can limit which properties are returned from the query
 <7> Only `rangeIndex` property will be populated in the entities returned
 <8> The arguments have no special meaning but you can use them in the query. The method must return either `Publisher` or `List` of entities.
-
 
 [source,java,indent=0,options="nowrap",role="secondary"]
 .Java

@@ -37,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Property(name = "localstack.containers.dynamodb.image", value = "amazon/dynamodb-local")
 @Property(name = "localstack.containers.dynamodb.tag", value = "1.20.0")
 @Property(name = "localstack.containers.dynamodb.port", value = "8000")
+@Property(name = "test.table.name", value = "DynamoDBJavaLocal")
 public class DynamoDBLocalTest {
 
     // end::header[]
