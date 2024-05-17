@@ -19,6 +19,7 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.*;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.*;
+import jakarta.annotation.Nullable;
 import org.reactivestreams.Publisher;
 
 import java.util.Date;
@@ -66,6 +67,10 @@ public interface DynamoDBEntityService {
 
     @Query(EqRangeIndex.class)
     int countByRangeIndex(String hashKey, String rangeKey);
+
+    @Consistent
+    @Index(DynamoDBEntity.RANGE_INDEX)
+    int countByRangeIndexUsingAnnotation(String hashKey, String rangeKey);
 
     class BetweenDateIndex implements QueryFunction<DynamoDBEntity> {
 
@@ -176,6 +181,103 @@ public interface DynamoDBEntityService {
     @Scan(EqRangeScan.class)                                                            // <4>
     Publisher<DynamoDBEntity> scanAllByRangeIndex(String foo);                          // <5>
     // end::sample-scan[]
+
+    // CHECKSTYLE:OFF
+    // tag::advanced-query-methods[]
+    @Consistent                                                                         // <1>
+    @Descending                                                                         // <2>
+    @Index(DynamoDBEntity.DATE_INDEX)                                                   // <3>
+    List<DynamoDBEntity> findAllByNumber(
+        @PartitionKey String parentId,
+        Integer number                                                                  // <4>
+    );
+
+    int countAllByOptionalNumber(
+        @PartitionKey String parentId,
+        @Nullable Integer number                                                        // <5>
+    );
+
+    List<DynamoDBEntity> findAllByNumberGreaterThan(
+        @PartitionKey String parentId,
+        @Filter(                                                                        // <6>
+            value = Filter.Operator.GT,
+            name = "number"                                                             // <7>
+        ) Integer theNumber
+    );
+
+    @Index(DynamoDBEntity.RANGE_INDEX)
+    List<DynamoDBEntity> findAllByRangeBeginsWith(
+        @PartitionKey String parentId,
+        @SortKey                                                                        // <8>
+        @Filter(
+            value = Filter.Operator.BEGINS_WITH,                                        // <9>
+            name = "rangeIndex"                                                         // <10>
+        )
+        String rangeIndexPrefix
+    );
+    // end::advanced-query-methods[]
+    // CHECKSTYLE:ON
+
+    List<DynamoDBEntity> findAllByNumberGreaterThanEqual(
+        @PartitionKey String parentId,
+        @Filter(Filter.Operator.GE) Integer number
+    );
+
+    List<DynamoDBEntity> findAllByNumberLowerThan(
+        @PartitionKey String parentId,
+        @Filter(Filter.Operator.LT) Integer number
+    );
+
+    List<DynamoDBEntity> findAllByNumberLowerThanEqual(
+        @PartitionKey String parentId,
+        @Filter(Filter.Operator.LE) Integer number
+    );
+
+    List<DynamoDBEntity> findAllByNumberNot(
+        @PartitionKey String parentId,
+        @Filter(Filter.Operator.NE) Integer number
+    );
+
+    List<DynamoDBEntity> findAllByNumberIn(
+        @PartitionKey String parentId,
+        List<Integer> number
+    );
+
+    List<DynamoDBEntity> findAllByNumberInArray(
+        @PartitionKey String parentId,
+        Integer... number
+    );
+
+    List<DynamoDBEntity> findAllByNumberInExplicit(
+        @PartitionKey String parentId,
+        @Filter(Filter.Operator.IN_LIST) List<Integer> number
+    );
+
+    List<DynamoDBEntity> findAllByNumberIsType(
+        @PartitionKey String parentId,
+        @Filter(value = Filter.Operator.TYPE_OF, name = "number") Class<?> type
+    );
+
+    List<DynamoDBEntity> findAllByNumberBetween(
+        @PartitionKey String parentId,
+        @Filter(value = Filter.Operator.BETWEEN, name = "number") Integer numberFrom,
+        @Filter(name = "number") Integer numberTo
+    );
+
+    @Index(DynamoDBEntity.RANGE_INDEX)
+    List<DynamoDBEntity> findAllByRangeContains(
+        @PartitionKey String parentId,
+        @SortKey @Filter(value = Filter.Operator.CONTAINS, name = "rangeIndex") String string
+    );
+
+    @Index(DynamoDBEntity.RANGE_INDEX)
+    List<DynamoDBEntity> findAllByRangeNotContains(
+        @PartitionKey String parentId,
+        @SortKey @Filter(value = Filter.Operator.NOT_CONTAINS, name = "rangeIndex") String string
+    );
+
+    int countAllByNumber(@PartitionKey String parentId, Integer number);
+
 
 // tag::footer[]
 }

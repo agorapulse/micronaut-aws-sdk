@@ -66,6 +66,7 @@ public class DeclarativeServiceTest {
         assertEquals(2, s.count("1"));
         assertEquals(1, s.count("1", "1"));
         assertEquals(1, s.countByRangeIndex("1", "bar"));
+        assertEquals(1, s.countByRangeIndexUsingAnnotation("1", "bar"));
         assertEquals(2, s.countByDates("1", Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS))));
         assertEquals(1, s.countByDates("3", Date.from(REFERENCE_DATE.plus(9, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(20, ChronoUnit.DAYS))));
 
