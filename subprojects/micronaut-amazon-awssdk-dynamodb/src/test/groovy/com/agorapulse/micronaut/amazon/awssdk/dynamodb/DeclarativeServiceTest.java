@@ -18,6 +18,7 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
 
+import io.micronaut.context.annotation.Property;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -33,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 // tag::header[]
 @MicronautTest                                                                          // <1>
+@Property(name = "test.table.name", value = "DynamoDBDeclarativeJava")
 public class DeclarativeServiceTest {
 
     // end::header[]
@@ -42,7 +44,7 @@ public class DeclarativeServiceTest {
     @Inject DynamoDBEntityService s;
 
     @Test
-    public void testJavaService() throws InterruptedException {
+    public void testJavaService() {
         assertNotNull(s.save(createEntity("1", "1", "foo", Date.from(REFERENCE_DATE))));
         assertNotNull(s.save(createEntity("1", "2", "bar", Date.from(REFERENCE_DATE.plus(1, ChronoUnit.DAYS)))));
         assertNotNull(s.saveAll(Arrays.asList(
@@ -53,10 +55,6 @@ public class DeclarativeServiceTest {
             createEntity("3", "1", "foo", Date.from(REFERENCE_DATE.plus(7, ChronoUnit.DAYS))),
             createEntity("3", "2", "bar", Date.from(REFERENCE_DATE.plus(14, ChronoUnit.DAYS)))
         ));
-
-
-        // wait for the data to be saved
-        Thread.sleep(500);
 
         assertNotNull(s.get("1", "1"));
         assertNotNull(s.load("1", "1"));
