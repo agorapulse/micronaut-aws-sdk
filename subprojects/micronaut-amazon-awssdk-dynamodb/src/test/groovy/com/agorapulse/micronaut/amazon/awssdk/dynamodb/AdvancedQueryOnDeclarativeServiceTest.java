@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -64,9 +65,9 @@ public class AdvancedQueryOnDeclarativeServiceTest {
         assertEquals(4, s.findAllByNumberLowerThanEqual("1", 2).size());
         assertEquals(5, s.findAllByNumberNot("1", 3).size());
         assertEquals(5, s.findAllByNumberIsType("1", Number.class).size());
-        assertEquals(4, s.findAllByNumberIn("1", List.of(1, 2)).size());
+        assertEquals(4, s.findAllByNumberIn("1", Arrays.asList(1, 2)).size());
         assertEquals(4, s.findAllByNumberInArray("1", 1, 2).size());
-        assertEquals(4, s.findAllByNumberInExplicit("1", List.of(1, 2)).size());
+        assertEquals(4, s.findAllByNumberInExplicit("1", Arrays.asList(1, 2)).size());
         assertEquals(4, s.findAllByNumberBetween("1", 1, 2).size());
         assertEquals(4, s.findAllByRangeBeginsWith("1", "f").size());
     }
