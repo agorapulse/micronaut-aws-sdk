@@ -42,7 +42,7 @@ public class DeclarativeServiceTest {
     @Inject DynamoDBEntityService s;
 
     @Test
-    public void testJavaService() {
+    public void testJavaService() throws InterruptedException {
         assertNotNull(s.save(createEntity("1", "1", "foo", Date.from(REFERENCE_DATE))));
         assertNotNull(s.save(createEntity("1", "2", "bar", Date.from(REFERENCE_DATE.plus(1, ChronoUnit.DAYS)))));
         assertNotNull(s.saveAll(Arrays.asList(
@@ -53,6 +53,10 @@ public class DeclarativeServiceTest {
             createEntity("3", "1", "foo", Date.from(REFERENCE_DATE.plus(7, ChronoUnit.DAYS))),
             createEntity("3", "2", "bar", Date.from(REFERENCE_DATE.plus(14, ChronoUnit.DAYS)))
         ));
+
+
+        // wait for the data to be saved
+        Thread.sleep(500);
 
         assertNotNull(s.get("1", "1"));
         assertNotNull(s.load("1", "1"));
