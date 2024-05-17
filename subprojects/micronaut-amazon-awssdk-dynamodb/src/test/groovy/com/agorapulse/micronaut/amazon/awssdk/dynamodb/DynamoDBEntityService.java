@@ -19,7 +19,7 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.*;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.*;
-import javax.annotation.Nullable;
+import io.micronaut.core.annotation.Nullable;
 import org.reactivestreams.Publisher;
 
 import java.util.Date;
