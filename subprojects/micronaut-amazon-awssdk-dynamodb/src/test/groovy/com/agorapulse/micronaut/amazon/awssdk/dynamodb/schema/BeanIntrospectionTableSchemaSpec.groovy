@@ -17,12 +17,15 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.schema
 
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.Address
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.DynamoDBEntity
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.DynamoDBEntityMapProperty
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.DynamoDBEntityNoRange
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.Person
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.PhoneNumber
 import io.micronaut.context.BeanContext
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.MetaTableSchemaCache
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 
@@ -45,7 +48,26 @@ class BeanIntrospectionTableSchemaSpec extends Specification {
         when:
             BeanIntrospectionTableSchema<Person> schema = BeanIntrospectionTableSchema.create(Person, context, cache)
         then:
-            schema.attributeNames().size() == 7
+            schema.attributeNames().size() == 8
+        when:
+            Map<String, AttributeValue> personMap = schema.itemToMap(new Person(
+                id: 1,
+                firstName: 'John',
+                lastName: 'Doe',
+                age: 42,
+                addresses: [
+                    main: new Address(
+                        street: 'Main Street',
+                        city: 'Springfield',
+                        zipCode: '12345'
+                    )
+                ],
+                phoneNumbers: [new PhoneNumber(type: 'home', number: '123456789')],
+                hobbies: ['reading', 'coding'],
+                favoriteColors: ['red', 'green'],
+            ), true)
+        then:
+            noExceptionThrown()
     }
 
     void 'read table schema for groovy class'() {
