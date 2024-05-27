@@ -23,6 +23,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbParti
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Introspected
 @DynamoDbBean
@@ -33,8 +34,8 @@ public class Person {
     Integer age;
     Map<String, Address> addresses;
     List<PhoneNumber> phoneNumbers;
-
     List<String> hobbies;
+    Set<String> favoriteColors;
 
     @DynamoDbPartitionKey
     public Integer getId() {
@@ -93,6 +94,14 @@ public class Person {
         this.hobbies = hobbies;
     }
 
+    public Set<String> getFavoriteColors() {
+        return favoriteColors;
+    }
+
+    public void setFavoriteColors(Set<String> favoriteColors) {
+        this.favoriteColors = favoriteColors;
+    }
+
     // CHECKSTYLE:OFF
     @Override
     public String toString() {
@@ -104,6 +113,7 @@ public class Person {
                 ", addresses=" + addresses +
                 ", phoneNumbers=" + phoneNumbers +
                 ", hobbies=" + hobbies +
+                ", favoriteColors=" + favoriteColors +
                 '}';
     }
 }
