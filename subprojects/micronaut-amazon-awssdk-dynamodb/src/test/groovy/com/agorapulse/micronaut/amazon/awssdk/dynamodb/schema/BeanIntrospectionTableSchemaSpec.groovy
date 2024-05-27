@@ -25,7 +25,6 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.Person
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.PhoneNumber
 import io.micronaut.context.BeanContext
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.MetaTableSchemaCache
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 
@@ -50,7 +49,7 @@ class BeanIntrospectionTableSchemaSpec extends Specification {
         then:
             schema.attributeNames().size() == 8
         when:
-            Map<String, AttributeValue> personMap = schema.itemToMap(new Person(
+            schema.itemToMap(new Person(
                 id: 1,
                 firstName: 'John',
                 lastName: 'Doe',
