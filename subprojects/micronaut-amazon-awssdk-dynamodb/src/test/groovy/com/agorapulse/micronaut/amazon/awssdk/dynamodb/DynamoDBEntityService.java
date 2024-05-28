@@ -215,6 +215,17 @@ public interface DynamoDBEntityService {
         )
         String rangeIndexPrefix
     );
+
+    @Index(DynamoDBEntity.RANGE_INDEX)
+    int deleteAllByRangeBeginsWith(                                                     // <11>
+        @PartitionKey String parentId,
+        @SortKey
+        @Filter(
+            value = Filter.Operator.BEGINS_WITH,
+            name = "rangeIndex"
+        )
+        String rangeIndexPrefix
+    );
     // end::advanced-query-methods[]
     // CHECKSTYLE:ON
 

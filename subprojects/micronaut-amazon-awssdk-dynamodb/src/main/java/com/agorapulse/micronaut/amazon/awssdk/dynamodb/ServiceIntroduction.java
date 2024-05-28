@@ -210,23 +210,29 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
             return service.update(criteria);
         }
 
-        if (methodName.startsWith("delete")) {
-            return handleDelete(service, context);
-        }
-
-        if (methodName.startsWith("query") || methodName.startsWith("findAll") || methodName.startsWith("list") || methodName.startsWith("count")) {
+        if (methodName.startsWith("query") || methodName.startsWith("findAll") || methodName.startsWith("list") || methodName.startsWith("count") || methodName.startsWith("delete")) {
             String index = context.getTargetMethod().isAnnotationPresent(Index.class) ? context.getTargetMethod().getAnnotation(Index.class).value() : null;
             boolean consistent = context.getTargetMethod().isAnnotationPresent(Consistent.class) && context.getTargetMethod().getAnnotation(Consistent.class).value();
             boolean descending = context.getTargetMethod().isAnnotationPresent(Descending.class) && context.getTargetMethod().getAnnotation(Descending.class).value();
 
             QueryArguments partitionAndSort = findHashAndRange(context.getArguments(), service);
+            boolean customized = index != null || consistent || descending || !partitionAndSort.filters.isEmpty() || partitionAndSort.sortKey != null && partitionAndSort.sortKey.operator != Filter.Operator.EQ;
+
             if (methodName.startsWith("count")) {
-                if (index != null || consistent || descending || !partitionAndSort.filters.isEmpty() || partitionAndSort.sortKey != null && partitionAndSort.sortKey.operator != Filter.Operator.EQ) {
+                if (customized) {
                     return service.countUsingQuery(generateQuery(context, partitionAndSort, index, consistent, descending));
                 }
                 return service.count(partitionAndSort.getPartitionValue(context.getParameters()), partitionAndSort.getSortValue(context.getParameters()));
             }
-            if (index != null || consistent || descending || !partitionAndSort.filters.isEmpty() || partitionAndSort.sortKey != null && partitionAndSort.sortKey.operator != Filter.Operator.EQ) {
+
+            if (methodName.startsWith("delete")) {
+                if (customized) {
+                    return service.deleteAll(service.query(generateQuery(context, partitionAndSort, index, consistent, descending)));
+                }
+                return handleDelete(service, context);
+            }
+
+            if (customized) {
                 return publisherOrIterable(service.query(generateQuery(context, partitionAndSort, index, consistent, descending)), context.getReturnType().getType());
             }
             return publisherOrIterable(
