@@ -49,6 +49,7 @@ import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -61,6 +62,11 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
     private static final String SORT = "sort";
     private static final String HASH = "hash";
     private static final String RANGE = "range";
+
+    private static class ItemArgument {
+        Argument<?> argument;
+        boolean single;
+    }
 
     private static class FilterArgument {
         Argument<?> firstArgument;
@@ -156,7 +162,7 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
     private <T> Object doIntercept(MethodInvocationContext<Object, Object> context, DynamoDbService<T> service) {
         String methodName = context.getMethodName();
         if (methodName.startsWith("save")) {
-            return handleSave(service, context);
+            return handleSave(service, context, findItemArgument(service, context));
         }
 
         if (methodName.startsWith("get") || methodName.startsWith("load")) {
@@ -211,22 +217,36 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         }
 
         if (methodName.startsWith("delete")) {
-            return handleDelete(service, context);
+            Optional<ItemArgument> maybeItemArgument = findItemArgument(service, context);
+            if (maybeItemArgument.isPresent()) {
+                return handleDelete(service, context, maybeItemArgument);
+            }
         }
 
-        if (methodName.startsWith("query") || methodName.startsWith("findAll") || methodName.startsWith("list") || methodName.startsWith("count")) {
+        if (methodName.startsWith("query") || methodName.startsWith("findAll") || methodName.startsWith("list") || methodName.startsWith("count") || methodName.startsWith("delete")) {
             String index = context.getTargetMethod().isAnnotationPresent(Index.class) ? context.getTargetMethod().getAnnotation(Index.class).value() : null;
             boolean consistent = context.getTargetMethod().isAnnotationPresent(Consistent.class) && context.getTargetMethod().getAnnotation(Consistent.class).value();
             boolean descending = context.getTargetMethod().isAnnotationPresent(Descending.class) && context.getTargetMethod().getAnnotation(Descending.class).value();
 
             QueryArguments partitionAndSort = findHashAndRange(context.getArguments(), service);
+            boolean customized = index != null || consistent || descending || !partitionAndSort.filters.isEmpty() || partitionAndSort.sortKey != null && partitionAndSort.sortKey.operator != Filter.Operator.EQ;
+
             if (methodName.startsWith("count")) {
-                if (index != null || consistent || descending || !partitionAndSort.filters.isEmpty() || partitionAndSort.sortKey != null && partitionAndSort.sortKey.operator != Filter.Operator.EQ) {
+                if (customized) {
                     return service.countUsingQuery(generateQuery(context, partitionAndSort, index, consistent, descending));
                 }
                 return service.count(partitionAndSort.getPartitionValue(context.getParameters()), partitionAndSort.getSortValue(context.getParameters()));
             }
-            if (index != null || consistent || descending || !partitionAndSort.filters.isEmpty() || partitionAndSort.sortKey != null && partitionAndSort.sortKey.operator != Filter.Operator.EQ) {
+
+            if (methodName.startsWith("delete")) {
+                Optional<ItemArgument> maybeItemArgument = findItemArgument(service, context);
+                if (customized) {
+                    return service.deleteAll(service.query(generateQuery(context, partitionAndSort, index, consistent, descending)));
+                }
+                return handleDelete(service, context, maybeItemArgument);
+            }
+
+            if (customized) {
                 return publisherOrIterable(service.query(generateQuery(context, partitionAndSort, index, consistent, descending)), context.getReturnType().getType());
             }
             return publisherOrIterable(
@@ -246,41 +266,35 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         return Flux.from(result).collectList().blockOptional().orElse(Collections.emptyList());
     }
 
-    private <T> Object handleSave(DynamoDbService<T> service, MethodInvocationContext<Object, Object> context) {
+    @SuppressWarnings("unchecked")
+    private <T> Object handleSave(DynamoDbService<T> service, MethodInvocationContext<Object, Object> context, Optional<ItemArgument> maybeItemArgument) {
         Map<String, MutableArgumentValue<?>> params = context.getParameters();
-        Argument<?>[] args = context.getArguments();
 
-        if (args.length != 1) {
+        if (maybeItemArgument.isPresent()) {
+            ItemArgument itemArgument = maybeItemArgument.get();
+            Publisher<T> items = toPublisher(service.getItemType(), itemArgument.argument, params);
+            if (itemArgument.single) {
+                return service.save((T) params.get(itemArgument.argument.getName()).getValue());
+            }
+            return publisherOrIterable(service.saveAll(items), context.getReturnType().getType());
+        } else {
             throw new UnsupportedOperationException("Method expects 1 parameter - item, iterable of items or array of items");
         }
-
-        Argument<?> itemArgument = args[0];
-        Publisher<T> items = toPublisher(service.getItemType(), itemArgument, params);
-
-        if (itemArgument.getType().isArray() || Iterable.class.isAssignableFrom(itemArgument.getType()) || Publisher.class.isAssignableFrom(itemArgument.getType())) {
-            return publisherOrIterable(service.saveAll(items), context.getReturnType().getType());
-        }
-
-        return service.save((T) params.get(itemArgument.getName()).getValue());
     }
 
-    private <T> Object handleDelete(DynamoDbService<T> service, MethodInvocationContext<Object, Object> context) {
+    private <T> Object handleDelete(DynamoDbService<T> service, MethodInvocationContext<Object, Object> context, Optional<ItemArgument> maybeItemArgument) {
         Map<String, MutableArgumentValue<?>> params = context.getParameters();
-        Argument<?>[] args = context.getArguments();
 
-        if (args.length == 1) {
-            Argument<?> itemArgument = args[0];
-            Publisher<T> items = toPublisher(service.getItemType(), itemArgument, params);
-
-            if (itemArgument.getType().isArray() || Iterable.class.isAssignableFrom(itemArgument.getType()) || Publisher.class.isAssignableFrom(itemArgument.getType())) {
-                return service.deleteAll(items);
-            }
-
-            if (service.getItemType().isAssignableFrom(itemArgument.getType())) {
+        if (maybeItemArgument.isPresent()) {
+            ItemArgument itemArgument = maybeItemArgument.get();
+            Publisher<T> items = toPublisher(service.getItemType(), itemArgument.argument, params);
+            if (itemArgument.single) {
                 return service.delete(Flux.from(items).blockFirst());
             }
+            return service.deleteAll(items);
         }
 
+        Argument<?>[] args = context.getArguments();
         if (args.length > 2) {
             throw new UnsupportedOperationException("Method expects at most 2 parameters - partition key and sort key, an item or items");
         }
@@ -315,6 +329,30 @@ public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
         }
 
         return service.get(partitionValue, partitionAndSort.getSortValue(params));
+    }
+
+    private <T> Optional<ItemArgument> findItemArgument(DynamoDbService<T> service, MethodInvocationContext<Object, Object> context) {
+        Map<String, MutableArgumentValue<?>> params = context.getParameters();
+        Argument<?>[] args = context.getArguments();
+
+        if (args.length == 1) {
+            Argument<?> itemArgument = args[0];
+            if (itemArgument.getType().isArray() || Iterable.class.isAssignableFrom(itemArgument.getType()) || Publisher.class.isAssignableFrom(itemArgument.getType())) {
+                ItemArgument item = new ItemArgument();
+                item.argument = itemArgument;
+                item.single = false;
+                return Optional.of(item);
+            }
+
+            if (service.getItemType().isAssignableFrom(itemArgument.getType())) {
+                ItemArgument item = new ItemArgument();
+                item.argument = itemArgument;
+                item.single = true;
+                return Optional.of(item);
+            }
+        }
+
+        return Optional.empty();
     }
 
     private QueryArguments findHashAndRange(Argument<?>[] arguments, DynamoDbService<?> table) {

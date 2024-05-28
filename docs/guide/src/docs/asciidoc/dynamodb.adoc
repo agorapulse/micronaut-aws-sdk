@@ -581,6 +581,7 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy
 <8> You can combine `@SortKey` and `@Filter` annotations to specify the sort key condition
 <9> Only`EQ`, `LE`, `LT`, `GE`, `GT`, `BETWEEN` and `BEGINS_WITH` operators are supported
 <10> You can also use `@Filter` annotation to specify the sort key name
+<11> If you use any customization annotations on delete method, then the method will be used as batch delete method
 
 TIP: The operator `EQ` is used by default if `@Filter` annotation is not present. This makes it special and the service introduction tries to find the appropriate operation based on the actual value. For collections or arrays, `inList` operation is actually used. If the actual value is `null` then `isNull` operation is used. For other types, `eq` operation is used. For sort keys, `eq` operation is always used.
 
