@@ -716,21 +716,45 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
         Object attributeValue,
         AttributeAction action
     ) {
+        return this.updateItemAttributes(hashKey, rangeKey, Map.of(attributeName, attributeValue), action)
+    }
+
+    /**
+     * Update a multiple item attributes
+     *
+     * @param hashKey
+     * @param rangeKey
+     * @param valueByAttributeKey
+     * @param action
+     * @return
+     */
+    UpdateItemResult updateItemAttributes(
+        Object hashKey,
+        Object rangeKey,
+        Map<String, Object> valueByAttributeKey,
+        AttributeAction action
+    ) {
         Map<String, Object> key = [(hashKeyName): buildAttributeValue(hashKey)]
         if (rangeKey) {
             key[rangeKeyName] = buildAttributeValue(rangeKey)
         }
+
         UpdateItemRequest request = new UpdateItemRequest(
             tableName: metadata.mainTable.tableName(),
             key: key,
             returnValues: ReturnValue.UPDATED_NEW
-        ).addAttributeUpdatesEntry(
-            attributeName,
-            new AttributeValueUpdate(
-                action: action,
-                value: buildAttributeValue(attributeValue)
-            )
         )
+
+        valueByAttributeKey.entrySet().forEach { entry ->
+            request.addAttributeUpdatesEntry(
+                entry.getKey(),
+                new AttributeValueUpdate(
+                    action: action,
+                    value: buildAttributeValue(entry.getValue())
+                )
+            )
+        }
+
         return client.updateItem(request)
     }
 

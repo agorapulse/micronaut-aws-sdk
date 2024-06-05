@@ -773,6 +773,8 @@ public interface DynamoDBService<T> {
      */
     UpdateItemResult updateItemAttribute(Object hashKey, Object rangeKey, String attributeName, Object attributeValue, AttributeAction action);
 
+    UpdateItemResult updateItemAttributes(Object hashKey, Object rangeKey, Map<String, Object> values, AttributeAction action);
+
     /**
      * Update a single item attribute
      *

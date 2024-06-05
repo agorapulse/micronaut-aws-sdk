@@ -25,20 +25,27 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
+import com.amazonaws.services.dynamodbv2.model.AttributeAction
 import com.amazonaws.services.dynamodbv2.model.CreateTableResult
+import com.amazonaws.services.dynamodbv2.model.UpdateItemResult
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
+import jakarta.inject.Inject
 import org.joda.time.DateTime
 import org.reactivestreams.Publisher
 import reactor.core.publisher.Flux
 import spock.lang.Specification
 import spock.lang.Stepwise
 
-import jakarta.inject.Inject
+import java.text.DateFormat
+import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
+import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*
+
 // tag::builders-import[]
-import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  // <1>
+
+// <1>
 
 // end::builders-import[]
 
@@ -362,6 +369,30 @@ class DefaultDynamoDBServiceSpec extends Specification {
                 after: REFERENCE_DATE.minusDays(20).toDate(),
                 before: REFERENCE_DATE.plusDays(20).toDate(),
             ]) == 0
+    }
+
+    void 'updateItemAttributes should correctly update specified attribute'() {
+        given:
+            s.save(new DynamoDBEntity(parentId: '0', id: '1', rangeIndex: 'foo', date: new Date()))
+            Map<String, Object> valueByAttributeKey = Map.of('rangeIndex', 'bar')
+        when:
+            UpdateItemResult result = s.updateItemAttributes('0', '1', valueByAttributeKey, AttributeAction.PUT)
+        then:
+            assert result.attributes.size() == 1
+            assert result.attributes.get('rangeIndex').getS() == 'bar'
+        when:
+            DateFormat formatter = new SimpleDateFormat('yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\'')
+            Date now = new Date()
+            valueByAttributeKey = Map.of(
+                'rangeIndex', 'randomRangeIndex',
+                'date', now
+            )
+            result = s.updateItemAttributes('0', '1', valueByAttributeKey, AttributeAction.PUT)
+        then:
+            assert result.attributes.size() == 2
+            assert result.attributes.get('rangeIndex').getS() == 'randomRangeIndex'
+            assert result.attributes.get('date').getS() == formatter.format(now)
+
     }
 
     private static <T> List<T> toList(Publisher<T> publisher) {
