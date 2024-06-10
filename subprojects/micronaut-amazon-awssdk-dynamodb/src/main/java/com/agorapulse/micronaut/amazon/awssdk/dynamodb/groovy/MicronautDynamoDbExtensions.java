@@ -122,7 +122,7 @@ public class MicronautDynamoDbExtensions {
     public static <T> QueryBuilder<T> configure(
         QueryBuilder<T> self,
         @DelegatesTo(type = "software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest.Builder", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest.Builder")
+        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest$Builder")
             Closure<Object> configurer
     ) {
         return self.configure(ConsumerWithDelegate.create(configurer));
@@ -168,7 +168,7 @@ public class MicronautDynamoDbExtensions {
     public static <T> ScanBuilder<T> configure(
         ScanBuilder<T> self,
         @DelegatesTo(type = "software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest.Builder", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest.Builder")
+        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest$Builder")
             Closure<Object> configurer
     ) {
         return self.configure(ConsumerWithDelegate.create(configurer));
@@ -271,7 +271,7 @@ public class MicronautDynamoDbExtensions {
     public static <T, R> UpdateBuilder<T, R> configure(
         UpdateBuilder<T, R> self,
         @DelegatesTo(type = "software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest.Builder", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest.Builder")
+        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest$Builder")
             Closure<Object> configurer
     ) {
         return self.configure(ConsumerWithDelegate.create(configurer));

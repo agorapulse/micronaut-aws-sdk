@@ -33,7 +33,7 @@ public class SecurityTokenServiceExtensions {
         String roleArn,
         int durationInSeconds,
         @DelegatesTo(value = AssumeRoleRequest.Builder.class, strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = SimpleType.class, options = "software.amazon.awssdk.services.sts.model.AssumeRoleRequest.Builder")
+        @ClosureParams(value = SimpleType.class, options = "software.amazon.awssdk.services.sts.model.AssumeRoleRequest$Builder")
             Closure<?> additionParameters
     ) {
         return service.assumeRole(sessionName, roleArn, durationInSeconds, ConsumerWithDelegate.create(additionParameters));

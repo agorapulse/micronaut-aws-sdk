@@ -43,7 +43,7 @@ public class MicronautS3Extensions {
         String path,
         File file,
         @DelegatesTo(type = "software.amazon.awssdk.services.s3.model.PutObjectRequest.Builder", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.s3.model.PutObjectRequest.Builder")
+        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.s3.model.PutObjectRequest$Builder")
             Closure<PutObjectRequest.Builder> metadataDefinition
     ) {
         return self.storeFile(path, file, ConsumerWithDelegate.create(metadataDefinition));
@@ -63,7 +63,7 @@ public class MicronautS3Extensions {
         String path,
         File file,
         @DelegatesTo(type = "software.amazon.awssdk.services.s3.model.PutObjectRequest.Builder", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.s3.model.PutObjectRequest.Builder")
+        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.s3.model.PutObjectRequest$Builder")
             Closure<PutObjectRequest.Builder> metadataDefinition
     ) {
         return self.storeFile(bucketName, path, file, ConsumerWithDelegate.create(metadataDefinition));
@@ -83,7 +83,7 @@ public class MicronautS3Extensions {
         String path,
         InputStream input,
         @DelegatesTo(type = "software.amazon.awssdk.services.s3.model.PutObjectRequest.Builder", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.s3.model.PutObjectRequest.Builder")
+        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.s3.model.PutObjectRequest$Builder")
         Closure<PutObjectRequest.Builder> metadataDefinition
     ) {
         return self.storeInputStream(bucketName, path, input, ConsumerWithDelegate.create(metadataDefinition));
@@ -101,7 +101,7 @@ public class MicronautS3Extensions {
         String path,
         InputStream input,
         @DelegatesTo(type = "software.amazon.awssdk.services.s3.model.PutObjectRequest.Builder", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.s3.model.PutObjectRequest.Builder")
+        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.s3.model.PutObjectRequest$Builder")
         Closure<PutObjectRequest.Builder> metadataDefinition
     ) {
         return self.storeInputStream(path, input, ConsumerWithDelegate.create(metadataDefinition));
@@ -123,7 +123,7 @@ public class MicronautS3Extensions {
         String path,
         PartData partData,
         @DelegatesTo(type = "software.amazon.awssdk.services.s3.model.PutObjectRequest.Builder", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.s3.model.PutObjectRequest.Builder")
+        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.s3.model.PutObjectRequest$Builder")
         Closure<PutObjectRequest.Builder> metadataDefinition
     ) throws IOException {
         return self.storeMultipartFile(bucketName, path, partData, ConsumerWithDelegate.create(metadataDefinition));
@@ -142,7 +142,7 @@ public class MicronautS3Extensions {
         String path,
         PartData multipartFile,
         @DelegatesTo(type = "software.amazon.awssdk.services.s3.model.PutObjectRequest.Builder", strategy = Closure.DELEGATE_FIRST)
-        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.s3.model.PutObjectRequest.Builder")
+        @ClosureParams(value = FromString.class, options = "software.amazon.awssdk.services.s3.model.PutObjectRequest$Builder")
         Closure<PutObjectRequest.Builder> metadataDefinition
     ) throws IOException {
         return self.storeMultipartFile(path, multipartFile, ConsumerWithDelegate.create(metadataDefinition));
