@@ -6,3 +6,7 @@ localstack:
       port: 8000
       shared: true
   services: dynamodb
+
+aws:
+    dynamodb:
+        create-tables: true

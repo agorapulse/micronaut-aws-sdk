@@ -209,7 +209,7 @@ public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
                     r.getT2().forEach(i -> publisher.publishEvent(DynamoDbEvent.postRemove(i)));
                     return Flux.fromIterable(r.getT2());
                 }
-                return Flux.error( new IllegalArgumentException("Following items couldn't be deleted:" + unprocesseded.stream()
+                return Flux.error(new IllegalArgumentException("Following items couldn't be deleted:" + unprocesseded.stream()
                     .map(k -> tableSchema.mapToItem(k.keyMap(tableSchema, TableMetadata.primaryIndexName()))).map(Object::toString)
                     .collect(Collectors.joining(", "))));
             });

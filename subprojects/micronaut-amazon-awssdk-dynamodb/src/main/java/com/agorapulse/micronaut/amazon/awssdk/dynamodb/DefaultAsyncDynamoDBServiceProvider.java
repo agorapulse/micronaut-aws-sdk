@@ -17,8 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
-import io.micronaut.context.ApplicationContext;
-import io.micronaut.context.env.Environment;
+import io.micronaut.context.annotation.Value;
 import io.micronaut.context.event.ApplicationEventPublisher;
 import jakarta.inject.Singleton;
 import reactor.core.publisher.Mono;
@@ -51,14 +50,14 @@ public class DefaultAsyncDynamoDBServiceProvider implements AsyncDynamoDBService
         AttributeConversionHelper attributeConversionHelper,
         ApplicationEventPublisher publisher,
         TableSchemaCreator tableSchemaCreator,
-        ApplicationContext context
+        @Value("${aws.dynamodb.create-tables:false}") boolean createTables
     ) {
         this.enhancedClient = enhancedClient;
         this.client = client;
         this.attributeConversionHelper = attributeConversionHelper;
         this.publisher = publisher;
         this.tableSchemaCreator = tableSchemaCreator;
-        this.createTables = context.getEnvironment().getActiveNames().contains("test") || context.getProperty("aws.dynamodb.create-tables", Boolean.class, false);
+        this.createTables = createTables;
     }
 
     /**

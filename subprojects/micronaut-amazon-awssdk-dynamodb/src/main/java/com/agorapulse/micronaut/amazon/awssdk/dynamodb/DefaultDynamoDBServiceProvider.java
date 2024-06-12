@@ -17,13 +17,12 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
-import io.micronaut.context.ApplicationContext;
+import io.micronaut.context.annotation.Value;
 import io.micronaut.context.event.ApplicationEventPublisher;
+import jakarta.inject.Singleton;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-
-import jakarta.inject.Singleton;
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,29 +47,28 @@ public class DefaultDynamoDBServiceProvider implements DynamoDBServiceProvider {
         AttributeConversionHelper attributeConversionHelper,
         ApplicationEventPublisher publisher,
         TableSchemaCreator tableSchemaCreator,
-        ApplicationContext context
+        @Value("${aws.dynamodb.create-tables:false}") boolean createTables
     ) {
         this.enhancedClient = enhancedClient;
         this.client = client;
         this.attributeConversionHelper = attributeConversionHelper;
         this.publisher = publisher;
         this.tableSchemaCreator = tableSchemaCreator;
-        this.createTables = context.getEnvironment().getActiveNames().contains("test") || context.getProperty("aws.dynamodb.create-tables", Boolean.class, false);
+        this.createTables = createTables;
     }
 
     /**
      * Provides {@link DynamoDbService} for given type.
      *
      * @param tableName name of the table
-     * @param type DynamoDB entity type
-     * @param <T>  the type of the DynamoDB entity
+     * @param type      DynamoDB entity type
+     * @param <T>       the type of the DynamoDB entity
      * @return {@link DynamoDbService} for given type
      */
     @Override
     @SuppressWarnings("unchecked")
     public <T> DynamoDbService<T> findOrCreate(String tableName, Class<T> type) {
-        return (DynamoDbService<T>) serviceCache.computeIfAbsent(tableName, t ->
-            {
+        return (DynamoDbService<T>) serviceCache.computeIfAbsent(tableName, t -> {
                 DynamoDbTable<T> table = enhancedClient.table(tableName, tableSchemaCreator.create(type));
                 DefaultDynamoDbService<T> newService = new DefaultDynamoDbService<>(
                     type,

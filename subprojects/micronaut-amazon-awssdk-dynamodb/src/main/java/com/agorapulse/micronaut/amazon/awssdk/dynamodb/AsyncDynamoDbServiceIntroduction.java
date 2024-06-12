@@ -17,8 +17,15 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.*;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.*;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Query;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Scan;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Service;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Update;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedQuery;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedScan;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedUpdate;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.util.QueryArguments;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.context.annotation.Replaces;
 import io.micronaut.context.annotation.Requires;
@@ -35,9 +42,7 @@ import reactor.core.publisher.Mono;
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 
 /**
  * Introduction for {@link Service} annotation.
@@ -48,43 +53,6 @@ import java.util.function.Consumer;
 public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduction {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AsyncDynamoDbServiceIntroduction.class);
-
-    private static final String PARTITION = "partition";
-    private static final String SORT = "sort";
-    private static final String HASH = "hash";
-    private static final String RANGE = "range";
-
-    private static class FilterArgument {
-        Argument<?> firstArgument;
-        Argument<?> secondArgument;
-        String name;
-        boolean required;
-        Filter.Operator operator;
-    }
-
-    private class QueryArguments {
-        Argument<?> partitionKey;
-        FilterArgument sortKey;
-        Map<String, FilterArgument> filters = new LinkedHashMap<>();
-
-
-        boolean isValid() {
-            return partitionKey != null;
-        }
-
-        Object getPartitionValue(Map<String, MutableArgumentValue<?>> params) {
-            return params.get(partitionKey.getName()).getValue();
-        }
-
-        Object getSortValue(Map<String, MutableArgumentValue<?>> params) {
-            return sortKey == null ? null : params.get(sortKey.firstArgument.getName()).getValue();
-        }
-
-        Publisher<?> getSortAttributeValues(Map<String, MutableArgumentValue<?>> params) {
-            return sortKey == null ? Flux.empty() : toPublisher(Object.class, sortKey.firstArgument, params);
-        }
-
-    }
 
     private final FunctionEvaluator functionEvaluator;
     private final AsyncDynamoDBServiceProvider provider;
@@ -196,19 +164,15 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
         }
 
         if (methodName.startsWith("query") || methodName.startsWith("findAll") || methodName.startsWith("list") || methodName.startsWith("count")) {
-            String index = context.getTargetMethod().isAnnotationPresent(Index.class) ? context.getTargetMethod().getAnnotation(Index.class).value() : null;
-            boolean consistent = context.getTargetMethod().isAnnotationPresent(Consistent.class) && context.getTargetMethod().getAnnotation(Consistent.class).value();
-            boolean descending = context.getTargetMethod().isAnnotationPresent(Descending.class) && context.getTargetMethod().getAnnotation(Descending.class).value();
-
-            QueryArguments partitionAndSort = findHashAndRange(context.getArguments(), service);
+            QueryArguments partitionAndSort = QueryArguments.create(context, service.getTable().tableSchema().tableMetadata());
             if (methodName.startsWith("count")) {
-                if (index != null || consistent || descending || !partitionAndSort.filters.isEmpty() || partitionAndSort.sortKey != null && partitionAndSort.sortKey.operator != Filter.Operator.EQ) {
-                    return unwrapIfRequired(service.countUsingQuery(generateQuery(context, partitionAndSort, index, consistent, descending)), context.getReturnType().getType());
+                if (partitionAndSort.isCustomized()) {
+                    return unwrapIfRequired(service.countUsingQuery(partitionAndSort.generateQuery(context)), context.getReturnType().getType());
                 }
                 return unwrapIfRequired(service.count(partitionAndSort.getPartitionValue(context.getParameters()), partitionAndSort.getSortValue(context.getParameters())), context.getReturnType().getType());
             }
-            if (index != null || consistent || descending || !partitionAndSort.filters.isEmpty() || partitionAndSort.sortKey != null && partitionAndSort.sortKey.operator != Filter.Operator.EQ) {
-                return unwrapIfRequired(service.query(generateQuery(context, partitionAndSort, index, consistent, descending)), context.getReturnType().getType());
+            if (partitionAndSort.isCustomized()) {
+                return unwrapIfRequired(service.query(partitionAndSort.generateQuery(context)), context.getReturnType().getType());
             }
             return unwrapIfRequired(
                 service.findAll(partitionAndSort.getPartitionValue(context.getParameters()), partitionAndSort.getSortValue(context.getParameters())),
@@ -293,7 +257,7 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
             throw new UnsupportedOperationException("Method expects at most 2 parameters - partition key and sort key, an item or items");
         }
 
-        QueryArguments partitionAndSort = findHashAndRange(args, service);
+        QueryArguments partitionAndSort = QueryArguments.create(context, service.getTable().tableSchema().tableMetadata());
         return service.delete(partitionAndSort.getPartitionValue(params), partitionAndSort.getSortValue(params));
     }
 
@@ -305,130 +269,18 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
             throw new UnsupportedOperationException("Method expects at most 2 parameters - partition key and sort key or sort keys");
         }
 
-        QueryArguments partitionAndSort = findHashAndRange(args, service);
+        QueryArguments partitionAndSort = QueryArguments.create(context, service.getTable().tableSchema().tableMetadata());
         Object partitionValue = partitionAndSort.getPartitionValue(params);
 
-        if (partitionAndSort.sortKey == null) {
+        if (!partitionAndSort.hasSortKey()) {
             return service.get(partitionValue, null);
         }
 
-        if (
-            partitionAndSort.sortKey.firstArgument.getType().isArray()
-                || Iterable.class.isAssignableFrom(partitionAndSort.sortKey.firstArgument.getType())
-                || Publisher.class.isAssignableFrom(partitionAndSort.sortKey.firstArgument.getType())
-        ) {
-            return service.getAll(partitionValue, partitionAndSort.getSortAttributeValues(params));
+        if (partitionAndSort.isSortKeyPublisherOrIterable()) {
+            return service.getAll(partitionValue, partitionAndSort.getSortAttributeValues(conversionService, params));
         }
 
         return service.get(partitionValue, partitionAndSort.getSortValue(params));
-    }
-
-    private QueryArguments findHashAndRange(Argument<?>[] arguments, AsyncDynamoDbService<?> table) {
-        QueryArguments names = new QueryArguments();
-        for (Argument<?> argument : arguments) {
-            if (
-                argument.isAnnotationPresent(SortKey.class)
-                    || argument.isAnnotationPresent(RangeKey.class)
-                    || argument.getName().toLowerCase().contains(SORT)
-                    || argument.getName().toLowerCase().contains(RANGE)
-                    || argument.getName().equals(table.getTable().tableSchema().tableMetadata().primarySortKey().orElse(SORT))
-            ) {
-                if (names.sortKey == null)  {
-                    names.sortKey = new FilterArgument();
-                    names.sortKey.name = getArgumentName(argument);
-                    if (names.sortKey.firstArgument == null) {
-                        fillFirstArgument(argument, names.sortKey);
-                    } else {
-                        names.sortKey.secondArgument = argument;
-                    }
-                }
-            } else if (
-                argument.isAnnotationPresent(PartitionKey.class)
-                    || argument.isAnnotationPresent(HashKey.class)
-                    || argument.getName().toLowerCase().contains(PARTITION)
-                    || argument.getName().toLowerCase().contains(HASH)
-                    || argument.getName().equals(table.getTable().tableSchema().tableMetadata().primaryPartitionKey())
-            ) {
-                names.partitionKey = argument;
-            } else {
-                String name = getArgumentName(argument);
-
-                FilterArgument filterArgument = names.filters.computeIfAbsent(name, argName -> {
-                    FilterArgument arg = new FilterArgument();
-                    arg.name = argName;
-                    return arg;
-                });
-
-                if (filterArgument.firstArgument == null) {
-                    fillFirstArgument(argument, filterArgument);
-                } else {
-                    filterArgument.secondArgument = argument;
-                }
-            }
-        }
-
-        if (!names.isValid()) {
-            throw new UnsupportedOperationException("Method needs to have at least one argument annotated with @PartitionKey or with called 'partition'");
-        }
-
-        return names;
-    }
-
-    private static void fillFirstArgument(Argument<?> argument, FilterArgument filterArgument) {
-        filterArgument.firstArgument = argument;
-        filterArgument.required = !argument.isNullable();
-        filterArgument.operator = argument.isAnnotationPresent(Filter.class)
-            ? argument.getAnnotation(Filter.class).enumValue("value", Filter.Operator.class).orElse(Filter.Operator.EQ)
-            : Filter.Operator.EQ;
-    }
-
-    private static String getArgumentName(Argument<?> argument) {
-        return argument.isAnnotationPresent(Filter.class)
-            ? argument.getAnnotation(Filter.class).stringValue("name").orElse(argument.getName())
-            : argument.getName();
-    }
-
-    private <T> Consumer<QueryBuilder<T>> generateQuery(MethodInvocationContext<Object, Object> context, QueryArguments partitionAndSort, String index, boolean consistent, boolean descending) {
-        return q -> {
-            if (index != null) {
-                q.index(index);
-            }
-
-            q.partitionKey(partitionAndSort.getPartitionValue(context.getParameters()));
-
-            Object sortValue = partitionAndSort.getSortValue(context.getParameters());
-            Object secondSortValue = partitionAndSort.sortKey == null || partitionAndSort.sortKey.secondArgument == null ? null : context.getParameters().get(partitionAndSort.sortKey.secondArgument.getName()).getValue();
-
-            if (sortValue != null) {
-                q.sortKey(s -> partitionAndSort.sortKey.operator.apply(s, partitionAndSort.sortKey.name, sortValue, secondSortValue));
-            }
-
-            if (consistent) {
-                q.consistent(Builders.Read.READ);
-            }
-
-            if (descending) {
-                q.order(Builders.Sort.DESC);
-            }
-
-            if (!partitionAndSort.filters.isEmpty()) {
-                partitionAndSort.filters.forEach((name, filter) -> {
-                    Object firstValue = context.getParameters().get(filter.firstArgument.getName()).getValue();
-                    Object secondValue = filter.secondArgument == null ? null : context.getParameters().get(filter.secondArgument.getName()).getValue();
-
-                    if (firstValue == null && !filter.required) {
-                        return;
-                    }
-
-                    q.filter(f -> filter.operator.apply(
-                        f,
-                        name,
-                        firstValue,
-                        secondValue)
-                    );
-                });
-            }
-        };
     }
 
 }
