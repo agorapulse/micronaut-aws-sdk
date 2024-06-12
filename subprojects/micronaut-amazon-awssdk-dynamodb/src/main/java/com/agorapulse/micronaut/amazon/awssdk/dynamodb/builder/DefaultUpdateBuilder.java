@@ -20,9 +20,13 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeConversionHelper;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbEvent;
 import io.micronaut.context.event.ApplicationEventPublisher;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Mono;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.MappedTableResource;
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeAction;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
@@ -129,6 +133,30 @@ class DefaultUpdateBuilder<T, R> implements UpdateBuilder<T, R> {
         T item = mapper.tableSchema().mapToItem(attributes);
         publisher.publishEvent(DynamoDbEvent.postUpdate(item));
         return (R) __returnValueMapper.apply(item);
+    }
+
+    @Override
+    public Publisher<R> update(DynamoDbAsyncTable<T> mapper, DynamoDbAsyncClient client, AttributeConversionHelper attributeConversionHelper, ApplicationEventPublisher publisher) {
+        UpdateItemRequest request = resolveRequest(mapper, attributeConversionHelper);
+        T keyItem = mapper.tableSchema().mapToItem(request.key());
+        publisher.publishEvent(DynamoDbEvent.preUpdate(keyItem));
+
+        return Mono.fromFuture(client.updateItem(request))
+            .flatMap(result -> {
+                if (ReturnValue.NONE.equals(__returnValue)) {
+                    return Mono.just((R) keyItem);
+                }
+
+                Map<String, AttributeValue> attributes = result.attributes();
+
+                if (attributes == null || attributes.isEmpty()) {
+                    return Mono.just((R) keyItem);
+                }
+
+                T item = mapper.tableSchema().mapToItem(attributes);
+                publisher.publishEvent(DynamoDbEvent.postUpdate(item));
+                return Mono.just((R)__returnValueMapper.apply(item));
+            });
     }
 
     @Override

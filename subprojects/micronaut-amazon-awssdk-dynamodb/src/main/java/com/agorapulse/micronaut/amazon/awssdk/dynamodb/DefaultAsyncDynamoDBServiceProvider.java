@@ -18,33 +18,36 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
 import io.micronaut.context.ApplicationContext;
+import io.micronaut.context.env.Environment;
 import io.micronaut.context.event.ApplicationEventPublisher;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-
 import jakarta.inject.Singleton;
+import reactor.core.publisher.Mono;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 
+import java.time.Duration;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Provider of {@link DynamoDbService} for particular DynamoDB entities.
+ * Provider of {@link AsyncDynamoDbService} for particular DynamoDB entities.
  */
 @Singleton
-public class DefaultDynamoDBServiceProvider implements DynamoDBServiceProvider {
+public class DefaultAsyncDynamoDBServiceProvider implements AsyncDynamoDBServiceProvider {
 
-    private final ConcurrentHashMap<String, DynamoDbService<?>> serviceCache = new ConcurrentHashMap<>();
-    private final DynamoDbEnhancedClient enhancedClient;
-    private final DynamoDbClient client;
+    private final ConcurrentHashMap<String, AsyncDynamoDbService<?>> serviceCache = new ConcurrentHashMap<>();
+    private final DynamoDbEnhancedAsyncClient enhancedClient;
+    private final DynamoDbAsyncClient client;
     private final AttributeConversionHelper attributeConversionHelper;
     private final ApplicationEventPublisher publisher;
     private final TableSchemaCreator tableSchemaCreator;
     private final boolean createTables;
 
-    public DefaultDynamoDBServiceProvider(
-        DynamoDbEnhancedClient enhancedClient,
-        DynamoDbClient client,
+    public DefaultAsyncDynamoDBServiceProvider(
+        DynamoDbEnhancedAsyncClient enhancedClient,
+        DynamoDbAsyncClient client,
         AttributeConversionHelper attributeConversionHelper,
         ApplicationEventPublisher publisher,
         TableSchemaCreator tableSchemaCreator,
@@ -62,17 +65,17 @@ public class DefaultDynamoDBServiceProvider implements DynamoDBServiceProvider {
      * Provides {@link DynamoDbService} for given type.
      *
      * @param tableName name of the table
-     * @param type DynamoDB entity type
-     * @param <T>  the type of the DynamoDB entity
+     * @param type      DynamoDB entity type
+     * @param <T>       the type of the DynamoDB entity
      * @return {@link DynamoDbService} for given type
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> DynamoDbService<T> findOrCreate(String tableName, Class<T> type) {
-        return (DynamoDbService<T>) serviceCache.computeIfAbsent(tableName, t ->
-            {
-                DynamoDbTable<T> table = enhancedClient.table(tableName, tableSchemaCreator.create(type));
-                DefaultDynamoDbService<T> newService = new DefaultDynamoDbService<>(
+    public <T> AsyncDynamoDbService<T> findOrCreate(String tableName, Class<T> type) {
+        return (AsyncDynamoDbService<T>) serviceCache.computeIfAbsent(tableName, t -> {
+                DynamoDbAsyncTable<T> table = enhancedClient.table(tableName, tableSchemaCreator.create(type));
+
+                DefaultAsyncDynamoDbService<T> newService = new DefaultAsyncDynamoDbService<>(
                     type,
                     enhancedClient,
                     client,
@@ -85,11 +88,13 @@ public class DefaultDynamoDBServiceProvider implements DynamoDBServiceProvider {
                     return newService;
                 }
 
-                try {
-                    table.describeTable();
-                } catch (ResourceNotFoundException e) {
-                    table.createTable();
-                }
+                Mono.fromFuture(table.describeTable())
+                    .map(Objects::nonNull)
+                    .onErrorResume(
+                        ResourceNotFoundException.class,
+                        e -> Mono.from(newService.createTable())
+                    )
+                    .block(Duration.ofSeconds(30));
 
                 return newService;
             }

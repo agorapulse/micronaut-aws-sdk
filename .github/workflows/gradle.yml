@@ -33,6 +33,8 @@ jobs:
           distribution: corretto
           java-version: 17
           cache: gradle
-      - uses: gradle/gradle-build-action@v2
-        with:
-          arguments: check coveralls --parallel
+      - uses: gradle/actions/setup-gradle@v3
+      - run: |
+          # test the async implementation of the DynamoDB client first
+          ./gradlew :micronaut-amazon-awssdk-dynamodb:test -Ptest.aws.dynamodb.v2=async
+          ./gradlew check coveralls --parallel

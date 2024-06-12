@@ -37,11 +37,12 @@ class DefaultDynamoDBServiceNoRangeSpec extends Specification {
             service.save(new DynamoDBEntityNoRange(parentId: '2'))
             service.saveAll([
                 new DynamoDBEntityNoRange(parentId: '3'),
-                new DynamoDBEntityNoRange(parentId: '4')])
+                new DynamoDBEntityNoRange(parentId: '4')]
+            ).collectList().block()
             service.saveAll(Flowable.just(
                 new DynamoDBEntityNoRange(parentId: '5'),
                 new DynamoDBEntityNoRange(parentId: '6')
-            ))
+            )).toList().blockingGet()
 
         then:
             noExceptionThrown()
@@ -49,6 +50,16 @@ class DefaultDynamoDBServiceNoRangeSpec extends Specification {
         and:
             service.get('1')
             service.count('1') == 1
+            service.get('2')
+            service.count('2') == 1
+            service.get('3')
+            service.count('3') == 1
+            service.get('4')
+            service.count('4') == 1
+            service.get('5')
+            service.count('5') == 1
+            service.get('6')
+            service.count('6') == 1
 
         when:
             service.increment('1')
@@ -68,8 +79,11 @@ class DefaultDynamoDBServiceNoRangeSpec extends Specification {
             !service.get('1').number
 
         and:
+            service.count('1') == 1
             service.delete(service.get('1'))
             service.count('1') == 0
+            service.query('3').size() == 1
+            service.count('3') == 1
             service.deleteByHash('3')
             service.count('3') == 0
             service.deleteByPartition('2')

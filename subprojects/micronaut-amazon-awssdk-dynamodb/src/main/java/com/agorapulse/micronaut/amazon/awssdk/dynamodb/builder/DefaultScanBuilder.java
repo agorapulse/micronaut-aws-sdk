@@ -20,7 +20,9 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeConversionHelper;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.MappedTableResource;
 import software.amazon.awssdk.enhanced.dynamodb.TableMetadata;
@@ -104,10 +106,26 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
     }
 
     @Override
-    public Publisher<T> scan(DynamoDbTable<T> mapper, AttributeConversionHelper attributeConversionHelper) {
+    public Mono<Long> count(DynamoDbAsyncTable<T> mapper, AttributeConversionHelper attributeConversionHelper) {
+        return scan(mapper, attributeConversionHelper).count();
+    }
+
+    @Override
+    public Flux<T> scan(DynamoDbTable<T> mapper, AttributeConversionHelper attributeConversionHelper) {
         ScanEnhancedRequest request = resolveRequest(mapper, attributeConversionHelper);
         SdkIterable<Page<T>> iterable = this.__index == null ? mapper.scan(request) : mapper.index(__index).scan(request);
         Flux<T> results = Flux.fromIterable(iterable).flatMap(p -> Flux.fromIterable(p.items()));
+        if (__max < Integer.MAX_VALUE) {
+            return results.take(__max);
+        }
+        return results;
+    }
+
+    @Override
+    public Flux<T> scan(DynamoDbAsyncTable<T> mapper, AttributeConversionHelper attributeConversionHelper) {
+        ScanEnhancedRequest request = resolveRequest(mapper, attributeConversionHelper);
+        Publisher<Page<T>> iterable = this.__index == null ? mapper.scan(request) : mapper.index(__index).scan(request);
+        Flux<T> results = Flux.from(iterable).flatMap(p -> Flux.fromIterable(p.items()));
         if (__max < Integer.MAX_VALUE) {
             return results.take(__max);
         }

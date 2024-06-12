@@ -45,9 +45,6 @@ class CompressedStringConverterSpec extends Specification {
 
     void 'should persist entity with compressed data field'() {
         given:
-        dynamoDbService.createTable()
-
-        and:
         String json = this.class.classLoader.getResourceAsStream('example.json').text
         EntityExample entity = new EntityExample(UUID.randomUUID().toString(), json)
 
