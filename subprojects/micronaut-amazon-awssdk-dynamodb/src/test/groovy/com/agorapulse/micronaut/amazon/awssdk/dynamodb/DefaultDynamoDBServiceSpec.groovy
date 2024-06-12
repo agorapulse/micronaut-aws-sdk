@@ -71,7 +71,6 @@ class DefaultDynamoDBServiceSpec extends Specification {
     }
     // end::setup[]
 
-    @SuppressWarnings('LineLength')
     void 'unsupported methods throws meaningful messages'() {
         when:
         unknownMethodsService.doSomething()
@@ -88,8 +87,8 @@ class DefaultDynamoDBServiceSpec extends Specification {
         when:
         unknownMethodsService.delete('1', '1', '1')
         then:
-        IllegalArgumentException e3 = thrown(IllegalArgumentException)
-        e3.message == '''Unknown property somethingElse for DynamoDBEntity{parentId='null', id='null', rangeIndex='null', date=null, number=0, mapProperty={}}'''
+        UnsupportedOperationException e3 = thrown(UnsupportedOperationException)
+        e3.message == 'Method expects at most 2 parameters - partition key and sort key, an item or items'
 
         when:
         unknownMethodsService.get('1', '1', '1')
@@ -113,6 +112,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
     ])
     void 'service introduction works'() {
         when:
+            playbook.forget()
             // tag::save-entity[]
             service.save(new DynamoDBEntity(                                                        // <3>
                 parentId: '1',
@@ -137,7 +137,6 @@ class DefaultDynamoDBServiceSpec extends Specification {
             ))
         then:
             playbook.verifyAndForget(
-                'PRE_PERSIST:1:1:foo:1',
                 'PRE_PERSIST:1:1:foo:1',
                 'POST_PERSIST:1:1:foo:1',
                 'PRE_PERSIST:1:2:bar:2',
@@ -407,9 +406,9 @@ class DefaultDynamoDBServiceSpec extends Specification {
             service.deleteByRangeIndex('1001', 'bar') == 1
         then:
             playbook.verifyAndForget(
-                'POST_LOAD:1001:2:bar:0',
-                'PRE_REMOVE:1001:2:bar:0',
-                'POST_REMOVE:1001:2:bar:0'
+                'POST_LOAD:1001:2:bar:123',
+                'PRE_REMOVE:1001:2:bar:123',
+                'POST_REMOVE:1001:2:bar:123'
             )
             service.countByRangeIndex('1001', 'bar') == 0
 

@@ -19,9 +19,11 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeConversionHelper;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.conditional.QueryConditionalFactory;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import software.amazon.awssdk.core.async.SdkPublisher;
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.MappedTableResource;
 import software.amazon.awssdk.enhanced.dynamodb.TableMetadata;
@@ -127,7 +129,12 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
     }
 
     @Override
-    public Publisher<T> query(DynamoDbTable<T> mapper, AttributeConversionHelper attributeConversionHelper) {
+    public Mono<Long> count(DynamoDbAsyncTable<T> mapper, AttributeConversionHelper attributeConversionHelper) {
+        return query(mapper, attributeConversionHelper).count();
+    }
+
+    @Override
+    public Flux<T> query(DynamoDbTable<T> mapper, AttributeConversionHelper attributeConversionHelper) {
         QueryEnhancedRequest request = resolveRequest(mapper, attributeConversionHelper);
         SdkIterable<Page<T>> iterable = this.__index == null ? mapper.query(request) : mapper.index(__index).query(request);
         Flux<T> results = Flux.fromIterable(iterable).flatMap(p -> Flux.fromIterable(p.items()));
@@ -146,6 +153,17 @@ class DefaultQueryBuilder<T> implements QueryBuilder<T> {
         __configurer.accept(__expression);
 
         return __expression.build();
+    }
+
+    @Override
+    public Flux<T> query(DynamoDbAsyncTable<T> mapper, AttributeConversionHelper attributeConversionHelper) {
+        QueryEnhancedRequest request = resolveRequest(mapper, attributeConversionHelper);
+        SdkPublisher<Page<T>> iterable = this.__index == null ? mapper.query(request) : mapper.index(__index).query(request);
+        Flux<T> results = Flux.from(iterable).flatMap(p -> Flux.fromIterable(p.items()));
+        if (__max < Integer.MAX_VALUE) {
+            return results.take(__max);
+        }
+        return results;
     }
 
     @Override

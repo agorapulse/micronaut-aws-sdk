@@ -28,3 +28,9 @@ dependencies {
     testImplementation project(':micronaut-amazon-awssdk-integration-testing')
     testImplementation 'io.micronaut.rxjava2:micronaut-rxjava2'
 }
+
+if (project.findProperty('test.aws.dynamodb.v2') == 'async') {
+    tasks.withType(Test).configureEach {
+        systemProperty 'aws.dynamodb.async', 'true'
+    }
+}
