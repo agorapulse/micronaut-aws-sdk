@@ -31,6 +31,6 @@ dependencies {
 
 if (project.findProperty('test.aws.dynamodb.v2') == 'async') {
     tasks.withType(Test).configureEach {
-        systemProperty 'aws.sdk.dynamodb.async', 'true'
+        systemProperty 'aws.dynamodb.async', 'true'
     }
 }

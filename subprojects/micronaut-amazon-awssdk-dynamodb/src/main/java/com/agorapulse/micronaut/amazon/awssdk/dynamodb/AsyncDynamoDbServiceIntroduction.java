@@ -49,7 +49,7 @@ import java.util.Map;
  */
 @Singleton
 @Replaces(SyncDynamoDbServiceIntroduction.class)
-@Requires(property = "aws.sdk.dynamodb.async", value = "true")
+@Requires(property = "aws.dynamodb.async", value = "true")
 public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduction {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AsyncDynamoDbServiceIntroduction.class);
