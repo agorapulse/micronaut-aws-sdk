@@ -119,6 +119,27 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
 
             }
         )
+        .addFirstType(Instant,
+            new ArgumentMarshaller() {
+
+                @Override
+                AttributeValue marshall(Object obj) {
+                    return obj == null ? null : new AttributeValue().withS(serializeDate((Instant) obj))
+                }
+
+            },
+            new ArgumentUnmarshaller() {
+
+                @Override
+                void typeCheck(AttributeValue value, Method setter) { }
+
+                @Override
+                Object unmarshall(AttributeValue value) throws ParseException {
+                    return value.s == null ? null : Instant.from(Instant.parse(value.s))
+                }
+
+            }
+        )
         .build()
 
     // Specific ranges ending with 'Index' are String concatenated indexes,

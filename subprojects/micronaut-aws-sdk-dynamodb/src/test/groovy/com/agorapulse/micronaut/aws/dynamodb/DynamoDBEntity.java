@@ -19,7 +19,9 @@ package com.agorapulse.micronaut.aws.dynamodb;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.*;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 @DynamoDBTable(tableName = "entity")
@@ -45,6 +47,8 @@ public class DynamoDBEntity {
 
     @DynamoDBTypeConvertedEnum
     State state = State.UNKNOWN;
+
+    private List<LogEntry> logs = new ArrayList<>();
 
     public String getParentId() {
         return parentId;
@@ -101,6 +105,14 @@ public class DynamoDBEntity {
 
     public void setState(State state) {
         this.state = state;
+    }
+
+    public List<LogEntry> getLogs() {
+        return logs;
+    }
+
+    public void setLogs(List<LogEntry> logs) {
+        this.logs = logs;
     }
 
     //CHECKSTYLE:OFF

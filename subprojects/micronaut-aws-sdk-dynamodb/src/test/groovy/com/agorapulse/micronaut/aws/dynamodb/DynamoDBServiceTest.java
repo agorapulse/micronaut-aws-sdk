@@ -27,6 +27,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -161,6 +162,7 @@ public class DynamoDBServiceTest {
         entity.setId(id);
         entity.setRangeIndex(rangeIndex);
         entity.setDate(date);
+        entity.setLogs(List.of(LogEntry.create("test")));
         return entity;
     }
 }
