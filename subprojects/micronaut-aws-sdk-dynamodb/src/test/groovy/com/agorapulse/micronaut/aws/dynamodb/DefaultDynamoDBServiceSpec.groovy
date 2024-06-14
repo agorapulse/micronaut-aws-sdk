@@ -39,11 +39,8 @@ import spock.lang.Stepwise
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*
-
 // tag::builders-import[]
-
-// <1>
+import static com.agorapulse.micronaut.aws.dynamodb.builder.Builders.*                  // <1>
 
 // end::builders-import[]
 
