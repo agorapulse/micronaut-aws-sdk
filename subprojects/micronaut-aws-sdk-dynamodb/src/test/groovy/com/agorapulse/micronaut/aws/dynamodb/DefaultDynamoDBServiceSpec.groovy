@@ -36,8 +36,6 @@ import reactor.core.publisher.Flux
 import spock.lang.Specification
 import spock.lang.Stepwise
 
-import java.text.DateFormat
-import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -373,26 +371,23 @@ class DefaultDynamoDBServiceSpec extends Specification {
 
     void 'updateItemAttributes should correctly update specified attribute'() {
         given:
-            s.save(new DynamoDBEntity(parentId: '0', id: '1', rangeIndex: 'foo', date: new Date()))
+            s.save(new DynamoDBEntity(parentId: '0', id: '1', rangeIndex: 'foo', number: 0))
             Map<String, Object> valueByAttributeKey = Map.of('rangeIndex', 'bar')
         when:
             UpdateItemResult result = s.updateItemAttributes('0', '1', valueByAttributeKey, AttributeAction.PUT)
         then:
             assert result.attributes.size() == 1
-            assert result.attributes.get('rangeIndex').getS() == 'bar'
+            assert result.attributes.get('rangeIndex').s == 'bar'
         when:
-            DateFormat formatter = new SimpleDateFormat('yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\'')
-            Date now = new Date()
             valueByAttributeKey = Map.of(
                 'rangeIndex', 'randomRangeIndex',
-                'date', now
+                'number', 1
             )
             result = s.updateItemAttributes('0', '1', valueByAttributeKey, AttributeAction.PUT)
         then:
             assert result.attributes.size() == 2
-            assert result.attributes.get('rangeIndex').getS() == 'randomRangeIndex'
-            assert result.attributes.get('date').getS() == formatter.format(now)
-
+            assert result.attributes.get('rangeIndex').s == 'randomRangeIndex'
+            assert result.attributes.get('number').n == '1'
     }
 
     private static <T> List<T> toList(Publisher<T> publisher) {

@@ -747,10 +747,10 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
 
         valueByAttributeKey.entrySet().forEach { entry ->
             request.addAttributeUpdatesEntry(
-                entry.getKey(),
+                entry.key,
                 new AttributeValueUpdate(
                     action: action,
-                    value: buildAttributeValue(entry.getValue())
+                    value: buildAttributeValue(entry.value)
                 )
             )
         }
