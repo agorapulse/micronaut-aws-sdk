@@ -69,6 +69,8 @@ public class AdvancedQueryOnDeclarativeServiceTest {
         assertEquals(4, s.findAllByNumberInExplicit("1", List.of(1, 2)).size());
         assertEquals(4, s.findAllByNumberBetween("1", 1, 2).size());
         assertEquals(4, s.findAllByRangeBeginsWith("1", "f").size());
+        assertEquals(4, s.deleteAllByRangeBeginsWith("1", "f"));
+        assertEquals(0, s.findAllByRangeBeginsWith("1", "f").size());
     }
 
 

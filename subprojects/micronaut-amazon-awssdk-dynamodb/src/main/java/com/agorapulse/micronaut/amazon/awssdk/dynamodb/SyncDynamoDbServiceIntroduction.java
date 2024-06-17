@@ -25,6 +25,7 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedQuery;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedScan;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedUpdate;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.util.ItemArgument;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.util.QueryArguments;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.core.async.publisher.Publishers;
@@ -38,6 +39,7 @@ import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Introduction for {@link Service} annotation.
@@ -133,16 +135,26 @@ public class SyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduct
         }
 
         if (methodName.startsWith("delete")) {
-            return handleDelete(service, context);
+            Optional<ItemArgument> maybeItemArgument = ItemArgument.findItemArgument(service.getItemType(), context);
+            if (maybeItemArgument.isPresent()) {
+                return handleDelete(service, context, maybeItemArgument);
+            }
         }
 
-        if (methodName.startsWith("query") || methodName.startsWith("findAll") || methodName.startsWith("list") || methodName.startsWith("count")) {
+        if (methodName.startsWith("query") || methodName.startsWith("findAll") || methodName.startsWith("list") || methodName.startsWith("count") || methodName.startsWith("delete")) {
             QueryArguments partitionAndSort = QueryArguments.create(context, service.getTable().tableSchema().tableMetadata());
             if (methodName.startsWith("count")) {
                 if (partitionAndSort.isCustomized()) {
                     return service.countUsingQuery(partitionAndSort.generateQuery(context));
                 }
                 return service.count(partitionAndSort.getPartitionValue(context.getParameters()), partitionAndSort.getSortValue(context.getParameters()));
+            }
+            if (methodName.startsWith("delete")) {
+                if (partitionAndSort.isCustomized()) {
+                    return service.deleteAll(service.query(partitionAndSort.generateQuery(context)));
+                }
+                Optional<ItemArgument> maybeItemArgument = ItemArgument.findItemArgument(service.getItemType(), context);
+                return handleDelete(service, context, maybeItemArgument);
             }
             if (partitionAndSort.isCustomized()) {
                 return publisherOrIterable(service.query(partitionAndSort.generateQuery(context)), context.getReturnType().getType());
@@ -182,23 +194,23 @@ public class SyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduct
         return service.save((T) params.get(itemArgument.getName()).getValue());
     }
 
-    private <T> Object handleDelete(DynamoDbService<T> service, MethodInvocationContext<Object, Object> context) {
+    private <T> Object handleDelete(DynamoDbService<T> service, MethodInvocationContext<Object, Object> context, Optional<ItemArgument> maybeItemArgument) {
         Map<String, MutableArgumentValue<?>> params = context.getParameters();
-        Argument<?>[] args = context.getArguments();
 
-        if (args.length == 1) {
-            Argument<?> itemArgument = args[0];
-            Publisher<T> items = QueryArguments.toPublisher(conversionService, service.getItemType(), itemArgument, params);
+        if (maybeItemArgument.isPresent()) {
+            ItemArgument itemArgument = maybeItemArgument.get();
+            Publisher<T> items = QueryArguments.toPublisher(conversionService, service.getItemType(), itemArgument.getArgument(), params);
 
-            if (itemArgument.getType().isArray() || Iterable.class.isAssignableFrom(itemArgument.getType()) || Publisher.class.isAssignableFrom(itemArgument.getType())) {
+            if (!itemArgument.isSingle()) {
                 return service.deleteAll(items);
             }
 
-            if (service.getItemType().isAssignableFrom(itemArgument.getType())) {
+            if (service.getItemType().isAssignableFrom(itemArgument.getArgument().getType())) {
                 return service.delete(Flux.from(items).blockFirst());
             }
         }
 
+        Argument<?>[] args = context.getArguments();
         if (args.length > 2) {
             throw new UnsupportedOperationException("Method expects at most 2 parameters - partition key and sort key, an item or items");
         }
