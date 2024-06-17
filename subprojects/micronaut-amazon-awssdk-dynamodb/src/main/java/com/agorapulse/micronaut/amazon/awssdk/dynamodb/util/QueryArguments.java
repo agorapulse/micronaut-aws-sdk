@@ -39,6 +39,9 @@ public class QueryArguments {
     private static final String SORT = "sort";
     private static final String HASH = "hash";
     private static final String RANGE = "range";
+    private static final String LAST_EVALUATED_KEY = "lastEvaluatedKey";
+    private static final String LIMIT = "limit";
+    private static final String PAGE = "page";
 
     private final Map<String, FilterArgument> filters = new LinkedHashMap<>();
 
@@ -47,8 +50,11 @@ public class QueryArguments {
     private String index;
     private boolean consistent;
     private boolean descending;
+    private Argument<?> lastEvaluatedKey;
+    private Argument<?> limit;
+    private Argument<?> page;
 
-    public static QueryArguments create(MethodInvocationContext<Object, Object> context, TableMetadata tableMetadata) {
+    public static <T> QueryArguments create(MethodInvocationContext<Object, Object> context, TableMetadata tableMetadata, Class<T> itemType) {
         QueryArguments queryArguments = new QueryArguments();
 
         queryArguments.index = context.getTargetMethod().isAnnotationPresent(Index.class) ? context.getTargetMethod().getAnnotation(Index.class).value() : null;
@@ -77,6 +83,24 @@ public class QueryArguments {
                     || argument.getName().equals(tableMetadata.primaryPartitionKey())
             ) {
                 queryArguments.partitionKey = argument;
+            } else if (
+                argument.isAnnotationPresent(LastEvaluatedKey.class)
+                    || argument.getName().toLowerCase().contains(LAST_EVALUATED_KEY)
+            ) {
+                if (!argument.getType().equals(itemType)) {
+                    throw new UnsupportedOperationException("Last evaluated key must be of the same type as the entity");
+                }
+                queryArguments.lastEvaluatedKey = argument;
+            } else if (
+                argument.isAnnotationPresent(Limit.class)
+                    || argument.getName().toLowerCase().contains(LIMIT)
+            ) {
+                queryArguments.limit = argument;
+            } else if (
+                argument.isAnnotationPresent(Page.class)
+                    || argument.getName().toLowerCase().contains(PAGE)
+            ) {
+                queryArguments.page = argument;
             } else {
                 String name = FilterArgument.getArgumentName(argument);
                 queryArguments.filters.computeIfAbsent(name, argName -> new FilterArgument()).fill(argument);
@@ -134,7 +158,7 @@ public class QueryArguments {
     }
 
 
-    public <T> Consumer<QueryBuilder<T>> generateQuery(MethodInvocationContext<Object, Object> context) {
+    public <T> Consumer<QueryBuilder<T>> generateQuery(MethodInvocationContext<Object, Object> context, ConversionService conversionService) {
         return q -> {
             if (index != null) {
                 q.index(index);
@@ -174,6 +198,18 @@ public class QueryArguments {
                     );
                 });
             }
+
+            if (lastEvaluatedKey != null) {
+                q.lastEvaluatedKey(context.getParameters().get(lastEvaluatedKey.getName()).getValue());
+            }
+
+            if (limit != null) {
+                q.limit(conversionService.convertRequired(context.getParameters().get(limit.getName()).getValue(), Integer.class));
+            }
+
+            if (page != null) {
+                q.page(conversionService.convertRequired(context.getParameters().get(page.getName()).getValue(), Integer.class));
+            }
         };
     }
 
@@ -182,6 +218,6 @@ public class QueryArguments {
     }
 
     public boolean isCustomized() {
-        return index != null || consistent || descending || !filters.isEmpty() || sortKey != null && sortKey.getOperator() != Filter.Operator.EQ;
+        return index != null || consistent || descending || !filters.isEmpty() || sortKey != null && sortKey.getOperator() != Filter.Operator.EQ || lastEvaluatedKey != null || limit != null || page != null;
     }
 }

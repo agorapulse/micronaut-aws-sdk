@@ -142,22 +142,22 @@ public class SyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduct
         }
 
         if (methodName.startsWith("query") || methodName.startsWith("findAll") || methodName.startsWith("list") || methodName.startsWith("count") || methodName.startsWith("delete")) {
-            QueryArguments partitionAndSort = QueryArguments.create(context, service.getTable().tableSchema().tableMetadata());
+            QueryArguments partitionAndSort = QueryArguments.create(context, service.getTable().tableSchema().tableMetadata(), service.getItemType());
             if (methodName.startsWith("count")) {
                 if (partitionAndSort.isCustomized()) {
-                    return service.countUsingQuery(partitionAndSort.generateQuery(context));
+                    return service.countUsingQuery(partitionAndSort.generateQuery(context, conversionService));
                 }
                 return service.count(partitionAndSort.getPartitionValue(context.getParameters()), partitionAndSort.getSortValue(context.getParameters()));
             }
             if (methodName.startsWith("delete")) {
                 if (partitionAndSort.isCustomized()) {
-                    return service.deleteAll(service.query(partitionAndSort.generateQuery(context)));
+                    return service.deleteAll(service.query(partitionAndSort.generateQuery(context, conversionService)));
                 }
                 Optional<ItemArgument> maybeItemArgument = ItemArgument.findItemArgument(service.getItemType(), context);
                 return handleDelete(service, context, maybeItemArgument);
             }
             if (partitionAndSort.isCustomized()) {
-                return publisherOrIterable(service.query(partitionAndSort.generateQuery(context)), context.getReturnType().getType());
+                return publisherOrIterable(service.query(partitionAndSort.generateQuery(context, conversionService)), context.getReturnType().getType());
             }
             return publisherOrIterable(
                 service.findAll(partitionAndSort.getPartitionValue(context.getParameters()), partitionAndSort.getSortValue(context.getParameters())),
@@ -215,7 +215,7 @@ public class SyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduct
             throw new UnsupportedOperationException("Method expects at most 2 parameters - partition key and sort key, an item or items");
         }
 
-        QueryArguments partitionAndSort = QueryArguments.create(context, service.getTable().tableSchema().tableMetadata());
+        QueryArguments partitionAndSort = QueryArguments.create(context, service.getTable().tableSchema().tableMetadata(), service.getItemType());
         service.delete(partitionAndSort.getPartitionValue(params), partitionAndSort.getSortValue(params));
         return 1;
     }
@@ -228,7 +228,7 @@ public class SyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduct
             throw new UnsupportedOperationException("Method expects at most 2 parameters - partition key and sort key or sort keys");
         }
 
-        QueryArguments partitionAndSort = QueryArguments.create(context, service.getTable().tableSchema().tableMetadata());
+        QueryArguments partitionAndSort = QueryArguments.create(context, service.getTable().tableSchema().tableMetadata(), service.getItemType());
         Object partitionValue = partitionAndSort.getPartitionValue(params);
 
         if (!partitionAndSort.hasSortKey()) {

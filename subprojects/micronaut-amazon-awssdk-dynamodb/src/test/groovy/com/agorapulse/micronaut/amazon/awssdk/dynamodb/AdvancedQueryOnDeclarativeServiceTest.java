@@ -69,8 +69,21 @@ public class AdvancedQueryOnDeclarativeServiceTest {
         assertEquals(4, s.findAllByNumberInExplicit("1", List.of(1, 2)).size());
         assertEquals(4, s.findAllByNumberBetween("1", 1, 2).size());
         assertEquals(4, s.findAllByRangeBeginsWith("1", "f").size());
+
+        List<DynamoDBEntity> allByNumberNotPaginated = s.findAllByNumberNot("1", 3, createLastEvaluatedKey("1", "2"), 1, 2);
+        assertEquals(2, allByNumberNotPaginated.size());
+        assertEquals("3", allByNumberNotPaginated.get(0).getId());
+        assertEquals("4", allByNumberNotPaginated.get(1).getId());
+
         assertEquals(4, s.deleteAllByRangeBeginsWith("1", "f"));
         assertEquals(0, s.findAllByRangeBeginsWith("1", "f").size());
+    }
+
+    private DynamoDBEntity createLastEvaluatedKey(String parentId, String id) {
+        DynamoDBEntity entity = new DynamoDBEntity();
+        entity.setParentId(parentId);
+        entity.setId(id);
+        return entity;
     }
 
 
