@@ -564,7 +564,7 @@ Instead you can annotate any method with `@Query` annotation to make it
  * batch delete method if its name begins with `delete`
  * otherwise an advanced query method
 
-For DynamoDB v2 you can use `@Index`, `@Consistent` `@Descending` and `@Fitler` annotations to further customize the query without the need of creating a custom query class and use it with `@Query` annotation.
+For DynamoDB v2 you can use `@Index`, `@Consistent` `@Descending`, `@Filter`, `@Limit`, `@Page` and `@LastEvaluatedKey` annotations to further customize the query without the need of creating a custom query class and use it with `@Query` annotation.
 
 [source,java,indent=0,options="nowrap"]
 .Advanced Query Annotations
@@ -582,6 +582,9 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy
 <9> Only`EQ`, `LE`, `LT`, `GE`, `GT`, `BETWEEN` and `BEGINS_WITH` operators are supported
 <10> You can also use `@Filter` annotation to specify the sort key name
 <11> If you use any customization annotations on delete method, then the method will be used as batch delete method
+<12> You can pass the last evaluated key to the query. It must be the same type as the entity type.
+<13> You can use `@Page` annotation to give the query the pagination hint
+<14> You can use `@Limit` annotation to specify the maximum number of items to return
 
 TIP: The operator `EQ` is used by default if `@Filter` annotation is not present. This makes it special and the service introduction tries to find the appropriate operation based on the actual value. For collections or arrays, `inList` operation is actually used. If the actual value is `null` then `isNull` operation is used. For other types, `eq` operation is used. For sort keys, `eq` operation is always used.
 

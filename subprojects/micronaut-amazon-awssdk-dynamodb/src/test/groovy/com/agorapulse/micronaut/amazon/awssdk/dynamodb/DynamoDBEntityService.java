@@ -226,6 +226,14 @@ public interface DynamoDBEntityService {
         )
         String rangeIndexPrefix
     );
+
+    List<DynamoDBEntity> findAllByNumberNot(
+        @PartitionKey String parentId,
+        @Filter(Filter.Operator.NE) Integer number,
+        @LastEvaluatedKey DynamoDBEntity lastEvaluatedKey,                              // <12>
+        @Page int page,                                                                 // <13>
+        @Limit int limit                                                                // <14>
+    );
     // end::advanced-query-methods[]
     // CHECKSTYLE:ON
 
