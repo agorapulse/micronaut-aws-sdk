@@ -66,8 +66,9 @@ public class QueryArguments {
                     || argument.getName().equals(tableMetadata.primarySortKey().orElse(SORT))
             ) {
                 if (queryArguments.sortKey == null) {
-                    queryArguments.sortKey = new FilterArgument().fill(argument);
+                    queryArguments.sortKey = new FilterArgument();
                 }
+                queryArguments.sortKey.fill(argument);
             } else if (
                 argument.isAnnotationPresent(PartitionKey.class)
                     || argument.isAnnotationPresent(HashKey.class)

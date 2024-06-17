@@ -173,20 +173,20 @@ public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
     @Override
     public Publisher<T> delete(T item) {
         publisher.publishEvent(DynamoDbEvent.preRemove(item));
-        return Mono.fromFuture(table.deleteItem(table.keyFrom(item))).then(Mono.fromCallable(() -> {
-            publisher.publishEvent(DynamoDbEvent.postRemove(item));
-            return item;
-        }));
+        return Mono.fromFuture(table.deleteItem(table.keyFrom(item))).map(deletedItem -> {
+            publisher.publishEvent(DynamoDbEvent.postRemove(deletedItem));
+            return deletedItem;
+        });
     }
 
     @Override
     public Publisher<T> delete(Key key) {
         T item = table.tableSchema().mapToItem(key.primaryKeyMap(table.tableSchema()));
         publisher.publishEvent(DynamoDbEvent.preRemove(item));
-        return Mono.fromFuture(table.deleteItem(key)).then(Mono.fromCallable(() -> {
-            publisher.publishEvent(DynamoDbEvent.postRemove(item));
-            return item;
-        }));
+        return Mono.fromFuture(table.deleteItem(key)).map(deletedItem -> {
+            publisher.publishEvent(DynamoDbEvent.postRemove(deletedItem));
+            return deletedItem;
+        });
     }
 
     @Override

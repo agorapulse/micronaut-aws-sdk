@@ -169,8 +169,8 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
     @Override
     public T delete(T item) {
         publisher.publishEvent(DynamoDbEvent.preRemove(item));
-        table.deleteItem(table.keyFrom(item));
-        publisher.publishEvent(DynamoDbEvent.postRemove(item));
+        T deleted = table.deleteItem(table.keyFrom(item));
+        publisher.publishEvent(DynamoDbEvent.postRemove(deleted));
         return item;
     }
 
@@ -178,8 +178,8 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
     public T delete(Key key) {
         T item = table.tableSchema().mapToItem(key.primaryKeyMap(table.tableSchema()));
         publisher.publishEvent(DynamoDbEvent.preRemove(item));
-        table.deleteItem(key);
-        publisher.publishEvent(DynamoDbEvent.postRemove(item));
+        T deleted = table.deleteItem(key);
+        publisher.publishEvent(DynamoDbEvent.postRemove(deleted));
         return item;
     }
 

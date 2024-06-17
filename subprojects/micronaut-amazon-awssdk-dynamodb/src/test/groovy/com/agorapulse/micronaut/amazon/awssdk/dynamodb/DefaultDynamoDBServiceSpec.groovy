@@ -71,6 +71,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
     }
     // end::setup[]
 
+    @SuppressWarnings('LineLength')
     void 'unsupported methods throws meaningful messages'() {
         when:
         unknownMethodsService.doSomething()
@@ -87,8 +88,8 @@ class DefaultDynamoDBServiceSpec extends Specification {
         when:
         unknownMethodsService.delete('1', '1', '1')
         then:
-        UnsupportedOperationException e3 = thrown(UnsupportedOperationException)
-        e3.message == 'Method expects at most 2 parameters - partition key and sort key, an item or items'
+        IllegalArgumentException e3 = thrown(IllegalArgumentException)
+        e3.message == '''Unknown property somethingElse for DynamoDBEntity{parentId='null', id='null', rangeIndex='null', date=null, number=0, mapProperty={}}'''
 
         when:
         unknownMethodsService.get('1', '1', '1')
@@ -397,7 +398,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
         then:
             playbook.verifyAndForget(
                 'PRE_REMOVE:1003:1:null:0',
-                'POST_REMOVE:1003:1:null:0'
+                'POST_REMOVE:1003:1:foo:11'
             )
             service.count('1003', '1') == 0
 
