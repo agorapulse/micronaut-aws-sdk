@@ -295,15 +295,13 @@ public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
         TableSchema<T> tableSchema = table.tableSchema();
         Map<AttributeValue, Integer> order = new ConcurrentHashMap<>();
         AtomicInteger counter = new AtomicInteger();
+        Comparator<T> comparator = Comparator.comparingInt(i -> order.getOrDefault(tableSchema.attributeValue(i, tableSchema.tableMetadata().primarySortKey().get()), 0));
 
         return Flux.from(rangeKeys).buffer(BATCH_SIZE).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> b.readBatches(batchRangeKeys.stream().map(k -> {
                 order.put(k, counter.getAndIncrement());
                 return ReadBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(table).addGetItem(Key.builder().partitionValue(hashKey).sortValue(k).build()).build();
             }
-        ).toList()))).flatMap(r -> {
-            Comparator<T> comparator = Comparator.comparingInt(i -> order.getOrDefault(tableSchema.attributeValue(i, tableSchema.tableMetadata().primarySortKey().get()), 0));
-            return Flux.from(r.resultsForTable(table)).sort(comparator).map(this::postLoad);
-        });
+        ).toList()))).flatMap(r -> Flux.from(r.resultsForTable(table)).map(this::postLoad)).sort(comparator);
     }
 
     private Map<String, ProjectionType> getProjectionTypes() {
