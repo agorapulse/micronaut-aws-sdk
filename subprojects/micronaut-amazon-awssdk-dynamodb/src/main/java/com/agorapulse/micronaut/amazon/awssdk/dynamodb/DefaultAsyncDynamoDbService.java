@@ -46,14 +46,9 @@ import software.amazon.awssdk.services.dynamodb.model.Projection;
 import software.amazon.awssdk.services.dynamodb.model.ProjectionType;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -286,9 +281,17 @@ public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
 
     private Publisher<T> getAll(AttributeValue hashKey, Publisher<AttributeValue> rangeKeys) {
         TableSchema<T> tableSchema = table.tableSchema();
-        return Flux.from(rangeKeys).buffer(BATCH_SIZE).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> b.readBatches(batchRangeKeys.stream().map(k ->
-            ReadBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(table).addGetItem(Key.builder().partitionValue(hashKey).sortValue(k).build()).build()
-        ).toList()))).flatMap(r -> Flux.from(r.resultsForTable(table)).map(this::postLoad));
+        Map<AttributeValue, Integer> order = new ConcurrentHashMap<>();
+        AtomicInteger counter = new AtomicInteger();
+
+        return Flux.from(rangeKeys).buffer(BATCH_SIZE).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> b.readBatches(batchRangeKeys.stream().map(k -> {
+                order.put(k, counter.getAndIncrement());
+                return ReadBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(table).addGetItem(Key.builder().partitionValue(hashKey).sortValue(k).build()).build();
+            }
+        ).toList()))).flatMap(r -> {
+            Comparator<T> comparator = Comparator.comparingInt(i -> order.getOrDefault(tableSchema.attributeValue(i, tableSchema.tableMetadata().primarySortKey().get()), 0));
+            return Flux.from(r.resultsForTable(table)).sort(comparator).map(this::postLoad);
+        });
     }
 
     private Map<String, ProjectionType> getProjectionTypes() {
