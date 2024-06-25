@@ -19,7 +19,11 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondaryPartitionKey;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondarySortKey;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.*;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.Builders;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedQuery;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedScan;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedUpdate;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbEvent;
 import io.micronaut.context.event.ApplicationEventPublisher;
 import io.micronaut.core.annotation.AnnotationValue;
@@ -50,10 +54,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -286,9 +293,15 @@ public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
 
     private Publisher<T> getAll(AttributeValue hashKey, Publisher<AttributeValue> rangeKeys) {
         TableSchema<T> tableSchema = table.tableSchema();
-        return Flux.from(rangeKeys).buffer(BATCH_SIZE).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> b.readBatches(batchRangeKeys.stream().map(k ->
-            ReadBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(table).addGetItem(Key.builder().partitionValue(hashKey).sortValue(k).build()).build()
-        ).toList()))).flatMap(r -> Flux.from(r.resultsForTable(table)).map(this::postLoad));
+        Map<AttributeValue, Integer> order = new ConcurrentHashMap<>();
+        AtomicInteger counter = new AtomicInteger();
+        Comparator<T> comparator = Comparator.comparingInt(i -> order.getOrDefault(tableSchema.attributeValue(i, tableSchema.tableMetadata().primarySortKey().get()), 0));
+
+        return Flux.from(rangeKeys).buffer(BATCH_SIZE).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> b.readBatches(batchRangeKeys.stream().map(k -> {
+                order.put(k, counter.getAndIncrement());
+                return ReadBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(table).addGetItem(Key.builder().partitionValue(hashKey).sortValue(k).build()).build();
+            }
+        ).toList()))).flatMap(r -> Flux.from(r.resultsForTable(table)).map(this::postLoad)).sort(comparator);
     }
 
     private Map<String, ProjectionType> getProjectionTypes() {
