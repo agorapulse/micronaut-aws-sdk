@@ -25,6 +25,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -77,6 +79,12 @@ public class AdvancedQueryOnDeclarativeServiceTest {
 
         assertEquals(4, s.deleteAllByRangeBeginsWith("1", "f"));
         assertEquals(0, s.findAllByRangeBeginsWith("1", "f").size());
+
+        List<String> ids = IntStream.range(10_000, 11_000).mapToObj(String::valueOf).collect(Collectors.toList());
+
+        s.saveAll(ids.stream().map(id -> createEntity("10000", id, "foo", 1, Date.from(REFERENCE_DATE))).collect(Collectors.toList()));
+
+        assertEquals(ids, s.getAll("10000", ids).stream().map(DynamoDBEntity::getId).collect(Collectors.toList()));
     }
 
     private DynamoDBEntity createLastEvaluatedKey(String parentId, String id) {
