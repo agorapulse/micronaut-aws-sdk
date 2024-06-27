@@ -95,6 +95,10 @@ class DefaultSimpleQueueService implements SimpleQueueService {
             createQueueRequest.attributes['FifoQueue'] = 'true'
         }
 
+        if (configuration.contentBasedDeduplication) {
+            createQueueRequest.attributes['ContentBasedDeduplication'] = 'true'
+        }
+
         if (configuration.tags) {
             createQueueRequest.tags = configuration.tags
         }

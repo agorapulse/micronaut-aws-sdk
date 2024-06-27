@@ -33,6 +33,11 @@ public class QueueConfiguration implements Cloneable {
         return this;
     }
 
+    public QueueConfiguration withContentBasedDeduplication(boolean contentBasedDeduplication) {
+        this.contentBasedDeduplication = contentBasedDeduplication;
+        return this;
+    }
+
     public QueueConfiguration withDelaySeconds(Integer delaySeconds) {
         this.delaySeconds = delaySeconds;
         return this;
@@ -57,6 +62,7 @@ public class QueueConfiguration implements Cloneable {
         return new QueueConfiguration()
             .withQueue(queue)
             .withFifo(fifo)
+            .withContentBasedDeduplication(contentBasedDeduplication)
             .withDelaySeconds(delaySeconds)
             .withMessageRetentionPeriod(messageRetentionPeriod)
             .withMaximumMessageSize(maximumMessageSize)
@@ -81,6 +87,18 @@ public class QueueConfiguration implements Cloneable {
 
     public void setFifo(boolean fifo) {
         this.fifo = fifo;
+    }
+
+    public boolean getContentBasedDeduplication() {
+        return contentBasedDeduplication;
+    }
+
+    public boolean isContentBasedDeduplication() {
+        return contentBasedDeduplication;
+    }
+
+    public void setContentBasedDeduplication(boolean contentBasedDeduplication) {
+        this.contentBasedDeduplication = contentBasedDeduplication;
     }
 
     public Integer getDelaySeconds() {
@@ -125,6 +143,7 @@ public class QueueConfiguration implements Cloneable {
 
     private String queue = "";
     private boolean fifo;
+    private boolean contentBasedDeduplication;
 
     @Min(0L)
     @Max(900L)

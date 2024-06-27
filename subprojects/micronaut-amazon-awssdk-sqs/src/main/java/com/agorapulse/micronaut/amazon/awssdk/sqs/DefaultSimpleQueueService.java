@@ -107,6 +107,10 @@ public class DefaultSimpleQueueService implements SimpleQueueService {
             attributes.put(QueueAttributeName.FIFO_QUEUE, Boolean.TRUE.toString());
         }
 
+        if (configuration.getContentBasedDeduplication()) {
+            attributes.put(QueueAttributeName.CONTENT_BASED_DEDUPLICATION, Boolean.TRUE.toString());
+        }
+
         if (!attributes.isEmpty()) {
             createQueueRequest.attributes(attributes);
         }
