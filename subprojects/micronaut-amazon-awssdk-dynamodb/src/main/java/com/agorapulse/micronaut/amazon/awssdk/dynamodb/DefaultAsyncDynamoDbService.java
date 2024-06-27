@@ -25,6 +25,7 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedScan;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedUpdate;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbEvent;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.exception.FailedBatchRequestException;
 import io.micronaut.context.event.ApplicationEventPublisher;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.annotation.Nullable;
@@ -168,7 +169,7 @@ public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
                 if (unprocesseded.isEmpty()) {
                     return Flux.fromIterable(r.getT2()).doOnNext(i -> publisher.publishEvent(DynamoDbEvent.postPersist(i)));
                 }
-                return Flux.error(new IllegalArgumentException("Following items couldn't be saved:" + unprocesseded.stream().map(Object::toString).collect(Collectors.joining(", "))));
+                return Flux.error(new FailedBatchRequestException("Failed to save items", unprocesseded));
             });
     }
 
@@ -216,9 +217,7 @@ public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
                     r.getT2().forEach(i -> publisher.publishEvent(DynamoDbEvent.postRemove(i)));
                     return Flux.fromIterable(r.getT2());
                 }
-                return Flux.error(new IllegalArgumentException("Following items couldn't be deleted:" + unprocesseded.stream()
-                    .map(k -> tableSchema.mapToItem(k.keyMap(tableSchema, TableMetadata.primaryIndexName()))).map(Object::toString)
-                    .collect(Collectors.joining(", "))));
+                return Flux.error(new FailedBatchRequestException("Failed to delete items", unprocesseded));
             });
     }
 
