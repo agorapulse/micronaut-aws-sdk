@@ -345,6 +345,11 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
 
     private <R> R doWithKey(Object partitionKey, Object sortKey, Function<Key, R> function) {
         String hashKeyName = table.tableSchema().tableMetadata().primaryPartitionKey();
+
+        if (partitionKey == null) {
+            throw new IllegalArgumentException("Partition key " + hashKeyName + " cannot be null");
+        }
+
         AttributeValue partitionKeyValue = attributeConversionHelper.convert(table, hashKeyName, partitionKey);
 
         if (sortKey == null) {
@@ -363,6 +368,11 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
 
     private <R> Publisher<R> doWithKeys(Object partitionKey, Publisher<?> sortKeys, BiFunction<AttributeValue, Publisher<AttributeValue>, Publisher<R>> function) {
         String hashKeyName = table.tableSchema().tableMetadata().primaryPartitionKey();
+
+        if (partitionKey == null) {
+            throw new IllegalArgumentException("Partition key " + hashKeyName + " cannot be null");
+        }
+
         AttributeValue partitionKeyValue = attributeConversionHelper.convert(table, hashKeyName, partitionKey);
 
         Optional<String> sortKeyName = table.tableSchema().tableMetadata().primarySortKey();

@@ -47,6 +47,8 @@ public class AdvancedQueryOnDeclarativeServiceTest {
         assertNotNull(s.save(createEntity("1", "6", "foo", null, Date.from(REFERENCE_DATE.plus(3, ChronoUnit.DAYS)))));
         assertNotNull(s.save(createEntity("2", "1", "bar", 3, Date.from(REFERENCE_DATE))));
 
+        assertThrowsExactly(IllegalArgumentException.class, () -> s.get(null, "1"));
+
         assertEquals(2, s.countAllByNumber("1", 1));
         assertEquals(1, s.countAllByNumber("1", null));
         assertEquals(6, s.countAllByOptionalNumber("1", null));
