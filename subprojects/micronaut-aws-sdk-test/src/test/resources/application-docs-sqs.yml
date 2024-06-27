@@ -9,11 +9,12 @@ aws:
     # related to default queue
     queue: MyQueue                                                                      # <4>
     fifo: true                                                                          # <5>
-    delaySeconds: 0                                                                     # <6>
-    messageRetentionPeriod: 345600                                                      # <7>
-    maximumMessageSize: 262144                                                          # <8>
-    visibilityTimeout: 30                                                               # <9>
+    contentBasedDeduplication: true                                                     # <6>
+    delaySeconds: 0                                                                     # <7>
+    messageRetentionPeriod: 345600                                                      # <8>
+    maximumMessageSize: 262144                                                          # <9>
+    visibilityTimeout: 30                                                               # <10>
 
-    queues:                                                                             # <10>
-      test:                                                                             # <11>
+    queues:                                                                             # <11>
+      test:                                                                             # <12>
         queue: TestQueue
