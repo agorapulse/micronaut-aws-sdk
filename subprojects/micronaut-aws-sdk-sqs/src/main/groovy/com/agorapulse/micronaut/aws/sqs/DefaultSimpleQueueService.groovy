@@ -92,11 +92,11 @@ class DefaultSimpleQueueService implements SimpleQueueService {
             createQueueRequest.attributes['VisibilityTimeout'] = configuration.visibilityTimeout.toString()
         }
         if (configuration.fifo || configuration.queue.endsWith('.fifo')) {
-            createQueueRequest.attributes['FifoQueue'] = 'true'
+            createQueueRequest.attributes['FifoQueue'] = Boolean.TRUE.toString()
         }
 
         if (configuration.contentBasedDeduplication) {
-            createQueueRequest.attributes['ContentBasedDeduplication'] = 'true'
+            createQueueRequest.attributes['ContentBasedDeduplication'] = Boolean.TRUE.toString()
         }
 
         if (configuration.tags) {
