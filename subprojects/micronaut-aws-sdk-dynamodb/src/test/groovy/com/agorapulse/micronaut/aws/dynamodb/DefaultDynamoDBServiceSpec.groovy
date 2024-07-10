@@ -25,15 +25,17 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper
+import com.amazonaws.services.dynamodbv2.model.AttributeAction
 import com.amazonaws.services.dynamodbv2.model.CreateTableResult
+import com.amazonaws.services.dynamodbv2.model.UpdateItemResult
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
+import jakarta.inject.Inject
 import org.joda.time.DateTime
 import org.reactivestreams.Publisher
 import reactor.core.publisher.Flux
 import spock.lang.Specification
 import spock.lang.Stepwise
 
-import jakarta.inject.Inject
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -362,6 +364,27 @@ class DefaultDynamoDBServiceSpec extends Specification {
                 after: REFERENCE_DATE.minusDays(20).toDate(),
                 before: REFERENCE_DATE.plusDays(20).toDate(),
             ]) == 0
+    }
+
+    void 'updateItemAttributes should correctly update specified attribute'() {
+        given:
+            s.save(new DynamoDBEntity(parentId: '0', id: '1', rangeIndex: 'foo', number: 0))
+            Map<String, Object> valueByAttributeKey = Map.of('rangeIndex', 'bar')
+        when:
+            UpdateItemResult result = s.updateItemAttributes('0', '1', valueByAttributeKey, AttributeAction.PUT)
+        then:
+            assert result.attributes.size() == 1
+            assert result.attributes.get('rangeIndex').s == 'bar'
+        when:
+            valueByAttributeKey = Map.of(
+                'rangeIndex', 'randomRangeIndex',
+                'number', 1
+            )
+            result = s.updateItemAttributes('0', '1', valueByAttributeKey, AttributeAction.PUT)
+        then:
+            assert result.attributes.size() == 2
+            assert result.attributes.get('rangeIndex').s == 'randomRangeIndex'
+            assert result.attributes.get('number').n == '1'
     }
 
     private static <T> List<T> toList(Publisher<T> publisher) {
