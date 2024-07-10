@@ -298,7 +298,7 @@ public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
         TableSchema<T> tableSchema = table.tableSchema();
         Map<AttributeValue, Integer> order = new ConcurrentHashMap<>();
         AtomicInteger counter = new AtomicInteger();
-        Comparator<T> comparator = Comparator.comparingInt(i -> order.getOrDefault(tableSchema.attributeValue(i, tableSchema.tableMetadata().primarySortKey().get()), 0));
+        Comparator<T> comparator = Comparator.comparingInt(i -> order.getOrDefault(tableSchema.attributeValue(i, tableSchema.tableMetadata().primaryPartitionKey()), 0));
 
         return Flux.from(partitionKeys).buffer(BATCH_SIZE).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> b.readBatches(batchRangeKeys.stream().map(k -> {
                 order.put(k, counter.getAndIncrement());
