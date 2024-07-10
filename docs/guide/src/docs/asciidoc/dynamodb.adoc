@@ -498,6 +498,8 @@ The following table summarizes the supported method signatures:
 
     `List<DynamoDBEntity> getAll(@HashKey String parentId, String... rangeKeys);`
 
+    `List<DynamoDBEntityNoRange> getAll(@HashKey List<String> parentIds);`
+
 | Loads a single entity or a list of entities from the table. Range key is required for tables which defines the range key
 
 

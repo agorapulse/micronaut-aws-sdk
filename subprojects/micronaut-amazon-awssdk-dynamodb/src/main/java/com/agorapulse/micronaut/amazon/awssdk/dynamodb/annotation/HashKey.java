@@ -29,6 +29,7 @@ import java.lang.annotation.*;
  *
  * @deprecated use @{@link PartitionKey} instead
  */
+@Deprecated
 @Inherited
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

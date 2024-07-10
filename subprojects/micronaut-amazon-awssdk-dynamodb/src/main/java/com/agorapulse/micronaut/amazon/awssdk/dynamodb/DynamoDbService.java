@@ -145,6 +145,8 @@ public interface DynamoDbService<T> {
 
     Publisher<T> getAll(Object partitionKey, Publisher<?> sortKeys);
 
+    Publisher<T> getAll(Publisher<?> partitionKeys);
+
     T get(Key key);
 
     int count(DetachedQuery<T> query);

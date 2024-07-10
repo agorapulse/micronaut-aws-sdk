@@ -35,6 +35,7 @@ import java.util.function.Function;
 public interface DynamoDBEntityNoRangeService {
 
     DynamoDBEntityNoRange get(@PartitionKey String parentId);
+    List<DynamoDBEntityNoRange> getAll(@PartitionKey List<String> parentIds);
     DynamoDBEntityNoRange save(DynamoDBEntityNoRange entity);
     Flowable<DynamoDBEntityNoRange> saveAll(DynamoDBEntityNoRange... entities);
 

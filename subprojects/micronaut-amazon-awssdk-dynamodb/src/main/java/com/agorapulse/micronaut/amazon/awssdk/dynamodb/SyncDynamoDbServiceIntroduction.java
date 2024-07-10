@@ -232,6 +232,9 @@ public class SyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduct
         Object partitionValue = partitionAndSort.getPartitionValue(params);
 
         if (!partitionAndSort.hasSortKey()) {
+            if (partitionAndSort.isPartitionKeyPublisherOrIterable()) {
+                return publisherOrIterable(service.getAll(partitionAndSort.getPartitionAttributeValues(conversionService, params)), context.getReturnType().getType());
+            }
             return service.get(partitionValue, null);
         }
 

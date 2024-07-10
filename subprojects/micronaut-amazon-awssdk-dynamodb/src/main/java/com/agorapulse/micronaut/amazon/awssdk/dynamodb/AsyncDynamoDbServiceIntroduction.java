@@ -284,6 +284,9 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
         Object partitionValue = partitionAndSort.getPartitionValue(params);
 
         if (!partitionAndSort.hasSortKey()) {
+            if (partitionAndSort.isPartitionKeyPublisherOrIterable()) {
+                return service.getAll(partitionAndSort.getPartitionAttributeValues(conversionService, params));
+            }
             return service.get(partitionValue, null);
         }
 

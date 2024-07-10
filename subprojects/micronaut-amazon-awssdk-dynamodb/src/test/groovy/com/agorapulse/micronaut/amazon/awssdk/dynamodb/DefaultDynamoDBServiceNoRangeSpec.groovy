@@ -60,6 +60,7 @@ class DefaultDynamoDBServiceNoRangeSpec extends Specification {
             service.count('5') == 1
             service.get('6')
             service.count('6') == 1
+            service.getAll(['1', '2', '3', '4', '5', '6']).parentId == ['1', '2', '3', '4', '5', '6']
 
         when:
             service.increment('1')
