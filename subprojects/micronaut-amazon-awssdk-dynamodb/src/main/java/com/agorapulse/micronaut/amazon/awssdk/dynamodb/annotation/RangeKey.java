@@ -29,6 +29,7 @@ import java.lang.annotation.*;
  *
  * @deprecated use @{@link SortKey} instead
  */
+@Deprecated
 @Inherited
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

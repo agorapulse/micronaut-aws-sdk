@@ -145,6 +145,8 @@ public interface AsyncDynamoDbService<T> {
 
     Publisher<T> getAll(Object partitionKey, Publisher<?> sortKeys);
 
+    Publisher<T> getAll(Publisher<?> partitionKeys);
+
     Publisher<T> get(Key key);
 
     Publisher<Long> count(DetachedQuery<T> query);

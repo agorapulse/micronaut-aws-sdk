@@ -225,6 +225,11 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
     }
 
     @Override
+    public Publisher<T> getAll(Publisher<?> partitionKeys) {
+        return doWithKeys(partitionKeys, this::getAllByAttributeValue);
+    }
+
+    @Override
     public T get(Key key) {
         T item = table.getItem(key);
         publisher.publishEvent(DynamoDbEvent.postLoad(item));
@@ -283,6 +288,22 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
                 return Builders.query(q -> q.partitionKey(key.partitionKeyValue()).sortKey(s -> s.eq(key.sortKeyValue().get())));
             }
             return Builders.query(q -> q.partitionKey(key.partitionKeyValue()));
+        });
+    }
+
+    private Publisher<T> getAllByAttributeValue(Publisher<AttributeValue> partitionKeys) {
+        TableSchema<T> tableSchema = table.tableSchema();
+        Map<AttributeValue, Integer> order = new ConcurrentHashMap<>();
+        AtomicInteger counter = new AtomicInteger();
+
+        return Flux.from(partitionKeys).buffer(BATCH_SIZE).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> b.readBatches(batchRangeKeys.stream().map(k -> {
+                order.put(k, counter.getAndIncrement());
+                return ReadBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(table).addGetItem(Key.builder().partitionValue(k).build()).build();
+            })
+            .collect(Collectors.toList())))).flatMap(r -> {
+            Comparator<T> comparator = Comparator.comparingInt(i -> order.getOrDefault(tableSchema.attributeValue(i, tableSchema.tableMetadata().primaryPartitionKey()), 0));
+            List<T> it = r.resultsForTable(table).stream().sorted(comparator).collect(Collectors.toList());
+            return Flux.fromIterable(it).map(this::postLoad);
         });
     }
 
@@ -376,5 +397,10 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
 
         Optional<String> sortKeyName = table.tableSchema().tableMetadata().primarySortKey();
         return function.apply(partitionKeyValue, Flux.from(sortKeys).map(key -> attributeConversionHelper.convert(table, sortKeyName.get(), key)));
+    }
+
+    private <R> Publisher<R> doWithKeys(Publisher<?> partitionKeys, Function<Publisher<AttributeValue>, Publisher<R>> function) {
+        String hashKeyName = table.tableSchema().tableMetadata().primaryPartitionKey();
+        return function.apply(Flux.from(partitionKeys).map(key -> attributeConversionHelper.convert(table, hashKeyName, key)));
     }
 }

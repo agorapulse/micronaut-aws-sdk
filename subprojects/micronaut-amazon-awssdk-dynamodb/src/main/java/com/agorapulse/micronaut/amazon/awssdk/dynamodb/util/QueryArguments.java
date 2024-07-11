@@ -157,6 +157,10 @@ public class QueryArguments {
         return sortKey == null ? Flux.empty() : toPublisher(conversionService, Object.class, sortKey.getFirstArgument(), params);
     }
 
+    public Publisher<?> getPartitionAttributeValues(ConversionService conversionService, Map<String, MutableArgumentValue<?>> params) {
+        return partitionKey == null ? Flux.empty() : toPublisher(conversionService, Object.class, partitionKey, params);
+    }
+
 
     public <T> Consumer<QueryBuilder<T>> generateQuery(MethodInvocationContext<Object, Object> context, ConversionService conversionService) {
         return q -> {
@@ -215,6 +219,10 @@ public class QueryArguments {
 
     public boolean isSortKeyPublisherOrIterable() {
         return sortKey.getFirstArgument().getType().isArray() || Iterable.class.isAssignableFrom(sortKey.getFirstArgument().getType()) || Publisher.class.isAssignableFrom(sortKey.getFirstArgument().getType());
+    }
+
+    public boolean isPartitionKeyPublisherOrIterable() {
+        return partitionKey.getType().isArray() || Iterable.class.isAssignableFrom(partitionKey.getType()) || Publisher.class.isAssignableFrom(partitionKey.getType());
     }
 
     public boolean isCustomized() {
