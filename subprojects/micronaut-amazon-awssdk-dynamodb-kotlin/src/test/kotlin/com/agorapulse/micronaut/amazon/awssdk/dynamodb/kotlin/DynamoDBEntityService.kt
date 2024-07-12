@@ -34,7 +34,6 @@ interface DynamoDBEntityService {
     fun loadAll(hash: String?, rangeKeys: List<String?>?): List<DynamoDBEntity?>?
     fun loadAll(hash: String?, vararg rangeKeys: String?): List<DynamoDBEntity?>?
     fun save(entity: DynamoDBEntity?): DynamoDBEntity?
-    fun saveAll(vararg entities: DynamoDBEntity?): List<DynamoDBEntity?>?
     fun saveAll(entities: Iterable<DynamoDBEntity?>?): List<DynamoDBEntity?>?
     fun count(hashKey: String?): Int
     fun count(hashKey: String?, rangeKey: String?): Int
