@@ -37,6 +37,9 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+        classpath("org.jetbrains.kotlin.plugin.allopen:org.jetbrains.kotlin.plugin.allopen.gradle.plugin:$kotlinVersion")
+        classpath("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$kspVersion")
         classpath("io.micronaut.gradle:micronaut-minimal-plugin:$micronautGradlePluginVersion")
     }
 }

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2018-2023 Agorapulse.
+ * Copyright 2018-2024 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ interface DynamoDBEntityService {
     fun loadAll(hash: String?, rangeKeys: List<String?>?): List<DynamoDBEntity?>?
     fun loadAll(hash: String?, vararg rangeKeys: String?): List<DynamoDBEntity?>?
     fun save(entity: DynamoDBEntity?): DynamoDBEntity?
-    fun saveAll(vararg entities: DynamoDBEntity?): List<DynamoDBEntity?>?
     fun saveAll(entities: Iterable<DynamoDBEntity?>?): List<DynamoDBEntity?>?
     fun count(hashKey: String?): Int
     fun count(hashKey: String?, rangeKey: String?): Int

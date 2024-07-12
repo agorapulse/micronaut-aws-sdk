@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2018-2023 Agorapulse.
+ * Copyright 2018-2024 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,14 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.kotlin
 
-import io.micronaut.test.annotation.MicronautTest
+import io.micronaut.test.extensions.junit5.annotation.MicronautTest
+import jakarta.inject.Inject
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import reactor.core.publisher.Flux
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
-import javax.inject.Inject
 
 // tag::header[]
 @MicronautTest // <1>
@@ -56,16 +56,18 @@ class DeclarativeServiceTest {
         )
         Assertions.assertNotNull(
             s.saveAll(
+                listOf(
                 createEntity("3", "1", "foo", Date.from(REFERENCE_DATE.plus(7, ChronoUnit.DAYS))),
                 createEntity("3", "2", "bar", Date.from(REFERENCE_DATE.plus(14, ChronoUnit.DAYS)))
+                )
             )
         )
         Assertions.assertNotNull(s.get("1", "1"))
         Assertions.assertNotNull(s.load("1", "1"))
         Assertions.assertEquals(2, s.getAll("1", Arrays.asList("2", "1"))!!.size)
         Assertions.assertEquals(2, s.loadAll("1", Arrays.asList("2", "1"))!!.size)
-        Assertions.assertEquals(2, s.getAll("1", "2", "1")!!.size)
-        Assertions.assertEquals(0, s.loadAll("1", "3", "4")!!.size)
+        Assertions.assertEquals(2, s.getAll("1", listOf("2", "1"))!!.size)
+        Assertions.assertEquals(0, s.loadAll("1", listOf("3", "4"))!!.size)
         Assertions.assertEquals(2, s.count("1"))
         Assertions.assertEquals(1, s.count("1", "1"))
         Assertions.assertEquals(1, s.countByRangeIndex("1", "bar"))
