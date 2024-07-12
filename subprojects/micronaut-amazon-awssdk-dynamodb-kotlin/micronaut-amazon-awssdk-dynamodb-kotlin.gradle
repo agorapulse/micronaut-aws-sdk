@@ -16,9 +16,9 @@
  * limitations under the License.
  */
 plugins {
-    id 'org.jetbrains.kotlin.jvm'               version "$kotlinVersion"
-    id 'org.jetbrains.kotlin.plugin.allopen'    version "$kotlinVersion"
-    id 'com.google.devtools.ksp'                version '1.9.21-1.0.15'
+    id 'org.jetbrains.kotlin.jvm'
+    id 'org.jetbrains.kotlin.plugin.allopen'
+    id 'com.google.devtools.ksp'
 }
 
 dependencies {
