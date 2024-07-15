@@ -24,6 +24,7 @@ import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.QueueDoesNotExistException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micronaut.aop.InterceptorBean;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.context.BeanContext;
@@ -39,6 +40,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 @Singleton
+@InterceptorBean(QueueClient.class)
 @Requires(classes = AmazonSQS.class)
 public class QueueClientIntroduction implements MethodInterceptor<Object, Object> {
 

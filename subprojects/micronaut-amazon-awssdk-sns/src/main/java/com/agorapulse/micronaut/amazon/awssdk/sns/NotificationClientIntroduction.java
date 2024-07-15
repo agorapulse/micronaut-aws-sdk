@@ -24,6 +24,7 @@ import com.agorapulse.micronaut.amazon.awssdk.sns.annotation.NotificationClient;
 import com.agorapulse.micronaut.amazon.awssdk.sns.annotation.Topic;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micronaut.aop.InterceptorBean;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.context.BeanContext;
@@ -42,6 +43,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 @Singleton
+@InterceptorBean(NotificationClient.class)
 public class NotificationClientIntroduction implements MethodInterceptor<Object, Object> {
 
     private static final String SUBJECT = "subject";
@@ -58,7 +60,7 @@ public class NotificationClientIntroduction implements MethodInterceptor<Object,
         Argument<?> attributes;
         Argument<?> messageGroupId;
         Argument<?> messageDeduplicationId;
-        
+
         boolean isValid() {
             return message != null;
         }

@@ -18,6 +18,7 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Service;
+import io.micronaut.aop.InterceptorBean;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.core.annotation.AnnotationValue;
@@ -27,6 +28,7 @@ import jakarta.inject.Singleton;
  * Introduction for {@link com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Service} annotation.
  */
 @Singleton
+@InterceptorBean(Service.class)
 public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
 
     private final DynamoDbServiceIntroduction introduction;

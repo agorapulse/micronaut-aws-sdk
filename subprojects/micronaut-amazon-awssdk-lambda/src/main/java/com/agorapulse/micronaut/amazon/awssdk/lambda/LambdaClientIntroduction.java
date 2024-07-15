@@ -22,6 +22,7 @@ import com.agorapulse.micronaut.amazon.awssdk.lambda.annotation.Body;
 import com.agorapulse.micronaut.amazon.awssdk.lambda.annotation.LambdaClient;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micronaut.aop.InterceptorBean;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.context.BeanContext;
@@ -45,6 +46,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 @Singleton
+@InterceptorBean(LambdaClient.class)
 @Requires(classes = software.amazon.awssdk.services.lambda.LambdaClient.class)
 public class LambdaClientIntroduction implements MethodInterceptor<Object, Object> {
 
