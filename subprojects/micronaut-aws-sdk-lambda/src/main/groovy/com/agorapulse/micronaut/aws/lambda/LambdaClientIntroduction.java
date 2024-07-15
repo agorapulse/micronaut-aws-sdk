@@ -26,6 +26,7 @@ import com.amazonaws.services.lambda.model.InvokeRequest;
 import com.amazonaws.services.lambda.model.InvokeResult;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micronaut.aop.InterceptorBean;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.context.BeanContext;
@@ -46,6 +47,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 @Singleton
+@InterceptorBean(LambdaClient.class)
 @Requires(classes = AWSLambda.class)
 public class LambdaClientIntroduction implements MethodInterceptor<Object, Object> {
 

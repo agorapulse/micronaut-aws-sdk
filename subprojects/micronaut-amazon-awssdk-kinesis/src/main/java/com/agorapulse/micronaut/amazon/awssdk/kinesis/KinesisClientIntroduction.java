@@ -24,6 +24,7 @@ import com.agorapulse.micronaut.amazon.awssdk.kinesis.annotation.SequenceNumber;
 import com.agorapulse.micronaut.amazon.awssdk.kinesis.annotation.Stream;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micronaut.aop.InterceptorBean;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.context.BeanContext;
@@ -45,6 +46,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Singleton
+@InterceptorBean(KinesisClient.class)
 @Requires(classes = software.amazon.awssdk.services.kinesis.KinesisClient.class)
 public class KinesisClientIntroduction implements MethodInterceptor<Object, Object> {
 

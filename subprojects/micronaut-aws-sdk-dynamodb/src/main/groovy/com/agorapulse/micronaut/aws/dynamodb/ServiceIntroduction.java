@@ -26,6 +26,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.IDynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException;
 import groovy.lang.Closure;
+import io.micronaut.aop.InterceptorBean;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.context.annotation.Requires;
@@ -45,6 +46,7 @@ import java.util.function.Function;
  * Introduction for {@link Service} annotation.
  */
 @Singleton
+@InterceptorBean(Service.class)
 @Requires(classes = IDynamoDBMapper.class)
 public class ServiceIntroduction implements MethodInterceptor<Object, Object> {
 

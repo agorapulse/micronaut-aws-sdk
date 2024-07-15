@@ -28,6 +28,7 @@ import com.amazonaws.services.kinesis.model.PutRecordsRequestEntry;
 import com.amazonaws.services.kinesis.model.ResourceNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micronaut.aop.InterceptorBean;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.context.BeanContext;
@@ -42,6 +43,7 @@ import java.nio.ByteBuffer;
 import java.util.*;
 
 @Singleton
+@InterceptorBean(KinesisClient.class)
 @Requires(classes = AmazonKinesis.class)
 public class KinesisClientIntroduction implements MethodInterceptor<Object, Object> {
 

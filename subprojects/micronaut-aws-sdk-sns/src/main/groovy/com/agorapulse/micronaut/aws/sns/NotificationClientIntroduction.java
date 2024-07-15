@@ -27,6 +27,7 @@ import com.amazonaws.services.sns.model.NotFoundException;
 import com.amazonaws.services.sns.model.PublishRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micronaut.aop.InterceptorBean;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.context.BeanContext;
@@ -44,6 +45,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 @Singleton
+@InterceptorBean(NotificationClient.class)
 @Requires(classes = AmazonSNS.class)
 public class NotificationClientIntroduction implements MethodInterceptor<Object, Object> {
 
