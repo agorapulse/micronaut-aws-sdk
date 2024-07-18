@@ -64,13 +64,13 @@ class DefaultRecordProcessor implements ShardRecordProcessor {
 
     @Override
     public void leaseLost(LeaseLostInput leaseLostInput) {
-        LOGGER.info("[{}] Lost lease, so terminating.", shardId);
+        LOGGER.debug("[{}] Lost lease, so terminating.", shardId);
     }
 
     @Override
     public void shardEnded(ShardEndedInput shardEndedInput) {
         try {
-            LOGGER.info("[{}] Reached shard end checkpointing.", shardId);
+            LOGGER.debug("[{}] Reached shard end checkpointing.", shardId);
             shardEndedInput.checkpointer().checkpoint();
         } catch (ShutdownException | InvalidStateException e) {
             LOGGER.error("Exception while checkpointing at shard end. Giving up.", e);
@@ -80,7 +80,7 @@ class DefaultRecordProcessor implements ShardRecordProcessor {
     @Override
     public void shutdownRequested(ShutdownRequestedInput shutdownRequestedInput) {
         try {
-            LOGGER.info("[{}] Scheduler is shutting down, checkpointing.", shardId);
+            LOGGER.debug("[{}] Scheduler is shutting down, checkpointing.", shardId);
             shutdownRequestedInput.checkpointer().checkpoint();
         } catch (ShutdownException | InvalidStateException e) {
             LOGGER.error("Exception while checkpointing at requested shutdown. Giving up.", e);
@@ -91,12 +91,12 @@ class DefaultRecordProcessor implements ShardRecordProcessor {
         this.shardId = initializationInput.shardId();
 
         Thread thread = Thread.currentThread();
-        LOGGER.info("[{}] Initializing: thread = {}: {}, sequence = {}", shardId, thread.getId(), thread.getName(), initializationInput.extendedSequenceNumber());
+        LOGGER.debug("[{}] Initializing: thread = {}: {}, sequence = {}", shardId, thread.getId(), thread.getName(), initializationInput.extendedSequenceNumber());
     }
 
     public void processRecords(ProcessRecordsInput input) {
         Thread thread = Thread.currentThread();
-        LOGGER.info("[{}] Processing: {} records, thread = {}: {}", shardId, input.records().size(), thread.getId(), thread.getName());
+        LOGGER.debug("[{}] Processing: {} records, thread = {}: {}", shardId, input.records().size(), thread.getId(), thread.getName());
 
         // Process records and perform all exception handling.
         processRecordsWithRetries(input.records());
@@ -135,7 +135,7 @@ class DefaultRecordProcessor implements ShardRecordProcessor {
                 try {
                     Thread.sleep(BACKOFF_TIME_IN_MILLIS);
                 } catch (InterruptedException e) {
-                    LOGGER.info("[{}] Interrupted sleep", shardId, e);
+                    LOGGER.debug("[{}] Interrupted sleep", shardId, e);
                 }
             }
 
@@ -165,14 +165,14 @@ class DefaultRecordProcessor implements ShardRecordProcessor {
      * @param checkpointer
      */
     protected void checkpoint(RecordProcessorCheckpointer checkpointer) {
-        LOGGER.info("[{}] Checkpointing shard", shardId);
+        LOGGER.debug("[{}] Checkpointing shard", shardId);
         for (int i = 0; i < NUM_RETRIES; i++) {
             try {
                 checkpointer.checkpoint();
                 break;
             } catch (ShutdownException se) {
                 // Ignore checkpoint if the processor instance has been shutdown (fail over).
-                LOGGER.info("[" + shardId + "] Caught shutdown exception, skipping checkpoint.", se);
+                LOGGER.debug("[" + shardId + "] Caught shutdown exception, skipping checkpoint.", se);
                 break;
             } catch (ThrottlingException e) {
                 // Backoff and re-attempt checkpoint upon transient failures
@@ -180,7 +180,7 @@ class DefaultRecordProcessor implements ShardRecordProcessor {
                     LOGGER.error("[" + shardId + "] Checkpoint failed after " + (i + 1) + " attempts.", e);
                     break;
                 } else {
-                    LOGGER.info("[" + shardId + "] Transient issue when checkpointing - attempt " + (i + 1) + " of $NUM_RETRIES", e);
+                    LOGGER.debug("[" + shardId + "] Transient issue when checkpointing - attempt " + (i + 1) + " of $NUM_RETRIES", e);
                 }
             } catch (InvalidStateException e) {
                 // This indicates an issue with the DynamoDB table (check for table, provisioned IOPS).

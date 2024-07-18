@@ -145,14 +145,14 @@ class DefaultRecordProcessor implements IRecordProcessor {
      * @param checkpointer
      */
     protected void checkpoint(IRecordProcessorCheckpointer checkpointer) {
-        log.info "[${shardId}] Checkpointing shard"
+        log.debug "[${shardId}] Checkpointing shard"
         for (int i = 0; i < NUM_RETRIES; i++) {
             try {
                 checkpointer.checkpoint()
                 break
             } catch (ShutdownException se) {
                 // Ignore checkpoint if the processor instance has been shutdown (fail over).
-                log.info "[${shardId}] Caught shutdown exception, skipping checkpoint.", se
+                log.debug "[${shardId}] Caught shutdown exception, skipping checkpoint.", se
                 break
             } catch (ThrottlingException e) {
                 // Backoff and re-attempt checkpoint upon transient failures
@@ -160,7 +160,7 @@ class DefaultRecordProcessor implements IRecordProcessor {
                     log.error "[${shardId}] Checkpoint failed after ${i + 1} attempts.", e
                     break
                 } else {
-                    log.info "[${shardId}] Transient issue when checkpointing - attempt ${i + 1} of $NUM_RETRIES", e
+                    log.debug "[${shardId}] Transient issue when checkpointing - attempt ${i + 1} of $NUM_RETRIES", e
                 }
             } catch (InvalidStateException e) {
                 // This indicates an issue with the DynamoDB table (check for table, provisioned IOPS).
