@@ -99,7 +99,7 @@ class DefaultKinesisWorker implements KinesisWorker {
         );
 
         try {
-            LOGGER.info("Starting Kinesis worker for {}", configuration.getStream());
+            LOGGER.debug("Starting Kinesis worker for {}", configuration.getStream());
             executorService.submit(scheduler);
         } catch (Exception t) {
             LOGGER.error("Caught throwable while processing Kinesis data.", t);

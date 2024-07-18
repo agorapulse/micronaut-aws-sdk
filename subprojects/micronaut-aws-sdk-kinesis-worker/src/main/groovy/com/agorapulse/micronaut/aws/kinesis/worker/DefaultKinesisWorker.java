@@ -81,7 +81,7 @@ class DefaultKinesisWorker implements KinesisWorker {
         builder.workerStateChangeListener(s -> applicationEventPublisher.publishEvent(new WorkerStateEvent(s, configuration.getStreamName())));
 
         try {
-            LOGGER.info("Starting Kinesis worker for {}", configuration.getStreamName());
+            LOGGER.debug("Starting Kinesis worker for {}", configuration.getStreamName());
             worker = builder.build();
             executorService.execute(worker);
         } catch (Exception t) {

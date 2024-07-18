@@ -49,7 +49,7 @@ public class SafeAwsRegionProviderChain extends AwsRegionProvider {
                 }
             } catch (Exception e) {
                 // Ignore any exceptions and move onto the next provider
-                LOG.info("Unable to load region from " + provider.toString() + ": " + e.getMessage());
+                LOG.debug("Unable to load region from " + provider.toString() + ": " + e.getMessage());
             }
         }
         return null;

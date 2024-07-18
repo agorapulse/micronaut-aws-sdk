@@ -125,7 +125,7 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
                 if (event instanceof Event && StringUtils.isNotEmpty(consumerFilterKey)) {
                     String eventKey = ((Event) event).getConsumerFilterKey();
                     if (!consumerFilterKey.equals(eventKey)) {
-                        LOGGER.info("Ignoring event because expected consumer filter key {} is not equal to the event's filter key {}: {}", consumerFilterKey, eventKey, s);
+                        LOGGER.debug("Ignoring event because expected consumer filter key {} is not equal to the event's filter key {}: {}", consumerFilterKey, eventKey, s);
                         return;
                     }
                 }
@@ -211,7 +211,7 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
             configurationName, key -> {
                 KinesisWorker w = kinesisWorkerFactory.create(getKinesisConfiguration(key));
 
-                LOGGER.info("Kinesis worker for configuration {} created", key);
+                LOGGER.debug("Kinesis worker for configuration {} created", key);
 
                 w.start();
 
@@ -221,7 +221,7 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
 
         worker.addConsumer(consumer);
 
-        LOGGER.info("Kinesis listener for method {} declared in {} registered", method, beanDefinition.getBeanType());
+        LOGGER.debug("Kinesis listener for method {} declared in {} registered", method, beanDefinition.getBeanType());
     }
 
     @Override

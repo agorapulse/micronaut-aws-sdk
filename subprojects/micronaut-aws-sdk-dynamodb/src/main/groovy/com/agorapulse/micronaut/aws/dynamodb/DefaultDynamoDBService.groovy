@@ -289,11 +289,11 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
                     globalSecondaryIndex.provisionedThroughput = new ProvisionedThroughput()
                         .withReadCapacityUnits(DEFAULT_READ_CAPACTIY)
                         .withWriteCapacityUnits(DEFAULT_WRITE_CAPACITY)
-                    log.info("Creating DynamoDB GSI: ${globalSecondaryIndex}")
+                    log.debug("Creating DynamoDB GSI: ${globalSecondaryIndex}")
                 }
             }
 
-            log.info("Creating DynamoDB table: ${createTableRequest}")
+            log.debug("Creating DynamoDB table: ${createTableRequest}")
 
             return client.createTable(createTableRequest)
         }
