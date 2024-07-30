@@ -58,6 +58,11 @@ public class QueueConfiguration implements Cloneable {
         return this;
     }
 
+    public QueueConfiguration withTags(Map<String, String> tags) {
+        this.tags = tags;
+        return this;
+    }
+
     public QueueConfiguration copy() {
         return new QueueConfiguration()
             .withQueue(queue)
@@ -66,7 +71,8 @@ public class QueueConfiguration implements Cloneable {
             .withDelaySeconds(delaySeconds)
             .withMessageRetentionPeriod(messageRetentionPeriod)
             .withMaximumMessageSize(maximumMessageSize)
-            .withVisibilityTimeout(visibilityTimeout);
+            .withVisibilityTimeout(visibilityTimeout)
+            .withTags(tags);
     }
 
     public String getQueue() {
