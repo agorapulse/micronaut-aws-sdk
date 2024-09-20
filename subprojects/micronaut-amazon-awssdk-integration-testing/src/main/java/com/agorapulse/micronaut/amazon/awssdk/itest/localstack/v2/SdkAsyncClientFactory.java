@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.amazon.awssdk.itest.localstack;
+package com.agorapulse.micronaut.amazon.awssdk.itest.localstack.v2;
 
 import com.agorapulse.micronaut.amazon.awssdk.core.AwsConfiguration;
 import io.micronaut.context.annotation.Bean;
@@ -23,23 +23,34 @@ import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Primary;
 import io.micronaut.context.annotation.Replaces;
 import io.micronaut.context.annotation.Requires;
-
 import jakarta.inject.Singleton;
-import java.util.List;
+import software.amazon.awssdk.http.Protocol;
+import software.amazon.awssdk.http.SdkHttpConfigurationOption;
+import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
+import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient;
+import software.amazon.awssdk.utils.AttributeMap;
 
 @Factory
 @Replaces(AwsConfiguration.class)
-@Requires(missingProperty = "localstack.disabled")
-public class LocalstackContainerHolderFactory {
+@Requires(missingProperty = "localstack.disabled", classes = NettyNioAsyncHttpClient.class)
+public class SdkAsyncClientFactory {
 
     @Primary
     @Singleton
     @Bean(preDestroy = "close")
-    public LocalstackContainerHolder localstackContainerHolder(
-        LocalstackContainerConfiguration configuration,
-        List<LocalstackContainerOverridesConfiguration> overrides
-    ) {
-        return new LocalstackContainerHolder(configuration, overrides);
+    public SdkAsyncHttpClient client() {
+        return  NettyNioAsyncHttpClient
+            .builder()
+            .protocol(Protocol.HTTP1_1)
+            .buildWithDefaults(
+                AttributeMap
+                    .builder()
+                    .put(
+                        SdkHttpConfigurationOption.TRUST_ALL_CERTIFICATES,
+                        Boolean.TRUE
+                    )
+                    .build()
+            );
     }
 
 }
