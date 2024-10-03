@@ -17,21 +17,22 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert;
 
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.ConvertedBy;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.Options;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.ConvertedJson;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.PartitionKey;
 import io.micronaut.core.annotation.Introspected;
 
 @Introspected
-public class EntityExample {
+public class ConvertedJsonEntityExample {
 
     private String id;
-    private String data;
+    private Options options;
 
-    public EntityExample() {}
+    public ConvertedJsonEntityExample() {}
 
-    public EntityExample(String id, String data) {
+    public ConvertedJsonEntityExample(String id, Options options) {
         this.id = id;
-        this.data = data;
+        this.options = options;
     }
 
     @PartitionKey
@@ -43,12 +44,12 @@ public class EntityExample {
         this.id = id;
     }
 
-    @ConvertedBy(value = CompressedStringConverter.class)
-    public String getData() {
-        return data;
+    @ConvertedJson
+    public Options getOptions() {
+        return options;
     }
 
-    public void setData(String data) {
-        this.data = data;
+    public void setOptions(Options options) {
+        this.options = options;
     }
 }

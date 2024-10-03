@@ -61,7 +61,7 @@ The entity class is a class which instances represent the items in DynamoDB.
 
 For AWS SDK v2 you don't need to use the https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/enhanced/dynamodb/mapper/annotations/package-summary.html[native annotations] but
 you fill their counterparts in `com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation` package. The only requirements is that
-the class needs to be annotated either with `@Introspected` or `@DynamoDbBean`.
+the class needs to be annotated either with `@Introspected` or `@DynamoDbBean`. There is a replacement for `@DynamoDBTypeConvertedJson` annotation as well - you can use `@ConvertedJson` annotation instead.
 
 
 

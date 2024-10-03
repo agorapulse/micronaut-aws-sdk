@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.ConvertedJson;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.PartitionKey;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Projection;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondaryPartitionKey;
@@ -26,10 +27,12 @@ import io.micronaut.core.annotation.Introspected;
 import software.amazon.awssdk.services.dynamodb.model.ProjectionType;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 @Introspected                                                                           // <1>
 public class DynamoDBEntity implements PlaybookAware {
@@ -45,6 +48,8 @@ public class DynamoDBEntity implements PlaybookAware {
     private Integer number = 0;
 
     private Map<String, List<String>> mapProperty = new LinkedHashMap<>();
+    private Set<String> stringSetProperty = new HashSet<>();
+    private Options options = new Options();
 
     @PartitionKey                                                                       // <2>
     public String getParentId() {
@@ -105,6 +110,23 @@ public class DynamoDBEntity implements PlaybookAware {
         this.mapProperty = mapProperty;
     }
 
+    public Set<String> getStringSetProperty() {
+        return stringSetProperty;
+    }
+
+    public void setStringSetProperty(Set<String> stringSetProperty) {
+        this.stringSetProperty = stringSetProperty;
+    }
+
+    @ConvertedJson
+    public Options getOptions() {
+        return options;
+    }
+
+    public void setOptions(Options options) {
+        this.options = options;
+    }
+
     //CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
@@ -116,12 +138,13 @@ public class DynamoDBEntity implements PlaybookAware {
             Objects.equals(rangeIndex, that.rangeIndex) &&
             Objects.equals(date, that.date) &&
             Objects.equals(number, that.number) &&
-            Objects.equals(mapProperty, that.mapProperty);
+            Objects.equals(mapProperty, that.mapProperty) &&
+            Objects.equals(stringSetProperty, that.stringSetProperty);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(parentId, id, rangeIndex, date, number, mapProperty);
+        return Objects.hash(parentId, id, rangeIndex, date, number, mapProperty, stringSetProperty);
     }
 
     @Override
@@ -133,6 +156,7 @@ public class DynamoDBEntity implements PlaybookAware {
             ", date=" + date +
             ", number=" + number +
             ", mapProperty=" + mapProperty +
+            ", stringSetProperty=" + stringSetProperty +
             '}';
     }
     //CHECKSTYLE:ON

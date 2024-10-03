@@ -18,6 +18,7 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.schema;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.*;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert.ConvertedJsonAttributeConverter;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert.LegacyAttributeConverterProvider;
 import io.micronaut.context.BeanContext;
 import io.micronaut.core.annotation.AnnotationMetadataProvider;
@@ -336,7 +337,9 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
     ) {
         return findAnnotation(propertyDescriptor, DynamoDbConvertedBy.class, ConvertedBy.class)
             .flatMap(AnnotationValue::classValue)
-            .map(clazz -> (AttributeConverter<P>) fromContextOrNew(clazz, beanContext).get());
+            .map(clazz -> (AttributeConverter<P>) fromContextOrNew(clazz, beanContext).get())
+            .or(() -> findAnnotation(propertyDescriptor, ConvertedJson.class)
+                .map(anno -> (AttributeConverter<P>) new ConvertedJsonAttributeConverter<>(propertyDescriptor.getType())));
     }
 
     /**

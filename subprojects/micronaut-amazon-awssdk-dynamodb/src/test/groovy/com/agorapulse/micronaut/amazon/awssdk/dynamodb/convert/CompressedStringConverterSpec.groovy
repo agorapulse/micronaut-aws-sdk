@@ -23,9 +23,6 @@ import groovy.util.logging.Slf4j
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import software.amazon.awssdk.enhanced.dynamodb.Key
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue
-import software.amazon.awssdk.services.dynamodb.model.GetItemRequest
-import software.amazon.awssdk.services.dynamodb.model.GetItemResponse
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -37,19 +34,19 @@ class CompressedStringConverterSpec extends Specification {
 
     @Inject DynamoDBServiceProvider dynamoDBServiceProvider
     @Inject DynamoDbClient dynamoDbClient
-    @Shared DynamoDbService<EntityExample> dynamoDbService
+    @Shared DynamoDbService<CompressedEntityExample> dynamoDbService
 
     void setup() {
-        dynamoDbService = dynamoDBServiceProvider.findOrCreate(EntityExample)
+        dynamoDbService = dynamoDBServiceProvider.findOrCreate(CompressedEntityExample)
     }
 
     void 'should persist entity with compressed data field'() {
         given:
         String json = this.class.classLoader.getResourceAsStream('example.json').text
-        EntityExample entity = new EntityExample(UUID.randomUUID().toString(), json)
+        CompressedEntityExample entity = new CompressedEntityExample(UUID.randomUUID().toString(), json)
 
         when:
-        EntityExample saved = dynamoDbService.save(entity)
+        CompressedEntityExample saved = dynamoDbService.save(entity)
 
         then:
         saved.id == entity.id
@@ -60,23 +57,13 @@ class CompressedStringConverterSpec extends Specification {
 
         when:
         int uncompressedSize = entity.data.length()
-        int compressedSize = getRawDynamoDbItem(entity.id).item().get('data').b().asByteArray().size()
+        int compressedSize = RawDataUtil.getRawDynamoDbItem(dynamoDbClient, CompressedEntityExample, entity.id).data.b().asByteArray().size()
 
         log.info 'uncompressed size: {} bytes', uncompressedSize
         log.info 'compressed size: {} bytes', compressedSize
 
         then:
         compressedSize < uncompressedSize
-    }
-
-    private GetItemResponse getRawDynamoDbItem(String id) {
-        GetItemRequest request = GetItemRequest
-            .builder()
-            .key([id: AttributeValue.builder().s(id).build()])
-            .tableName(EntityExample.simpleName)
-            .build() as GetItemRequest
-
-        return dynamoDbClient.getItem(request)
     }
 
 }
