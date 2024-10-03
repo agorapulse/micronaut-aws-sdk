@@ -40,7 +40,7 @@ class BeanIntrospectionTableSchemaSpec extends Specification {
         when:
             BeanIntrospectionTableSchema<DynamoDBEntity> schema = BeanIntrospectionTableSchema.create(DynamoDBEntity, context, cache)
         then:
-            schema.attributeNames().size() == 7
+            schema.attributeNames().size() == 9
     }
 
     void 'read table schema for java class with nested beans'() {

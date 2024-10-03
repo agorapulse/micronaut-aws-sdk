@@ -23,10 +23,14 @@ dependencies {
     implementation "space.jasan:groovy-closure-support:$closureSupportVersion"
     implementation "io.projectreactor:reactor-core:$projectReactorVersion"
 
+    // required by the com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert.ConvertedToJsonAttributeConverter
+    compileOnly 'io.micronaut:micronaut-jackson-databind'
+
     testAnnotationProcessor project(':micronaut-amazon-awssdk-dynamodb-annotation-processor')
     testImplementation project(':micronaut-amazon-awssdk-dynamodb-annotation-processor')
     testImplementation project(':micronaut-amazon-awssdk-integration-testing')
     testImplementation 'io.micronaut.rxjava2:micronaut-rxjava2'
+    testImplementation 'io.micronaut:micronaut-jackson-databind'
 }
 
 if (project.findProperty('test.aws.dynamodb.v2') == 'async') {

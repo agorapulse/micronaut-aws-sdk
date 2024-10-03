@@ -89,7 +89,7 @@ class DefaultDynamoDBServiceSpec extends Specification {
         unknownMethodsService.delete('1', '1', '1')
         then:
         IllegalArgumentException e3 = thrown(IllegalArgumentException)
-        e3.message == '''Unknown property somethingElse for DynamoDBEntity{parentId='null', id='null', rangeIndex='null', date=null, number=0, mapProperty={}}'''
+        e3.message == '''Unknown property somethingElse for DynamoDBEntity{parentId='null', id='null', rangeIndex='null', date=null, number=0, mapProperty={}, stringSetProperty=[]}'''
 
         when:
         unknownMethodsService.get('1', '1', '1')

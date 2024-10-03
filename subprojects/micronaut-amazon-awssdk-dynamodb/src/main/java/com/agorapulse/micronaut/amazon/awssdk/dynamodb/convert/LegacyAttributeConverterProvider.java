@@ -33,7 +33,8 @@ import java.util.stream.Collectors;
 public class LegacyAttributeConverterProvider implements AttributeConverterProvider {
 
     private final List<AttributeConverter<?>> customConverters = Arrays.asList(
-        new DateToStringAttributeConverter()
+        new DateToStringAttributeConverter(),
+        new EmptySafeStringSetConverter()
     );
 
     private final Map<EnhancedType<?>, AttributeConverter<?>> customConvertersMap;

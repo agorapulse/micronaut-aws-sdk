@@ -111,6 +111,12 @@ public class DynamoDBLocalTest {
         entity.setId(id);
         entity.setRangeIndex(rangeIndex);
         entity.setDate(date);
+
+        Options options = new Options();
+        options.setOne("one");
+        options.setTwo("two");
+        entity.setOptions(options);
+
         return entity;
     }
 }

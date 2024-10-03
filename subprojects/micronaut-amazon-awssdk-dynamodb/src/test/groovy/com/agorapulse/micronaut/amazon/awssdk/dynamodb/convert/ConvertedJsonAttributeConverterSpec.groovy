@@ -19,51 +19,49 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.DynamoDBServiceProvider
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.DynamoDbService
-import groovy.util.logging.Slf4j
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.Options
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
+import jakarta.inject.Inject
 import software.amazon.awssdk.enhanced.dynamodb.Key
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import spock.lang.Shared
 import spock.lang.Specification
 
-import jakarta.inject.Inject
-
-@Slf4j
 @MicronautTest
-class CompressedStringConverterSpec extends Specification {
+class ConvertedJsonAttributeConverterSpec extends Specification {
 
     @Inject DynamoDBServiceProvider dynamoDBServiceProvider
     @Inject DynamoDbClient dynamoDbClient
-    @Shared DynamoDbService<CompressedEntityExample> dynamoDbService
+    @Inject ObjectMapper objectMapper
+
+    DynamoDbService<ConvertedJsonEntityExample> dynamoDbService
 
     void setup() {
-        dynamoDbService = dynamoDBServiceProvider.findOrCreate(CompressedEntityExample)
+        dynamoDbService = dynamoDBServiceProvider.findOrCreate(ConvertedJsonEntityExample)
     }
 
-    void 'should persist entity with compressed data field'() {
+    void 'should persist entity with options stored as JSON'() {
         given:
-        String json = this.class.classLoader.getResourceAsStream('example.json').text
-        CompressedEntityExample entity = new CompressedEntityExample(UUID.randomUUID().toString(), json)
+            ConvertedJsonEntityExample entity = new ConvertedJsonEntityExample(
+                UUID.randomUUID().toString(),
+                new Options(one: '1', two: '2')
+            )
+        when:
+            ConvertedJsonEntityExample saved = dynamoDbService.save(entity)
+        then:
+            saved.id == entity.id
+            saved.options == entity.options
+        when:
+            ConvertedJsonEntityExample loaded = dynamoDbService.get(Key.builder().partitionValue(entity.id).build())
+        then:
+            loaded.id == entity.id
+            loaded.options == entity.options
 
         when:
-        CompressedEntityExample saved = dynamoDbService.save(entity)
-
+            String json = RawDataUtil.getRawDynamoDbItem(dynamoDbClient, ConvertedJsonEntityExample, entity.id).options.s()
+            Options options = objectMapper.readValue(json, Options)
         then:
-        saved.id == entity.id
-        saved.data == entity.data
-
-        and:
-        dynamoDbService.get(Key.builder().partitionValue(entity.id).build()).data == entity.data
-
-        when:
-        int uncompressedSize = entity.data.length()
-        int compressedSize = RawDataUtil.getRawDynamoDbItem(dynamoDbClient, CompressedEntityExample, entity.id).data.b().asByteArray().size()
-
-        log.info 'uncompressed size: {} bytes', uncompressedSize
-        log.info 'compressed size: {} bytes', compressedSize
-
-        then:
-        compressedSize < uncompressedSize
+            options == entity.options
     }
 
 }
