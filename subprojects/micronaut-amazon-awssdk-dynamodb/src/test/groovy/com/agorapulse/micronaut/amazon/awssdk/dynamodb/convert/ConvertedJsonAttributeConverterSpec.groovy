@@ -64,4 +64,25 @@ class ConvertedJsonAttributeConverterSpec extends Specification {
             options == entity.options
     }
 
+    void 'should persist entity with null options'() {
+        given:
+            ConvertedJsonEntityExample entity = new ConvertedJsonEntityExample(
+                UUID.randomUUID().toString(),
+                null
+            )
+        when:
+            ConvertedJsonEntityExample saved = dynamoDbService.save(entity)
+        then:
+            saved.id == entity.id
+            !saved.options
+
+        when:
+            ConvertedJsonEntityExample loaded = dynamoDbService.get(Key.builder().partitionValue(entity.id).build())
+        then:
+            loaded.id == entity.id
+            loaded.options == entity.options
+
+            !RawDataUtil.getRawDynamoDbItem(dynamoDbClient, ConvertedJsonEntityExample, entity.id).options
+    }
+
 }
