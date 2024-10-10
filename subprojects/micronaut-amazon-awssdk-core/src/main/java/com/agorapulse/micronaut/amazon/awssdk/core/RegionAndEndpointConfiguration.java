@@ -17,8 +17,11 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.core;
 
+import com.agorapulse.micronaut.amazon.awssdk.core.client.ClientBuilderProvider;
+import software.amazon.awssdk.awscore.client.builder.AwsAsyncClientBuilder;
 import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder;
 import software.amazon.awssdk.awscore.presigner.SdkPresigner;
+import software.amazon.awssdk.core.client.builder.SdkSyncClientBuilder;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
 
@@ -32,7 +35,11 @@ public interface RegionAndEndpointConfiguration {
 
     String getEndpoint();
 
-    default <C, B extends AwsClientBuilder<B, C>> B configure(B builder, AwsRegionProvider awsRegionProvider) {
+    String getClient();
+
+    String getAsyncClient();
+
+    default <C, B extends AwsClientBuilder<B, C>> B configure(B builder, AwsRegionProvider awsRegionProvider, ClientBuilderProvider builderProvider) {
         builder.region(Optional.ofNullable(getRegion()).map(Region::of).orElseGet(awsRegionProvider::getRegion));
 
         if (getEndpoint() != null) {
@@ -41,6 +48,14 @@ public interface RegionAndEndpointConfiguration {
             } catch (URISyntaxException e) {
                 throw new IllegalArgumentException("Endpoint configured for " + getClass() + " is not a valid URI!", e);
             }
+        }
+
+        if (getClient() != null && builder instanceof SdkSyncClientBuilder<?,?> clientBuilder) {
+            builderProvider.findHttpClientBuilder(getClient()).ifPresent(clientBuilder::httpClientBuilder);
+        }
+
+        if (getAsyncClient() != null && builder instanceof AwsAsyncClientBuilder<?,?> clientBuilder) {
+            builderProvider.findAsyncHttpClientBuilder(getClient()).ifPresent(clientBuilder::httpClientBuilder);
         }
 
         return builder;

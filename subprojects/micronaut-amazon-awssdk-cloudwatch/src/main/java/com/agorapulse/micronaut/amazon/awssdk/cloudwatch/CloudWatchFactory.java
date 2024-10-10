@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.cloudwatch;
 
+import com.agorapulse.micronaut.amazon.awssdk.core.client.ClientBuilderProvider;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;
@@ -44,10 +45,11 @@ public class CloudWatchFactory {
     CloudWatchClient cloudWatch(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
+        ClientBuilderProvider builderProvider,
         CloudWatchConfiguration configuration
     ) {
         return configuration
-            .configure(CloudWatchClient.builder().credentialsProvider(credentialsProvider), awsRegionProvider)
+            .configure(CloudWatchClient.builder().credentialsProvider(credentialsProvider), awsRegionProvider, builderProvider)
             .build();
     }
 
@@ -58,10 +60,11 @@ public class CloudWatchFactory {
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
         CloudWatchConfiguration configuration,
+        ClientBuilderProvider builderProvider,
         Optional<SdkAsyncHttpClient> httpClient
     ) {
         CloudWatchAsyncClientBuilder builder = configuration
-            .configure(CloudWatchAsyncClient.builder().credentialsProvider(credentialsProvider), awsRegionProvider);
+            .configure(CloudWatchAsyncClient.builder().credentialsProvider(credentialsProvider), awsRegionProvider, builderProvider);
         httpClient.ifPresent(builder::httpClient);
         return builder.build();
     }

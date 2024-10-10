@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.kinesis;
 
+import com.agorapulse.micronaut.amazon.awssdk.core.client.ClientBuilderProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.EachBean;
@@ -42,9 +43,10 @@ public class KinesisFactory {
     KinesisClient kinesis(
         KinesisConfiguration configuration,
         AwsCredentialsProvider credentialsProvider,
-        AwsRegionProvider awsRegionProvider
+        AwsRegionProvider awsRegionProvider,
+        ClientBuilderProvider builderProvider
     ) {
-        return configuration.configure(KinesisClient.builder(), awsRegionProvider)
+        return configuration.configure(KinesisClient.builder(), awsRegionProvider, builderProvider)
             .credentialsProvider(credentialsProvider)
             .build();
     }
@@ -56,10 +58,11 @@ public class KinesisFactory {
         KinesisConfiguration configuration,
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
+        ClientBuilderProvider builderProvider,
         Optional<SdkAsyncHttpClient> httpClient
     ) {
         KinesisAsyncClientBuilder builder = KinesisAsyncClient.builder().credentialsProvider(credentialsProvider);
-        configuration.configure(builder, awsRegionProvider);
+        configuration.configure(builder, awsRegionProvider, builderProvider);
         httpClient.ifPresent(builder::httpClient);
         return builder.build();
     }

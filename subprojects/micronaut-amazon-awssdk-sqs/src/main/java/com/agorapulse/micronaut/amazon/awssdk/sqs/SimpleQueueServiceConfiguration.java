@@ -32,6 +32,8 @@ public abstract class SimpleQueueServiceConfiguration extends QueueConfiguration
 
     @Nullable private String region;
     @Nullable private String endpoint;
+    @Nullable private String client;
+    @Nullable private String asyncClient;
 
     public String getQueueNamePrefix() {
         return queueNamePrefix;
@@ -73,4 +75,21 @@ public abstract class SimpleQueueServiceConfiguration extends QueueConfiguration
         this.endpoint = endpoint;
     }
 
+    @Override
+    public @Nullable String getClient() {
+        return client;
+    }
+
+    public void setClient(@Nullable String client) {
+        this.client = client;
+    }
+
+    @Override
+    public @Nullable String getAsyncClient() {
+        return asyncClient;
+    }
+
+    public void setAsyncClient(@Nullable String asyncClient) {
+        this.asyncClient = asyncClient;
+    }
 }

@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.sqs;
 
+import com.agorapulse.micronaut.amazon.awssdk.core.client.ClientBuilderProvider;
 import io.micronaut.aws.sdk.v2.service.sqs.SqsClientFactory;
 import io.micronaut.context.annotation.EachBean;
 import io.micronaut.context.annotation.Factory;
@@ -43,9 +44,10 @@ public class SimpleQueueServiceFactory {
     SqsClient sqsClient(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
+        ClientBuilderProvider builderProvider,
         SimpleQueueServiceConfiguration configuration
     ) {
-        return configuration.configure(SqsClient.builder(), awsRegionProvider)
+        return configuration.configure(SqsClient.builder(), awsRegionProvider, builderProvider)
             .credentialsProvider(credentialsProvider)
             .build();
     }
@@ -56,11 +58,12 @@ public class SimpleQueueServiceFactory {
     SqsAsyncClient sqsAsyncClient(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
+        ClientBuilderProvider builderProvider,
         SimpleQueueServiceConfiguration configuration,
         Optional<SdkAsyncHttpClient> httpClient
     ) {
         SqsAsyncClientBuilder builder = SqsAsyncClient.builder().credentialsProvider(credentialsProvider);
-        configuration.configure(builder, awsRegionProvider);
+        configuration.configure(builder, awsRegionProvider, builderProvider);
         httpClient.ifPresent(builder::httpClient);
         return builder.build();
     }

@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
+import com.agorapulse.micronaut.amazon.awssdk.core.client.ClientBuilderProvider;
 import io.micronaut.aws.sdk.v2.service.dynamodb.DynamoDbClientFactory;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
@@ -45,10 +46,11 @@ public class DynamoDBClientsFactory {
     public DynamoDbClient dynamoDbClient(
         DynamoDBConfiguration configuration,
         AwsCredentialsProvider awsCredentialsProvider,
-        AwsRegionProvider awsRegionProvider
+        AwsRegionProvider awsRegionProvider,
+        ClientBuilderProvider builderProvider
     ) {
         DynamoDbClientBuilder builder = DynamoDbClient.builder().credentialsProvider(awsCredentialsProvider);
-        configuration.configure(builder, awsRegionProvider);
+        configuration.configure(builder, awsRegionProvider, builderProvider);
         return builder.build();
     }
 
@@ -59,10 +61,11 @@ public class DynamoDBClientsFactory {
         DynamoDBConfiguration configuration,
         AwsCredentialsProvider awsCredentialsProvider,
         AwsRegionProvider awsRegionProvider,
+        ClientBuilderProvider builderProvider,
         Optional<SdkAsyncHttpClient> httpClient
     ) {
         DynamoDbAsyncClientBuilder builder = DynamoDbAsyncClient.builder().credentialsProvider(awsCredentialsProvider);
-        configuration.configure(builder, awsRegionProvider);
+        configuration.configure(builder, awsRegionProvider, builderProvider);
         httpClient.ifPresent(builder::httpClient);
         return builder.build();
     }

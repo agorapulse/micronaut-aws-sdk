@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.lambda;
 
+import com.agorapulse.micronaut.amazon.awssdk.core.client.ClientBuilderProvider;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.EachBean;
 import io.micronaut.context.annotation.Factory;
@@ -41,9 +42,10 @@ public class LambdaClientFactory {
     LambdaClient lambdaClient(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
+        ClientBuilderProvider builderProvider,
         LambdaConfiguration configuration
     ) {
-        return configuration.configure(LambdaClient.builder(), awsRegionProvider)
+        return configuration.configure(LambdaClient.builder(), awsRegionProvider, builderProvider)
             .credentialsProvider(credentialsProvider)
             .build();
     }
@@ -54,11 +56,12 @@ public class LambdaClientFactory {
     LambdaAsyncClient lambdaAsyncClient(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
+        ClientBuilderProvider builderProvider,
         LambdaConfiguration configuration,
         Optional<SdkAsyncHttpClient> httpClient
     ) {
         LambdaAsyncClientBuilder builder = LambdaAsyncClient.builder().credentialsProvider(credentialsProvider);
-        configuration.configure(builder, awsRegionProvider);
+        configuration.configure(builder, awsRegionProvider, builderProvider);
         httpClient.ifPresent(builder::httpClient);
         return builder.build();
     }

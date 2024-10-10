@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.s3;
 
+import com.agorapulse.micronaut.amazon.awssdk.core.client.ClientBuilderProvider;
 import io.micronaut.aws.sdk.v2.service.s3.S3ClientFactory;
 import io.micronaut.context.annotation.EachBean;
 import io.micronaut.context.annotation.Factory;
@@ -42,9 +43,10 @@ public class SimpleStorageServiceFactory {
     public S3Client s3Client(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
+        ClientBuilderProvider builderProvider,
         SimpleStorageServiceConfiguration configuration
     ) {
-        return configuration.configure(S3Client.builder(), awsRegionProvider)
+        return configuration.configure(S3Client.builder(), awsRegionProvider, builderProvider)
             .credentialsProvider(credentialsProvider)
             .forcePathStyle(configuration.getForcePathStyle())
             .build();
@@ -72,6 +74,7 @@ public class SimpleStorageServiceFactory {
     public S3AsyncClient s3AsyncClient(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
+        ClientBuilderProvider builderProvider,
         SimpleStorageServiceConfiguration configuration,
         Optional<SdkAsyncHttpClient> httpClient
     ) {
@@ -79,7 +82,7 @@ public class SimpleStorageServiceFactory {
             .forcePathStyle(configuration.getForcePathStyle())
             .credentialsProvider(credentialsProvider);
         httpClient.ifPresent(builder::httpClient);
-        configuration.configure(builder, awsRegionProvider);
+        configuration.configure(builder, awsRegionProvider, builderProvider);
         return builder.build();
     }
 

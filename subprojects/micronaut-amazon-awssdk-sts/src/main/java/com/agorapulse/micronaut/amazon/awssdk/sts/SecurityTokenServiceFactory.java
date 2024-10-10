@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.sts;
 
+import com.agorapulse.micronaut.amazon.awssdk.core.client.ClientBuilderProvider;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;
@@ -39,10 +40,11 @@ public class SecurityTokenServiceFactory {
     StsClient awsSecurityTokenService(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
+        ClientBuilderProvider builderProvider,
         SecurityTokenServiceConfiguration configuration
     ) {
         return configuration
-            .configure(StsClient.builder().credentialsProvider(credentialsProvider), awsRegionProvider)
+            .configure(StsClient.builder().credentialsProvider(credentialsProvider), awsRegionProvider, builderProvider)
             .build();
     }
 
@@ -51,11 +53,12 @@ public class SecurityTokenServiceFactory {
     StsAsyncClient awsSecurityTokenAsyncService(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
+        ClientBuilderProvider builderProvider,
         SecurityTokenServiceConfiguration configuration,
         Optional<SdkAsyncHttpClient> httpClient
     ) {
         StsAsyncClientBuilder builder = StsAsyncClient.builder().credentialsProvider(credentialsProvider);
-        configuration.configure(builder, awsRegionProvider);
+        configuration.configure(builder, awsRegionProvider, builderProvider);
         httpClient.ifPresent(builder::httpClient);
         return builder.build();
     }
