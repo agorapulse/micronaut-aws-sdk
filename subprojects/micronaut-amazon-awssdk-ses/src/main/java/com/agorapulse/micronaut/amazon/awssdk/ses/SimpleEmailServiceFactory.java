@@ -44,7 +44,7 @@ public class SimpleEmailServiceFactory {
         ClientBuilderProvider builderProvider,
         SimpleEmailServiceConfiguration configuration
     ) {
-        return configuration.configure(SesClient.builder(), awsRegionProvider, builderProvider)
+        return configuration.configure(SesClient.builder(), awsRegionProvider, builderProvider, Optional.empty())
             .credentialsProvider(credentialsProvider)
             .build();
     }
@@ -60,8 +60,7 @@ public class SimpleEmailServiceFactory {
         Optional<SdkAsyncHttpClient> httpClient
     ) {
         SesAsyncClientBuilder builder = SesAsyncClient.builder().credentialsProvider(credentialsProvider);
-        httpClient.ifPresent(builder::httpClient);
-        configuration.configure(builder, awsRegionProvider, builderProvider);
+        configuration.configure(builder, awsRegionProvider, builderProvider, httpClient);
         return builder.build();
     }
 

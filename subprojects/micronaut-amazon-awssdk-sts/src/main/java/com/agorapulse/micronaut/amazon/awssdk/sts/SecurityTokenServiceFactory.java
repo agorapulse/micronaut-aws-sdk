@@ -44,7 +44,7 @@ public class SecurityTokenServiceFactory {
         SecurityTokenServiceConfiguration configuration
     ) {
         return configuration
-            .configure(StsClient.builder().credentialsProvider(credentialsProvider), awsRegionProvider, builderProvider)
+            .configure(StsClient.builder().credentialsProvider(credentialsProvider), awsRegionProvider, builderProvider, Optional.empty())
             .build();
     }
 
@@ -58,8 +58,7 @@ public class SecurityTokenServiceFactory {
         Optional<SdkAsyncHttpClient> httpClient
     ) {
         StsAsyncClientBuilder builder = StsAsyncClient.builder().credentialsProvider(credentialsProvider);
-        configuration.configure(builder, awsRegionProvider, builderProvider);
-        httpClient.ifPresent(builder::httpClient);
+        configuration.configure(builder, awsRegionProvider, builderProvider, httpClient);
         return builder.build();
     }
 

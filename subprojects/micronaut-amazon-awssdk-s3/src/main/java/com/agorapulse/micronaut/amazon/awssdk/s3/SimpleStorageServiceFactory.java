@@ -46,7 +46,7 @@ public class SimpleStorageServiceFactory {
         ClientBuilderProvider builderProvider,
         SimpleStorageServiceConfiguration configuration
     ) {
-        return configuration.configure(S3Client.builder(), awsRegionProvider, builderProvider)
+        return configuration.configure(S3Client.builder(), awsRegionProvider, builderProvider, Optional.empty())
             .credentialsProvider(credentialsProvider)
             .forcePathStyle(configuration.getForcePathStyle())
             .build();
@@ -81,8 +81,7 @@ public class SimpleStorageServiceFactory {
         S3AsyncClientBuilder builder = S3AsyncClient.builder()
             .forcePathStyle(configuration.getForcePathStyle())
             .credentialsProvider(credentialsProvider);
-        httpClient.ifPresent(builder::httpClient);
-        configuration.configure(builder, awsRegionProvider, builderProvider);
+        configuration.configure(builder, awsRegionProvider, builderProvider, httpClient);
         return builder.build();
     }
 

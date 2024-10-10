@@ -22,6 +22,7 @@ import software.amazon.awssdk.awscore.client.builder.AwsAsyncClientBuilder;
 import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder;
 import software.amazon.awssdk.awscore.presigner.SdkPresigner;
 import software.amazon.awssdk.core.client.builder.SdkSyncClientBuilder;
+import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
 
@@ -39,7 +40,7 @@ public interface RegionAndEndpointConfiguration {
 
     String getAsyncClient();
 
-    default <C, B extends AwsClientBuilder<B, C>> B configure(B builder, AwsRegionProvider awsRegionProvider, ClientBuilderProvider builderProvider) {
+    default <C, B extends AwsClientBuilder<B, C>> B configure(B builder, AwsRegionProvider awsRegionProvider, ClientBuilderProvider builderProvider, Optional<SdkAsyncHttpClient> httpClient) {
         builder.region(Optional.ofNullable(getRegion()).map(Region::of).orElseGet(awsRegionProvider::getRegion));
 
         if (getEndpoint() != null) {
@@ -56,6 +57,8 @@ public interface RegionAndEndpointConfiguration {
 
         if (getAsyncClient() != null && builder instanceof AwsAsyncClientBuilder<?,?> clientBuilder) {
             builderProvider.findAsyncHttpClientBuilder(getClient()).ifPresent(clientBuilder::httpClientBuilder);
+        } else if (httpClient.isPresent() && builder instanceof AwsAsyncClientBuilder<?,?> clientBuilder) {
+            clientBuilder.httpClient(httpClient.get());
         }
 
         return builder;

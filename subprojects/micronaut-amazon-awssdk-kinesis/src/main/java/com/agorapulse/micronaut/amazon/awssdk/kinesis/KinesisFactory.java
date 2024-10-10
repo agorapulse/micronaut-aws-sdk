@@ -46,7 +46,7 @@ public class KinesisFactory {
         AwsRegionProvider awsRegionProvider,
         ClientBuilderProvider builderProvider
     ) {
-        return configuration.configure(KinesisClient.builder(), awsRegionProvider, builderProvider)
+        return configuration.configure(KinesisClient.builder(), awsRegionProvider, builderProvider, Optional.empty())
             .credentialsProvider(credentialsProvider)
             .build();
     }
@@ -62,8 +62,7 @@ public class KinesisFactory {
         Optional<SdkAsyncHttpClient> httpClient
     ) {
         KinesisAsyncClientBuilder builder = KinesisAsyncClient.builder().credentialsProvider(credentialsProvider);
-        configuration.configure(builder, awsRegionProvider, builderProvider);
-        httpClient.ifPresent(builder::httpClient);
+        configuration.configure(builder, awsRegionProvider, builderProvider, httpClient);
         return builder.build();
     }
 

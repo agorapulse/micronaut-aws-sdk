@@ -49,7 +49,7 @@ public class CloudWatchFactory {
         CloudWatchConfiguration configuration
     ) {
         return configuration
-            .configure(CloudWatchClient.builder().credentialsProvider(credentialsProvider), awsRegionProvider, builderProvider)
+            .configure(CloudWatchClient.builder().credentialsProvider(credentialsProvider), awsRegionProvider, builderProvider, Optional.empty())
             .build();
     }
 
@@ -64,8 +64,7 @@ public class CloudWatchFactory {
         Optional<SdkAsyncHttpClient> httpClient
     ) {
         CloudWatchAsyncClientBuilder builder = configuration
-            .configure(CloudWatchAsyncClient.builder().credentialsProvider(credentialsProvider), awsRegionProvider, builderProvider);
-        httpClient.ifPresent(builder::httpClient);
+            .configure(CloudWatchAsyncClient.builder().credentialsProvider(credentialsProvider), awsRegionProvider, builderProvider, httpClient);
         return builder.build();
     }
 

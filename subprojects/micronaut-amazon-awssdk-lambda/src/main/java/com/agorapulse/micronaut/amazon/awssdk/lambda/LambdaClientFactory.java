@@ -45,7 +45,7 @@ public class LambdaClientFactory {
         ClientBuilderProvider builderProvider,
         LambdaConfiguration configuration
     ) {
-        return configuration.configure(LambdaClient.builder(), awsRegionProvider, builderProvider)
+        return configuration.configure(LambdaClient.builder(), awsRegionProvider, builderProvider, Optional.empty())
             .credentialsProvider(credentialsProvider)
             .build();
     }
@@ -61,8 +61,7 @@ public class LambdaClientFactory {
         Optional<SdkAsyncHttpClient> httpClient
     ) {
         LambdaAsyncClientBuilder builder = LambdaAsyncClient.builder().credentialsProvider(credentialsProvider);
-        configuration.configure(builder, awsRegionProvider, builderProvider);
-        httpClient.ifPresent(builder::httpClient);
+        configuration.configure(builder, awsRegionProvider, builderProvider, httpClient);
         return builder.build();
     }
 

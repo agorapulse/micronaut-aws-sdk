@@ -50,7 +50,7 @@ public class DynamoDBClientsFactory {
         ClientBuilderProvider builderProvider
     ) {
         DynamoDbClientBuilder builder = DynamoDbClient.builder().credentialsProvider(awsCredentialsProvider);
-        configuration.configure(builder, awsRegionProvider, builderProvider);
+        configuration.configure(builder, awsRegionProvider, builderProvider, Optional.empty());
         return builder.build();
     }
 
@@ -65,8 +65,7 @@ public class DynamoDBClientsFactory {
         Optional<SdkAsyncHttpClient> httpClient
     ) {
         DynamoDbAsyncClientBuilder builder = DynamoDbAsyncClient.builder().credentialsProvider(awsCredentialsProvider);
-        configuration.configure(builder, awsRegionProvider, builderProvider);
-        httpClient.ifPresent(builder::httpClient);
+        configuration.configure(builder, awsRegionProvider, builderProvider, httpClient);
         return builder.build();
     }
 

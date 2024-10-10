@@ -45,7 +45,7 @@ public class SimpleNotificationServiceFactory {
         ClientBuilderProvider builderProvider,
         SimpleNotificationServiceConfiguration configuration
     ) {
-        return configuration.configure(SnsClient.builder(), awsRegionProvider, builderProvider)
+        return configuration.configure(SnsClient.builder(), awsRegionProvider, builderProvider, Optional.empty())
             .credentialsProvider(credentialsProvider)
             .build();
     }
@@ -61,8 +61,7 @@ public class SimpleNotificationServiceFactory {
         Optional<SdkAsyncHttpClient> httpClient
     ) {
         SnsAsyncClientBuilder builder = SnsAsyncClient.builder().credentialsProvider(credentialsProvider);
-        configuration.configure(builder, awsRegionProvider, builderProvider);
-        httpClient.ifPresent(builder::httpClient);
+        configuration.configure(builder, awsRegionProvider, builderProvider, httpClient);
         return builder.build();
     }
 

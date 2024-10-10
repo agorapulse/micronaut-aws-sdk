@@ -47,7 +47,7 @@ public class SimpleQueueServiceFactory {
         ClientBuilderProvider builderProvider,
         SimpleQueueServiceConfiguration configuration
     ) {
-        return configuration.configure(SqsClient.builder(), awsRegionProvider, builderProvider)
+        return configuration.configure(SqsClient.builder(), awsRegionProvider, builderProvider, Optional.empty())
             .credentialsProvider(credentialsProvider)
             .build();
     }
@@ -63,8 +63,7 @@ public class SimpleQueueServiceFactory {
         Optional<SdkAsyncHttpClient> httpClient
     ) {
         SqsAsyncClientBuilder builder = SqsAsyncClient.builder().credentialsProvider(credentialsProvider);
-        configuration.configure(builder, awsRegionProvider, builderProvider);
-        httpClient.ifPresent(builder::httpClient);
+        configuration.configure(builder, awsRegionProvider, builderProvider, httpClient);
         return builder.build();
     }
 
