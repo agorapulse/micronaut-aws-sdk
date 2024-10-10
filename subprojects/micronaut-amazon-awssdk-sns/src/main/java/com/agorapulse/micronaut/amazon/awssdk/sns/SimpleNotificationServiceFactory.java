@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.sns;
 
+import com.agorapulse.micronaut.amazon.awssdk.core.client.ClientBuilderProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.aws.sdk.v2.service.sns.SnsClientFactory;
 import io.micronaut.context.annotation.EachBean;
@@ -41,9 +42,10 @@ public class SimpleNotificationServiceFactory {
     SnsClient snsClient(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
+        ClientBuilderProvider builderProvider,
         SimpleNotificationServiceConfiguration configuration
     ) {
-        return configuration.configure(SnsClient.builder(), awsRegionProvider)
+        return configuration.configure(SnsClient.builder(), awsRegionProvider, builderProvider, Optional.empty())
             .credentialsProvider(credentialsProvider)
             .build();
     }
@@ -54,12 +56,12 @@ public class SimpleNotificationServiceFactory {
     SnsAsyncClient snsAsyncClient(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
+        ClientBuilderProvider builderProvider,
         SimpleNotificationServiceConfiguration configuration,
         Optional<SdkAsyncHttpClient> httpClient
     ) {
         SnsAsyncClientBuilder builder = SnsAsyncClient.builder().credentialsProvider(credentialsProvider);
-        configuration.configure(builder, awsRegionProvider);
-        httpClient.ifPresent(builder::httpClient);
+        configuration.configure(builder, awsRegionProvider, builderProvider, httpClient);
         return builder.build();
     }
 

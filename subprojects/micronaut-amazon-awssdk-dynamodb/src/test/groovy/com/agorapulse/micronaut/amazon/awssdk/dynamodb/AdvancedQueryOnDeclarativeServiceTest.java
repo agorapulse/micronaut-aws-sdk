@@ -17,6 +17,8 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
+import com.agorapulse.micronaut.amazon.awssdk.core.client.ClientBuilderProvider;
+import io.micronaut.context.annotation.Property;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
@@ -31,6 +33,8 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.*;
 
 @MicronautTest
+@Property(name = "aws.dynamodb.client", value = ClientBuilderProvider.AWS_CRT)
+@Property(name = "aws.dynamodb.async-client", value = ClientBuilderProvider.AWS_CRT)
 public class AdvancedQueryOnDeclarativeServiceTest {
 
     private static final Instant REFERENCE_DATE = Instant.ofEpochMilli(1358487600000L);

@@ -86,3 +86,27 @@ aws:
     endpoint: http://localhost:8000
 ----
 
+The same service can also be configured with different https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/http-configuration.html[HTTP client] settings when using AWS SDK 2.x.:
+
+[source,yaml]
+----
+aws:
+  dynamodb:
+    # can be url-connection or aws-crt, apache is the default
+    client: url-connection
+    # can be aws-crt, netty is the default
+    async-client: aws-crt
+----
+
+The client libraries must be added to the classpath. For example for Gradle add the following dependencies:
+
+```groovy
+dependencies {
+    runtimeOnly "software.amazon.awssdk:aws-crt-client:$awsSdk2Version"
+    runtimeOnly "software.amazon.awssdk:url-connection-client:$awsSdk2Version"
+    runtimeOnly "software.amazon.awssdk:netty-nio-client:$awsSdk2Version"
+    runtimeOnly "software.amazon.awssdk:apache-client:$awsSdk2Version"
+}
+```
+
+

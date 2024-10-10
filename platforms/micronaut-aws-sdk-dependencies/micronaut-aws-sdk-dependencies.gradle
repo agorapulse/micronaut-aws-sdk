@@ -55,6 +55,12 @@ dependencies {
         api "software.amazon.awssdk:sts:$project.awsSdk2Version"
         api "software.amazon.awssdk:aws-query-protocol:$project.awsSdk2Version"
 
+        // HTTP clients
+        api "software.amazon.awssdk:aws-crt-client:$project.awsSdk2Version"
+        api "software.amazon.awssdk:url-connection-client:$project.awsSdk2Version"
+        api "software.amazon.awssdk:netty-nio-client:$project.awsSdk2Version"
+        api "software.amazon.awssdk:apache-client:$project.awsSdk2Version"
+
         api group: 'com.amazonaws', name: 'amazon-dax-client', version: '1.0.230341.0'
         api group: 'com.amazonaws', name: 'aws-lambda-java-events', version: awsLambdaEventsVersion
         api group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-cbor', version: project['jackson.datatype.version']
