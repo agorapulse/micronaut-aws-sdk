@@ -100,13 +100,21 @@ aws:
 
 The client libraries must be added to the classpath. For example for Gradle add the following dependencies:
 
-```groovy
+[source,groovy]
+----
 dependencies {
     runtimeOnly "software.amazon.awssdk:aws-crt-client:$awsSdk2Version"
     runtimeOnly "software.amazon.awssdk:url-connection-client:$awsSdk2Version"
     runtimeOnly "software.amazon.awssdk:netty-nio-client:$awsSdk2Version"
     runtimeOnly "software.amazon.awssdk:apache-client:$awsSdk2Version"
 }
-```
+----
 
+The particular client builder can be then configured using `BeanCreatedEventListener` beans:
+
+[source,java,indent=0,options="nowrap"]
+.NettyClientCustomizer
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-core/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/core/client/NettyClientCustomizer.java[tags=customizer]
+----
 

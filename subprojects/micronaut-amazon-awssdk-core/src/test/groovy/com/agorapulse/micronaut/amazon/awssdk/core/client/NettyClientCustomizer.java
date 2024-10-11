@@ -17,22 +17,23 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.core.client;
 
-import io.micronaut.context.annotation.Bean;
-import io.micronaut.context.annotation.Factory;
-import io.micronaut.context.annotation.Requires;
-import jakarta.inject.Named;
+import io.micronaut.context.event.BeanCreatedEvent;
+import io.micronaut.context.event.BeanCreatedEventListener;
+import io.micronaut.core.annotation.NonNull;
 import jakarta.inject.Singleton;
-import software.amazon.awssdk.http.apache.ApacheHttpClient;
+import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient;
 
-@Factory
-@Requires(classes = ApacheHttpClient.class)
-public class ApacheHttpClientBuilderFactory {
+import java.time.Duration;
 
-    @Bean
-    @Singleton
-    @Named("apache")
-    public ApacheHttpClient.Builder awsCrtHttpClientBuilder() {
-        return ApacheHttpClient.builder();
+// tag::customizer[]
+@Singleton
+public class NettyClientCustomizer implements BeanCreatedEventListener<NettyNioAsyncHttpClient.Builder> {
+
+    @Override
+    public NettyNioAsyncHttpClient.Builder onCreated(@NonNull BeanCreatedEvent<NettyNioAsyncHttpClient.Builder> event) {
+        event.getBean().readTimeout(Duration.ofSeconds(10));
+        return event.getBean();
     }
 
 }
+// end::customizer[]

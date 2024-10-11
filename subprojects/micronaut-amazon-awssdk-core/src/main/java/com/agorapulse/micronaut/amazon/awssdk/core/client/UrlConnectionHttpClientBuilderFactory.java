@@ -22,7 +22,6 @@ import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
-import software.amazon.awssdk.http.SdkHttpClient;
 import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 
 @Factory
@@ -32,7 +31,7 @@ public class UrlConnectionHttpClientBuilderFactory {
     @Bean
     @Singleton
     @Named("url-connection")
-    public SdkHttpClient.Builder<UrlConnectionHttpClient.Builder> awsCrtHttpClientBuilder() {
+    public UrlConnectionHttpClient.Builder awsCrtHttpClientBuilder() {
         return UrlConnectionHttpClient.builder();
     }
 

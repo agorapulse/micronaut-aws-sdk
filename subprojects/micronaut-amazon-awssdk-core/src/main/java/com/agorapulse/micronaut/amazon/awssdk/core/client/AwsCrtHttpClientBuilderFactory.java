@@ -22,8 +22,6 @@ import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
-import software.amazon.awssdk.http.SdkHttpClient;
-import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
 import software.amazon.awssdk.http.crt.AwsCrtAsyncHttpClient;
 import software.amazon.awssdk.http.crt.AwsCrtHttpClient;
 
@@ -34,14 +32,14 @@ public class AwsCrtHttpClientBuilderFactory {
     @Bean
     @Singleton
     @Named("aws-crt")
-    public SdkAsyncHttpClient.Builder<AwsCrtAsyncHttpClient.Builder> awsCrtHttpAsyncClientBuilder() {
+    public AwsCrtAsyncHttpClient.Builder awsCrtHttpAsyncClientBuilder() {
         return AwsCrtAsyncHttpClient.builder();
     }
 
     @Bean
     @Singleton
     @Named("aws-crt")
-    public SdkHttpClient.Builder<AwsCrtHttpClient.Builder> awsCrtHttpClientBuilder() {
+    public AwsCrtHttpClient.Builder awsCrtHttpClientBuilder() {
         return AwsCrtHttpClient.builder();
     }
 
