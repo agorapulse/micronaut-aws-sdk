@@ -51,13 +51,13 @@ public interface RegionAndEndpointConfiguration {
             }
         }
 
-        if (getClient() != null && builder instanceof SdkSyncClientBuilder<?,?> clientBuilder) {
+        if (getClient() != null && builder instanceof SdkSyncClientBuilder<?, ?> clientBuilder) {
             builderProvider.findHttpClientBuilder(getClient()).ifPresent(clientBuilder::httpClientBuilder);
         }
 
-        if (getAsyncClient() != null && builder instanceof AwsAsyncClientBuilder<?,?> clientBuilder) {
+        if (getAsyncClient() != null && builder instanceof AwsAsyncClientBuilder<?, ?> clientBuilder) {
             builderProvider.findAsyncHttpClientBuilder(getClient()).ifPresent(clientBuilder::httpClientBuilder);
-        } else if (httpClient.isPresent() && builder instanceof AwsAsyncClientBuilder<?,?> clientBuilder) {
+        } else if (httpClient.isPresent() && builder instanceof AwsAsyncClientBuilder<?, ?> clientBuilder) {
             clientBuilder.httpClient(httpClient.get());
         }
 
