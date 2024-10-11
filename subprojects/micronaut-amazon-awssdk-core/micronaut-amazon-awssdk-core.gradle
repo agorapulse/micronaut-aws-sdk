@@ -17,4 +17,15 @@
  */
 dependencies {
     api 'software.amazon.awssdk:aws-core'
+
+    // HTTP clients
+    compileOnly "software.amazon.awssdk:aws-crt-client:$project.awsSdk2Version"
+    compileOnly "software.amazon.awssdk:url-connection-client:$project.awsSdk2Version"
+    compileOnly "software.amazon.awssdk:netty-nio-client:$project.awsSdk2Version"
+    compileOnly "software.amazon.awssdk:apache-client:$project.awsSdk2Version"
+
+    testImplementation "software.amazon.awssdk:aws-crt-client:$project.awsSdk2Version"
+    testImplementation "software.amazon.awssdk:url-connection-client:$project.awsSdk2Version"
+    testImplementation "software.amazon.awssdk:netty-nio-client:$project.awsSdk2Version"
+    testImplementation "software.amazon.awssdk:apache-client:$project.awsSdk2Version"
 }
