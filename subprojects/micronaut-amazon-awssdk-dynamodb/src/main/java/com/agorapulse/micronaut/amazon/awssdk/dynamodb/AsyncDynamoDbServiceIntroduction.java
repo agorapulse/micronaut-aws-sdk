@@ -70,6 +70,22 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
         this.conversionService = conversionService;
     }
 
+    @Override
+    public <T> Object doIntercept(MethodInvocationContext<Object, Object> context, Class<T> type, String tableName) {
+        AsyncDynamoDbService<T> service = provider.findOrCreate(tableName, type);
+
+        try {
+            return doIntercept(context, service);
+        } catch (ResourceNotFoundException ignored) {
+            return unwrapIfRequired(Flux.from(service.createTable()).map(t -> doIntercept(context, service)), context.getReturnType().getType());
+        }
+    }
+
+    private static void logTypeConversionFailure(Class<?> type, Object result) {
+        String message = "Cannot convert value %s to type %s".formatted(result, type);
+        LOGGER.warn(message, result, type, new IllegalArgumentException(message));
+    }
+
     @SuppressWarnings("unchecked")
     private <T> Publisher<T> toPublisher(Class<T> type, Argument<?> itemArgument, Map<String, MutableArgumentValue<?>> params) {
         Object item = params.get(itemArgument.getName()).getValue();
@@ -90,17 +106,6 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
         }
 
         return Flux.just((T) item);
-    }
-
-    @Override
-    public <T> Object doIntercept(MethodInvocationContext<Object, Object> context, Class<T> type, String tableName) {
-        AsyncDynamoDbService<T> service = provider.findOrCreate(tableName, type);
-
-        try {
-            return doIntercept(context, service);
-        } catch (ResourceNotFoundException ignored) {
-            return unwrapIfRequired(Flux.from(service.createTable()).map(t -> doIntercept(context, service)), context.getReturnType().getType());
-        }
     }
 
     private <T> Object doIntercept(MethodInvocationContext<Object, Object> context, AsyncDynamoDbService<T> service) {
@@ -205,14 +210,24 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
         if (Number.class.isAssignableFrom(type) || type.isPrimitive() && !boolean.class.isAssignableFrom(type)) {
             if (Publishers.isSingle(publisher.getClass())) {
                 Object result = Mono.from(publisher).block();
+
+                if (result == null) {
+                    return 0;
+                }
+
                 return conversionService.convert(result, type).orElseGet(() -> {
-                    LOGGER.warn("Cannot convert value {} to type {}", result, type);
+                    logTypeConversionFailure(type, result);
                     return 0;
                 });
             }
             Long count = Flux.from(publisher).count().block();
+
+            if (count == null) {
+                return 0;
+            }
+
             return conversionService.convert(count, type).orElseGet(() -> {
-                LOGGER.warn("Cannot convert value {} to type {}", count, type);
+                logTypeConversionFailure(type, count);
                 return 0;
             });
         }
@@ -222,8 +237,13 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
         }
 
         Object value = Mono.from(publisher).block();
+
+        if (value == null) {
+            return null;
+        }
+
         return conversionService.convert(value, type).orElseGet(() -> {
-            LOGGER.warn("Cannot convert value {} to type {}", value, type);
+            logTypeConversionFailure(type, value);
             return null;
         });
     }
