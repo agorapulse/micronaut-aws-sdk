@@ -23,6 +23,7 @@ dependencies {
     implementation "space.jasan:groovy-closure-support:$closureSupportVersion"
     implementation 'io.micronaut.validation:micronaut-validation'
     implementation 'io.micronaut:micronaut-jackson-databind'
+    implementation 'io.micronaut.reactor:micronaut-reactor'
 
     testImplementation project(':micronaut-amazon-awssdk-integration-testing')
 }

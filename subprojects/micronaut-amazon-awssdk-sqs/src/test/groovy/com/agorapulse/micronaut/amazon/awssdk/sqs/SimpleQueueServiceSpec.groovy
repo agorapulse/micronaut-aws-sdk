@@ -19,6 +19,7 @@ package com.agorapulse.micronaut.amazon.awssdk.sqs
 
 import io.micronaut.context.annotation.Property
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
+import reactor.core.publisher.Flux
 import software.amazon.awssdk.services.sqs.model.Message
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName
 import spock.lang.Retry
@@ -73,6 +74,21 @@ class SimpleQueueServiceSpec extends Specification {
             service.deleteMessage(messages.first().receiptHandle())
         then:
             !service.receiveMessages()
+
+        when:
+            List<String> messageIds = Flux.from(service.sendMessages(Flux.just(DATA).repeat(11))).collectList().block()
+        and:
+            List<Message> firstBatch = service.receiveMessages(10)
+        then:
+            messageIds.size() == 12
+            firstBatch.size() == 10
+
+        when:
+            firstBatch.forEach { m -> service.deleteMessage(m.receiptHandle()) }
+        and:
+            List<Message> secondBatch = service.receiveMessages(10)
+        then:
+            secondBatch.size() == 2
 
         when:
             service.deleteQueue(TEST_QUEUE)

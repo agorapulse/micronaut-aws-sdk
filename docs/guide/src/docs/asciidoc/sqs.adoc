@@ -92,7 +92,9 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-sqs/src/test/groovy/com/
 <6> You can publish a string with custom delay
 <7> You can publish a string with custom FIFO queue group
 <8> You can publish a string with custom delay and FIFO queue group
-<9> You can delete published message using the message ID if the
+<9> You can send multiple messages at once when the argument is `Publisher`
+<10> If the return type is also publisher type then **you need to subscribe to the publisher to actually send the messages**
+<11> You can delete published message using the message ID if the
 
 [source,java,indent=0,options="nowrap",role="secondary"]
 .Publishing String Records (AWS SDK 1.x)

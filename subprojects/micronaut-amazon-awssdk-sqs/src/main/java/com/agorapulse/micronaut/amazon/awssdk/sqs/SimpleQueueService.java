@@ -17,8 +17,10 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.sqs;
 
+import org.reactivestreams.Publisher;
 import software.amazon.awssdk.services.sqs.model.Message;
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
+import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequestEntry;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 
 import java.util.List;
@@ -288,4 +290,86 @@ public interface SimpleQueueService {
      * @return message id
      */
     String sendMessage(String queueName, String messageBody, Consumer<SendMessageRequest.Builder> messageConfiguration);
+
+    /**
+     * Send message immediately
+     * @param queueName the name of the queue
+     * @param messageBodies the message bodies to be sent
+     * @return the publisher of message ids that must be subscribed in order to send the messages
+     */
+    default Publisher<String> sendMessages(String queueName, Publisher<String> messageBodies) {
+        return sendMessages(queueName, messageBodies, 0);
+    }
+
+    /**
+     * Send message with given delay.
+     * @param queueName the name of the queue
+     * @param messageBodies the message bodies to be sent
+     * @param delaySeconds the delay in seconds
+     * @param groupId group id for FIFO queues
+     * @return the publisher of message ids that must be subscribed in order to send the messages
+     */
+    Publisher<String> sendMessages(String queueName, Publisher<String> messageBodies, int delaySeconds, String groupId);
+
+    /**
+     * Send message with given delay.
+     * @param queueName the name of the queue
+     * @param messageBodies the message bodies to be sent
+     * @param delaySeconds the delay in seconds
+     * @return the publisher of message ids that must be subscribed in order to send the messages
+     */
+    default Publisher<String> sendMessages(String queueName, Publisher<String> messageBodies, int delaySeconds) {
+        return sendMessages(queueName, messageBodies, delaySeconds, null);
+    }
+
+    /**
+     * Send message in default queue immediately
+     * @param messageBodies the message bodies to be sent
+     * @return the publisher of message ids that must be subscribed in order to send the messages
+     */
+    default Publisher<String> sendMessages(Publisher<String> messageBodies) {
+        return sendMessages(getDefaultQueueName(), messageBodies);
+    }
+
+    /**
+     * Send message in the default queue with given delay.
+     * @param messageBodies the message bodies to be sent
+     * @param delaySeconds the delay in seconds
+     * @return the publisher of message ids that must be subscribed in order to send the messages
+     */
+    default Publisher<String> sendMessages(Publisher<String> messageBodies, int delaySeconds) {
+        return sendMessages(getDefaultQueueName(), messageBodies, delaySeconds);
+    }
+
+    /**
+     * Send message with given delay.
+     * @param messageBodies the message bodies to be sent
+     * @param delaySeconds the delay in seconds
+     * @param groupId group id for FIFO queues
+     * @return the publisher of message ids that must be subscribed in order to send the messages
+     */
+    default Publisher<String> sendMessage(Publisher<String> messageBodies, int delaySeconds, String groupId) {
+        return sendMessages(getDefaultQueueName(), messageBodies, delaySeconds, groupId);
+    }
+
+    /**
+     * Sends message with additional configuration into the default queue.
+     * @param messageBodies the message bodies to be sent
+     * @param messageConfiguration additional configuration
+     * @return the publisher of message ids that must be subscribed in order to send the messages
+     */
+    default Publisher<String> sendMessages(Publisher<String> messageBodies, Consumer<SendMessageBatchRequestEntry.Builder> messageConfiguration) {
+        return sendMessages(getDefaultQueueName(), messageBodies, messageConfiguration);
+    }
+
+    /**
+     * Sends message with additional configuration into the given queue.
+     * @param queueName name of the queue
+     * @param messageBodies the message bodies to be sent
+     * @param messageConfiguration additional configuration
+     * @return the publisher of message ids that must be subscribed in order to send the messages
+     */
+    Publisher<String> sendMessages(String queueName, Publisher<String> messageBodies, Consumer<SendMessageBatchRequestEntry.Builder> messageConfiguration);
+
+
 }

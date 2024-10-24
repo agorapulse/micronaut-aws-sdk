@@ -28,9 +28,12 @@ import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.context.BeanContext;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.annotation.AnnotationValue;
+import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.qualifiers.Qualifiers;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException;
 
@@ -108,7 +111,7 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
     }
 
     private Object doIntercept(MethodInvocationContext<Object, Object> context, SimpleQueueService service, String queueName, String group, Integer delay) {
-        Argument[] arguments = context.getArguments();
+        Argument<?>[] arguments = context.getArguments();
         Map<String, Object> params = context.getParameterValueMap();
 
         if (arguments.length == 1 && context.getMethodName().startsWith("delete")) {
@@ -141,6 +144,27 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
                 return service.sendMessage(queueName, new String((byte[]) message), delay, group);
             }
 
+            if (Publisher.class.isAssignableFrom(messageType)) {
+                Publisher<String> messageIdsPublisher;
+
+                if (queueArguments.message.getTypeParameters()[0].equalsType(Argument.STRING)) {
+                     messageIdsPublisher = service.sendMessages(queueName, (Publisher<String>) message, delay, group);
+                } else {
+                     messageIdsPublisher = service.sendMessages(queueName, Flux.from((Publisher<?>) message).map(this::convertMessageToJson), delay, group);
+                }
+
+                if (context.getReturnType().asArgument().isVoid()) {
+                    Flux.from(messageIdsPublisher).subscribe();
+                    return null;
+                }
+
+                if (Publishers.isConvertibleToPublisher(context.getReturnType().getType())) {
+                    return Publishers.convertPublisher(beanContext.getConversionService(), messageIdsPublisher, context.getReturnType().getType());
+                }
+
+                return beanContext.getConversionService().convert(messageIdsPublisher, context.getReturnType().getType());
+            }
+
             return sendJson(service, queueName, message, delay, group);
         }
 
@@ -148,8 +172,12 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
     }
 
     private String sendJson(SimpleQueueService service, String queueName, Object message, int delay, String group) {
+        return service.sendMessage(queueName, convertMessageToJson(message), delay, group);
+    }
+
+    private String convertMessageToJson(Object message) {
         try {
-            return service.sendMessage(queueName, objectMapper.writeValueAsString(message), delay, group);
+            return objectMapper.writeValueAsString(message);
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException("Failed to marshal " + message + " to JSON", e);
         }
