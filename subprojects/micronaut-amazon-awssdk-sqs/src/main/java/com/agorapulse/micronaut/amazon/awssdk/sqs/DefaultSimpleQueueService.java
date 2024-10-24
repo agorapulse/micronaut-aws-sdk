@@ -18,8 +18,10 @@
 package com.agorapulse.micronaut.amazon.awssdk.sqs;
 
 import io.micronaut.core.util.StringUtils;
+import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.sqs.SqsClient;
@@ -278,6 +280,54 @@ public class DefaultSimpleQueueService implements SimpleQueueService {
         return messageId;
     }
 
+    @Override
+    public Publisher<String> sendMessages(String queueName, Publisher<String> messageBodies, int delaySeconds, String groupId) {
+        String queueUrl = getQueueUrl(queueName);
+
+        return Flux.from(messageBodies).map(messageBody -> {
+            SendMessageBatchRequestEntry.Builder request = SendMessageBatchRequestEntry
+                .builder()
+                .id(UUID.randomUUID().toString())
+                .messageBody(messageBody);
+
+            if (delaySeconds > 0) {
+                request.delaySeconds(delaySeconds);
+            }
+
+            if (StringUtils.isNotEmpty(groupId)) {
+                request.messageGroupId(groupId);
+            }
+
+            return request.build();
+        }).buffer(10).map(batch -> {
+            SendMessageBatchRequest.Builder request = SendMessageBatchRequest.builder().queueUrl(queueUrl).entries(batch);
+            SendMessageBatchResponse response = client.sendMessageBatch(request.build());
+            return response.successful().stream().map(SendMessageBatchResultEntry::messageId).toList();
+        }).flatMap(Flux::fromIterable);
+    }
+
+    @Override
+    public Publisher<String> sendMessages(String queueName, Publisher<String> messageBodies, Consumer<SendMessageBatchRequestEntry.Builder> messageConfiguration) {
+        String queueUrl = getQueueUrl(queueName);
+
+        return Flux.from(messageBodies).map(messageBody -> {
+            SendMessageBatchRequestEntry.Builder request = SendMessageBatchRequestEntry.builder().messageBody(messageBody);
+            messageConfiguration.accept(request);
+            return request.build();
+        }).buffer(10).flatMap(batch -> Flux.<List<String>>generate(synchronousSink -> {
+            SendMessageBatchRequest.Builder request = SendMessageBatchRequest.builder().queueUrl(queueUrl).entries(batch);
+            SendMessageBatchResponse response = client.sendMessageBatch(request.build());
+            if (response.failed().isEmpty()) {
+                synchronousSink.next(response.successful().stream().map(SendMessageBatchResultEntry::messageId).toList());
+                synchronousSink.complete();
+            } else {
+                synchronousSink.error(new IllegalArgumentException("Following messages were not sent:\n" + response.failed().stream().map(e ->
+                    String.format("Message %s failed with code %s and message %s%n", e.id(), e.code(), e.message())
+                ).toList()));
+            }
+        })).flatMap(Flux::fromIterable);
+    }
+
     /**
      * @param queueName
      * @param messageBody
@@ -319,9 +369,7 @@ public class DefaultSimpleQueueService implements SimpleQueueService {
             throw new IllegalStateException("Queue URL cannot be null or empty");
         }
 
-        synchronized (queueUrlByNames) {
-            queueUrlByNames.put(getQueueNameFromUrl(queueUrl),  queueUrl);
-        }
+        queueUrlByNames.put(getQueueNameFromUrl(queueUrl),  queueUrl);
     }
 
     private void loadQueues() {
@@ -340,10 +388,8 @@ public class DefaultSimpleQueueService implements SimpleQueueService {
                 )
             );
 
-        synchronized (queueUrlByNames) {
             queueUrlByNames.clear();
             queueUrlByNames.putAll(queueUrls);
-        }
     }
 
     private void removeQueue(String queueUrl) {
@@ -351,9 +397,7 @@ public class DefaultSimpleQueueService implements SimpleQueueService {
             throw new IllegalStateException("Queue URL cannot be null or empty");
         }
 
-        synchronized (queueUrlByNames) {
-            queueUrlByNames.remove(getQueueNameFromUrl(queueUrl));
-        }
+        queueUrlByNames.remove(getQueueNameFromUrl(queueUrl));
     }
 
 }
