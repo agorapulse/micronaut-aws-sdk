@@ -31,6 +31,11 @@ dependencies {
     testImplementation project(':micronaut-amazon-awssdk-integration-testing')
     testImplementation 'io.micronaut.rxjava2:micronaut-rxjava2'
     testImplementation 'io.micronaut:micronaut-jackson-databind'
+
+    testImplementation "software.amazon.awssdk:aws-crt-client:$project.awsSdk2Version"
+    testImplementation "software.amazon.awssdk:url-connection-client:$project.awsSdk2Version"
+    testImplementation "software.amazon.awssdk:netty-nio-client:$project.awsSdk2Version"
+    testImplementation "software.amazon.awssdk:apache-client:$project.awsSdk2Version"
 }
 
 if (project.findProperty('test.aws.dynamodb.v2') == 'async') {
