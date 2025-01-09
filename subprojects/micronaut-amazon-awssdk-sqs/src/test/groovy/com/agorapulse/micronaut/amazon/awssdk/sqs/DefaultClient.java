@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2018-2024 Agorapulse.
+ * Copyright 2018-2025 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package com.agorapulse.micronaut.amazon.awssdk.sqs;
 
 import com.agorapulse.micronaut.amazon.awssdk.sqs.annotation.Queue;
 import com.agorapulse.micronaut.amazon.awssdk.sqs.annotation.QueueClient;
+import org.reactivestreams.Publisher;
 
 @QueueClient                                                                            // <1>
 interface DefaultClient {
@@ -38,7 +39,11 @@ interface DefaultClient {
 
     String sendMessage(String record, int delay, String group);                         // <8>
 
-    void deleteMessage(String messageId);                                               // <9>
+    void sendStringMessages(Publisher<String> messages);                                // <9>
+
+    Publisher<String> sendMessages(Publisher<Pogo> messages);                           // <10>
+
+    void deleteMessage(String messageId);                                               // <11>
 
     String OTHER_QUEUE = "OtherQueue";
 }

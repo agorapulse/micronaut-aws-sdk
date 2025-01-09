@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2018-2024 Agorapulse.
+ * Copyright 2018-2025 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.cloudwatchlogs;
 
+import com.agorapulse.micronaut.amazon.awssdk.core.client.ClientBuilderProvider;
 import io.micronaut.aws.sdk.v2.service.cloudwatchlogs.CloudwatchLogsClientFactory;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
@@ -47,10 +48,11 @@ public class CloudWatchLogsFactory {
     CloudWatchLogsClient cloudWatchLogs(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
+        ClientBuilderProvider builderProvider,
         CloudWatchLogsConfiguration configuration
     ) {
         return configuration
-            .configure(CloudWatchLogsClient.builder().credentialsProvider(credentialsProvider), awsRegionProvider)
+            .configure(CloudWatchLogsClient.builder().credentialsProvider(credentialsProvider), awsRegionProvider, builderProvider, Optional.empty())
             .build();
     }
 
@@ -61,12 +63,12 @@ public class CloudWatchLogsFactory {
     CloudWatchLogsAsyncClient cloudWatchAsync(
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
+        ClientBuilderProvider builderProvider,
         CloudWatchLogsConfiguration configuration,
         Optional<SdkAsyncHttpClient> httpClient
     ) {
         CloudWatchLogsAsyncClientBuilder builder = configuration
-            .configure(CloudWatchLogsAsyncClient.builder().credentialsProvider(credentialsProvider), awsRegionProvider);
-        httpClient.ifPresent(builder::httpClient);
+            .configure(CloudWatchLogsAsyncClient.builder().credentialsProvider(credentialsProvider), awsRegionProvider, builderProvider, httpClient);
         return builder.build();
     }
 

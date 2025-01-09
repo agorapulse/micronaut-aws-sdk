@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2018-2024 Agorapulse.
+ * Copyright 2018-2025 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.kinesis;
 
+import com.agorapulse.micronaut.amazon.awssdk.core.client.ClientBuilderProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.EachBean;
@@ -42,9 +43,10 @@ public class KinesisFactory {
     KinesisClient kinesis(
         KinesisConfiguration configuration,
         AwsCredentialsProvider credentialsProvider,
-        AwsRegionProvider awsRegionProvider
+        AwsRegionProvider awsRegionProvider,
+        ClientBuilderProvider builderProvider
     ) {
-        return configuration.configure(KinesisClient.builder(), awsRegionProvider)
+        return configuration.configure(KinesisClient.builder(), awsRegionProvider, builderProvider, Optional.empty())
             .credentialsProvider(credentialsProvider)
             .build();
     }
@@ -56,11 +58,11 @@ public class KinesisFactory {
         KinesisConfiguration configuration,
         AwsCredentialsProvider credentialsProvider,
         AwsRegionProvider awsRegionProvider,
+        ClientBuilderProvider builderProvider,
         Optional<SdkAsyncHttpClient> httpClient
     ) {
         KinesisAsyncClientBuilder builder = KinesisAsyncClient.builder().credentialsProvider(credentialsProvider);
-        configuration.configure(builder, awsRegionProvider);
-        httpClient.ifPresent(builder::httpClient);
+        configuration.configure(builder, awsRegionProvider, builderProvider, httpClient);
         return builder.build();
     }
 

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2018-2024 Agorapulse.
+ * Copyright 2018-2025 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,25 @@ public class DefaultRegionAndEndpointConfiguration implements RegionAndEndpointC
         this.endpoint = endpoint;
     }
 
+    public String getClient() {
+        return client;
+    }
+
+    public void setClient(String client) {
+        this.client = client;
+    }
+
+    public String getAsyncClient() {
+        return asyncClient;
+    }
+
+    public void setAsyncClient(String asyncClient) {
+        this.asyncClient = asyncClient;
+    }
+
     @Nullable private String region;
     @Nullable private String endpoint;
+    @Nullable private String client;
+    @Nullable private String asyncClient;
 
 }

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2018-2024 Agorapulse.
+ * Copyright 2018-2025 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ package com.agorapulse.micronaut.amazon.awssdk.sqs
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.micronaut.context.ApplicationContext
 import io.micronaut.inject.qualifiers.Qualifiers
+import org.reactivestreams.Publisher
+import reactor.core.publisher.Flux
 import spock.lang.AutoCleanup
 import spock.lang.Specification
 
@@ -144,6 +146,29 @@ class QueueClientSpec extends Specification {
             id == ID
 
             1 * defaultService.sendMessage(DEFAULT_QUEUE_NAME, MESSAGE, DELAY, GROUP) >> ID
+    }
+
+    void 'can send multiple messages when publisher is a parameter'() {
+        given:
+            List<String> ids = [ID + 1, ID + 2, ID + 3]
+            DefaultClient client = context.getBean(DefaultClient)
+
+        when:
+            Publisher<String> messages = client.sendMessages(Flux.just(POGO, POGO, POGO))
+
+        then:
+            Flux.from(messages).collectList().block() == ids
+
+            1 * defaultService.sendMessages(DEFAULT_QUEUE_NAME, _ as Publisher, 0, null) >> Flux.just(ID + 1, ID + 2, ID + 3)
+    }
+
+    void 'can send multiple string messages and return void'() {
+        given:
+            DefaultClient client = context.getBean(DefaultClient)
+        when:
+            client.sendStringMessages(Flux.just(MESSAGE, MESSAGE, MESSAGE))
+        then:
+            1 * defaultService.sendMessages(DEFAULT_QUEUE_NAME, _ as Publisher, 0, null) >> Flux.just(ID + 1, ID + 2, ID + 3)
     }
 
     void 'needs to follow the method convention rules'() {

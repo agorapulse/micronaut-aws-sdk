@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2018-2024 Agorapulse.
+ * Copyright 2018-2025 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb
 
+import com.agorapulse.micronaut.amazon.awssdk.core.client.ClientBuilderProvider
+import io.micronaut.context.annotation.Property
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import io.reactivex.Flowable
 import spock.lang.Specification
@@ -27,6 +29,8 @@ import jakarta.inject.Inject
  * Specification for testing DefaultDynamoDBService using entity with no range key.
  */
 @MicronautTest
+@Property(name = 'aws.dynamodb.client', value = ClientBuilderProvider.URL_CONNECTION)
+@Property(name = 'aws.dynamodb.async-client', value = ClientBuilderProvider.NETTY)
 class DefaultDynamoDBServiceNoRangeSpec extends Specification {
 
     @Inject DynamoDBEntityNoRangeService service
