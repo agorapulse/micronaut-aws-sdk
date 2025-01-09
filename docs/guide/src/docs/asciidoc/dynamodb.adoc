@@ -607,7 +607,7 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy
 <5> Specify some range key criteria with the method's `rangeKey` argument (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
 <6> You can limit which properties are returned from the query
 <7> Only `rangeIndex` property will be populated in the entities returned
-<8> The arguments have no special meaning but you can use them in the query. The method must return either `Publisher` or `List` of entities.
+<8> The arguments have no special meaning but you can use them in the query. The method must return either `Publisher`, `Stream` or `Iterable` of entities.
 
 [source,java,indent=0,options="nowrap",role="secondary"]
 .Java
@@ -626,7 +626,7 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy
 <4> Specify some range key criteria with the method's `rangeKey` argument (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
 <5> Only `rangeIndex` property will be populated in the entities returned
 <6> `@Query` annotation accepts a class which implements `Function<Map<String, Object>, DetachedQuery>`
-<7> The arguments have no special meaning but you can use them in the query using `arguments` map. The method must return either `Publisher` or `List` of entities.
+<7> The arguments have no special meaning but you can use them in the query using `arguments` map. The method must return either `Publisher`, `Stream` or `List` of entities.
 
 
 [source,kotlin,indent=0,options="nowrap",role="secondary"]
@@ -647,7 +647,7 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test
 <4> Specify some range key criteria with the method's `rangeKey` argument (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
 <5> Only `rangeIndex` property will be populated in the entities returned
 <6> `@Query` annotation accepts a class which implements `Function<Map<String, Object>, DetachedQuery>`
-<7> The arguments have no special meaning but you can use them in the query using `arguments` map. The method must return either `Publisher` or `List` of entities.
+<7> The arguments have no special meaning but you can use them in the query using `arguments` map. The method must return either `Publisher`, `Stream` or `List` of entities.
 
 
 [source,groovy,indent=0,options="nowrap",role="secondary"]
@@ -665,7 +665,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/a
 <5> Specify some range key criteria with the method's `rangeKey` argument (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
 <6> You can limit which properties are returned from the query
 <7> Only `rangeIndex` property will be populated in the entities returned
-<8> The arguments have no special meaning but you can use them in the query. The method must return either `Publisher` or `List` of entities.
+<8> The arguments have no special meaning but you can use them in the query. The method must return either `Publisher`, `Stream` or `List` of entities.
 
 ===== Scanning
 
@@ -690,7 +690,7 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy
 <2> Annotate an interface with `@Service` with the type of the entity as its `value`
 <3> `@Scan` annotation accepts a closure which returns a scan builder (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/ScanBuilder.html[ScanBuilder] for full reference)
 <4> Specify some filter criteria with the method's `foo` argument (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
-<5> The arguments have no special meaning but you can use them in the scan definition. The method must return either `Publisher` or `List` of entities.
+<5> The arguments have no special meaning but you can use them in the scan definition. The method must return either `Publisher`, `Stream` or `List` of entities.
 
 
 [source,java,indent=0,options="nowrap",role="secondary"]
@@ -708,7 +708,7 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy
 <2> Define class which implements `ScanFunction`
 <3> Specify some filter criteria with the method's `foo` argument (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
 <4> `@Scan` annotation accepts a class which implements `Function<Map<String, Object>, DetachedScan>`
-<5> The arguments have no special meaning but you can use them in the scan definition. The method must return either `Publisher` or `List` of entities.
+<5> The arguments have no special meaning but you can use them in the scan definition. The method must return either `Publisher`, `Stream` or `List` of entities.
 
 [source,kotlin,indent=0,options="nowrap",role="secondary"]
 .Kotlin
@@ -725,7 +725,7 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test
 <2> Define class which implements `ScanFunction`
 <3> Specify some filter criteria with the method's `foo` argument (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
 <4> `@Scan` annotation accepts a class which implements `Function<Map<String, Object>, DetachedScan>`
-<5> The arguments have no special meaning but you can use them in the scan definition. The method must return either `Publisher` or `List` of entities.
+<5> The arguments have no special meaning but you can use them in the scan definition. The method must return either `Publisher`, `Stream` or `List` of entities.
 
 [source,groovy,indent=0,options="nowrap",role="secondary"]
 .Groovy  (AWS SDK 1.x)
@@ -742,7 +742,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/a
 <2> Annotate an interface with `@Service` with the type of the entity as its `value`
 <3> `@Scan` annotation accepts a closure which returns a scan builder (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/ScanBuilder.html[ScanBuilder] for full reference)
 <4> Specify some filter criteria with the method's `foo` argument (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
-<5> The arguments have no special meaning but you can use them in the scan definition. The method must return either `Publisher` or `List` of entities.
+<5> The arguments have no special meaning but you can use them in the scan definition. The method must return either `Publisher`, `Stream` or `List` of entities.
 
 
 =====  Updates

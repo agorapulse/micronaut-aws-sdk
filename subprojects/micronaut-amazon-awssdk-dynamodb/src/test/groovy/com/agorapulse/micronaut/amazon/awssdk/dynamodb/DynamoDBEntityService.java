@@ -25,6 +25,7 @@ import org.reactivestreams.Publisher;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 // tag::all[]
 // tag::header[]
@@ -37,6 +38,8 @@ public interface DynamoDBEntityService {
     DynamoDBEntity load(@PartitionKey String parentId, @SortKey String id);
 
     List<DynamoDBEntity> getAll(String hash, List<String> rangeKeys);
+
+    Stream<DynamoDBEntity> getAllAsStream(String hash, List<String> rangeKeys);
 
     List<DynamoDBEntity> getAll(String hash, String... rangeKeys);
 

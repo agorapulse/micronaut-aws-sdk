@@ -61,6 +61,7 @@ public class DeclarativeServiceTest {
 
 
         assertEquals(2, s.getAll("1", Arrays.asList("2", "1")).size());
+        assertEquals(2, s.getAllAsStream("1", Arrays.asList("2", "1")).count());
         assertEquals(2, s.loadAll("1", Arrays.asList("2", "1")).size());
         assertEquals(2, s.getAll("1", "2", "1").size());
         assertEquals(0, s.loadAll("1", "3", "4").size());

@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.dynamodb.model.Stream;
 
 import java.util.Collections;
 import java.util.Map;
@@ -230,6 +231,10 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
                 logTypeConversionFailure(type, count);
                 return 0;
             });
+        }
+
+        if (Stream.class.isAssignableFrom(type)) {
+            return Flux.from(publisher).toStream();
         }
 
         if (type.isArray() || Iterable.class.isAssignableFrom(type)) {

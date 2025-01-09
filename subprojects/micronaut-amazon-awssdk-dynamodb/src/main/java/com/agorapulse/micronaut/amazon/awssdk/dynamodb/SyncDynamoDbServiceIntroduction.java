@@ -40,6 +40,7 @@ import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * Introduction for {@link Service} annotation.
@@ -171,6 +172,10 @@ public class SyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduct
     private Object publisherOrIterable(Publisher<?> result, Class<?> type) {
         if (Publishers.isConvertibleToPublisher(type)) {
             return Publishers.convertPublisher(conversionService, result, type);
+        }
+
+        if (Stream.class.isAssignableFrom(type)) {
+            return Flux.from(result).toStream();
         }
 
         return Flux.from(result).collectList().blockOptional().orElse(Collections.emptyList());
