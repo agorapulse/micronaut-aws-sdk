@@ -17,6 +17,6 @@
  */
 dependencies {
     api 'software.amazon.awssdk:cloudwatchlogs'
-    implementation project(':micronaut-amazon-awssdk-core')
+   api project(':micronaut-amazon-awssdk-core')
     testImplementation 'io.micronaut:micronaut-inject'
 }

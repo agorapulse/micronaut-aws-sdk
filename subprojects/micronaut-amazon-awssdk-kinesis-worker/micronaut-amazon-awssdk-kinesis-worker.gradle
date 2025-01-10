@@ -20,7 +20,7 @@ dependencies {
         exclude group: 'software.amazon.awssdk', module: 'url-connection-client'
     }
 
-    implementation project(':micronaut-amazon-awssdk-core')
+   api project(':micronaut-amazon-awssdk-core')
     implementation project(':micronaut-amazon-awssdk-cloudwatch')
     implementation project(':micronaut-amazon-awssdk-dynamodb')
     implementation project(':micronaut-amazon-awssdk-kinesis')

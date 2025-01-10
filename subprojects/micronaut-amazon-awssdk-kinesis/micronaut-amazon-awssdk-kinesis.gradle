@@ -22,7 +22,7 @@ dependencies {
     implementation 'io.micronaut.validation:micronaut-validation'
     implementation 'io.micronaut:micronaut-jackson-databind'
 
-    implementation project(':micronaut-amazon-awssdk-core')
+   api project(':micronaut-amazon-awssdk-core')
     implementation "space.jasan:groovy-closure-support:$closureSupportVersion"
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
     implementation "io.projectreactor:reactor-core:$projectReactorVersion"

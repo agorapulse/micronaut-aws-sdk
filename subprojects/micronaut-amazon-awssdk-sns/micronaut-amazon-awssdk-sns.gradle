@@ -18,7 +18,7 @@
 dependencies {
     api 'software.amazon.awssdk:sns'
 
-    implementation project(':micronaut-amazon-awssdk-core')
+   api project(':micronaut-amazon-awssdk-core')
     implementation "space.jasan:groovy-closure-support:$closureSupportVersion"
     implementation "io.projectreactor:reactor-core:$projectReactorVersion"
     implementation 'io.micronaut:micronaut-jackson-databind'

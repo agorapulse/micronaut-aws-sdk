@@ -17,6 +17,6 @@
  */
 dependencies {
     api 'software.amazon.awssdk:sts'
-    implementation project(':micronaut-amazon-awssdk-core')
+   api project(':micronaut-amazon-awssdk-core')
     implementation "space.jasan:groovy-closure-support:$closureSupportVersion"
 }
