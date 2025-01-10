@@ -19,7 +19,8 @@ dependencies {
     api 'software.amazon.awssdk:dynamodb'
     api 'software.amazon.awssdk:dynamodb-enhanced'
 
-    implementation project(':micronaut-amazon-awssdk-core')
+    api project(':micronaut-amazon-awssdk-core')
+
     implementation "space.jasan:groovy-closure-support:$closureSupportVersion"
     implementation "io.projectreactor:reactor-core:$projectReactorVersion"
 
