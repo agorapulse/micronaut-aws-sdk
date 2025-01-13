@@ -40,6 +40,11 @@ public interface RegionAndEndpointConfiguration {
 
     String getAsyncClient();
 
+    @Deprecated
+    default <C, B extends AwsClientBuilder<B, C>> B configure(B builder, AwsRegionProvider awsRegionProvider) {
+        return configure(builder, awsRegionProvider, null, Optional.empty());
+    }
+
     default <C, B extends AwsClientBuilder<B, C>> B configure(B builder, AwsRegionProvider awsRegionProvider, ClientBuilderProvider builderProvider, Optional<SdkAsyncHttpClient> httpClient) {
         builder.region(Optional.ofNullable(getRegion()).map(Region::of).orElseGet(awsRegionProvider::getRegion));
 
@@ -51,11 +56,11 @@ public interface RegionAndEndpointConfiguration {
             }
         }
 
-        if (getClient() != null && builder instanceof SdkSyncClientBuilder<?, ?> clientBuilder) {
+        if (builderProvider != null && getClient() != null && builder instanceof SdkSyncClientBuilder<?, ?> clientBuilder) {
             builderProvider.findHttpClientBuilder(getClient()).ifPresent(clientBuilder::httpClientBuilder);
         }
 
-        if (getAsyncClient() != null && builder instanceof AwsAsyncClientBuilder<?, ?> clientBuilder) {
+        if (builderProvider != null && getAsyncClient() != null && builder instanceof AwsAsyncClientBuilder<?, ?> clientBuilder) {
             builderProvider.findAsyncHttpClientBuilder(getClient()).ifPresent(clientBuilder::httpClientBuilder);
         } else if (httpClient.isPresent() && builder instanceof AwsAsyncClientBuilder<?, ?> clientBuilder) {
             clientBuilder.httpClient(httpClient.get());
