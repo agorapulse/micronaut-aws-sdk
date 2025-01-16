@@ -1096,3 +1096,28 @@ aws:
 ----
 
 ====
+
+==== Data Loader
+
+You can data exported as CSV from the AWS DynamoDB Console:
+
+image::export-tables.png[]
+
+These data can be loaded using `DynamoDbLoader` bean. The following test shows how to load the data from the CSV file into your DynamoDB tables. Use the integration testing library as described above to have the automatic local DynamoDB for testing.
+
+[source,java,indent]
+.DynamoDbLoader Example
+----
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-loader/src/test/java/com/agorapulse/amazon/awssdk/dynamodb/loader/DynamoDbLoaderTest.java[lines=19..-1]
+----
+<1> Test must be annotated wiht `@MicronautTest` to allow loader injection
+<2> Property `aws.dynamodb.create-tables` guarantees that the tables are created automatically
+<3> https://agorapulse.github.io/testing-libraries/#_fixt[Fixt] is very convenient way how to keep your test fixtures organized and can be easily used with the loader
+<4> Load the data from the CSV file
+<5> The mapping is specified as map with the entity types as keys and iterables of the CSV files as values
+<6> After loading the data, the entities according to the rows in the CSV file are available in the database
+
+This is how the files are laid out for this particular example:
+
+image:loader-layout.png[]
+
