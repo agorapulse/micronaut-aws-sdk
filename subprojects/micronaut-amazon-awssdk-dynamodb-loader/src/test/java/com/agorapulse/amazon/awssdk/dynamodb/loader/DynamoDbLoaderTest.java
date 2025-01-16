@@ -23,7 +23,6 @@ import io.micronaut.context.annotation.Property;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Flux;
 
 import java.time.Instant;
 import java.util.List;
@@ -35,29 +34,22 @@ import static org.junit.jupiter.api.Assertions.*;
 @Property(name = "aws.dynamodb.create-tables", value = "true")                          // <2>
 class DynamoDbLoaderTest {
 
-    private static final Fixt fixt = Fixt.create(DynamoDbLoaderTest.class);             // <3>
+    private static final Fixt FIXT = Fixt.create(DynamoDbLoaderTest.class);             // <3>
 
     @Inject DynamoDbLoader loader;
     @Inject DynamoDBServiceProvider provider;
 
     @Test
     void loadIntoDynamoDb() {
-        TestEntity referenceEntity = getReferenceEntity();
 
-        Object loadedValue = Flux.from(
-            loader.load(                                                                // <4>
-                fixt::readText,
-                Map.of(
-                    TestEntity.class, List.of("test-entity.csv")                        // <5>
-                )
-            )
-        ).blockLast();
+        Map<Class<?>, Iterable<String>> mappings = Map.of(
+            TestEntity.class, List.of("test-entity.csv")                                // <4>
+        );
 
-        assertInstanceOf(TestEntity.class, loadedValue);
-
-        assertEquals(referenceEntity, loadedValue);
+        loader.loadAll(FIXT::readText, mappings);                                       // <5>
 
         TestEntity fromDb = provider.findOrCreate(TestEntity.class).get("1", null);     // <6>
+        TestEntity referenceEntity = getReferenceEntity();
         assertEquals(referenceEntity, fromDb);
     }
 
