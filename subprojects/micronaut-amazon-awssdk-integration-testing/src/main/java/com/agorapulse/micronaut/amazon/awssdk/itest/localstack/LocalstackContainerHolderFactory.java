@@ -36,7 +36,7 @@ public class LocalstackContainerHolderFactory {
     @Primary
     @Singleton
     @Bean(preDestroy = "close")
-    @Requires(property = "locastack.shared", notEquals = "true")
+    @Requires(property = "localstack.shared", notEquals = "true")
     public LocalstackContainerHolder localstackContainerHolderLazy(
         LocalstackContainerConfiguration configuration,
         List<LocalstackContainerOverridesConfiguration> overrides
