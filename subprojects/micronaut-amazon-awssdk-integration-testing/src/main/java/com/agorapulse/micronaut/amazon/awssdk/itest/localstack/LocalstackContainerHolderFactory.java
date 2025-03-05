@@ -19,12 +19,13 @@ package com.agorapulse.micronaut.amazon.awssdk.itest.localstack;
 
 import com.agorapulse.micronaut.amazon.awssdk.core.AwsConfiguration;
 import io.micronaut.context.annotation.Bean;
+import io.micronaut.context.annotation.Context;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Primary;
 import io.micronaut.context.annotation.Replaces;
 import io.micronaut.context.annotation.Requires;
-
 import jakarta.inject.Singleton;
+
 import java.util.List;
 
 @Factory
@@ -35,7 +36,19 @@ public class LocalstackContainerHolderFactory {
     @Primary
     @Singleton
     @Bean(preDestroy = "close")
-    public LocalstackContainerHolder localstackContainerHolder(
+    @Requires(property = "localstack.shared", notEquals = "true")
+    public LocalstackContainerHolder localstackContainerHolderLazy(
+        LocalstackContainerConfiguration configuration,
+        List<LocalstackContainerOverridesConfiguration> overrides
+    ) {
+        return new LocalstackContainerHolder(configuration, overrides);
+    }
+
+    @Primary
+    @Context
+    @Bean(preDestroy = "close")
+    @Requires(property = "localstack.shared", value = "true")
+    public LocalstackContainerHolder localstackContainerHolderEager(
         LocalstackContainerConfiguration configuration,
         List<LocalstackContainerOverridesConfiguration> overrides
     ) {
