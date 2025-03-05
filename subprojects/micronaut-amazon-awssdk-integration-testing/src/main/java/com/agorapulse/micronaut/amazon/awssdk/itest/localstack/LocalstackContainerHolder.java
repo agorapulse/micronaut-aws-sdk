@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 public class LocalstackContainerHolder implements Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalstackContainerHolder.class);
-    private static final Map<LocalStackContainer.Service, GenericContainer> SHARED_CONTAINERS = new ConcurrentHashMap<>();
+    private static final Map<LocalStackContainer.Service, GenericContainer<?>> SHARED_CONTAINERS = new ConcurrentHashMap<>();
 
     private static LocalStackContainer sharedContainer;
 
@@ -50,14 +50,14 @@ public class LocalstackContainerHolder implements Closeable {
     private final LocalstackContainerConfiguration configuration;
     private final Map<LocalStackContainer.Service, LocalstackContainerOverridesConfiguration> overrides;
     private LocalStackContainer container;
-    private final Map<LocalStackContainer.Service, GenericContainer> containers = new ConcurrentHashMap<>();
+    private final Map<LocalStackContainer.Service, GenericContainer<?>> containers = new ConcurrentHashMap<>();
 
     public LocalstackContainerHolder(
         LocalstackContainerConfiguration configuration,
         List<LocalstackContainerOverridesConfiguration> configationOverrides
     ) {
         this.configuration = configuration;
-        this.overrides = configationOverrides.isEmpty() ? Collections.emptyMap() : new EnumMap<LocalStackContainer.Service, LocalstackContainerOverridesConfiguration>(
+        this.overrides = configationOverrides.isEmpty() ? Collections.emptyMap() : new EnumMap<>(
             configationOverrides.stream().collect(Collectors.toMap(
                 conf -> LocalStackContainer.Service.valueOf(conf.getService().toUpperCase()),
                 conf -> conf
@@ -68,8 +68,11 @@ public class LocalstackContainerHolder implements Closeable {
                 .map(String::toUpperCase)
                 .map(LocalStackContainer.Service::valueOf)
                 .filter(s -> !this.overrides.containsKey(s))
-                .collect(Collectors.toList())
+                .toList()
         );
+        if (this.configuration.isShared()) {
+            this.enabledServices.forEach(this::requireRunningContainer);
+        }
     }
 
     public LocalstackContainerHolder withServiceEnabled(LocalStackContainer.Service service) {
@@ -103,14 +106,14 @@ public class LocalstackContainerHolder implements Closeable {
                     if (!SHARED_CONTAINERS.containsKey(service)) {
                         SHARED_CONTAINERS.put(service, createAndStartGenericContainer(configurationOverride, service));
                     }
-                    GenericContainer mock = SHARED_CONTAINERS.get(service);
+                    GenericContainer<?> mock = SHARED_CONTAINERS.get(service);
                     return URI.create("http://" + mock.getHost() + ":" + mock.getMappedPort(configurationOverride.getPort()));
                 }
 
                 if (!containers.containsKey(service)) {
                     containers.put(service, createAndStartGenericContainer(configurationOverride, service));
                 }
-                GenericContainer mock = containers.get(service);
+                GenericContainer<?> mock = containers.get(service);
                 return URI.create("http://" + mock.getHost() + ":" + mock.getMappedPort(configurationOverride.getPort()));
             } else {
                 LOGGER.warn(
