@@ -52,12 +52,13 @@ public class LocalstackContainerHolder implements Closeable {
     private LocalStackContainer container;
     private final Map<LocalStackContainer.Service, GenericContainer<?>> containers = new ConcurrentHashMap<>();
 
+    @SuppressWarnings("java:S2293")
     public LocalstackContainerHolder(
         LocalstackContainerConfiguration configuration,
         List<LocalstackContainerOverridesConfiguration> configationOverrides
     ) {
         this.configuration = configuration;
-        this.overrides = configationOverrides.isEmpty() ? Collections.emptyMap() : new EnumMap<>(
+        this.overrides = configationOverrides.isEmpty() ? Collections.emptyMap() : new EnumMap<LocalStackContainer.Service, LocalstackContainerOverridesConfiguration>(
             configationOverrides.stream().collect(Collectors.toMap(
                 conf -> LocalStackContainer.Service.valueOf(conf.getService().toUpperCase()),
                 conf -> conf
