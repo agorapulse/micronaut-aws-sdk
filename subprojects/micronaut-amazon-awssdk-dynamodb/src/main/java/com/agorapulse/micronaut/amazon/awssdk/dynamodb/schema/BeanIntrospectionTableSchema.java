@@ -227,7 +227,7 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         return builder.build();
     }
 
-    private static <T> StaticAttribute<T,?> createTtlAttributeFromTopLevelAnnotation(Class<T> type, AnnotationValue<TimeToLive> ttl, BeanContext beanContext) {
+    private static <T> StaticAttribute<T, ?> createTtlAttributeFromTopLevelAnnotation(Class<T> type, AnnotationValue<TimeToLive> ttl, BeanContext beanContext) {
         long durationInSeconds = beanContext.getConversionService().convertRequired(ttl.getRequiredValue(String.class), Duration.class).getSeconds();
         return StaticAttribute.builder(type, Long.class)
             .name(ttl.stringValue("attributeName").filter(StringUtils::isNotEmpty).orElse("ttl"))
@@ -236,7 +236,7 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
             .build();
     }
 
-    private static <T> StaticAttribute<T,?> createTtlAttributeFromFieldAnnotation(Class<T> type, AnnotationValue<TimeToLive> ttl, BeanProperty<T, ?> property, BeanContext beanContext) {
+    private static <T> StaticAttribute<T, ?> createTtlAttributeFromFieldAnnotation(Class<T> type, AnnotationValue<TimeToLive> ttl, BeanProperty<T, ?> property, BeanContext beanContext) {
         Duration duration = beanContext.getConversionService().convertRequired(ttl.getRequiredValue(String.class), Duration.class);
         Function<T, Instant> toInstant = createInstantGetter(ttl, property, beanContext);
 
@@ -249,7 +249,7 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
 
     private static <T> Function<T, Instant> createInstantGetter(AnnotationValue<TimeToLive> ttl, BeanProperty<T, ?> property, BeanContext beanContext) {
         if (Instant.class.isAssignableFrom(property.getType())) {
-            return instance -> ((Instant) property.get(instance));
+            return instance -> (Instant) property.get(instance);
         }
 
         if (CharSequence.class.isAssignableFrom(property.getType())) {
