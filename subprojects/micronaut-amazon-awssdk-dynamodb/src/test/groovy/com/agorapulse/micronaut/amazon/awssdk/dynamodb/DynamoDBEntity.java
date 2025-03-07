@@ -17,7 +17,13 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.*;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.ConvertedJson;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.PartitionKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Projection;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondaryPartitionKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondarySortKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SortKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.TimeToLive;
 import io.micronaut.core.annotation.Introspected;
 import software.amazon.awssdk.services.dynamodb.model.ProjectionType;
 
