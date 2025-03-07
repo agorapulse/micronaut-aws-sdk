@@ -48,7 +48,7 @@ class BeanIntrospectionTableSchemaSpec extends Specification {
         when:
             BeanIntrospectionTableSchema<DynamoDBEntity> schema = BeanIntrospectionTableSchema.create(DynamoDBEntity, context, cache)
         then:
-            schema.attributeNames().size() == 9
+            schema.attributeNames().size() == 11
     }
 
     <T> void '#attribute attribute is added to the class #type when TimeToLive annotation is used with duration #duration'(
