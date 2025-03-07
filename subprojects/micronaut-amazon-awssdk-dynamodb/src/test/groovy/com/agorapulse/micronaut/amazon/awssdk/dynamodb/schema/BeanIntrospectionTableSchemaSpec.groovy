@@ -40,7 +40,7 @@ class BeanIntrospectionTableSchemaSpec extends Specification {
 
     BeanContext context = Mock {
         findBean(_) >> Optional.empty()
-        getConversionService() >> ConversionService.SHARED
+        conversionService >> ConversionService.SHARED
     }
 
     void 'read table schema for java class'() {
@@ -119,7 +119,7 @@ class BeanIntrospectionTableSchemaSpec extends Specification {
 
     void 'ttl field must be convertable'() {
         when:
-            BeanIntrospectionTableSchema<EntityWithTtlOnDateField> schema = BeanIntrospectionTableSchema.create(EntityWithTtlOnDateField, context, cache)
+            BeanIntrospectionTableSchema.create(EntityWithTtlOnDateField, context, cache)
         then:
             thrown(IllegalArgumentException)
     }

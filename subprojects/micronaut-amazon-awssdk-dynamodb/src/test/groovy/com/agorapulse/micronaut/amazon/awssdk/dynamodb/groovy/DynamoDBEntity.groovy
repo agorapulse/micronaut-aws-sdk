@@ -57,7 +57,7 @@ class DynamoDBEntity {
         return "$parentId:$id"
     }
 
-    @TimeToLive("365d")                                                                 // <7>
+    @TimeToLive('365d')                                                                 // <7>
     Instant created
 
 }
