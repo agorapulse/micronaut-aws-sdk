@@ -17,15 +17,11 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.ConvertedJson;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.PartitionKey;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Projection;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondaryPartitionKey;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondarySortKey;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SortKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.*;
 import io.micronaut.core.annotation.Introspected;
 import software.amazon.awssdk.services.dynamodb.model.ProjectionType;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -46,6 +42,7 @@ public class DynamoDBEntity implements PlaybookAware {
     private String rangeIndex;
     private Date date;
     private Integer number = 0;
+    private Instant created;
 
     private Map<String, List<String>> mapProperty = new LinkedHashMap<>();
     private Set<String> stringSetProperty = new HashSet<>();
@@ -102,6 +99,15 @@ public class DynamoDBEntity implements PlaybookAware {
         return parentId + ":" + id;
     }
 
+    @TimeToLive("365d")                                                                 // <7>
+    public Instant getCreated() {
+        return created;
+    }
+
+    public void setCreated(Instant created) {
+        this.created = created;
+    }
+
     public Map<String, List<String>> getMapProperty() {
         return mapProperty;
     }
@@ -139,6 +145,7 @@ public class DynamoDBEntity implements PlaybookAware {
             Objects.equals(date, that.date) &&
             Objects.equals(number, that.number) &&
             Objects.equals(mapProperty, that.mapProperty) &&
+            Objects.equals(created, that.created) &&
             Objects.equals(stringSetProperty, that.stringSetProperty);
     }
 
@@ -156,6 +163,7 @@ public class DynamoDBEntity implements PlaybookAware {
             ", date=" + date +
             ", number=" + number +
             ", mapProperty=" + mapProperty +
+            ", created=" + created +
             ", stringSetProperty=" + stringSetProperty +
             '}';
     }

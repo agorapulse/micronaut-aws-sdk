@@ -20,6 +20,7 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb.kotlin
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.*
 import io.micronaut.core.annotation.Introspected
 import software.amazon.awssdk.services.dynamodb.model.ProjectionType
+import java.time.Instant
 import java.util.*
 
 @Introspected                                                                           // <1>
@@ -47,6 +48,9 @@ class DynamoDBEntity {
     fun getGlobalIndex(): String {
         return "$parentId:$id"
     }
+
+    @TimeToLive("365d")                                                                 // <7>
+    var created: Instant? = null
 
     companion object {
         const val DATE_INDEX = "date"

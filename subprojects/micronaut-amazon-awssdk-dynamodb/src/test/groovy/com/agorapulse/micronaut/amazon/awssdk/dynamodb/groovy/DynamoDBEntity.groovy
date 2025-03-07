@@ -22,10 +22,13 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Projection
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondaryPartitionKey
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondarySortKey
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SortKey
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.TimeToLive
 import groovy.transform.Canonical
 import groovy.transform.CompileStatic
 import io.micronaut.core.annotation.Introspected
 import software.amazon.awssdk.services.dynamodb.model.ProjectionType
+
+import java.time.Instant
 
 @Canonical
 @Introspected                                                                           // <1>
@@ -53,5 +56,8 @@ class DynamoDBEntity {
     String getGlobalIndex() {
         return "$parentId:$id"
     }
+
+    @TimeToLive("365d")                                                                 // <7>
+    Instant created
 
 }
