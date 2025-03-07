@@ -242,7 +242,7 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
 
         return StaticAttribute.builder(type, Long.class)
             .name(ttl.stringValue("attributeName").filter(StringUtils::isNotEmpty).orElse("ttl"))
-            .getter(instance -> Optional.of(toInstant.apply(instance)).orElseGet(Instant::now).plus(duration).getEpochSecond())
+            .getter(instance -> Optional.ofNullable(toInstant.apply(instance)).orElseGet(Instant::now).plus(duration).getEpochSecond())
             .setter((instance, value) -> { })
             .build();
     }
