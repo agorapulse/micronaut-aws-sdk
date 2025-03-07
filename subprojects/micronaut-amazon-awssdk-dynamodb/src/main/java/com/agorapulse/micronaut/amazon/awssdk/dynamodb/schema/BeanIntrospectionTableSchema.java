@@ -27,6 +27,7 @@ import io.micronaut.core.beans.BeanIntrospection;
 import io.micronaut.core.beans.BeanIntrospector;
 import io.micronaut.core.beans.BeanProperty;
 import io.micronaut.core.type.Argument;
+import io.micronaut.core.util.StringUtils;
 import software.amazon.awssdk.annotations.SdkPublicApi;
 import software.amazon.awssdk.annotations.ThreadSafe;
 import software.amazon.awssdk.enhanced.dynamodb.AttributeConverter;
@@ -59,13 +60,13 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbUpdat
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAccessor;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -206,15 +207,81 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
             builder.attributeConverterProviders(new LegacyAttributeConverterProvider());
         }
 
-        List<StaticAttribute<T, ?>> attributes = introspection.getBeanProperties().stream()
+        List<StaticAttribute<T, ?>> attributes = new ArrayList<>();
+
+        introspection.getBeanProperties().stream()
             .filter(p -> isMappableProperty(beanClass, p))
-            .map(propertyDescriptor -> extractAttributeFromProperty(beanClass, metaTableSchemaCache, builder, propertyDescriptor, beanContext))
+            .map(propertyDescriptor -> {
+                propertyDescriptor.findAnnotation(TimeToLive.class).ifPresent(timeToLive -> {
+                    attributes.add(createTtlAttributeFromFieldAnnotation(beanClass, timeToLive, propertyDescriptor, beanContext));
+                });
+                return extractAttributeFromProperty(beanClass, metaTableSchemaCache, builder, propertyDescriptor, beanContext);
+            })
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .forEach(attributes::add);
+
+        introspection.findAnnotation(TimeToLive.class).ifPresent(ttl -> attributes.add(createTtlAttributeFromTopLevelAnnotation(beanClass, ttl, beanContext)));
 
         builder.attributes(attributes);
 
         return builder.build();
+    }
+
+    private static <T> StaticAttribute<T, ?> createTtlAttributeFromTopLevelAnnotation(Class<T> type, AnnotationValue<TimeToLive> ttl, BeanContext beanContext) {
+        long durationInSeconds = beanContext.getConversionService().convertRequired(ttl.getRequiredValue(String.class), Duration.class).getSeconds();
+        return StaticAttribute.builder(type, Long.class)
+            .name(ttl.stringValue("attributeName").filter(StringUtils::isNotEmpty).orElse("ttl"))
+            .getter(instance -> System.currentTimeMillis() / 1000 + durationInSeconds)
+            .setter((instance, value) -> { })
+            .build();
+    }
+
+    private static <T> StaticAttribute<T, ?> createTtlAttributeFromFieldAnnotation(Class<T> type, AnnotationValue<TimeToLive> ttl, BeanProperty<T, ?> property, BeanContext beanContext) {
+        Duration duration = beanContext.getConversionService().convertRequired(ttl.getRequiredValue(String.class), Duration.class);
+        Function<T, Instant> toInstant = createInstantGetter(ttl, property, beanContext);
+
+        return StaticAttribute.builder(type, Long.class)
+            .name(ttl.stringValue("attributeName").filter(StringUtils::isNotEmpty).orElse("ttl"))
+            .getter(instance -> Optional.ofNullable(toInstant.apply(instance)).orElseGet(Instant::now).plus(duration).getEpochSecond())
+            .setter((instance, value) -> { })
+            .build();
+    }
+
+    private static <T> Function<T, Instant> createInstantGetter(AnnotationValue<TimeToLive> ttl, BeanProperty<T, ?> property, BeanContext beanContext) {
+        if (Instant.class.isAssignableFrom(property.getType())) {
+            return instance -> (Instant) property.get(instance);
+        }
+
+        if (CharSequence.class.isAssignableFrom(property.getType())) {
+            DateTimeFormatter formatter = ttl
+                .stringValue("format")
+                .filter(StringUtils::isNotEmpty)
+                .map(DateTimeFormatter::ofPattern)
+                .orElse(DateTimeFormatter.ISO_INSTANT);
+
+            return instance -> {
+                TemporalAccessor parsed = formatter.parse((CharSequence) property.get(instance));
+                if (!parsed.isSupported(ChronoField.INSTANT_SECONDS)) {
+                    if (parsed.isSupported(ChronoField.HOUR_OF_DAY)) {
+                        return LocalDateTime.from(parsed).atZone(ZoneOffset.UTC).toInstant();
+                    }
+                    return LocalDate.from(parsed).atStartOfDay(ZoneOffset.UTC).toInstant();
+                }
+                return Instant.from(parsed);
+            };
+        }
+
+        if (Number.class.isAssignableFrom(property.getType())) {
+            return instance -> Instant.ofEpochMilli(((Number) property.get(instance)).longValue());
+        }
+
+        if (beanContext.getConversionService().canConvert(property.getType(), Instant.class)) {
+            return instance -> beanContext.getConversionService().convert(property.get(instance), Instant.class).orElseThrow(
+                () -> new IllegalArgumentException("Failed to convert " + property.get(instance) + " to Instant for field " + property + " annotated with @TimeToLive " + ttl
+            ));
+        }
+
+        throw new IllegalArgumentException("TimeToLive annotation can only be used on fields of type Instant, String or Long or any type that can be converted using ConversionService but was used on " + property);
     }
 
     private static <T, P> StaticAttribute<T, P> extractAttributeFromProperty(
