@@ -76,6 +76,7 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy
 <4> The secondary indices are generated automatically if not present
 <5> If the secondary indices are generated then the projection type must be specified (the default is KEYS_ONLY)
 <6> The secondary indices can be read only if you derive them from the other attributes
+<7> You can use `@TimeToLive` annotation to specify the attribute which will be used for TTL. The annotation used on class level, the `Instant.now()` will be used as a reference time.
 
 
 [source,java,indent=0,options="nowrap",role="secondary"]
@@ -89,6 +90,7 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy
 <4> The secondary indices are generated automatically if not present
 <5> If the secondary indices are generated then the projection type must be specified (the default is KEYS_ONLY)
 <6> The secondary indices can be read only if you derive them from the other attributes
+<7> You can use `@TimeToLive` annotation to specify the attribute which will be used for TTL. The annotation used on class level, the `Instant.now()` will be used as a reference time.
 
 [source,kotlin,indent=0,options="nowrap",role="secondary"]
 .Kotlin
@@ -101,6 +103,9 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test
 <4> The secondary indices are generated automatically if not present
 <5> If the secondary indices are generated then the projection type must be specified (the default is KEYS_ONLY)
 <6> The secondary indices can be read only if you derive them from the other attributes
+<7> You can use `@TimeToLive` annotation to specify the attribute which will be used for TTL. The annotation used on class level, the `Instant.now()` will be used as a reference time.
+
+WARNING: The `@TimeToLive` annotation only adds read only attribute to the entity. You need to enable TTL on the table manually.
 
 ==== Declarative Services with `@Service`
 
