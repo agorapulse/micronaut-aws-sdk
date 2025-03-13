@@ -60,11 +60,22 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbUpdat
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
-import java.time.*;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -212,9 +223,9 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         introspection.getBeanProperties().stream()
             .filter(p -> isMappableProperty(beanClass, p))
             .map(propertyDescriptor -> {
-                propertyDescriptor.findAnnotation(TimeToLive.class).ifPresent(timeToLive -> {
-                    attributes.add(createTtlAttributeFromFieldAnnotation(beanClass, timeToLive, propertyDescriptor, beanContext));
-                });
+                propertyDescriptor.findAnnotation(TimeToLive.class).ifPresent(timeToLive ->
+                    attributes.add(createTtlAttributeFromFieldAnnotation(beanClass, timeToLive, propertyDescriptor, beanContext))
+                );
                 return extractAttributeFromProperty(beanClass, metaTableSchemaCache, builder, propertyDescriptor, beanContext);
             })
             .filter(Objects::nonNull)
@@ -260,14 +271,18 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
                 .orElse(DateTimeFormatter.ISO_INSTANT);
 
             return instance -> {
-                TemporalAccessor parsed = formatter.parse((CharSequence) property.get(instance));
-                if (!parsed.isSupported(ChronoField.INSTANT_SECONDS)) {
-                    if (parsed.isSupported(ChronoField.HOUR_OF_DAY)) {
-                        return LocalDateTime.from(parsed).atZone(ZoneOffset.UTC).toInstant();
+                try {
+                    TemporalAccessor parsed = formatter.parse((CharSequence) property.get(instance));
+                    if (!parsed.isSupported(ChronoField.INSTANT_SECONDS)) {
+                        if (parsed.isSupported(ChronoField.HOUR_OF_DAY)) {
+                            return LocalDateTime.from(parsed).atZone(ZoneOffset.UTC).toInstant();
+                        }
+                        return LocalDate.from(parsed).atStartOfDay(ZoneOffset.UTC).toInstant();
                     }
-                    return LocalDate.from(parsed).atStartOfDay(ZoneOffset.UTC).toInstant();
+                    return Instant.from(parsed);
+                } catch (DateTimeParseException e) {
+                    throw new TimeToLiveExtractionFailedException(instance, property, "Failed to extract TTL from property %s of instance %s".formatted(property.getName(), instance), e);
                 }
-                return Instant.from(parsed);
             };
         }
 
@@ -277,8 +292,8 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
 
         if (beanContext.getConversionService().canConvert(property.getType(), Instant.class)) {
             return instance -> beanContext.getConversionService().convert(property.get(instance), Instant.class).orElseThrow(
-                () -> new IllegalArgumentException("Failed to convert " + property.get(instance) + " to Instant for field " + property + " annotated with @TimeToLive " + ttl
-            ));
+                () -> new TimeToLiveExtractionFailedException(instance, property, "Failed to convert " + property.get(instance) + " to Instant for field " + property + " annotated with @TimeToLive " + ttl, null)
+            );
         }
 
         throw new IllegalArgumentException("TimeToLive annotation can only be used on fields of type Instant, String or Long or any type that can be converted using ConversionService but was used on " + property);
