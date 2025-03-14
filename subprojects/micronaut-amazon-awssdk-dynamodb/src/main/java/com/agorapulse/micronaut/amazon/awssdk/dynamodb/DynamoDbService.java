@@ -40,6 +40,8 @@ import java.util.function.Function;
  */
 public interface DynamoDbService<T> {
 
+    int DEFAULT_BATCH_SIZE = 25;
+
     /**
      * @return the type of the items handled by this service
      */
@@ -131,7 +133,17 @@ public interface DynamoDbService<T> {
 
     T save(T entity);
 
-    Publisher<T> saveAll(Publisher<T> itemsToSave);
+    /**
+     * Saves all the items from the given publisher.
+     * @param itemsToSave the items to save
+     * @param batchSize the batch size
+     * @return the saved items
+     */
+    Publisher<T> saveAll(Publisher<T> itemsToSave, int batchSize);
+
+    default Publisher<T> saveAll(Publisher<T> itemsToSave) {
+        return saveAll(itemsToSave, DEFAULT_BATCH_SIZE);
+    }
 
     T delete(Object partitionKey, @Nullable Object sortKey);
 
@@ -139,13 +151,34 @@ public interface DynamoDbService<T> {
 
     T delete(Key key);
 
-    int deleteAll(Publisher<T> items);
+    /**
+     * Deletes all the items from the given publisher.
+     * @param items the items to delete
+     * @param batchSize the batch size
+     * @return the number of deleted items
+     */
+    int deleteAll(Publisher<T> items, int batchSize);
+
+    default int deleteAll(Publisher<T> items) {
+        return deleteAll(items, DEFAULT_BATCH_SIZE);
+    }
 
     T get(Object partitionKey, Object sortKey);
 
     Publisher<T> getAll(Object partitionKey, Publisher<?> sortKeys);
 
-    Publisher<T> getAll(Publisher<?> partitionKeys);
+    /**
+     * Finds all the items for given partition key.
+     *
+     * @param partitionKeys the partition keys
+     * @param batchSize the batch size, max 25
+     * @return flowable of all items with given partition keys
+     */
+    Publisher<T> getAll(Publisher<?> partitionKeys, int batchSize);
+
+    default Publisher<T> getAll(Publisher<?> partitionKeys) {
+        return getAll(partitionKeys, DEFAULT_BATCH_SIZE);
+    }
 
     T get(Key key);
 

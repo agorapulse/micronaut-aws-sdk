@@ -67,8 +67,6 @@ import java.util.stream.Collectors;
 
 public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
 
-    private static final int BATCH_SIZE = 25;
-
     private final Class<T> itemType;
     private final DynamoDbEnhancedClient enhancedClient;
     private final DynamoDbClient client;
@@ -153,9 +151,9 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
     }
 
     @Override
-    public Publisher<T> saveAll(Publisher<T> itemsToSave) {
+    public Publisher<T> saveAll(Publisher<T> itemsToSave, int batchSize) {
         List<T> saved = new ArrayList<>();
-        List<T> unprocessed = Flux.from(itemsToSave).buffer(BATCH_SIZE).map(batchItems -> enhancedClient.batchWriteItem(b -> {
+        List<T> unprocessed = Flux.from(itemsToSave).buffer(batchSize).map(batchItems -> enhancedClient.batchWriteItem(b -> {
             b.writeBatches(batchItems.stream().map(i -> {
                 publisher.publishEvent(DynamoDbEvent.prePersist(i));
                 saved.add(i);
@@ -194,10 +192,10 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
     }
 
     @Override
-    public int deleteAll(Publisher<T> items) {
+    public int deleteAll(Publisher<T> items, int batchSize) {
         TableSchema<T> tableSchema = table.tableSchema();
         List<T> deleted = new ArrayList<>();
-        List<Key> unprocessed = Flux.from(items).buffer(BATCH_SIZE).map(batchItems -> enhancedClient.batchWriteItem(b -> {
+        List<Key> unprocessed = Flux.from(items).buffer(batchSize).map(batchItems -> enhancedClient.batchWriteItem(b -> {
             b.writeBatches(batchItems.stream().map(i -> {
                     publisher.publishEvent(DynamoDbEvent.preRemove(i));
                     deleted.add(i);
@@ -225,8 +223,8 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
     }
 
     @Override
-    public Publisher<T> getAll(Publisher<?> partitionKeys) {
-        return doWithKeys(partitionKeys, this::getAllByAttributeValue);
+    public Publisher<T> getAll(Publisher<?> partitionKeys, int batchSize) {
+        return doWithKeys(partitionKeys, keys -> getAllByAttributeValue(keys, batchSize));
     }
 
     @Override
@@ -291,12 +289,12 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
         });
     }
 
-    private Publisher<T> getAllByAttributeValue(Publisher<AttributeValue> partitionKeys) {
+    private Publisher<T> getAllByAttributeValue(Publisher<AttributeValue> partitionKeys, int batchSize) {
         TableSchema<T> tableSchema = table.tableSchema();
         Map<AttributeValue, Integer> order = new ConcurrentHashMap<>();
         AtomicInteger counter = new AtomicInteger();
 
-        return Flux.from(partitionKeys).buffer(BATCH_SIZE).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> b.readBatches(batchRangeKeys.stream().map(k -> {
+        return Flux.from(partitionKeys).buffer(batchSize).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> b.readBatches(batchRangeKeys.stream().map(k -> {
                 order.put(k, counter.getAndIncrement());
                 return ReadBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(table).addGetItem(Key.builder().partitionValue(k).build()).build();
             })
@@ -307,12 +305,12 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
         });
     }
 
-    private Publisher<T> getAll(AttributeValue hashKey, Publisher<AttributeValue> rangeKeys) {
+    private Publisher<T> getAll(AttributeValue hashKey, Publisher<AttributeValue> rangeKeys, int batchSize) {
         TableSchema<T> tableSchema = table.tableSchema();
         Map<AttributeValue, Integer> order = new ConcurrentHashMap<>();
         AtomicInteger counter = new AtomicInteger();
 
-        return Flux.from(rangeKeys).buffer(BATCH_SIZE).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> b.readBatches(batchRangeKeys.stream().map(k -> {
+        return Flux.from(rangeKeys).buffer(batchSize).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> b.readBatches(batchRangeKeys.stream().map(k -> {
             order.put(k, counter.getAndIncrement());
             return ReadBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(table).addGetItem(Key.builder().partitionValue(hashKey).sortValue(k).build()).build();
         })
