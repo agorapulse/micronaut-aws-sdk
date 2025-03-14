@@ -153,7 +153,7 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
     @Override
     public Publisher<T> saveAll(Publisher<T> itemsToSave, int batchSize) {
         List<T> saved = new ArrayList<>();
-        List<T> unprocessed = Flux.from(itemsToSave).buffer(batchSize).map(batchItems -> enhancedClient.batchWriteItem(b -> {
+        List<T> unprocessed = Flux.from(itemsToSave).buffer(withinBatchSizeBounds(batchSize)).map(batchItems -> enhancedClient.batchWriteItem(b -> {
             b.writeBatches(batchItems.stream().map(i -> {
                 publisher.publishEvent(DynamoDbEvent.prePersist(i));
                 saved.add(i);
@@ -195,7 +195,7 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
     public int deleteAll(Publisher<T> items, int batchSize) {
         TableSchema<T> tableSchema = table.tableSchema();
         List<T> deleted = new ArrayList<>();
-        List<Key> unprocessed = Flux.from(items).buffer(batchSize).map(batchItems -> enhancedClient.batchWriteItem(b -> {
+        List<Key> unprocessed = Flux.from(items).buffer(withinBatchSizeBounds(batchSize)).map(batchItems -> enhancedClient.batchWriteItem(b -> {
             b.writeBatches(batchItems.stream().map(i -> {
                     publisher.publishEvent(DynamoDbEvent.preRemove(i));
                     deleted.add(i);
@@ -218,8 +218,8 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
     }
 
     @Override
-    public Publisher<T> getAll(Object partitionKey, Publisher<?> sortKeys) {
-        return doWithKeys(partitionKey, sortKeys, this::getAll);
+    public Publisher<T> getAll(Object partitionKey, Publisher<?> sortKeys, int batchSize) {
+        return doWithKeys(partitionKey, sortKeys, (attrPartition, attrSorts) -> getAll(attrPartition, attrSorts, batchSize));
     }
 
     @Override
@@ -280,6 +280,10 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
 
     }
 
+    private static int withinBatchSizeBounds(int batchSize) {
+        return Math.max(2, Math.min(batchSize, 25));
+    }
+
     private DetachedQuery<T> simplePartitionAndSort(Object partitionKey, Object sortKey) {
         return doWithKey(partitionKey, sortKey, key -> {
             if (key.sortKeyValue().isPresent()) {
@@ -294,7 +298,7 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
         Map<AttributeValue, Integer> order = new ConcurrentHashMap<>();
         AtomicInteger counter = new AtomicInteger();
 
-        return Flux.from(partitionKeys).buffer(batchSize).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> b.readBatches(batchRangeKeys.stream().map(k -> {
+        return Flux.from(partitionKeys).buffer(withinBatchSizeBounds(batchSize)).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> b.readBatches(batchRangeKeys.stream().map(k -> {
                 order.put(k, counter.getAndIncrement());
                 return ReadBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(table).addGetItem(Key.builder().partitionValue(k).build()).build();
             })
@@ -310,7 +314,7 @@ public class DefaultDynamoDbService<T> implements DynamoDbService<T> {
         Map<AttributeValue, Integer> order = new ConcurrentHashMap<>();
         AtomicInteger counter = new AtomicInteger();
 
-        return Flux.from(rangeKeys).buffer(batchSize).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> b.readBatches(batchRangeKeys.stream().map(k -> {
+        return Flux.from(rangeKeys).buffer(withinBatchSizeBounds(batchSize)).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> b.readBatches(batchRangeKeys.stream().map(k -> {
             order.put(k, counter.getAndIncrement());
             return ReadBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(table).addGetItem(Key.builder().partitionValue(hashKey).sortValue(k).build()).build();
         })

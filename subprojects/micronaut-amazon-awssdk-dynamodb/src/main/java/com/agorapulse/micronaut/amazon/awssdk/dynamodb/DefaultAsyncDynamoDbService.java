@@ -151,7 +151,7 @@ public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
     @Override
     public Publisher<T> saveAll(Publisher<T> itemsToSave, int batchSize) {
         return Flux.from(itemsToSave)
-            .buffer(batchSize)
+            .buffer(withinBatchSizeBounds(batchSize))
             .flatMap(batchItems ->
                 Mono.fromFuture(enhancedClient.batchWriteItem(b -> {
                     List<WriteBatch> writeBatches = batchItems.stream().map(i -> {
@@ -197,7 +197,7 @@ public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
     @Override
     public Publisher<T> deleteAll(Publisher<T> items, int batchSize) {
         return Flux.from(items)
-            .buffer(batchSize)
+            .buffer(withinBatchSizeBounds(batchSize))
             .flatMap(batchItems ->
                 Mono.fromFuture(enhancedClient.batchWriteItem(b -> {
                     List<WriteBatch> writeBatches = batchItems.stream().map(i -> {
@@ -282,6 +282,10 @@ public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
         })).then(Mono.just(true)).onErrorReturn(false);
     }
 
+    private static int withinBatchSizeBounds(int batchSize) {
+        return Math.max(2, Math.min(batchSize, 25));
+    }
+
     private DetachedQuery<T> simplePartitionAndSort(Object partitionKey, Object sortKey) {
         return doWithKey(partitionKey, sortKey, key -> {
             if (key.sortKeyValue().isPresent()) {
@@ -297,7 +301,7 @@ public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
         AtomicInteger counter = new AtomicInteger();
         Comparator<T> comparator = Comparator.comparingInt(i -> order.getOrDefault(tableSchema.attributeValue(i, tableSchema.tableMetadata().primaryPartitionKey()), 0));
 
-        return Flux.from(partitionKeys).buffer(batchSize).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> b.readBatches(batchRangeKeys.stream().map(k -> {
+        return Flux.from(partitionKeys).buffer(withinBatchSizeBounds(batchSize)).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> b.readBatches(batchRangeKeys.stream().map(k -> {
                 order.put(k, counter.getAndIncrement());
                 return ReadBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(table).addGetItem(Key.builder().partitionValue(k).build()).build();
         }).toList()))).flatMap(r -> Flux.from(r.resultsForTable(table)).map(this::postLoad)).sort(comparator);
@@ -310,7 +314,7 @@ public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
         AtomicInteger counter = new AtomicInteger();
         Comparator<T> comparator = Comparator.comparingInt(i -> order.getOrDefault(tableSchema.attributeValue(i, tableSchema.tableMetadata().primarySortKey().get()), 0));
 
-        return Flux.from(rangeKeys).buffer(batchSize).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> b.readBatches(batchRangeKeys.stream().map(k -> {
+        return Flux.from(rangeKeys).buffer(withinBatchSizeBounds(batchSize)).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> b.readBatches(batchRangeKeys.stream().map(k -> {
                 order.put(k, counter.getAndIncrement());
                 return ReadBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(table).addGetItem(Key.builder().partitionValue(hashKey).sortValue(k).build()).build();
             }

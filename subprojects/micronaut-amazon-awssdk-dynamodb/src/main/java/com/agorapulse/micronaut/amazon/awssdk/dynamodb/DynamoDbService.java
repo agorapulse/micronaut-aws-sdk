@@ -165,7 +165,11 @@ public interface DynamoDbService<T> {
 
     T get(Object partitionKey, Object sortKey);
 
-    Publisher<T> getAll(Object partitionKey, Publisher<?> sortKeys);
+    Publisher<T> getAll(Object partitionKey, Publisher<?> sortKeys, int batchSize);
+
+    default Publisher<T> getAll(Object partitionKey, Publisher<?> sortKeys) {
+        return getAll(partitionKey, sortKeys, DEFAULT_BATCH_SIZE);
+    }
 
     /**
      * Finds all the items for given partition key.
