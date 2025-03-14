@@ -67,13 +67,11 @@ import java.util.function.Function;
 
 public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
 
-    private static final int BATCH_SIZE = 25;
-
     private final Class<T> itemType;
     private final DynamoDbEnhancedAsyncClient enhancedClient;
     private final DynamoDbAsyncClient client;
     private final AttributeConversionHelper attributeConversionHelper;
-    private final ApplicationEventPublisher<DynamoDbEvent> publisher;
+    private final ApplicationEventPublisher<DynamoDbEvent<T>> publisher;
     private final DynamoDbAsyncTable<T> table;
 
     public DefaultAsyncDynamoDbService(
@@ -81,7 +79,7 @@ public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
         DynamoDbEnhancedAsyncClient enhancedClient,
         DynamoDbAsyncClient client,
         AttributeConversionHelper attributeConversionHelper,
-        ApplicationEventPublisher<DynamoDbEvent> publisher,
+        ApplicationEventPublisher<DynamoDbEvent<T>> publisher,
         DynamoDbAsyncTable<T> table
     ) {
         this.itemType = itemType;
@@ -151,9 +149,9 @@ public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
     }
 
     @Override
-    public Publisher<T> saveAll(Publisher<T> itemsToSave) {
+    public Publisher<T> saveAll(Publisher<T> itemsToSave, int batchSize) {
         return Flux.from(itemsToSave)
-            .buffer(BATCH_SIZE)
+            .buffer(withinBatchSizeBounds(batchSize))
             .flatMap(batchItems ->
                 Mono.fromFuture(enhancedClient.batchWriteItem(b -> {
                     List<WriteBatch> writeBatches = batchItems.stream().map(i -> {
@@ -197,10 +195,9 @@ public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
     }
 
     @Override
-    public Publisher<T> deleteAll(Publisher<T> items) {
-        TableSchema<T> tableSchema = table.tableSchema();
+    public Publisher<T> deleteAll(Publisher<T> items, int batchSize) {
         return Flux.from(items)
-            .buffer(BATCH_SIZE)
+            .buffer(withinBatchSizeBounds(batchSize))
             .flatMap(batchItems ->
                 Mono.fromFuture(enhancedClient.batchWriteItem(b -> {
                     List<WriteBatch> writeBatches = batchItems.stream().map(i -> {
@@ -226,13 +223,13 @@ public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
     }
 
     @Override
-    public Publisher<T> getAll(Object partitionKey, Publisher<?> sortKeys) {
-        return doWithKeys(partitionKey, sortKeys, this::getAll);
+    public Publisher<T> getAll(Object partitionKey, Publisher<?> sortKeys, int batchSize) {
+        return doWithKeys(partitionKey, sortKeys, (key, rangeKeys) -> getAll(key, rangeKeys, batchSize));
     }
 
     @Override
-    public Publisher<T> getAll(Publisher<?> partitionKeys) {
-        return doWithKeys(partitionKeys, this::getAllByAttributeValue);
+    public Publisher<T> getAll(Publisher<?> partitionKeys, int batchSize) {
+        return doWithKeys(partitionKeys, keys -> getAllByAttributeValue(keys, batchSize));
     }
 
     @Override
@@ -285,6 +282,10 @@ public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
         })).then(Mono.just(true)).onErrorReturn(false);
     }
 
+    private static int withinBatchSizeBounds(int batchSize) {
+        return Math.max(2, Math.min(batchSize, 25));
+    }
+
     private DetachedQuery<T> simplePartitionAndSort(Object partitionKey, Object sortKey) {
         return doWithKey(partitionKey, sortKey, key -> {
             if (key.sortKeyValue().isPresent()) {
@@ -294,26 +295,26 @@ public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
         });
     }
 
-    private Publisher<T> getAllByAttributeValue(Publisher<AttributeValue> partitionKeys) {
+    private Publisher<T> getAllByAttributeValue(Publisher<AttributeValue> partitionKeys, int batchSize) {
         TableSchema<T> tableSchema = table.tableSchema();
         Map<AttributeValue, Integer> order = new ConcurrentHashMap<>();
         AtomicInteger counter = new AtomicInteger();
         Comparator<T> comparator = Comparator.comparingInt(i -> order.getOrDefault(tableSchema.attributeValue(i, tableSchema.tableMetadata().primaryPartitionKey()), 0));
 
-        return Flux.from(partitionKeys).buffer(BATCH_SIZE).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> b.readBatches(batchRangeKeys.stream().map(k -> {
+        return Flux.from(partitionKeys).buffer(withinBatchSizeBounds(batchSize)).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> b.readBatches(batchRangeKeys.stream().map(k -> {
                 order.put(k, counter.getAndIncrement());
                 return ReadBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(table).addGetItem(Key.builder().partitionValue(k).build()).build();
         }).toList()))).flatMap(r -> Flux.from(r.resultsForTable(table)).map(this::postLoad)).sort(comparator);
 
     }
 
-    private Publisher<T> getAll(AttributeValue hashKey, Publisher<AttributeValue> rangeKeys) {
+    private Publisher<T> getAll(AttributeValue hashKey, Publisher<AttributeValue> rangeKeys, int batchSize) {
         TableSchema<T> tableSchema = table.tableSchema();
         Map<AttributeValue, Integer> order = new ConcurrentHashMap<>();
         AtomicInteger counter = new AtomicInteger();
         Comparator<T> comparator = Comparator.comparingInt(i -> order.getOrDefault(tableSchema.attributeValue(i, tableSchema.tableMetadata().primarySortKey().get()), 0));
 
-        return Flux.from(rangeKeys).buffer(BATCH_SIZE).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> b.readBatches(batchRangeKeys.stream().map(k -> {
+        return Flux.from(rangeKeys).buffer(withinBatchSizeBounds(batchSize)).map(batchRangeKeys -> enhancedClient.batchGetItem(b -> b.readBatches(batchRangeKeys.stream().map(k -> {
                 order.put(k, counter.getAndIncrement());
                 return ReadBatch.builder(tableSchema.itemType().rawClass()).mappedTableResource(table).addGetItem(Key.builder().partitionValue(hashKey).sortValue(k).build()).build();
             }
