@@ -393,7 +393,7 @@ interface DynamoDBEntityService {
     })
 
     @Query(EqRangeIndex::class)
-    fun countByRangeIndex(String hashKey, String rangeKey): Int
+    fun countByRangeIndex(hashKey: String, rangeKey: String): Int
 
     class BetweenDateIndex : QueryFunction<DynamoDBEntity>({ args: Map<String, Any> ->
         index(DynamoDBEntity.DATE_INDEX)
@@ -403,10 +403,10 @@ interface DynamoDBEntityService {
     })
 
     @Query(BetweenDateIndex::class)
-    fun countByDates(String hashKey, Date after, Date before): Int
+    fun countByDates(hashKey: String, after: Date, before: Date): Int
 
-    fun query(String partitionKey): Publisher<DynamoDBEntity>
-    fun query(String partitionKey, String sortKey): Publisher<DynamoDBEntity>
+    fun query(partitionKey: String): Publisher<DynamoDBEntity>
+    fun query(partitionKey: String, sortKey: String): Publisher<DynamoDBEntity>
 
     class EqRangeProjection : QueryFunction<DynamoDBEntity>({ args: Map<String, Any> ->
         partitionKey(args["hashKey"])
@@ -415,10 +415,10 @@ interface DynamoDBEntityService {
         only(DynamoDBEntity.RANGE_INDEX)
     })
     @Query(EqRangeProjection::class)
-    fun queryByRangeIndex(String hashKey, String rangeKey): Publisher<DynamoDBEntity>
+    fun queryByRangeIndex(hashKey: String, rangeKey: String): Publisher<DynamoDBEntity>
 
     @Query(BetweenDateIndex::class)
-    fun queryByDates(String hashKey, Date after, Date before): List<DynamoDBEntity>
+    fun queryByDates(hashKey: String, after: Date, before: Date): List<DynamoDBEntity>
 
     class BetweenDateIndexScroll : QueryFunction<DynamoDBEntity>({ args: Map<String, Any> ->
         index(DynamoDBEntity.DATE_INDEX)
@@ -429,20 +429,20 @@ interface DynamoDBEntityService {
 
     @Query(BetweenDateIndexScroll::class)
     fun queryByDatesScroll(
-        String hashKey,
-        Date after,
-        Date before,
-        DynamoDBEntity lastEvaluatedKey
+        hashKey: String,
+        after: Date,
+        before: Date,
+        lastEvaluatedKey: DynamoDBEntity
     ): List<DynamoDBEntity>
 
-    fun delete(DynamoDBEntity entity)
-    fun delete(String partitionKey, String sortKey)
+    fun delete(entity: DynamoDBEntity)
+    fun delete(partitionKey: String, sortKey: String)
 
     @Query(EqRangeIndex::class)
-    fun deleteByRangeIndex(String hashKey, String rangeKey): Int
+    fun deleteByRangeIndex(hashKey: String, rangeKey: String): Int
 
     @Query(BetweenDateIndex::class)
-    fun deleteByDates(String hashKey, Date after, Date before): Int
+    fun deleteByDates(hashKey: String, after: Date, before: Date): Int
     class IncrementNumber : UpdateFunction<DynamoDBEntity, Int>({ args: Map<String, Any> ->
         partitionKey(args["hashKey"])
         sortKey(args["rangeKey"])
@@ -451,7 +451,7 @@ interface DynamoDBEntityService {
     })
 
     @Update(IncrementNumber::class)
-    fun increment(String hashKey, String rangeKey): Number
+    fun increment(hashKey: String, rangeKey: String): Number
     class DecrementNumber : UpdateFunction<DynamoDBEntity, Int>({ args: Map<String, Any> ->
         partitionKey(args["hashKey"])
         sortKey(args["rangeKey"])
@@ -460,7 +460,7 @@ interface DynamoDBEntityService {
     })
 
     @Update(DecrementNumber::class)
-    fun decrement(String hashKey, String rangeKey): Number
+    fun decrement(hashKey: String, rangeKey: String): Number
     class EqRangeScan : ScanFunction<DynamoDBEntity>({ args: Map<String, Any> ->
         filter {
             eq(DynamoDBEntity.RANGE_INDEX, args["foo"])
@@ -468,7 +468,7 @@ interface DynamoDBEntityService {
 
     })
     @Scan(EqRangeScan::class)
-    fun scanAllByRangeIndex(String foo): Publisher<DynamoDBEntity>
+    fun scanAllByRangeIndex(foo: String): Publisher<DynamoDBEntity>
 }
 ----
 
