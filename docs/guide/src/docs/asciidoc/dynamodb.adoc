@@ -60,7 +60,7 @@ NOTE: For Kotlin use `kapt` instead of `annotationProcessor` configuration.
 The entity class is a class which instances represent the items in DynamoDB.
 
 For AWS SDK v2 you don't need to use the https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/enhanced/dynamodb/mapper/annotations/package-summary.html[native annotations] but
-you fill their counterparts in `com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation` package. The only requirements is that
+you can use their counterparts in `com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation` package. The only requirements is that
 the class needs to be annotated either with `@Introspected` or `@DynamoDbBean`. There is a replacement for `@DynamoDBTypeConvertedJson` annotation as well - you can use `@ConvertedJson` annotation instead.
 
 
@@ -126,24 +126,24 @@ The following example shows many of available method signatures:
 @Service(DynamoDBEntity)
 interface DynamoDBItemDBService {
 
-    DynamoDBEntity get(String hash, String rangeKey)
-    DynamoDBEntity load(String hash, String rangeKey)
-    List<DynamoDBEntity> getAll(String hash, List<String> rangeKeys)
-    List<DynamoDBEntity> getAll(String hash, String... rangeKeys)
-    List<DynamoDBEntity> loadAll(String hash, List<String> rangeKeys)
-    List<DynamoDBEntity> loadAll(String hash, String... rangeKeys)
+    DynamoDBEntity get(String partition, String sortKey)
+    DynamoDBEntity load(String partition, String sortKey)
+    List<DynamoDBEntity> getAll(String partition, List<String> sortKeys)
+    List<DynamoDBEntity> getAll(String partition, String... sortKeys)
+    List<DynamoDBEntity> loadAll(String partition, List<String> sortKeys)
+    List<DynamoDBEntity> loadAll(String partition, String... sortKeys)
 
     DynamoDBEntity save(DynamoDBEntity entity)
     List<DynamoDBEntity> saveAll(DynamoDBEntity... entities)
     List<DynamoDBEntity> saveAll(Iterable<DynamoDBEntity> entities)
 
-    int count(String hashKey)
-    int count(String hashKey, String rangeKey)
+    int count(String partitionKey)
+    int count(String partitionKey, String sortKey)
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
-            range {
+            partitionKey hashKey
+            sortKey {
                 eq DynamoDBEntity.RANGE_INDEX, rangeKey
             }
         }
@@ -152,19 +152,19 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
-            range { between DynamoDBEntity.DATE_INDEX, after, before }
+            partitionKey hashKey
+            sortKey { between DynamoDBEntity.DATE_INDEX, after, before }
         }
     })
     int countByDates(String hashKey, Date after, Date before)
 
-    Publisher<DynamoDBEntity> query(String hashKey)
-    Publisher<DynamoDBEntity> query(String hashKey, String rangeKey)
+    Publisher<DynamoDBEntity> query(String partitionKey)
+    Publisher<DynamoDBEntity> query(String partitionKey, String sortKey)
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
-            range {
+            partitionKey hashKey
+            sortKey {
                 eq DynamoDBEntity.RANGE_INDEX, rangeKey
             }
             only {
@@ -176,19 +176,19 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
-            range { between DynamoDBEntity.DATE_INDEX, after, before }
+            partitionKey hashKey
+            sortKey { between DynamoDBEntity.DATE_INDEX, after, before }
         }
     })
     List<DynamoDBEntity> queryByDates(String hashKey, Date after, Date before)
 
     void delete(DynamoDBEntity entity)
-    void delete(String hashKey, String rangeKey)
+    void delete(String partitionKey, String sortKey)
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
-            range {
+            partitionKey hashKey
+            sortKey {
                 eq DynamoDBEntity.RANGE_INDEX, rangeKey
             }
         }
@@ -197,16 +197,16 @@ interface DynamoDBItemDBService {
 
     @Query({
         query(DynamoDBEntity) {
-            hash hashKey
-            range { between DynamoDBEntity.DATE_INDEX, after, before }
+            partitionKey hashKey
+            sortKey { between DynamoDBEntity.DATE_INDEX, after, before }
         }
     })
     int deleteByDates(String hashKey, Date after, Date before)
 
     @Update({
         update(DynamoDBEntity) {
-            hash hashKey
-            range rangeKey
+            partitionKey hashKey
+            sortKey rangeKey
             add 'number', 1
             returnUpdatedNew { number }
         }
@@ -215,8 +215,8 @@ interface DynamoDBItemDBService {
 
     @Update({
         update(DynamoDBEntity) {
-            hash hashKey
-            range rangeKey
+            partitionKey hashKey
+            sortKey rangeKey
             add 'number', -1
             returnUpdatedNew { number }
         }
@@ -244,16 +244,16 @@ public interface DynamoDBEntityService {
     class EqRangeIndex implements Function<Map<String, Object>, DetachedQuery> {
         public DetachedQuery apply(Map<String, Object> arguments) {
             return Builders.query(DynamoDBEntity.class)
-                .hash(arguments.get("hashKey"))
-                .range(r -> r.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("rangeKey")));
+                .partitionKey(arguments.get("hashKey"))
+                .sortKey(r -> r.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("rangeKey")));
         }
     }
 
     class EqRangeProjection implements Function<Map<String, Object>, DetachedQuery> {
         public DetachedQuery apply(Map<String, Object> arguments) {
             return Builders.query(DynamoDBEntity.class)
-                .hash(arguments.get("hashKey"))
-                .range(r ->
+                .partitionKey(arguments.get("hashKey"))
+                .sortKey(r ->
                     r.eq(DynamoDBEntity.RANGE_INDEX, arguments.get("rangeKey"))
                 )
                 .only(DynamoDBEntity.RANGE_INDEX);
@@ -270,16 +270,16 @@ public interface DynamoDBEntityService {
     class BetweenDateIndex implements Function<Map<String, Object>, DetachedQuery> {
         public DetachedQuery apply(Map<String, Object> arguments) {
             return Builders.query(DynamoDBEntity.class)
-                .hash(arguments.get("hashKey"))
-                .range(r -> r.between(DynamoDBEntity.DATE_INDEX, arguments.get("after"), arguments.get("before")));
+                .partitionKey(arguments.get("hashKey"))
+                .sortKey(r -> r.between(DynamoDBEntity.DATE_INDEX, arguments.get("after"), arguments.get("before")));
         }
     }
 
     class IncrementNumber implements Function<Map<String, Object>, DetachedUpdate> {
         public DetachedUpdate apply(Map<String, Object> arguments) {
             return Builders.update(DynamoDBEntity.class)
-                .hash(arguments.get("hashKey"))
-                .range(arguments.get("rangeKey"))
+                .partitionKey(arguments.get("hashKey"))
+                .sortKey(arguments.get("rangeKey"))
                 .add("number", 1)
                 .returnUpdatedNew(DynamoDBEntity::getNumber);
         }
@@ -288,24 +288,24 @@ public interface DynamoDBEntityService {
     class DecrementNumber implements Function<Map<String, Object>, DetachedUpdate> {
         public DetachedUpdate apply(Map<String, Object> arguments) {
             return Builders.update(DynamoDBEntity.class)
-                .hash(arguments.get("hashKey"))
-                .range(arguments.get("rangeKey"))
+                .partitionKey(arguments.get("hashKey"))
+                .sortKey(arguments.get("rangeKey"))
                 .add("number", -1)
                 .returnUpdatedNew(DynamoDBEntity::getNumber);
         }
     }
 
-    DynamoDBEntity get(String hash, String rangeKey);
+    DynamoDBEntity get(String partition, String sortKey);
 
-    DynamoDBEntity load(String hash, String rangeKey);
+    DynamoDBEntity load(String partition, String sortKey);
 
-    List<DynamoDBEntity> getAll(String hash, List<String> rangeKeys);
+    List<DynamoDBEntity> getAll(String partition, List<String> sortKeys);
 
-    List<DynamoDBEntity> getAll(String hash, String... rangeKeys);
+    List<DynamoDBEntity> getAll(String partition, String... sortKeys);
 
-    List<DynamoDBEntity> loadAll(String hash, List<String> rangeKeys);
+    List<DynamoDBEntity> loadAll(String partition, List<String> sortKeys);
 
-    List<DynamoDBEntity> loadAll(String hash, String... rangeKeys);
+    List<DynamoDBEntity> loadAll(String partition, String... sortKeys);
 
     DynamoDBEntity save(DynamoDBEntity entity);
 
@@ -313,9 +313,9 @@ public interface DynamoDBEntityService {
 
     List<DynamoDBEntity> saveAll(Iterable<DynamoDBEntity> entities);
 
-    int count(String hashKey);
+    int count(String partitionKey);
 
-    int count(String hashKey, String rangeKey);
+    int count(String partitionKey, String sortKey);
 
     @Query(EqRangeIndex.class)
     int countByRangeIndex(String hashKey, String rangeKey);
@@ -323,9 +323,9 @@ public interface DynamoDBEntityService {
     @Query(BetweenDateIndex.class)
     int countByDates(String hashKey, Date after, Date before);
 
-    Publisher<DynamoDBEntity> query(String hashKey);
+    Publisher<DynamoDBEntity> query(String partitionKey);
 
-    Publisher<DynamoDBEntity> query(String hashKey, String rangeKey);
+    Publisher<DynamoDBEntity> query(String partitionKey, String sortKey);
 
     @Query(EqRangeProjection.class)
     Publisher<DynamoDBEntity> queryByRangeIndex(String hashKey, String rangeKey);
@@ -335,7 +335,7 @@ public interface DynamoDBEntityService {
 
     void delete(DynamoDBEntity entity);
 
-    void delete(String hashKey, String rangeKey);
+    void delete(String partitionKey, String sortKey);
 
     @Query(EqRangeIndex.class)
     int deleteByRangeIndex(String hashKey, String rangeKey);
@@ -366,13 +366,13 @@ interface DynamoDBEntityService {
 
     fun load(@PartitionKey parentId: String, @SortKey id: String): DynamoDBEntity
 
-    fun getAll(hash: String, rangeKeys: List<String>): List<DynamoDBEntity>
+    fun getAll(partition: String, sortKeys: List<String>): List<DynamoDBEntity>
 
-    fun getAll(hash: String, vararg rangeKeys: String): List<DynamoDBEntity>
+    fun getAll(partition: String, vararg sortKeys: String): List<DynamoDBEntity>
 
-    fun loadAll(hash: String, rangeKeys: List<String>): List<DynamoDBEntity>
+    fun loadAll(partition: String, sortKeys: List<String>): List<DynamoDBEntity>
 
-    fun loadAll(hash: String, vararg rangeKeys: String): List<DynamoDBEntity>
+    fun loadAll(partition: String, vararg sortKeys: String): List<DynamoDBEntity>
 
     fun save(entity: DynamoDBEntity): DynamoDBEntity
 
@@ -380,9 +380,9 @@ interface DynamoDBEntityService {
 
     fun saveAll(entities: Iterable<DynamoDBEntity>): List<DynamoDBEntity>
 
-    fun count(hashKey: String): Int
+    fun count(partitionKey: String): Int
 
-    fun count(hashKey: String, rangeKey: String): Int
+    fun count(partitionKey: String, sortKey: String): Int
 
     class EqRangeIndex : QueryFunction<DynamoDBEntity>({ args: Map<String, Any> ->
         partitionKey(args.get("hashKey"))
@@ -393,7 +393,7 @@ interface DynamoDBEntityService {
     })
 
     @Query(EqRangeIndex::class)
-    fun countByRangeIndex(hashKey: String, rangeKey: String): Int
+    fun countByRangeIndex(String hashKey, String rangeKey): Int
 
     class BetweenDateIndex : QueryFunction<DynamoDBEntity>({ args: Map<String, Any> ->
         index(DynamoDBEntity.DATE_INDEX)
@@ -403,10 +403,10 @@ interface DynamoDBEntityService {
     })
 
     @Query(BetweenDateIndex::class)
-    fun countByDates(hashKey: String, after: Date, before: Date): Int
+    fun countByDates(String hashKey, Date after, Date before): Int
 
-    fun query(hashKey: String): Publisher<DynamoDBEntity>
-    fun query(hashKey: String, rangeKey: String): Publisher<DynamoDBEntity>
+    fun query(String partitionKey): Publisher<DynamoDBEntity>
+    fun query(String partitionKey, String sortKey): Publisher<DynamoDBEntity>
 
     class EqRangeProjection : QueryFunction<DynamoDBEntity>({ args: Map<String, Any> ->
         partitionKey(args["hashKey"])
@@ -415,10 +415,10 @@ interface DynamoDBEntityService {
         only(DynamoDBEntity.RANGE_INDEX)
     })
     @Query(EqRangeProjection::class)
-    fun queryByRangeIndex(hashKey: String, rangeKey: String): Publisher<DynamoDBEntity>
+    fun queryByRangeIndex(String hashKey, String rangeKey): Publisher<DynamoDBEntity>
 
     @Query(BetweenDateIndex::class)
-    fun queryByDates(hashKey: String, after: Date, before: Date): List<DynamoDBEntity>
+    fun queryByDates(String hashKey, Date after, Date before): List<DynamoDBEntity>
 
     class BetweenDateIndexScroll : QueryFunction<DynamoDBEntity>({ args: Map<String, Any> ->
         index(DynamoDBEntity.DATE_INDEX)
@@ -429,20 +429,20 @@ interface DynamoDBEntityService {
 
     @Query(BetweenDateIndexScroll::class)
     fun queryByDatesScroll(
-        hashKey: String,
-        after: Date,
-        before: Date,
-        lastEvaluatedKey: DynamoDBEntity
+        String hashKey,
+        Date after,
+        Date before,
+        DynamoDBEntity lastEvaluatedKey
     ): List<DynamoDBEntity>
 
-    fun delete(entity: DynamoDBEntity)
-    fun delete(hashKey: String, rangeKey: String)
+    fun delete(DynamoDBEntity entity)
+    fun delete(String partitionKey, String sortKey)
 
     @Query(EqRangeIndex::class)
-    fun deleteByRangeIndex(hashKey: String, rangeKey: String): Int
+    fun deleteByRangeIndex(String hashKey, String rangeKey): Int
 
     @Query(BetweenDateIndex::class)
-    fun deleteByDates(hashKey: String, after: Date, before: Date): Int
+    fun deleteByDates(String hashKey, Date after, Date before): Int
     class IncrementNumber : UpdateFunction<DynamoDBEntity, Int>({ args: Map<String, Any> ->
         partitionKey(args["hashKey"])
         sortKey(args["rangeKey"])
@@ -451,7 +451,7 @@ interface DynamoDBEntityService {
     })
 
     @Update(IncrementNumber::class)
-    fun increment(hashKey: String, rangeKey: String): Number
+    fun increment(String hashKey, String rangeKey): Number
     class DecrementNumber : UpdateFunction<DynamoDBEntity, Int>({ args: Map<String, Any> ->
         partitionKey(args["hashKey"])
         sortKey(args["rangeKey"])
@@ -460,7 +460,7 @@ interface DynamoDBEntityService {
     })
 
     @Update(DecrementNumber::class)
-    fun decrement(hashKey: String, rangeKey: String): Number
+    fun decrement(String hashKey, String rangeKey): Number
     class EqRangeScan : ScanFunction<DynamoDBEntity>({ args: Map<String, Any> ->
         filter {
             eq(DynamoDBEntity.RANGE_INDEX, args["foo"])
@@ -468,7 +468,7 @@ interface DynamoDBEntityService {
 
     })
     @Scan(EqRangeScan::class)
-    fun scanAllByRangeIndex(foo: String): Publisher<DynamoDBEntity>
+    fun scanAllByRangeIndex(String foo): Publisher<DynamoDBEntity>
 }
 ----
 
@@ -497,38 +497,38 @@ The following table summarizes the supported method signatures:
 
     `List<T>`
 | `get*`, `load*`
-| Hash key and optional range key, array of range keys or iterable of range keys annotated with `@HashKey` and `@RangeKey` if the argument name does not contain word `hash` or `range`
+| Partition key and optional sort key, array of sort keys or iterable of sort keys annotated with `@PartitionKey` and `@SortKey` if the argument name does not contain word `partition` or `sort`
 |
-    `DynamoDBEntity load(String hashKey);`
+    `DynamoDBEntity load(String partitionKey);`
 
-    `List<DynamoDBEntity> getAll(@HashKey String parentId, String... rangeKeys);`
+    `List<DynamoDBEntity> getAll(@PartitionKey String parentId, String... sortKeys);`
 
-    `List<DynamoDBEntityNoRange> getAll(@HashKey List<String> parentIds);`
+    `List<DynamoDBEntityNoRange> getAll(@PartitionKey List<String> parentIds);`
 
-| Loads a single entity or a list of entities from the table. Range key is required for tables which defines the range key
+| Loads a single entity or a list of entities from the table. Sort key is required for tables which defines the sort key
 
 
 | `int`
 | `count*`
-| Hash key and optional range key annotated with `@HashKey` and `@RangeKey` if the argument name does not contain word `hash` or `range`
+| Partition key and optional sort key annotated with `@PartitionKey` and `@SortKey` if the argument name does not contain word `partition` or `sort`
 |
 
-    `int count(String hashKey)`
+    `int count(String partitionKey)`
 
-    `int count(@HashKey String parentId, String rangeKey)`
+    `int count(@PartitionKey String parentId, String sortKey)`
 
 | Counts the items in the database. Beware, this can be very expensive operation in DynamoDB. See <<Advanced Queries>> for advanced use cases
 
 | `void`
 | `delete*`
-| Entity or Hash key and optional range key annotated with `@HashKey` and `@RangeKey` if the argument name does not contain word `hash` or `range`
+| Entity or Partition key and optional sort key annotated with `@PartitionKey` and `@SortKey` if the argument name does not contain word `partition` or `sort`
 |
 
     `void delete(DynamoDBEntity entity)`
 
-    `void delete(String hashKey, String rangeKey)`
+    `void delete(String partitionKey, String sortKey)`
 
-| Deletes an item which can be specified with hash key and optional range key. See <<Advanced Queries>> for advanced use cases
+| Deletes an item which can be specified with partition key and optional sort key. See <<Advanced Queries>> for advanced use cases
 
 | `Publisher<T>`
 |
@@ -538,13 +538,13 @@ The following table summarizes the supported method signatures:
 
 `query*`
 
-| Entity or Hash key and optional range key annotated with `@HashKey` and `@RangeKey` if the argument name does not contain word `hash` or `range`
+| Entity or Partition key and optional sort key annotated with `@PartitionKey` and `@SortKey` if the argument name does not contain word `partition` or `sort`
 |
-    `Publisher<DynamoDBEntity> query(String hashKey)`
+    `Publisher<DynamoDBEntity> query(String partitionKey)`
 
-    `List<DynamoDBEntity> query(String hashKey, String rangeKey)`
+    `List<DynamoDBEntity> query(String partitionKey, String sortKey)`
 
-| Queries for all entities with given hash key and/or range key.
+| Queries for all entities with given partition key and/or sort key.
 
 
 |
@@ -667,7 +667,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/a
 <2> Annotate an interface with `@Service` with the type of the entity as its `value`
 <3> `@Query` annotation accepts a closure which returns a query builder (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/QueryBuilder.html[QueryBuilder] for full reference)
 <4> Specify a partition key with `partitionKey` method and method's `hashKey` argument
-<5> Specify some range key criteria with the method's `rangeKey` argument (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
+<5> Specify some sort key criteria with the method's `rangeKey` argument (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/RangeConditionCollector.html[RangeConditionCollector] for full reference)
 <6> You can limit which properties are returned from the query
 <7> Only `rangeIndex` property will be populated in the entities returned
 <8> The arguments have no special meaning but you can use them in the query. The method must return either `Publisher`, `Stream` or `List` of entities.
@@ -830,7 +830,7 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/a
 <2> Annotate an interface with `@Service` with the type of the entity as its `value`
 <3> `@Update` annotation accepts a closure which returns an update builder (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html[UpdateBuilder] for full reference)
 <4> Specify a partition key with `partitionKey` method and method's `hashKey` argument
-<5> Specify a range key with `range` method and method's `rangeKey` argument
+<5> Specify a sort key with `sortKey` method and method's `rangeKey` argument
 <6> Specify update operation - increment `number` attribute (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html[UpdateBuilder] for full reference). You may have multiple update operations.
 <7> Specify what should be returned from the method (see https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/dynamodb/builder/UpdateBuilder.html[UpdateBuilder] for full reference).
 <8> The arguments have no special meaning but you can use them in the scan definition. The method's return value depends on the value returned from `returnUpdatedNew` mapper.
@@ -857,7 +857,7 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy
 service.query {                                                                         // <5>
     partitionKey '1'
     index DynamoDBEntity.DATE_INDEX
-    range { between from, to }
+    sortKey { between from, to }
 }
 
 service.update {                                                                        // <6>
@@ -872,9 +872,9 @@ service.delete('1001', '1')                                                     
 <1> Obtain the instance of `DynamoDBService` from `DynamoDBServiceProvider` (provider can be injected)
 <2> Create table for the entity
 <3> Save an entity
-<4> Load the entity by its hash and range keys
+<4> Load the entity by its partition and sort keys
 <5> Query the table for entities with given range index value
-<6> Increment a property for entity specified by hash and range keys
+<6> Increment a property for entity specified by partition and sort keys
 <7> Delete an entity
 
 [source,java,indent=0,options="nowrap",role="secondary"]
@@ -898,7 +898,7 @@ service.get("1", "1");                                                          
 service.query(query ->                                                                  // <5>
     query.partitionKey("1")
     .index(DynamoDBEntity.DATE_INDEX)
-    .range(r -> r.between(from, to))
+    .sortKey(r -> r.between(from, to))
 );
 
 service.update(update ->                                                                // <6>
@@ -913,9 +913,9 @@ service.delete("1001", "1");                                                    
 <1> Obtain the instance of `DynamoDBService` from `DynamoDBServiceProvider` (provider can be injected)
 <2> Create table for the entity
 <3> Save an entity
-<4> Load the entity by its hash and range keys
+<4> Load the entity by its partition and sort keys
 <5> Query the table for entities with given range index value
-<6> Increment a property for entity specified by hash and range keys
+<6> Increment a property for entity specified by partition and sort keys
 <7> Delete an entity
 
 [source,groovy,indent=0,options="nowrap",role="secondary"]
@@ -945,10 +945,10 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/a
 <1> Obtain the instance of `DynamoDBService` from `DynamoDBServiceProvider` (provider can be injected)
 <2> Create table for the entity
 <3> Save an entity
-<4> Load the entity by its hash and range keys
+<4> Load the entity by its partition and sort keys
 <5> Query the table for entities with given range index value
 <6> Query the table for entities having date between the specified dates
-<7> Increment a property for entity specified by hash and range keys
+<7> Increment a property for entity specified by partition and sort keys
 <8> Delete an entity by object reference
 <9> Delete all entities with given range index value
 
@@ -976,10 +976,10 @@ include::{root-dir}/subprojects/micronaut-aws-sdk-dynamodb/src/test/groovy/com/a
 <1> Obtain the instance of `DynamoDBService` from `DynamoDBServiceProvider` (provider can be injected)
 <2> Create table for the entity
 <3> Save an entity
-<4> Load the entity by its hash and range keys
+<4> Load the entity by its partition and sort keys
 <5> Query the table for entities with given range index value
 <6> Query the table for entities having date between the specified dates
-<7> Increment a property for entity specified by hash and range keys
+<7> Increment a property for entity specified by partition and sort keys
 <8> Delete an entity by object reference
 <9> Delete all entities with given range index value
 
