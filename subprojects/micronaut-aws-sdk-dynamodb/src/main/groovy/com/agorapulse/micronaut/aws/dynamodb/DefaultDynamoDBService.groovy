@@ -783,19 +783,23 @@ class DefaultDynamoDBService<TItemClass> implements DynamoDBService<TItemClass> 
         return metadata.secondaryIndexes.contains(rangeName)
     }
 
-    String getHashKeyName() {
+    @Override
+    String getPartitionKeyName() {
         return metadata.hashKeyName
     }
 
-    Class getHashKeyClass() {
+    @Override
+    Class getPartitionKeyClass() {
         return metadata.hashKeyClass
     }
 
-    String getRangeKeyName() {
+    @Override
+    String getSortKeyName() {
         return metadata.rangeKeyName
     }
 
-    Class getRangeKeyClass() {
+    @Override
+    Class getSortKeyClass() {
         return metadata.rangeKeyClass
     }
 
