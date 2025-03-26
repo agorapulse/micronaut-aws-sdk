@@ -58,6 +58,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortK
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbUpdateBehavior;
 
 import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 import java.time.Duration;
@@ -466,7 +467,7 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         try {
             Constructor<R> constructor = clazz.getConstructor();
             debugLog(clazz, () -> "Constructor: " + constructor);
-            return ObjectConstructor.create(clazz, constructor);
+            return ObjectConstructor.create(clazz, constructor, MethodHandles.lookup());
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException(
                 String.format("Class '%s' appears to have no default constructor thus cannot be used with the BeanTableSchema", clazz), e);
