@@ -19,7 +19,7 @@ dependencies {
     api group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
 
     compileOnly 'com.amazonaws:aws-java-sdk-core'
-    compileOnly "software.amazon.awssdk:netty-nio-client:$kinesisClientV2Version"
+    compileOnly "software.amazon.awssdk:netty-nio-client:$awsSdk2Version"
 
     compileOnly project(':micronaut-amazon-awssdk-cloudwatch')
     compileOnly project(':micronaut-amazon-awssdk-cloudwatchlogs')
