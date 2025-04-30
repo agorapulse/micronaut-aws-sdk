@@ -32,6 +32,8 @@ import io.micronaut.core.annotation.Nullable;
 import io.micronaut.core.beans.BeanIntrospection;
 import io.micronaut.core.beans.BeanProperty;
 import org.reactivestreams.Publisher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
@@ -66,6 +68,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
+
+    private static final Logger log = LoggerFactory.getLogger(DefaultAsyncDynamoDbService.class);
 
     private final Class<T> itemType;
     private final DynamoDbEnhancedAsyncClient enhancedClient;
@@ -162,11 +166,13 @@ public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
                 })).zipWith(Mono.just(batchItems))
             )
             .flatMap(r -> {
-                List<T> unprocesseded = r.getT1().unprocessedPutItemsForTable(table);
-                if (unprocesseded.isEmpty()) {
-                    return Flux.fromIterable(r.getT2()).doOnNext(i -> publisher.publishEvent(DynamoDbEvent.postPersist(i)));
+                List<T> unprocessed = r.getT1().unprocessedPutItemsForTable(table);
+                Flux<T> processed = Flux.fromIterable(r.getT2()).doOnNext(i -> publisher.publishEvent(DynamoDbEvent.postPersist(i)));
+                if (unprocessed.isEmpty()) {
+                    return processed;
                 }
-                return Flux.error(new FailedBatchRequestException("Failed to save items", unprocesseded));
+                log.info("Failed to save batch of items, retrying individually", new FailedBatchRequestException("Failed to save batch of items", unprocessed));
+                return Flux.concat(processed, Flux.fromIterable(unprocessed).flatMap(this::save));
             });
     }
 
@@ -208,12 +214,13 @@ public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
                 })).zipWith(Mono.just(batchItems))
             )
             .flatMap(r -> {
-                List<Key> unprocesseded = r.getT1().unprocessedDeleteItemsForTable(table);
-                if (unprocesseded.isEmpty()) {
-                    r.getT2().forEach(i -> publisher.publishEvent(DynamoDbEvent.postRemove(i)));
-                    return Flux.fromIterable(r.getT2());
+                List<Key> unprocessed = r.getT1().unprocessedDeleteItemsForTable(table);
+                Flux<T> processed = Flux.fromIterable(r.getT2()).doOnNext(i -> publisher.publishEvent(DynamoDbEvent.postRemove(i)));
+                if (unprocessed.isEmpty()) {
+                    return processed;
                 }
-                return Flux.error(new FailedBatchRequestException("Failed to delete items", unprocesseded));
+                log.info("Failed to delete batch of items, retrying individually", new FailedBatchRequestException("Failed to delete batch of items", unprocessed));
+                return Flux.concat(processed, Flux.fromIterable(unprocessed).flatMap(this::delete));
             });
     }
 

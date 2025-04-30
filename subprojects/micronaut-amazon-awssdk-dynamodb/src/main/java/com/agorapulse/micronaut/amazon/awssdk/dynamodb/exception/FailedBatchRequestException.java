@@ -24,6 +24,10 @@ import java.util.List;
  * Exception thrown when a batch request fails.
  * <p>
  *     The exception contains a list of unprocessed items - for save operation it is a list of items that were not saved and for delete operation it is a list of keys that were not deleted.
+ * </p>
+ * <p>
+ *     This exception is not thrown from async implementation but the unprocessed items are saved or deleted individually instead.
+ * </p>
  */
 public class FailedBatchRequestException extends IllegalArgumentException {
 
