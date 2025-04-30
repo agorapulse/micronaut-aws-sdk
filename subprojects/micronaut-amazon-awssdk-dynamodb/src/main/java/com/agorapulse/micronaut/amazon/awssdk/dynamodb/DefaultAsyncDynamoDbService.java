@@ -69,7 +69,7 @@ import java.util.function.Function;
 
 public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
 
-    private static final Logger log = LoggerFactory.getLogger(DefaultAsyncDynamoDbService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultAsyncDynamoDbService.class);
 
     private final Class<T> itemType;
     private final DynamoDbEnhancedAsyncClient enhancedClient;
@@ -171,7 +171,7 @@ public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
                 if (unprocessed.isEmpty()) {
                     return processed;
                 }
-                log.info("Failed to save batch of items, retrying individually", new FailedBatchRequestException("Failed to save batch of items", unprocessed));
+                LOGGER.info("Failed to save batch of items, retrying individually", new FailedBatchRequestException("Failed to save batch of items", unprocessed));
                 return Flux.concat(processed, Flux.fromIterable(unprocessed).flatMap(this::save));
             });
     }
@@ -219,7 +219,7 @@ public class DefaultAsyncDynamoDbService<T> implements AsyncDynamoDbService<T> {
                 if (unprocessed.isEmpty()) {
                     return processed;
                 }
-                log.info("Failed to delete batch of items, retrying individually", new FailedBatchRequestException("Failed to delete batch of items", unprocessed));
+                LOGGER.info("Failed to delete batch of items, retrying individually", new FailedBatchRequestException("Failed to delete batch of items", unprocessed));
                 return Flux.concat(processed, Flux.fromIterable(unprocessed).flatMap(this::delete));
             });
     }
