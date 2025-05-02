@@ -20,9 +20,6 @@ jobs:
         with:
           distribution: corretto
           java-version: 17
-      - name: Semantic Version
-        id: version
-        uses: ncipollo/semantic-version-action@v1
       - name: Decode PGP
         id: write_file
         uses: timheuer/base64-to-file@v1
@@ -34,7 +31,7 @@ jobs:
           SIGNING_SECRET_KEY_PATH: ${{ steps.write_file.outputs.filePath }}
         uses: eskatos/gradle-command-action@v2
         with:
-          arguments: gitPublishPush -x groovydoc publish closeAndReleaseSonatypeStagingRepository -Pversion=${{ steps.version.outputs.tag }} -Prelease=true -Dorg.ajoberstar.grgit.auth.username=${{ secrets.AGORAPULSE_BOT_PERSONAL_TOKEN }} --parallel
+          arguments: gitPublishPush -x groovydoc publish closeAndReleaseSonatypeStagingRepository -Pversion=${{ github.ref_name }} -Prelease=true -Dorg.ajoberstar.grgit.auth.username=${{ secrets.AGORAPULSE_BOT_PERSONAL_TOKEN }} --parallel
   ping:
     name: Notify Upstream Repositories
     runs-on: ubuntu-latest
@@ -62,4 +59,4 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           repository: ${{ matrix.repository }}
           event-type: ap-new-version-released-event
-          client-payload: '{ "group": "com.agorapulse", "module": "micronaut-aws-sdk", "micronautCompatibility": [4], "version": "${{ steps.version.outputs.tag }}", "property" : "micronaut.aws.sdk.version", "github" : ${{ toJson(github) }} }'
+          client-payload: '{ "group": "com.agorapulse", "module": "micronaut-aws-sdk", "micronautCompatibility": [4], "version": "${{ github.ref_name }}", "property" : "micronaut.aws.sdk.version", "github" : ${{ toJson(github) }} }'
