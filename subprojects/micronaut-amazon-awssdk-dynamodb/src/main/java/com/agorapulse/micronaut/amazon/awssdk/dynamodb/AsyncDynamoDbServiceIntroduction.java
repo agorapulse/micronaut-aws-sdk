@@ -204,7 +204,7 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
         Class<Object> type = context.getReturnType().getType();
         Publisher<?> publisher = publisherWithCheckpoint(publisherWithoutCheckpoint, context);
         if (void.class.isAssignableFrom(type) || Void.class.isAssignableFrom(type)) {
-            return Mono.from(publisher).block();
+            return Flux.from(publisher).collectList().block();
         }
         if (Publishers.isConvertibleToPublisher(type)) {
             return Publishers.convertPublisher(conversionService, publisher, type);
