@@ -104,7 +104,7 @@ public class CsvDynamoDbLoader implements DynamoDbLoader {
                     sink.error(e);
                 }
             }).map(data -> {
-                T insight = introspection.instantiate();
+                T entity = introspection.instantiate();
 
                 data.forEach((header, value) -> {
                     if (StringUtils.isEmpty(value)) {
@@ -137,14 +137,21 @@ public class CsvDynamoDbLoader implements DynamoDbLoader {
                             convertedValue = Optional.empty();
                             LOGGER.error("Error parsing JSON: {} for property: {} of {}", cleanUpJson, property.getName(), type);
                         }
+                    } else if (value.startsWith("[")) {
+                        try {
+                            convertedValue = Optional.of(mapper.readValue(value, property.getType()));
+                        } catch (JsonProcessingException e) {
+                            convertedValue = Optional.empty();
+                            LOGGER.error("Error parsing JSON: {} for property: {} of {}", value, property.getName(), type);
+                        }
                     } else {
                         convertedValue = conversionService.convert(value, property.asArgument());
                     }
 
-                    convertedValue.map(Object.class::cast).ifPresent(o -> property.set(insight, o));
+                    convertedValue.map(Object.class::cast).ifPresent(o -> property.set(entity, o));
                 });
 
-                return insight;
+                return entity;
             }).doOnComplete(() -> {
                 LOGGER.info("Loaded {} records from {} as {} in {} ms", reader.getRecordsRead(), filename, type, System.currentTimeMillis() - tick);
                 try {

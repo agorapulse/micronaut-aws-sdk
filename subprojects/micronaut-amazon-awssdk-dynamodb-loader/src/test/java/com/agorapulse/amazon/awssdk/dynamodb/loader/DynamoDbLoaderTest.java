@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -62,6 +63,7 @@ class DynamoDbLoaderTest {
         referenceEntity.setCount(2);
         referenceEntity.setValue(3.4);
         referenceEntity.setData(Map.of("string", "text"));
+        referenceEntity.setTags(Set.of("one", "two", "three"));
         return referenceEntity;
     }
 

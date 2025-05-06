@@ -23,6 +23,7 @@ import io.micronaut.core.annotation.Introspected;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 @Introspected
 public class TestEntity {
@@ -35,6 +36,7 @@ public class TestEntity {
     private int count;
     private double value;
     private Map<String, String> data;
+    private Set<String> tags;
 
     public String getId() {
         return id;
@@ -92,22 +94,30 @@ public class TestEntity {
         this.data = data;
     }
 
+    public Set<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Set<String> tags) {
+        this.tags = tags;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
         TestEntity that = (TestEntity) o;
-        return active == that.active && count == that.count && Double.compare(value, that.value) == 0 && Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(created, that.created) && Objects.equals(data, that.data);
+        return active == that.active && count == that.count && Double.compare(value, that.value) == 0 && Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(created, that.created) && Objects.equals(data, that.data) && Objects.equals(tags, that.tags);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, created, active, count, value, data);
+        return Objects.hash(id, name, created, active, count, value, data, tags);
     }
 
     @Override
     public String toString() {
-        return "TestEntity{id='%s', name='%s', created=%s, active=%s, count=%d, value=%s, data=%s}".formatted(id, name, created, active, count, value, data);
+        return "TestEntity{id='%s', name='%s', created=%s, active=%s, count=%d, value=%s, data=%s, tags=%s}".formatted(id, name, created, active, count, value, data, tags);
     }
 }
