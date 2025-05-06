@@ -118,6 +118,6 @@ public class TestEntity {
 
     @Override
     public String toString() {
-        return "TestEntity{id='%s', name='%s', created=%s, active=%s, count=%d, value=%s, data=%s, tags'%s}".formatted(id, name, created, active, count, value, data, tags);
+        return "TestEntity{id='%s', name='%s', created=%s, active=%s, count=%d, value=%s, data=%s, tags=%s}".formatted(id, name, created, active, count, value, data, tags);
     }
 }
