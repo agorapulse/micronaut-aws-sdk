@@ -26,6 +26,7 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Provider of {@link DynamoDbService} for particular DynamoDB entities.
@@ -33,6 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Singleton
 public class DefaultDynamoDBServiceProvider implements DynamoDBServiceProvider {
 
+    private final ReentrantLock lock = new ReentrantLock();
     private final ConcurrentHashMap<String, DynamoDbService<?>> serviceCache = new ConcurrentHashMap<>();
     private final DynamoDbEnhancedClient enhancedClient;
     private final DynamoDbClient client;
@@ -68,30 +70,37 @@ public class DefaultDynamoDBServiceProvider implements DynamoDBServiceProvider {
     @Override
     @SuppressWarnings("unchecked")
     public <T> DynamoDbService<T> findOrCreate(String tableName, Class<T> type) {
-        return (DynamoDbService<T>) serviceCache.computeIfAbsent(tableName, t -> {
-                DynamoDbTable<T> table = enhancedClient.table(tableName, tableSchemaCreator.create(type));
-                DefaultDynamoDbService<T> newService = new DefaultDynamoDbService<>(
-                    type,
-                    enhancedClient,
-                    client,
-                    attributeConversionHelper,
-                    publisher,
-                    table
-                );
+        // guard against concurrent access because MetaTableSchemaCache is not thread-safe
+        lock.lock();
 
-                if (!createTables) {
+        try {
+            return (DynamoDbService<T>) serviceCache.computeIfAbsent(tableName, t -> {
+                    DynamoDbTable<T> table = enhancedClient.table(tableName, tableSchemaCreator.create(type));
+                    DefaultDynamoDbService<T> newService = new DefaultDynamoDbService<>(
+                        type,
+                        enhancedClient,
+                        client,
+                        attributeConversionHelper,
+                        publisher,
+                        table
+                    );
+
+                    if (!createTables) {
+                        return newService;
+                    }
+
+                    try {
+                        table.describeTable();
+                    } catch (ResourceNotFoundException e) {
+                        table.createTable();
+                    }
+
                     return newService;
                 }
-
-                try {
-                    table.describeTable();
-                } catch (ResourceNotFoundException e) {
-                    table.createTable();
-                }
-
-                return newService;
-            }
-        );
+            );
+        } finally {
+            lock.unlock();
+        }
     }
 
 }
