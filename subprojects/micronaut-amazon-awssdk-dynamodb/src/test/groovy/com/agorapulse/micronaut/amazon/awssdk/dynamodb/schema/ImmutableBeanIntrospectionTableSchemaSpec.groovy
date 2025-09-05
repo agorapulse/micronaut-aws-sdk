@@ -18,7 +18,7 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.schema
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.Address
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.PhoneNumber
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.ImmutablePhoneNumber
 import io.micronaut.context.BeanContext
 import io.micronaut.core.convert.ConversionService
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.MetaTableSchemaCache
@@ -39,8 +39,7 @@ class ImmutableBeanIntrospectionTableSchemaSpec extends Specification {
 
     void 'read table schema for immutable class with @DynamoDbImmutable'() {
         when:
-            ImmutableBeanIntrospectionTableSchema<ImmutableEntityWithDynamoDbImmutable, ImmutableEntityWithDynamoDbImmutable.Builder> schema = 
-                ImmutableBeanIntrospectionTableSchema.create(ImmutableEntityWithDynamoDbImmutable, ImmutableEntityWithDynamoDbImmutable.Builder, context, cache)
+            ImmutableBeanIntrospectionTableSchema<ImmutableEntityWithDynamoDbImmutable> schema = ImmutableBeanIntrospectionTableSchema.create(ImmutableEntityWithDynamoDbImmutable, context, cache)
         then:
             schema.attributeNames().size() == 3 // id, sortKey, ttl
             schema.attributeNames().containsAll(['id', 'sortKey', 'ttl'])
@@ -65,8 +64,8 @@ class ImmutableBeanIntrospectionTableSchemaSpec extends Specification {
 
     void 'read table schema for immutable class with @Immutable annotation'() {
         when:
-            ImmutableBeanIntrospectionTableSchema<ImmutableEntityWithCustomAnnotation, ImmutableEntityWithCustomAnnotation.Builder> schema = 
-                ImmutableBeanIntrospectionTableSchema.create(ImmutableEntityWithCustomAnnotation, ImmutableEntityWithCustomAnnotation.Builder, context, cache)
+            ImmutableBeanIntrospectionTableSchema<ImmutableEntityWithCustomAnnotation> schema =
+                ImmutableBeanIntrospectionTableSchema.create(ImmutableEntityWithCustomAnnotation, context, cache)
         then:
             schema.attributeNames().size() == 4 // id, sortKey, created, ttl
             schema.attributeNames().containsAll(['id', 'sortKey', 'created', 'ttl'])
@@ -95,8 +94,8 @@ class ImmutableBeanIntrospectionTableSchemaSpec extends Specification {
 
     void 'read table schema for immutable record'() {
         when:
-            ImmutableBeanIntrospectionTableSchema<ImmutableEntityRecord, ImmutableEntityRecord.Builder> schema = 
-                ImmutableBeanIntrospectionTableSchema.create(ImmutableEntityRecord, ImmutableEntityRecord.Builder, context, cache)
+            ImmutableBeanIntrospectionTableSchema<ImmutableEntityRecord> schema =
+                ImmutableBeanIntrospectionTableSchema.create(ImmutableEntityRecord, context, cache)
         then:
             schema.attributeNames().size() == 4 // accountId, subId, name, createdDate
 
@@ -126,8 +125,8 @@ class ImmutableBeanIntrospectionTableSchemaSpec extends Specification {
 
     void 'read table schema for immutable class with nested beans'() {
         when:
-            ImmutableBeanIntrospectionTableSchema<ImmutablePersonEntity, ImmutablePersonEntity.Builder> schema = 
-                ImmutableBeanIntrospectionTableSchema.create(ImmutablePersonEntity, ImmutablePersonEntity.Builder, context, cache)
+            ImmutableBeanIntrospectionTableSchema<ImmutablePersonEntity> schema =
+                ImmutableBeanIntrospectionTableSchema.create(ImmutablePersonEntity, context, cache)
         then:
             schema.attributeNames().size() == 8
 
@@ -142,7 +141,7 @@ class ImmutableBeanIntrospectionTableSchemaSpec extends Specification {
                     city: 'Springfield',
                     zipCode: '12345'
                 )])
-                .phoneNumbers([new PhoneNumber('123456789', 'home')])
+                .phoneNumbers([new ImmutablePhoneNumber('home', '123456789')])
                 .hobbies(['reading', 'coding'])
                 .favoriteColors(['red', 'green'] as Set)
                 .build()
@@ -160,15 +159,15 @@ class ImmutableBeanIntrospectionTableSchemaSpec extends Specification {
             loaded.lastName == 'Doe'
             loaded.age == 42
             loaded.addresses['main'].street == 'Main Street'
-            loaded.phoneNumbers[0].number == '123456789'
+            loaded.phoneNumbers[0].number() == '123456789'
             loaded.hobbies.contains('reading')
             loaded.favoriteColors.contains('red')
     }
 
     void 'ttl is computed correctly for immutable entity with TimeToLive annotation'() {
         given:
-            ImmutableBeanIntrospectionTableSchema<ImmutableEntityWithDynamoDbImmutable, ImmutableEntityWithDynamoDbImmutable.Builder> schema = 
-                ImmutableBeanIntrospectionTableSchema.create(ImmutableEntityWithDynamoDbImmutable, ImmutableEntityWithDynamoDbImmutable.Builder, context, cache)
+            ImmutableBeanIntrospectionTableSchema<ImmutableEntityWithDynamoDbImmutable> schema =
+                ImmutableBeanIntrospectionTableSchema.create(ImmutableEntityWithDynamoDbImmutable, context, cache)
 
         when:
             long secondsBefore = (long) (System.currentTimeMillis() / 1000L)
@@ -186,8 +185,8 @@ class ImmutableBeanIntrospectionTableSchemaSpec extends Specification {
 
     void 'ttl is computed correctly for immutable entity with field-level TimeToLive annotation'() {
         given:
-            ImmutableBeanIntrospectionTableSchema<ImmutableEntityWithCustomAnnotation, ImmutableEntityWithCustomAnnotation.Builder> schema = 
-                ImmutableBeanIntrospectionTableSchema.create(ImmutableEntityWithCustomAnnotation, ImmutableEntityWithCustomAnnotation.Builder, context, cache)
+            ImmutableBeanIntrospectionTableSchema<ImmutableEntityWithCustomAnnotation> schema =
+                ImmutableBeanIntrospectionTableSchema.create(ImmutableEntityWithCustomAnnotation, context, cache)
 
         when:
             Instant refTime = Instant.now()
@@ -207,7 +206,7 @@ class ImmutableBeanIntrospectionTableSchemaSpec extends Specification {
                 .id(1L)
                 .sortKey(2L)
                 .build()
-            
+
             ImmutableEntityWithDynamoDbImmutable entity2 = ImmutableEntityWithDynamoDbImmutable.builder()
                 .id(1L)
                 .sortKey(2L)
@@ -228,7 +227,7 @@ class ImmutableBeanIntrospectionTableSchemaSpec extends Specification {
                 .name('John')
                 .createdDate(now)
                 .build()
-            
+
             ImmutableEntityRecord record2 = new ImmutableEntityRecord('test', 123, 'John', now)
         then:
             record1 == record2
@@ -242,7 +241,7 @@ class ImmutableBeanIntrospectionTableSchemaSpec extends Specification {
     void 'builder class must be annotated with @Introspected'() {
         when:
             // This would fail in a real scenario if builder wasn't annotated
-            ImmutableBeanIntrospectionTableSchema.create(ImmutableEntityWithDynamoDbImmutable, ImmutableEntityWithDynamoDbImmutable.Builder, context, cache)
+            ImmutableBeanIntrospectionTableSchema.create(ImmutableEntityWithDynamoDbImmutable, context, cache)
         then:
             noExceptionThrown()
     }
@@ -250,8 +249,9 @@ class ImmutableBeanIntrospectionTableSchemaSpec extends Specification {
     void 'immutable class must be annotated with @Introspected'() {
         when:
             // This would fail in a real scenario if the immutable class wasn't annotated
-            ImmutableBeanIntrospectionTableSchema.create(ImmutableEntityWithDynamoDbImmutable, ImmutableEntityWithDynamoDbImmutable.Builder, context, cache)
+            ImmutableBeanIntrospectionTableSchema.create(ImmutableEntityWithDynamoDbImmutable, context, cache)
         then:
             noExceptionThrown()
     }
+
 }

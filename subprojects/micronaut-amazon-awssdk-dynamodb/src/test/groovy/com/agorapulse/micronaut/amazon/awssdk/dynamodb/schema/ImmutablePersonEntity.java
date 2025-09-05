@@ -18,8 +18,8 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.schema;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.Address;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.ImmutablePhoneNumber;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.PhoneNumber;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Immutable;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.PartitionKey;
 import io.micronaut.core.annotation.Introspected;
 
@@ -28,8 +28,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-@Introspected
-@Immutable(builder = ImmutablePersonEntity.Builder.class)
+@Introspected(builder = @Introspected.IntrospectionBuilder(builderClass = ImmutablePersonEntity.Builder.class))
 public class ImmutablePersonEntity {
 
     private final Long id;
@@ -37,7 +36,7 @@ public class ImmutablePersonEntity {
     private final String lastName;
     private final Integer age;
     private final Map<String, Address> addresses;
-    private final List<PhoneNumber> phoneNumbers;
+    private final List<ImmutablePhoneNumber> phoneNumbers;
     private final List<String> hobbies;
     private final Set<String> favoriteColors;
 
@@ -73,7 +72,7 @@ public class ImmutablePersonEntity {
         return addresses;
     }
 
-    public List<PhoneNumber> getPhoneNumbers() {
+    public List<ImmutablePhoneNumber> getPhoneNumbers() {
         return phoneNumbers;
     }
 
@@ -119,14 +118,13 @@ public class ImmutablePersonEntity {
             '}';
     }
 
-    @Introspected
     public static class Builder {
         private Long id;
         private String firstName;
         private String lastName;
         private Integer age;
         private Map<String, Address> addresses;
-        private List<PhoneNumber> phoneNumbers;
+        private List<ImmutablePhoneNumber> phoneNumbers;
         private List<String> hobbies;
         private Set<String> favoriteColors;
 
@@ -155,7 +153,7 @@ public class ImmutablePersonEntity {
             return this;
         }
 
-        public Builder phoneNumbers(List<PhoneNumber> phoneNumbers) {
+        public Builder phoneNumbers(List<ImmutablePhoneNumber> phoneNumbers) {
             this.phoneNumbers = phoneNumbers;
             return this;
         }

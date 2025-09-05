@@ -35,10 +35,8 @@ import software.amazon.awssdk.enhanced.dynamodb.internal.AttributeConfiguration;
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.MetaTableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.MetaTableSchemaCache;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttribute;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticTableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.WrappedTableSchema;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.BeanTableSchemaAttributeTag;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbFlatten;
 
@@ -46,7 +44,6 @@ import java.lang.annotation.Annotation;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -114,28 +111,6 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         return newTableSchema;
     }
 
-    // Called when creating an immutable TableSchema recursively. Utilizes the MetaTableSchema cache to stop infinite
-    // recursion
-    static <T> TableSchema<T> recursiveCreate(Class<T> beanClass, BeanContext context, MetaTableSchemaCache metaTableSchemaCache) {
-        Optional<MetaTableSchema<T>> metaTableSchema = metaTableSchemaCache.get(beanClass);
-
-        // If we get a cache hit...
-        if (metaTableSchema.isPresent()) {
-            // Either: use the cached concrete TableSchema if we have one
-            if (metaTableSchema.get().isInitialized()) {
-                return metaTableSchema.get().concreteTableSchema();
-            }
-
-            // Or: return the uninitialized MetaTableSchema as this must be a recursive reference, and it will be
-            // initialized later as the chain completes
-            return metaTableSchema.get();
-        }
-
-        // Otherwise: cache doesn't know about this class; create a new one from scratch
-        return create(beanClass, context, metaTableSchemaCache);
-
-    }
-
     private static <T> StaticTableSchema<T> createStaticTableSchema(Class<T> beanClass,
                                                                     BeanContext beanContext,
                                                                     MetaTableSchemaCache metaTableSchemaCache) {
@@ -198,7 +173,6 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
             .build();
     }
 
-
     private static <T, P> StaticAttribute<T, P> extractAttributeFromProperty(
         Class<T> beanClass,
         MetaTableSchemaCache metaTableSchemaCache,
@@ -221,13 +195,11 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
             StaticAttribute.Builder<T, P> attributeBuilder = staticAttributeBuilder(propertyDescriptor, beanClass, metaTableSchemaCache, attributeConfiguration, beanContext);
 
             IntrospectionTableSchema.createAttributeConverterFromAnnotation(propertyDescriptor, beanContext).ifPresent(attributeBuilder::attributeConverter);
+            IntrospectionTableSchema.collectTagsToAttribute(propertyDescriptor).forEach(attributeBuilder::addTag);
 
-            addTagsToAttribute(attributeBuilder, propertyDescriptor);
             return attributeBuilder.build();
         }
     }
-
-
 
     private static <T, P> StaticAttribute.Builder<T, P> staticAttributeBuilder(
         BeanProperty<T, P> propertyDescriptor,
@@ -244,38 +216,6 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
             // secondary indices can be read only
             .setter(propertyDescriptor.isReadOnly() ? (bean, value) -> {} : propertyDescriptor::set);
     }
-
-
-
-    /**
-     * This method scans all the annotations on a property and looks for a meta-annotation of
-     * {@link BeanTableSchemaAttributeTag}. If the meta-annotation is found, it attempts to create
-     * an annotation tag based on a standard named static method
-     * of the class that tag has been annotated with passing in the original property annotation as an argument.
-     */
-    private static <T> void addTagsToAttribute(StaticAttribute.Builder<?, ?> attributeBuilder,
-                                               BeanProperty<T, ?> propertyDescriptor) {
-
-        IntrospectionTableSchema.findAnnotation(propertyDescriptor, IntrospectionTableSchema.UPDATE_BEHAVIOUR_ANNOTATIONS)
-            .flatMap(anno -> anno.enumValue(Enum.class))
-            .ifPresent(behavior -> attributeBuilder.addTag(StaticAttributeTags.updateBehavior(software.amazon.awssdk.enhanced.dynamodb.mapper.UpdateBehavior.valueOf(behavior.name()))));
-
-        IntrospectionTableSchema.findAnnotation(propertyDescriptor, IntrospectionTableSchema.PARTITION_KEYS_ANNOTATIONS)
-            .ifPresent(anno -> attributeBuilder.addTag(StaticAttributeTags.primaryPartitionKey()));
-
-        IntrospectionTableSchema.findAnnotation(propertyDescriptor, IntrospectionTableSchema.SORT_KEYS_ANNOTATIONS)
-            .ifPresent(anno -> attributeBuilder.addTag(StaticAttributeTags.primarySortKey()));
-
-        IntrospectionTableSchema.findAnnotation(propertyDescriptor, IntrospectionTableSchema.SECONDARY_PARTITION_KEYS_ANNOTATIONS)
-            .map(anno -> anno.stringValues("indexNames"))
-            .ifPresent(indexNames -> attributeBuilder.addTag(StaticAttributeTags.secondaryPartitionKey(Arrays.asList(indexNames))));
-
-        IntrospectionTableSchema.findAnnotation(propertyDescriptor, IntrospectionTableSchema.SECONDARY_SORT_KEYS_ANNOTATIONS)
-            .map(anno -> anno.stringValues("indexNames"))
-            .ifPresent(indexNames -> attributeBuilder.addTag(StaticAttributeTags.secondarySortKey(Arrays.asList(indexNames))));
-    }
-
-
 
     private static <T> boolean isMappableProperty(Class<T> beanClass, BeanProperty<T, ?> propertyDescriptor) {
 

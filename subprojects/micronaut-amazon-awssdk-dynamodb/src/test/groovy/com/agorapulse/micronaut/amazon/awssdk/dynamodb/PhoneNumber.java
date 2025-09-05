@@ -19,32 +19,51 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
 import io.micronaut.core.annotation.Introspected;
 
+import java.util.Objects;
+
 @Introspected
-public record PhoneNumber(
-    String type,
-    String number
-){
+public class PhoneNumber {
+    String type;
+    String number;
 
-    @Introspected
-    public static class Builder {
+    public String getType() {
+        return type;
+    }
 
-        private String type;
-        private String number;
+    public void setType(String type) {
+        this.type = type;
+    }
 
-        public Builder type(String type) {
-            this.type = type;
-            return this;
+    public String getNumber() {
+        return number;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
+    }
+
+    // CHECKSTYLE:OFF
+    @Override
+    public String toString() {
+        return "PhoneNumber{" +
+                "type='" + type + '\'' +
+                ", number='" + number + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
         }
 
-        public Builder number(String number) {
-            this.number = number;
-            return this;
-        }
+        PhoneNumber that = (PhoneNumber) o;
+        return Objects.equals(type, that.type) && Objects.equals(number, that.number);
+    }
 
-        public PhoneNumber build() {
-            return new PhoneNumber(type, number);
-        }
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, number);
     }
 
 }

@@ -18,7 +18,6 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.schema;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.*;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Immutable;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert.ConvertedJsonAttributeConverter;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert.LegacyAttributeConverterProvider;
 import io.micronaut.context.BeanContext;
@@ -35,8 +34,11 @@ import software.amazon.awssdk.enhanced.dynamodb.EnhancedType;
 import software.amazon.awssdk.enhanced.dynamodb.EnhancedTypeDocumentConfiguration;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.internal.AttributeConfiguration;
+import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.MetaTableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.MetaTableSchemaCache;
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.ObjectConstructor;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.ImmutableAttribute;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTag;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 
 import java.lang.annotation.Annotation;
@@ -76,8 +78,7 @@ import static software.amazon.awssdk.enhanced.dynamodb.internal.DynamoDbEnhanced
  * Classes are considered immutable if they:
  * <ul>
  *   <li>Are annotated with {@link DynamoDbImmutable}</li>
- *   <li>Are annotated with {@link Immutable}</li>
- *   <li>Are Java records with a static builder() method</li>
+ *   <li>Are annotated with {@link io.micronaut.core.annotation.Introspected} with <code>builder</code> settings</li>
  * </ul>
  * </p>
  *
@@ -130,12 +131,8 @@ public class IntrospectionTableSchema {
      */
     public static <T> TableSchema<T> create(Class<T> beanClass, BeanContext context, MetaTableSchemaCache metaTableSchemaCache) {
         if (isImmutableClass(beanClass)) {
-            // For immutable classes, determine the builder class and create immutable schema
-            @SuppressWarnings("unchecked")
-            Class<Object> builderClass = (Class<Object>) determineBuilderClass(beanClass);
-            return ImmutableBeanIntrospectionTableSchema.create(beanClass, builderClass, context, metaTableSchemaCache);
+            return ImmutableBeanIntrospectionTableSchema.create(beanClass, context, metaTableSchemaCache);
         } else {
-            // For mutable classes, use the standard bean schema
             return BeanIntrospectionTableSchema.create(beanClass, context, metaTableSchemaCache);
         }
     }
@@ -152,10 +149,35 @@ public class IntrospectionTableSchema {
      */
     static <T> TableSchema<T> recursiveCreate(Class<T> beanClass, BeanContext context, MetaTableSchemaCache metaTableSchemaCache) {
         if (isImmutableClass(beanClass)) {
-            return ImmutableBeanIntrospectionTableSchema.recursiveCreate(beanClass, context, metaTableSchemaCache);
+            return recursiveCreate(
+                beanClass, metaTableSchemaCache, () -> ImmutableBeanIntrospectionTableSchema.create(beanClass, context, metaTableSchemaCache)
+            );
         } else {
-            return BeanIntrospectionTableSchema.recursiveCreate(beanClass, context, metaTableSchemaCache);
+            return recursiveCreate(
+                beanClass, metaTableSchemaCache, () -> BeanIntrospectionTableSchema.create(beanClass, context, metaTableSchemaCache)
+            );
         }
+    }
+
+
+    // Called when creating an immutable TableSchema recursively. Utilizes the MetaTableSchema cache to stop infinite
+    // recursion
+    static <T> TableSchema<T> recursiveCreate(Class<T> immutableClass, MetaTableSchemaCache metaTableSchemaCache, Supplier<TableSchema<T>> tableSchemaSupplier) {
+        Optional<MetaTableSchema<T>> metaTableSchema = metaTableSchemaCache.get(immutableClass);
+
+        // If we get a cache hit...
+        if (metaTableSchema.isPresent()) {
+            // Either: use the cached concrete TableSchema if we have one
+            if (metaTableSchema.get().isInitialized()) {
+                return metaTableSchema.get().concreteTableSchema();
+            }
+
+            // Or: return the uninitialized MetaTableSchema as this must be a recursive reference, and it will be
+            // initialized later as the chain completes
+            return metaTableSchema.get();
+        }
+
+        return tableSchemaSupplier.get();
     }
 
     /**
@@ -165,76 +187,14 @@ public class IntrospectionTableSchema {
      * @return true if the class is immutable, false otherwise
      */
     static boolean isImmutableClass(Class<?> clazz) {
-        // Check for explicit immutable annotations
-        if (clazz.getAnnotation(DynamoDbImmutable.class) != null) {
-            return true;
-        }
-        if (clazz.getAnnotation(Immutable.class) != null) {
-            return true;
-        }
-
-        // Check if it's a record with a static builder() method
-        if (clazz.isRecord()) {
-            // using var to prevent generics issue
-            var introspectionOptional = BeanIntrospector.SHARED.findIntrospection(clazz);
-            if (introspectionOptional.isPresent()) {
-                BeanIntrospection<?> introspection = introspectionOptional.get();
-                return introspection.getBeanMethods().stream()
-                    .anyMatch(method -> "builder".equals(method.getName()) && method.getArguments().length == 0);
-            }
+        // Check if the class has builder support via @Introspected annotation
+        var introspectionOptional = BeanIntrospector.SHARED.findIntrospection(clazz);
+        if (introspectionOptional.isPresent()) {
+            BeanIntrospection<?> introspection = introspectionOptional.get();
+            return introspection.hasBuilder();
         }
 
-        return false;
-    }
-
-    /**
-     * Determines the builder class for an immutable class.
-     * For classes annotated with @DynamoDbImmutable or @Immutable, uses the annotation's builder value.
-     * For records with a static builder() method, uses the return type of that method.
-     * Otherwise, falls back to looking for a Builder inner class.
-     *
-     * @param <T> The immutable class type
-     * @param immutableClass The immutable class
-     * @return The builder class for the immutable class
-     * @throws IllegalArgumentException if no builder class can be determined
-     */
-    static <T> Class<?> determineBuilderClass(Class<T> immutableClass) {
-        // First check for @DynamoDbImmutable annotation
-        DynamoDbImmutable immutableAnnotation = immutableClass.getAnnotation(DynamoDbImmutable.class);
-        if (immutableAnnotation != null) {
-            return immutableAnnotation.builder();
-        }
-
-        // Then check for our @Immutable annotation alias
-        Immutable immutableAlias = immutableClass.getAnnotation(Immutable.class);
-        if (immutableAlias != null) {
-            return immutableAlias.builder();
-        }
-
-        // For records, check if there's a static builder() method
-        if (immutableClass.isRecord()) {
-            Optional<BeanIntrospection<T>> introspectionOptional = BeanIntrospector.SHARED.findIntrospection(immutableClass);
-            if (introspectionOptional.isPresent()) {
-                BeanIntrospection<T> introspection = introspectionOptional.get();
-                return introspection.getBeanMethods().stream()
-                    .filter(method -> "builder".equals(method.getName()))
-                    .filter(method -> method.getArguments().length == 0)
-                    // For records with @Introspected, static methods should be included in getBeanMethods()
-                    // We assume that a parameterless builder() method is static (common record pattern)
-                    .map(method -> method.getReturnType().getType())
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException(
-                        "Record " + immutableClass.getTypeName() + " must have a static builder() method"));
-            }
-        }
-
-        // Fall back to looking for Builder inner class (common convention)
-        try {
-            return Class.forName(immutableClass.getName() + "$Builder");
-        } catch (ClassNotFoundException e) {
-            throw new IllegalArgumentException("Cannot determine builder class for " + immutableClass.getTypeName() +
-                ". Please ensure the class is annotated with @DynamoDbImmutable, is a record with a static builder() method, or has a Builder inner class.", e);
-        }
+        return clazz.isRecord();
     }
 
     /**
@@ -490,6 +450,28 @@ public class IntrospectionTableSchema {
         }
 
         return true;
+    }
+
+    static <T> List<StaticAttributeTag> collectTagsToAttribute(BeanProperty<T, ?> propertyDescriptor) {
+        List<StaticAttributeTag> tags = new java.util.ArrayList<>();
+        IntrospectionTableSchema.findAnnotation(propertyDescriptor, IntrospectionTableSchema.UPDATE_BEHAVIOUR_ANNOTATIONS)
+            .flatMap(anno -> anno.enumValue(Enum.class))
+            .ifPresent(behavior ->  tags.add(software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags.updateBehavior(software.amazon.awssdk.enhanced.dynamodb.mapper.UpdateBehavior.valueOf(behavior.name()))));
+
+        IntrospectionTableSchema.findAnnotation(propertyDescriptor, IntrospectionTableSchema.PARTITION_KEYS_ANNOTATIONS)
+            .ifPresent(anno -> tags.add(software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags.primaryPartitionKey()));
+
+        IntrospectionTableSchema.findAnnotation(propertyDescriptor, IntrospectionTableSchema.SORT_KEYS_ANNOTATIONS)
+            .ifPresent(anno -> tags.add(software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags.primarySortKey()));
+
+        IntrospectionTableSchema.findAnnotation(propertyDescriptor, IntrospectionTableSchema.SECONDARY_PARTITION_KEYS_ANNOTATIONS)
+            .map(anno -> anno.stringValues("indexNames"))
+            .ifPresent(indexNames -> tags.add(software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags.secondaryPartitionKey(Arrays.asList(indexNames))));
+
+        IntrospectionTableSchema.findAnnotation(propertyDescriptor, IntrospectionTableSchema.SECONDARY_SORT_KEYS_ANNOTATIONS)
+            .map(anno -> anno.stringValues("indexNames"))
+            .ifPresent(indexNames -> tags.add(software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags.secondarySortKey(Arrays.asList(indexNames))));
+        return tags;
     }
 
     private IntrospectionTableSchema() {

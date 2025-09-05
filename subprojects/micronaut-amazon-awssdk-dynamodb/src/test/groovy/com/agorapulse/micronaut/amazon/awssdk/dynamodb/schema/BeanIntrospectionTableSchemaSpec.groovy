@@ -143,7 +143,7 @@ class BeanIntrospectionTableSchemaSpec extends Specification {
                         zipCode: '12345'
                     )
                 ],
-                phoneNumbers: [new PhoneNumber('123456789', 'home')],
+                phoneNumbers: [new PhoneNumber(type: 'home', number: '123456789')],
                 hobbies: ['reading', 'coding'],
                 favoriteColors: ['red', 'green'],
             )

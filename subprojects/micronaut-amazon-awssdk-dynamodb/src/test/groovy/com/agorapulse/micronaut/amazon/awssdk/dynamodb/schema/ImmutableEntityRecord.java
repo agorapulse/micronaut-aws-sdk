@@ -25,7 +25,7 @@ import io.micronaut.core.annotation.Introspected;
 
 import java.time.Instant;
 
-@Introspected
+@Introspected(builder = @Introspected.IntrospectionBuilder(builderClass = ImmutableEntityRecord.Builder.class))
 public record ImmutableEntityRecord(
     @PartitionKey String accountId,
     @SortKey int subId,
@@ -37,7 +37,6 @@ public record ImmutableEntityRecord(
         return new Builder();
     }
     
-    @Introspected
     public static class Builder {
         private String accountId;
         private int subId;

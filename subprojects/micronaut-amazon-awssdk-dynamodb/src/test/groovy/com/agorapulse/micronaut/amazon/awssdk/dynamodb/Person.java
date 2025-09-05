@@ -22,6 +22,7 @@ import io.micronaut.core.annotation.Introspected;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 @Introspected
@@ -113,5 +114,20 @@ public class Person {
                 ", hobbies=" + hobbies +
                 ", favoriteColors=" + favoriteColors +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Person person = (Person) o;
+        return Objects.equals(id, person.id) && Objects.equals(firstName, person.firstName) && Objects.equals(lastName, person.lastName) && Objects.equals(age, person.age) && Objects.equals(addresses, person.addresses) && Objects.equals(phoneNumbers, person.phoneNumbers) && Objects.equals(hobbies, person.hobbies) && Objects.equals(favoriteColors, person.favoriteColors);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, firstName, lastName, age, addresses, phoneNumbers, hobbies, favoriteColors);
     }
 }
