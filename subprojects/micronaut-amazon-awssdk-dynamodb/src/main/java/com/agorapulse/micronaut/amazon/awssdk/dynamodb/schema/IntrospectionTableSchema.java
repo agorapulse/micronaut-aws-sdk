@@ -17,7 +17,20 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.schema;
 
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.*;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Attribute;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.ConvertedBy;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.ConvertedJson;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.HashKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Ignore;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.IgnoreNulls;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.PartitionKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.PreserveEmptyObjects;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.RangeKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondaryPartitionKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondarySortKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SortKey;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.TimeToLive;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.UpdateBehavior;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert.ConvertedJsonAttributeConverter;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert.LegacyAttributeConverterProvider;
 import io.micronaut.context.BeanContext;
@@ -37,9 +50,18 @@ import software.amazon.awssdk.enhanced.dynamodb.internal.AttributeConfiguration;
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.MetaTableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.MetaTableSchemaCache;
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.ObjectConstructor;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.ImmutableAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTag;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbConvertedBy;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbIgnore;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbIgnoreNulls;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbImmutable;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPreserveEmptyObject;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondarySortKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbUpdateBehavior;
 
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandles;

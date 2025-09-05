@@ -39,7 +39,8 @@ class ImmutableBeanIntrospectionTableSchemaSpec extends Specification {
 
     void 'read table schema for immutable class with @DynamoDbImmutable'() {
         when:
-            ImmutableBeanIntrospectionTableSchema<ImmutableEntityWithDynamoDbImmutable> schema = ImmutableBeanIntrospectionTableSchema.create(ImmutableEntityWithDynamoDbImmutable, context, cache)
+            ImmutableBeanIntrospectionTableSchema<ImmutableEntityWithDynamoDbImmutable> schema =
+                ImmutableBeanIntrospectionTableSchema.create(ImmutableEntityWithDynamoDbImmutable, context, cache)
         then:
             schema.attributeNames().size() == 3 // id, sortKey, ttl
             schema.attributeNames().containsAll(['id', 'sortKey', 'ttl'])
@@ -238,6 +239,7 @@ class ImmutableBeanIntrospectionTableSchemaSpec extends Specification {
             record1.createdDate() == now
     }
 
+    @SuppressWarnings('BuilderMethodWithSideEffects')
     void 'builder class must be annotated with @Introspected'() {
         when:
             // This would fail in a real scenario if builder wasn't annotated
