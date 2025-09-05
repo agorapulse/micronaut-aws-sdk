@@ -107,6 +107,30 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test
 
 WARNING: The `@TimeToLive` annotation only adds read only attribute to the entity. You need to enable TTL on the table manually.
 
+==== Immutable Entities
+
+For immutable entities such as these declared as records, use `@Introspected` with builder configuration:
+
+[source,java,indent=0,options="nowrap"]
+.Immutable Entity
+----
+@Introspected(builder = @Introspected.IntrospectionBuilder(builderClass = Customer.Builder.class))
+public record Customer(
+    @PartitionKey Long id,
+    @SortKey String name
+) {
+
+    public static class Builder {
+        public Builder id(Long id) { /* ... */ }
+        public Builder name(String name) { /* ... */ }
+        public Customer build() { /* ... */ }
+    }
+
+}
+----
+
+NOTE: Alternative: use `@DynamoDbImmutable` that is mapped to `@Introspected` annotation using the DynamoDB annotation processor.
+
 ==== Declarative Services with `@Service`
 
 Declarative services are very similar to http://gorm.grails.org/6.1.x/hibernate/manual/#dataServices[Grails GORM Data Services].

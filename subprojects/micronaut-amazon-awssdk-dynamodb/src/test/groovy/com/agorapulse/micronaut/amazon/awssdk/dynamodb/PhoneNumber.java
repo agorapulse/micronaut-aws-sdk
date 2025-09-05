@@ -18,10 +18,10 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
 import io.micronaut.core.annotation.Introspected;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
+
+import java.util.Objects;
 
 @Introspected
-@DynamoDbBean
 public class PhoneNumber {
     String type;
     String number;
@@ -50,4 +50,20 @@ public class PhoneNumber {
                 ", number='" + number + '\'' +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        PhoneNumber that = (PhoneNumber) o;
+        return Objects.equals(type, that.type) && Objects.equals(number, that.number);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, number);
+    }
+
 }

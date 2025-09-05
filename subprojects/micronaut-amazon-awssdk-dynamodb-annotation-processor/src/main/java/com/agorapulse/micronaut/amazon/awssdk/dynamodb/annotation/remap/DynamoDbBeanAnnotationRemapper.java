@@ -26,11 +26,14 @@ import io.micronaut.core.annotation.NonNull;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class DynamoDbBeanAnnotationRemapper implements AnnotationRemapper {
 
     private static final String PACKAGE_NAME = "software.amazon.awssdk.enhanced.dynamodb.mapper.annotations";
-    private static final String ANNOTATION_NAME = PACKAGE_NAME + ".DynamoDbBean";
+    private static final String DYNAMODB_BEAN = PACKAGE_NAME + ".DynamoDbBean";
+    private static final String DYNAMODB_IMMUTABLE = PACKAGE_NAME + ".DynamoDbImmutable";
+    private static final String BUILDER_ATTRIBUTE = "builder";
 
     @NonNull
     @Override
@@ -41,9 +44,31 @@ public class DynamoDbBeanAnnotationRemapper implements AnnotationRemapper {
     @NonNull
     @Override
     public List<AnnotationValue<?>> remap(AnnotationValue<?> annotation, VisitorContext visitorContext) {
-        if (ANNOTATION_NAME.equals(annotation.getAnnotationName())) {
+        String annotationName = annotation.getAnnotationName();
+
+        if (DYNAMODB_BEAN.equals(annotationName)) {
             return Arrays.asList(annotation, AnnotationValue.builder(Introspected.class).build());
+        } else if (DYNAMODB_IMMUTABLE.equals(annotationName)) {
+            AnnotationValue<Introspected> introspectedAnnotation;
+
+            // Map the builder class to Introspected.IntrospectionBuilder
+            Optional<Class<?>> builderClassOptional = annotation.classValue(BUILDER_ATTRIBUTE);
+            if (builderClassOptional.isPresent()) {
+                Class<?> builderClass = builderClassOptional.get();
+                AnnotationValue<Introspected.IntrospectionBuilder> builderAnnotation =
+                    AnnotationValue.builder(Introspected.IntrospectionBuilder.class)
+                        .member("builderClass", builderClass)
+                        .build();
+                introspectedAnnotation = AnnotationValue.builder(Introspected.class)
+                    .member(BUILDER_ATTRIBUTE, builderAnnotation)
+                    .build();
+            } else {
+                introspectedAnnotation = AnnotationValue.builder(Introspected.class).build();
+            }
+
+            return Arrays.asList(annotation, introspectedAnnotation);
         }
+
         return Collections.singletonList(annotation);
     }
 
