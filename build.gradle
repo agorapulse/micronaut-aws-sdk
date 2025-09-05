@@ -128,12 +128,6 @@ allprojects {
     }
 }
 
-subprojects { Project subproject ->
-    if (subproject.name.startsWith('micronaut')) {
-        project(':micronaut-aws-sdk-bom').dependencies.constraints.api subproject
-    }
-}
-
 gradleProjects {
     subprojects {
         dirs(['subprojects', 'platforms']) {
@@ -239,6 +233,10 @@ gradleProjects {
             }
 
             clean.dependsOn cleanOut
+        }
+
+        dirs(['subprojects', 'kotlin-libs']) { Project subproject ->
+            project(':micronaut-aws-sdk-bom').dependencies.constraints.api subproject
         }
     }
 }
