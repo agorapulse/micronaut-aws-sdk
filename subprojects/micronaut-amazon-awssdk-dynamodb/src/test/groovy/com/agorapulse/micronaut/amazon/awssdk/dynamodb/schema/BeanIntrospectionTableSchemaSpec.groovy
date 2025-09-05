@@ -26,6 +26,7 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.PhoneNumber
 import io.micronaut.context.BeanContext
 import io.micronaut.core.convert.ConversionService
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.MetaTableSchemaCache
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 
@@ -129,8 +130,8 @@ class BeanIntrospectionTableSchemaSpec extends Specification {
             BeanIntrospectionTableSchema<Person> schema = BeanIntrospectionTableSchema.create(Person, context, cache)
         then:
             schema.attributeNames().size() == 8
-        when:
-            schema.itemToMap(new Person(
+
+            Person person = new Person(
                 id: 1,
                 firstName: 'John',
                 lastName: 'Doe',
@@ -142,12 +143,19 @@ class BeanIntrospectionTableSchemaSpec extends Specification {
                         zipCode: '12345'
                     )
                 ],
-                phoneNumbers: [new PhoneNumber(type: 'home', number: '123456789')],
+                phoneNumbers: [new PhoneNumber('123456789', 'home')],
                 hobbies: ['reading', 'coding'],
                 favoriteColors: ['red', 'green'],
-            ), true)
+            )
+        when:
+            Map<String, AttributeValue> map = schema.itemToMap(person, true)
         then:
             noExceptionThrown()
+
+        when:
+            Person loaded = schema.mapToItem(map)
+        then:
+            loaded == person
     }
 
     void 'read table schema for groovy class'() {

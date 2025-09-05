@@ -17,16 +17,14 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.PartitionKey;
 import io.micronaut.core.annotation.Introspected;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 @Introspected
-@DynamoDbBean
 public class Person {
     Integer id;
     String firstName;
@@ -37,7 +35,7 @@ public class Person {
     List<String> hobbies;
     Set<String> favoriteColors;
 
-    @DynamoDbPartitionKey
+    @PartitionKey
     public Integer getId() {
         return id;
     }

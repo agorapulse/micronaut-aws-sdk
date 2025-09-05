@@ -39,9 +39,8 @@ import software.amazon.awssdk.enhanced.dynamodb.internal.AttributeConfiguration;
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.MetaTableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.MetaTableSchemaCache;
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.ObjectConstructor;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttribute;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticTableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.ImmutableAttribute;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticImmutableTableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.WrappedTableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.BeanTableSchemaAttributeTag;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
@@ -50,6 +49,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbConve
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbFlatten;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbIgnore;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbIgnoreNulls;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbImmutable;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPreserveEmptyObject;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
@@ -60,7 +60,6 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbUpdat
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Type;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -77,6 +76,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -85,48 +85,53 @@ import java.util.stream.Collectors;
 import static software.amazon.awssdk.enhanced.dynamodb.internal.DynamoDbEnhancedLogger.BEAN_LOGGER;
 
 /**
- * Implementation of {@link TableSchema} that builds a table schema based on properties and annotations of a bean
- * class. Example:
+ * Implementation of {@link TableSchema} that builds a table schema based on properties and annotations of an immutable
+ * class using Micronaut bean introspection instead of reflection. This is based on AWS SDK's ImmutableTableSchema
+ * but adapted to work with Micronaut's introspection capabilities.
+ * 
+ * Example:
  * <pre>
  * <code>
  * {@literal @}Introspected
+ * {@literal @}DynamoDbImmutable(builder = Customer.Builder.class)
  * public class Customer {
- *     private String accountId;
- *     private int subId;            // primitive types are supported
- *     private String name;
- *     private Instant createdDate;
+ *     {@literal @}DynamoDbPartitionKey
+ *     public String accountId() { ... }
  *
- *     {@literal @}PartitionKey
- *     public String getAccountId() { return this.accountId; }
- *     public void setAccountId(String accountId) { this.accountId = accountId; }
- *
- *     {@literal @}SortKey
- *     public int getSubId() { return this.subId; }
- *     public void setSubId(int subId) { this.subId = subId; }
+ *     {@literal @}DynamoDbSortKey
+ *     public int subId() { ... }
  *
  *     // Defines a GSI (customers_by_name) with a partition key of 'name'
- *     {@literal @}SecondaryPartitionKey(indexNames = "customers_by_name")
- *     public String getName() { return this.name; }
- *     public void setName(String name) { this.name = name; }
+ *     {@literal @}DynamoDbSecondaryPartitionKey(indexNames = "customers_by_name")
+ *     public String name() { ... }
  *
  *     // Defines an LSI (customers_by_date) with a sort key of 'createdDate' and also declares the
  *     // same attribute as a sort key for the GSI named 'customers_by_name'
- *     {@literal @}SecondarySortKey(indexNames = {"customers_by_date", "customers_by_name"})
- *     public Instant getCreatedDate() { return this.createdDate; }
- *     public void setCreatedDate(Instant createdDate) { this.createdDate = createdDate; }
- * }
+ *     {@literal @}DynamoDbSecondarySortKey(indexNames = {"customers_by_date", "customers_by_name"})
+ *     public Instant createdDate() { ... }
  *
+ *     // Builder class (can be inner or separate class)
+ *     public static final class Builder {
+ *         public Builder accountId(String accountId) { ... };
+ *         public Builder subId(int subId) { ... };
+ *         public Builder name(String name) { ... };
+ *         public Builder createdDate(Instant createdDate) { ... };
+ *
+ *         public Customer build() { ... };
+ *     }
+ * }
  * </pre>
  * <p>
- * Creating an {@link BeanIntrospectionTableSchema} is a moderately expensive operation, and should be performed sparingly. This is
+ * Creating an {@link ImmutableBeanIntrospectionTableSchema} is a moderately expensive operation, and should be performed sparingly. This is
  * usually done once at application startup.
  * <p>
  *
  * @param <T> The type of object that this {@link TableSchema} maps to.
+ * @param <B> The type of the builder class used to construct instances of T.
  */
 @SdkPublicApi
 @ThreadSafe
-public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T, StaticTableSchema<T>> {
+public final class ImmutableBeanIntrospectionTableSchema<T, B> extends WrappedTableSchema<T, StaticImmutableTableSchema<T, B>> {
 
     @SuppressWarnings("deprecation")
     private static final List<String> PARTITION_KEYS_ANNOTATIONS = Arrays.asList(
@@ -153,22 +158,25 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         SecondarySortKey.class.getName(),
         DynamoDbSecondarySortKey.class.getName()
     );
+    
     private static final List<String> UPDATE_BEHAVIOUR_ANNOTATIONS = Arrays.asList(
         UpdateBehavior.class.getName(),
         DynamoDbUpdateBehavior.class.getName()
     );
 
-    private BeanIntrospectionTableSchema(StaticTableSchema<T> staticTableSchema) {
-        super(staticTableSchema);
+    private static final String ATTRIBUTE_TAG_STATIC_SUPPLIER_NAME = "attributeTagFor";
+
+    private ImmutableBeanIntrospectionTableSchema(StaticImmutableTableSchema<T, B> staticImmutableTableSchema) {
+        super(staticImmutableTableSchema);
     }
 
-    public static <T> BeanIntrospectionTableSchema<T> create(Class<T> beanClass, BeanContext context, MetaTableSchemaCache metaTableSchemaCache) {
-        debugLog(beanClass, () -> "Creating bean schema");
+    public static <T, B> ImmutableBeanIntrospectionTableSchema<T, B> create(Class<T> immutableClass, Class<B> builderClass, BeanContext context, MetaTableSchemaCache metaTableSchemaCache) {
+        debugLog(immutableClass, () -> "Creating immutable bean introspection schema");
         // Fetch or create a new reference to this yet-to-be-created TableSchema in the cache
-        MetaTableSchema<T> metaTableSchema = metaTableSchemaCache.getOrCreate(beanClass);
+        MetaTableSchema<T> metaTableSchema = metaTableSchemaCache.getOrCreate(immutableClass);
 
-        BeanIntrospectionTableSchema<T> newTableSchema =
-            new BeanIntrospectionTableSchema<>(createStaticTableSchema(beanClass, context, metaTableSchemaCache));
+        ImmutableBeanIntrospectionTableSchema<T, B> newTableSchema =
+            new ImmutableBeanIntrospectionTableSchema<>(createStaticImmutableTableSchema(immutableClass, builderClass, context, metaTableSchemaCache));
         if (!metaTableSchema.isInitialized()) {
             metaTableSchema.initialize(newTableSchema);
         }
@@ -177,8 +185,8 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
 
     // Called when creating an immutable TableSchema recursively. Utilizes the MetaTableSchema cache to stop infinite
     // recursion
-    static <T> TableSchema<T> recursiveCreate(Class<T> beanClass, BeanContext context, MetaTableSchemaCache metaTableSchemaCache) {
-        Optional<MetaTableSchema<T>> metaTableSchema = metaTableSchemaCache.get(beanClass);
+    static <T> TableSchema<T> recursiveCreate(Class<T> immutableClass, BeanContext context, MetaTableSchemaCache metaTableSchemaCache) {
+        Optional<MetaTableSchema<T>> metaTableSchema = metaTableSchemaCache.get(immutableClass);
 
         // If we get a cache hit...
         if (metaTableSchema.isPresent()) {
@@ -193,69 +201,116 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         }
 
         // Otherwise: cache doesn't know about this class; create a new one from scratch
-        return create(beanClass, context, metaTableSchemaCache);
-
+        // We need to determine the builder class from the DynamoDbImmutable annotation
+        DynamoDbImmutable immutableAnnotation = immutableClass.getAnnotation(DynamoDbImmutable.class);
+        if (immutableAnnotation == null) {
+            throw new IllegalArgumentException("Immutable class " + immutableClass.getTypeName() + " must be annotated with @DynamoDbImmutable");
+        }
+        
+        @SuppressWarnings("unchecked")
+        Class<Object> builderClass = (Class<Object>) immutableAnnotation.builder();
+        
+        return create(immutableClass, builderClass, context, metaTableSchemaCache);
     }
 
-    private static <T> StaticTableSchema<T> createStaticTableSchema(Class<T> beanClass,
-                                                                    BeanContext beanContext,
-                                                                    MetaTableSchemaCache metaTableSchemaCache) {
-        Optional<BeanIntrospection<T>> introspectionOptional = BeanIntrospector.SHARED.findIntrospection(beanClass);
+    private static <T, B> StaticImmutableTableSchema<T, B> createStaticImmutableTableSchema(
+        Class<T> immutableClass,
+        Class<B> builderClass,
+        BeanContext beanContext,
+        MetaTableSchemaCache metaTableSchemaCache) {
 
+        Optional<BeanIntrospection<T>> immutableIntrospectionOptional = BeanIntrospector.SHARED.findIntrospection(immutableClass);
+        Optional<BeanIntrospection<B>> builderIntrospectionOptional = BeanIntrospector.SHARED.findIntrospection(builderClass);
 
-        if (!introspectionOptional.isPresent()) {
-            throw new IllegalArgumentException("A DynamoDb bean class must be annotated with @Introspected, but " + beanClass.getTypeName() + " was not.");
+        if (!immutableIntrospectionOptional.isPresent()) {
+            throw new IllegalArgumentException("An immutable DynamoDb class must be annotated with @Introspected, but " + immutableClass.getTypeName() + " was not.");
         }
 
-        BeanIntrospection<T> introspection = introspectionOptional.get();
+        if (!builderIntrospectionOptional.isPresent()) {
+            throw new IllegalArgumentException("An immutable DynamoDb builder class must be annotated with @Introspected, but " + builderClass.getTypeName() + " was not.");
+        }
 
+        BeanIntrospection<T> immutableIntrospection = immutableIntrospectionOptional.get();
+        BeanIntrospection<B> builderIntrospection = builderIntrospectionOptional.get();
 
-        StaticTableSchema.Builder<T> builder = StaticTableSchema.builder(beanClass).newItemSupplier(introspection::instantiate);
+        // Find the build method in the builder
+        BeanProperty<B, T> buildMethod = findBuildMethod(builderIntrospection, immutableClass);
+        
+        Supplier<B> newBuilderSupplier = builderIntrospection::instantiate;
+        Function<B, T> buildFunction = createBuildFunction(buildMethod);
 
-        Optional<AnnotationValue<DynamoDbBean>> optionalDynamoDbBean = introspection.findAnnotation(DynamoDbBean.class);
+        StaticImmutableTableSchema.Builder<T, B> builder = StaticImmutableTableSchema.builder(immutableClass, builderClass)
+            .newItemBuilder(newBuilderSupplier, buildFunction);
+
+        Optional<AnnotationValue<DynamoDbBean>> optionalDynamoDbBean = immutableIntrospection.findAnnotation(DynamoDbBean.class);
+        Optional<AnnotationValue<DynamoDbImmutable>> optionalDynamoDbImmutable = immutableIntrospection.findAnnotation(DynamoDbImmutable.class);
+        
         if (optionalDynamoDbBean.isPresent()) {
-            builder.attributeConverterProviders(createConverterProvidersFromAnnotation(beanClass, optionalDynamoDbBean.get(), beanContext));
+            builder.attributeConverterProviders(createConverterProvidersFromAnnotation(immutableClass, optionalDynamoDbBean.get(), beanContext));
+        } else if (optionalDynamoDbImmutable.isPresent()) {
+            builder.attributeConverterProviders(createConverterProvidersFromImmutableAnnotation(immutableClass, optionalDynamoDbImmutable.get(), beanContext));
         } else {
             builder.attributeConverterProviders(new LegacyAttributeConverterProvider());
         }
 
-        List<StaticAttribute<T, ?>> attributes = new ArrayList<>();
+        List<ImmutableAttribute<T, B, ?>> attributes = new ArrayList<>();
 
-        introspection.getBeanProperties().stream()
-            .filter(p -> isMappableProperty(beanClass, p))
+        immutableIntrospection.getBeanProperties().stream()
+            .filter(p -> isMappableProperty(immutableClass, p))
             .map(propertyDescriptor -> {
                 propertyDescriptor.findAnnotation(TimeToLive.class).ifPresent(timeToLive ->
-                    attributes.add(createTtlAttributeFromFieldAnnotation(beanClass, timeToLive, propertyDescriptor, beanContext))
+                    attributes.add(createTtlAttributeFromFieldAnnotation(immutableClass, builderClass, timeToLive, propertyDescriptor, beanContext))
                 );
-                return extractAttributeFromProperty(beanClass, metaTableSchemaCache, builder, propertyDescriptor, beanContext);
+                return extractAttributeFromProperty(immutableClass, builderClass, builderIntrospection, metaTableSchemaCache, builder, propertyDescriptor, beanContext);
             })
             .filter(Objects::nonNull)
             .forEach(attributes::add);
 
-        introspection.findAnnotation(TimeToLive.class).ifPresent(ttl -> attributes.add(createTtlAttributeFromTopLevelAnnotation(beanClass, ttl, beanContext)));
+        immutableIntrospection.findAnnotation(TimeToLive.class).ifPresent(ttl -> 
+            attributes.add(createTtlAttributeFromTopLevelAnnotation(immutableClass, builderClass, ttl, beanContext)));
 
         builder.attributes(attributes);
 
         return builder.build();
     }
 
-    private static <T> StaticAttribute<T, ?> createTtlAttributeFromTopLevelAnnotation(Class<T> type, AnnotationValue<TimeToLive> ttl, BeanContext beanContext) {
+    private static <B, T> BeanProperty<B, T> findBuildMethod(BeanIntrospection<B> builderIntrospection, Class<T> immutableClass) {
+        // Look for a method property that returns the immutable type
+        return builderIntrospection.getBeanMethods().stream()
+            .filter(method -> immutableClass.isAssignableFrom(method.getReturnType().getType()))
+            .filter(method -> method.getArguments().length == 0)
+            .map(method -> (BeanProperty<B, T>) method)
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException(
+                "Builder class " + builderIntrospection.getBeanType().getTypeName() + " must have a parameterless method that returns " + immutableClass.getTypeName()));
+    }
+
+    private static <B, T> Function<B, T> createBuildFunction(BeanProperty<B, T> buildMethod) {
+        return buildMethod::get;
+    }
+
+    private static <T, B> ImmutableAttribute<T, B, ?> createTtlAttributeFromTopLevelAnnotation(
+        Class<T> immutableClass, Class<B> builderClass, AnnotationValue<TimeToLive> ttl, BeanContext beanContext) {
+        
         long durationInSeconds = beanContext.getConversionService().convertRequired(ttl.getRequiredValue(String.class), Duration.class).getSeconds();
-        return StaticAttribute.builder(type, Long.class)
+        
+        return ImmutableAttribute.builder(immutableClass, builderClass, EnhancedType.of(Long.class))
             .name(ttl.stringValue("attributeName").filter(StringUtils::isNotEmpty).orElse("ttl"))
             .getter(instance -> System.currentTimeMillis() / 1000 + durationInSeconds)
-            .setter((instance, value) -> { })
+            .setter((builder, value) -> { }) // TTL is read-only
             .build();
     }
 
-    private static <T> StaticAttribute<T, ?> createTtlAttributeFromFieldAnnotation(Class<T> type, AnnotationValue<TimeToLive> ttl, BeanProperty<T, ?> property, BeanContext beanContext) {
+    private static <T, B> ImmutableAttribute<T, B, ?> createTtlAttributeFromFieldAnnotation(
+        Class<T> immutableClass, Class<B> builderClass, AnnotationValue<TimeToLive> ttl, BeanProperty<T, ?> property, BeanContext beanContext) {
+        
         Duration duration = beanContext.getConversionService().convertRequired(ttl.getRequiredValue(String.class), Duration.class);
         Function<T, Instant> toInstant = createInstantGetter(ttl, property, beanContext);
 
-        return StaticAttribute.builder(type, Long.class)
+        return ImmutableAttribute.builder(immutableClass, builderClass, EnhancedType.of(Long.class))
             .name(ttl.stringValue("attributeName").filter(StringUtils::isNotEmpty).orElse("ttl"))
             .getter(instance -> Optional.ofNullable(toInstant.apply(instance)).orElseGet(Instant::now).plus(duration).getEpochSecond())
-            .setter((instance, value) -> { })
+            .setter((builder, value) -> { }) // TTL is read-only
             .build();
     }
 
@@ -300,31 +355,82 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         throw new IllegalArgumentException("TimeToLive annotation can only be used on fields of type Instant, String or Long or any type that can be converted using ConversionService but was used on " + property);
     }
 
-    private static <T, P> StaticAttribute<T, P> extractAttributeFromProperty(
-        Class<T> beanClass,
+    private static <T, B, P> ImmutableAttribute<T, B, P> extractAttributeFromProperty(
+        Class<T> immutableClass,
+        Class<B> builderClass,
+        BeanIntrospection<B> builderIntrospection,
         MetaTableSchemaCache metaTableSchemaCache,
-        StaticTableSchema.Builder<T> builder,
+        StaticImmutableTableSchema.Builder<T, B> builder,
         BeanProperty<T, P> propertyDescriptor,
         BeanContext beanContext
     ) {
         Optional<AnnotationValue<Annotation>> dynamoDbFlatten = findAnnotation(propertyDescriptor, DynamoDbFlatten.class, Flatten.class);
 
         if (dynamoDbFlatten.isPresent()) {
+            // Find corresponding setter in builder
+            BeanProperty<B, P> builderProperty = findBuilderProperty(builderIntrospection, propertyDescriptor.getName());
+            
             builder.flatten(
-                BeanIntrospectionTableSchema.create(propertyDescriptor.getType(), beanContext, metaTableSchemaCache),
+                ImmutableBeanIntrospectionTableSchema.create(propertyDescriptor.getType(), findBuilderClassForProperty(propertyDescriptor.getType()), beanContext, metaTableSchemaCache),
                 propertyDescriptor::get,
-                propertyDescriptor::set
+                builderProperty != null ? builderProperty::set : (builderInstance, value) -> { }
             );
             return null;
         } else {
             AttributeConfiguration attributeConfiguration = resolveAttributeConfiguration(propertyDescriptor);
 
-            StaticAttribute.Builder<T, P> attributeBuilder = staticAttributeBuilder(propertyDescriptor, beanClass, metaTableSchemaCache, attributeConfiguration, beanContext);
+            ImmutableAttribute.Builder<T, B, P> attributeBuilder = immutableAttributeBuilder(
+                propertyDescriptor, builderIntrospection, immutableClass, builderClass, metaTableSchemaCache, attributeConfiguration, beanContext);
 
             createAttributeConverterFromAnnotation(propertyDescriptor, beanContext).ifPresent(attributeBuilder::attributeConverter);
 
             addTagsToAttribute(attributeBuilder, propertyDescriptor);
             return attributeBuilder.build();
+        }
+    }
+
+    private static <T, B, P> ImmutableAttribute.Builder<T, B, P> immutableAttributeBuilder(
+        BeanProperty<T, P> propertyDescriptor,
+        BeanIntrospection<B> builderIntrospection,
+        Class<T> immutableClass,
+        Class<B> builderClass,
+        MetaTableSchemaCache metaTableSchemaCache,
+        AttributeConfiguration attributeConfiguration,
+        BeanContext beanContext
+    ) {
+        Argument<P> propertyType = propertyDescriptor.asArgument();
+        EnhancedType<P> propertyTypeToken = convertTypeToEnhancedType(propertyType, metaTableSchemaCache, attributeConfiguration, beanContext);
+        
+        // Find corresponding setter in builder
+        BeanProperty<B, P> builderProperty = findBuilderProperty(builderIntrospection, propertyDescriptor.getName());
+        
+        return ImmutableAttribute.builder(immutableClass, builderClass, propertyTypeToken)
+            .name(attributeNameForProperty(propertyDescriptor))
+            .getter(propertyDescriptor::get)
+            .setter(builderProperty != null ? builderProperty::set : (builderInstance, value) -> { });
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <B, P> BeanProperty<B, P> findBuilderProperty(BeanIntrospection<B> builderIntrospection, String propertyName) {
+        return (BeanProperty<B, P>) builderIntrospection.getBeanProperties().stream()
+            .filter(prop -> prop.getName().equals(propertyName))
+            .findFirst()
+            .orElse(null);
+    }
+
+    private static <T> Class<?> findBuilderClassForProperty(Class<T> propertyClass) {
+        // Look for @DynamoDbImmutable annotation to find builder class
+        DynamoDbImmutable immutableAnnotation = propertyClass.getAnnotation(DynamoDbImmutable.class);
+        if (immutableAnnotation != null) {
+            return immutableAnnotation.builder();
+        }
+        
+        // If no annotation found, assume Builder as inner class (common convention)
+        try {
+            return Class.forName(propertyClass.getName() + "$Builder");
+        } catch (ClassNotFoundException e) {
+            throw new IllegalArgumentException("Cannot determine builder class for " + propertyClass.getTypeName() + 
+                ". Please ensure the class is annotated with @DynamoDbImmutable or has a Builder inner class.", e);
         }
     }
 
@@ -339,41 +445,31 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
     }
 
     @SuppressWarnings("unchecked")
-    private static List<AttributeConverterProvider> createConverterProvidersFromAnnotation(Class<?> beanClass, AnnotationValue<DynamoDbBean> dynamoDbBean, BeanContext beanContext) {
+    private static List<AttributeConverterProvider> createConverterProvidersFromAnnotation(Class<?> immutableClass, AnnotationValue<DynamoDbBean> dynamoDbBean, BeanContext beanContext) {
         Class<? extends AttributeConverterProvider>[] providerClasses = (Class<? extends AttributeConverterProvider>[]) dynamoDbBean.classValues("converterProviders");
         if (providerClasses.length == 0) {
             providerClasses = new Class[]{LegacyAttributeConverterProvider.class};
         }
 
         return Arrays.stream(providerClasses)
-            .peek(c -> debugLog(beanClass, () -> "Adding Converter: " + c.getTypeName()))
+            .peek(c -> debugLog(immutableClass, () -> "Adding Converter: " + c.getTypeName()))
             .map(c -> (AttributeConverterProvider) fromContextOrNew(c, beanContext).get())
             .collect(Collectors.toList());
     }
 
-    private static <T, P> StaticAttribute.Builder<T, P> staticAttributeBuilder(
-        BeanProperty<T, P> propertyDescriptor,
-        Class<T> beanClass,
-        MetaTableSchemaCache metaTableSchemaCache,
-        AttributeConfiguration attributeConfiguration,
-        BeanContext beanContext
-    ) {
-        Argument<P> propertyType = propertyDescriptor.asArgument();
-        EnhancedType<P> propertyTypeToken = convertTypeToEnhancedType(propertyType, metaTableSchemaCache, attributeConfiguration, beanContext);
-        return StaticAttribute.builder(beanClass, propertyTypeToken)
-            .name(attributeNameForProperty(propertyDescriptor))
-            .getter(propertyDescriptor::get)
-            // secondary indices can be read only
-            .setter(propertyDescriptor.isReadOnly() ? (bean, value) -> {} : propertyDescriptor::set);
+    @SuppressWarnings("unchecked")
+    private static List<AttributeConverterProvider> createConverterProvidersFromImmutableAnnotation(Class<?> immutableClass, AnnotationValue<DynamoDbImmutable> dynamoDbImmutable, BeanContext beanContext) {
+        Class<? extends AttributeConverterProvider>[] providerClasses = (Class<? extends AttributeConverterProvider>[]) dynamoDbImmutable.classValues("converterProviders");
+        if (providerClasses.length == 0) {
+            providerClasses = new Class[]{LegacyAttributeConverterProvider.class};
+        }
+
+        return Arrays.stream(providerClasses)
+            .peek(c -> debugLog(immutableClass, () -> "Adding Converter: " + c.getTypeName()))
+            .map(c -> (AttributeConverterProvider) fromContextOrNew(c, beanContext).get())
+            .collect(Collectors.toList());
     }
 
-    /**
-     * Converts a {@link Type} to an {@link EnhancedType}. Usually {@link EnhancedType#of} is capable of doing this all
-     * by itself, but for the BeanTableSchema we want to detect if a parameterized class is being passed without a
-     * converter that is actually another annotated class in which case we want to capture its schema and add it to the
-     * EnhancedType. Unfortunately this means we have to duplicate some of the recursive Type parsing that
-     * EnhancedClient otherwise does all by itself.
-     */
     @SuppressWarnings("unchecked")
     private static <T> EnhancedType<T> convertTypeToEnhancedType(
         Argument<T> type,
@@ -402,11 +498,20 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
                     .preserveEmptyObject(attributeConfiguration.preserveEmptyObject())
                     .ignoreNulls(attributeConfiguration.ignoreNulls());
 
-                return EnhancedType.documentOf(
-                    clazz,
-                    BeanIntrospectionTableSchema.recursiveCreate(clazz, beanContext, metaTableSchemaCache),
-                    attrConfiguration
-                );
+                // Check if it's an immutable class
+                if (clazz.getAnnotation(DynamoDbImmutable.class) != null) {
+                    return EnhancedType.documentOf(
+                        clazz,
+                        ImmutableBeanIntrospectionTableSchema.recursiveCreate(clazz, beanContext, metaTableSchemaCache),
+                        attrConfiguration
+                    );
+                } else {
+                    return EnhancedType.documentOf(
+                        clazz,
+                        BeanIntrospectionTableSchema.recursiveCreate(clazz, beanContext, metaTableSchemaCache),
+                        attrConfiguration
+                    );
+                }
             }
         }
 
@@ -425,32 +530,26 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
                 .map(anno -> (AttributeConverter<P>) new ConvertedJsonAttributeConverter<>(propertyDescriptor.getType())));
     }
 
-    /**
-     * This method scans all the annotations on a property and looks for a meta-annotation of
-     * {@link BeanTableSchemaAttributeTag}. If the meta-annotation is found, it attempts to create
-     * an annotation tag based on a standard named static method
-     * of the class that tag has been annotated with passing in the original property annotation as an argument.
-     */
-    private static <T> void addTagsToAttribute(StaticAttribute.Builder<?, ?> attributeBuilder,
+    private static <T> void addTagsToAttribute(ImmutableAttribute.Builder<?, ?, ?> attributeBuilder,
                                                BeanProperty<T, ?> propertyDescriptor) {
 
         findAnnotation(propertyDescriptor, UPDATE_BEHAVIOUR_ANNOTATIONS)
             .flatMap(anno -> anno.enumValue(Enum.class))
-            .ifPresent(behavior -> attributeBuilder.addTag(StaticAttributeTags.updateBehavior(software.amazon.awssdk.enhanced.dynamodb.mapper.UpdateBehavior.valueOf(behavior.name()))));
+            .ifPresent(behavior -> attributeBuilder.addTag(software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags.updateBehavior(software.amazon.awssdk.enhanced.dynamodb.mapper.UpdateBehavior.valueOf(behavior.name()))));
 
         findAnnotation(propertyDescriptor, PARTITION_KEYS_ANNOTATIONS)
-            .ifPresent(anno -> attributeBuilder.addTag(StaticAttributeTags.primaryPartitionKey()));
+            .ifPresent(anno -> attributeBuilder.addTag(software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags.primaryPartitionKey()));
 
         findAnnotation(propertyDescriptor, SORT_KEYS_ANNOTATIONS)
-            .ifPresent(anno -> attributeBuilder.addTag(StaticAttributeTags.primarySortKey()));
+            .ifPresent(anno -> attributeBuilder.addTag(software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags.primarySortKey()));
 
         findAnnotation(propertyDescriptor, SECONDARY_PARTITION_KEYS_ANNOTATIONS)
             .map(anno -> anno.stringValues("indexNames"))
-            .ifPresent(indexNames -> attributeBuilder.addTag(StaticAttributeTags.secondaryPartitionKey(Arrays.asList(indexNames))));
+            .ifPresent(indexNames -> attributeBuilder.addTag(software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags.secondaryPartitionKey(Arrays.asList(indexNames))));
 
         findAnnotation(propertyDescriptor, SECONDARY_SORT_KEYS_ANNOTATIONS)
             .map(anno -> anno.stringValues("indexNames"))
-            .ifPresent(indexNames -> attributeBuilder.addTag(StaticAttributeTags.secondarySortKey(Arrays.asList(indexNames))));
+            .ifPresent(indexNames -> attributeBuilder.addTag(software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags.secondarySortKey(Arrays.asList(indexNames))));
     }
 
     private static <R> Supplier<R> fromContextOrNew(Class<R> clazz, BeanContext beanContext) {
@@ -470,7 +569,7 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
             return ObjectConstructor.create(clazz, constructor, MethodHandles.lookup());
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException(
-                String.format("Class '%s' appears to have no default constructor thus cannot be used with the BeanTableSchema", clazz), e);
+                String.format("Class '%s' appears to have no default constructor thus cannot be used with the ImmutableBeanIntrospectionTableSchema", clazz), e);
         }
     }
 
@@ -480,39 +579,28 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
             .orElseGet(propertyDescriptor::getName);
     }
 
-    private static <T> boolean isMappableProperty(Class<T> beanClass, BeanProperty<T, ?> propertyDescriptor) {
+    private static <T> boolean isMappableProperty(Class<T> immutableClass, BeanProperty<T, ?> propertyDescriptor) {
 
         if (propertyDescriptor.isWriteOnly()) {
-            debugLog(beanClass, () -> "Ignoring bean property " + propertyDescriptor.getName() + " because it is write only.");
+            debugLog(immutableClass, () -> "Ignoring bean property " + propertyDescriptor.getName() + " because it is write only.");
             return false;
         }
 
-        if (propertyDescriptor.isReadOnly()) {
-            debugLog(beanClass, () -> "Ignoring bean property " + propertyDescriptor.getName() + " because it is read only.");
-            return isSecondaryIndex(propertyDescriptor);
-        }
-
         if (propertyDescriptor.isAnnotationPresent(DynamoDbIgnore.class)) {
-            debugLog(beanClass, () -> "Ignoring bean property " + propertyDescriptor.getName() + " because it is ignored.");
+            debugLog(immutableClass, () -> "Ignoring bean property " + propertyDescriptor.getName() + " because it is ignored.");
             return false;
         }
 
         if (propertyDescriptor.isAnnotationPresent(Ignore.class)) {
-            debugLog(beanClass, () -> "Ignoring bean property " + propertyDescriptor.getName() + " because it is ignored.");
+            debugLog(immutableClass, () -> "Ignoring bean property " + propertyDescriptor.getName() + " because it is ignored.");
             return false;
         }
 
         return true;
     }
 
-    private static <T> boolean isSecondaryIndex(BeanProperty<T, ?> propertyDescriptor) {
-        return propertyDescriptor.getAnnotationNames().stream().anyMatch(name ->
-            SECONDARY_PARTITION_KEYS_ANNOTATIONS.contains(name) || SECONDARY_SORT_KEYS_ANNOTATIONS.contains(name)
-        );
-    }
-
-    private static void debugLog(Class<?> beanClass, Supplier<String> logMessage) {
-        BEAN_LOGGER.debug(() -> beanClass.getTypeName() + " - " + logMessage.get());
+    private static void debugLog(Class<?> immutableClass, Supplier<String> logMessage) {
+        BEAN_LOGGER.debug(() -> immutableClass.getTypeName() + " - " + logMessage.get());
     }
 
     private static Optional<AnnotationValue<Annotation>> findAnnotation(AnnotationMetadataProvider source, Class<? extends Annotation>... annotationClasses) {
@@ -536,4 +624,3 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         return Optional.empty();
     }
 }
-
