@@ -20,14 +20,13 @@ plugins {
     id 'org.kordamp.gradle.checkstyle'
     id 'org.kordamp.gradle.codenarc'
     id 'org.kordamp.gradle.coveralls'
-    id 'io.github.gradle-nexus.publish-plugin'
 }
 
-if (!project.hasProperty('ossrhUsername'))      ext.ossrhUsername       = System.getenv('SONATYPE_USERNAME') ?: '**UNDEFINED**'
-if (!project.hasProperty('ossrhPassword'))      ext.ossrhPassword       = System.getenv('SONATYPE_PASSWORD') ?: '**UNDEFINED**'
-if (!project.hasProperty('signingKeyId'))       ext.signingKeyId        = System.getenv('SIGNING_KEY_ID') ?: '**UNDEFINED**'
-if (!project.hasProperty('signingPassword'))    ext.signingPassword     = System.getenv('SIGNING_PASSWORD') ?: '**UNDEFINED**'
-if (!project.hasProperty('signingSecretKey'))   ext.signingSecretKey    = System.getenv('SIGNING_SECRET_KEY_PATH') ? rootProject.file(System.getenv('SIGNING_SECRET_KEY_PATH')).text : '**UNDEFINED**'
+if (!project.hasProperty('mavenCentralUsername'))       ext.mavenCentralUsername            = System.getenv('MAVEN_CENTRAL_USERNAME') ?: '**UNDEFINED**'
+if (!project.hasProperty('mavenCentralPassword'))       ext.mavenCentralPassword            = System.getenv('MAVEN_CENTRAL_PASSWORD') ?: '**UNDEFINED**'
+if (!project.hasProperty('signingInMemoryKeyId'))       ext.signingInMemoryKeyId            = System.getenv('SIGNING_KEY_ID') ?: '**UNDEFINED**'
+if (!project.hasProperty('signingInMemoryKeyPassword')) ext.signingInMemoryKeyPassword      = System.getenv('SIGNING_PASSWORD') ?: '**UNDEFINED**'
+if (!project.hasProperty('signingInMemoryKey'))         ext.signingInMemoryKey              = System.getenv('SIGNING_SECRET_KEY_PATH') ? rootProject.file(System.getenv('SIGNING_SECRET_KEY_PATH')).text : '**UNDEFINED**'
 
 
 config {
@@ -73,14 +72,16 @@ config {
     }
 
     publishing {
+        enabled = false
         signing {
-            enabled =  true
-            keyId = signingKeyId
-            secretKey = signingSecretKey
-            password = signingPassword
+            enabled = false
         }
-        releasesRepository  = 'localRelease'
-        snapshotsRepository = 'localSnapshot'
+    }
+
+    artifacts {
+        source {
+            enabled = false
+        }
     }
 
     quality {
@@ -95,6 +96,7 @@ config {
 
     docs {
         javadoc {
+            enabled = false
             autoLinks {
                 enabled = false
             }
@@ -112,16 +114,6 @@ config {
 
 }
 
-nexusPublishing {
-    repositories {
-        sonatype {
-            nexusUrl = uri('https://s01.oss.sonatype.org/service/local/')
-            snapshotRepositoryUrl = uri('https://s01.oss.sonatype.org/content/repositories/snapshots/')
-            username = ossrhUsername
-            password = ossrhPassword
-        }
-    }
-}
 
 allprojects {
     repositories {
@@ -136,87 +128,119 @@ allprojects {
     }
 }
 
-project(':micronaut-aws-sdk-bom').apply(plugin: 'java-platform')
-
 subprojects { Project subproject ->
-    if (subproject.name == 'guide' || subproject.name == 'micronaut-aws-sdk-dependencies'|| subproject.name == 'micronaut-aws-sdk-bom') return
-
     if (subproject.name.startsWith('micronaut')) {
         project(':micronaut-aws-sdk-bom').dependencies.constraints.api subproject
     }
+}
 
-    if (subproject.name.contains('kotlin')) return
+gradleProjects {
+    subprojects {
+        dirs(['subprojects', 'platforms']) {
+            mavenPublishing {
+                publishToMavenCentral(true)
+                signAllPublications()
 
-    apply plugin: 'groovy'
-    apply plugin: 'java-library'
-
-    if (subproject.projectDir.parentFile.name.equals('subprojects')) {
-        micronaut {
-            if (it.hasProperty('importMicronautPlatform')) {
-                importMicronautPlatform = true
-            } else {
-                project.logger.lifecycle "No importMicronautPlatform property found for ${micronaut.dump()}"
+                pom {
+                    name = "Micronaut AWS SDK"
+                    description = 'Set of useful libraries for Micronaut'
+                    inceptionYear = "2018"
+                    url = "https://github.com/${slug}"
+                    licenses {
+                        license {
+                            name = "The Apache License, Version 2.0"
+                            url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                            distribution = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = "musketyr"
+                            name = "Vladimir Orany"
+                            url = "https://github.com/musketyr/"
+                        }
+                    }
+                    scm {
+                        url = "https://github.com/${slug}.git"
+                        connection = "scm:git:git://github.com/${slug}.git"
+                        developerConnection = "scm:git:ssh://git@github.com/${slug}.git"
+                    }
+                }
             }
-            testRuntime 'spock'
-            processing {
-                incremental false
+
+            signing {
+                useInMemoryPgpKeys(rootProject.ext.signingInMemoryKey, rootProject.ext.signingInMemoryKeyPassword)
+                sign publishing.publications
             }
         }
-    }
 
-    dependencies {
-        api platform(project(':micronaut-aws-sdk-dependencies'))
+        dirs(['subprojects', 'benchmarks']) { Project subproject ->
+            micronaut {
+                if (it.hasProperty('importMicronautPlatform')) {
+                    importMicronautPlatform = true
+                } else {
+                    project.logger.lifecycle "No importMicronautPlatform property found for ${micronaut.dump()}"
+                }
+                testRuntime 'spock'
+                processing {
+                    incremental false
+                }
+            }
 
-        // Groovy
-        if (subproject.name.startsWith('micronaut-amazon-awssdk')) {
-            compileOnly "org.apache.groovy:groovy:$groovyVersion"
-            compileOnly 'io.micronaut.aws:micronaut-aws-sdk-v2'
-            testImplementation "org.apache.groovy:groovy:$groovyVersion"
-            testImplementation 'io.micronaut.aws:micronaut-aws-sdk-v2'
-        } else {
-            compileOnly 'io.micronaut.aws:micronaut-aws-sdk-v1'
-            implementation "org.apache.groovy:groovy:$groovyVersion"
-            implementation 'io.micronaut.groovy:micronaut-runtime-groovy'
-            compileOnly 'io.micronaut:micronaut-inject-groovy'
-            testImplementation 'io.micronaut.aws:micronaut-aws-sdk-v1'
+            dependencies {
+                api platform(project(':micronaut-aws-sdk-dependencies'))
+
+                // Groovy
+                if (subproject.name.startsWith('micronaut-amazon-awssdk')) {
+                    compileOnly "org.apache.groovy:groovy:$groovyVersion"
+                    compileOnly 'io.micronaut.aws:micronaut-aws-sdk-v2'
+                    testImplementation "org.apache.groovy:groovy:$groovyVersion"
+                    testImplementation 'io.micronaut.aws:micronaut-aws-sdk-v2'
+                } else {
+                    compileOnly 'io.micronaut.aws:micronaut-aws-sdk-v1'
+                    implementation "org.apache.groovy:groovy:$groovyVersion"
+                    implementation 'io.micronaut.groovy:micronaut-runtime-groovy'
+                    compileOnly 'io.micronaut:micronaut-inject-groovy'
+                    testImplementation 'io.micronaut.aws:micronaut-aws-sdk-v1'
+                }
+
+                implementation 'io.micronaut:micronaut-inject'
+                implementation 'io.micronaut:micronaut-runtime'
+
+
+                testAnnotationProcessor 'io.micronaut:micronaut-inject-java'
+
+                testImplementation 'io.micronaut:micronaut-inject-groovy'
+
+                testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+                testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+
+
+                testImplementation 'io.micronaut.test:micronaut-test-junit5'
+                testImplementation 'io.micronaut.test:micronaut-test-spock'
+
+                testRuntimeOnly 'ch.qos.logback:logback-classic:1.2.3'
+                testRuntimeOnly 'org.yaml:snakeyaml'
+            }
+
+            compileJava.options.compilerArgs += '-parameters'
+            compileTestJava.options.compilerArgs += '-parameters'
+
+            test {
+                useJUnitPlatform()
+                environment 'AWS_CBOR_DISABLE', 'true'
+                systemProperty 'TEST_RESOURCES_FOLDER', new File(subproject.projectDir, 'src/test/resources').canonicalPath
+                systemProperty 'user.timezone', 'UTC'
+                systemProperty 'user.language', 'en'
+            }
+
+            task cleanOut(type: Delete) {
+                delete file('out')
+            }
+
+            clean.dependsOn cleanOut
         }
-
-        implementation 'io.micronaut:micronaut-inject'
-        implementation 'io.micronaut:micronaut-runtime'
-
-
-        testAnnotationProcessor 'io.micronaut:micronaut-inject-java'
-
-        testImplementation 'io.micronaut:micronaut-inject-groovy'
-
-        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-        testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
-
-
-        testImplementation 'io.micronaut.test:micronaut-test-junit5'
-        testImplementation 'io.micronaut.test:micronaut-test-spock'
-
-        testRuntimeOnly 'ch.qos.logback:logback-classic:1.2.3'
-        testRuntimeOnly 'org.yaml:snakeyaml'
     }
-
-    compileJava.options.compilerArgs += '-parameters'
-    compileTestJava.options.compilerArgs += '-parameters'
-
-    test {
-        useJUnitPlatform()
-        environment 'AWS_CBOR_DISABLE', 'true'
-        systemProperty 'TEST_RESOURCES_FOLDER', new File(subproject.projectDir, 'src/test/resources').canonicalPath
-        systemProperty 'user.timezone', 'UTC'
-        systemProperty 'user.language', 'en'
-    }
-
-    task cleanOut(type: Delete) {
-        delete file('out')
-    }
-
-    clean.dependsOn cleanOut
-
 }
 
 check.dependsOn('aggregateCheckstyle', 'aggregateCodenarc', 'aggregateAllTestReports', 'coveralls')
