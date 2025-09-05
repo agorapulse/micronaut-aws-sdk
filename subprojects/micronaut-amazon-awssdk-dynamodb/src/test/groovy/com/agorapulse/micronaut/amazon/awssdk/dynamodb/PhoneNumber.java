@@ -23,4 +23,28 @@ import io.micronaut.core.annotation.Introspected;
 public record PhoneNumber(
     String type,
     String number
-){ }
+){
+
+    @Introspected
+    public static class Builder {
+
+        private String type;
+        private String number;
+
+        public Builder type(String type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder number(String number) {
+            this.number = number;
+            return this;
+        }
+
+        public PhoneNumber build() {
+            return new PhoneNumber(type, number);
+        }
+
+    }
+
+}

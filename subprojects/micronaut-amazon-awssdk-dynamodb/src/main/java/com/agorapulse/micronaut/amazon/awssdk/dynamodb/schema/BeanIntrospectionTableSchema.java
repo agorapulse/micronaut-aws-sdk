@@ -17,11 +17,10 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.schema;
 
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.*;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert.ConvertedJsonAttributeConverter;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Flatten;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.TimeToLive;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert.LegacyAttributeConverterProvider;
 import io.micronaut.context.BeanContext;
-import io.micronaut.core.annotation.AnnotationMetadataProvider;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.beans.BeanIntrospection;
 import io.micronaut.core.beans.BeanIntrospector;
@@ -30,59 +29,28 @@ import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.StringUtils;
 import software.amazon.awssdk.annotations.SdkPublicApi;
 import software.amazon.awssdk.annotations.ThreadSafe;
-import software.amazon.awssdk.enhanced.dynamodb.AttributeConverter;
-import software.amazon.awssdk.enhanced.dynamodb.AttributeConverterProvider;
 import software.amazon.awssdk.enhanced.dynamodb.EnhancedType;
-import software.amazon.awssdk.enhanced.dynamodb.EnhancedTypeDocumentConfiguration;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.internal.AttributeConfiguration;
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.MetaTableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.MetaTableSchemaCache;
-import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.ObjectConstructor;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticTableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.WrappedTableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.BeanTableSchemaAttributeTag;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbConvertedBy;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbFlatten;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbIgnore;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbIgnoreNulls;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPreserveEmptyObject;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondarySortKey;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbUpdateBehavior;
 
 import java.lang.annotation.Annotation;
-import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Type;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.time.temporal.ChronoField;
-import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
-import static software.amazon.awssdk.enhanced.dynamodb.internal.DynamoDbEnhancedLogger.BEAN_LOGGER;
 
 /**
  * Implementation of {@link TableSchema} that builds a table schema based on properties and annotations of a bean
@@ -128,42 +96,13 @@ import static software.amazon.awssdk.enhanced.dynamodb.internal.DynamoDbEnhanced
 @ThreadSafe
 public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T, StaticTableSchema<T>> {
 
-    @SuppressWarnings("deprecation")
-    private static final List<String> PARTITION_KEYS_ANNOTATIONS = Arrays.asList(
-        PartitionKey.class.getName(),
-        HashKey.class.getName(),
-        DynamoDbPartitionKey.class.getName(),
-        "com.agorapulse.micronaut.aws.dynamodb.annotation.HashKey"
-    );
-
-    @SuppressWarnings("deprecation")
-    private static final List<String> SORT_KEYS_ANNOTATIONS = Arrays.asList(
-        SortKey.class.getName(),
-        RangeKey.class.getName(),
-        DynamoDbSortKey.class.getName(),
-        "com.agorapulse.micronaut.aws.dynamodb.annotation.RangeKey"
-    );
-
-    private static final List<String> SECONDARY_PARTITION_KEYS_ANNOTATIONS = Arrays.asList(
-        SecondaryPartitionKey.class.getName(),
-        DynamoDbSecondaryPartitionKey.class.getName()
-    );
-
-    private static final List<String> SECONDARY_SORT_KEYS_ANNOTATIONS = Arrays.asList(
-        SecondarySortKey.class.getName(),
-        DynamoDbSecondarySortKey.class.getName()
-    );
-    private static final List<String> UPDATE_BEHAVIOUR_ANNOTATIONS = Arrays.asList(
-        UpdateBehavior.class.getName(),
-        DynamoDbUpdateBehavior.class.getName()
-    );
 
     private BeanIntrospectionTableSchema(StaticTableSchema<T> staticTableSchema) {
         super(staticTableSchema);
     }
 
     public static <T> BeanIntrospectionTableSchema<T> create(Class<T> beanClass, BeanContext context, MetaTableSchemaCache metaTableSchemaCache) {
-        debugLog(beanClass, () -> "Creating bean schema");
+        IntrospectionTableSchema.debugLog(beanClass, () -> "Creating bean schema");
         // Fetch or create a new reference to this yet-to-be-created TableSchema in the cache
         MetaTableSchema<T> metaTableSchema = metaTableSchemaCache.getOrCreate(beanClass);
 
@@ -187,7 +126,7 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
                 return metaTableSchema.get().concreteTableSchema();
             }
 
-            // Or: return the uninitialized MetaTableSchema as this must be a recursive reference and it will be
+            // Or: return the uninitialized MetaTableSchema as this must be a recursive reference, and it will be
             // initialized later as the chain completes
             return metaTableSchema.get();
         }
@@ -203,7 +142,7 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         Optional<BeanIntrospection<T>> introspectionOptional = BeanIntrospector.SHARED.findIntrospection(beanClass);
 
 
-        if (!introspectionOptional.isPresent()) {
+        if (introspectionOptional.isEmpty()) {
             throw new IllegalArgumentException("A DynamoDb bean class must be annotated with @Introspected, but " + beanClass.getTypeName() + " was not.");
         }
 
@@ -214,7 +153,7 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
 
         Optional<AnnotationValue<DynamoDbBean>> optionalDynamoDbBean = introspection.findAnnotation(DynamoDbBean.class);
         if (optionalDynamoDbBean.isPresent()) {
-            builder.attributeConverterProviders(createConverterProvidersFromAnnotation(beanClass, optionalDynamoDbBean.get(), beanContext));
+            builder.attributeConverterProviders(IntrospectionTableSchema.createConverterProvidersFromAnnotation(optionalDynamoDbBean.get(), beanContext));
         } else {
             builder.attributeConverterProviders(new LegacyAttributeConverterProvider());
         }
@@ -250,7 +189,7 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
 
     private static <T> StaticAttribute<T, ?> createTtlAttributeFromFieldAnnotation(Class<T> type, AnnotationValue<TimeToLive> ttl, BeanProperty<T, ?> property, BeanContext beanContext) {
         Duration duration = beanContext.getConversionService().convertRequired(ttl.getRequiredValue(String.class), Duration.class);
-        Function<T, Instant> toInstant = createInstantGetter(ttl, property, beanContext);
+        Function<T, Instant> toInstant = IntrospectionTableSchema.createInstantGetter(ttl, property, beanContext);
 
         return StaticAttribute.builder(type, Long.class)
             .name(ttl.stringValue("attributeName").filter(StringUtils::isNotEmpty).orElse("ttl"))
@@ -259,46 +198,6 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
             .build();
     }
 
-    private static <T> Function<T, Instant> createInstantGetter(AnnotationValue<TimeToLive> ttl, BeanProperty<T, ?> property, BeanContext beanContext) {
-        if (Instant.class.isAssignableFrom(property.getType())) {
-            return instance -> (Instant) property.get(instance);
-        }
-
-        if (CharSequence.class.isAssignableFrom(property.getType())) {
-            DateTimeFormatter formatter = ttl
-                .stringValue("format")
-                .filter(StringUtils::isNotEmpty)
-                .map(DateTimeFormatter::ofPattern)
-                .orElse(DateTimeFormatter.ISO_INSTANT);
-
-            return instance -> {
-                try {
-                    TemporalAccessor parsed = formatter.parse((CharSequence) property.get(instance));
-                    if (!parsed.isSupported(ChronoField.INSTANT_SECONDS)) {
-                        if (parsed.isSupported(ChronoField.HOUR_OF_DAY)) {
-                            return LocalDateTime.from(parsed).atZone(ZoneOffset.UTC).toInstant();
-                        }
-                        return LocalDate.from(parsed).atStartOfDay(ZoneOffset.UTC).toInstant();
-                    }
-                    return Instant.from(parsed);
-                } catch (DateTimeParseException e) {
-                    throw new TimeToLiveExtractionFailedException(instance, property, "Failed to extract TTL from property %s of instance %s".formatted(property.getName(), instance), e);
-                }
-            };
-        }
-
-        if (Number.class.isAssignableFrom(property.getType())) {
-            return instance -> Instant.ofEpochMilli(((Number) property.get(instance)).longValue());
-        }
-
-        if (beanContext.getConversionService().canConvert(property.getType(), Instant.class)) {
-            return instance -> beanContext.getConversionService().convert(property.get(instance), Instant.class).orElseThrow(
-                () -> new TimeToLiveExtractionFailedException(instance, property, "Failed to convert " + property.get(instance) + " to Instant for field " + property + " annotated with @TimeToLive " + ttl, null)
-            );
-        }
-
-        throw new IllegalArgumentException("TimeToLive annotation can only be used on fields of type Instant, String or Long or any type that can be converted using ConversionService but was used on " + property);
-    }
 
     private static <T, P> StaticAttribute<T, P> extractAttributeFromProperty(
         Class<T> beanClass,
@@ -307,49 +206,28 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         BeanProperty<T, P> propertyDescriptor,
         BeanContext beanContext
     ) {
-        Optional<AnnotationValue<Annotation>> dynamoDbFlatten = findAnnotation(propertyDescriptor, DynamoDbFlatten.class, Flatten.class);
+        Optional<AnnotationValue<Annotation>> dynamoDbFlatten = IntrospectionTableSchema.findAnnotation(propertyDescriptor, DynamoDbFlatten.class, Flatten.class);
 
         if (dynamoDbFlatten.isPresent()) {
             builder.flatten(
-                BeanIntrospectionTableSchema.create(propertyDescriptor.getType(), beanContext, metaTableSchemaCache),
+                IntrospectionTableSchema.create(propertyDescriptor.getType(), beanContext, metaTableSchemaCache),
                 propertyDescriptor::get,
                 propertyDescriptor::set
             );
             return null;
         } else {
-            AttributeConfiguration attributeConfiguration = resolveAttributeConfiguration(propertyDescriptor);
+            AttributeConfiguration attributeConfiguration = IntrospectionTableSchema.resolveAttributeConfiguration(propertyDescriptor);
 
             StaticAttribute.Builder<T, P> attributeBuilder = staticAttributeBuilder(propertyDescriptor, beanClass, metaTableSchemaCache, attributeConfiguration, beanContext);
 
-            createAttributeConverterFromAnnotation(propertyDescriptor, beanContext).ifPresent(attributeBuilder::attributeConverter);
+            IntrospectionTableSchema.createAttributeConverterFromAnnotation(propertyDescriptor, beanContext).ifPresent(attributeBuilder::attributeConverter);
 
             addTagsToAttribute(attributeBuilder, propertyDescriptor);
             return attributeBuilder.build();
         }
     }
 
-    private static <T> AttributeConfiguration resolveAttributeConfiguration(BeanProperty<T, ?> propertyDescriptor) {
-        boolean shouldPreserveEmptyObject = findAnnotation(propertyDescriptor, DynamoDbPreserveEmptyObject.class, PreserveEmptyObjects.class).isPresent();
-        boolean shouldIgnoreNulls = findAnnotation(propertyDescriptor, DynamoDbIgnoreNulls.class, IgnoreNulls.class).isPresent();
 
-        return AttributeConfiguration.builder()
-            .preserveEmptyObject(shouldPreserveEmptyObject)
-            .ignoreNulls(shouldIgnoreNulls)
-            .build();
-    }
-
-    @SuppressWarnings("unchecked")
-    private static List<AttributeConverterProvider> createConverterProvidersFromAnnotation(Class<?> beanClass, AnnotationValue<DynamoDbBean> dynamoDbBean, BeanContext beanContext) {
-        Class<? extends AttributeConverterProvider>[] providerClasses = (Class<? extends AttributeConverterProvider>[]) dynamoDbBean.classValues("converterProviders");
-        if (providerClasses.length == 0) {
-            providerClasses = new Class[]{LegacyAttributeConverterProvider.class};
-        }
-
-        return Arrays.stream(providerClasses)
-            .peek(c -> debugLog(beanClass, () -> "Adding Converter: " + c.getTypeName()))
-            .map(c -> (AttributeConverterProvider) fromContextOrNew(c, beanContext).get())
-            .collect(Collectors.toList());
-    }
 
     private static <T, P> StaticAttribute.Builder<T, P> staticAttributeBuilder(
         BeanProperty<T, P> propertyDescriptor,
@@ -359,71 +237,15 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         BeanContext beanContext
     ) {
         Argument<P> propertyType = propertyDescriptor.asArgument();
-        EnhancedType<P> propertyTypeToken = convertTypeToEnhancedType(propertyType, metaTableSchemaCache, attributeConfiguration, beanContext);
+        EnhancedType<P> propertyTypeToken = IntrospectionTableSchema.convertTypeToEnhancedType(propertyType, metaTableSchemaCache, attributeConfiguration, beanContext);
         return StaticAttribute.builder(beanClass, propertyTypeToken)
-            .name(attributeNameForProperty(propertyDescriptor))
+            .name(IntrospectionTableSchema.attributeNameForProperty(propertyDescriptor))
             .getter(propertyDescriptor::get)
             // secondary indices can be read only
             .setter(propertyDescriptor.isReadOnly() ? (bean, value) -> {} : propertyDescriptor::set);
     }
 
-    /**
-     * Converts a {@link Type} to an {@link EnhancedType}. Usually {@link EnhancedType#of} is capable of doing this all
-     * by itself, but for the BeanTableSchema we want to detect if a parameterized class is being passed without a
-     * converter that is actually another annotated class in which case we want to capture its schema and add it to the
-     * EnhancedType. Unfortunately this means we have to duplicate some of the recursive Type parsing that
-     * EnhancedClient otherwise does all by itself.
-     */
-    @SuppressWarnings("unchecked")
-    private static <T> EnhancedType<T> convertTypeToEnhancedType(
-        Argument<T> type,
-        MetaTableSchemaCache metaTableSchemaCache,
-        AttributeConfiguration attributeConfiguration,
-        BeanContext beanContext
-    ) {
-        if (List.class.equals(type.getType())) {
-            EnhancedType<?> enhancedType = convertTypeToEnhancedType(type.getTypeParameters()[0], metaTableSchemaCache, attributeConfiguration, beanContext);
-            return (EnhancedType<T>) EnhancedType.listOf(enhancedType);
-        } else if (Set.class.equals(type.getType())) {
-            EnhancedType<?> enhancedType = convertTypeToEnhancedType(type.getTypeParameters()[0], metaTableSchemaCache, attributeConfiguration, beanContext);
-            return (EnhancedType<T>) EnhancedType.setOf(enhancedType);
-        } else if (Map.class.equals(type.getType())) {
-            EnhancedType<?> keyType = convertTypeToEnhancedType(type.getTypeVariable("K").orElseThrow(() -> new IllegalArgumentException("Missing key type")), metaTableSchemaCache, attributeConfiguration, beanContext);
-            EnhancedType<?> valueType = convertTypeToEnhancedType(type.getTypeVariable("V").orElseThrow(() -> new IllegalArgumentException("Missing value type")), metaTableSchemaCache, attributeConfiguration, beanContext);
-            return (EnhancedType<T>) EnhancedType.mapOf(keyType, valueType);
-        }
 
-        Class<T> clazz = type.getType();
-
-        if (clazz.getPackage() != null && !clazz.getPackage().getName().startsWith("java.")) {
-            Optional<BeanIntrospection<T>> introspection = BeanIntrospector.SHARED.findIntrospection(clazz);
-            if (introspection.isPresent()) {
-                Consumer<EnhancedTypeDocumentConfiguration.Builder> attrConfiguration = b -> b
-                    .preserveEmptyObject(attributeConfiguration.preserveEmptyObject())
-                    .ignoreNulls(attributeConfiguration.ignoreNulls());
-
-                return EnhancedType.documentOf(
-                    clazz,
-                    BeanIntrospectionTableSchema.recursiveCreate(clazz, beanContext, metaTableSchemaCache),
-                    attrConfiguration
-                );
-            }
-        }
-
-        return EnhancedType.of(clazz);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T, P> Optional<AttributeConverter<P>> createAttributeConverterFromAnnotation(
-        BeanProperty<T, P> propertyDescriptor,
-        BeanContext beanContext
-    ) {
-        return findAnnotation(propertyDescriptor, DynamoDbConvertedBy.class, ConvertedBy.class)
-            .flatMap(AnnotationValue::classValue)
-            .map(clazz -> (AttributeConverter<P>) fromContextOrNew(clazz, beanContext).get())
-            .or(() -> findAnnotation(propertyDescriptor, ConvertedJson.class)
-                .map(anno -> (AttributeConverter<P>) new ConvertedJsonAttributeConverter<>(propertyDescriptor.getType())));
-    }
 
     /**
      * This method scans all the annotations on a property and looks for a meta-annotation of
@@ -434,106 +256,48 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
     private static <T> void addTagsToAttribute(StaticAttribute.Builder<?, ?> attributeBuilder,
                                                BeanProperty<T, ?> propertyDescriptor) {
 
-        findAnnotation(propertyDescriptor, UPDATE_BEHAVIOUR_ANNOTATIONS)
+        IntrospectionTableSchema.findAnnotation(propertyDescriptor, IntrospectionTableSchema.UPDATE_BEHAVIOUR_ANNOTATIONS)
             .flatMap(anno -> anno.enumValue(Enum.class))
             .ifPresent(behavior -> attributeBuilder.addTag(StaticAttributeTags.updateBehavior(software.amazon.awssdk.enhanced.dynamodb.mapper.UpdateBehavior.valueOf(behavior.name()))));
 
-        findAnnotation(propertyDescriptor, PARTITION_KEYS_ANNOTATIONS)
+        IntrospectionTableSchema.findAnnotation(propertyDescriptor, IntrospectionTableSchema.PARTITION_KEYS_ANNOTATIONS)
             .ifPresent(anno -> attributeBuilder.addTag(StaticAttributeTags.primaryPartitionKey()));
 
-        findAnnotation(propertyDescriptor, SORT_KEYS_ANNOTATIONS)
+        IntrospectionTableSchema.findAnnotation(propertyDescriptor, IntrospectionTableSchema.SORT_KEYS_ANNOTATIONS)
             .ifPresent(anno -> attributeBuilder.addTag(StaticAttributeTags.primarySortKey()));
 
-        findAnnotation(propertyDescriptor, SECONDARY_PARTITION_KEYS_ANNOTATIONS)
+        IntrospectionTableSchema.findAnnotation(propertyDescriptor, IntrospectionTableSchema.SECONDARY_PARTITION_KEYS_ANNOTATIONS)
             .map(anno -> anno.stringValues("indexNames"))
             .ifPresent(indexNames -> attributeBuilder.addTag(StaticAttributeTags.secondaryPartitionKey(Arrays.asList(indexNames))));
 
-        findAnnotation(propertyDescriptor, SECONDARY_SORT_KEYS_ANNOTATIONS)
+        IntrospectionTableSchema.findAnnotation(propertyDescriptor, IntrospectionTableSchema.SECONDARY_SORT_KEYS_ANNOTATIONS)
             .map(anno -> anno.stringValues("indexNames"))
             .ifPresent(indexNames -> attributeBuilder.addTag(StaticAttributeTags.secondarySortKey(Arrays.asList(indexNames))));
     }
 
-    private static <R> Supplier<R> fromContextOrNew(Class<R> clazz, BeanContext beanContext) {
-        Optional<R> optionalBean = beanContext.findBean(clazz);
-        if (optionalBean.isPresent()) {
-            return optionalBean::get;
-        }
 
-        Optional<BeanIntrospection<R>> optionalBeanIntrospection = BeanIntrospector.SHARED.findIntrospection(clazz);
-        if (optionalBeanIntrospection.isPresent()) {
-            return optionalBeanIntrospection.get()::instantiate;
-        }
-
-        try {
-            Constructor<R> constructor = clazz.getConstructor();
-            debugLog(clazz, () -> "Constructor: " + constructor);
-            return ObjectConstructor.create(clazz, constructor, MethodHandles.lookup());
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException(
-                String.format("Class '%s' appears to have no default constructor thus cannot be used with the BeanTableSchema", clazz), e);
-        }
-    }
-
-    private static <T> String attributeNameForProperty(BeanProperty<T, ?> propertyDescriptor) {
-        return findAnnotation(propertyDescriptor, DynamoDbAttribute.class, Attribute.class)
-            .flatMap(AnnotationValue::stringValue)
-            .orElseGet(propertyDescriptor::getName);
-    }
 
     private static <T> boolean isMappableProperty(Class<T> beanClass, BeanProperty<T, ?> propertyDescriptor) {
 
         if (propertyDescriptor.isWriteOnly()) {
-            debugLog(beanClass, () -> "Ignoring bean property " + propertyDescriptor.getName() + " because it is write only.");
+            IntrospectionTableSchema.debugLog(beanClass, () -> "Ignoring bean property %s because it is write only.".formatted(propertyDescriptor.getName()));
             return false;
         }
 
         if (propertyDescriptor.isReadOnly()) {
-            debugLog(beanClass, () -> "Ignoring bean property " + propertyDescriptor.getName() + " because it is read only.");
+            IntrospectionTableSchema.debugLog(beanClass, () -> "Ignoring bean property %s because it is read only.".formatted(propertyDescriptor.getName()));
             return isSecondaryIndex(propertyDescriptor);
         }
 
-        if (propertyDescriptor.isAnnotationPresent(DynamoDbIgnore.class)) {
-            debugLog(beanClass, () -> "Ignoring bean property " + propertyDescriptor.getName() + " because it is ignored.");
-            return false;
-        }
-
-        if (propertyDescriptor.isAnnotationPresent(Ignore.class)) {
-            debugLog(beanClass, () -> "Ignoring bean property " + propertyDescriptor.getName() + " because it is ignored.");
-            return false;
-        }
-
-        return true;
+        return IntrospectionTableSchema.isNotIgnored(beanClass, propertyDescriptor);
     }
 
     private static <T> boolean isSecondaryIndex(BeanProperty<T, ?> propertyDescriptor) {
         return propertyDescriptor.getAnnotationNames().stream().anyMatch(name ->
-            SECONDARY_PARTITION_KEYS_ANNOTATIONS.contains(name) || SECONDARY_SORT_KEYS_ANNOTATIONS.contains(name)
+            IntrospectionTableSchema.SECONDARY_PARTITION_KEYS_ANNOTATIONS.contains(name) || IntrospectionTableSchema.SECONDARY_SORT_KEYS_ANNOTATIONS.contains(name)
         );
     }
 
-    private static void debugLog(Class<?> beanClass, Supplier<String> logMessage) {
-        BEAN_LOGGER.debug(() -> beanClass.getTypeName() + " - " + logMessage.get());
-    }
 
-    private static Optional<AnnotationValue<Annotation>> findAnnotation(AnnotationMetadataProvider source, Class<? extends Annotation>... annotationClasses) {
-        for (Class<? extends Annotation> annotationName : annotationClasses) {
-            @SuppressWarnings("unchecked")
-            Optional<AnnotationValue<Annotation>> maybeAnno = source.findAnnotation((Class<Annotation>) annotationName);
-            if (maybeAnno.isPresent()) {
-                return maybeAnno;
-            }
-        }
-        return Optional.empty();
-    }
-
-    private static Optional<AnnotationValue<Annotation>> findAnnotation(AnnotationMetadataProvider source, Iterable<String> annotationNames) {
-        for (String annotationName : annotationNames) {
-            Optional<AnnotationValue<Annotation>> maybeAnno = source.findAnnotation(annotationName);
-            if (maybeAnno.isPresent()) {
-                return maybeAnno;
-            }
-        }
-        return Optional.empty();
-    }
 }
 
