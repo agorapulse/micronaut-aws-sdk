@@ -55,8 +55,14 @@ public class ImmutableEntityWithCustomAnnotation {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
         ImmutableEntityWithCustomAnnotation that = (ImmutableEntityWithCustomAnnotation) o;
         return Objects.equals(id, that.id) && Objects.equals(sortKey, that.sortKey) && Objects.equals(created, that.created);
     }
@@ -68,11 +74,7 @@ public class ImmutableEntityWithCustomAnnotation {
 
     @Override
     public String toString() {
-        return "ImmutableEntityWithCustomAnnotation{" +
-            "id=" + id +
-            ", sortKey=" + sortKey +
-            ", created=" + created +
-            '}';
+        return "ImmutableEntityWithCustomAnnotation{id=%d, sortKey=%d, created=%s}".formatted(id, sortKey, created);
     }
 
     public static class Builder {

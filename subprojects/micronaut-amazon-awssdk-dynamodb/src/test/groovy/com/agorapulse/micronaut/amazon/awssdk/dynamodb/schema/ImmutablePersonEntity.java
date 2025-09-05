@@ -19,7 +19,6 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb.schema;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.Address;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.ImmutablePhoneNumber;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.PhoneNumber;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.PartitionKey;
 import io.micronaut.core.annotation.Introspected;
 
@@ -86,17 +85,23 @@ public class ImmutablePersonEntity {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
         ImmutablePersonEntity that = (ImmutablePersonEntity) o;
-        return Objects.equals(id, that.id) &&
-            Objects.equals(firstName, that.firstName) &&
-            Objects.equals(lastName, that.lastName) &&
-            Objects.equals(age, that.age) &&
-            Objects.equals(addresses, that.addresses) &&
-            Objects.equals(phoneNumbers, that.phoneNumbers) &&
-            Objects.equals(hobbies, that.hobbies) &&
-            Objects.equals(favoriteColors, that.favoriteColors);
+        return Objects.equals(id, that.id)
+            && Objects.equals(firstName, that.firstName)
+            && Objects.equals(lastName, that.lastName)
+            && Objects.equals(age, that.age)
+            && Objects.equals(addresses, that.addresses)
+            && Objects.equals(phoneNumbers, that.phoneNumbers)
+            && Objects.equals(hobbies, that.hobbies)
+            && Objects.equals(favoriteColors, that.favoriteColors);
     }
 
     @Override
@@ -106,16 +111,7 @@ public class ImmutablePersonEntity {
 
     @Override
     public String toString() {
-        return "ImmutablePersonEntity{" +
-            "id=" + id +
-            ", firstName='" + firstName + '\'' +
-            ", lastName='" + lastName + '\'' +
-            ", age=" + age +
-            ", addresses=" + addresses +
-            ", phoneNumbers=" + phoneNumbers +
-            ", hobbies=" + hobbies +
-            ", favoriteColors=" + favoriteColors +
-            '}';
+        return "ImmutablePersonEntity{id=%d, firstName='%s', lastName='%s', age=%d, addresses=%s, phoneNumbers=%s, hobbies=%s, favoriteColors=%s}".formatted(id, firstName, lastName, age, addresses, phoneNumbers, hobbies, favoriteColors);
     }
 
     public static class Builder {

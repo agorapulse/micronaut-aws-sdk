@@ -50,8 +50,14 @@ public class ImmutableEntityWithDynamoDbImmutable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
         ImmutableEntityWithDynamoDbImmutable that = (ImmutableEntityWithDynamoDbImmutable) o;
         return Objects.equals(id, that.id) && Objects.equals(sortKey, that.sortKey);
     }
@@ -63,10 +69,7 @@ public class ImmutableEntityWithDynamoDbImmutable {
 
     @Override
     public String toString() {
-        return "ImmutableEntityWithDynamoDbImmutable{" +
-            "id=" + id +
-            ", sortKey=" + sortKey +
-            '}';
+        return "ImmutableEntityWithDynamoDbImmutable{id=%d, sortKey=%d}".formatted(id, sortKey);
     }
 
     public static class Builder {
