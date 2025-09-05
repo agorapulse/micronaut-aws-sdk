@@ -27,7 +27,6 @@ pluginManagement {
         id 'org.kordamp.gradle.guide'               version kordampVersion
         id 'org.kordamp.gradle.coveralls'           version kordampVersion
         id 'org.ajoberstar.git-publish'             version gitPublishPluginVersion
-        id 'io.github.gradle-nexus.publish-plugin'  version nexusPluginVersion
     }
 }
 
@@ -41,6 +40,7 @@ buildscript {
         classpath("org.jetbrains.kotlin.plugin.allopen:org.jetbrains.kotlin.plugin.allopen.gradle.plugin:$kotlinVersion")
         classpath("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$kspVersion")
         classpath("io.micronaut.gradle:micronaut-minimal-plugin:$micronautGradlePluginVersion")
+        classpath("com.vanniktech:gradle-maven-publish-plugin:$mavenCentralPublishPluginVersion")
     }
 }
 
