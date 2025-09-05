@@ -174,7 +174,7 @@ gradleProjects {
             }
         }
 
-        dirs(['subprojects']) { Project subproject ->
+        dirs(['subprojects', 'benchmarks']) { Project subproject ->
             micronaut {
                 if (it.hasProperty('importMicronautPlatform')) {
                     importMicronautPlatform = true

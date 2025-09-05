@@ -63,6 +63,9 @@ projects {
     directories = ['subprojects', 'examples', 'docs', 'benchmarks', 'platforms', 'kotlin-libs']
 
     plugins {
+        dir('benchmarks') {
+            id 'io.micronaut.minimal.library'
+        }
         dir('platforms') {
             id 'java-platform'
             id 'com.vanniktech.maven.publish'
