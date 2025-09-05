@@ -128,163 +128,119 @@ allprojects {
     }
 }
 
-project(':micronaut-aws-sdk-bom').apply(plugin: 'java-platform')
-project(':micronaut-aws-sdk-bom').apply(plugin: 'com.vanniktech.maven.publish')
-
-project(':micronaut-aws-sdk-bom') {
-    mavenPublishing {
-        publishToMavenCentral(true)
-        signAllPublications()
-
-        pom {
-            name = "Micronaut AWS SDK BOM"
-            description = 'Micronaut AWS SDK Bill of Materials'
-            inceptionYear = "2018"
-            url = "https://github.com/${slug}"
-            licenses {
-                license {
-                    name = "The Apache License, Version 2.0"
-                    url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
-                    distribution = "https://www.apache.org/licenses/LICENSE-2.0.txt"
-                }
-            }
-            developers {
-                developer {
-                    id = "musketyr"
-                    name = "Vladimir Orany"
-                    url = "https://github.com/musketyr/"
-                }
-            }
-            scm {
-                url = "https://github.com/${slug}.git"
-                connection = "scm:git:git://github.com/${slug}.git"
-                developerConnection = "scm:git:ssh://git@github.com/${slug}.git"
-            }
-        }
-    }
-
-    signing {
-        useInMemoryPgpKeys(rootProject.ext.signingInMemoryKey, rootProject.ext.signingInMemoryKeyPassword)
-        sign publishing.publications
-    }
-}
-
 subprojects { Project subproject ->
-    if (subproject.name == 'guide' || subproject.name == 'micronaut-aws-sdk-dependencies'|| subproject.name == 'micronaut-aws-sdk-bom') return
-
     if (subproject.name.startsWith('micronaut')) {
         project(':micronaut-aws-sdk-bom').dependencies.constraints.api subproject
     }
+}
 
-    if (subproject.name.contains('kotlin')) return
+gradleProjects {
+    subprojects {
+        dirs(['subprojects', 'platforms']) {
+            mavenPublishing {
+                publishToMavenCentral(true)
+                signAllPublications()
 
-    apply plugin: 'groovy'
-    apply plugin: 'java-library'
-    apply plugin: 'com.vanniktech.maven.publish'
-
-    if (subproject.projectDir.parentFile.name.equals('subprojects')) {
-        micronaut {
-            if (it.hasProperty('importMicronautPlatform')) {
-                importMicronautPlatform = true
-            } else {
-                project.logger.lifecycle "No importMicronautPlatform property found for ${micronaut.dump()}"
-            }
-            testRuntime 'spock'
-            processing {
-                incremental false
-            }
-        }
-    }
-
-    dependencies {
-        api platform(project(':micronaut-aws-sdk-dependencies'))
-
-        // Groovy
-        if (subproject.name.startsWith('micronaut-amazon-awssdk')) {
-            compileOnly "org.apache.groovy:groovy:$groovyVersion"
-            compileOnly 'io.micronaut.aws:micronaut-aws-sdk-v2'
-            testImplementation "org.apache.groovy:groovy:$groovyVersion"
-            testImplementation 'io.micronaut.aws:micronaut-aws-sdk-v2'
-        } else {
-            compileOnly 'io.micronaut.aws:micronaut-aws-sdk-v1'
-            implementation "org.apache.groovy:groovy:$groovyVersion"
-            implementation 'io.micronaut.groovy:micronaut-runtime-groovy'
-            compileOnly 'io.micronaut:micronaut-inject-groovy'
-            testImplementation 'io.micronaut.aws:micronaut-aws-sdk-v1'
-        }
-
-        implementation 'io.micronaut:micronaut-inject'
-        implementation 'io.micronaut:micronaut-runtime'
-
-
-        testAnnotationProcessor 'io.micronaut:micronaut-inject-java'
-
-        testImplementation 'io.micronaut:micronaut-inject-groovy'
-
-        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-        testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
-
-
-        testImplementation 'io.micronaut.test:micronaut-test-junit5'
-        testImplementation 'io.micronaut.test:micronaut-test-spock'
-
-        testRuntimeOnly 'ch.qos.logback:logback-classic:1.2.3'
-        testRuntimeOnly 'org.yaml:snakeyaml'
-    }
-
-    compileJava.options.compilerArgs += '-parameters'
-    compileTestJava.options.compilerArgs += '-parameters'
-
-    test {
-        useJUnitPlatform()
-        environment 'AWS_CBOR_DISABLE', 'true'
-        systemProperty 'TEST_RESOURCES_FOLDER', new File(subproject.projectDir, 'src/test/resources').canonicalPath
-        systemProperty 'user.timezone', 'UTC'
-        systemProperty 'user.language', 'en'
-    }
-
-    task cleanOut(type: Delete) {
-        delete file('out')
-    }
-
-    clean.dependsOn cleanOut
-
-    mavenPublishing {
-        publishToMavenCentral(true)
-        signAllPublications()
-
-        pom {
-            name = "Micronaut AWS SDK"
-            description = 'Set of useful libraries for Micronaut'
-            inceptionYear = "2018"
-            url = "https://github.com/${slug}"
-            licenses {
-                license {
-                    name = "The Apache License, Version 2.0"
-                    url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
-                    distribution = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                pom {
+                    name = "Micronaut AWS SDK"
+                    description = 'Set of useful libraries for Micronaut'
+                    inceptionYear = "2018"
+                    url = "https://github.com/${slug}"
+                    licenses {
+                        license {
+                            name = "The Apache License, Version 2.0"
+                            url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                            distribution = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = "musketyr"
+                            name = "Vladimir Orany"
+                            url = "https://github.com/musketyr/"
+                        }
+                    }
+                    scm {
+                        url = "https://github.com/${slug}.git"
+                        connection = "scm:git:git://github.com/${slug}.git"
+                        developerConnection = "scm:git:ssh://git@github.com/${slug}.git"
+                    }
                 }
             }
-            developers {
-                developer {
-                    id = "musketyr"
-                    name = "Vladimir Orany"
-                    url = "https://github.com/musketyr/"
-                }
-            }
-            scm {
-                url = "https://github.com/${slug}.git"
-                connection = "scm:git:git://github.com/${slug}.git"
-                developerConnection = "scm:git:ssh://git@github.com/${slug}.git"
+
+            signing {
+                useInMemoryPgpKeys(rootProject.ext.signingInMemoryKey, rootProject.ext.signingInMemoryKeyPassword)
+                sign publishing.publications
             }
         }
-    }
 
-    signing {
-        useInMemoryPgpKeys(rootProject.ext.signingInMemoryKey, rootProject.ext.signingInMemoryKeyPassword)
-        sign publishing.publications
-    }
+        dirs(['subprojects']) { Project subproject ->
+            micronaut {
+                if (it.hasProperty('importMicronautPlatform')) {
+                    importMicronautPlatform = true
+                } else {
+                    project.logger.lifecycle "No importMicronautPlatform property found for ${micronaut.dump()}"
+                }
+                testRuntime 'spock'
+                processing {
+                    incremental false
+                }
+            }
 
+            dependencies {
+                api platform(project(':micronaut-aws-sdk-dependencies'))
+
+                // Groovy
+                if (subproject.name.startsWith('micronaut-amazon-awssdk')) {
+                    compileOnly "org.apache.groovy:groovy:$groovyVersion"
+                    compileOnly 'io.micronaut.aws:micronaut-aws-sdk-v2'
+                    testImplementation "org.apache.groovy:groovy:$groovyVersion"
+                    testImplementation 'io.micronaut.aws:micronaut-aws-sdk-v2'
+                } else {
+                    compileOnly 'io.micronaut.aws:micronaut-aws-sdk-v1'
+                    implementation "org.apache.groovy:groovy:$groovyVersion"
+                    implementation 'io.micronaut.groovy:micronaut-runtime-groovy'
+                    compileOnly 'io.micronaut:micronaut-inject-groovy'
+                    testImplementation 'io.micronaut.aws:micronaut-aws-sdk-v1'
+                }
+
+                implementation 'io.micronaut:micronaut-inject'
+                implementation 'io.micronaut:micronaut-runtime'
+
+
+                testAnnotationProcessor 'io.micronaut:micronaut-inject-java'
+
+                testImplementation 'io.micronaut:micronaut-inject-groovy'
+
+                testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+                testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+
+
+                testImplementation 'io.micronaut.test:micronaut-test-junit5'
+                testImplementation 'io.micronaut.test:micronaut-test-spock'
+
+                testRuntimeOnly 'ch.qos.logback:logback-classic:1.2.3'
+                testRuntimeOnly 'org.yaml:snakeyaml'
+            }
+
+            compileJava.options.compilerArgs += '-parameters'
+            compileTestJava.options.compilerArgs += '-parameters'
+
+            test {
+                useJUnitPlatform()
+                environment 'AWS_CBOR_DISABLE', 'true'
+                systemProperty 'TEST_RESOURCES_FOLDER', new File(subproject.projectDir, 'src/test/resources').canonicalPath
+                systemProperty 'user.timezone', 'UTC'
+                systemProperty 'user.language', 'en'
+            }
+
+            task cleanOut(type: Delete) {
+                delete file('out')
+            }
+
+            clean.dependsOn cleanOut
+        }
+    }
 }
 
 check.dependsOn('aggregateCheckstyle', 'aggregateCodenarc', 'aggregateAllTestReports', 'coveralls')

@@ -60,10 +60,22 @@ gradleEnterprise {
 
 
 projects {
-    directories = ['subprojects', 'examples', 'docs', 'benchmarks', 'platforms']
+    directories = ['subprojects', 'examples', 'docs', 'benchmarks', 'platforms', 'kotlin-libs']
 
     plugins {
+        dir('platforms') {
+            id 'java-platform'
+            id 'com.vanniktech.maven.publish'
+        }
+
         dir('subprojects') {
+            id 'io.micronaut.minimal.library'
+            id 'groovy'
+            id 'java-library'
+            id 'com.vanniktech.maven.publish'
+        }
+
+        dir('kotlin-libs') {
             id 'io.micronaut.minimal.library'
         }
     }
