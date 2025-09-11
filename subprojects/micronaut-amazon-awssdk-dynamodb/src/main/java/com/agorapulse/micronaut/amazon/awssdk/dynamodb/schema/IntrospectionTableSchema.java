@@ -17,20 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.schema;
 
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Attribute;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.ConvertedBy;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.ConvertedJson;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.HashKey;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Ignore;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.IgnoreNulls;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.PartitionKey;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.PreserveEmptyObjects;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.RangeKey;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondaryPartitionKey;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SecondarySortKey;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SortKey;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.TimeToLive;
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.UpdateBehavior;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.*;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert.ConvertedJsonAttributeConverter;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert.LegacyAttributeConverterProvider;
 import io.micronaut.context.BeanContext;
@@ -41,6 +28,8 @@ import io.micronaut.core.beans.BeanIntrospector;
 import io.micronaut.core.beans.BeanProperty;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.enhanced.dynamodb.AttributeConverter;
 import software.amazon.awssdk.enhanced.dynamodb.AttributeConverterProvider;
 import software.amazon.awssdk.enhanced.dynamodb.EnhancedType;
@@ -139,6 +128,7 @@ public class IntrospectionTableSchema {
         UpdateBehavior.class.getName(),
         DynamoDbUpdateBehavior.class.getName()
     );
+    private static final Logger log = LoggerFactory.getLogger(IntrospectionTableSchema.class);
 
     /**
      * Creates a table schema for the given class using Micronaut bean introspection.
@@ -211,9 +201,25 @@ public class IntrospectionTableSchema {
     static boolean isImmutableClass(Class<?> clazz) {
         // Check if the class has builder support via @Introspected annotation
         var introspectionOptional = BeanIntrospector.SHARED.findIntrospection(clazz);
+
         if (introspectionOptional.isPresent()) {
             BeanIntrospection<?> introspection = introspectionOptional.get();
-            return introspection.hasBuilder();
+
+            // classes that are not records but have a builder are considered immutable only if they have the annotation present
+            if (introspection.getAnnotationMetadata().isAnnotationPresent(Immutable.class) || introspection.getAnnotationMetadata().isAnnotationPresent(DynamoDbImmutable.class)) {
+                if (!introspection.hasBuilder()) {
+                    log.error("Class {} is annotated with @Immutable or @DynamoDbImmutable but has no builder. Such classes cannot be used as immutable DynamoDB entities.", clazz);
+                }
+
+                // we return true under any circumstance here because the exception will be thrown later
+                return true;
+            }
+
+            if (clazz.isRecord() && !introspection.hasBuilder()) {
+                log.error("Class {} is a record but has no builder. Records with no builder cannot be used as immutable DynamoDB entities.", clazz);
+            }
+
+            return clazz.isRecord();
         }
 
         return clazz.isRecord();

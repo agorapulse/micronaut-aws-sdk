@@ -114,6 +114,7 @@ For immutable entities such as these declared as records, use `@Introspected` wi
 [source,java,indent=0,options="nowrap"]
 .Immutable Entity
 ----
+@Immutable
 @Introspected(builder = @Introspected.IntrospectionBuilder(builderClass = Customer.Builder.class))
 public record Customer(
     @PartitionKey Long id,
@@ -128,6 +129,10 @@ public record Customer(
 
 }
 ----
+
+Records actually does not require `@Immutable` annotation because they are immutable by design. They only requires `@Introspected` annotation with builder configuration.
+
+For some versions of Micronaut the  builder is detected automatically so you may only need to use `@Introspected` annotation.
 
 NOTE: Alternative: use `@DynamoDbImmutable` that is mapped to `@Introspected` annotation using the DynamoDB annotation processor.
 
