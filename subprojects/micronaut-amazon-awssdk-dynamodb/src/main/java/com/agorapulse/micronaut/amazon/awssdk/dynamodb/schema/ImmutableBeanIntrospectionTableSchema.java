@@ -29,6 +29,7 @@ import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.StringUtils;
 import software.amazon.awssdk.annotations.SdkPublicApi;
 import software.amazon.awssdk.annotations.ThreadSafe;
+import software.amazon.awssdk.enhanced.dynamodb.AttributeConverterProvider;
 import software.amazon.awssdk.enhanced.dynamodb.EnhancedType;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.internal.AttributeConfiguration;
@@ -162,13 +163,14 @@ public final class ImmutableBeanIntrospectionTableSchema<T> extends WrappedTable
         Optional<AnnotationValue<DynamoDbBean>> optionalDynamoDbBean = immutableIntrospection.findAnnotation(DynamoDbBean.class);
         Optional<AnnotationValue<DynamoDbImmutable>> optionalDynamoDbImmutable = immutableIntrospection.findAnnotation(DynamoDbImmutable.class);
 
-        if (optionalDynamoDbBean.isPresent()) {
-            builder.attributeConverterProviders(IntrospectionTableSchema.createConverterProvidersFromAnnotation(optionalDynamoDbBean.get(), beanContext));
-        } else if (optionalDynamoDbImmutable.isPresent()) {
-            builder.attributeConverterProviders(IntrospectionTableSchema.createConverterProvidersFromAnnotation(optionalDynamoDbImmutable.get(), beanContext));
-        } else {
-            builder.attributeConverterProviders(new LegacyAttributeConverterProvider());
-        }
+        List<AttributeConverterProvider> attributeConverterProviders = optionalDynamoDbBean
+            .map(dynamoDbBeanAnnotationValue -> IntrospectionTableSchema.createConverterProvidersFromAnnotation(dynamoDbBeanAnnotationValue, beanContext))
+            .orElseGet(() -> optionalDynamoDbImmutable
+                .map(dynamoDbImmutableAnnotationValue -> IntrospectionTableSchema.createConverterProvidersFromAnnotation(dynamoDbImmutableAnnotationValue, beanContext))
+                .orElseGet(() -> List.of(new LegacyAttributeConverterProvider()))
+            );
+
+        builder.attributeConverterProviders(attributeConverterProviders);
 
         List<ImmutableAttribute<T, BeanIntrospection.Builder<T>, ?>> attributes = new ArrayList<>();
 
@@ -178,7 +180,7 @@ public final class ImmutableBeanIntrospectionTableSchema<T> extends WrappedTable
                 propertyDescriptor.findAnnotation(TimeToLive.class).ifPresent(timeToLive ->
                     attributes.add(createTtlAttributeFromFieldAnnotation(immutableClass, builderClass, timeToLive, propertyDescriptor, beanContext))
                 );
-                return extractAttributeFromProperty(immutableClass, builderClass, metaTableSchemaCache, builder, propertyDescriptor, beanContext);
+                return extractAttributeFromProperty(immutableClass, builderClass, metaTableSchemaCache, builder, propertyDescriptor, beanContext, attributeConverterProviders);
             })
             .filter(Objects::nonNull)
             .forEach(attributes::add);
@@ -223,7 +225,8 @@ public final class ImmutableBeanIntrospectionTableSchema<T> extends WrappedTable
         MetaTableSchemaCache metaTableSchemaCache,
         StaticImmutableTableSchema.Builder<T, BeanIntrospection.Builder<T>> builder,
         BeanProperty<T, P> propertyDescriptor,
-        BeanContext beanContext
+        BeanContext beanContext,
+        List<AttributeConverterProvider> attributeConverterProviders
     ) {
         Optional<AnnotationValue<Annotation>> dynamoDbFlatten = IntrospectionTableSchema.findAnnotation(propertyDescriptor, DynamoDbFlatten.class, Flatten.class);
 
@@ -238,7 +241,7 @@ public final class ImmutableBeanIntrospectionTableSchema<T> extends WrappedTable
         } else {
             AttributeConfiguration attributeConfiguration = IntrospectionTableSchema.resolveAttributeConfiguration(propertyDescriptor);
 
-            ImmutableAttribute.Builder<T, BeanIntrospection.Builder<T>, P> attributeBuilder = immutableAttributeBuilder(propertyDescriptor, immutableClass, builderClass, metaTableSchemaCache, attributeConfiguration, beanContext);
+            ImmutableAttribute.Builder<T, BeanIntrospection.Builder<T>, P> attributeBuilder = immutableAttributeBuilder(propertyDescriptor, immutableClass, builderClass, metaTableSchemaCache, attributeConfiguration, beanContext, attributeConverterProviders);
 
             IntrospectionTableSchema.createAttributeConverterFromAnnotation(propertyDescriptor, beanContext).ifPresent(attributeBuilder::attributeConverter);
 
@@ -254,10 +257,11 @@ public final class ImmutableBeanIntrospectionTableSchema<T> extends WrappedTable
         Class<BeanIntrospection.Builder<T>> builderClass,
         MetaTableSchemaCache metaTableSchemaCache,
         AttributeConfiguration attributeConfiguration,
-        BeanContext beanContext
+        BeanContext beanContext,
+        List<AttributeConverterProvider> attributeConverterProviders
     ) {
         Argument<P> propertyType = propertyDescriptor.asArgument();
-        EnhancedType<P> propertyTypeToken = IntrospectionTableSchema.convertTypeToEnhancedType(propertyType, metaTableSchemaCache, attributeConfiguration, beanContext);
+        EnhancedType<P> propertyTypeToken = IntrospectionTableSchema.convertTypeToEnhancedType(propertyType, metaTableSchemaCache, attributeConfiguration, beanContext, attributeConverterProviders);
 
         return ImmutableAttribute.builder(immutableClass, builderClass, propertyTypeToken)
             .name(IntrospectionTableSchema.attributeNameForProperty(propertyDescriptor))

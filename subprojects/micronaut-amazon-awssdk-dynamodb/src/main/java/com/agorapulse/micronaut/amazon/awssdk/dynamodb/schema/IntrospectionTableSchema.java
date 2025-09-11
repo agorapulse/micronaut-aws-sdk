@@ -27,6 +27,7 @@ import io.micronaut.core.beans.BeanIntrospection;
 import io.micronaut.core.beans.BeanIntrospector;
 import io.micronaut.core.beans.BeanProperty;
 import io.micronaut.core.type.Argument;
+import io.micronaut.core.util.CollectionUtils;
 import io.micronaut.core.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +67,7 @@ import java.time.temporal.TemporalAccessor;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -272,39 +274,60 @@ public class IntrospectionTableSchema {
         Argument<T> type,
         MetaTableSchemaCache metaTableSchemaCache,
         AttributeConfiguration attributeConfiguration,
-        BeanContext beanContext
+        BeanContext beanContext,
+        List<AttributeConverterProvider> attributeConverterProviders
     ) {
         if (List.class.equals(type.getType())) {
-            EnhancedType<?> enhancedType = convertTypeToEnhancedType(type.getTypeParameters()[0], metaTableSchemaCache, attributeConfiguration, beanContext);
+            EnhancedType<?> enhancedType = convertTypeToEnhancedType(type.getTypeParameters()[0], metaTableSchemaCache, attributeConfiguration, beanContext, attributeConverterProviders);
             return (EnhancedType<T>) EnhancedType.listOf(enhancedType);
         } else if (Set.class.equals(type.getType())) {
-            EnhancedType<?> enhancedType = convertTypeToEnhancedType(type.getTypeParameters()[0], metaTableSchemaCache, attributeConfiguration, beanContext);
+            EnhancedType<?> enhancedType = convertTypeToEnhancedType(type.getTypeParameters()[0], metaTableSchemaCache, attributeConfiguration, beanContext, attributeConverterProviders);
             return (EnhancedType<T>) EnhancedType.setOf(enhancedType);
         } else if (Map.class.equals(type.getType())) {
-            EnhancedType<?> keyType = convertTypeToEnhancedType(type.getTypeVariable("K").orElseThrow(() -> new IllegalArgumentException("Missing key type")), metaTableSchemaCache, attributeConfiguration, beanContext);
-            EnhancedType<?> valueType = convertTypeToEnhancedType(type.getTypeVariable("V").orElseThrow(() -> new IllegalArgumentException("Missing value type")), metaTableSchemaCache, attributeConfiguration, beanContext);
+            EnhancedType<?> keyType = convertTypeToEnhancedType(type.getTypeVariable("K").orElseThrow(() -> new IllegalArgumentException("Missing key type")), metaTableSchemaCache, attributeConfiguration, beanContext, attributeConverterProviders);
+            EnhancedType<?> valueType = convertTypeToEnhancedType(type.getTypeVariable("V").orElseThrow(() -> new IllegalArgumentException("Missing value type")), metaTableSchemaCache, attributeConfiguration, beanContext, attributeConverterProviders);
             return (EnhancedType<T>) EnhancedType.mapOf(keyType, valueType);
         }
 
         Class<T> clazz = type.getType();
+        EnhancedType<T> enhancedType = EnhancedType.of(clazz);
 
-        if (clazz.getPackage() != null && !clazz.getPackage().getName().startsWith("java.")) {
-            Optional<BeanIntrospection<T>> introspection = BeanIntrospector.SHARED.findIntrospection(clazz);
-            if (introspection.isPresent()) {
-                Consumer<EnhancedTypeDocumentConfiguration.Builder> attrConfiguration = b -> b
-                    .preserveEmptyObject(attributeConfiguration.preserveEmptyObject())
-                    .ignoreNulls(attributeConfiguration.ignoreNulls());
+        if (clazz.getPackage() == null || clazz.getPackage().getName().startsWith("java.")) {
+            return enhancedType;
+        }
 
-                // Use the TableSchemaGenerator to recursively create schemas based on immutability
-                return EnhancedType.documentOf(
-                    clazz,
-                    recursiveCreate(clazz, beanContext, metaTableSchemaCache),
-                    attrConfiguration
-                );
+        // if there is a converter for the type, we don't need to do anything special
+        if (CollectionUtils.isNotEmpty(attributeConverterProviders)) {
+            Optional<AttributeConverter<T>> converter = attributeConverterProviders.stream()
+                .map(p -> {
+                    try {
+                        return p.converterFor(enhancedType);
+                    } catch (IllegalStateException e) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .findFirst();
+            if (converter.isPresent()) {
+                return enhancedType;
             }
         }
 
-        return EnhancedType.of(clazz);
+        Optional<BeanIntrospection<T>> introspection = BeanIntrospector.SHARED.findIntrospection(clazz);
+        if (introspection.isPresent()) {
+            Consumer<EnhancedTypeDocumentConfiguration.Builder> attrConfiguration = b -> b
+                .preserveEmptyObject(attributeConfiguration.preserveEmptyObject())
+                .ignoreNulls(attributeConfiguration.ignoreNulls());
+
+            // Use the TableSchemaGenerator to recursively create schemas based on immutability
+            return EnhancedType.documentOf(
+                clazz,
+                recursiveCreate(clazz, beanContext, metaTableSchemaCache),
+                attrConfiguration
+            );
+        }
+
+        return enhancedType;
     }
 
     /**

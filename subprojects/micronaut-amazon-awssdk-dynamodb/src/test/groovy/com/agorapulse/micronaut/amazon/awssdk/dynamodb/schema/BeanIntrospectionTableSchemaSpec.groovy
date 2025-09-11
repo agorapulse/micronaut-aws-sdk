@@ -185,4 +185,15 @@ class BeanIntrospectionTableSchemaSpec extends Specification {
             schema.itemToMap(new DynamoDBEntity(date: new Date()), ['date']).get('date').s()
     }
 
+    void 'verify converters with introspected class'() {
+        when:
+            BeanIntrospectionTableSchema<EntityWithConverter> schema = BeanIntrospectionTableSchema.create(EntityWithConverter, context, cache)
+            Map<String, AttributeValue> map = schema.itemToMap(
+                new EntityWithConverter(id: 'one', subEntity: new EntityWithConverter.SubEntity(name: 'Test')),
+                true
+            )
+        then:
+            map.get('subEntity') == AttributeValue.fromS('Test')
+    }
+
 }
