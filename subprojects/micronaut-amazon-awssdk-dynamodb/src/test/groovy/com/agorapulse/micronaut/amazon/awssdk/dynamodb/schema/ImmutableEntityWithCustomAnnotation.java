@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.schema;
 
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Immutable;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.PartitionKey;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.SortKey;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.TimeToLive;
@@ -25,6 +26,7 @@ import io.micronaut.core.annotation.Introspected;
 import java.time.Instant;
 import java.util.Objects;
 
+@Immutable
 @Introspected(builder = @Introspected.IntrospectionBuilder(builderClass = ImmutableEntityWithCustomAnnotation.Builder.class))
 public class ImmutableEntityWithCustomAnnotation {
 

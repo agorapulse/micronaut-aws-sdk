@@ -48,7 +48,9 @@ public class DynamoDbBeanAnnotationRemapper implements AnnotationRemapper {
 
         if (DYNAMODB_BEAN.equals(annotationName)) {
             return Arrays.asList(annotation, AnnotationValue.builder(Introspected.class).build());
-        } else if (DYNAMODB_IMMUTABLE.equals(annotationName)) {
+        }
+
+        if (DYNAMODB_IMMUTABLE.equals(annotationName)) {
             AnnotationValue<Introspected> introspectedAnnotation;
 
             // Map the builder class to Introspected.IntrospectionBuilder
@@ -62,11 +64,13 @@ public class DynamoDbBeanAnnotationRemapper implements AnnotationRemapper {
                 introspectedAnnotation = AnnotationValue.builder(Introspected.class)
                     .member(BUILDER_ATTRIBUTE, builderAnnotation)
                     .build();
-            } else {
-                introspectedAnnotation = AnnotationValue.builder(Introspected.class).build();
+                return List.of(
+                    annotation,
+                    introspectedAnnotation,
+                    AnnotationValue.builder("com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.Immutable").build()
+                );
             }
-
-            return Arrays.asList(annotation, introspectedAnnotation);
+            return List.of(annotation, AnnotationValue.builder(Introspected.class).build());
         }
 
         return Collections.singletonList(annotation);

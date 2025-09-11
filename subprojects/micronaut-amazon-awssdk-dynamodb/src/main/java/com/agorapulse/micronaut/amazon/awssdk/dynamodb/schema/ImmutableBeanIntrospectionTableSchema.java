@@ -120,6 +120,9 @@ public final class ImmutableBeanIntrospectionTableSchema<T> extends WrappedTable
     }
 
     public static <T> ImmutableBeanIntrospectionTableSchema<T> create(Class<T> immutableClass, BeanContext context, MetaTableSchemaCache metaTableSchemaCache) {
+        if (!IntrospectionTableSchema.isImmutableClass(immutableClass)) {
+            throw new IllegalArgumentException("The class " + immutableClass.getName() + " is not immutable. Use BeanIntrospectionTableSchema instead.");
+        }
         IntrospectionTableSchema.debugLog(immutableClass, () -> "Creating immutable bean introspection schema");
         // Fetch or create a new reference to this yet-to-be-created TableSchema in the cache
         MetaTableSchema<T> metaTableSchema = metaTableSchemaCache.getOrCreate(immutableClass);

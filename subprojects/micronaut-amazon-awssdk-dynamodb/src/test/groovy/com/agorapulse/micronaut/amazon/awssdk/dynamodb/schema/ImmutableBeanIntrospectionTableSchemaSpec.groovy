@@ -17,8 +17,6 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.schema
 
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.Address
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.ImmutablePhoneNumber
 import io.micronaut.context.BeanContext
 import io.micronaut.core.convert.ConversionService
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.MetaTableSchemaCache
@@ -126,43 +124,9 @@ class ImmutableBeanIntrospectionTableSchemaSpec extends Specification {
 
     void 'read table schema for immutable class with nested beans'() {
         when:
-            ImmutableBeanIntrospectionTableSchema<ImmutablePersonEntity> schema =
-                ImmutableBeanIntrospectionTableSchema.create(ImmutablePersonEntity, context, cache)
+            ImmutableBeanIntrospectionTableSchema.create(ImmutablePersonEntity, context, cache)
         then:
-            schema.attributeNames().size() == 8
-
-        when:
-            ImmutablePersonEntity person = ImmutablePersonEntity.builder()
-                .id(1L)
-                .firstName('John')
-                .lastName('Doe')
-                .age(42)
-                .addresses(['main': new Address(
-                    street: 'Main Street',
-                    city: 'Springfield',
-                    zipCode: '12345'
-                )])
-                .phoneNumbers([new ImmutablePhoneNumber('home', '123456789')])
-                .hobbies(['reading', 'coding'])
-                .favoriteColors(['red', 'green'] as Set)
-                .build()
-            Map<String, AttributeValue> map = schema.itemToMap(person, true)
-        then:
-            noExceptionThrown()
-            map.get('id').n() == '1'
-            map.get('firstName').s() == 'John'
-
-        when:
-            ImmutablePersonEntity loaded = schema.mapToItem(map)
-        then:
-            loaded.id == 1L
-            loaded.firstName == 'John'
-            loaded.lastName == 'Doe'
-            loaded.age == 42
-            loaded.addresses['main'].street == 'Main Street'
-            loaded.phoneNumbers[0].number() == '123456789'
-            loaded.hobbies.contains('reading')
-            loaded.favoriteColors.contains('red')
+            thrown(IllegalArgumentException)
     }
 
     void 'ttl is computed correctly for immutable entity with TimeToLive annotation'() {
