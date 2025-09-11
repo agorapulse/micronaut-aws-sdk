@@ -29,6 +29,7 @@ import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.StringUtils;
 import software.amazon.awssdk.annotations.SdkPublicApi;
 import software.amazon.awssdk.annotations.ThreadSafe;
+import software.amazon.awssdk.enhanced.dynamodb.AttributeConverterProvider;
 import software.amazon.awssdk.enhanced.dynamodb.EnhancedType;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.internal.AttributeConfiguration;
@@ -131,11 +132,12 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         StaticTableSchema.Builder<T> builder = StaticTableSchema.builder(beanClass).newItemSupplier(introspection::instantiate);
 
         Optional<AnnotationValue<DynamoDbBean>> optionalDynamoDbBean = introspection.findAnnotation(DynamoDbBean.class);
-        if (optionalDynamoDbBean.isPresent()) {
-            builder.attributeConverterProviders(IntrospectionTableSchema.createConverterProvidersFromAnnotation(optionalDynamoDbBean.get(), beanContext));
-        } else {
-            builder.attributeConverterProviders(new LegacyAttributeConverterProvider());
-        }
+
+        List<AttributeConverterProvider> attributeConverterProviders = optionalDynamoDbBean
+            .map(dynamoDbBeanAnnotationValue -> IntrospectionTableSchema.createConverterProvidersFromAnnotation(dynamoDbBeanAnnotationValue, beanContext))
+            .orElseGet(() -> List.of(new LegacyAttributeConverterProvider()));
+
+        builder.attributeConverterProviders(attributeConverterProviders);
 
         List<StaticAttribute<T, ?>> attributes = new ArrayList<>();
 
@@ -145,7 +147,7 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
                 propertyDescriptor.findAnnotation(TimeToLive.class).ifPresent(timeToLive ->
                     attributes.add(createTtlAttributeFromFieldAnnotation(beanClass, timeToLive, propertyDescriptor, beanContext))
                 );
-                return extractAttributeFromProperty(beanClass, metaTableSchemaCache, builder, propertyDescriptor, beanContext);
+                return extractAttributeFromProperty(beanClass, metaTableSchemaCache, builder, propertyDescriptor, beanContext, attributeConverterProviders);
             })
             .filter(Objects::nonNull)
             .forEach(attributes::add);
@@ -182,7 +184,8 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         MetaTableSchemaCache metaTableSchemaCache,
         StaticTableSchema.Builder<T> builder,
         BeanProperty<T, P> propertyDescriptor,
-        BeanContext beanContext
+        BeanContext beanContext,
+        List<AttributeConverterProvider> attributeConverterProviders
     ) {
         Optional<AnnotationValue<Annotation>> dynamoDbFlatten = IntrospectionTableSchema.findAnnotation(propertyDescriptor, DynamoDbFlatten.class, Flatten.class);
 
@@ -196,7 +199,7 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         } else {
             AttributeConfiguration attributeConfiguration = IntrospectionTableSchema.resolveAttributeConfiguration(propertyDescriptor);
 
-            StaticAttribute.Builder<T, P> attributeBuilder = staticAttributeBuilder(propertyDescriptor, beanClass, metaTableSchemaCache, attributeConfiguration, beanContext);
+            StaticAttribute.Builder<T, P> attributeBuilder = staticAttributeBuilder(propertyDescriptor, beanClass, metaTableSchemaCache, attributeConfiguration, beanContext, attributeConverterProviders);
 
             IntrospectionTableSchema.createAttributeConverterFromAnnotation(propertyDescriptor, beanContext).ifPresent(attributeBuilder::attributeConverter);
             IntrospectionTableSchema.collectTagsToAttribute(propertyDescriptor).forEach(attributeBuilder::addTag);
@@ -210,10 +213,11 @@ public final class BeanIntrospectionTableSchema<T> extends WrappedTableSchema<T,
         Class<T> beanClass,
         MetaTableSchemaCache metaTableSchemaCache,
         AttributeConfiguration attributeConfiguration,
-        BeanContext beanContext
+        BeanContext beanContext,
+        List<AttributeConverterProvider> attributeConverterProviders
     ) {
         Argument<P> propertyType = propertyDescriptor.asArgument();
-        EnhancedType<P> propertyTypeToken = IntrospectionTableSchema.convertTypeToEnhancedType(propertyType, metaTableSchemaCache, attributeConfiguration, beanContext);
+        EnhancedType<P> propertyTypeToken = IntrospectionTableSchema.convertTypeToEnhancedType(propertyType, metaTableSchemaCache, attributeConfiguration, beanContext, attributeConverterProviders);
         return StaticAttribute.builder(beanClass, propertyTypeToken)
             .name(IntrospectionTableSchema.attributeNameForProperty(propertyDescriptor))
             .getter(propertyDescriptor::get)
