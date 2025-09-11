@@ -128,7 +128,8 @@ public class IntrospectionTableSchema {
         UpdateBehavior.class.getName(),
         DynamoDbUpdateBehavior.class.getName()
     );
-    private static final Logger log = LoggerFactory.getLogger(IntrospectionTableSchema.class);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(IntrospectionTableSchema.class);
 
     /**
      * Creates a table schema for the given class using Micronaut bean introspection.
@@ -208,7 +209,7 @@ public class IntrospectionTableSchema {
             // classes that are not records but have a builder are considered immutable only if they have the annotation present
             if (introspection.getAnnotationMetadata().isAnnotationPresent(Immutable.class) || introspection.getAnnotationMetadata().isAnnotationPresent(DynamoDbImmutable.class)) {
                 if (!introspection.hasBuilder()) {
-                    log.error("Class {} is annotated with @Immutable or @DynamoDbImmutable but has no builder. Such classes cannot be used as immutable DynamoDB entities.", clazz);
+                    LOGGER.error("Class {} is annotated with @Immutable or @DynamoDbImmutable but has no builder. Such classes cannot be used as immutable DynamoDB entities.", clazz);
                 }
 
                 // we return true under any circumstance here because the exception will be thrown later
@@ -216,7 +217,7 @@ public class IntrospectionTableSchema {
             }
 
             if (clazz.isRecord() && !introspection.hasBuilder()) {
-                log.error("Class {} is a record but has no builder. Records with no builder cannot be used as immutable DynamoDB entities.", clazz);
+                LOGGER.error("Class {} is a record but has no builder. Records with no builder cannot be used as immutable DynamoDB entities.", clazz);
             }
 
             return clazz.isRecord();

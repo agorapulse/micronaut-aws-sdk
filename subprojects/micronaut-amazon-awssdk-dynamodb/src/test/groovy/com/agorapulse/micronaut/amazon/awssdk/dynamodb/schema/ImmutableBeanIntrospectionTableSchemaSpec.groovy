@@ -17,8 +17,6 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.schema
 
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.Address
-import com.agorapulse.micronaut.amazon.awssdk.dynamodb.ImmutablePhoneNumber
 import io.micronaut.context.BeanContext
 import io.micronaut.core.convert.ConversionService
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.MetaTableSchemaCache
@@ -126,8 +124,7 @@ class ImmutableBeanIntrospectionTableSchemaSpec extends Specification {
 
     void 'read table schema for immutable class with nested beans'() {
         when:
-            ImmutableBeanIntrospectionTableSchema<ImmutablePersonEntity> schema =
-                ImmutableBeanIntrospectionTableSchema.create(ImmutablePersonEntity, context, cache)
+            ImmutableBeanIntrospectionTableSchema.create(ImmutablePersonEntity, context, cache)
         then:
             thrown(IllegalArgumentException)
     }
