@@ -20,15 +20,12 @@ package com.agorapulse.micronaut.aws.dynamodb.annotation;
 import java.lang.annotation.*;
 
 /**
- * Annotates partition key.
+ * Annotates sort key.
  *
- * This annotation is not required if the name of the argument contains word <code>hash</code> or <code>partition</code>.
- * 
- * @deprecated use {@link PartitionKey} instead
+ * This annotation is not required if the name of the argument contains word <code>range</code> or <code>sort</code>.
  */
-@Deprecated
 @Inherited
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER, ElementType.ANNOTATION_TYPE})
-public @interface HashKey { }
+public @interface SortKey { }

@@ -44,28 +44,28 @@ public interface DynamoDBService<T> {
      * - consistentRead (default to false)
      * - limit (default to DEFAULT_COUNT_LIMIT)
      *
-     * @param hashKey
-     * @param rangeKeyName
-     * @param rangeKeyValue
-     * @param operator
-     * @param settings
-     * @return
+     * @param partitionKey the partition key value
+     * @param sortKeyName the name of the sort key
+     * @param sortKeyValue the value of the sort key
+     * @param operator comparison operator
+     * @param settings additional settings
+     * @return number of matching items
      */
-    int count(Object hashKey, String rangeKeyName, Object rangeKeyValue, ComparisonOperator operator, Map settings);
+    int count(Object partitionKey, String sortKeyName, Object sortKeyValue, ComparisonOperator operator, Map settings);
 
     /**
      * Optional settings:
      * - consistentRead (default to false)
      * - limit (default to DEFAULT_COUNT_LIMIT)
      *
-     * @param hashKey
-     * @param rangeKeyName
-     * @param rangeKeyValue
-     * @param operator
-     * @return
+     * @param partitionKey the partition key value
+     * @param sortKeyName the name of the sort key
+     * @param sortKeyValue the value of the sort key
+     * @param operator comparison operator
+     * @return number of matching items
      */
-    default int count(Object hashKey, String rangeKeyName, Object rangeKeyValue, ComparisonOperator operator) {
-        return count(hashKey, rangeKeyName, rangeKeyValue, operator, Collections.emptyMap());
+    default int count(Object partitionKey, String sortKeyName, Object sortKeyValue, ComparisonOperator operator) {
+        return count(partitionKey, sortKeyName, sortKeyValue, operator, Collections.emptyMap());
     }
 
     /**
@@ -73,13 +73,13 @@ public interface DynamoDBService<T> {
      * - consistentRead (default to false)
      * - limit (default to DEFAULT_COUNT_LIMIT)
      *
-     * @param hashKey
-     * @param rangeKeyName
-     * @param rangeKeyValue
-     * @return
+     * @param partitionKey the partition key value
+     * @param sortKeyName the name of the sort key
+     * @param sortKeyValue the value of the sort key
+     * @return number of matching items
      */
-    default int count(Object hashKey, String rangeKeyName, Object rangeKeyValue) {
-        return count(hashKey, rangeKeyName, rangeKeyValue, ComparisonOperator.EQ);
+    default int count(Object partitionKey, String sortKeyName, Object sortKeyValue) {
+        return count(partitionKey, sortKeyName, sortKeyValue, ComparisonOperator.EQ);
     }
 
     /**
@@ -87,12 +87,12 @@ public interface DynamoDBService<T> {
      * - consistentRead (default to false)
      * - limit (default to DEFAULT_COUNT_LIMIT)
      *
-     * @param hashKey
-     * @param rangeKeyValue
-     * @return
+     * @param partitionKey the partition key value
+     * @param sortKeyValue the value of the sort key
+     * @return number of matching items
      */
-    default int count(Object hashKey, Object rangeKeyValue) {
-        return count(hashKey, getRangeKeyName(), rangeKeyValue);
+    default int count(Object partitionKey, Object sortKeyValue) {
+        return count(partitionKey, getSortKeyName(), sortKeyValue);
     }
 
     /**
@@ -790,9 +790,60 @@ public interface DynamoDBService<T> {
 
     boolean isIndexRangeKey(String rangeName);
 
-    String getHashKeyName();
-    Class<?> getHashKeyClass();
-    String getRangeKeyName();
-    Class<?> getRangeKeyClass();
+    /**
+     * @return the name of the partition key
+     * @deprecated use {@link #getPartitionKeyName()} instead
+     */
+    @Deprecated
+    default String getHashKeyName() {
+        return getPartitionKeyName();
+    }
+
+    /**
+     * @return the type of the partition key
+     * @deprecated use {@link #getPartitionKeyClass()} instead
+     */
+    @Deprecated
+    default Class<?> getHashKeyClass() {
+        return getPartitionKeyClass();
+    }
+
+    /**
+     * @return the name of the sort key
+     * @deprecated use {@link #getSortKeyName()} instead
+     */
+    @Deprecated
+    default String getRangeKeyName() {
+        return getSortKeyName();
+    }
+
+    /**
+     * @return the type of the sort key
+     * @deprecated use {@link #getSortKeyClass()} instead
+     */
+    @Deprecated
+    default Class<?> getRangeKeyClass() {
+        return getSortKeyClass();
+    }
+    
+    /**
+     * @return the name of the partition key
+     */
+    String getPartitionKeyName();
+    
+    /**
+     * @return the type of the partition key
+     */
+    Class<?> getPartitionKeyClass();
+    
+    /**
+     * @return the name of the sort key
+     */
+    String getSortKeyName();
+    
+    /**
+     * @return the type of the sort key
+     */
+    Class<?> getSortKeyClass();
 
 }
