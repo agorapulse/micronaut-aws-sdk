@@ -32,6 +32,9 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+// CHECKSTYLE:OFF
+
+// tag::loader[]
 @MicronautTest                                                                          // <1>
 @Property(name = "aws.dynamodb.create-tables", value = "true")                          // <2>
 class DynamoDbLoaderTest {
@@ -64,9 +67,7 @@ class DynamoDbLoaderTest {
     @Test
     void skipLoadingTo() {
         List<TestEntity> loaded = loader.readAll(                                       // <7>
-            FIXT::readText,
-            TestEntity.class,
-            List.of("test-entity.csv")
+            FIXT::readText, TestEntity.class, List.of("test-entity.csv")
         ).toList();
 
         assertEquals(1, loaded.size());
@@ -90,3 +91,4 @@ class DynamoDbLoaderTest {
     }
 
 }
+// end::loader[]
