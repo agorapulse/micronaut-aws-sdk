@@ -1142,7 +1142,7 @@ These data can be loaded using `DynamoDbLoader` bean. The following test shows h
 [source,java,indent]
 .DynamoDbLoader Example
 ----
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-loader/src/test/java/com/agorapulse/amazon/awssdk/dynamodb/loader/DynamoDbLoaderTest.java[lines=19..-1]
+include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-loader/src/test/java/com/agorapulse/amazon/awssdk/dynamodb/loader/DynamoDbLoaderTest.java[tags=loader]
 ----
 <1> Test must be annotated wiht `@MicronautTest` to allow loader injection
 <2> Property `aws.dynamodb.create-tables` guarantees that the tables are created automatically
@@ -1150,6 +1150,7 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-loader/src/test
 <4> The mapping is specified as map with the entity types as keys and iterables of the CSV files as values
 <5> Load the data from the CSV file
 <6> After loading the data, the entities according to the rows in the CSV file are available in the database
+<7> Alternatively you can  load the data without saving them to the DynamoDB using the `read` methods
 
 This is how the files are laid out for this particular example:
 

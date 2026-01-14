@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2018-2025 Agorapulse.
+ * Copyright 2018-2026 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,16 @@ public class CsvDynamoDbLoader implements DynamoDbLoader {
         return (Publisher<Object>) Flux.fromIterable(mappings.entrySet()).parallel().runOn(scheduler).flatMap(entry ->
                 Flux.fromIterable(entry.getValue()).parallel().runOn(scheduler).flatMap(filename ->
                         preload(fileLoader, entry.getKey(), filename)
+                )
+        ).sequential();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Publisher<Object> read(UnaryOperator<String> fileLoader, Map<Class<?>, Iterable<String>> mappings) {
+        return (Publisher<Object>) Flux.fromIterable(mappings.entrySet()).parallel().runOn(scheduler).flatMap(entry ->
+                Flux.fromIterable(entry.getValue()).flatMap(filename ->
+                        load(fileLoader, entry.getKey(), filename)
                 )
         ).sequential();
     }

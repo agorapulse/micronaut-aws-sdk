@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2018-2025 Agorapulse.
+ * Copyright 2018-2026 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import com.agorapulse.testing.fixt.Fixt;
 import io.micronaut.context.annotation.Property;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -31,6 +32,9 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+// CHECKSTYLE:OFF
+
+// tag::loader[]
 @MicronautTest                                                                          // <1>
 @Property(name = "aws.dynamodb.create-tables", value = "true")                          // <2>
 class DynamoDbLoaderTest {
@@ -39,6 +43,12 @@ class DynamoDbLoaderTest {
 
     @Inject DynamoDbLoader loader;
     @Inject DynamoDBServiceProvider provider;
+
+    @AfterEach
+    void cleanUp() {
+        var service = provider.findOrCreate(TestEntity.class);
+        service.deleteAll(service.findAll("1"));
+    }
 
     @Test
     void loadIntoDynamoDb() {
@@ -52,6 +62,19 @@ class DynamoDbLoaderTest {
         TestEntity fromDb = provider.findOrCreate(TestEntity.class).get("1", null);     // <6>
         TestEntity referenceEntity = getReferenceEntity();
         assertEquals(referenceEntity, fromDb);
+    }
+
+    @Test
+    void skipLoadingTo() {
+        List<TestEntity> loaded = loader.readAll(                                       // <7>
+            FIXT::readText, TestEntity.class, List.of("test-entity.csv")
+        ).toList();
+
+        assertEquals(1, loaded.size());
+
+        TestEntity fromDb = provider.findOrCreate(TestEntity.class).get("1", null);
+
+        assertNull(fromDb);
     }
 
     private static TestEntity getReferenceEntity() {
@@ -68,3 +91,4 @@ class DynamoDbLoaderTest {
     }
 
 }
+// end::loader[]
