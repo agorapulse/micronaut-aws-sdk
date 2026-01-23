@@ -65,7 +65,7 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
     private final ConversionService conversionService;
     private final ExecutorService blockingExecutorService = LoomSupport.isSupported()
         ? LoomSupport.newThreadPerTaskExecutor(LoomSupport.newVirtualThreadFactory("dynamodb-blocking-pool-"))
-        : Executors.newCachedThreadPool() ;
+        : Executors.newCachedThreadPool();
 
     public AsyncDynamoDbServiceIntroduction(
         FunctionEvaluator functionEvaluator,
