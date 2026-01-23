@@ -20,15 +20,21 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
 import io.micronaut.context.annotation.Property;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
 import jakarta.inject.Inject;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -42,6 +48,17 @@ public class DeclarativeServiceTest {
     private static final Instant REFERENCE_DATE = Instant.ofEpochMilli(1358487600000L);
 
     @Inject DynamoDBEntityService s;
+
+    @BeforeEach
+    public void setup() {
+        final String testThreadName= Thread.currentThread().getName();
+        Schedulers.registerNonBlockingThreadPredicate(t -> t.getName().equals(testThreadName));
+    }
+
+    @AfterEach
+    public void cleanup() {
+        Schedulers.resetNonBlockingThreadPredicate();
+    }
 
     @Test
     public void testJavaService() {
@@ -73,11 +90,11 @@ public class DeclarativeServiceTest {
         assertEquals(2, s.countByDates("1", Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS))));
         assertEquals(1, s.countByDates("3", Date.from(REFERENCE_DATE.plus(9, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(20, ChronoUnit.DAYS))));
 
-        assertEquals(2, Flux.from(s.query("1")).count().block().intValue());
-        assertEquals(1, Flux.from(s.query("1", "1")).count().block().intValue());
-        assertEquals(1, Flux.from(s.queryByRangeIndex("1", "bar")).count().block().intValue());
-        assertNull(Flux.from(s.queryByRangeIndex("1", "bar")).blockFirst().getParentId());
-        assertEquals("bar", Flux.from(s.queryByRangeIndex("1", "bar")).blockFirst().getRangeIndex());
+        assertEquals(2, safeBlock(Flux.from(s.query("1")).count()).intValue());
+        assertEquals(1, safeBlock(Flux.from(s.query("1", "1")).count()).intValue());
+        assertEquals(1, safeBlock(Flux.from(s.queryByRangeIndex("1", "bar")).count()).intValue());
+        assertNull(safeBlock(Flux.from(s.queryByRangeIndex("1", "bar")).next()).getParentId());
+        assertEquals("bar", safeBlock(Flux.from(s.queryByRangeIndex("1", "bar")).next()).getRangeIndex());
 
         List<DynamoDBEntity> byDates = s.queryByDates("1", Date.from(REFERENCE_DATE.minus(1, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(2, ChronoUnit.DAYS)));
         assertEquals(2, byDates.size());
@@ -85,7 +102,7 @@ public class DeclarativeServiceTest {
 
         assertEquals(1, s.queryByDates("3", Date.from(REFERENCE_DATE.plus(9, ChronoUnit.DAYS)), Date.from(REFERENCE_DATE.plus(20, ChronoUnit.DAYS))).size());
 
-        assertEquals(2, Flux.from(s.scanAllByRangeIndex("bar")).count().block().intValue());
+        assertEquals(2, safeBlock(Flux.from(s.scanAllByRangeIndex("bar")).count()).intValue());
 
         s.increment("1", "1");
         s.increment("1", "1");
@@ -111,5 +128,9 @@ public class DeclarativeServiceTest {
         entity.setRangeIndex(rangeIndex);
         entity.setDate(date);
         return entity;
+    }
+
+    private <T> T safeBlock(Mono<T> source) {
+        return CompletableFuture.supplyAsync(source::block).join();
     }
 }
