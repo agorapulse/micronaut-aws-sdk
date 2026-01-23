@@ -278,7 +278,7 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
             return mono.block();
         }
 
-        // for a blocking thread we need to move the blocking operation to a separate thread
+        // for a non-blocking thread we need to move the blocking operation to a separate thread
         try {
             return CompletableFuture.supplyAsync(mono::block, blockingExecutorService).join();
         } catch (CompletionException e) {
