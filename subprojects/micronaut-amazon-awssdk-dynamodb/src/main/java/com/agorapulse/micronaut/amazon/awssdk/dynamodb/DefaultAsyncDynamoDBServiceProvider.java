@@ -19,8 +19,9 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
 import io.micronaut.context.annotation.Value;
 import io.micronaut.context.event.ApplicationEventPublisher;
+import io.micronaut.scheduling.TaskExecutors;
+import jakarta.inject.Named;
 import jakarta.inject.Singleton;
-import reactor.core.publisher.Mono;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
@@ -28,7 +29,10 @@ import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 
 import java.time.Duration;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Provider of {@link AsyncDynamoDbService} for particular DynamoDB entities.
@@ -43,6 +47,7 @@ public class DefaultAsyncDynamoDBServiceProvider implements AsyncDynamoDBService
     private final ApplicationEventPublisher publisher;
     private final TableSchemaCreator tableSchemaCreator;
     private final boolean createTables;
+    private final ExecutorService blockingExecutor;
 
     public DefaultAsyncDynamoDBServiceProvider(
         DynamoDbEnhancedAsyncClient enhancedClient,
@@ -50,7 +55,8 @@ public class DefaultAsyncDynamoDBServiceProvider implements AsyncDynamoDBService
         AttributeConversionHelper attributeConversionHelper,
         ApplicationEventPublisher publisher,
         TableSchemaCreator tableSchemaCreator,
-        @Value("${aws.dynamodb.create-tables:false}") boolean createTables
+        @Value("${aws.dynamodb.create-tables:false}") boolean createTables,
+        @Named(TaskExecutors.BLOCKING) ExecutorService blockingScheduler
     ) {
         this.enhancedClient = enhancedClient;
         this.client = client;
@@ -58,6 +64,7 @@ public class DefaultAsyncDynamoDBServiceProvider implements AsyncDynamoDBService
         this.publisher = publisher;
         this.tableSchemaCreator = tableSchemaCreator;
         this.createTables = createTables;
+        this.blockingExecutor = blockingScheduler;
     }
 
     /**
@@ -87,13 +94,13 @@ public class DefaultAsyncDynamoDBServiceProvider implements AsyncDynamoDBService
                     return newService;
                 }
 
-                Mono.fromFuture(table.describeTable())
-                    .map(Objects::nonNull)
-                    .onErrorResume(
-                        ResourceNotFoundException.class,
-                        e -> Mono.from(newService.createTable())
-                    )
-                    .block(Duration.ofSeconds(30));
+                try {
+                    table.describeTable().join();
+                } catch (CompletionException e) {
+                    if (e.getCause() instanceof ResourceNotFoundException) {
+                        CompletableFuture.supplyAsync(newService::createTable, blockingExecutor).join();
+                    }
+                }
 
                 return newService;
             }

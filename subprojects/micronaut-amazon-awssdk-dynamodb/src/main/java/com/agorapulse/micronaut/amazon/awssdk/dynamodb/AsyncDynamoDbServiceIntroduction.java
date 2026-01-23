@@ -32,47 +32,55 @@ import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.core.convert.ConversionService;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.type.MutableArgumentValue;
-import io.micronaut.scheduling.TaskExecutors;
-import jakarta.inject.Named;
+import io.micronaut.scheduling.LoomSupport;
+import jakarta.annotation.PreDestroy;
 import jakarta.inject.Singleton;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
 /**
  * Introduction for {@link Service} annotation.
  */
 @Singleton
-public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduction {
+public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduction, AutoCloseable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AsyncDynamoDbServiceIntroduction.class);
 
     private final FunctionEvaluator functionEvaluator;
     private final AsyncDynamoDBServiceProvider provider;
     private final ConversionService conversionService;
-    private final Scheduler blockingScheduler;
+    private final ExecutorService blockingExecutorService = LoomSupport.isSupported()
+        ? LoomSupport.newThreadPerTaskExecutor(LoomSupport.newVirtualThreadFactory("dynamodb-blocking-pool-"))
+        : Executors.newCachedThreadPool() ;
 
     public AsyncDynamoDbServiceIntroduction(
         FunctionEvaluator functionEvaluator,
         AsyncDynamoDBServiceProvider provider,
-        ConversionService conversionService,
-        @Named(TaskExecutors.BLOCKING) ExecutorService executorService
+        ConversionService conversionService
     ) {
         this.functionEvaluator = functionEvaluator;
         this.provider = provider;
         this.conversionService = conversionService;
-        this.blockingScheduler = Schedulers.fromExecutorService(executorService);
+    }
+
+    @Override
+    @PreDestroy
+    public void close() {
+        blockingExecutorService.shutdown();
     }
 
     @Override
@@ -240,6 +248,11 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
         }
 
         if (Stream.class.isAssignableFrom(type)) {
+            // to stream is also blocking operation, see reactor.core.publisher.BlockingIterable.SubscriberIterator.hasNext
+            if (Schedulers.isInNonBlockingThread()) {
+                return safeBlock(Flux.from(publisher).collectList()).stream();
+            }
+            // for blocking threads we can return directly
             return Flux.from(publisher).toStream();
         }
 
@@ -260,7 +273,20 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
     }
 
     private <T> T safeBlock(Mono<T> mono) {
-        return mono.publishOn(blockingScheduler).block();
+        // fast track for blocking threads, we can call block
+        if (!Schedulers.isInNonBlockingThread()) {
+            return mono.block();
+        }
+
+        // for a blocking thread we need to move the blocking operation to a separate thread
+        try {
+            return CompletableFuture.supplyAsync(mono::block, blockingExecutorService).join();
+        } catch (CompletionException e) {
+            if (e.getCause() instanceof RuntimeException runtimeException) {
+                throw runtimeException;
+            }
+            throw e;
+        }
     }
 
     private <T> Publisher<T> handleSave(AsyncDynamoDbService<T> service, MethodInvocationContext<Object, Object> context) {
