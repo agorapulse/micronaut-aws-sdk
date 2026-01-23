@@ -20,10 +20,14 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb;
 
 import io.micronaut.context.annotation.Property;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
 import jakarta.inject.Inject;
+import reactor.core.scheduler.Schedulers;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -42,6 +46,16 @@ public class DeclarativeServiceTest {
     private static final Instant REFERENCE_DATE = Instant.ofEpochMilli(1358487600000L);
 
     @Inject DynamoDBEntityService s;
+
+    @BeforeEach
+    public void setup() {
+        Schedulers.registerNonBlockingThreadPredicate(t -> t.getName().equals(Thread.currentThread().getName()));
+    }
+
+    @AfterEach
+    public void cleanup() {
+        Schedulers.resetNonBlockingThreadPredicate();
+    }
 
     @Test
     public void testJavaService() {

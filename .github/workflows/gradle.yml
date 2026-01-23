@@ -35,6 +35,4 @@ jobs:
           distribution: zulu
       - uses: gradle/actions/setup-gradle@v4
       - run: |
-          # test the async implementation of the DynamoDB client first
-          ./gradlew :micronaut-amazon-awssdk-dynamodb:test -Ptest.aws.dynamodb.v2=async
           ./gradlew check coveralls --parallel
