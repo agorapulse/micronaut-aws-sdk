@@ -28,12 +28,12 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.util.ItemArgument;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.util.QueryArguments;
 import io.micronaut.aop.MethodInvocationContext;
-import io.micronaut.context.annotation.Replaces;
-import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.core.convert.ConversionService;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.type.MutableArgumentValue;
+import io.micronaut.scheduling.TaskExecutors;
+import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
@@ -45,14 +45,14 @@ import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
 /**
  * Introduction for {@link Service} annotation.
  */
 @Singleton
-@Replaces(SyncDynamoDbServiceIntroduction.class)
-@Requires(property = "aws.dynamodb.async", value = "true")
 public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduction {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AsyncDynamoDbServiceIntroduction.class);
@@ -60,15 +60,18 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
     private final FunctionEvaluator functionEvaluator;
     private final AsyncDynamoDBServiceProvider provider;
     private final ConversionService conversionService;
+    private final ExecutorService blockingExecutorService;
 
     public AsyncDynamoDbServiceIntroduction(
         FunctionEvaluator functionEvaluator,
         AsyncDynamoDBServiceProvider provider,
-        ConversionService conversionService
+        ConversionService conversionService,
+        @Named(TaskExecutors.BLOCKING) ExecutorService executorService
     ) {
         this.functionEvaluator = functionEvaluator;
         this.provider = provider;
         this.conversionService = conversionService;
+        this.blockingExecutorService = executorService;
     }
 
     @Override
@@ -204,7 +207,7 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
         Class<Object> type = context.getReturnType().getType();
         Publisher<?> publisher = publisherWithCheckpoint(publisherWithoutCheckpoint, context);
         if (void.class.isAssignableFrom(type) || Void.class.isAssignableFrom(type)) {
-            return Flux.from(publisher).collectList().block();
+            return safeBlock(Flux.from(publisher).collectList());
         }
         if (Publishers.isConvertibleToPublisher(type)) {
             return Publishers.convertPublisher(conversionService, publisher, type);
@@ -212,7 +215,7 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
 
         if (Number.class.isAssignableFrom(type) || type.isPrimitive() && !boolean.class.isAssignableFrom(type)) {
             if (Publishers.isSingle(publisher.getClass())) {
-                Object result = Mono.from(publisher).block();
+                Object result = safeBlock(Mono.from(publisher));
 
                 if (result == null) {
                     return 0;
@@ -223,7 +226,7 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
                     return 0;
                 });
             }
-            Long count = Flux.from(publisher).count().block();
+            Long count = safeBlock(Flux.from(publisher).count());
 
             if (count == null) {
                 return 0;
@@ -240,10 +243,10 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
         }
 
         if (type.isArray() || Iterable.class.isAssignableFrom(type)) {
-            return conversionService.convert(Flux.from(publisher).collectList().block(), type).orElse(Collections.emptyList());
+            return conversionService.convert(safeBlock(Flux.from(publisher).collectList()), type).orElse(Collections.emptyList());
         }
 
-        Object value = Mono.from(publisher).block();
+        Object value = safeBlock(Mono.from(publisher));
 
         if (value == null) {
             return null;
@@ -255,6 +258,9 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
         });
     }
 
+    private <T> T safeBlock(Mono<T> mono) {
+        return CompletableFuture.supplyAsync(mono::block, blockingExecutorService).join();
+    }
 
     private <T> Publisher<T> handleSave(AsyncDynamoDbService<T> service, MethodInvocationContext<Object, Object> context) {
         Map<String, MutableArgumentValue<?>> params = context.getParameters();
