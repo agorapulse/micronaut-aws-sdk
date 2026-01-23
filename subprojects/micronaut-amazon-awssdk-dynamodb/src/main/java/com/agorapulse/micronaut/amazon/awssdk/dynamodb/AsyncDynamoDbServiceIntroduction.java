@@ -40,12 +40,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
@@ -60,7 +61,7 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
     private final FunctionEvaluator functionEvaluator;
     private final AsyncDynamoDBServiceProvider provider;
     private final ConversionService conversionService;
-    private final ExecutorService blockingExecutorService;
+    private final Scheduler blockingScheduler;
 
     public AsyncDynamoDbServiceIntroduction(
         FunctionEvaluator functionEvaluator,
@@ -71,7 +72,7 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
         this.functionEvaluator = functionEvaluator;
         this.provider = provider;
         this.conversionService = conversionService;
-        this.blockingExecutorService = executorService;
+        this.blockingScheduler = Schedulers.fromExecutorService(executorService);
     }
 
     @Override
@@ -259,7 +260,7 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
     }
 
     private <T> T safeBlock(Mono<T> mono) {
-        return CompletableFuture.supplyAsync(mono::block, blockingExecutorService).join();
+        return mono.publishOn(blockingScheduler).block();
     }
 
     private <T> Publisher<T> handleSave(AsyncDynamoDbService<T> service, MethodInvocationContext<Object, Object> context) {
