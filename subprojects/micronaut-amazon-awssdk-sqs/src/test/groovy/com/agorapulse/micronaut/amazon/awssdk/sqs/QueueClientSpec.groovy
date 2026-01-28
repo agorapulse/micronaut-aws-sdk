@@ -24,6 +24,8 @@ import org.reactivestreams.Publisher
 import reactor.core.publisher.Flux
 import reactor.core.scheduler.Schedulers
 import spock.lang.AutoCleanup
+
+import java.util.function.Predicate
 import spock.lang.Specification
 
 /**
@@ -53,7 +55,7 @@ class QueueClientSpec extends Specification {
     void setup() {
         // simulate non-blocking thread to test the blocking executor pattern
         String testThreadName = Thread.currentThread().getName()
-        Schedulers.registerNonBlockingThreadPredicate { t -> t.getName() == testThreadName }
+        Schedulers.registerNonBlockingThreadPredicate({ Thread t -> t.getName() == testThreadName } as Predicate<Thread>)
 
         context = ApplicationContext.builder().build()
 
