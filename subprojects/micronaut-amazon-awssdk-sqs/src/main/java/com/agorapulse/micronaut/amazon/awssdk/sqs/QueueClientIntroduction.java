@@ -32,20 +32,29 @@ import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.qualifiers.Qualifiers;
+import io.micronaut.scheduling.LoomSupport;
+import jakarta.annotation.PreDestroy;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException;
 
 import jakarta.inject.Singleton;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 
 @Singleton
 @InterceptorBean(QueueClient.class)
 @Requires(classes = SqsClient.class)
-public class QueueClientIntroduction implements MethodInterceptor<Object, Object> {
+public class QueueClientIntroduction implements MethodInterceptor<Object, Object>, AutoCloseable {
 
     private static final String GROUP = "group";
     private static final String DELAY = "delay";
@@ -66,10 +75,19 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
 
     private final BeanContext beanContext;
     private final ObjectMapper objectMapper;
+    private final ExecutorService blockingExecutorService = LoomSupport.isSupported()
+        ? LoomSupport.newThreadPerTaskExecutor(LoomSupport.newVirtualThreadFactory("sqs-blocking-pool-"))
+        : Executors.newCachedThreadPool();
 
     public QueueClientIntroduction(BeanContext beanContext, ObjectMapper objectMapper) {
         this.beanContext = beanContext;
         this.objectMapper = objectMapper;
+    }
+
+    @Override
+    @PreDestroy
+    public void close() {
+        blockingExecutorService.shutdown();
     }
 
     @Override
@@ -153,16 +171,33 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
                      messageIdsPublisher = service.sendMessages(queueName, Flux.from((Publisher<?>) message).map(this::convertMessageToJson), delay, group);
                 }
 
-                if (context.getReturnType().asArgument().isVoid()) {
-                    Flux.from(messageIdsPublisher).subscribe();
-                    return null;
+                return unwrapIfRequired(messageIdsPublisher, context);
+            }
+
+            if (Iterable.class.isAssignableFrom(messageType)) {
+                Publisher<String> messageIdsPublisher;
+
+                Argument<?>[] typeParameters = queueArguments.message.getTypeParameters();
+                if (typeParameters.length > 0 && typeParameters[0].equalsType(Argument.STRING)) {
+                    messageIdsPublisher = service.sendMessages(queueName, Flux.fromIterable((Iterable<String>) message), delay, group);
+                } else {
+                    messageIdsPublisher = service.sendMessages(queueName, Flux.fromIterable((Iterable<?>) message).map(this::convertMessageToJson), delay, group);
                 }
 
-                if (Publishers.isConvertibleToPublisher(context.getReturnType().getType())) {
-                    return Publishers.convertPublisher(beanContext.getConversionService(), messageIdsPublisher, context.getReturnType().getType());
+                return unwrapIfRequired(messageIdsPublisher, context);
+            }
+
+            if (messageType.isArray()) {
+                Publisher<String> messageIdsPublisher;
+
+                Class<?> componentType = messageType.getComponentType();
+                if (String.class.equals(componentType)) {
+                    messageIdsPublisher = service.sendMessages(queueName, Flux.fromArray((String[]) message), delay, group);
+                } else {
+                    messageIdsPublisher = service.sendMessages(queueName, Flux.fromArray((Object[]) message).map(this::convertMessageToJson), delay, group);
                 }
 
-                return beanContext.getConversionService().convert(messageIdsPublisher, context.getReturnType().getType());
+                return unwrapIfRequired(messageIdsPublisher, context);
             }
 
             return sendJson(service, queueName, message, delay, group);
@@ -203,5 +238,42 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
         }
 
         return names;
+    }
+
+    private Object unwrapIfRequired(Publisher<String> publisher, MethodInvocationContext<Object, Object> context) {
+        Class<Object> type = context.getReturnType().getType();
+
+        if (void.class.isAssignableFrom(type) || Void.class.isAssignableFrom(type)) {
+            safeBlock(Flux.from(publisher).collectList());
+            return null;
+        }
+
+        if (Publishers.isConvertibleToPublisher(type)) {
+            return Publishers.convertPublisher(beanContext.getConversionService(), publisher, type);
+        }
+
+        if (type.isArray() || Iterable.class.isAssignableFrom(type)) {
+            List<String> result = safeBlock(Flux.from(publisher).collectList());
+            return beanContext.getConversionService().convert(result, type).orElse(result);
+        }
+
+        return beanContext.getConversionService().convert(publisher, type).orElse(null);
+    }
+
+    private <T> T safeBlock(Mono<T> mono) {
+        // fast track for blocking threads, we can call block directly
+        if (!Schedulers.isInNonBlockingThread()) {
+            return mono.block();
+        }
+
+        // for a non-blocking thread we need to move the blocking operation to a separate thread
+        try {
+            return CompletableFuture.supplyAsync(mono::block, blockingExecutorService).join();
+        } catch (CompletionException e) {
+            if (e.getCause() instanceof RuntimeException runtimeException) {
+                throw runtimeException;
+            }
+            throw e;
+        }
     }
 }

@@ -21,6 +21,8 @@ import com.agorapulse.micronaut.amazon.awssdk.sqs.annotation.Queue;
 import com.agorapulse.micronaut.amazon.awssdk.sqs.annotation.QueueClient;
 import org.reactivestreams.Publisher;
 
+import java.util.List;
+
 @QueueClient                                                                            // <1>
 interface DefaultClient {
 
@@ -44,6 +46,16 @@ interface DefaultClient {
     Publisher<String> sendMessages(Publisher<Pogo> messages);                           // <10>
 
     void deleteMessage(String messageId);                                               // <11>
+
+    List<String> sendMessages(List<Pogo> messages);                                     // <12>
+
+    List<String> sendStringMessages(List<String> messages);                             // <13>
+
+    List<String> sendMessages(Pogo[] messages);                                         // <14>
+
+    List<String> sendStringMessages(String[] messages);                                 // <15>
+
+    void sendMessagesVoid(List<Pogo> messages);                                         // <16>
 
     String OTHER_QUEUE = "OtherQueue";
 }
