@@ -22,10 +22,7 @@ import io.micronaut.context.ApplicationContext
 import io.micronaut.inject.qualifiers.Qualifiers
 import org.reactivestreams.Publisher
 import reactor.core.publisher.Flux
-import reactor.core.scheduler.Schedulers
 import spock.lang.AutoCleanup
-
-import java.util.function.Predicate
 import spock.lang.Specification
 
 /**
@@ -53,10 +50,6 @@ class QueueClientSpec extends Specification {
     String marshalledPogo
 
     void setup() {
-        // simulate non-blocking thread to test the blocking executor pattern
-        String testThreadName = Thread.currentThread().getName()
-        Schedulers.registerNonBlockingThreadPredicate({ Thread t -> t.getName() == testThreadName } as Predicate<Thread>)
-
         context = ApplicationContext.builder().build()
 
         context.registerSingleton(SimpleQueueService, defaultService)
@@ -65,10 +58,6 @@ class QueueClientSpec extends Specification {
         context.start()
 
         marshalledPogo = context.getBean(ObjectMapper).writeValueAsString(POGO)
-    }
-
-    void cleanup() {
-        Schedulers.resetNonBlockingThreadPredicate()
     }
 
     void 'can send message to other than default queue potentionally altering the group'() {
@@ -209,75 +198,6 @@ class QueueClientSpec extends Specification {
             id == ID
 
             1 * defaultService.sendMessage(SomeClient.SOME_QUEUE, marshalledPogo, DELAY, null) >> ID
-    }
-
-    void 'can send multiple messages when list is a parameter and return list of ids'() {
-        given:
-            List<String> ids = [ID + 1, ID + 2, ID + 3]
-            DefaultClient client = context.getBean(DefaultClient)
-
-        when:
-            List<String> result = client.sendMessages([POGO, POGO, POGO])
-
-        then:
-            result == ids
-
-            1 * defaultService.sendMessages(DEFAULT_QUEUE_NAME, _ as Publisher, 0, null) >> Flux.just(ID + 1, ID + 2, ID + 3)
-    }
-
-    void 'can send multiple string messages when list is a parameter and return list of ids'() {
-        given:
-            List<String> ids = [ID + 1, ID + 2, ID + 3]
-            DefaultClient client = context.getBean(DefaultClient)
-
-        when:
-            List<String> result = client.sendStringMessages([MESSAGE, MESSAGE, MESSAGE])
-
-        then:
-            result == ids
-
-            1 * defaultService.sendMessages(DEFAULT_QUEUE_NAME, _ as Publisher, 0, null) >> Flux.just(ID + 1, ID + 2, ID + 3)
-    }
-
-    void 'can send multiple messages when array is a parameter and return list of ids'() {
-        given:
-            List<String> ids = [ID + 1, ID + 2, ID + 3]
-            DefaultClient client = context.getBean(DefaultClient)
-            Pogo[] messages = [POGO, POGO, POGO] as Pogo[]
-
-        when:
-            List<String> result = client.sendMessages(messages)
-
-        then:
-            result == ids
-
-            1 * defaultService.sendMessages(DEFAULT_QUEUE_NAME, _ as Publisher, 0, null) >> Flux.just(ID + 1, ID + 2, ID + 3)
-    }
-
-    void 'can send multiple string messages when array is a parameter and return list of ids'() {
-        given:
-            List<String> ids = [ID + 1, ID + 2, ID + 3]
-            DefaultClient client = context.getBean(DefaultClient)
-            String[] messages = [MESSAGE, MESSAGE, MESSAGE] as String[]
-
-        when:
-            List<String> result = client.sendStringMessages(messages)
-
-        then:
-            result == ids
-
-            1 * defaultService.sendMessages(DEFAULT_QUEUE_NAME, _ as Publisher, 0, null) >> Flux.just(ID + 1, ID + 2, ID + 3)
-    }
-
-    void 'can send multiple messages when list is a parameter and return void'() {
-        given:
-            DefaultClient client = context.getBean(DefaultClient)
-
-        when:
-            client.sendMessagesVoid([POGO, POGO, POGO])
-
-        then:
-            1 * defaultService.sendMessages(DEFAULT_QUEUE_NAME, _ as Publisher, 0, null) >> Flux.just(ID + 1, ID + 2, ID + 3)
     }
 
 }

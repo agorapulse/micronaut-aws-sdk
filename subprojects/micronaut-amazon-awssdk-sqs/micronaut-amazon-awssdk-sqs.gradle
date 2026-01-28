@@ -19,8 +19,9 @@ dependencies {
     annotationProcessor 'io.micronaut.validation:micronaut-validation-processor'
     api 'software.amazon.awssdk:sqs'
 
-   api project(':micronaut-amazon-awssdk-core')
+    api project(':micronaut-amazon-awssdk-core')
     implementation "space.jasan:groovy-closure-support:$closureSupportVersion"
+    implementation "io.projectreactor:reactor-core:$projectReactorVersion"
     implementation 'io.micronaut.validation:micronaut-validation'
     implementation 'io.micronaut:micronaut-jackson-databind'
     implementation 'io.micronaut.reactor:micronaut-reactor'
