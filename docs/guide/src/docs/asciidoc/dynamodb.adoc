@@ -11,7 +11,7 @@ This library provides two approaches to work with DynamoDB tables and entities:
 
 
 [source,indent=0,role="primary",subs='verbatim,attributes']
-.Gradle (AWS SDK 2.x)
+.Gradle
 ----
 annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-dynamodb-annotation-processor:{project-version}'
 implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb:{project-version}'
@@ -21,7 +21,7 @@ implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb-kotlin:{project-
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']
-.Maven (AWS SDK 2.x)
+.Maven
 ----
 <dependency>
     <groupId>com.agorapulse</groupId>
@@ -78,7 +78,7 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy
 [source,kotlin,indent=0,options="nowrap",role="secondary"]
 .Kotlin
 ----
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntity.kt[lines=19..-1]
+include::{root-dir}/kotlin-libs/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntity.kt[lines=19..-1]
 ----
 <1> The entity must be annotated with `@Introspected` or `@DynamoDBBean`
 <2> The entity must provide the partition key using `@ParitionKey` annotation
@@ -608,7 +608,7 @@ TIP: The operator `EQ` is used by default if `@Filter` annotation is not present
 For more complex queries you can use `@Query` annotation with a class implementing `QueryFunction` interface:
 
 [source,groovy,indent=0,options="nowrap",role="primary"]
-.Groovy (AWS SDK 2.x)
+.Groovy
 ----
 include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=builders-import]
 include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=service-header]
@@ -648,11 +648,11 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy
 .Kotlin
 
 ----
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=header]
+include::{root-dir}/kotlin-libs/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=header]
 
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=sample-query-class]
+include::{root-dir}/kotlin-libs/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=sample-query-class]
 
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=sample-query]
+include::{root-dir}/kotlin-libs/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=sample-query]
 
 }
 ----
@@ -674,7 +674,7 @@ If you need to scan the table by unindexed attributes you can annotate any metho
  * otherwise an advanced query method
 
 [source,groovy,indent=0,options="nowrap",role="primary"]
-.Groovy (AWS SDK 2.x)
+.Groovy
 ----
 include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=builders-import]
 
@@ -711,11 +711,11 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy
 [source,kotlin,indent=0,options="nowrap",role="secondary"]
 .Kotlin
 ----
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=header]
+include::{root-dir}/kotlin-libs/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=header]
 
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=sample-scan-class]
+include::{root-dir}/kotlin-libs/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=sample-scan-class]
 
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=sample-scan]
+include::{root-dir}/kotlin-libs/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=sample-scan]
 
 }
 ----
@@ -729,7 +729,7 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test
 Declarative services allows you to execute fine-grained updates. Any method annotated with `@Update` will perform the update in the DynamoDB table.
 
 [source,groovy,indent=0,options="nowrap",role="primary"]
-.Groovy (AWS SDK 2.x)
+.Groovy
 ----
 include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/dynamodb/DefaultDynamoDBServiceSpec.groovy[tags=builders-import]
 
@@ -772,11 +772,11 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb/src/test/groovy
 [source,kotlin,indent=0,options="nowrap",role="secondary"]
 .Kotlin
 ----
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=header]
+include::{root-dir}/kotlin-libs/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=header]
 
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=sample-update-class]
+include::{root-dir}/kotlin-libs/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=sample-update-class]
 
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=sample-update]
+include::{root-dir}/kotlin-libs/micronaut-amazon-awssdk-dynamodb-kotlin/src/test/kotlin/com/agorapulse/micronaut/amazon/awssdk/dynamodb/kotlin/DynamoDBEntityService.kt[tags=sample-update]
 
 }
 ----
@@ -797,7 +797,7 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-dynamodb-kotlin/src/test
 
 
 [source,groovy,indent=0,options="nowrap",role="primary"]
-.Groovy (AWS SDK 2.x)
+.Groovy
 ----
 
 DynamoDBServiceProvider provider = context.getBean(DynamoDBServiceProvider)
@@ -833,7 +833,7 @@ service.delete('1001', '1')                                                     
 <7> Delete an entity
 
 [source,java,indent=0,options="nowrap",role="secondary"]
-.Java (AWS SDK 2.x)
+.Java
 ----
 DynamoDBServiceProvider provider = context.getBean(DynamoDBServiceProvider);
 DynamoDBService<DynamoDBEntity> service = provider.findOrCreate(DynamoDBEntity.class);  // <1>

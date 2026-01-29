@@ -47,15 +47,27 @@ You need no configuration at all but some of the configuration may be useful for
 [source,yaml,indent=0,options="nowrap"]
 .application.yml
 ----
-include::{root-dir}/subprojects/micronaut-amazon-awssdk-kinesis/src/test/resources/application-docs-kinesis.yml[]
+aws:
+  kinesis:
+    stream: DefaultStream                              # <1>
+    streams:
+      other:                                           # <2>
+        stream: OtherStream                            # <3>
+    listener:
+      application: my-application                      # <4>
+      worker-id: my-worker-id                          # <5>
+      stream: ListenerStream                           # <6>
+    listeners:
+      other:                                           # <7>
+        stream: OtherListenerStream
 ----
-<1> You can specify the default stream for https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/kinesis/KinesisService.html[KinesisService] and `@KinesisClient`
+<1> You can specify the default stream for `KinesisService` and `@KinesisClient`
 <2> You can define multiple configurations
-<3> Each of the configuration can be access using `@Named('test') KinesisService` qualifier or you can define the configuration as `value` of `@KinesisClient('test')`
-<4> For Kinesis listeners you should provide application name which default to `micronaut.application.name` if not present
-<5> You can also provide the of the Kinesis worker
+<3> Each of the configuration can be access using `@Named('other') KinesisService` qualifier or you can define the configuration as `value` of `@KinesisClient('other')`
+<4> For Kinesis listeners you should provide application name which defaults to `micronaut.application.name` if not present
+<5> You can also provide the worker ID of the Kinesis worker
 <6> This is the default stream to listen
-<7> You can listen to the multiple Kinesis stream by declaring the name of the configuration in the annotation such as `@KinesisListener("other")`
+<7> You can listen to multiple Kinesis streams by declaring the name of the configuration in the annotation such as `@KinesisListener("other")`
 
 
 ==== Publishing with `@KinesisClient`
