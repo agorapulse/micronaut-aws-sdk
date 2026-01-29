@@ -7,33 +7,17 @@ This library provides basic support for Amazon SES using <<Simple Email Service>
 ==== Installation
 
 [source,indent=0,role="primary",subs='verbatim,attributes']
-.Gradle (AWS SDK 2.x)
+.Gradle
 ----
 implementation 'com.agorapulse:micronaut-amazon-awssdk-ses:{project-version}'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']
-.Maven (AWS SDK 2.x)
+.Maven
 ----
 <dependency>
     <groupId>com.agorapulse</groupId>
     <artifactId>micronaut-amazon-awssdk-ses</artifactId>
-    <version>{project-version}</version>
-</dependency>
-----
-
-[source,indent=0,role="secondary",subs='verbatim,attributes']
-.Gradle (AWS SDK 1.x)
-----
-implementation 'com.agorapulse:micronaut-aws-sdk-ses:{project-version}'
-----
-
-[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
-.Maven (AWS SDK 1.x)
-----
-<dependency>
-    <groupId>com.agorapulse</groupId>
-    <artifactId>micronaut-aws-sdk-ses</artifactId>
     <version>{project-version}</version>
 </dependency>
 ----
@@ -83,9 +67,7 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-ses/src/test/groovy/com/
 <12> Define the description of the file (optional)
 
 Please, see
-https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/amazon/awsses/SimpleEmailService.html[SimpleEmailService AWS SDK 2.x]
-or
-https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/ses/SimpleEmailService.html[SimpleEmailService AWS SDK 1.x]
+https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/amazon/awsses/SimpleEmailService.html[SimpleEmailService]
 for the full reference.
 
 ==== Configuration

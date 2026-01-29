@@ -10,35 +10,18 @@ This library provides two approaches to work with Simple Notification Service to
 ==== Installation
 
 [source,indent=0,role="primary",subs='verbatim,attributes']
-.Gradle (AWS SDK 2.x)
+.Gradle
 ----
 annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-sns-annotation-processor:{project-version}'
 implementation 'com.agorapulse:micronaut-amazon-awssdk-sns:{project-version}'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']
-.Maven (AWS SDK 2.x)
+.Maven
 ----
 <dependency>
     <groupId>com.agorapulse</groupId>
     <artifactId>micronaut-amazon-awssdk-sns</artifactId>
-    <version>{project-version}</version>
-</dependency>
-----
-
-[source,indent=0,role="secondary",subs='verbatim,attributes']
-.Gradle (AWS SDK 1.x)
-----
-annotationProcessor 'com.agorapulse:micronaut-aws-sdk-sns-annotation-processor:{project-version}'
-implementation 'com.agorapulse:micronaut-aws-sdk-sns:{project-version}'
-----
-
-[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
-.Maven (AWS SDK 1.x)
-----
-<dependency>
-    <groupId>com.agorapulse</groupId>
-    <artifactId>micronaut-aws-sdk-sns</artifactId>
     <version>{project-version}</version>
 </dependency>
 ----
@@ -51,9 +34,20 @@ No configuration is required but some of the configuration properties may be use
 [source,yaml,indent=0,options="nowrap"]
 .application.yml
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk-test/src/test/resources/application-docs-sns.yml[]
+aws:
+  sns:
+    topic: TestTopic                              # <1>
+    ios:
+      arn: 'arn:aws:sns:eu-west-1:123456789:...'  # <2>
+    android:
+      arn: 'arn:aws:sns:eu-west-1:123456789:...'  # <3>
+    amazon:
+      arn: 'arn:aws:sns:eu-west-1:123456789:...'  # <4>
+    topics:
+      test:                                       # <5>
+        topic: SomeOtherTopic                     # <6>
 ----
-<1> You can specify the default topic for https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/sns/SimpleNotificationService.html[SimpleNotificationService] and `@NotificationClient`
+<1> You can specify the default topic for `SimpleNotificationService` and `@NotificationClient`
 <2> Amazon Resource Name for the iOS application mobile push
 <3> Amazon Resource Name for the Android application mobile push
 <4> Amazon Resource Name for the Amazon application mobile push
@@ -67,14 +61,12 @@ If you place `NotificationClient` annotation on the interface then methods
 matching predefined pattern will be automatically implemented. Methods containing word `sms` will send text messages.
 Other methods of `NotificationClient` will publish new messages into the topic.
 
-NOTE: For AWS SDK 2.x, use packages starting `com.agorapulse.micronaut.amazon.awssdk.sns`.
-
-NOTE: For AWS SDK 1.x, use packages starting `com.agorapulse.micronaut.aws.sdk.sns`.
+Use packages starting `com.agorapulse.micronaut.amazon.awssdk.sns`.
 
 The following example shows many of available method signatures for publishing records:
 
-[source,java,indent=0,options="nowrap",role="primary"]
-.Publishing String Records (AWS SDK 2.x)
+[source,java,indent=0,options="nowrap"]
+.Publishing String Records
 ----
 include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/DefaultClient.java[lines=18..-1]
 ----
@@ -86,19 +78,6 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/
 <6> You can publish a string message
 <7> You can send SMS using the word `SMS` in the name of the method. One argument must be phone number and its name must contain the word `number`
 <8> You can provide additional attributes for the SMS message
-
-[source,java,indent=0,options="nowrap",role="secondary"]
-.Publishing String Records (AWS SDK 1.x)
-----
-include::{root-dir}/subprojects/micronaut-aws-sdk-sns/src/test/groovy/com/agorapulse/micronaut/aws/sns/DefaultClient.java[lines=18..-1]
-----
-<1> `@NotificationClient` annotation makes the interface a SNS client
-<2> You can specify to which topic is the message published using `@Topic` annotation
-<3> You can publish any object which can be converted into JSON.
-<4> You can add additional subject to published message (only useful for few protocols, e.g. email)
-<5> You can publish a string message
-<6> You can send SMS using the word `SMS` in the name of the method. One argument must be phone number and its name must contain the word `number`
-<7> You can provide additional attributes for the SMS message
 
 NOTE: The return value of the methods is message id returned by AWS.
 
@@ -121,18 +100,10 @@ Following example shows some of the most common use cases for working with Amazo
 
 ===== Working with Topics
 
-[source,java,indent=0,options="nowrap",role="primary"]
-.Creating Topic (AWS SDK 2.x)
+[source,java,indent=0,options="nowrap"]
+.Creating Topic
 ----
 include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationServiceTest.java[tags=new-topic]
-----
-<1> Create new topic of given name
-<2> The topic is present within the list of all topics' names
-
-[source,java,indent=0,options="nowrap",role="secondary"]
-.Creating Topic (AWS SDK 1.x)
-----
-include::{root-dir}/subprojects/micronaut-aws-sdk-sns/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=new-topic]
 ----
 <1> Create new topic of given name
 <2> The topic is present within the list of all topics' names
@@ -147,18 +118,10 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/
 <2> Publish message to the topic
 <3> Use the subscription ARN to unsubscribe from the topic
 
-[source,java,indent=0,options="nowrap",role="primary"]
-.Delete Topic (AWS SDK 2.x)
+[source,java,indent=0,options="nowrap"]
+.Delete Topic
 ----
 include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationServiceTest.java[tags=delete-topic]
-----
-<1> Delete the topic
-<2> The topic is no longer present within the list of all topics' names
-
-[source,java,indent=0,options="nowrap",role="secondary"]
-.Delete Topic (AWS SDK 1.x)
-----
-include::{root-dir}/subprojects/micronaut-aws-sdk-sns/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=delete-topic]
 ----
 <1> Delete the topic
 <2> The topic is no longer present within the list of all topics' names
@@ -178,23 +141,15 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/
 
 ===== Sending SMS
 
-[source,java,indent=0,options="nowrap",role="primary"]
-.Sending SMS (AWS SDK 2.x)
+[source,java,indent=0,options="nowrap"]
+.Sending SMS
 ----
 include::{root-dir}/subprojects/micronaut-amazon-awssdk-sns/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationServiceTest.java[tags=sms]
 ----
 <1> Send a message to the phone number
 
-[source,java,indent=0,options="nowrap",role="secondary"]
-.Sending SMS (AWS SDK 1.x)
-----
-include::{root-dir}/subprojects/micronaut-aws-sdk-sns/src/test/groovy/com/agorapulse/micronaut/aws/sns/SimpleNotificationServiceTest.java[tags=sms]
-----
-<1> Send a message to the phone number
-
 Please, see
-https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationService.html[SimpleNotificationService AWS SDK 2.x] or
-https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/sns/SimpleNotificationService.html[SimpleNotificationService AWS SDK 1.x]
+https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/amazon/awssdk/sns/SimpleNotificationService.html[SimpleNotificationService]
 for the full reference.
 
 ==== Testing

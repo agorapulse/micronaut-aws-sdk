@@ -1,3 +1,0 @@
-localstack:
-  services: sns
-  shared: true

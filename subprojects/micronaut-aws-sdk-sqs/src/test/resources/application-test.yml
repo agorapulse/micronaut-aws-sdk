@@ -1,9 +1,0 @@
-localstack:
-  services: sqs
-  shared: true
-  env:
-    DEBUG: 1
-aws:
-  sqs:
-    tags:
-      domain: Agorapulse

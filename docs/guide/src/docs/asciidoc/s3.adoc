@@ -7,33 +7,17 @@ This library provides basic support for Amazon S3 using <<Simple Storage Service
 ==== Installation
 
 [source,indent=0,role="primary",subs='verbatim,attributes']
-.Gradle (AWS SDK 2.x)
+.Gradle
 ----
 implementation 'com.agorapulse:micronaut-amazon-awssdk-s3:{project-version}'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']
-.Maven (AWS SDK 2.x)
+.Maven
 ----
 <dependency>
     <groupId>com.agorapulse</groupId>
     <artifactId>micronaut-amazon-awssdk-s3</artifactId>
-    <version>{project-version}</version>
-</dependency>
-----
-
-[source,indent=0,role="secondary",subs='verbatim,attributes']
-.Gradle (AWS SDK 1.x)
-----
-implementation 'com.agorapulse:micronaut-aws-sdk-s3:{project-version}'
-----
-
-[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
-.Maven (AWS SDK 1.x)
-----
-<dependency>
-    <groupId>com.agorapulse</groupId>
-    <artifactId>micronaut-aws-sdk-s3</artifactId>
     <version>{project-version}</version>
 </dependency>
 ----
@@ -43,20 +27,16 @@ implementation 'com.agorapulse:micronaut-aws-sdk-s3:{project-version}'
 You can store the name of the bucket in the configuration using `aws.s3.bucket` property. You can create additional configurations
 by providing 'aws.s3.buckets' configuration map.
 
-[source,yaml,indent=0,role="primary",options="nowrap"]
-.application.yml (AWS SDK 2.x)
+[source,yaml,indent=0,options="nowrap"]
+.application.yml
 ----
-include::{root-dir}/subprojects/micronaut-aws-sdk-test/src/test/resources/application-docs-s3-v2.yml[]
-----
-<1> You can define default bucket for the service
-<2> Force path style URL usage
-<3> You can define multiple configurations
-<4> Each of the configuration can be access using `@Named('test') SimpleStorageService` qualifier
-
-[source,yaml,indent=0,role="secondary",options="nowrap"]
-.application.yml (AWS SDK 1.x)
-----
-include::{root-dir}/subprojects/micronaut-aws-sdk-test/src/test/resources/application-docs-s3-v1.yml[]
+aws:
+  s3:
+    bucket: DefaultBucket                          # <1>
+    use-path-style-urls: true                      # <2>
+    buckets:
+      test:                                        # <3>
+        bucket: SomeOtherBucket                    # <4>
 ----
 <1> You can define default bucket for the service
 <2> Force path style URL usage
@@ -81,8 +61,8 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-s3/src/test/groovy/com/a
 <1> Create new bucket of given name
 <2> The bucket is present within the list of all bucket names
 
-[source,java,indent=0,options="nowrap",role="primary"]
-.Upload File (AWS SDK 2.x)
+[source,java,indent=0,options="nowrap"]
+.Upload File
 ----
 include::{root-dir}/subprojects/micronaut-amazon-awssdk-s3/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/s3/SimpleStorageServiceTest.java[tags=store-file]
 ----
@@ -90,27 +70,10 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-s3/src/test/groovy/com/a
 <2> File is uploaded
 <3> File is present in the summaries of all files
 
-[source,java,indent=0,options="nowrap",role="secondary"]
-.Upload File (AWS SDK 1.x)
-----
-include::{root-dir}/subprojects/micronaut-aws-sdk-s3/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=store-file]
-----
-<1> Upload file
-<2> File is uploaded
-<3> File is present in the summaries of all files
-
-[source,java,indent=0,options="nowrap",role="primary"]
-.Upload from `InputStream` (AWS SDK 2.x)
+[source,java,indent=0,options="nowrap"]
+.Upload from `InputStream`
 ----
 include::{root-dir}/subprojects/micronaut-amazon-awssdk-s3/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/s3/SimpleStorageServiceTest.java[tags=store-input-stream]
-----
-<1> Upload data from stream
-<2> Stream is uploaded
-
-[source,java,indent=0,options="nowrap",role="secondary"]
-.Upload from `InputStream` (AWS SDK 1.x)
-----
-include::{root-dir}/subprojects/micronaut-aws-sdk-s3/src/test/groovy/com/agorapulse/micronaut/aws/s3/SimpleStorageServiceTest.java[tags=store-input-stream]
 ----
 <1> Upload data from stream
 <2> Stream is uploaded
@@ -148,8 +111,7 @@ include::{root-dir}/subprojects/micronaut-amazon-awssdk-s3/src/test/groovy/com/a
 <2> The Bucket is no longer present
 
 Please, see
-https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/amazon/awssdk/s3/SimpleStorageService.html[SimpleStorageService AWS SDK 2.x] or
-https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/s3/SimpleStorageService.html[SimpleStorageService AWS SDK 1.x] for the full reference.
+https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/amazon/awssdk/s3/SimpleStorageService.html[SimpleStorageService] for the full reference.
 
 ==== Testing
 

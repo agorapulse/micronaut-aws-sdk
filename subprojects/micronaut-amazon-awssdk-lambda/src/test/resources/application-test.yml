@@ -5,8 +5,10 @@ localstack:
     PROVIDER_OVERRIDE_LAMBDA: asf
     DEBUG: 1
 
+# tag::configuration[]
 aws:
   lambda:
     functions:
-      hello:
-        function: HelloFunction
+      hello:                          # <1>
+        function: HelloFunction       # <2>
+# end::configuration[]

@@ -104,16 +104,14 @@ public class IntrospectionTableSchema {
     static final List<String> PARTITION_KEYS_ANNOTATIONS = Arrays.asList(
         PartitionKey.class.getName(),
         HashKey.class.getName(),
-        DynamoDbPartitionKey.class.getName(),
-        "com.agorapulse.micronaut.aws.dynamodb.annotation.HashKey"
+        DynamoDbPartitionKey.class.getName()
     );
 
     @SuppressWarnings("deprecation")
     static final List<String> SORT_KEYS_ANNOTATIONS = Arrays.asList(
         SortKey.class.getName(),
         RangeKey.class.getName(),
-        DynamoDbSortKey.class.getName(),
-        "com.agorapulse.micronaut.aws.dynamodb.annotation.RangeKey"
+        DynamoDbSortKey.class.getName()
     );
 
     static final List<String> SECONDARY_PARTITION_KEYS_ANNOTATIONS = Arrays.asList(
