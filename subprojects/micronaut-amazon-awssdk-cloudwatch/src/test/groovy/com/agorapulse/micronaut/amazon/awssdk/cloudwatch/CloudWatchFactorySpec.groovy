@@ -17,7 +17,6 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.cloudwatch
 
-import com.agorapulse.micronaut.amazon.awssdk.cloudwatch.CloudWatchConfiguration
 import groovy.transform.CompileDynamic
 import io.micronaut.context.ApplicationContext
 import spock.lang.AutoCleanup
