@@ -18,6 +18,7 @@
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.AttributeConversionHelper;
+import io.micronaut.core.util.CollectionUtils;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -194,7 +195,9 @@ class DefaultScanBuilder<T> implements ScanBuilder<T> {
 
         key = key.entrySet().stream().filter(e -> indexKeys.contains(e.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        exp.exclusiveStartKey(key);
+        if (CollectionUtils.isNotEmpty(key)) {
+            exp.exclusiveStartKey(key);
+        }
     }
 
     // fields are prefixed with "__" to allow groovy evaluation of the arguments
