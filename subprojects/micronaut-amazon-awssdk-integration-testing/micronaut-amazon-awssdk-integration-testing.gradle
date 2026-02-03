@@ -18,7 +18,6 @@
 dependencies {
     api group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
 
-    compileOnly 'com.amazonaws:aws-java-sdk-core'
     compileOnly "software.amazon.awssdk:netty-nio-client:$awsSdk2Version"
 
     compileOnly project(':micronaut-amazon-awssdk-cloudwatch')
@@ -32,16 +31,4 @@ dependencies {
     compileOnly project(':micronaut-amazon-awssdk-sns')
     compileOnly project(':micronaut-amazon-awssdk-sqs')
     compileOnly project(':micronaut-amazon-awssdk-sts')
-
-    compileOnly project(':micronaut-aws-sdk-cloudwatch')
-    compileOnly project(':micronaut-aws-sdk-cloudwatchlogs')
-    compileOnly project(':micronaut-aws-sdk-core')
-    compileOnly project(':micronaut-aws-sdk-dynamodb')
-    compileOnly project(':micronaut-aws-sdk-lambda')
-    compileOnly project(':micronaut-aws-sdk-kinesis')
-    compileOnly project(':micronaut-aws-sdk-s3')
-    compileOnly project(':micronaut-aws-sdk-ses')
-    compileOnly project(':micronaut-aws-sdk-sns')
-    compileOnly project(':micronaut-aws-sdk-sqs')
-    compileOnly project(':micronaut-aws-sdk-sts')
 }

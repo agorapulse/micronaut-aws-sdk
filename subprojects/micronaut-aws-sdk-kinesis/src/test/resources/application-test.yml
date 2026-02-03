@@ -1,3 +1,0 @@
-localstack:
-  services: kinesis
-  shared: true

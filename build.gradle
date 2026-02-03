@@ -184,19 +184,10 @@ gradleProjects {
             dependencies {
                 api platform(project(':micronaut-aws-sdk-dependencies'))
 
-                // Groovy
-                if (subproject.name.startsWith('micronaut-amazon-awssdk')) {
-                    compileOnly "org.apache.groovy:groovy:$groovyVersion"
-                    compileOnly 'io.micronaut.aws:micronaut-aws-sdk-v2'
-                    testImplementation "org.apache.groovy:groovy:$groovyVersion"
-                    testImplementation 'io.micronaut.aws:micronaut-aws-sdk-v2'
-                } else {
-                    compileOnly 'io.micronaut.aws:micronaut-aws-sdk-v1'
-                    implementation "org.apache.groovy:groovy:$groovyVersion"
-                    implementation 'io.micronaut.groovy:micronaut-runtime-groovy'
-                    compileOnly 'io.micronaut:micronaut-inject-groovy'
-                    testImplementation 'io.micronaut.aws:micronaut-aws-sdk-v1'
-                }
+                compileOnly "org.apache.groovy:groovy:$groovyVersion"
+                compileOnly 'io.micronaut.aws:micronaut-aws-sdk-v2'
+                testImplementation "org.apache.groovy:groovy:$groovyVersion"
+                testImplementation 'io.micronaut.aws:micronaut-aws-sdk-v2'
 
                 implementation 'io.micronaut:micronaut-inject'
                 implementation 'io.micronaut:micronaut-runtime'

@@ -7,33 +7,17 @@ This library provides basic support for Amazon STS using <<Security Token Servic
 ==== Installation
 
 [source,indent=0,role="primary",subs='verbatim,attributes']
-.Gradle (AWS SDK 2.x)
+.Gradle
 ----
 implementation 'com.agorapulse:micronaut-amazon-awssdk-sts:{project-version}'
 ----
 
 [source,xml,indent=0,role="secondary",subs='verbatim,attributes']
-.Maven (AWS SDK 2.x)
+.Maven
 ----
 <dependency>
     <groupId>com.agorapulse</groupId>
     <artifactId>micronaut-amazon-awssdk-sts</artifactId>
-    <version>{project-version}</version>
-</dependency>
-----
-
-[source,indent=0,role="secondary",subs='verbatim,attributes']
-.Gradle (AWS SDK 1.x)
-----
-implementation 'com.agorapulse:micronaut-aws-sdk-sts:{project-version}'
-----
-
-[source,xml,indent=0,role="secondary",subs='verbatim,attributes']
-.Maven (AWS SDK 1.x)
-----
-<dependency>
-    <groupId>com.agorapulse</groupId>
-    <artifactId>micronaut-aws-sdk-sts</artifactId>
     <version>{project-version}</version>
 </dependency>
 ----
@@ -46,20 +30,13 @@ which assumes usage of a certain IAM role.
 Following example shows how to create credentials for assumed role.
 
 [source,groovy,indent=0,options="nowrap",role="primary"]
-.Assume Role (AWS SDK 2.x)
+.Assume Role
 ----
 include::{root-dir}/subprojects/micronaut-amazon-awssdk-sts/src/test/groovy/com/agorapulse/micronaut/amazon/awssdk/sts/SecurityTokenServiceSpec.groovy[tag=usage]
 ----
 
-[source,groovy,indent=0,options="nowrap",role="secondary"]
-.Assume Role (AWS SDK 1.x)
-----
-include::{root-dir}/subprojects/micronaut-aws-sdk-sts/src/test/groovy/com/agorapulse/micronaut/aws/sts/SecurityTokenServiceSpec.groovy[tag=usage]
-----
-
 Please, see
-https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/amazon/awssdk/sts/SecurityTokenService.html[SecurityTokenService AWS SDK 2.x] or
-https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/aws/sts/SecurityTokenService.html[SecurityTokenService AWS SDK 1.x]
+https://agorapulse.github.io/micronaut-aws-sdk/api/com/agorapulse/micronaut/amazon/awssdk/sts/SecurityTokenService.html[SecurityTokenService]
 for the full reference.
 
 ==== Testing

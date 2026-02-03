@@ -52,7 +52,7 @@ asciidoctor {
 
     attributes = [
         'gradle-version': project.gradle.gradleVersion,
-        'aws-sdk-version': awsSdkVersion,
+        'aws-sdk-version': awsSdk2Version,
         'source-highlighter': 'prettify',
         'root-dir': rootDir,
         'project-slug': slug
