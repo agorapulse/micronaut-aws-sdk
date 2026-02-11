@@ -90,7 +90,12 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
         try {
             return doIntercept(context, service);
         } catch (ResourceNotFoundException ignored) {
-            return unwrapIfRequired(Flux.from(service.createTable()).map(t -> doIntercept(context, service)), context);
+            return unwrapIfRequired(Flux.from(service.createTable()).handle((t, sink) -> {
+                Object result = doIntercept(context, service);
+                if (result != null) {
+                    sink.next(result);
+                }
+            }), context);
         }
     }
 
