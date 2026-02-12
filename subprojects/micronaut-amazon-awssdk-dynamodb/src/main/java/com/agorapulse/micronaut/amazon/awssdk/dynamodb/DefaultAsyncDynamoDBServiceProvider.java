@@ -25,6 +25,7 @@ import jakarta.inject.Singleton;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
+import reactor.core.publisher.Mono;
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 
 import java.util.concurrent.CompletableFuture;
@@ -96,7 +97,7 @@ public class DefaultAsyncDynamoDBServiceProvider implements AsyncDynamoDBService
                     table.describeTable().join();
                 } catch (CompletionException e) {
                     if (e.getCause() instanceof ResourceNotFoundException) {
-                        CompletableFuture.supplyAsync(newService::createTable, blockingExecutor).join();
+                        CompletableFuture.runAsync(() -> Mono.from(newService.createTable()).block(), blockingExecutor).join();
                     }
                 }
 
