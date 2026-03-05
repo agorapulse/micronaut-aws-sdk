@@ -17,46 +17,38 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.gcp;
 
-import io.micronaut.context.annotation.ConfigurationProperties;
+import io.micronaut.context.annotation.Value;
+import jakarta.inject.Singleton;
 
 /**
  * Configuration for GCP Workload Identity Federation with AWS.
  * <p>
- * Configure these properties to enable automatic creation of GCP credentials
- * using AWS credentials via Workload Identity Federation.
- * <p>
- * Example configuration:
- * <pre>
- * gcp:
- *   workload-identity:
- *     enabled: true
- *     project-number: "123456789012"
- *     pool-id: "aws-pool"
- *     provider-id: "aws-provider"
- *     service-account-email: "my-sa@project.iam.gserviceaccount.com"
- * </pre>
+ * Uses the same environment variables as typically configured in ECS task definitions:
+ * <ul>
+ *   <li>{@code GCP_PROJECT_NUMBER} - The GCP project number (not project ID)</li>
+ *   <li>{@code GCP_WORKLOAD_POOL} - The Workload Identity Pool ID</li>
+ *   <li>{@code GCP_WORKLOAD_PROVIDER} - The Workload Identity Provider ID</li>
+ *   <li>{@code GCP_SERVICE_ACCOUNT} - The GCP service account email to impersonate</li>
+ * </ul>
  */
-@ConfigurationProperties("gcp.workload-identity")
+@Singleton
 public class GcpWorkloadIdentityConfiguration {
 
-    private boolean enabled = true;
-    private String projectNumber;
-    private String poolId;
-    private String providerId;
-    private String serviceAccountEmail;
+    private final String projectNumber;
+    private final String workloadPool;
+    private final String workloadProvider;
+    private final String serviceAccount;
 
-    /**
-     * @return whether GCP Workload Identity Federation is enabled
-     */
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    /**
-     * @param enabled whether GCP Workload Identity Federation is enabled
-     */
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    public GcpWorkloadIdentityConfiguration(
+            @Value("${GCP_PROJECT_NUMBER:}") String projectNumber,
+            @Value("${GCP_WORKLOAD_POOL:}") String workloadPool,
+            @Value("${GCP_WORKLOAD_PROVIDER:}") String workloadProvider,
+            @Value("${GCP_SERVICE_ACCOUNT:}") String serviceAccount
+    ) {
+        this.projectNumber = projectNumber;
+        this.workloadPool = workloadPool;
+        this.workloadProvider = workloadProvider;
+        this.serviceAccount = serviceAccount;
     }
 
     /**
@@ -67,61 +59,37 @@ public class GcpWorkloadIdentityConfiguration {
     }
 
     /**
-     * @param projectNumber the GCP project number (not project ID)
-     */
-    public void setProjectNumber(String projectNumber) {
-        this.projectNumber = projectNumber;
-    }
-
-    /**
      * @return the Workload Identity Pool ID
      */
-    public String getPoolId() {
-        return poolId;
-    }
-
-    /**
-     * @param poolId the Workload Identity Pool ID
-     */
-    public void setPoolId(String poolId) {
-        this.poolId = poolId;
+    public String getWorkloadPool() {
+        return workloadPool;
     }
 
     /**
      * @return the Workload Identity Provider ID
      */
-    public String getProviderId() {
-        return providerId;
-    }
-
-    /**
-     * @param providerId the Workload Identity Provider ID
-     */
-    public void setProviderId(String providerId) {
-        this.providerId = providerId;
+    public String getWorkloadProvider() {
+        return workloadProvider;
     }
 
     /**
      * @return the GCP service account email to impersonate
      */
-    public String getServiceAccountEmail() {
-        return serviceAccountEmail;
-    }
-
-    /**
-     * @param serviceAccountEmail the GCP service account email to impersonate
-     */
-    public void setServiceAccountEmail(String serviceAccountEmail) {
-        this.serviceAccountEmail = serviceAccountEmail;
+    public String getServiceAccount() {
+        return serviceAccount;
     }
 
     /**
      * @return true if all required properties are configured
      */
     public boolean isFullyConfigured() {
-        return projectNumber != null && !projectNumber.isEmpty()
-                && poolId != null && !poolId.isEmpty()
-                && providerId != null && !providerId.isEmpty()
-                && serviceAccountEmail != null && !serviceAccountEmail.isEmpty();
+        return isNotEmpty(projectNumber)
+                && isNotEmpty(workloadPool)
+                && isNotEmpty(workloadProvider)
+                && isNotEmpty(serviceAccount);
+    }
+
+    private static boolean isNotEmpty(String value) {
+        return value != null && !value.isEmpty();
     }
 }

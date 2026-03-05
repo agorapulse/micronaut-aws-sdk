@@ -32,10 +32,12 @@ import org.slf4j.LoggerFactory;
  * This factory creates {@link GoogleCredentials} that use AWS credentials
  * to authenticate with GCP services via Workload Identity Federation.
  * <p>
- * The credentials are only created when:
+ * The credentials are only created when all required environment variables are set:
  * <ul>
- *   <li>The configuration is enabled ({@code gcp.workload-identity.enabled=true})</li>
- *   <li>All required properties are configured (project-number, pool-id, provider-id, service-account-email)</li>
+ *   <li>{@code GCP_PROJECT_NUMBER}</li>
+ *   <li>{@code GCP_WORKLOAD_POOL}</li>
+ *   <li>{@code GCP_WORKLOAD_PROVIDER}</li>
+ *   <li>{@code GCP_SERVICE_ACCOUNT}</li>
  * </ul>
  */
 @Factory
@@ -53,11 +55,10 @@ public class GcpCredentialsFactory {
     @Bean
     @Singleton
     @Requires(beans = {GcpWorkloadIdentityConfiguration.class, AwsSecurityCredentialsSupplierBean.class})
-    @Requires(property = "gcp.workload-identity.enabled", value = "true", defaultValue = "true")
-    @Requires(property = "gcp.workload-identity.project-number")
-    @Requires(property = "gcp.workload-identity.pool-id")
-    @Requires(property = "gcp.workload-identity.provider-id")
-    @Requires(property = "gcp.workload-identity.service-account-email")
+    @Requires(property = "GCP_PROJECT_NUMBER")
+    @Requires(property = "GCP_WORKLOAD_POOL")
+    @Requires(property = "GCP_WORKLOAD_PROVIDER")
+    @Requires(property = "GCP_SERVICE_ACCOUNT")
     public GoogleCredentials gcpCredentials(
             GcpWorkloadIdentityConfiguration configuration,
             AwsSecurityCredentialsSupplierBean credentialsSupplier
@@ -65,19 +66,19 @@ public class GcpCredentialsFactory {
         LOG.info("Creating GCP credentials with AWS Workload Identity Federation");
         LOG.debug("Project number: {}, Pool: {}, Provider: {}",
                 configuration.getProjectNumber(),
-                configuration.getPoolId(),
-                configuration.getProviderId());
+                configuration.getWorkloadPool(),
+                configuration.getWorkloadProvider());
 
         String audience = String.format(
                 "//iam.googleapis.com/projects/%s/locations/global/workloadIdentityPools/%s/providers/%s",
                 configuration.getProjectNumber(),
-                configuration.getPoolId(),
-                configuration.getProviderId()
+                configuration.getWorkloadPool(),
+                configuration.getWorkloadProvider()
         );
 
         String serviceAccountImpersonationUrl = String.format(
                 "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/%s:generateAccessToken",
-                configuration.getServiceAccountEmail()
+                configuration.getServiceAccount()
         );
 
         LOG.debug("Audience: {}", audience);

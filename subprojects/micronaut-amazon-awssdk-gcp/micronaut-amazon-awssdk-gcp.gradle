@@ -19,7 +19,7 @@ dependencies {
     api project(':micronaut-amazon-awssdk-core')
     
     // GCP Auth library for Workload Identity Federation
-    api 'com.google.auth:google-auth-library-oauth2-http:1.23.0'
+    api "com.google.auth:google-auth-library-oauth2-http:$googleAuthVersion"
     
     testImplementation 'org.testcontainers:localstack'
 }
