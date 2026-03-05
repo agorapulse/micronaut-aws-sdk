@@ -1,0 +1,5 @@
+# Test configuration for AWS SDK GCP module
+aws:
+  region: us-east-1
+  accessKeyId: test-key
+  secretKey: test-secret

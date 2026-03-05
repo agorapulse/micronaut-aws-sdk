@@ -45,6 +45,9 @@ dependencies {
 
         api group: 'com.amazonaws', name: 'aws-lambda-java-events', version: awsLambdaEventsVersion
         api group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-cbor', version: project['jackson.datatype.version']
+
+        // GCP dependencies for Workload Identity Federation
+        api 'com.google.auth:google-auth-library-oauth2-http:1.23.0'
     }
 }
 
