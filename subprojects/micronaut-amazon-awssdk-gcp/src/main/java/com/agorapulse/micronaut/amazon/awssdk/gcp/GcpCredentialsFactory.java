@@ -32,12 +32,12 @@ import org.slf4j.LoggerFactory;
  * This factory creates {@link GoogleCredentials} that use AWS credentials
  * to authenticate with GCP services via Workload Identity Federation.
  * <p>
- * The credentials are only created when all required environment variables are set:
+ * The credentials are only created when all required properties are set:
  * <ul>
- *   <li>{@code GCP_PROJECT_NUMBER}</li>
- *   <li>{@code GCP_WORKLOAD_POOL}</li>
- *   <li>{@code GCP_WORKLOAD_PROVIDER}</li>
- *   <li>{@code GCP_SERVICE_ACCOUNT}</li>
+ *   <li>{@code gcp.project-number} (or env: {@code GCP_PROJECT_NUMBER})</li>
+ *   <li>{@code gcp.workload-pool} (or env: {@code GCP_WORKLOAD_POOL})</li>
+ *   <li>{@code gcp.workload-provider} (or env: {@code GCP_WORKLOAD_PROVIDER})</li>
+ *   <li>{@code gcp.service-account} (or env: {@code GCP_SERVICE_ACCOUNT})</li>
  * </ul>
  */
 @Factory
@@ -55,10 +55,10 @@ public class GcpCredentialsFactory {
     @Bean
     @Singleton
     @Requires(beans = {GcpWorkloadIdentityConfiguration.class, AwsSecurityCredentialsSupplierBean.class})
-    @Requires(property = "GCP_PROJECT_NUMBER")
-    @Requires(property = "GCP_WORKLOAD_POOL")
-    @Requires(property = "GCP_WORKLOAD_PROVIDER")
-    @Requires(property = "GCP_SERVICE_ACCOUNT")
+    @Requires(property = "gcp.project-number")
+    @Requires(property = "gcp.workload-pool")
+    @Requires(property = "gcp.workload-provider")
+    @Requires(property = "gcp.service-account")
     public GoogleCredentials gcpCredentials(
             GcpWorkloadIdentityConfiguration configuration,
             AwsSecurityCredentialsSupplierBean credentialsSupplier
