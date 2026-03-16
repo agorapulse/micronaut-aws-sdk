@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker;
 
+import io.micronaut.context.event.ApplicationEventPublisher;
 import software.amazon.kinesis.processor.ShardRecordProcessor;
 import software.amazon.kinesis.processor.ShardRecordProcessorFactory;
 import software.amazon.kinesis.retrieval.KinesisClientRecord;
@@ -26,18 +27,22 @@ import java.util.function.BiConsumer;
 class DefaultRecordProcessorFactory implements ShardRecordProcessorFactory {
 
     private final BiConsumer<String, KinesisClientRecord> consumer;
+    private final ApplicationEventPublisher applicationEventPublisher;
+    private final String stream;
 
-    static ShardRecordProcessorFactory create(BiConsumer<String, KinesisClientRecord> consumer) {
-        return new DefaultRecordProcessorFactory(consumer);
+    static ShardRecordProcessorFactory create(BiConsumer<String, KinesisClientRecord> consumer, ApplicationEventPublisher applicationEventPublisher, String stream) {
+        return new DefaultRecordProcessorFactory(consumer, applicationEventPublisher, stream);
     }
 
-    private DefaultRecordProcessorFactory(BiConsumer<String, KinesisClientRecord> consumer) {
+    private DefaultRecordProcessorFactory(BiConsumer<String, KinesisClientRecord> consumer, ApplicationEventPublisher applicationEventPublisher, String stream) {
         this.consumer = consumer;
+        this.applicationEventPublisher = applicationEventPublisher;
+        this.stream = stream;
     }
 
     @Override
     public ShardRecordProcessor shardRecordProcessor() {
-        return DefaultRecordProcessor.create(consumer);
+        return DefaultRecordProcessor.create(consumer, applicationEventPublisher, stream);
     }
 
 

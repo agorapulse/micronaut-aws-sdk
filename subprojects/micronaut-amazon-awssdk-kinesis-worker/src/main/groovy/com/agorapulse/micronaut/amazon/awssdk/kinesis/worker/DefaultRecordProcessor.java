@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker;
 
+import io.micronaut.context.event.ApplicationEventPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,13 +53,15 @@ class DefaultRecordProcessor implements ShardRecordProcessor {
     // Checkpoint about once a minute
     private static final long CHECKPOINT_INTERVAL_MILLIS = 60000L;
 
-    static ShardRecordProcessor create(BiConsumer<String, KinesisClientRecord> consumer) {
-        return new DefaultRecordProcessor(consumer);
+    static ShardRecordProcessor create(BiConsumer<String, KinesisClientRecord> consumer, ApplicationEventPublisher applicationEventPublisher, String stream) {
+        return new DefaultRecordProcessor(consumer, applicationEventPublisher, stream);
     }
 
     private long nextCheckpointTimeInMillis;
     private final CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
     private final BiConsumer<String, KinesisClientRecord> processor;
+    private final ApplicationEventPublisher applicationEventPublisher;
+    private final String stream;
 
     private String shardId = "";
 
@@ -101,6 +104,8 @@ class DefaultRecordProcessor implements ShardRecordProcessor {
         // Process records and perform all exception handling.
         processRecordsWithRetries(input.records());
 
+        applicationEventPublisher.publishEvent(new ProcessRecordsEvent(stream, shardId, input.millisBehindLatest(), input.records().size()));
+
         // Checkpoint once every checkpoint interval.
         if (System.currentTimeMillis() > nextCheckpointTimeInMillis) {
             checkpoint(input.checkpointer());
@@ -108,8 +113,10 @@ class DefaultRecordProcessor implements ShardRecordProcessor {
         }
     }
 
-    private DefaultRecordProcessor(BiConsumer<String, KinesisClientRecord> processor) {
+    private DefaultRecordProcessor(BiConsumer<String, KinesisClientRecord> processor, ApplicationEventPublisher applicationEventPublisher, String stream) {
         this.processor = processor;
+        this.applicationEventPublisher = applicationEventPublisher;
+        this.stream = stream;
     }
 
     /**

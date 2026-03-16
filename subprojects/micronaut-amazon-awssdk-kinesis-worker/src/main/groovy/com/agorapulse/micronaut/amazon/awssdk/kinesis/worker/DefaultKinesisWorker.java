@@ -74,7 +74,9 @@ class DefaultKinesisWorker implements KinesisWorker {
                 } catch (Exception e) {
                     LOGGER.error("Exception processing Kinesis record " + record + " decoded as " + string, e);
                 }
-            })
+            }),
+            applicationEventPublisher,
+            configuration.getStream()
         );
 
         ConfigsBuilder configsBuilder = configuration.getConfigsBuilder(
