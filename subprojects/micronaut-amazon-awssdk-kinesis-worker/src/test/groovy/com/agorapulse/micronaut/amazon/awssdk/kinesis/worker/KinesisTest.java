@@ -52,6 +52,7 @@ public class KinesisTest {
     @Inject KinesisListenerTester tester;
     @Inject DefaultClient client;
     @Inject WorkerStateListener listener;
+    @Inject ProcessRecordsEventCollector processRecordsEventCollector;
 
     // tag::testcontainers-test[]
     @Test
@@ -66,6 +67,18 @@ public class KinesisTest {
         subscription.dispose();
 
         Assertions.assertTrue(allTestEventsReceived(tester));
+        
+        // Verify ProcessRecordsEvent was published (async events need a small delay)
+        Thread.sleep(100);
+        Assertions.assertTrue(processRecordsEventCollector.hasReceivedEvents(), 
+            "ProcessRecordsEvent should have been published");
+        
+        // Verify event properties
+        ProcessRecordsEvent firstEvent = processRecordsEventCollector.getEvents().get(0);
+        Assertions.assertEquals(TEST_STREAM, firstEvent.getStream());
+        Assertions.assertNotNull(firstEvent.getShardId());
+        // millisBehindLatest may be null in test environment, so we just check it doesn't throw
+        firstEvent.getMillisBehindLatest();
     }
     // end::testcontainers-test[]
 

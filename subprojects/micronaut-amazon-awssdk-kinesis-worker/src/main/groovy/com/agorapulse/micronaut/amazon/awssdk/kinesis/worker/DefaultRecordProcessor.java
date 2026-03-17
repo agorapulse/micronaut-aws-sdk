@@ -119,17 +119,18 @@ class DefaultRecordProcessor implements ShardRecordProcessor {
     }
 
     private void publishProcessRecordsEvent(ProcessRecordsInput input) {
-        try {
-            ProcessRecordsEvent event = new ProcessRecordsEvent(
-                stream,
-                shardId,
-                input.millisBehindLatest(),
-                input.records().size()
-            );
-            eventPublisher.publishEvent(event);
-        } catch (Exception e) {
-            LOGGER.warn("[{}] Failed to publish ProcessRecordsEvent", shardId, e);
-        }
+        // Publish asynchronously to avoid blocking record processing or breaking the flow
+        ProcessRecordsEvent event = new ProcessRecordsEvent(
+            stream,
+            shardId,
+            input.millisBehindLatest(),
+            input.records().size()
+        );
+        eventPublisher.publishEventAsync(event).whenComplete((result, error) -> {
+            if (error != null) {
+                LOGGER.warn("[{}] Failed to publish ProcessRecordsEvent", shardId, error);
+            }
+        });
     }
 
     private DefaultRecordProcessor(
