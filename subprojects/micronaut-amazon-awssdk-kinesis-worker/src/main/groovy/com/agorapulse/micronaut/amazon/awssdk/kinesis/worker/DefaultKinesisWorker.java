@@ -42,7 +42,8 @@ class DefaultKinesisWorker implements KinesisWorker {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultKinesisWorker.class);
 
     private final KinesisClientConfiguration configuration;
-    private final ApplicationEventPublisher applicationEventPublisher;
+    private final ApplicationEventPublisher<WorkerStateEvent> workerStateEventPublisher;
+    private final ApplicationEventPublisher<ProcessRecordsEvent> processRecordsEventPublisher;
     private final Optional<DynamoDbAsyncClient> amazonDynamoDB;
     private final Optional<KinesisAsyncClient> amazonKinesis;
     private final Optional<CloudWatchAsyncClient> amazonCloudWatch;
@@ -53,13 +54,15 @@ class DefaultKinesisWorker implements KinesisWorker {
 
     DefaultKinesisWorker(
         KinesisClientConfiguration configuration,
-        ApplicationEventPublisher applicationEventPublisher,
+        ApplicationEventPublisher<WorkerStateEvent> workerStateEventPublisher,
+        ApplicationEventPublisher<ProcessRecordsEvent> processRecordsEventPublisher,
         Optional<DynamoDbAsyncClient> amazonDynamoDB,
         Optional<KinesisAsyncClient> amazonKinesis,
         Optional<CloudWatchAsyncClient> amazonCloudWatch
     ) {
         this.configuration = configuration;
-        this.applicationEventPublisher = applicationEventPublisher;
+        this.workerStateEventPublisher = workerStateEventPublisher;
+        this.processRecordsEventPublisher = processRecordsEventPublisher;
         this.amazonDynamoDB = amazonDynamoDB;
         this.amazonKinesis = amazonKinesis;
         this.amazonCloudWatch = amazonCloudWatch;
@@ -67,14 +70,16 @@ class DefaultKinesisWorker implements KinesisWorker {
 
     @Override
     public void start() {
-        ShardRecordProcessorFactory recordProcessorFactory = DefaultRecordProcessorFactory.create((string, record) ->
-            consumers.forEach(c -> {
+        ShardRecordProcessorFactory recordProcessorFactory = DefaultRecordProcessorFactory.create(
+            (string, record) -> consumers.forEach(c -> {
                 try {
                     c.accept(string, record);
                 } catch (Exception e) {
                     LOGGER.error("Exception processing Kinesis record " + record + " decoded as " + string, e);
                 }
-            })
+            }),
+            processRecordsEventPublisher,
+            configuration.getStream()
         );
 
         ConfigsBuilder configsBuilder = configuration.getConfigsBuilder(
@@ -84,7 +89,7 @@ class DefaultKinesisWorker implements KinesisWorker {
             recordProcessorFactory
         );
 
-        WorkerStateChangeListener workerStateChangeListener = s -> applicationEventPublisher.publishEvent(new WorkerStateEvent(s, configuration.getStream()));
+        WorkerStateChangeListener workerStateChangeListener = s -> workerStateEventPublisher.publishEvent(new WorkerStateEvent(s, configuration.getStream()));
 
         PollingConfig pollingConfig = new PollingConfig(configuration.getStream(), configsBuilder.kinesisClient());
 
