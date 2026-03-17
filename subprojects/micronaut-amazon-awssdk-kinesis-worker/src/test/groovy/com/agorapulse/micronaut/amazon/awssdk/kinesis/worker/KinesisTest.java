@@ -20,7 +20,6 @@ package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker;
 import com.agorapulse.micronaut.amazon.awssdk.kinesis.KinesisService;
 import io.micronaut.context.annotation.Property;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
-import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import reactor.core.Disposable;
@@ -70,7 +69,7 @@ public class KinesisTest {
         Assertions.assertTrue(allTestEventsReceived(tester));
         
         // Verify ProcessRecordsEvent was published (async events)
-        Awaitility.await()
+        org.awaitility.Awaitility.await()
             .atMost(Duration.ofSeconds(5))
             .untilAsserted(() -> {
                 Assertions.assertTrue(processRecordsEventCollector.hasReceivedEvents(), 
