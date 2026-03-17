@@ -17,6 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker;
 
+import io.micronaut.context.event.ApplicationEventPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,13 +53,19 @@ class DefaultRecordProcessor implements ShardRecordProcessor {
     // Checkpoint about once a minute
     private static final long CHECKPOINT_INTERVAL_MILLIS = 60000L;
 
-    static ShardRecordProcessor create(BiConsumer<String, KinesisClientRecord> consumer) {
-        return new DefaultRecordProcessor(consumer);
+    static ShardRecordProcessor create(
+        BiConsumer<String, KinesisClientRecord> consumer,
+        ApplicationEventPublisher<ProcessRecordsEvent> eventPublisher,
+        String stream
+    ) {
+        return new DefaultRecordProcessor(consumer, eventPublisher, stream);
     }
 
     private long nextCheckpointTimeInMillis;
     private final CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
     private final BiConsumer<String, KinesisClientRecord> processor;
+    private final ApplicationEventPublisher<ProcessRecordsEvent> eventPublisher;
+    private final String stream;
 
     private String shardId = "";
 
@@ -101,6 +108,9 @@ class DefaultRecordProcessor implements ShardRecordProcessor {
         // Process records and perform all exception handling.
         processRecordsWithRetries(input.records());
 
+        // Publish event for metrics/monitoring
+        publishProcessRecordsEvent(input);
+
         // Checkpoint once every checkpoint interval.
         if (System.currentTimeMillis() > nextCheckpointTimeInMillis) {
             checkpoint(input.checkpointer());
@@ -108,8 +118,31 @@ class DefaultRecordProcessor implements ShardRecordProcessor {
         }
     }
 
-    private DefaultRecordProcessor(BiConsumer<String, KinesisClientRecord> processor) {
+    private void publishProcessRecordsEvent(ProcessRecordsInput input) {
+        // Publish asynchronously to avoid blocking record processing or breaking the flow
+        ProcessRecordsEvent event = new ProcessRecordsEvent(
+            stream,
+            shardId,
+            input.millisBehindLatest(),
+            input.records().size()
+        );
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            try {
+                eventPublisher.publishEvent(event);
+            } catch (Exception e) {
+                LOGGER.warn("[{}] Failed to publish ProcessRecordsEvent", shardId, e);
+            }
+        });
+    }
+
+    private DefaultRecordProcessor(
+        BiConsumer<String, KinesisClientRecord> processor,
+        ApplicationEventPublisher<ProcessRecordsEvent> eventPublisher,
+        String stream
+    ) {
         this.processor = processor;
+        this.eventPublisher = eventPublisher;
+        this.stream = stream;
     }
 
     /**

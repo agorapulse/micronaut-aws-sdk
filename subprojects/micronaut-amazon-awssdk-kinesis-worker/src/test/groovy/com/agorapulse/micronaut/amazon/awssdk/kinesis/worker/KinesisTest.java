@@ -52,6 +52,7 @@ public class KinesisTest {
     @Inject KinesisListenerTester tester;
     @Inject DefaultClient client;
     @Inject WorkerStateListener listener;
+    @Inject ProcessRecordsEventCollector processRecordsEventCollector;
 
     // tag::testcontainers-test[]
     @Test
@@ -66,6 +67,19 @@ public class KinesisTest {
         subscription.dispose();
 
         Assertions.assertTrue(allTestEventsReceived(tester));
+        
+        // Verify ProcessRecordsEvent was published (async events)
+        org.awaitility.Awaitility.await()
+            .atMost(Duration.ofSeconds(5))
+            .untilAsserted(() -> {
+                Assertions.assertTrue(processRecordsEventCollector.hasReceivedEvents(), 
+                    "ProcessRecordsEvent should have been published");
+                
+                // Verify event properties
+                ProcessRecordsEvent firstEvent = processRecordsEventCollector.getEvents().get(0);
+                Assertions.assertEquals(TEST_STREAM, firstEvent.getStream());
+                Assertions.assertNotNull(firstEvent.getShardId());
+            });
     }
     // end::testcontainers-test[]
 

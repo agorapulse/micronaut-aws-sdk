@@ -56,13 +56,21 @@ public class DefaultKinesisWorkerFactory implements KinesisWorkerFactory {
         }
     };
 
-    private final ApplicationEventPublisher applicationEventPublisher;
+    private final ApplicationEventPublisher<WorkerStateEvent> workerStateEventPublisher;
+    private final ApplicationEventPublisher<ProcessRecordsEvent> processRecordsEventPublisher;
     private final Optional<DynamoDbAsyncClient> amazonDynamoDB;
     private final Optional<KinesisAsyncClient> kinesis;
     private final Optional<CloudWatchAsyncClient> cloudWatch;
 
-    public DefaultKinesisWorkerFactory(ApplicationEventPublisher applicationEventPublisher, Optional<DynamoDbAsyncClient> amazonDynamoDB, Optional<KinesisAsyncClient> kinesis, Optional<CloudWatchAsyncClient> cloudWatch) {
-        this.applicationEventPublisher = applicationEventPublisher;
+    public DefaultKinesisWorkerFactory(
+        ApplicationEventPublisher<WorkerStateEvent> workerStateEventPublisher,
+        ApplicationEventPublisher<ProcessRecordsEvent> processRecordsEventPublisher,
+        Optional<DynamoDbAsyncClient> amazonDynamoDB,
+        Optional<KinesisAsyncClient> kinesis,
+        Optional<CloudWatchAsyncClient> cloudWatch
+    ) {
+        this.workerStateEventPublisher = workerStateEventPublisher;
+        this.processRecordsEventPublisher = processRecordsEventPublisher;
         this.amazonDynamoDB = amazonDynamoDB;
         this.kinesis = kinesis;
         this.cloudWatch = cloudWatch;
@@ -79,7 +87,14 @@ public class DefaultKinesisWorkerFactory implements KinesisWorkerFactory {
             return NOOP;
         }
 
-        return new DefaultKinesisWorker(kinesisConfiguration, applicationEventPublisher, amazonDynamoDB, kinesis, cloudWatch);
+        return new DefaultKinesisWorker(
+            kinesisConfiguration,
+            workerStateEventPublisher,
+            processRecordsEventPublisher,
+            amazonDynamoDB,
+            kinesis,
+            cloudWatch
+        );
     }
 
 }
