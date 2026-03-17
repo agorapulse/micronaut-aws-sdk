@@ -108,12 +108,12 @@ public class ProcessRecordsEvent {
 
     @Override
     public String toString() {
-        return "ProcessRecordsEvent{" +
-            "stream='" + stream + '\'' +
-            ", shardId='" + shardId + '\'' +
-            ", millisBehindLatest=" + millisBehindLatest +
-            ", recordCount=" + recordCount +
-            '}';
+        return "ProcessRecordsEvent{"
+            + "stream='" + stream + '\''
+            + ", shardId='" + shardId + '\''
+            + ", millisBehindLatest=" + millisBehindLatest
+            + ", recordCount=" + recordCount
+            + '}';
     }
 
 }
