@@ -55,6 +55,18 @@ public class DeleteFirstOperationTest {
     }
 
     @Test
+    public void findAllAsFirstOperationShouldReturnEmptyList() {
+        // findAll on a non-existent table should return empty list [], not [[]]
+        // This test verifies the fix for double-wrapping issue where createTableAndRetry
+        // was wrapping an already-unwrapped result
+        var result = service.findAllByOrganizationUid("nonexistent-org");
+        assertNotNull(result);
+        assertTrue(result.isEmpty(), "Result should be empty list");
+        // Verify it's not [[]] (list containing empty list) by checking it's actually empty
+        assertEquals(0, result.size(), "Result size should be 0, not 1 (which would indicate [[]])");
+    }
+
+    @Test
     public void deleteAfterFindAllShouldWork() {
         // reproduces the exact pattern from the failing spec setup method
         var items = service.findAllByOrganizationUid("org1");

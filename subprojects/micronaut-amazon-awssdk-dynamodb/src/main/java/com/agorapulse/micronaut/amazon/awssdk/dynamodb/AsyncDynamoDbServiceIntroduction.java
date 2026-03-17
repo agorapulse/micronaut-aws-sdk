@@ -100,12 +100,10 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
     }
 
     private <T> Object createTableAndRetry(MethodInvocationContext<Object, Object> context, AsyncDynamoDbService<T> service) {
-        return unwrapIfRequired(Flux.from(service.createTable()).handle((t, sink) -> {
-            Object result = doIntercept(context, service);
-            if (result != null) {
-                sink.next(result);
-            }
-        }), context);
+        // Wait for table creation to complete, then retry the operation
+        // doIntercept already handles unwrapping, so we must not wrap its result again
+        safeBlock(Mono.from(service.createTable()));
+        return doIntercept(context, service);
     }
 
     private static void logTypeConversionFailure(Class<?> type, Object result) {
