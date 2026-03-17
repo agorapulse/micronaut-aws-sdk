@@ -126,9 +126,11 @@ class DefaultRecordProcessor implements ShardRecordProcessor {
             input.millisBehindLatest(),
             input.records().size()
         );
-        eventPublisher.publishEventAsync(event).whenComplete((result, error) -> {
-            if (error != null) {
-                LOGGER.warn("[{}] Failed to publish ProcessRecordsEvent", shardId, error);
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            try {
+                eventPublisher.publishEvent(event);
+            } catch (Exception e) {
+                LOGGER.warn("[{}] Failed to publish ProcessRecordsEvent", shardId, e);
             }
         });
     }
