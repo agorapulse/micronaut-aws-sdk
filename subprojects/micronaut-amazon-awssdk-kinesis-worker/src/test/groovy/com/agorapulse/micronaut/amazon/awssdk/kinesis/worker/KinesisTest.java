@@ -20,6 +20,7 @@ package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker;
 import com.agorapulse.micronaut.amazon.awssdk.kinesis.KinesisService;
 import io.micronaut.context.annotation.Property;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import reactor.core.Disposable;
@@ -68,17 +69,18 @@ public class KinesisTest {
 
         Assertions.assertTrue(allTestEventsReceived(tester));
         
-        // Verify ProcessRecordsEvent was published (async events need a small delay)
-        Thread.sleep(100);
-        Assertions.assertTrue(processRecordsEventCollector.hasReceivedEvents(), 
-            "ProcessRecordsEvent should have been published");
-        
-        // Verify event properties
-        ProcessRecordsEvent firstEvent = processRecordsEventCollector.getEvents().get(0);
-        Assertions.assertEquals(TEST_STREAM, firstEvent.getStream());
-        Assertions.assertNotNull(firstEvent.getShardId());
-        // millisBehindLatest may be null in test environment, so we just check it doesn't throw
-        firstEvent.getMillisBehindLatest();
+        // Verify ProcessRecordsEvent was published (async events)
+        Awaitility.await()
+            .atMost(Duration.ofSeconds(5))
+            .untilAsserted(() -> {
+                Assertions.assertTrue(processRecordsEventCollector.hasReceivedEvents(), 
+                    "ProcessRecordsEvent should have been published");
+                
+                // Verify event properties
+                ProcessRecordsEvent firstEvent = processRecordsEventCollector.getEvents().get(0);
+                Assertions.assertEquals(TEST_STREAM, firstEvent.getStream());
+                Assertions.assertNotNull(firstEvent.getShardId());
+            });
     }
     // end::testcontainers-test[]
 
