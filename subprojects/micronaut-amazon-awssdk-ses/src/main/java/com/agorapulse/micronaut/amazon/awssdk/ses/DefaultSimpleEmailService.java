@@ -135,7 +135,7 @@ public class DefaultSimpleEmailService implements SimpleEmailService {
         MimeMultipart mimeMultipart = new MimeMultipart();
 
         BodyPart p = new MimeBodyPart();
-        p.setContent(email.getHtmlBody(), "text/html");
+        p.setContent(email.getHtmlBody(), "text/html; charset=" + StandardCharsets.UTF_8.name());
         if (configuration.getUseBase64EncodingForMultipartEmails().orElse(false)) {
             p.setHeader("Content-Transfer-Encoding", "base64");
         }
@@ -181,7 +181,7 @@ public class DefaultSimpleEmailService implements SimpleEmailService {
                         : email.getSubject()
                     )
                 );
-                b.body(body -> body.html(c -> c.data(email.getHtmlBody())));
+                b.body(body -> body.html(c -> c.data(email.getHtmlBody()).charset(StandardCharsets.UTF_8.name())));
             })
             .source(Optional.ofNullable(email.getFrom()).orElseGet(() -> configuration.getSourceEmail().orElse(null)));
 
