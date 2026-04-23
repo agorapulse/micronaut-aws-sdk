@@ -72,7 +72,7 @@ class ScanBuilder<T>(private val delegate: com.agorapulse.micronaut.amazon.awssd
      *
      * This only sets the optimal pagination of the scans and does not limit the number of items returned.
      *
-     * Use `[io.reactivex.Flowable.take]` to limit the number results returned from the scan.
+     * Use `[reactor.core.publisher.Flux.take]` to limit the number results returned from the scan.
      *
      * @param page number of entities loaded by one scan request (not a number of total entities returned)
      * @return self
@@ -85,7 +85,7 @@ class ScanBuilder<T>(private val delegate: com.agorapulse.micronaut.amazon.awssd
     /**
      * Sets the maximum number of items to be returned from the queries.
      *
-     * This is a shortcut for calling `[io.reactivex.Flowable.take]` on the result Flowable.
+     * This is a shortcut for calling `[reactor.core.publisher.Flux.take]` on the result Flux.
      *
      * @param max the maximum number of items returned
      * @return self
