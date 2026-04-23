@@ -20,7 +20,7 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb
 import com.agorapulse.micronaut.amazon.awssdk.core.client.ClientBuilderProvider
 import io.micronaut.context.annotation.Property
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
-import io.reactivex.Flowable
+import reactor.core.publisher.Flux
 import spock.lang.Specification
 
 import jakarta.inject.Inject
@@ -43,10 +43,10 @@ class DefaultDynamoDBServiceNoRangeSpec extends Specification {
                 new DynamoDBEntityNoRange(parentId: '3'),
                 new DynamoDBEntityNoRange(parentId: '4')]
             ).collectList().block()
-            service.saveAll(Flowable.just(
+            service.saveAll(Flux.just(
                 new DynamoDBEntityNoRange(parentId: '5'),
                 new DynamoDBEntityNoRange(parentId: '6')
-            )).toList().blockingGet()
+            )).collectList().block()
 
         then:
             noExceptionThrown()

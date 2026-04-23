@@ -62,7 +62,7 @@ public interface ScanBuilder<T> extends DetachedScan<T> {
      *
      * This only sets the optimal pagination of the scans and does not limit the number of items returned.
      *
-     * Use <code>{@link io.reactivex.Flowable#take(long)}</code> to limit the number results returned from the scan.
+     * Use <code>{@link reactor.core.publisher.Flux#take(long)}</code> to limit the number results returned from the scan.
      *
      * @param page number of entities loaded by one scan request (not a number of total entities returned)
      * @return self
@@ -72,7 +72,7 @@ public interface ScanBuilder<T> extends DetachedScan<T> {
     /**
      * Sets the maximum number of items to be returned from the queries.
      *
-     * This is a shortcut for calling <code>{@link io.reactivex.Flowable#take(long)}</code> on the result Flowable.
+     * This is a shortcut for calling <code>{@link reactor.core.publisher.Flux#take(long)}</code> on the result Flux.
      *
      * @param max the maximum number of items returned
      * @return self

@@ -126,7 +126,7 @@ public interface QueryBuilder<T> extends DetachedQuery<T> {
      *
      * This only sets the optimal pagination of the queries and does not limit the number of items returned.
      *
-     * Use <code>{@link io.reactivex.Flowable#take(long)}</code> to limit the number results returned from the query.
+     * Use <code>{@link reactor.core.publisher.Flux#take(long)}</code> to limit the number results returned from the query.
      *
      * @param page number of entities loaded by one query request (not a number of total entities returned)
      * @return self
@@ -136,7 +136,7 @@ public interface QueryBuilder<T> extends DetachedQuery<T> {
     /**
      * Sets the maximum number of items to be returned from the queries.
      *
-     * This is a shortcut for calling <code>{@link io.reactivex.Flowable#take(long)}</code> on the result Flowable.
+     * This is a shortcut for calling <code>{@link reactor.core.publisher.Flux#take(long)}</code> on the result Flux.
      *
      * @param max the maximum number of items returned
      * @return self
