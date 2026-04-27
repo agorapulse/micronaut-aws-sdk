@@ -20,8 +20,8 @@ package com.agorapulse.micronaut.amazon.awssdk.ses
 import com.agorapulse.gru.Gru
 import com.agorapulse.gru.minions.JsonMinion
 import com.agorapulse.micronaut.amazon.awssdk.itest.localstack.LocalstackContainerHolder
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.micronaut.context.annotation.Property
+import io.micronaut.json.JsonMapper
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
 import software.amazon.awssdk.services.ses.SesClient
@@ -43,7 +43,7 @@ class SimpleEmailServiceIntegrationSpec extends Specification {
     @Inject SimpleEmailService simpleEmailService
     @Inject SesClient sesClient
     @Inject LocalstackContainerHolder localstack
-    @Inject ObjectMapper objectMapper
+    @Inject JsonMapper jsonMapper
 
     void "send email with attachemnt and base64 settings"() {
         given:
@@ -93,7 +93,7 @@ class SimpleEmailServiceIntegrationSpec extends Specification {
             content
 
         when:
-            Map messagesResponse = objectMapper.readValue(content, Map)
+            Map messagesResponse = jsonMapper.readValue(content, Map)
             String rawData = messagesResponse['messages'][0]['RawData']
             File emailFile = new File(tempDir, 'email.eml')
             emailFile << rawData

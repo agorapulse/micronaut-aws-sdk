@@ -20,8 +20,6 @@ package com.agorapulse.micronaut.amazon.awssdk.sqs;
 import com.agorapulse.micronaut.amazon.awssdk.core.util.ConfigurationUtil;
 import com.agorapulse.micronaut.amazon.awssdk.sqs.annotation.Queue;
 import com.agorapulse.micronaut.amazon.awssdk.sqs.annotation.QueueClient;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.aop.InterceptorBean;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
@@ -32,6 +30,7 @@ import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.qualifiers.Qualifiers;
+import io.micronaut.json.JsonMapper;
 import io.micronaut.scheduling.LoomSupport;
 import jakarta.annotation.PreDestroy;
 import org.reactivestreams.Publisher;
@@ -42,6 +41,7 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException;
 
 import jakarta.inject.Singleton;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -74,14 +74,14 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
     }
 
     private final BeanContext beanContext;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
     private final ExecutorService blockingExecutorService = LoomSupport.isSupported()
         ? LoomSupport.newThreadPerTaskExecutor(LoomSupport.newVirtualThreadFactory("sqs-blocking-pool-"))
         : Executors.newCachedThreadPool();
 
-    public QueueClientIntroduction(BeanContext beanContext, ObjectMapper objectMapper) {
+    public QueueClientIntroduction(BeanContext beanContext, JsonMapper jsonMapper) {
         this.beanContext = beanContext;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
     }
 
     @Override
@@ -212,8 +212,8 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
 
     private String convertMessageToJson(Object message) {
         try {
-            return objectMapper.writeValueAsString(message);
-        } catch (JsonProcessingException e) {
+            return jsonMapper.writeValueAsString(message);
+        } catch (IOException e) {
             throw new IllegalArgumentException("Failed to marshal " + message + " to JSON", e);
         }
     }

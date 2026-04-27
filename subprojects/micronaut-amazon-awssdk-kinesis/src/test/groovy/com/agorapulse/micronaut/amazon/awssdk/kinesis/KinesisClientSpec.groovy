@@ -18,7 +18,7 @@
 package com.agorapulse.micronaut.amazon.awssdk.kinesis
 
 import com.agorapulse.micronaut.amazon.awssdk.kinesis.annotation.KinesisClient
-import com.fasterxml.jackson.databind.ObjectMapper
+import io.micronaut.json.JsonMapper
 import groovy.transform.CompileDynamic
 import io.micronaut.context.ApplicationContext
 import io.micronaut.inject.qualifiers.Qualifiers
@@ -294,7 +294,7 @@ class KinesisClientSpec extends Specification {
     }
 
     private byte[] json(Object object) {
-        return context.getBean(ObjectMapper).writeValueAsBytes(object)
+        return context.getBean(JsonMapper).writeValueAsBytes(object)
     }
 
 }

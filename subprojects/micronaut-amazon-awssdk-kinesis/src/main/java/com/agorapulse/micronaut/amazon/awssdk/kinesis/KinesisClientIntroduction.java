@@ -22,8 +22,6 @@ import com.agorapulse.micronaut.amazon.awssdk.kinesis.annotation.KinesisClient;
 import com.agorapulse.micronaut.amazon.awssdk.kinesis.annotation.PartitionKey;
 import com.agorapulse.micronaut.amazon.awssdk.kinesis.annotation.SequenceNumber;
 import com.agorapulse.micronaut.amazon.awssdk.kinesis.annotation.Stream;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.aop.InterceptorBean;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
@@ -33,12 +31,14 @@ import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.qualifiers.Qualifiers;
+import io.micronaut.json.JsonMapper;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kinesis.model.PutRecordResponse;
 import software.amazon.awssdk.services.kinesis.model.PutRecordsRequestEntry;
 import software.amazon.awssdk.services.kinesis.model.ResourceNotFoundException;
 
 import jakarta.inject.Singleton;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -65,11 +65,11 @@ public class KinesisClientIntroduction implements MethodInterceptor<Object, Obje
     }
 
     private final BeanContext beanContext;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
-    public KinesisClientIntroduction(BeanContext beanContext, ObjectMapper objectMapper) {
+    public KinesisClientIntroduction(BeanContext beanContext, JsonMapper jsonMapper) {
         this.beanContext = beanContext;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
     }
 
     @Override
@@ -187,8 +187,8 @@ public class KinesisClientIntroduction implements MethodInterceptor<Object, Obje
 
     private byte[] json(Object data) {
         try {
-            return objectMapper.writeValueAsBytes(data);
-        } catch (JsonProcessingException e) {
+            return jsonMapper.writeValueAsBytes(data);
+        } catch (IOException e) {
             throw new IllegalArgumentException("Failed to marshal " + data + " to JSON", e);
         }
     }

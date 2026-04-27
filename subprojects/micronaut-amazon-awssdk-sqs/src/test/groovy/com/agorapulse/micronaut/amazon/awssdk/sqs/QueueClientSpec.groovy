@@ -17,9 +17,9 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.sqs
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.micronaut.context.ApplicationContext
 import io.micronaut.inject.qualifiers.Qualifiers
+import io.micronaut.json.JsonMapper
 import org.reactivestreams.Publisher
 import reactor.core.publisher.Flux
 import spock.lang.AutoCleanup
@@ -57,7 +57,7 @@ class QueueClientSpec extends Specification {
 
         context.start()
 
-        marshalledPogo = context.getBean(ObjectMapper).writeValueAsString(POGO)
+        marshalledPogo = context.getBean(JsonMapper).writeValueAsString(POGO)
     }
 
     void 'can send message to other than default queue potentionally altering the group'() {

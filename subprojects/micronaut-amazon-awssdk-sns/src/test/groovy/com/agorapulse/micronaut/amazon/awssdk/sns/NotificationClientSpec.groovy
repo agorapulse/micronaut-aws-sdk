@@ -17,9 +17,9 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.sns
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.micronaut.context.ApplicationContext
 import io.micronaut.inject.qualifiers.Qualifiers
+import io.micronaut.json.JsonMapper
 import software.amazon.awssdk.services.sns.model.NotFoundException
 import software.amazon.awssdk.services.sns.model.PublishRequest
 import spock.lang.AutoCleanup
@@ -38,7 +38,7 @@ class NotificationClientSpec extends Specification {
     private static final Map SMS_ATTRIBUTES = Collections.singletonMap('foo', 'bar')
     private static final Map PUBLISH_ATTRIBUTES = Collections.singletonMap('attr', 'value')
     private static final Map EMPTY_MAP = Collections.emptyMap()
-    private static final String POGO_AS_JSON = new ObjectMapper().writeValueAsString(POGO)
+    private static final String POGO_AS_JSON = JsonMapper.createDefault().writeValueAsString(POGO)
     private static final String MESSAGE_ID = '1234567890'
     private static final String MESSAGE_GROUP_ID = 'messageGroupId1'
     private static final String MESSAGE_DEDUPLICATION_ID = 'messageDeduplicationId1'

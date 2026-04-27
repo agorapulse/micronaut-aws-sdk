@@ -18,11 +18,11 @@
 package com.agorapulse.micronaut.amazon.awssdk.sns;
 
 import com.agorapulse.micronaut.amazon.awssdk.core.client.ClientBuilderProvider;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.aws.sdk.v2.service.sns.SnsClientFactory;
 import io.micronaut.context.annotation.EachBean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Replaces;
+import io.micronaut.json.JsonMapper;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
@@ -68,7 +68,7 @@ public class SimpleNotificationServiceFactory {
 
     @Singleton
     @EachBean(SimpleNotificationServiceConfiguration.class)
-    SimpleNotificationService simpleQueueService(SnsClient sqs, SimpleNotificationServiceConfiguration configuration, ObjectMapper mapper) {
+    SimpleNotificationService simpleQueueService(SnsClient sqs, SimpleNotificationServiceConfiguration configuration, JsonMapper mapper) {
         return new DefaultSimpleNotificationService(sqs, configuration, mapper);
     }
 

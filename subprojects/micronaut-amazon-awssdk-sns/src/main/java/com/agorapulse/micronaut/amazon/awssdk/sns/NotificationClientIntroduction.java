@@ -22,8 +22,6 @@ import com.agorapulse.micronaut.amazon.awssdk.sns.annotation.MessageDeduplicatio
 import com.agorapulse.micronaut.amazon.awssdk.sns.annotation.MessageGroupId;
 import com.agorapulse.micronaut.amazon.awssdk.sns.annotation.NotificationClient;
 import com.agorapulse.micronaut.amazon.awssdk.sns.annotation.Topic;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.aop.InterceptorBean;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
@@ -32,10 +30,12 @@ import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.qualifiers.Qualifiers;
+import io.micronaut.json.JsonMapper;
 import software.amazon.awssdk.services.sns.model.NotFoundException;
 import software.amazon.awssdk.services.sns.model.PublishRequest;
 
 import jakarta.inject.Singleton;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -77,11 +77,11 @@ public class NotificationClientIntroduction implements MethodInterceptor<Object,
     }
 
     private final BeanContext beanContext;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
-    public NotificationClientIntroduction(BeanContext beanContext, ObjectMapper objectMapper) {
+    public NotificationClientIntroduction(BeanContext beanContext, JsonMapper jsonMapper) {
         this.beanContext = beanContext;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
     }
 
     @Override
@@ -188,8 +188,8 @@ public class NotificationClientIntroduction implements MethodInterceptor<Object,
 
     private String toJsonMessage(Object message) {
         try {
-            return objectMapper.writeValueAsString(message);
-        } catch (JsonProcessingException e) {
+            return jsonMapper.writeValueAsString(message);
+        } catch (IOException e) {
             throw new IllegalArgumentException("Failed to marshal " + message + " to JSON", e);
         }
     }

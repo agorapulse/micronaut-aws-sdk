@@ -18,14 +18,13 @@
 package com.agorapulse.amazon.awssdk.dynamodb.loader;
 
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.DynamoDBServiceProvider;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReaderHeaderAware;
 import com.opencsv.exceptions.CsvValidationException;
 import io.micronaut.core.beans.BeanIntrospection;
 import io.micronaut.core.beans.BeanProperty;
 import io.micronaut.core.convert.ConversionService;
 import io.micronaut.core.util.StringUtils;
+import io.micronaut.json.JsonMapper;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import org.reactivestreams.Publisher;
@@ -54,9 +53,9 @@ public class CsvDynamoDbLoader implements DynamoDbLoader {
     private final Scheduler scheduler = Schedulers.boundedElastic();
     private final ConversionService conversionService;
     private final DynamoDBServiceProvider dynamoDBServiceProvider;
-    private final ObjectMapper mapper;
+    private final JsonMapper mapper;
 
-    public CsvDynamoDbLoader(ConversionService conversionService, DynamoDBServiceProvider dynamoDBServiceProvider, ObjectMapper mapper) {
+    public CsvDynamoDbLoader(ConversionService conversionService, DynamoDBServiceProvider dynamoDBServiceProvider, JsonMapper mapper) {
         this.conversionService = conversionService;
         this.dynamoDBServiceProvider = dynamoDBServiceProvider;
         this.mapper = mapper;
@@ -143,14 +142,14 @@ public class CsvDynamoDbLoader implements DynamoDbLoader {
                         String cleanUpJson = value.substring(1, value.length() - 1).replace("\"\"", "\"");
                         try {
                             convertedValue = Optional.of(mapper.readValue(cleanUpJson, property.getType()));
-                        } catch (JsonProcessingException e) {
+                        } catch (IOException e) {
                             convertedValue = Optional.empty();
                             LOGGER.error("Error parsing JSON: {} for property: {} of {}", cleanUpJson, property.getName(), type);
                         }
                     } else if (value.startsWith("[")) {
                         try {
                             convertedValue = Optional.of(mapper.readValue(value, property.getType()));
-                        } catch (JsonProcessingException e) {
+                        } catch (IOException e) {
                             convertedValue = Optional.empty();
                             LOGGER.error("Error parsing JSON: {} for property: {} of {}", value, property.getName(), type);
                         }

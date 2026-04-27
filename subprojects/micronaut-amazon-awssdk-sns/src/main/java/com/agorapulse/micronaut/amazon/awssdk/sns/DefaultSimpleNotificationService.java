@@ -17,8 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.sns;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micronaut.json.JsonMapper;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +37,7 @@ import software.amazon.awssdk.services.sns.model.PublishRequest;
 import software.amazon.awssdk.services.sns.model.SetEndpointAttributesResponse;
 import software.amazon.awssdk.services.sns.model.Topic;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -56,12 +56,12 @@ public class DefaultSimpleNotificationService implements SimpleNotificationServi
     private final Map<String, String> namesToArn = new ConcurrentHashMap<>();
     private final SnsClient client;
     private final SimpleNotificationServiceConfiguration configuration;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
-    public DefaultSimpleNotificationService(SnsClient client, SimpleNotificationServiceConfiguration configuration, ObjectMapper objectMapper) {
+    public DefaultSimpleNotificationService(SnsClient client, SimpleNotificationServiceConfiguration configuration, JsonMapper jsonMapper) {
         this.client = client;
         this.configuration = configuration;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
     }
 
     @Override
@@ -360,8 +360,8 @@ public class DefaultSimpleNotificationService implements SimpleNotificationServi
 
     private String toJson(Map<String, Object> message) {
         try {
-            return objectMapper.writeValueAsString(message);
-        } catch (JsonProcessingException e) {
+            return jsonMapper.writeValueAsString(message);
+        } catch (IOException e) {
             throw new IllegalArgumentException("Cannot write json for message " + message, e);
         }
     }
