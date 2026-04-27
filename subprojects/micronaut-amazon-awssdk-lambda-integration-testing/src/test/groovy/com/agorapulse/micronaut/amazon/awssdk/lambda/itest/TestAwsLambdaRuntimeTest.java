@@ -17,7 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.lambda.itest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micronaut.json.JsonMapper;
 import io.micronaut.test.annotation.MockBean;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
@@ -36,7 +36,7 @@ public class TestAwsLambdaRuntimeTest {
     private static final String RESPONSE_TEXT = "olleH";
     private static final String REQUEST = "{ \"message\": \"Hello\" }";
 
-    @Inject ObjectMapper mapper;
+    @Inject JsonMapper mapper;
 
     @Inject TestAwsLambdaRuntime aws;                                                   // <2>
 

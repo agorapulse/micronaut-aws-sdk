@@ -17,11 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import io.micronaut.jackson.ObjectMapperFactory;
+import io.micronaut.json.JsonMapper;
 import software.amazon.awssdk.enhanced.dynamodb.AttributeConverter;
 import software.amazon.awssdk.enhanced.dynamodb.AttributeValueType;
 import software.amazon.awssdk.enhanced.dynamodb.EnhancedType;
@@ -35,14 +31,7 @@ import java.io.IOException;
  */
 public class ConvertedJsonAttributeConverter<T> implements AttributeConverter<T> {
 
-        private static final ObjectWriter OBJECT_WRITER;
-        private static final ObjectReader OBJECT_READER;
-
-        static {
-            ObjectMapper mapper = new ObjectMapperFactory().objectMapper(null, null);
-            OBJECT_READER = mapper.reader();
-            OBJECT_WRITER = mapper.writer();
-        }
+        private static final JsonMapper JSON_MAPPER = JsonMapper.createDefault();
 
         private final Class<T> type;
 
@@ -53,8 +42,8 @@ public class ConvertedJsonAttributeConverter<T> implements AttributeConverter<T>
         @Override
         public AttributeValue transformFrom(T input) {
             try {
-                return AttributeValue.fromS(OBJECT_WRITER.writeValueAsString(input));
-            } catch (JsonProcessingException e) {
+                return AttributeValue.fromS(JSON_MAPPER.writeValueAsString(input));
+            } catch (IOException e) {
                 throw new IllegalArgumentException("Cannot write value as JSON: " + input, e);
             }
         }
@@ -62,7 +51,7 @@ public class ConvertedJsonAttributeConverter<T> implements AttributeConverter<T>
         @Override
         public T transformTo(AttributeValue input) {
             try {
-                return OBJECT_READER.readValue(input.s(), type);
+                return JSON_MAPPER.readValue(input.s(), type);
             } catch (IOException e) {
                 throw new IllegalArgumentException("Cannot read value: " + input.s(),  e);
             }

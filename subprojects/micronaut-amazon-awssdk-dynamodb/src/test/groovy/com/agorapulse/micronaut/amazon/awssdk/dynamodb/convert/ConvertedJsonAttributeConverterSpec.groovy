@@ -20,7 +20,7 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb.convert
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.DynamoDBServiceProvider
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.DynamoDbService
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.Options
-import com.fasterxml.jackson.databind.ObjectMapper
+import io.micronaut.json.JsonMapper
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
 import software.amazon.awssdk.enhanced.dynamodb.Key
@@ -32,7 +32,7 @@ class ConvertedJsonAttributeConverterSpec extends Specification {
 
     @Inject DynamoDBServiceProvider dynamoDBServiceProvider
     @Inject DynamoDbClient dynamoDbClient
-    @Inject ObjectMapper objectMapper
+    @Inject JsonMapper jsonMapper
 
     DynamoDbService<ConvertedJsonEntityExample> dynamoDbService
 
@@ -59,7 +59,7 @@ class ConvertedJsonAttributeConverterSpec extends Specification {
 
         when:
             String json = RawDataUtil.getRawDynamoDbItem(dynamoDbClient, ConvertedJsonEntityExample, entity.id).options.s()
-            Options options = objectMapper.readValue(json, Options)
+            Options options = jsonMapper.readValue(json, Options)
         then:
             options == entity.options
     }

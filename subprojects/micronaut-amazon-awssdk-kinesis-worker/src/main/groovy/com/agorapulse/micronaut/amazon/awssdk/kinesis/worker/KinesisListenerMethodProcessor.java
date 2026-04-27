@@ -19,7 +19,6 @@ package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker;
 
 import com.agorapulse.micronaut.amazon.awssdk.kinesis.Event;
 import com.agorapulse.micronaut.amazon.awssdk.kinesis.worker.annotation.KinesisListener;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.context.BeanContext;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.annotation.Value;
@@ -32,6 +31,7 @@ import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.BeanDefinition;
 import io.micronaut.inject.ExecutableMethod;
 import io.micronaut.inject.qualifiers.Qualifiers;
+import io.micronaut.json.JsonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.kinesis.retrieval.KinesisClientRecord;
@@ -102,11 +102,11 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
 
         private final ExecutableMethod method;
         private final Object bean;
-        private final ObjectMapper mapper;
+        private final JsonMapper mapper;
 
         private final String consumerFilterKey;
 
-        EventListener(ExecutableMethod method, Object bean, ObjectMapper mapper, String consumerFilterKey) {
+        EventListener(ExecutableMethod method, Object bean, JsonMapper mapper, String consumerFilterKey) {
             this.method = method;
             this.bean = bean;
             this.mapper = mapper;
@@ -138,9 +138,9 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
 
         private final ExecutableMethod method;
         private final Object bean;
-        private final ObjectMapper mapper;
+        private final JsonMapper mapper;
 
-        EventAndRecordListener(ExecutableMethod method, Object bean, ObjectMapper mapper) {
+        EventAndRecordListener(ExecutableMethod method, Object bean, JsonMapper mapper) {
             this.method = method;
             this.bean = bean;
             this.mapper = mapper;
@@ -158,7 +158,7 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
     }
 
     private final BeanContext beanContext;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
     private final KinesisWorkerFactory kinesisWorkerFactory;
 
     private final String consumerFilterKey;
@@ -167,12 +167,12 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
 
     public KinesisListenerMethodProcessor(
         BeanContext beanContext,
-        ObjectMapper objectMapper,
+        JsonMapper jsonMapper,
         KinesisWorkerFactory kinesisWorkerFactory,
         @Value("${aws.kinesis.consumer-filter-key:}") String consumerFilterKey
     ) {
         this.beanContext = beanContext;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
         this.kinesisWorkerFactory = kinesisWorkerFactory;
         this.consumerFilterKey = consumerFilterKey;
     }
@@ -248,7 +248,7 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
             if (CharSequence.class.isAssignableFrom(arguments[0].getType())) {
                 return new StringAndRecordListener(method, bean);
             }
-            return new EventAndRecordListener(method, bean, objectMapper);
+            return new EventAndRecordListener(method, bean, jsonMapper);
         }
 
         if (CharSequence.class.isAssignableFrom(arguments[0].getType())) {
@@ -259,7 +259,7 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
             return new RecordListener(method, bean);
         }
 
-        return new EventListener(method, bean, objectMapper, consumerFilterKey);
+        return new EventListener(method, bean, jsonMapper, consumerFilterKey);
     }
 
 }

@@ -19,7 +19,7 @@ package com.agorapulse.micronaut.amazon.awssdk.lambda.itest;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micronaut.json.JsonMapper;
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.function.executor.FunctionInitializer;
 import jakarta.inject.Inject;
@@ -31,7 +31,7 @@ import java.io.OutputStream;
 public class PojoStreamHandler extends FunctionInitializer implements RequestStreamHandler {
 
     @Inject private SomeService service;
-    @Inject private ObjectMapper mapper;
+    @Inject private JsonMapper mapper;
 
     public PojoStreamHandler() { }
 

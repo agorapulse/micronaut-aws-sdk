@@ -17,9 +17,8 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.kinesis;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.core.util.StringUtils;
+import io.micronaut.json.JsonMapper;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +50,7 @@ import software.amazon.awssdk.services.kinesis.model.SplitShardRequest;
 import software.amazon.awssdk.services.kinesis.model.SplitShardResponse;
 import software.amazon.awssdk.services.kinesis.model.StreamStatus;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CharsetDecoder;
@@ -73,12 +73,12 @@ class DefaultKinesisService implements KinesisService {
 
     private final KinesisClient client;
     private final KinesisConfiguration configuration;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
-    public DefaultKinesisService(KinesisClient client, KinesisConfiguration configuration, ObjectMapper objectMapper) {
+    public DefaultKinesisService(KinesisClient client, KinesisConfiguration configuration, JsonMapper jsonMapper) {
         this.client = client;
         this.configuration = configuration;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
     }
 
     @Override
@@ -211,8 +211,8 @@ class DefaultKinesisService implements KinesisService {
         setConsumerFilterKeyIfEmpty(event, configuration.getConsumerFilterKey());
 
         try {
-            return putRecord(streamName, event.getPartitionKey(), objectMapper.writeValueAsString(event), sequenceNumberForOrdering);
-        } catch (JsonProcessingException e) {
+            return putRecord(streamName, event.getPartitionKey(), jsonMapper.writeValueAsString(event), sequenceNumberForOrdering);
+        } catch (IOException e) {
             throw new IllegalArgumentException("Cannot write value as JSON: " + event, e);
         }
     }
@@ -227,10 +227,10 @@ class DefaultKinesisService implements KinesisService {
 
             try {
                 return PutRecordsRequestEntry.builder()
-                    .data(SdkBytes.fromByteArray(objectMapper.writeValueAsString(event).getBytes()))
+                    .data(SdkBytes.fromByteArray(jsonMapper.writeValueAsBytes(event)))
                     .partitionKey(event.getPartitionKey())
                     .build();
-            } catch (JsonProcessingException e) {
+            } catch (IOException e) {
                 throw new IllegalArgumentException("Cannot write value as JSON: " + event, e);
             }
         }).collect(Collectors.toList()));

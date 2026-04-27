@@ -20,8 +20,6 @@ package com.agorapulse.micronaut.amazon.awssdk.lambda;
 import com.agorapulse.micronaut.amazon.awssdk.core.util.ConfigurationUtil;
 import com.agorapulse.micronaut.amazon.awssdk.lambda.annotation.Body;
 import com.agorapulse.micronaut.amazon.awssdk.lambda.annotation.LambdaClient;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.aop.InterceptorBean;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
@@ -31,7 +29,7 @@ import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.qualifiers.Qualifiers;
-import io.micronaut.jackson.JacksonConfiguration;
+import io.micronaut.json.JsonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.core.SdkBytes;
@@ -55,11 +53,11 @@ public class LambdaClientIntroduction implements MethodInterceptor<Object, Objec
     private static final Function<String, Optional<String>> EMPTY_IF_UNDEFINED = (String s) -> StringUtils.isEmpty(s) ? Optional.empty() : Optional.of(s);
 
     private final BeanContext beanContext;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
-    public LambdaClientIntroduction(BeanContext beanContext, ObjectMapper objectMapper) {
+    public LambdaClientIntroduction(BeanContext beanContext, JsonMapper jsonMapper) {
         this.beanContext = beanContext;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
     }
 
     @Override
@@ -106,7 +104,7 @@ public class LambdaClientIntroduction implements MethodInterceptor<Object, Objec
     private Object invokeFunction(MethodInvocationContext<Object, Object> context, software.amazon.awssdk.services.lambda.LambdaClient service, String functionName, Duration timeout, Object requestObject) {
         try {
             boolean event = void.class.equals(context.getReturnType().getType());
-            String payload = objectMapper.writeValueAsString(requestObject);
+            String payload = jsonMapper.writeValueAsString(requestObject);
 
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Invoking function {} with a payload {}", functionName, payload);
@@ -131,13 +129,11 @@ public class LambdaClientIntroduction implements MethodInterceptor<Object, Objec
                 return null;
             }
 
-            JavaType javaType = JacksonConfiguration.constructType(context.getReturnType().asArgument(), objectMapper.getTypeFactory());
-
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Response from the function {} is {}", functionName, new String(response.payload().asByteArray()));
             }
 
-            return objectMapper.readValue(response.payload().asByteArray(), javaType);
+            return jsonMapper.readValue(response.payload().asByteArray(), context.getReturnType().asArgument());
         } catch (IOException e) {
             throw new IllegalArgumentException("Cannot invoke function " + functionName, e);
         }

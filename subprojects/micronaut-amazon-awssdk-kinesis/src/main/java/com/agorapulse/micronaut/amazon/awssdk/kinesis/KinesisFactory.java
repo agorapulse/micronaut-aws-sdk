@@ -18,11 +18,11 @@
 package com.agorapulse.micronaut.amazon.awssdk.kinesis;
 
 import com.agorapulse.micronaut.amazon.awssdk.core.client.ClientBuilderProvider;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.EachBean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;
+import io.micronaut.json.JsonMapper;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
@@ -71,7 +71,7 @@ public class KinesisFactory {
     KinesisService simpleQueueService(
         KinesisClient kinesis,
         KinesisConfiguration configuration,
-        ObjectMapper mapper
+        JsonMapper mapper
     ) {
         return new DefaultKinesisService(kinesis, configuration, mapper);
     }

@@ -17,8 +17,8 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.kinesis
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.micronaut.context.annotation.Property
+import io.micronaut.json.JsonMapper
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import reactor.core.publisher.Flux
 import software.amazon.awssdk.services.kinesis.KinesisClient
@@ -51,7 +51,7 @@ class KinesisServiceSpec extends Specification {
     private static final String STREAM = 'STREAM'
     private static final String VALUE_1 = 'VALUE'
     private static final String VALUE_2 = 'VALUE_2'
-    private static final ObjectMapper MAPPER = new ObjectMapper()
+    private static final JsonMapper MAPPER = JsonMapper.createDefault()
     private static final int SHARD_COUNT = 2
 
     @Inject KinesisClient kinesis
