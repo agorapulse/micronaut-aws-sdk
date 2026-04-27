@@ -227,7 +227,7 @@ class DefaultKinesisService implements KinesisService {
 
             try {
                 return PutRecordsRequestEntry.builder()
-                    .data(SdkBytes.fromByteArray(jsonMapper.writeValueAsString(event).getBytes()))
+                    .data(SdkBytes.fromByteArray(jsonMapper.writeValueAsBytes(event)))
                     .partitionKey(event.getPartitionKey())
                     .build();
             } catch (IOException e) {

@@ -24,6 +24,7 @@ dependencies {
     implementation project(':micronaut-amazon-awssdk-cloudwatch')
     implementation project(':micronaut-amazon-awssdk-dynamodb')
     implementation project(':micronaut-amazon-awssdk-kinesis')
+    implementation 'io.micronaut:micronaut-jackson-databind'
 
     testImplementation project(':micronaut-amazon-awssdk-integration-testing')
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
