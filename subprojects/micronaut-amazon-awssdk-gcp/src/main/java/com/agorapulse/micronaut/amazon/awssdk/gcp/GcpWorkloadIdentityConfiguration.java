@@ -33,21 +33,24 @@ package com.agorapulse.micronaut.amazon.awssdk.gcp;
  * Equivalent environment variables: {@code GCP_PROJECT_NUMBER}, {@code GCP_WORKLOAD_POOL},
  * {@code GCP_WORKLOAD_PROVIDER}, {@code GCP_SERVICE_ACCOUNT}.
  * <p>
- * Named credentials, producing one {@link com.google.auth.oauth2.GoogleCredentials} bean
- * per entry (the {@code default} entry becomes the primary bean):
+ * Named credentials, producing one {@link com.google.auth.oauth2.GoogleCredentials}
+ * bean per entry, qualified by the entry name. May coexist with the flat layout
+ * above, which provides the primary {@code default} bean; avoid declaring a
+ * {@code gcp.credentials.default} entry in that case to prevent two beans
+ * competing for the same qualifier.
  * <pre>
  * gcp:
  *   credentials:
- *     default:
+ *     analytics:
  *       project-number: "123456789012"
  *       workload-pool: "aws-pool"
  *       workload-provider: "aws-provider"
- *       service-account: "my-sa@project.iam.gserviceaccount.com"
- *     analytics:
+ *       service-account: "analytics@project.iam.gserviceaccount.com"
+ *     billing:
  *       project-number: "987654321098"
  *       workload-pool: "aws-pool"
  *       workload-provider: "aws-provider"
- *       service-account: "analytics@project.iam.gserviceaccount.com"
+ *       service-account: "billing@project.iam.gserviceaccount.com"
  * </pre>
  */
 public abstract class GcpWorkloadIdentityConfiguration {
