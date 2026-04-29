@@ -17,20 +17,12 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.gcp;
 
-import io.micronaut.context.annotation.ConfigurationProperties;
-
 /**
- * Configuration for GCP Workload Identity Federation with AWS.
+ * Base configuration for GCP Workload Identity Federation with AWS.
  * <p>
- * Can be configured via environment variables (Micronaut auto-converts):
- * <ul>
- *   <li>{@code GCP_PROJECT_NUMBER} → {@code gcp.project-number}</li>
- *   <li>{@code GCP_WORKLOAD_POOL} → {@code gcp.workload-pool}</li>
- *   <li>{@code GCP_WORKLOAD_PROVIDER} → {@code gcp.workload-provider}</li>
- *   <li>{@code GCP_SERVICE_ACCOUNT} → {@code gcp.service-account}</li>
- * </ul>
+ * Two layouts are supported:
  * <p>
- * Or via application.yml:
+ * Single (default) credentials via flat properties or environment variables:
  * <pre>
  * gcp:
  *   project-number: "123456789012"
@@ -38,9 +30,30 @@ import io.micronaut.context.annotation.ConfigurationProperties;
  *   workload-provider: "aws-provider"
  *   service-account: "my-sa@project.iam.gserviceaccount.com"
  * </pre>
+ * Equivalent environment variables: {@code GCP_PROJECT_NUMBER}, {@code GCP_WORKLOAD_POOL},
+ * {@code GCP_WORKLOAD_PROVIDER}, {@code GCP_SERVICE_ACCOUNT}.
+ * <p>
+ * Named credentials, producing one {@link com.google.auth.oauth2.GoogleCredentials}
+ * bean per entry, qualified by the entry name. May coexist with the flat layout
+ * above, which provides the primary {@code default} bean; avoid declaring a
+ * {@code gcp.credentials.default} entry in that case to prevent two beans
+ * competing for the same qualifier.
+ * <pre>
+ * gcp:
+ *   credentials:
+ *     analytics:
+ *       project-number: "123456789012"
+ *       workload-pool: "aws-pool"
+ *       workload-provider: "aws-provider"
+ *       service-account: "analytics@project.iam.gserviceaccount.com"
+ *     billing:
+ *       project-number: "987654321098"
+ *       workload-pool: "aws-pool"
+ *       workload-provider: "aws-provider"
+ *       service-account: "billing@project.iam.gserviceaccount.com"
+ * </pre>
  */
-@ConfigurationProperties("gcp")
-public class GcpWorkloadIdentityConfiguration {
+public abstract class GcpWorkloadIdentityConfiguration {
 
     private String projectNumber;
     private String workloadPool;
