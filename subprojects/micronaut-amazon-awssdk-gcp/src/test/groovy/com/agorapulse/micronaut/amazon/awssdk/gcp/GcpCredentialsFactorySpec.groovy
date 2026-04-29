@@ -76,7 +76,7 @@ class GcpCredentialsFactorySpec extends Specification {
                     'gcp.credentials.analytics.service-account'   : 'analytics@p.iam.gserviceaccount.com',
             ])
 
-        expect: 'flat-config-only default bean is not created when gcp.credentials is set'
+        expect: 'no flat default bean when gcp.project-number is not set'
             !ctx.containsBean(DefaultGcpWorkloadIdentityConfiguration)
 
         and: 'one named configuration bean per entry'
@@ -89,6 +89,33 @@ class GcpCredentialsFactorySpec extends Specification {
             ctx.getBean(GoogleCredentials) != null
             ctx.getBean(GoogleCredentials, Qualifiers.byName('default')) != null
             ctx.getBean(GoogleCredentials, Qualifiers.byName('analytics')) != null
+
+        cleanup:
+            ctx?.close()
+    }
+
+    void 'flat default and named entries can coexist'() {
+        given:
+            ApplicationContext ctx = ApplicationContext.run([
+                    'aws.region'                                 : 'us-east-1',
+                    'aws.accessKeyId'                            : 'test-key',
+                    'aws.secretKey'                              : 'test-secret',
+                    'gcp.project-number'                         : '111111111111',
+                    'gcp.workload-pool'                          : 'aws-pool',
+                    'gcp.workload-provider'                      : 'aws-provider',
+                    'gcp.service-account'                        : 'flat@p.iam.gserviceaccount.com',
+                    'gcp.credentials.analytics.project-number'   : '222222222222',
+                    'gcp.credentials.analytics.workload-pool'    : 'aws-pool',
+                    'gcp.credentials.analytics.workload-provider': 'aws-provider',
+                    'gcp.credentials.analytics.service-account'  : 'analytics@p.iam.gserviceaccount.com',
+            ])
+
+        expect:
+            ctx.containsBean(DefaultGcpWorkloadIdentityConfiguration)
+            ctx.getBeansOfType(GcpWorkloadIdentityConfiguration).size() == 2
+            ctx.getBean(GcpWorkloadIdentityConfiguration, Qualifiers.byName('default')).projectNumber == '111111111111'
+            ctx.getBean(GcpWorkloadIdentityConfiguration, Qualifiers.byName('analytics')).projectNumber == '222222222222'
+            ctx.getBeansOfType(GoogleCredentials).size() == 2
 
         cleanup:
             ctx?.close()

@@ -25,13 +25,14 @@ import jakarta.inject.Named;
 
 /**
  * Default GCP Workload Identity Federation configuration sourced from the flat
- * {@code gcp.*} properties. Only active when the named-credentials map
- * {@code gcp.credentials} is not configured.
+ * {@code gcp.*} properties. Coexists with named entries declared under
+ * {@code gcp.credentials}; avoid declaring a {@code gcp.credentials.default}
+ * entry when the flat layout is also in use, otherwise two beans will compete
+ * for the {@code default} qualifier.
  */
 @Primary
 @Named(ConfigurationUtil.DEFAULT_CONFIGURATION_NAME)
 @ConfigurationProperties("gcp")
-@Requires(missingProperty = "gcp.credentials")
 @Requires(property = "gcp.project-number")
 public class DefaultGcpWorkloadIdentityConfiguration extends GcpWorkloadIdentityConfiguration {
 }
