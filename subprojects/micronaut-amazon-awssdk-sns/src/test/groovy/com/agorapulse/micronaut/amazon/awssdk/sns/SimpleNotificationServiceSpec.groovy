@@ -248,6 +248,7 @@ class SimpleNotificationServiceSpec extends Specification {
 
     void 'unsubscribe from the topic'() {
         when:
+            subscriptionArn = service.subscribeTopicWithQueue(topicArn, simpleQueueService.getQueueArn(TEST_QUEUE))
             service.unsubscribeTopic(subscriptionArn)
         then:
             noExceptionThrown()
