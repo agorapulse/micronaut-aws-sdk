@@ -199,7 +199,7 @@ class SimpleNotificationServiceSpec extends Specification {
 
     void 'subscribe to the application'() {
         when:
-            subscriptionArn = service.subscribeTopicWithApplication(topicArn, 'fake-app-arn')
+            subscriptionArn = service.subscribeTopicWithApplication(topicArn, iosEndpointArn)
         then:
             subscriptionArn
     }
