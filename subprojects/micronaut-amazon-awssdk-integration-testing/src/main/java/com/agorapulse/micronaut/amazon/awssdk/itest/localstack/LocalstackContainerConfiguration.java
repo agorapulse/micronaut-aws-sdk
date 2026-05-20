@@ -32,7 +32,7 @@ public class LocalstackContainerConfiguration extends AbstractContainerConfigura
     );
 
     public static final String DEFAULT_IMAGE = "localstack/localstack";
-    public static final String DEFAULT_TAG = "3.2.0";
+    public static final String DEFAULT_TAG = "3.8.1";
 
     public LocalstackContainerConfiguration() {
         setImage(DEFAULT_IMAGE);
