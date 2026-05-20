@@ -960,6 +960,18 @@ aws:
     create-tables: true
 ----
 
+You can also use https://ministack.org/[MiniStack] as a drop-in alternative to LocalStack by enabling the `ministack` configuration. When `ministack.enabled` is `true`, the LocalStack container is not started.
+
+[source,yaml]
+.application-test.yml
+----
+ministack:
+  enabled: true
+  shared: true
+----
+
+The same per-service container override mechanism is available via `ministack.containers.<service>` (for example to substitute a real `amazon/dynamodb-local` container).
+
 ====
 
 ==== Data Loader

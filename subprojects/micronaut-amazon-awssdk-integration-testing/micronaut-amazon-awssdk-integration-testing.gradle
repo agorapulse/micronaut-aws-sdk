@@ -17,6 +17,7 @@
  */
 dependencies {
     api group: 'org.testcontainers', name: 'localstack', version: testcontainersVersion
+    api group: 'org.ministack', name: 'testcontainers-ministack', version: ministackVersion
 
     compileOnly "software.amazon.awssdk:netty-nio-client:$awsSdk2Version"
 

@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.agorapulse.micronaut.amazon.awssdk.itest.localstack;
+package com.agorapulse.micronaut.amazon.awssdk.itest.ministack;
 
 import com.agorapulse.micronaut.amazon.awssdk.core.AwsConfiguration;
 import io.micronaut.context.annotation.Bean;
@@ -30,30 +30,29 @@ import java.util.List;
 
 @Factory
 @Replaces(AwsConfiguration.class)
-@Requires(missingProperty = "localstack.disabled")
-@Requires(property = "ministack.enabled", notEquals = "true")
-public class LocalstackContainerHolderFactory {
+@Requires(property = "ministack.enabled", value = "true")
+public class MinistackContainerHolderFactory {
 
     @Primary
     @Singleton
     @Bean(preDestroy = "close")
-    @Requires(property = "localstack.shared", notEquals = "true")
-    public LocalstackContainerHolder localstackContainerHolderLazy(
-        LocalstackContainerConfiguration configuration,
-        List<LocalstackContainerOverridesConfiguration> overrides
+    @Requires(property = "ministack.shared", notEquals = "true")
+    public MinistackContainerHolder ministackContainerHolderLazy(
+        MinistackContainerConfiguration configuration,
+        List<MinistackContainerOverridesConfiguration> overrides
     ) {
-        return new LocalstackContainerHolder(configuration, overrides);
+        return new MinistackContainerHolder(configuration, overrides);
     }
 
     @Primary
     @Context
     @Bean(preDestroy = "close")
-    @Requires(property = "localstack.shared", value = "true")
-    public LocalstackContainerHolder localstackContainerHolderEager(
-        LocalstackContainerConfiguration configuration,
-        List<LocalstackContainerOverridesConfiguration> overrides
+    @Requires(property = "ministack.shared", value = "true")
+    public MinistackContainerHolder ministackContainerHolderEager(
+        MinistackContainerConfiguration configuration,
+        List<MinistackContainerOverridesConfiguration> overrides
     ) {
-        return new LocalstackContainerHolder(configuration, overrides);
+        return new MinistackContainerHolder(configuration, overrides);
     }
 
 }
