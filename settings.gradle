@@ -27,6 +27,7 @@ buildscript {
     repositories {
         mavenCentral()
         gradlePluginPortal()
+        maven { url 'https://agorapulse.jfrog.io/agorapulse/gradle-plugins-releases-local/' }
     }
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
@@ -34,6 +35,8 @@ buildscript {
         classpath("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$kspVersion")
         classpath("io.micronaut.gradle:micronaut-minimal-plugin:$micronautGradlePluginVersion")
         classpath("com.vanniktech:gradle-maven-publish-plugin:$mavenCentralPublishPluginVersion")
+        classpath("com.agorapulse.gradle:micronaut-library:$agorapulseGradlePluginsVersion")
+        classpath("com.agorapulse.gradle:groovy-common-configuration:$agorapulseGradlePluginsVersion")
     }
 }
 
@@ -46,7 +49,7 @@ plugins {
 }
 
 
-projects {
+gradleProjects {
     directories = ['subprojects', 'examples', 'docs', 'benchmarks', 'platforms', 'kotlin-libs']
 
     plugins {
