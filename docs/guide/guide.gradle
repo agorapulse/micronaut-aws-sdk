@@ -24,18 +24,8 @@ buildscript {
     }
 }
 plugins {
-    id 'org.kordamp.gradle.guide'
-    id 'org.ajoberstar.git-publish'
-}
-
-config {
-    docs {
-        guide {
-            publish {
-                enabled = true
-            }
-        }
-    }
+    id 'com.agorapulse.gradle.guide'
+    id 'org.ajoberstar.git-publish' version "$gitPublishPluginVersion"
 }
 
 configurations {

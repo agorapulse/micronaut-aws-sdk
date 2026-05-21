@@ -18,15 +18,8 @@
 pluginManagement {
     repositories {
         gradlePluginPortal()
-    }
-    plugins {
-        id 'org.kordamp.gradle.settings'            version kordampVersion
-        id 'org.kordamp.gradle.groovy-project'      version kordampVersion
-        id 'org.kordamp.gradle.checkstyle'          version kordampVersion
-        id 'org.kordamp.gradle.codenarc'            version kordampVersion
-        id 'org.kordamp.gradle.guide'               version kordampVersion
-        id 'org.kordamp.gradle.coveralls'           version kordampVersion
-        id 'org.ajoberstar.git-publish'             version gitPublishPluginVersion
+        maven { url 'https://agorapulse.jfrog.io/agorapulse/gradle-plugins-releases-local/' }
+        mavenCentral()
     }
 }
 
@@ -46,16 +39,10 @@ buildscript {
 
 
 plugins {
-    id 'org.kordamp.gradle.settings'
-    id 'com.gradle.enterprise' version '3.15.1'
-}
-
-gradleEnterprise {
-    buildScan {
-        publishAlways()
-        termsOfServiceUrl = "https://gradle.com/terms-of-service"
-        termsOfServiceAgree = "yes"
-    }
+    id 'com.agorapulse.gradle.settings'             version "$agorapulseGradlePluginsVersion"
+    id 'com.agorapulse.gradle.gradle-enterprise'    version "$agorapulseGradlePluginsVersion"
+    id 'com.agorapulse.gradle.remote-cache'         version "$agorapulseGradlePluginsVersion"
+    id 'com.agorapulse.gradle.internal-version-catalog' version "$agorapulseGradlePluginsVersion"
 }
 
 
@@ -64,7 +51,7 @@ projects {
 
     plugins {
         dir('benchmarks') {
-            id 'io.micronaut.minimal.library'
+            id 'com.agorapulse.gradle.micronaut-library'
         }
         dir('platforms') {
             id 'java-platform'
@@ -72,14 +59,15 @@ projects {
         }
 
         dir('subprojects') {
-            id 'io.micronaut.minimal.library'
+            id 'com.agorapulse.gradle.micronaut-library'
             id 'groovy'
             id 'java-library'
+            id 'com.agorapulse.gradle.groovy-common-configuration'
             id 'com.vanniktech.maven.publish'
         }
 
         dir('kotlin-libs') {
-            id 'io.micronaut.minimal.library'
+            id 'com.agorapulse.gradle.micronaut-library'
         }
     }
 }
