@@ -34,4 +34,23 @@ jobs:
           distribution: zulu
       - uses: gradle/actions/setup-gradle@v4
       - run: |
-          ./gradlew check --parallel
+          ./gradlew check --parallel --continue
+      - name: Print failed test details
+        if: failure()
+        run: |
+          set +e
+          for f in $(find . -path '*/build/test-results/test/*.xml'); do
+            if grep -q '<failure\|<error' "$f"; then
+              echo "::group::$f"
+              cat "$f"
+              echo "::endgroup::"
+            fi
+          done
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            **/build/reports/tests/
+            **/build/test-results/
