@@ -24,8 +24,8 @@ buildscript {
     }
 }
 plugins {
-    id 'com.agorapulse.gradle.guide'
-    id 'org.ajoberstar.git-publish' version "$gitPublishPluginVersion"
+    id 'com.agorapulse.gradle.guide'        version "$agorapulseGradlePluginsVersion"
+    id 'org.ajoberstar.git-publish'         version "$gitPublishPluginVersion"
 }
 
 configurations {

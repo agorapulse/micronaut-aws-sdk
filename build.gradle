@@ -15,13 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-plugins {
-    id 'com.agorapulse.gradle.aggregate-checkstyle-reports'
-    id 'com.agorapulse.gradle.aggregate-codenarc-reports'
-    id 'com.agorapulse.gradle.aggregate-jacoco-reports'
-    id 'com.agorapulse.gradle.aggregate-test-reports'
-}
-
 if (!project.hasProperty('mavenCentralUsername'))       ext.mavenCentralUsername            = System.getenv('MAVEN_CENTRAL_USERNAME') ?: '**UNDEFINED**'
 if (!project.hasProperty('mavenCentralPassword'))       ext.mavenCentralPassword            = System.getenv('MAVEN_CENTRAL_PASSWORD') ?: '**UNDEFINED**'
 if (!project.hasProperty('signingInMemoryKeyId'))       ext.signingInMemoryKeyId            = System.getenv('SIGNING_KEY_ID') ?: '**UNDEFINED**'
@@ -33,6 +26,16 @@ allprojects {
     repositories {
         mavenCentral()
         maven { url 'https://repo.spring.io/release' }
+    }
+}
+
+configure(subprojects.findAll { it.projectDir.parentFile?.name in ['subprojects', 'benchmarks', 'kotlin-libs'] }) { Project subproject ->
+    plugins.withType(JavaPlugin) {
+        java {
+            toolchain {
+                languageVersion = JavaLanguageVersion.of(25)
+            }
+        }
     }
 }
 
@@ -136,5 +139,3 @@ configure(subprojects.findAll { it.projectDir.parentFile?.name in ['subprojects'
 configure(subprojects.findAll { it.projectDir.parentFile?.name in ['subprojects', 'kotlin-libs'] }) { Project subproject ->
     project(':micronaut-aws-sdk-bom').dependencies.constraints.api subproject
 }
-
-check.dependsOn('aggregateCheckstyle', 'aggregateCodenarc', 'aggregateTestReports', 'aggregateJacoco')
