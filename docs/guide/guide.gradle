@@ -17,7 +17,6 @@
  */
 plugins {
     id 'com.agorapulse.gradle.guide'
-    id 'org.ajoberstar.git-publish' version "$gitPublishPluginVersion"
 }
 
 // gradle-git-publish 5.x no longer reads GRGIT_USER / GRGIT_PASS env vars
