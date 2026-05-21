@@ -30,6 +30,7 @@ jobs:
           SIGNING_SECRET_KEY_PATH: ${{ steps.write_file.outputs.filePath }}
         run: ./gradlew gitPublishPush publishAndReleaseToMavenCentral "-Pversion=${{ github.ref_name }}" -PmavenCentralUsername=${{ secrets.MAVEN_CENTRAL_USERNAME }} -PmavenCentralPassword=${{ secrets.MAVEN_CENTRAL_PASSWORD }} -Prelease=true "-Dorg.ajoberstar.grgit.auth.username=${{ secrets.AGORAPULSE_BOT_PERSONAL_TOKEN }}" --stacktrace
   ping:
+    if: ${{ !github.event.release.prerelease }}
     name: Notify Upstream Repositories
     runs-on: ubuntu-latest
     needs: [release]
