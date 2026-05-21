@@ -17,7 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.core;
 
-import io.micronaut.core.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Default region and endpoint configuration.
