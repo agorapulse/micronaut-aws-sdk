@@ -15,27 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath("org.ajoberstar.grgit:grgit-core:$grgitVersion")
-    }
-}
 plugins {
-    id 'org.kordamp.gradle.guide'
-    id 'org.ajoberstar.git-publish'
-}
-
-config {
-    docs {
-        guide {
-            publish {
-                enabled = true
-            }
-        }
-    }
+    id 'com.agorapulse.gradle.guide'
+    id 'org.ajoberstar.git-publish' version "$gitPublishPluginVersion"
 }
 
 configurations {
@@ -57,5 +39,4 @@ asciidoctor {
         'root-dir': rootDir,
         'project-slug': slug
     ]
-
 }
