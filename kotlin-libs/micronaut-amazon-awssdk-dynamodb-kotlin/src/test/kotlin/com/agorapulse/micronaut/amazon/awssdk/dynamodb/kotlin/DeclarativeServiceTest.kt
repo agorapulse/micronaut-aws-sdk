@@ -86,28 +86,28 @@ class DeclarativeServiceTest {
             )
         )
         Assertions.assertEquals(
-            2, Flux.from(
-                s.query("1")
-            ).count().block().toInt()
+            2, Flux.from<DynamoDBEntity>(
+                s.query("1") as org.reactivestreams.Publisher<DynamoDBEntity>
+            ).count().block()!!.toInt()
         )
         Assertions.assertEquals(
-            1, Flux.from(
-                s.query("1", "1")
-            ).count().block().toInt()
+            1, Flux.from<DynamoDBEntity>(
+                s.query("1", "1") as org.reactivestreams.Publisher<DynamoDBEntity>
+            ).count().block()!!.toInt()
         )
         Assertions.assertEquals(
-            1, Flux.from(
-                s.queryByRangeIndex("1", "bar")
-            ).count().block().toInt()
+            1, Flux.from<DynamoDBEntity>(
+                s.queryByRangeIndex("1", "bar") as org.reactivestreams.Publisher<DynamoDBEntity>
+            ).count().block()!!.toInt()
         )
         Assertions.assertNull(
-            Flux.from(
-                s.queryByRangeIndex("1", "bar")
+            Flux.from<DynamoDBEntity>(
+                s.queryByRangeIndex("1", "bar") as org.reactivestreams.Publisher<DynamoDBEntity>
             ).blockFirst()!!.parentId
         )
         Assertions.assertEquals(
-            "bar", Flux.from(
-                s.queryByRangeIndex("1", "bar")
+            "bar", Flux.from<DynamoDBEntity>(
+                s.queryByRangeIndex("1", "bar") as org.reactivestreams.Publisher<DynamoDBEntity>
             ).blockFirst()?.rangeIndex
         )
         val byDates = s.queryByDates(
@@ -152,9 +152,9 @@ class DeclarativeServiceTest {
             )!!.size
         )
         Assertions.assertEquals(
-            2, Flux.from(
-                s.scanAllByRangeIndex("bar")
-            ).count().block().toInt()
+            2, Flux.from<DynamoDBEntity>(
+                s.scanAllByRangeIndex("bar") as org.reactivestreams.Publisher<DynamoDBEntity>
+            ).count().block()!!.toInt()
         )
         s.increment("1", "1")
         s.increment("1", "1")
