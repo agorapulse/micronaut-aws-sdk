@@ -20,6 +20,14 @@ plugins {
     id 'org.ajoberstar.git-publish' version "$gitPublishPluginVersion"
 }
 
+// gradle-git-publish 5.x no longer reads GRGIT_USER / GRGIT_PASS env vars
+// (or the org.ajoberstar.grgit.auth.* system properties). HTTPS push
+// credentials must be set on the gitPublish extension directly.
+gitPublish {
+    username = providers.environmentVariable('GIT_PUBLISH_USERNAME').orElse('')
+    password = providers.environmentVariable('GIT_PUBLISH_PASSWORD').orElse('')
+}
+
 configurations {
     asciidoctorExtensions
 }

@@ -21,5 +21,12 @@ jobs:
           owner: agorapulse
           repo: micronaut-aws-sdk
       - uses: gradle/actions/setup-gradle@v5
+      - name: Configure git identity for gitPublishCommit
+        run: |
+          git config --global user.name 'Agorapulse Bot'
+          git config --global user.email 'oss@agorapulse.com'
       - name: Publish GitHub Pages
-        run: ./gradlew gitPublishPush -x groovydoc -Pversion=${{ steps.latest_version.outputs.latest_tag }} -Prelease=true -Dorg.ajoberstar.grgit.auth.username=${{ secrets.AGORAPULSE_BOT_PERSONAL_TOKEN }}
+        env:
+          GIT_PUBLISH_USERNAME: agorapulse-bot
+          GIT_PUBLISH_PASSWORD: ${{ secrets.AGORAPULSE_BOT_PERSONAL_TOKEN }}
+        run: ./gradlew gitPublishPush -x groovydoc -Pversion=${{ steps.latest_version.outputs.latest_tag }} -Prelease=true
