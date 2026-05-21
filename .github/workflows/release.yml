@@ -23,12 +23,18 @@ jobs:
           fileName: 'secret.pgp'
           encodedString: ${{ secrets.SIGNING_SECRET_KEY_BASE64 }}
       - uses: gradle/actions/setup-gradle@v4
+      - name: Configure git identity for gitPublishCommit
+        run: |
+          git config --global user.name 'Agorapulse Bot'
+          git config --global user.email 'oss@agorapulse.com'
       - name: Release
         env:
           SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
           SIGNING_SECRET_KEY_PATH: ${{ steps.write_file.outputs.filePath }}
-        run: ./gradlew gitPublishPush publishAndReleaseToMavenCentral "-Pversion=${{ github.ref_name }}" -PmavenCentralUsername=${{ secrets.MAVEN_CENTRAL_USERNAME }} -PmavenCentralPassword=${{ secrets.MAVEN_CENTRAL_PASSWORD }} -Prelease=true "-Dorg.ajoberstar.grgit.auth.username=${{ secrets.AGORAPULSE_BOT_PERSONAL_TOKEN }}" --stacktrace
+          GIT_PUBLISH_USERNAME: agorapulse-bot
+          GIT_PUBLISH_PASSWORD: ${{ secrets.AGORAPULSE_BOT_PERSONAL_TOKEN }}
+        run: ./gradlew gitPublishPush publishAndReleaseToMavenCentral "-Pversion=${{ github.ref_name }}" -PmavenCentralUsername=${{ secrets.MAVEN_CENTRAL_USERNAME }} -PmavenCentralPassword=${{ secrets.MAVEN_CENTRAL_PASSWORD }} -Prelease=true --stacktrace
   ping:
     if: ${{ !github.event.release.prerelease }}
     name: Notify Upstream Repositories
