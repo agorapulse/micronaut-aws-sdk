@@ -43,11 +43,17 @@ buildscript {
 
 plugins {
     id 'com.agorapulse.gradle.settings'             version "$agorapulseGradlePluginsVersion"
-    id 'com.agorapulse.gradle.gradle-enterprise'    version "$agorapulseGradlePluginsVersion"
-    id 'com.agorapulse.gradle.remote-cache'         version "$agorapulseGradlePluginsVersion"
     id 'com.agorapulse.gradle.internal-version-catalog' version "$agorapulseGradlePluginsVersion"
+    id 'com.gradle.develocity'                      version "$develocityPluginVersion"
 }
 
+develocity {
+    buildScan {
+        termsOfUseUrl = 'https://gradle.com/terms-of-service'
+        termsOfUseAgree = 'yes'
+        publishing.onlyIf { true }
+    }
+}
 
 gradleProjects {
     directories = ['subprojects', 'examples', 'docs', 'benchmarks', 'platforms', 'kotlin-libs']
