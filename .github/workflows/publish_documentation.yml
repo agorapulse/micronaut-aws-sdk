@@ -10,10 +10,9 @@ jobs:
       GRADLE_OPTS: "-Xmx6g -Xms4g"
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
-          java-version: 17
+          java-version: 25
           distribution: zulu
       - name: Get Latest Release
         id: latest_version
@@ -21,6 +20,6 @@ jobs:
         with:
           owner: agorapulse
           repo: micronaut-aws-sdk
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v5
       - name: Publish GitHub Pages
         run: ./gradlew gitPublishPush -x groovydoc -Pversion=${{ steps.latest_version.outputs.latest_tag }} -Prelease=true -Dorg.ajoberstar.grgit.auth.username=${{ secrets.AGORAPULSE_BOT_PERSONAL_TOKEN }}

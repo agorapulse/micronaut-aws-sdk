@@ -33,6 +33,14 @@ allprojects {
 }
 
 subprojects {
+    plugins.withType(JavaPlugin) {
+        java {
+            toolchain {
+                languageVersion = JavaLanguageVersion.of(javaVersion as int)
+            }
+        }
+    }
+
     plugins.withId('com.agorapulse.gradle.micronaut-library') {
         micronaut {
             if (project.hasProperty('importMicronautPlatform')) {
@@ -104,11 +112,12 @@ configure(subprojects.findAll { it.projectDir.parentFile?.name in ['subprojects'
 
         testImplementation 'io.micronaut:micronaut-inject-groovy'
 
-        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-        testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+        testImplementation "org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion"
+        testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion"
 
         testImplementation 'io.micronaut.test:micronaut-test-junit5'
         testImplementation 'io.micronaut.test:micronaut-test-spock'
+        testImplementation "org.spockframework:spock-core:$spockVersion"
 
         testRuntimeOnly 'ch.qos.logback:logback-classic:1.2.3'
         testRuntimeOnly 'org.yaml:snakeyaml'

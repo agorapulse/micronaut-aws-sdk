@@ -21,6 +21,7 @@ dependencies {
     }
 
    api project(':micronaut-amazon-awssdk-core')
+    api 'jakarta.validation:jakarta.validation-api'
     implementation project(':micronaut-amazon-awssdk-cloudwatch')
     implementation project(':micronaut-amazon-awssdk-dynamodb')
     implementation project(':micronaut-amazon-awssdk-kinesis')

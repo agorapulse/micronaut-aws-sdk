@@ -11,10 +11,9 @@ jobs:
       GRADLE_OPTS: "-Xmx6g -Xms4g"
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
-          java-version: 17
+          java-version: 25
           distribution: zulu
       - name: Decode PGP
         id: write_file
@@ -22,7 +21,7 @@ jobs:
         with:
           fileName: 'secret.pgp'
           encodedString: ${{ secrets.SIGNING_SECRET_KEY_BASE64 }}
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v5
       - name: Release
         env:
           SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}

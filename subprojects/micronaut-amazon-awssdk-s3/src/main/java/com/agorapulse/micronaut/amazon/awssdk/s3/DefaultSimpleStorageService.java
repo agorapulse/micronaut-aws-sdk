@@ -35,6 +35,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequ
 import software.amazon.awssdk.utils.IoUtils;
 import software.amazon.awssdk.utils.Md5Utils;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -192,7 +193,7 @@ public class DefaultSimpleStorageService implements SimpleStorageService {
     @Override
     public String storeMultipartFile(String bucketName, String path, PartData partData, Consumer<PutObjectRequest.Builder> additionalConfig) throws IOException {
         byte[] bytes = partData.getBytes();
-        return storeInputStream(bucketName, path, partData.getInputStream(), b -> {
+        return storeInputStream(bucketName, path, new ByteArrayInputStream(bytes), b -> {
             b.contentLength(Integer.valueOf(bytes.length).longValue());
             b.contentMD5(Md5Utils.md5AsBase64(bytes));
             partData.getContentType().ifPresent(t -> b.contentType(t.getName()));

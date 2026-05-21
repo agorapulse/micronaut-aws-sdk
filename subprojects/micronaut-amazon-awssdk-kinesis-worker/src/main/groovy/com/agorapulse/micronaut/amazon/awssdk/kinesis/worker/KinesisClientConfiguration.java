@@ -24,9 +24,9 @@ import software.amazon.awssdk.services.kinesis.KinesisAsyncClient;
 import software.amazon.kinesis.common.ConfigsBuilder;
 import software.amazon.kinesis.processor.ShardRecordProcessorFactory;
 
-import io.micronaut.core.annotation.NonNull;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
+import org.jspecify.annotations.NonNull;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
 import java.net.URI;
 import java.util.Optional;
 

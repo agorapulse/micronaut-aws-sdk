@@ -24,7 +24,7 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.DetachedUpdate;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.QueryBuilder;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ScanBuilder;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.UpdateBuilder;
-import io.micronaut.core.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
