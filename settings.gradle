@@ -22,6 +22,7 @@ pluginManagement {
         mavenCentral()
     }
     plugins {
+        id 'com.agorapulse.gradle.root-project'                version "${agorapulseGradlePluginsVersion}"
         id 'com.agorapulse.gradle.micronaut-library'           version "${agorapulseGradlePluginsVersion}"
         id 'com.agorapulse.gradle.groovy-common-configuration' version "${agorapulseGradlePluginsVersion}"
         id 'com.agorapulse.gradle.guide'                       version "${agorapulseGradlePluginsVersion}"

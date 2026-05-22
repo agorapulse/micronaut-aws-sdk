@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 plugins {
-    id 'lifecycle-base'
+    id 'com.agorapulse.gradle.root-project'
 }
 
 if (!project.hasProperty('mavenCentralUsername'))       ext.mavenCentralUsername       = System.getenv('MAVEN_CENTRAL_USERNAME') ?: '**UNDEFINED**'
@@ -32,114 +32,114 @@ allprojects {
     }
 }
 
-subprojects {
-    plugins.withType(JavaPlugin) {
-        java {
-            toolchain {
-                languageVersion = JavaLanguageVersion.of(javaVersion as int)
-            }
-        }
-    }
-
-    plugins.withId('com.agorapulse.gradle.micronaut-library') {
-        micronaut {
-            if (project.hasProperty('importMicronautPlatform')) {
-                importMicronautPlatform = true
-            }
-            testRuntime 'spock'
-            processing {
-                incremental false
-            }
-        }
-    }
-}
-
-configure(subprojects.findAll { it.projectDir.parentFile?.name in ['subprojects', 'platforms', 'kotlin-libs'] }) { Project sub ->
-    sub.mavenPublishing {
-        publishToMavenCentral(true)
-        signAllPublications()
-
-        pom {
-            name = sub.name
-            description = 'Micronaut AWS SDK'
-            inceptionYear = '2018'
-            url = "https://github.com/${rootProject.slug}"
-            licenses {
-                license {
-                    name = 'The Apache Software License, Version 2.0'
-                    url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
-                    distribution = 'repo'
+gradleProjects {
+    subprojects {
+        dirs(['subprojects', 'kotlin-libs', 'benchmarks']) {
+            java {
+                toolchain {
+                    languageVersion = JavaLanguageVersion.of(javaVersion as int)
                 }
             }
-            developers {
-                developer {
-                    id = 'musketyr'
-                    name = 'Vladimir Orany'
-                    url = 'https://github.com/musketyr/'
+
+            micronaut {
+                if (project.hasProperty('importMicronautPlatform')) {
+                    importMicronautPlatform = true
+                }
+                testRuntime 'spock'
+                processing {
+                    incremental false
                 }
             }
-            scm {
-                url = "https://github.com/${rootProject.slug}"
-                connection = "scm:git:https://github.com/${rootProject.slug}.git"
-                developerConnection = "scm:git:git@github.com:${rootProject.slug}.git"
+        }
+
+        dirs(['subprojects', 'platforms', 'kotlin-libs']) {
+            mavenPublishing {
+                publishToMavenCentral(true)
+                signAllPublications()
+
+                pom {
+                    name = project.name
+                    description = 'Micronaut AWS SDK'
+                    inceptionYear = '2018'
+                    url = "https://github.com/${rootProject.slug}"
+                    licenses {
+                        license {
+                            name = 'The Apache Software License, Version 2.0'
+                            url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                            distribution = 'repo'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'musketyr'
+                            name = 'Vladimir Orany'
+                            url = 'https://github.com/musketyr/'
+                        }
+                    }
+                    scm {
+                        url = "https://github.com/${rootProject.slug}"
+                        connection = "scm:git:https://github.com/${rootProject.slug}.git"
+                        developerConnection = "scm:git:git@github.com:${rootProject.slug}.git"
+                    }
+                    issueManagement {
+                        system = 'GitHub'
+                        url = "https://github.com/${rootProject.slug}/issues"
+                    }
+                }
             }
-            issueManagement {
-                system = 'GitHub'
-                url = "https://github.com/${rootProject.slug}/issues"
+
+            signing {
+                useInMemoryPgpKeys(rootProject.ext.signingInMemoryKey, rootProject.ext.signingInMemoryKeyPassword)
+                sign publishing.publications
             }
         }
+
+        dirs(['subprojects', 'benchmarks']) {
+            dependencies {
+                api platform(project(':micronaut-aws-sdk-dependencies'))
+
+                compileOnly "org.apache.groovy:groovy:$groovyVersion"
+                compileOnly 'io.micronaut.aws:micronaut-aws-sdk-v2'
+                testImplementation "org.apache.groovy:groovy:$groovyVersion"
+                testImplementation 'io.micronaut.aws:micronaut-aws-sdk-v2'
+
+                implementation 'io.micronaut:micronaut-inject'
+                implementation 'io.micronaut:micronaut-runtime'
+
+                testAnnotationProcessor 'io.micronaut:micronaut-inject-java'
+
+                testImplementation 'io.micronaut:micronaut-inject-groovy'
+
+                testImplementation "org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion"
+                testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion"
+
+                testImplementation 'io.micronaut.test:micronaut-test-junit5'
+                testImplementation 'io.micronaut.test:micronaut-test-spock'
+                testImplementation "org.spockframework:spock-core:$spockVersion"
+
+                testRuntimeOnly 'ch.qos.logback:logback-classic:1.2.3'
+                testRuntimeOnly 'org.yaml:snakeyaml'
+            }
+
+            compileJava.options.compilerArgs += '-parameters'
+            compileTestJava.options.compilerArgs += '-parameters'
+
+            test {
+                useJUnitPlatform()
+                environment 'AWS_CBOR_DISABLE', 'true'
+                systemProperty 'TEST_RESOURCES_FOLDER', new File(projectDir, 'src/test/resources').canonicalPath
+                systemProperty 'user.timezone', 'UTC'
+                systemProperty 'user.language', 'en'
+            }
+
+            tasks.register('cleanOut', Delete) {
+                delete file('out')
+            }
+            clean.dependsOn cleanOut
+        }
+
+        dirs(['subprojects', 'kotlin-libs']) {
+            rootProject.project(':micronaut-aws-sdk-bom').dependencies.constraints.api project
+        }
     }
-
-    sub.signing {
-        useInMemoryPgpKeys(rootProject.ext.signingInMemoryKey, rootProject.ext.signingInMemoryKeyPassword)
-        sign publishing.publications
-    }
-}
-
-configure(subprojects.findAll { it.projectDir.parentFile?.name in ['subprojects', 'benchmarks'] }) { Project subproject ->
-    dependencies {
-        api platform(project(':micronaut-aws-sdk-dependencies'))
-
-        compileOnly "org.apache.groovy:groovy:$groovyVersion"
-        compileOnly 'io.micronaut.aws:micronaut-aws-sdk-v2'
-        testImplementation "org.apache.groovy:groovy:$groovyVersion"
-        testImplementation 'io.micronaut.aws:micronaut-aws-sdk-v2'
-
-        implementation 'io.micronaut:micronaut-inject'
-        implementation 'io.micronaut:micronaut-runtime'
-
-        testAnnotationProcessor 'io.micronaut:micronaut-inject-java'
-
-        testImplementation 'io.micronaut:micronaut-inject-groovy'
-
-        testImplementation "org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion"
-        testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion"
-
-        testImplementation 'io.micronaut.test:micronaut-test-junit5'
-        testImplementation 'io.micronaut.test:micronaut-test-spock'
-        testImplementation "org.spockframework:spock-core:$spockVersion"
-
-        testRuntimeOnly 'ch.qos.logback:logback-classic:1.2.3'
-        testRuntimeOnly 'org.yaml:snakeyaml'
-    }
-
-    compileJava.options.compilerArgs += '-parameters'
-    compileTestJava.options.compilerArgs += '-parameters'
-
-    test {
-        useJUnitPlatform()
-        environment 'AWS_CBOR_DISABLE', 'true'
-        systemProperty 'TEST_RESOURCES_FOLDER', new File(subproject.projectDir, 'src/test/resources').canonicalPath
-        systemProperty 'user.timezone', 'UTC'
-        systemProperty 'user.language', 'en'
-    }
-
-    tasks.register('cleanOut', Delete) {
-        delete file('out')
-    }
-    clean.dependsOn cleanOut
-}
-
-configure(subprojects.findAll { it.projectDir.parentFile?.name in ['subprojects', 'kotlin-libs'] }) { Project subproject ->
-    project(':micronaut-aws-sdk-bom').dependencies.constraints.api subproject
 }
