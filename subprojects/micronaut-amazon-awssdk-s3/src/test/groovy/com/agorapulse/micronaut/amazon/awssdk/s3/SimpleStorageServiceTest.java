@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Property(name = "aws.s3.bucket", value = SimpleStorageServiceTest.MY_BUCKET)           // <2>
 public class SimpleStorageServiceTest {
     // end::header[]
-    public static final String MY_BUCKET = "testbucket";
+    public static final String MY_BUCKET = "java-testbucket";
 
     private static final String KEY = "foo/bar.baz";
     private static final String SAMPLE_CONTENT = "hello world!";

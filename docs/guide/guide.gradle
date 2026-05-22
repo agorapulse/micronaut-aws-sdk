@@ -15,27 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath("org.ajoberstar.grgit:grgit-core:$grgitVersion")
-    }
-}
 plugins {
-    id 'org.kordamp.gradle.guide'
-    id 'org.ajoberstar.git-publish'
+    id 'com.agorapulse.gradle.guide'
 }
 
-config {
-    docs {
-        guide {
-            publish {
-                enabled = true
-            }
-        }
-    }
+// gradle-git-publish 5.x no longer reads GRGIT_USER / GRGIT_PASS env vars
+// (or the org.ajoberstar.grgit.auth.* system properties). HTTPS push
+// credentials must be set on the gitPublish extension directly.
+gitPublish {
+    username = providers.environmentVariable('GIT_PUBLISH_USERNAME').orElse('')
+    password = providers.environmentVariable('GIT_PUBLISH_PASSWORD').orElse('')
 }
 
 configurations {
@@ -57,5 +46,4 @@ asciidoctor {
         'root-dir': rootDir,
         'project-slug': slug
     ]
-
 }

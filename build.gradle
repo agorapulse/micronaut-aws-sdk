@@ -16,148 +16,74 @@
  * limitations under the License.
  */
 plugins {
-    id 'org.kordamp.gradle.groovy-project'
-    id 'org.kordamp.gradle.checkstyle'
-    id 'org.kordamp.gradle.codenarc'
-    id 'org.kordamp.gradle.coveralls'
+    id 'com.agorapulse.gradle.root-project'
 }
 
-if (!project.hasProperty('mavenCentralUsername'))       ext.mavenCentralUsername            = System.getenv('MAVEN_CENTRAL_USERNAME') ?: '**UNDEFINED**'
-if (!project.hasProperty('mavenCentralPassword'))       ext.mavenCentralPassword            = System.getenv('MAVEN_CENTRAL_PASSWORD') ?: '**UNDEFINED**'
-if (!project.hasProperty('signingInMemoryKeyId'))       ext.signingInMemoryKeyId            = System.getenv('SIGNING_KEY_ID') ?: '**UNDEFINED**'
-if (!project.hasProperty('signingInMemoryKeyPassword')) ext.signingInMemoryKeyPassword      = System.getenv('SIGNING_PASSWORD') ?: '**UNDEFINED**'
-if (!project.hasProperty('signingInMemoryKey'))         ext.signingInMemoryKey              = System.getenv('SIGNING_SECRET_KEY_PATH') ? rootProject.file(System.getenv('SIGNING_SECRET_KEY_PATH')).text : '**UNDEFINED**'
-
-
-config {
-    release = (rootProject.findProperty('release') ?: false).toBoolean()
-
-    info {
-        name        = 'Micronaut Libraries'
-        vendor      = 'Agorapulse'
-        description = 'Set of useful libraries for Micronaut'
-
-        links {
-            website      = "https://github.com/${slug}"
-            issueTracker = "https://github.com/${slug}/issues"
-            scm          = "https://github.com/${slug}.git"
-        }
-
-        people {
-            person {
-                id    = 'musketyr'
-                name  = 'Vladimir Orany'
-                roles = ['developer']
-            }
-        }
-
-        repositories {
-            repository {
-                name = 'localRelease'
-                url  = "${project.rootProject.buildDir}/repos/local/release"
-            }
-            repository {
-                name = 'localSnapshot'
-                url  = "${project.rootProject.buildDir}/repos/local/snapshot"
-            }
-        }
-    }
-
-    licensing {
-        licenses {
-            license {
-                id = 'Apache-2.0'
-            }
-        }
-    }
-
-    publishing {
-        enabled = false
-        signing {
-            enabled = false
-        }
-    }
-
-    artifacts {
-        source {
-            enabled = false
-        }
-    }
-
-    quality {
-        checkstyle {
-            toolVersion = '8.27'
-        }
-
-        codenarc {
-            toolVersion = '1.5'
-        }
-    }
-
-    docs {
-        javadoc {
-            enabled = false
-            autoLinks {
-                enabled = false
-            }
-            aggregate {
-                enabled = false
-            }
-        }
-        groovydoc {
-            enabled = false
-            aggregate {
-                enabled = false
-            }
-        }
-    }
-
-}
-
+if (!project.hasProperty('mavenCentralUsername'))       ext.mavenCentralUsername       = System.getenv('MAVEN_CENTRAL_USERNAME') ?: '**UNDEFINED**'
+if (!project.hasProperty('mavenCentralPassword'))       ext.mavenCentralPassword       = System.getenv('MAVEN_CENTRAL_PASSWORD') ?: '**UNDEFINED**'
+if (!project.hasProperty('signingInMemoryKeyId'))       ext.signingInMemoryKeyId       = System.getenv('SIGNING_KEY_ID') ?: '**UNDEFINED**'
+if (!project.hasProperty('signingInMemoryKeyPassword')) ext.signingInMemoryKeyPassword = System.getenv('SIGNING_PASSWORD') ?: '**UNDEFINED**'
+if (!project.hasProperty('signingInMemoryKey'))         ext.signingInMemoryKey         = System.getenv('SIGNING_SECRET_KEY_PATH') ? rootProject.file(System.getenv('SIGNING_SECRET_KEY_PATH')).text : '**UNDEFINED**'
 
 allprojects {
     repositories {
         mavenCentral()
         maven { url 'https://repo.spring.io/release' }
     }
-
-    license {
-        exclude '**/*.json'
-        exclude '***.yml'
-        exclude 'logback.xml'
-    }
 }
 
 gradleProjects {
     subprojects {
-        dirs(['subprojects', 'platforms']) {
+        dirs(['subprojects', 'kotlin-libs', 'benchmarks']) {
+            java {
+                toolchain {
+                    languageVersion = JavaLanguageVersion.of(javaVersion as int)
+                }
+            }
+
+            micronaut {
+                if (project.hasProperty('importMicronautPlatform')) {
+                    importMicronautPlatform = true
+                }
+                testRuntime 'spock'
+                processing {
+                    incremental false
+                }
+            }
+        }
+
+        dirs(['subprojects', 'platforms', 'kotlin-libs']) {
             mavenPublishing {
                 publishToMavenCentral(true)
                 signAllPublications()
 
                 pom {
-                    name = "Micronaut AWS SDK"
-                    description = 'Set of useful libraries for Micronaut'
-                    inceptionYear = "2018"
-                    url = "https://github.com/${slug}"
+                    name = project.name
+                    description = 'Micronaut AWS SDK'
+                    inceptionYear = '2018'
+                    url = "https://github.com/${rootProject.slug}"
                     licenses {
                         license {
-                            name = "The Apache License, Version 2.0"
-                            url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
-                            distribution = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                            name = 'The Apache Software License, Version 2.0'
+                            url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                            distribution = 'repo'
                         }
                     }
                     developers {
                         developer {
-                            id = "musketyr"
-                            name = "Vladimir Orany"
-                            url = "https://github.com/musketyr/"
+                            id = 'musketyr'
+                            name = 'Vladimir Orany'
+                            url = 'https://github.com/musketyr/'
                         }
                     }
                     scm {
-                        url = "https://github.com/${slug}.git"
-                        connection = "scm:git:git://github.com/${slug}.git"
-                        developerConnection = "scm:git:ssh://git@github.com/${slug}.git"
+                        url = "https://github.com/${rootProject.slug}"
+                        connection = "scm:git:https://github.com/${rootProject.slug}.git"
+                        developerConnection = "scm:git:git@github.com:${rootProject.slug}.git"
+                    }
+                    issueManagement {
+                        system = 'GitHub'
+                        url = "https://github.com/${rootProject.slug}/issues"
                     }
                 }
             }
@@ -168,19 +94,7 @@ gradleProjects {
             }
         }
 
-        dirs(['subprojects', 'benchmarks']) { Project subproject ->
-            micronaut {
-                if (it.hasProperty('importMicronautPlatform')) {
-                    importMicronautPlatform = true
-                } else {
-                    project.logger.lifecycle "No importMicronautPlatform property found for ${micronaut.dump()}"
-                }
-                testRuntime 'spock'
-                processing {
-                    incremental false
-                }
-            }
-
+        dirs(['subprojects', 'benchmarks']) {
             dependencies {
                 api platform(project(':micronaut-aws-sdk-dependencies'))
 
@@ -192,17 +106,16 @@ gradleProjects {
                 implementation 'io.micronaut:micronaut-inject'
                 implementation 'io.micronaut:micronaut-runtime'
 
-
                 testAnnotationProcessor 'io.micronaut:micronaut-inject-java'
 
                 testImplementation 'io.micronaut:micronaut-inject-groovy'
 
-                testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-                testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
-
+                testImplementation "org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion"
+                testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion"
 
                 testImplementation 'io.micronaut.test:micronaut-test-junit5'
                 testImplementation 'io.micronaut.test:micronaut-test-spock'
+                testImplementation "org.spockframework:spock-core:$spockVersion"
 
                 testRuntimeOnly 'ch.qos.logback:logback-classic:1.2.3'
                 testRuntimeOnly 'org.yaml:snakeyaml'
@@ -214,22 +127,19 @@ gradleProjects {
             test {
                 useJUnitPlatform()
                 environment 'AWS_CBOR_DISABLE', 'true'
-                systemProperty 'TEST_RESOURCES_FOLDER', new File(subproject.projectDir, 'src/test/resources').canonicalPath
+                systemProperty 'TEST_RESOURCES_FOLDER', new File(projectDir, 'src/test/resources').canonicalPath
                 systemProperty 'user.timezone', 'UTC'
                 systemProperty 'user.language', 'en'
             }
 
-            task cleanOut(type: Delete) {
+            tasks.register('cleanOut', Delete) {
                 delete file('out')
             }
-
             clean.dependsOn cleanOut
         }
 
-        dirs(['subprojects', 'kotlin-libs']) { Project subproject ->
-            project(':micronaut-aws-sdk-bom').dependencies.constraints.api subproject
+        dirs(['subprojects', 'kotlin-libs']) {
+            rootProject.project(':micronaut-aws-sdk-bom').dependencies.constraints.api project
         }
     }
 }
-
-check.dependsOn('aggregateCheckstyle', 'aggregateCodenarc', 'aggregateAllTestReports', 'coveralls')

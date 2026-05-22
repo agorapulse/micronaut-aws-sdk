@@ -20,7 +20,7 @@ dependencies {
 
    api project(':micronaut-amazon-awssdk-core')
     implementation "space.jasan:groovy-closure-support:$closureSupportVersion"
-    implementation 'javax.mail:mail:1.4.4'
+    implementation 'org.eclipse.angus:jakarta.mail:2.0.3'
 
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation project(':micronaut-amazon-awssdk-integration-testing')

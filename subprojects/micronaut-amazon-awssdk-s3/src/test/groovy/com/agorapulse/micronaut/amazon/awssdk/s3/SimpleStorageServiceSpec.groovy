@@ -125,7 +125,7 @@ class SimpleStorageServiceSpec extends Specification {
 
     void 'upload multipart'() {
         when:
-            service.storeMultipartFile('mix/multi', new MockPartData('Hello')) {
+            service.storeMultipartFile('mix/multi', MockPartData.of('Hello')) {
                 acl ObjectCannedACL.PUBLIC_READ
             }
             S3Object object = blocking(service.listObjectSummaries('mix'))
@@ -136,7 +136,7 @@ class SimpleStorageServiceSpec extends Specification {
 
     void 'upload multipart - other'() {
         when:
-            service.storeMultipartFile(OTHER_BUCKET, 'mix/multi', new MockPartData('Hello')) {
+            service.storeMultipartFile(OTHER_BUCKET, 'mix/multi', MockPartData.of('Hello')) {
                 acl ObjectCannedACL.PUBLIC_READ
             }
             S3Object object = blocking(service.listObjectSummaries(OTHER_BUCKET, 'mix'))
@@ -150,7 +150,7 @@ class SimpleStorageServiceSpec extends Specification {
         when:
             String newKey = 'mix/moved-' + desiredAcl
             String oldKey = 'mix/to-be-moved-' + desiredAcl
-            service.storeMultipartFile(oldKey, new MockPartData('Public')) {
+            service.storeMultipartFile(oldKey, MockPartData.of('Public')) {
                 acl desiredAcl
                 tagging(Tagging.builder().tagSet(Tag.builder().key('foo').value('bar').build()).build())
                 contentDisposition 'attachment'
@@ -277,7 +277,7 @@ class SimpleStorageServiceSpec extends Specification {
         expect:
             !service.exists(MY_BUCKET, KEY)
             !service.storeInputStream(KEY, new ByteArrayInputStream('Hello'.bytes))
-            !service.storeMultipartFile(KEY, new MockPartData('Foo'))
+            !service.storeMultipartFile(KEY, MockPartData.of('Foo'))
     }
 
     private static <T> T blocking(Publisher<T> publisher) {

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 plugins {
-    id "me.champeau.jmh" version "0.6.6"
+    id 'me.champeau.jmh' version '0.7.3'
 }
 
 dependencies {

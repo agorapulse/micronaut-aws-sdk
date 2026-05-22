@@ -17,8 +17,8 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.kinesis.worker;
 
-import io.micronaut.core.annotation.NonNull;
-import io.micronaut.core.annotation.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Event published after processing a batch of Kinesis records.

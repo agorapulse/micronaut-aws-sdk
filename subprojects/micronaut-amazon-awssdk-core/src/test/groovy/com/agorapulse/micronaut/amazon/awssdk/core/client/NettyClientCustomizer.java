@@ -19,7 +19,7 @@ package com.agorapulse.micronaut.amazon.awssdk.core.client;
 
 import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.context.event.BeanCreatedEventListener;
-import io.micronaut.core.annotation.NonNull;
+import org.jspecify.annotations.NonNull;
 import jakarta.inject.Singleton;
 import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient;
 

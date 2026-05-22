@@ -17,7 +17,7 @@
  */
 package com.agorapulse.micronaut.amazon.awssdk.ses;
 
-import io.micronaut.core.annotation.NonNull;
+import org.jspecify.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;

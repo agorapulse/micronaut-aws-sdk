@@ -178,7 +178,7 @@ public class KinesisListenerMethodProcessor implements ExecutableMethodProcessor
     }
 
     @Override
-    public void process(BeanDefinition<?> beanDefinition, ExecutableMethod<?, ?> method) {
+    public <B> void process(BeanDefinition<B> beanDefinition, ExecutableMethod<B, ?> method) {
         Argument[] arguments = method.getArguments();
 
         if (arguments.length > 2) {

@@ -28,7 +28,7 @@ import com.agorapulse.micronaut.amazon.awssdk.dynamodb.events.DynamoDbEvent;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.exception.FailedBatchRequestException;
 import io.micronaut.context.event.ApplicationEventPublisher;
 import io.micronaut.core.annotation.AnnotationValue;
-import io.micronaut.core.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import io.micronaut.core.beans.BeanIntrospection;
 import io.micronaut.core.beans.BeanProperty;
 import org.reactivestreams.Publisher;

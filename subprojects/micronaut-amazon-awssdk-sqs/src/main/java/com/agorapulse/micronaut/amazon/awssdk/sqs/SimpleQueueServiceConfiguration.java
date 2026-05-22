@@ -19,7 +19,7 @@ package com.agorapulse.micronaut.amazon.awssdk.sqs;
 
 import com.agorapulse.micronaut.amazon.awssdk.core.RegionAndEndpointConfiguration;
 
-import io.micronaut.core.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Default configuration for Simple Queue Service.
