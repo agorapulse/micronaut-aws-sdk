@@ -27,16 +27,7 @@ gitPublish {
     password = providers.environmentVariable('GIT_PUBLISH_PASSWORD').orElse('')
 }
 
-configurations {
-    asciidoctorExtensions
-}
-
-dependencies {
-    asciidoctorExtensions 'com.bmuschko:asciidoctorj-tabbed-code-extension:0.3'
-}
-
 asciidoctor {
-    configurations 'asciidoctorExtensions'
     baseDirFollowsSourceDir()
 
     attributes = [
