@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.18">
-<meta name="author" content="{project-author}">
-<title>{project-title}</title>
+<meta name="author" content="Agorapulse">
+<title>Micronaut AWS SDK</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -437,7 +437,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
-<link rel="stylesheet" href="css/docs.css?v={project-version}" />
+<link rel="stylesheet" href="css/docs.css?v=5.0.1" />
 <style>
 .hidden {
     display: none;
@@ -517,10 +517,10 @@ $(addBlockSwitches);
 </head>
 <body class="article">
 <div id="header">
-<h1>{project-title}</h1>
+<h1>Micronaut AWS SDK</h1>
 <div class="details">
-<span id="author" class="author">{project-author}</span><br>
-<span id="revnumber">version {project-version}</span>
+<span id="author" class="author">Agorapulse</span><br>
+<span id="revnumber">version 5.0.1</span>
 </div>
 </div>
 <div id="content">
@@ -693,7 +693,7 @@ functions.</p>
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-cloudwatchlogs:{project-version}'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-cloudwatchlogs:5.0.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -702,7 +702,7 @@ functions.</p>
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-cloudwatchlogs&lt;/artifactId&gt;
-    &lt;version&gt;{project-version}&lt;/version&gt;
+    &lt;version&gt;5.0.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -760,7 +760,7 @@ public class LogCheckService {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:{project-version}'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:5.0.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -769,7 +769,7 @@ public class LogCheckService {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-integration-testing&lt;/artifactId&gt;
-    &lt;version&gt;{project-version}&lt;/version&gt;
+    &lt;version&gt;5.0.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -802,11 +802,11 @@ public class LogCheckService {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-dynamodb-annotation-processor:{project-version}'
-implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb:{project-version}'
+<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-dynamodb-annotation-processor:5.0.1'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb:5.0.1'
 
 // for Kotlin Query DSL
-implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb-kotlin:{project-version}'</code></pre>
+implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb-kotlin:5.0.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -815,13 +815,13 @@ implementation 'com.agorapulse:micronaut-amazon-awssdk-dynamodb-kotlin:{project-
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;{project-version}&lt;/version&gt;
+    &lt;version&gt;5.0.1&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;!-- for Kotlin Query DSL --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;{project-version}&lt;/version&gt;
+    &lt;version&gt;5.0.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2430,7 +2430,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:{project-version}'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:5.0.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2439,7 +2439,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;{project-version}&lt;/version&gt;
+    &lt;version&gt;5.0.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2712,11 +2712,11 @@ class DynamoDbLoaderTest {
 <div class="title">Gradle</div>
 <div class="content">
 <pre class="prettyprint highlight"><code>// for Kinesis client
-annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-kinesis-annotation-processor:{project-version}'
-implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis:{project-version}'
+annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-kinesis-annotation-processor:5.0.1'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis:5.0.1'
 
 // for Kinesis listener
-implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:{project-version}'</code></pre>
+implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:5.0.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -2726,13 +2726,13 @@ implementation 'com.agorapulse:micronaut-amazon-awssdk-kinesis-worker:{project-v
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-kinesis&lt;/artifactId&gt;
-    &lt;version&gt;{project-version}&lt;/version&gt;
+    &lt;version&gt;5.0.1&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;!-- for Kinesis listener --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-kinesis-worker&lt;/artifactId&gt;
-    &lt;version&gt;{project-version}&lt;/version&gt;
+    &lt;version&gt;5.0.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3122,7 +3122,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:{project-version}'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:5.0.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3131,7 +3131,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;{project-version}&lt;/version&gt;
+    &lt;version&gt;5.0.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3233,7 +3233,7 @@ public class KinesisJavaDemoTest {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-lambda:{project-version}'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-lambda:5.0.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3242,7 +3242,7 @@ public class KinesisJavaDemoTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-lambda&lt;/artifactId&gt;
-    &lt;version&gt;{project-version}&lt;/version&gt;
+    &lt;version&gt;5.0.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3347,7 +3347,7 @@ public interface HelloBodyClient {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:{project-version}'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:5.0.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3356,7 +3356,7 @@ public interface HelloBodyClient {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;{project-version}&lt;/version&gt;
+    &lt;version&gt;5.0.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3541,7 +3541,7 @@ public class HelloClientTest {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-lambda-integration-testing:{project-version}'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-lambda-integration-testing:5.0.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3550,7 +3550,7 @@ public class HelloClientTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-lambda-integration-testing&lt;/artifactId&gt;
-    &lt;version&gt;{project-version}&lt;/version&gt;
+    &lt;version&gt;5.0.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3750,7 +3750,7 @@ public class TestAwsLambdaRuntimeTest {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-s3:{project-version}'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-s3:5.0.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3759,7 +3759,7 @@ public class TestAwsLambdaRuntimeTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-s3&lt;/artifactId&gt;
-    &lt;version&gt;{project-version}&lt;/version&gt;
+    &lt;version&gt;5.0.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -3972,7 +3972,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:{project-version}'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:5.0.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -3981,7 +3981,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;{project-version}&lt;/version&gt;
+    &lt;version&gt;5.0.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4085,7 +4085,7 @@ public class SimpleStorageServiceTest {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-ses:{project-version}'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-ses:5.0.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4094,7 +4094,7 @@ public class SimpleStorageServiceTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-ses&lt;/artifactId&gt;
-    &lt;version&gt;{project-version}&lt;/version&gt;
+    &lt;version&gt;5.0.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4281,8 +4281,8 @@ Use <code>aws.ses.use-base64-encoding-for-multipart-emails</code> to enable base
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-sns-annotation-processor:{project-version}'
-implementation 'com.agorapulse:micronaut-amazon-awssdk-sns:{project-version}'</code></pre>
+<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-sns-annotation-processor:5.0.1'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-sns:5.0.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4291,7 +4291,7 @@ implementation 'com.agorapulse:micronaut-amazon-awssdk-sns:{project-version}'</c
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-sns&lt;/artifactId&gt;
-    &lt;version&gt;{project-version}&lt;/version&gt;
+    &lt;version&gt;5.0.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4619,7 +4619,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:{project-version}'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:5.0.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4628,7 +4628,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;{project-version}&lt;/version&gt;
+    &lt;version&gt;5.0.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -4747,8 +4747,8 @@ public class SimpleNotificationServiceTest {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-sqs-annotation-processor:{project-version}'
-implementation 'com.agorapulse:micronaut-amazon-awssdk-sqs:{project-version}'</code></pre>
+<pre class="prettyprint highlight"><code>annotationProcessor 'com.agorapulse:micronaut-amazon-awssdk-sqs-annotation-processor:5.0.1'
+implementation 'com.agorapulse:micronaut-amazon-awssdk-sqs:5.0.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -4757,7 +4757,7 @@ implementation 'com.agorapulse:micronaut-amazon-awssdk-sqs:{project-version}'</c
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-sqs&lt;/artifactId&gt;
-    &lt;version&gt;{project-version}&lt;/version&gt;
+    &lt;version&gt;5.0.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -5105,7 +5105,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:{project-version}'</code></pre>
+<pre class="prettyprint highlight"><code>testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:5.0.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -5114,7 +5114,7 @@ DynamoDB integration works well with <a href="https://www.testcontainers.org/">T
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-dynamodb&lt;/artifactId&gt;
-    &lt;version&gt;{project-version}&lt;/version&gt;
+    &lt;version&gt;5.0.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -5221,7 +5221,7 @@ public class SimpleQueueServiceTest {
 <div class="listingblock primary">
 <div class="title">Gradle</div>
 <div class="content">
-<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-sts:{project-version}'</code></pre>
+<pre class="prettyprint highlight"><code>implementation 'com.agorapulse:micronaut-amazon-awssdk-sts:5.0.1'</code></pre>
 </div>
 </div>
 <div class="listingblock secondary">
@@ -5230,7 +5230,7 @@ public class SimpleQueueServiceTest {
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;com.agorapulse&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-amazon-awssdk-sts&lt;/artifactId&gt;
-    &lt;version&gt;{project-version}&lt;/version&gt;
+    &lt;version&gt;5.0.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -5388,8 +5388,8 @@ public class NettyClientCustomizer implements BeanCreatedEventListener&lt;NettyN
 </div>
 <div id="footer">
 <div id="footer-text">
-Version {project-version}<br>
-Last updated 2026-07-27 09:05:05 UTC
+Version 5.0.1<br>
+Last updated 2026-07-28 09:21:34 UTC
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/run_prettify.min.js"></script>
