@@ -38,6 +38,14 @@ dependencies {
     testImplementation "software.amazon.awssdk:apache-client:$project.awsSdk2Version"
 }
 
+configurations.named('testRuntimeClasspath') {
+    // Micronaut AWS 5.1.0 pulls the AWS SDK v2 BOM (2.48.3), which newly adds
+    // apache5-client. Its SdkHttpClient.Builder bean collides with aws-crt-client's
+    // under the same map key, breaking map-of-beans injection; exclude it so the
+    // explicitly tested http clients inject cleanly.
+    exclude group: 'software.amazon.awssdk', module: 'apache5-client'
+}
+
 if (project.findProperty('test.aws.dynamodb.v2') == 'async') {
     tasks.withType(Test).configureEach {
         systemProperty 'aws.dynamodb.async', 'true'
