@@ -35,6 +35,9 @@ asciidoctor {
         'aws-sdk-version': awsSdk2Version,
         'source-highlighter': 'prettify',
         'root-dir': rootDir,
-        'project-slug': slug
+        'project-slug': slug,
+        'project-title': 'Micronaut AWS SDK',
+        'project-version': project.version,
+        'project-author': 'Agorapulse'
     ]
 }
