@@ -224,6 +224,11 @@ public class QueryArguments {
         };
     }
 
+    /**
+     * Build the scan definition for a partition-less finder from its annotations: index, consistency, filters and
+     * pagination ({@code @Limit}, {@code @Page}, {@code @LastEvaluatedKey}). A sort key and descending order are not
+     * applied because a scan cannot honour them.
+     */
     public <T> Consumer<ScanBuilder<T>> generateScan(MethodInvocationContext<Object, Object> context, ConversionService conversionService) {
         return s -> {
             if (index != null) {
