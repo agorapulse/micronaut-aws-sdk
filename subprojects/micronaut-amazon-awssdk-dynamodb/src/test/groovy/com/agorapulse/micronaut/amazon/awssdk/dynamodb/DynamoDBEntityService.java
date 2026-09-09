@@ -300,6 +300,22 @@ public interface DynamoDBEntityService {
 
     int countAllByNumber(@PartitionKey String parentId, Integer number);
 
+    List<DynamoDBEntity> scanAll();
+
+    List<DynamoDBEntity> scanAllByNumberGreaterThan(
+        @Filter(value = Filter.Operator.GT, name = "number") int number
+    );
+
+    List<DynamoDBEntity> scanAllByNumberGreaterThan(
+        @Filter(value = Filter.Operator.GT, name = "number") int number,
+        @LastEvaluatedKey DynamoDBEntity lastEvaluatedKey,
+        @Limit int limit
+    );
+
+    int countScannedByNumberGreaterThan(
+        @Filter(value = Filter.Operator.GT, name = "number") int number
+    );
+
 
 // tag::footer[]
 }

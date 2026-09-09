@@ -197,20 +197,30 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
             }
         }
 
-        if (methodName.startsWith("query") || methodName.startsWith("findAll") || methodName.startsWith("list") || methodName.startsWith("count") || methodName.startsWith("delete")) {
+        if (methodName.startsWith("query") || methodName.startsWith("scan") || methodName.startsWith("findAll") || methodName.startsWith("list") || methodName.startsWith("count") || methodName.startsWith("delete")) {
             QueryArguments partitionAndSort = QueryArguments.create(context, service.getTable().tableSchema().tableMetadata(), service.getItemType());
+            boolean scan = !partitionAndSort.hasPartitionKey();
             if (methodName.startsWith("count")) {
+                if (scan) {
+                    return unwrapIfRequired(service.countUsingScan(partitionAndSort.generateScan(context, conversionService)), context);
+                }
                 if (partitionAndSort.isCustomized()) {
                     return unwrapIfRequired(service.countUsingQuery(partitionAndSort.generateQuery(context, conversionService)), context);
                 }
                 return unwrapIfRequired(service.count(partitionAndSort.getPartitionValue(context.getParameters()), partitionAndSort.getSortValue(context.getParameters())), context);
             }
             if (methodName.startsWith("delete")) {
+                if (scan) {
+                    return unwrapIfRequired(service.deleteAll(service.scan(partitionAndSort.generateScan(context, conversionService))), context);
+                }
                 if (partitionAndSort.isCustomized()) {
                     return unwrapIfRequired(service.deleteAll(service.query(partitionAndSort.generateQuery(context, conversionService))), context);
                 }
                 Optional<ItemArgument> maybeItemArgument = ItemArgument.findItemArgument(service.getItemType(), context);
                 return unwrapIfRequired(handleDelete(service, context, maybeItemArgument), context);
+            }
+            if (scan) {
+                return unwrapIfRequired(service.scan(partitionAndSort.generateScan(context, conversionService)), context);
             }
             if (partitionAndSort.isCustomized()) {
                 return unwrapIfRequired(service.query(partitionAndSort.generateQuery(context, conversionService)), context);

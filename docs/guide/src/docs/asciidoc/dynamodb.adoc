@@ -725,6 +725,17 @@ include::{root-dir}/kotlin-libs/micronaut-amazon-awssdk-dynamodb-kotlin/src/test
 <4> `@Scan` annotation accepts a class which implements `Function<Map<String, Object>, DetachedScan>`
 <5> The arguments have no special meaning but you can use them in the scan definition. The method must return either `Publisher`, `Stream` or `List` of entities.
 
+A method that has no partition key argument is served by a scan instead of a query, so the advanced finder methods described above can also be used to scan the whole table. Every remaining argument must be an explicit `@Filter` (a bare, unannotated argument is treated as a forgotten `@PartitionKey` and rejected), and `@Limit`, `@Page` and `@LastEvaluatedKey` page through the scan the same way they page through a query.
+
+[source,java,indent=0,options="nowrap"]
+----
+List<DynamoDBEntity> scanAllByNumberGreaterThan(
+    @Filter(value = Filter.Operator.GT, name = "number") int number,
+    @LastEvaluatedKey DynamoDBEntity lastEvaluatedKey,
+    @Limit int limit
+);
+----
+
 =====  Updates
 Declarative services allows you to execute fine-grained updates. Any method annotated with `@Update` will perform the update in the DynamoDB table.
 

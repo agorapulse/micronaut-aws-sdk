@@ -20,6 +20,7 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb.util;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.*;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.Builders;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.QueryBuilder;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ScanBuilder;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.core.convert.ConversionService;
@@ -53,6 +54,7 @@ public class QueryArguments {
     private Argument<?> lastEvaluatedKey;
     private Argument<?> limit;
     private Argument<?> page;
+    private boolean hasBareFilterArgument;
 
     public static <T> QueryArguments create(MethodInvocationContext<Object, Object> context, TableMetadata tableMetadata, Class<T> itemType) {
         QueryArguments queryArguments = new QueryArguments();
@@ -102,12 +104,17 @@ public class QueryArguments {
             ) {
                 queryArguments.page = argument;
             } else {
+                if (!argument.isAnnotationPresent(Filter.class)) {
+                    queryArguments.hasBareFilterArgument = true;
+                }
                 String name = FilterArgument.getArgumentName(argument);
                 queryArguments.filters.computeIfAbsent(name, argName -> new FilterArgument()).fill(argument);
             }
         }
 
-        if (!queryArguments.isValid()) {
+        // A method without a partition key is served by a scan, but only when every remaining argument is an
+        // explicit @Filter - a bare unannotated argument is more likely a forgotten @PartitionKey than a scan filter.
+        if (queryArguments.partitionKey == null && queryArguments.hasBareFilterArgument) {
             throw new UnsupportedOperationException("Method needs to have at least one argument annotated with @PartitionKey or with called 'partition'");
         }
 
@@ -141,7 +148,7 @@ public class QueryArguments {
     }
 
 
-    boolean isValid() {
+    public boolean hasPartitionKey() {
         return partitionKey != null;
     }
 
@@ -213,6 +220,51 @@ public class QueryArguments {
 
             if (page != null) {
                 q.page(conversionService.convertRequired(context.getParameters().get(page.getName()).getValue(), Integer.class));
+            }
+        };
+    }
+
+    public <T> Consumer<ScanBuilder<T>> generateScan(MethodInvocationContext<Object, Object> context, ConversionService conversionService) {
+        return s -> {
+            if (index != null) {
+                s.index(index);
+            }
+
+            if (consistent) {
+                s.consistent(Builders.Read.READ);
+            }
+
+            if (!filters.isEmpty()) {
+                filters.forEach((name, filter) -> {
+                    Object firstValue = context.getParameters().get(filter.getFirstArgument().getName()).getValue();
+                    Object secondValue = filter.getSecondArgument() == null ? null : context.getParameters().get(filter.getSecondArgument().getName()).getValue();
+
+                    if (firstValue == null && !filter.isRequired()) {
+                        return;
+                    }
+
+                    s.filter(f -> filter.getOperator().apply(
+                        f,
+                        name,
+                        firstValue,
+                        secondValue)
+                    );
+                });
+            }
+
+            if (lastEvaluatedKey != null) {
+                Object exclusiveStartKey = context.getParameters().get(lastEvaluatedKey.getName()).getValue();
+                if (exclusiveStartKey != null) {
+                    s.lastEvaluatedKey(exclusiveStartKey);
+                }
+            }
+
+            if (limit != null) {
+                s.limit(conversionService.convertRequired(context.getParameters().get(limit.getName()).getValue(), Integer.class));
+            }
+
+            if (page != null) {
+                s.page(conversionService.convertRequired(context.getParameters().get(page.getName()).getValue(), Integer.class));
             }
         };
     }
