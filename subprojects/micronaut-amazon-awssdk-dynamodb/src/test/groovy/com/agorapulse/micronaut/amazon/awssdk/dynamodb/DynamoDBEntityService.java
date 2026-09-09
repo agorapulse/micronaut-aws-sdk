@@ -318,6 +318,10 @@ public interface DynamoDBEntityService {
         @Filter(value = Filter.Operator.GT, name = "number") int number
     );
 
+    List<DynamoDBEntity> scanAllByRangeBeginsWith(
+        @Filter(value = Filter.Operator.BEGINS_WITH, name = "rangeIndex") String rangeIndexPrefix
+    );
+
 
 // tag::footer[]
 }

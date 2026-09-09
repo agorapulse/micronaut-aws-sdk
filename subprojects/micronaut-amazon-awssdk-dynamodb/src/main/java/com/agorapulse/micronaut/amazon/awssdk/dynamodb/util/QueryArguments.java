@@ -239,6 +239,17 @@ public class QueryArguments {
                 s.consistent(Builders.Read.READ);
             }
 
+            // A scan has no key structure, so an argument classified as the sort key (e.g. named like the table's
+            // sort key) is applied as an ordinary filter condition instead of being dropped.
+            if (sortKey != null) {
+                Object firstValue = context.getParameters().get(sortKey.getFirstArgument().getName()).getValue();
+                Object secondValue = sortKey.getSecondArgument() == null ? null : context.getParameters().get(sortKey.getSecondArgument().getName()).getValue();
+
+                if (firstValue != null || sortKey.isRequired()) {
+                    s.filter(f -> sortKey.getOperator().apply(f, sortKey.getName(), firstValue, secondValue));
+                }
+            }
+
             if (!filters.isEmpty()) {
                 filters.forEach((name, filter) -> {
                     Object firstValue = context.getParameters().get(filter.getFirstArgument().getName()).getValue();
@@ -292,6 +303,6 @@ public class QueryArguments {
      * rejected instead of silently scanning the whole table.
      */
     public boolean hasScanIntent() {
-        return index != null || consistent || !filters.isEmpty() || lastEvaluatedKey != null || limit != null || page != null;
+        return index != null || consistent || !filters.isEmpty() || sortKey != null || lastEvaluatedKey != null || limit != null || page != null;
     }
 }

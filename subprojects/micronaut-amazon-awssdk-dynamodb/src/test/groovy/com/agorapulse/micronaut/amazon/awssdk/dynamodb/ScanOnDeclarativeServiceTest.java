@@ -61,6 +61,9 @@ public class ScanOnDeclarativeServiceTest {
         assertEquals(2, s.scanAllByNumberGreaterThan(2).size());
         assertEquals(4, s.countScannedByNumberGreaterThan(1));
 
+        // a @Filter whose argument name resembles the sort key is still applied to the scan
+        assertEquals(2, s.scanAllByRangeBeginsWith("range-2").size());
+
         // @Limit + @LastEvaluatedKey page through the whole table without overlap
         List<DynamoDBEntity> firstPage = s.scanAllByNumberGreaterThan(1, null, 2);
         assertEquals(2, firstPage.size());
