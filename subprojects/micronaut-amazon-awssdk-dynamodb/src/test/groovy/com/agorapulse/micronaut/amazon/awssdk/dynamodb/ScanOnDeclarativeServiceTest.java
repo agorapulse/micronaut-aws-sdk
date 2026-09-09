@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @MicronautTest
@@ -69,6 +70,12 @@ public class ScanOnDeclarativeServiceTest {
 
         Set<String> firstKeys = firstPage.stream().map(ScanOnDeclarativeServiceTest::key).collect(Collectors.toSet());
         assertTrue(secondPage.stream().map(ScanOnDeclarativeServiceTest::key).noneMatch(firstKeys::contains));
+    }
+
+    @Test
+    public void partitionlessFinderWithoutScanIntentIsRejected() {
+        UnsupportedOperationException e = assertThrows(UnsupportedOperationException.class, () -> s.findAllInTable());
+        assertTrue(e.getMessage().contains("no scan intent"));
     }
 
     private static String key(DynamoDBEntity entity) {

@@ -280,4 +280,13 @@ public class QueryArguments {
     public boolean isCustomized() {
         return index != null || consistent || descending || !filters.isEmpty() || sortKey != null && sortKey.getOperator() != Filter.Operator.EQ || lastEvaluatedKey != null || limit != null || page != null;
     }
+
+    /**
+     * Whether the method explicitly asks to scan through its arguments - a filter, pagination, an index or a
+     * consistency requirement. A partition-less method without any such intent (and not named {@code scan...}) is
+     * rejected instead of silently scanning the whole table.
+     */
+    public boolean hasScanIntent() {
+        return index != null || consistent || !filters.isEmpty() || lastEvaluatedKey != null || limit != null || page != null;
+    }
 }

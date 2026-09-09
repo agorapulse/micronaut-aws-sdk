@@ -302,6 +302,8 @@ public interface DynamoDBEntityService {
 
     List<DynamoDBEntity> scanAll();
 
+    List<DynamoDBEntity> findAllInTable();
+
     List<DynamoDBEntity> scanAllByNumberGreaterThan(
         @Filter(value = Filter.Operator.GT, name = "number") int number
     );

@@ -200,6 +200,10 @@ public class AsyncDynamoDbServiceIntroduction implements DynamoDbServiceIntroduc
         if (methodName.startsWith("query") || methodName.startsWith("scan") || methodName.startsWith("findAll") || methodName.startsWith("list") || methodName.startsWith("count") || methodName.startsWith("delete")) {
             QueryArguments partitionAndSort = QueryArguments.create(context, service.getTable().tableSchema().tableMetadata(), service.getItemType());
             boolean scan = !partitionAndSort.hasPartitionKey();
+            if (scan && !methodName.startsWith("scan") && !partitionAndSort.hasScanIntent()) {
+                throw new UnsupportedOperationException("Method " + context.getExecutableMethod().getTargetMethod()
+                    + " has no @PartitionKey and no scan intent - annotate an argument with @Filter, @Limit, @Page or @LastEvaluatedKey, or name the method 'scan...' to scan the whole table");
+            }
             if (methodName.startsWith("count")) {
                 if (scan) {
                     return unwrapIfRequired(service.countUsingScan(partitionAndSort.generateScan(context, conversionService)), context);
