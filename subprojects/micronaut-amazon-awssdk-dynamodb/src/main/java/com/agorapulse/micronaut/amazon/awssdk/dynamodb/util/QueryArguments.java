@@ -20,6 +20,7 @@ package com.agorapulse.micronaut.amazon.awssdk.dynamodb.util;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.annotation.*;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.Builders;
 import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.QueryBuilder;
+import com.agorapulse.micronaut.amazon.awssdk.dynamodb.builder.ScanBuilder;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.core.convert.ConversionService;
@@ -53,6 +54,7 @@ public class QueryArguments {
     private Argument<?> lastEvaluatedKey;
     private Argument<?> limit;
     private Argument<?> page;
+    private boolean hasBareFilterArgument;
 
     public static <T> QueryArguments create(MethodInvocationContext<Object, Object> context, TableMetadata tableMetadata, Class<T> itemType) {
         QueryArguments queryArguments = new QueryArguments();
@@ -102,12 +104,17 @@ public class QueryArguments {
             ) {
                 queryArguments.page = argument;
             } else {
+                if (!argument.isAnnotationPresent(Filter.class)) {
+                    queryArguments.hasBareFilterArgument = true;
+                }
                 String name = FilterArgument.getArgumentName(argument);
                 queryArguments.filters.computeIfAbsent(name, argName -> new FilterArgument()).fill(argument);
             }
         }
 
-        if (!queryArguments.isValid()) {
+        // A method without a partition key is served by a scan, but only when every remaining argument is an
+        // explicit @Filter - a bare unannotated argument is more likely a forgotten @PartitionKey than a scan filter.
+        if (queryArguments.partitionKey == null && queryArguments.hasBareFilterArgument) {
             throw new UnsupportedOperationException("Method needs to have at least one argument annotated with @PartitionKey or with called 'partition'");
         }
 
@@ -141,7 +148,7 @@ public class QueryArguments {
     }
 
 
-    boolean isValid() {
+    public boolean hasPartitionKey() {
         return partitionKey != null;
     }
 
@@ -217,6 +224,67 @@ public class QueryArguments {
         };
     }
 
+    /**
+     * Build the scan definition for a partition-less finder from its annotations: index, consistency, filters and
+     * pagination ({@code @Limit}, {@code @Page}, {@code @LastEvaluatedKey}). A sort key and descending order are not
+     * applied because a scan cannot honour them.
+     */
+    public <T> Consumer<ScanBuilder<T>> generateScan(MethodInvocationContext<Object, Object> context, ConversionService conversionService) {
+        return s -> {
+            if (index != null) {
+                s.index(index);
+            }
+
+            if (consistent) {
+                s.consistent(Builders.Read.READ);
+            }
+
+            // A scan has no key structure, so an argument classified as the sort key (e.g. named like the table's
+            // sort key) is applied as an ordinary filter condition instead of being dropped.
+            if (sortKey != null) {
+                Object firstValue = context.getParameters().get(sortKey.getFirstArgument().getName()).getValue();
+                Object secondValue = sortKey.getSecondArgument() == null ? null : context.getParameters().get(sortKey.getSecondArgument().getName()).getValue();
+
+                if (firstValue != null || sortKey.isRequired()) {
+                    s.filter(f -> sortKey.getOperator().apply(f, sortKey.getName(), firstValue, secondValue));
+                }
+            }
+
+            if (!filters.isEmpty()) {
+                filters.forEach((name, filter) -> {
+                    Object firstValue = context.getParameters().get(filter.getFirstArgument().getName()).getValue();
+                    Object secondValue = filter.getSecondArgument() == null ? null : context.getParameters().get(filter.getSecondArgument().getName()).getValue();
+
+                    if (firstValue == null && !filter.isRequired()) {
+                        return;
+                    }
+
+                    s.filter(f -> filter.getOperator().apply(
+                        f,
+                        name,
+                        firstValue,
+                        secondValue)
+                    );
+                });
+            }
+
+            if (lastEvaluatedKey != null) {
+                Object exclusiveStartKey = context.getParameters().get(lastEvaluatedKey.getName()).getValue();
+                if (exclusiveStartKey != null) {
+                    s.lastEvaluatedKey(exclusiveStartKey);
+                }
+            }
+
+            if (limit != null) {
+                s.limit(conversionService.convertRequired(context.getParameters().get(limit.getName()).getValue(), Integer.class));
+            }
+
+            if (page != null) {
+                s.page(conversionService.convertRequired(context.getParameters().get(page.getName()).getValue(), Integer.class));
+            }
+        };
+    }
+
     public boolean isSortKeyPublisherOrIterable() {
         return sortKey.getFirstArgument().getType().isArray() || Iterable.class.isAssignableFrom(sortKey.getFirstArgument().getType()) || Publisher.class.isAssignableFrom(sortKey.getFirstArgument().getType());
     }
@@ -227,5 +295,14 @@ public class QueryArguments {
 
     public boolean isCustomized() {
         return index != null || consistent || descending || !filters.isEmpty() || sortKey != null && sortKey.getOperator() != Filter.Operator.EQ || lastEvaluatedKey != null || limit != null || page != null;
+    }
+
+    /**
+     * Whether the method explicitly asks to scan through its arguments - a filter, pagination, an index or a
+     * consistency requirement. A partition-less method without any such intent (and not named {@code scan...}) is
+     * rejected instead of silently scanning the whole table.
+     */
+    public boolean hasScanIntent() {
+        return index != null || consistent || !filters.isEmpty() || sortKey != null || lastEvaluatedKey != null || limit != null || page != null;
     }
 }
