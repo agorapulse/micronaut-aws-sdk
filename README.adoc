@@ -3,6 +3,7 @@
 --
 image::https://img.shields.io/maven-central/v/com.agorapulse/micronaut-amazon-awssdk-dynamodb.svg?label=Maven%20Central[link="https://search.maven.org/search?q=g:%22com.agorapulse%22%20AND%20a:%22micronaut-amazon-awssdk-dynamodb%22",float="left"]
 image::https://github.com/agorapulse/micronaut-aws-sdk/workflows/Check/badge.svg["Build Status", link="https://github.com/agorapulse/micronaut-aws-sdk/actions?query=workflow%3ACheck"float="left"]
+image::https://img.shields.io/badge/License-Apache%202.0-blue.svg["License", link="https://www.apache.org/licenses/LICENSE-2.0"float="left"]
 --
 
 '''
@@ -10,3 +11,7 @@ image::https://github.com/agorapulse/micronaut-aws-sdk/workflows/Check/badge.svg
 Set of useful libraries for http://micronaut.io[Micronaut]. All of the libraries are available in the Maven Central.
 
 See https://agorapulse.github.io/micronaut-aws-sdk[Full Documentation].
+
+== License
+
+Licensed under the http://www.apache.org/licenses/LICENSE-2.0[Apache License, Version 2.0]. See the link:LICENSE[LICENSE] file for details.
