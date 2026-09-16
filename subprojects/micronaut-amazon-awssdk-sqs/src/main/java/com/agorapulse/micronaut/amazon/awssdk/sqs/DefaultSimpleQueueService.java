@@ -44,7 +44,7 @@ public class DefaultSimpleQueueService implements SimpleQueueService {
     private final SqsClient client;
     private final SimpleQueueServiceConfiguration configuration;
 
-    private final ConcurrentMap<String, String> queueUrlByNames = new ConcurrentHashMap<>();
+    private volatile ConcurrentMap<String, String> queueUrlByNames = new ConcurrentHashMap<>();
 
     public DefaultSimpleQueueService(
         SqsClient client,
@@ -63,6 +63,11 @@ public class DefaultSimpleQueueService implements SimpleQueueService {
     @Override
     public boolean isCaching() {
         return configuration.isCache();
+    }
+
+    @Override
+    public boolean isAutoCreateQueue() {
+        return configuration.isAutoCreateQueue();
     }
 
     /**
@@ -388,8 +393,9 @@ public class DefaultSimpleQueueService implements SimpleQueueService {
                 )
             );
 
-            queueUrlByNames.clear();
-            queueUrlByNames.putAll(queueUrls);
+        // swap the whole map in one volatile write; clear() then putAll() leaves a window where
+        // a concurrent reader sees an empty map and reports an existing queue as missing
+        queueUrlByNames = new ConcurrentHashMap<>(queueUrls);
     }
 
     private void removeQueue(String queueUrl) {
