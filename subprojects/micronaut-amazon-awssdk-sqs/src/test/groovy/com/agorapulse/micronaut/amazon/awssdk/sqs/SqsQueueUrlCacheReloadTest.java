@@ -19,98 +19,110 @@ package com.agorapulse.micronaut.amazon.awssdk.sqs;
 
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
+import software.amazon.awssdk.services.sqs.model.CreateQueueResponse;
 import software.amazon.awssdk.services.sqs.model.ListQueuesResponse;
 
 import java.lang.reflect.Proxy;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
- * Guards the cached queue-URL lookup against the reload race that dropped inbox item-update
- * messages: loadQueues() used to clear() then putAll(), so a concurrent reader saw an empty map
- * and reported an existing queue as missing.
+ * Guards the cached queue-URL map against two reload hazards that dropped inbox item-update messages:
+ * a reader seeing the map mid-reload, and a concurrent createQueue() being discarded by the reload swap.
  */
 class SqsQueueUrlCacheReloadTest {
 
-    private static final String QUEUE = "report_ReportPostInsightUpdate";
-    private static final String QUEUE_URL = "https://sqs.eu-west-1.amazonaws.com/123456789012/" + QUEUE;
-
-    private static final int READER_THREADS = 4;
-    private static final int RELOADS = 500;
+    private static final String BASE = "https://sqs.eu-west-1.amazonaws.com/123456789012/";
+    private static final String EXISTING = "report_ReportPostInsightUpdate";
+    private static final String CREATED = "report_ReportPostInsightUpdateCreated";
 
     @Test
-    void concurrentReloadNeverHidesAnExistingQueue() throws Exception {
+    void concurrentReloadKeepsExistingQueueVisibleAndDoesNotDiscardCreatedQueue() throws Exception {
+        FakeSqs sqs = new FakeSqs();
+        sqs.add(EXISTING);
         DefaultSimpleQueueServiceConfiguration configuration = new DefaultSimpleQueueServiceConfiguration();
         configuration.setCache(true);
-        SimpleQueueService service = new DefaultSimpleQueueService(listingClient(), configuration);
+        SimpleQueueService service = new DefaultSimpleQueueService(sqs.client(), configuration);
 
-        service.getQueueUrl(QUEUE);
+        service.getQueueUrl(EXISTING);
 
-        CountDownLatch start = new CountDownLatch(1);
-        AtomicReference<Throwable> failure = new AtomicReference<>();
+        CountDownLatch reloadInFlight = new CountDownLatch(1);
+        CountDownLatch releaseReload = new CountDownLatch(1);
+        sqs.blockNextListQueues(reloadInFlight, releaseReload);
 
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
-            List<Future<?>> readers = IntStream.range(0, READER_THREADS)
-                .<Future<?>>mapToObj(ignored -> executor.submit(() -> {
-                    awaitStart(start);
-                    try {
-                        for (int i = 0; i < RELOADS && failure.get() == null; i++) {
-                            assertEquals(QUEUE_URL, service.getQueueUrl(QUEUE));
-                        }
-                    } catch (Throwable t) {
-                        failure.compareAndSet(null, t);
-                    }
-                }))
-                .toList();
+            Future<?> reloader = executor.submit(() -> service.listQueueNames(true));
 
-            Future<?> reloader = executor.submit(() -> {
-                awaitStart(start);
-                for (int i = 0; i < RELOADS; i++) {
-                    service.listQueueNames(true);
-                }
-            });
+            reloadInFlight.await();
+            // while the reload holds its snapshot, an existing queue must never look missing
+            assertEquals(BASE + EXISTING, service.getQueueUrl(EXISTING));
+            // ...and a queue created during the reload must survive the swap that follows
+            Future<?> creator = executor.submit(() -> service.createQueue(CREATED));
 
-            start.countDown();
-            for (Future<?> reader : readers) {
-                reader.get();
-            }
+            releaseReload.countDown();
             reloader.get();
+            creator.get();
         }
 
-        assertNull(failure.get(), () -> "a concurrent reload hid an existing queue: " + failure.get());
+        assertEquals(BASE + EXISTING, service.getQueueUrl(EXISTING));
+        assertEquals(BASE + CREATED, service.getQueueUrl(CREATED));
     }
 
-    private static void awaitStart(CountDownLatch start) {
-        try {
-            start.await();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException(e);
+    private static final class FakeSqs {
+
+        private final Set<String> names = ConcurrentHashMap.newKeySet();
+        private volatile CountDownLatch listQueuesEntered;
+        private volatile CountDownLatch listQueuesReleased;
+
+        void add(String name) {
+            names.add(name);
         }
-    }
 
-    private static SqsClient listingClient() {
-        ListQueuesResponse response = ListQueuesResponse.builder().queueUrls(QUEUE_URL).build();
-        return (SqsClient) Proxy.newProxyInstance(
-            SqsClient.class.getClassLoader(),
-            new Class<?>[]{SqsClient.class},
-            (proxy, method, args) -> {
-                if ("listQueues".equals(method.getName())) {
-                    return response;
-                }
-                if ("close".equals(method.getName()) || "serviceName".equals(method.getName())) {
-                    return method.getReturnType() == String.class ? "sqs" : null;
-                }
-                throw new UnsupportedOperationException(method.getName());
-            });
+        void blockNextListQueues(CountDownLatch entered, CountDownLatch released) {
+            this.listQueuesEntered = entered;
+            this.listQueuesReleased = released;
+        }
+
+        SqsClient client() {
+            return (SqsClient) Proxy.newProxyInstance(
+                SqsClient.class.getClassLoader(),
+                new Class<?>[]{SqsClient.class},
+                (proxy, method, args) -> {
+                    switch (method.getName()) {
+                        case "listQueues": {
+                            CountDownLatch entered = listQueuesEntered;
+                            CountDownLatch released = listQueuesReleased;
+                            if (entered != null) {
+                                listQueuesEntered = null;
+                                listQueuesReleased = null;
+                                entered.countDown();
+                                released.await();
+                            }
+                            return ListQueuesResponse.builder()
+                                .queueUrls(names.stream().map(name -> BASE + name).toList())
+                                .build();
+                        }
+                        case "createQueue": {
+                            String name = ((CreateQueueRequest) args[0]).queueName();
+                            names.add(name);
+                            return CreateQueueResponse.builder().queueUrl(BASE + name).build();
+                        }
+                        case "close":
+                            return null;
+                        default:
+                            throw new UnsupportedOperationException(method.getName());
+                    }
+                });
+        }
+
     }
 
 }
