@@ -60,16 +60,21 @@ class SqsQueueUrlCacheReloadTest {
 
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
             Future<?> reloader = executor.submit(() -> service.listQueueNames(true));
+            try {
+                reloadInFlight.await();
+                // while the reload holds its snapshot, an existing queue must never look missing
+                assertEquals(BASE + EXISTING, service.getQueueUrl(EXISTING));
+                // ...and a queue created during the reload must survive the swap that follows
+                Future<?> creator = executor.submit(() -> service.createQueue(CREATED));
 
-            reloadInFlight.await();
-            // while the reload holds its snapshot, an existing queue must never look missing
-            assertEquals(BASE + EXISTING, service.getQueueUrl(EXISTING));
-            // ...and a queue created during the reload must survive the swap that follows
-            Future<?> creator = executor.submit(() -> service.createQueue(CREATED));
-
-            releaseReload.countDown();
-            reloader.get();
-            creator.get();
+                releaseReload.countDown();
+                reloader.get();
+                creator.get();
+            } finally {
+                // always release the reloader; otherwise a failure above leaves it blocked on the
+                // latch holding cacheLock and the executor's close() would wait forever
+                releaseReload.countDown();
+            }
         }
 
         assertEquals(BASE + EXISTING, service.getQueueUrl(EXISTING));
