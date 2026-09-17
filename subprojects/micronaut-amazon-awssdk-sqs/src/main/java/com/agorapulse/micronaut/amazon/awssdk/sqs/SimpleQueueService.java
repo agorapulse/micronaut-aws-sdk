@@ -45,6 +45,13 @@ public interface SimpleQueueService {
      */
     boolean isCaching();
 
+    /**
+     * @return true if the service creates a missing queue on demand (aws.sqs.auto-create-queue configuration value)
+     */
+    default boolean isAutoCreateQueue() {
+        return false;
+    }
+
     String createQueue(QueueConfiguration queueConfiguration);
 
     /**

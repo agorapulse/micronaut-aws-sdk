@@ -44,7 +44,10 @@ public class DefaultSimpleQueueService implements SimpleQueueService {
     private final SqsClient client;
     private final SimpleQueueServiceConfiguration configuration;
 
-    private final ConcurrentMap<String, String> queueUrlByNames = new ConcurrentHashMap<>();
+    private volatile ConcurrentMap<String, String> queueUrlByNames = new ConcurrentHashMap<>();
+
+    // guards structural cache changes (reload, add, remove) against each other; readers stay lock-free on the volatile map
+    private final Object cacheLock = new Object();
 
     public DefaultSimpleQueueService(
         SqsClient client,
@@ -63,6 +66,11 @@ public class DefaultSimpleQueueService implements SimpleQueueService {
     @Override
     public boolean isCaching() {
         return configuration.isCache();
+    }
+
+    @Override
+    public boolean isAutoCreateQueue() {
+        return configuration.isAutoCreateQueue();
     }
 
     /**
@@ -369,7 +377,9 @@ public class DefaultSimpleQueueService implements SimpleQueueService {
             throw new IllegalStateException("Queue URL cannot be null or empty");
         }
 
-        queueUrlByNames.put(getQueueNameFromUrl(queueUrl),  queueUrl);
+        synchronized (cacheLock) {
+            queueUrlByNames.put(getQueueNameFromUrl(queueUrl), queueUrl);
+        }
     }
 
     private void loadQueues() {
@@ -378,18 +388,23 @@ public class DefaultSimpleQueueService implements SimpleQueueService {
             listQueuesRequest.queueNamePrefix(configuration.getQueueNamePrefix());
         }
 
-        Map<String, String> queueUrls = client.listQueues(listQueuesRequest.build())
-            .queueUrls()
-            .stream()
-            .collect(
-                Collectors.toMap(
-                    DefaultSimpleQueueService::getQueueNameFromUrl,
-                    Function.identity()
-                )
-            );
+        // hold the lock across the listing so a concurrent addQueue/removeQueue cannot be discarded by the swap:
+        // it either lands in this snapshot (its queue already exists in SQS) or runs after the new map is published
+        synchronized (cacheLock) {
+            Map<String, String> queueUrls = client.listQueues(listQueuesRequest.build())
+                .queueUrls()
+                .stream()
+                .collect(
+                    Collectors.toMap(
+                        DefaultSimpleQueueService::getQueueNameFromUrl,
+                        Function.identity()
+                    )
+                );
 
-            queueUrlByNames.clear();
-            queueUrlByNames.putAll(queueUrls);
+            // swap the whole map in one volatile write; clear() then putAll() leaves a window where
+            // a concurrent reader sees an empty map and reports an existing queue as missing
+            queueUrlByNames = new ConcurrentHashMap<>(queueUrls);
+        }
     }
 
     private void removeQueue(String queueUrl) {
@@ -397,7 +412,9 @@ public class DefaultSimpleQueueService implements SimpleQueueService {
             throw new IllegalStateException("Queue URL cannot be null or empty");
         }
 
-        queueUrlByNames.remove(getQueueNameFromUrl(queueUrl));
+        synchronized (cacheLock) {
+            queueUrlByNames.remove(getQueueNameFromUrl(queueUrl));
+        }
     }
 
 }

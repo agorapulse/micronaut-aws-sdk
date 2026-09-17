@@ -122,7 +122,10 @@ public class QueueClientIntroduction implements MethodInterceptor<Object, Object
 
         try {
             return doIntercept(context, service, queueName, group, delay);
-        } catch (QueueDoesNotExistException ignored) {
+        } catch (QueueDoesNotExistException e) {
+            if (!service.isAutoCreateQueue()) {
+                throw e;
+            }
             service.createQueue(queueName);
             return doIntercept(context, service, queueName, group, delay);
         }

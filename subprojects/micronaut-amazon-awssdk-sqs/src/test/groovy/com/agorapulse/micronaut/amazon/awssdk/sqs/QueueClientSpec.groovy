@@ -22,6 +22,7 @@ import io.micronaut.inject.qualifiers.Qualifiers
 import io.micronaut.json.JsonMapper
 import org.reactivestreams.Publisher
 import reactor.core.publisher.Flux
+import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException
 import spock.lang.AutoCleanup
 import spock.lang.Specification
 
@@ -187,6 +188,33 @@ class QueueClientSpec extends Specification {
             client.deleteMessage(ID)
         then:
             1 * defaultService.deleteMessage(DEFAULT_QUEUE_NAME, ID)
+    }
+
+    void 'does not create a missing queue when auto-create is disabled'() {
+        given:
+            DefaultClient client = context.getBean(DefaultClient)
+        when:
+            client.sendMessage(POGO)
+        then:
+            1 * defaultService.sendMessage(DEFAULT_QUEUE_NAME, marshalledPogo, 0, null) >> {
+                throw QueueDoesNotExistException.builder().message('missing').build()
+            }
+            1 * defaultService.isAutoCreateQueue() >> false
+            0 * defaultService.createQueue(_)
+            thrown(QueueDoesNotExistException)
+    }
+
+    void 'creates a missing queue and retries when auto-create is enabled'() {
+        given:
+            DefaultClient client = context.getBean(DefaultClient)
+        when:
+            String id = client.sendMessage(POGO)
+        then:
+            2 * defaultService.sendMessage(DEFAULT_QUEUE_NAME, marshalledPogo, 0, null) >>
+                { throw QueueDoesNotExistException.builder().message('missing').build() } >> ID
+            1 * defaultService.isAutoCreateQueue() >> true
+            1 * defaultService.createQueue(DEFAULT_QUEUE_NAME)
+            id == ID
     }
 
     void 'can send message with specified queue name'() {
