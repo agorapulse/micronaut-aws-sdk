@@ -170,7 +170,8 @@ incoming payload.
 
 ===== Parallel Processing
 
-By default, the records of a shard are processed one at a time. Set `concurrency` on the listener configuration to process them in parallel:
+By default, each shard is processed by its own thread, one record at a time. Set `concurrency` on the listener configuration to process the records
+of a shard in parallel. The value is the number of records processed at once by the application instance, shared between the shards it holds:
 
 [source,yaml,indent=0,options="nowrap"]
 .application.yml
@@ -183,7 +184,7 @@ aws:
       max-attempts: 2                                  # <2>
       ordered-by-partition-key: true                   # <3>
 ----
-<1> The number of records processed at once by the application instance, shared between the shards it holds. The parallel processing is disabled when the property is missing or zero.
+<1> The parallel processing is disabled when the property is missing or zero
 <2> The attempts a record gets before it is logged and dropped (defaults to `2`)
 <3> Whether the records sharing a partition key are processed one at a time, in the order of the shard (defaults to `true`)
 
