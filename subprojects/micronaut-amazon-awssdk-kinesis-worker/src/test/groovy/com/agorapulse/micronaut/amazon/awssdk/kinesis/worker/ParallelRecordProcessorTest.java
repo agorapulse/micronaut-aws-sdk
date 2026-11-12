@@ -22,6 +22,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import software.amazon.kinesis.exceptions.ShutdownException;
 import software.amazon.kinesis.exceptions.ThrottlingException;
 import software.amazon.kinesis.lifecycle.events.InitializationInput;
 import software.amazon.kinesis.lifecycle.events.LeaseLostInput;
@@ -45,7 +46,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.stream.IntStream;
@@ -213,6 +213,49 @@ class ParallelRecordProcessorTest {
 
         assertEquals(2, consumer.attempts.get("hot-0").get());
         assertEquals(List.of("hot-1"), consumer.processedSequenceNumbers());
+        assertEquals(Set.of(), consumer.interruptedOnEntry);
+    }
+
+    @Test
+    void processRecords_shouldStillSubmitTheBatchWhenTheCheckpointFails() throws Exception {
+        Semaphore slots = new Semaphore(12, true);
+        ParallelRecordProcessor processor = processor(slots, CHECKPOINT_EVERY_BATCH);
+        doThrow(new IllegalStateException("dynamodb unavailable")).doNothing().when(checkpointer).checkpoint("first-0", 0L);
+        processor.processRecords(batch(records("first", 1)));
+        awaitProcessed(1);
+        await().atMost(TIMEOUT).until(() -> slots.availablePermits() == 12);
+
+        processor.processRecords(batch(records("second", 2)));
+        awaitCheckpoint(processor, "second-1");
+
+        assertEquals(List.of("first-0", "second-0", "second-1"), consumer.processedSequenceNumbers().stream().sorted().toList());
+    }
+
+    @Test
+    void processRecords_shouldLeaveTheRecordsOnceTheCheckpointReportsAShutdown() throws Exception {
+        Semaphore slots = new Semaphore(12, true);
+        ParallelRecordProcessor processor = processor(slots, CHECKPOINT_EVERY_BATCH);
+        doThrow(new ShutdownException("lease lost")).when(checkpointer).checkpoint("first-0", 0L);
+        processor.processRecords(batch(records("first", 1)));
+        awaitProcessed(1);
+        await().atMost(TIMEOUT).until(() -> slots.availablePermits() == 12);
+
+        processor.processRecords(batch(records("second", 2)));
+        processor.shardEnded(ShardEndedInput.builder().checkpointer(checkpointer).build());
+
+        assertEquals(List.of("first-0"), consumer.processedSequenceNumbers());
+        verify(checkpointer, never()).checkpoint();
+    }
+
+    @Test
+    void processRecords_shouldClearAnInterruptFlagLeftByTheHandler() throws Exception {
+        consumer.interruptLeftBySequences.add("hot-0");
+        ParallelRecordProcessor processor = processor(new Semaphore(12, true), CHECKPOINT_EVERY_BATCH);
+
+        processor.processRecords(batch(sameKeyRecords("hot", 2)));
+        awaitCheckpoint(processor, "hot-1");
+
+        assertEquals(List.of("hot-0", "hot-1"), consumer.processedSequenceNumbers());
         assertEquals(Set.of(), consumer.interruptedOnEntry);
     }
 
@@ -385,6 +428,7 @@ class ParallelRecordProcessorTest {
         ParallelRecordProcessor processor = processor(slots, CHECKPOINT_EVERY_BATCH);
         processor.processRecords(batch(records("key", 1)));
         awaitCheckpoint(processor, "key-0");
+        await().atMost(TIMEOUT).until(() -> slots.availablePermits() == 12);
         executor.shutdown();
         clearInvocations(checkpointer);
 
@@ -485,6 +529,7 @@ class ParallelRecordProcessorTest {
         final Set<String> errorsBySequence = ConcurrentHashMap.newKeySet();
         final Set<String> interruptedSequences = ConcurrentHashMap.newKeySet();
         final Set<String> interruptedOnEntry = ConcurrentHashMap.newKeySet();
+        final Set<String> interruptLeftBySequences = ConcurrentHashMap.newKeySet();
         final Map<String, CountDownLatch> gates = new ConcurrentHashMap<>();
         final AtomicInteger inFlight = new AtomicInteger();
         final AtomicInteger maxInFlight = new AtomicInteger();
@@ -529,14 +574,17 @@ class ParallelRecordProcessorTest {
             maxInFlight.accumulateAndGet(inFlight.incrementAndGet(), Math::max);
             try {
                 CountDownLatch gate = gates.get(kinesisRecord.sequenceNumber());
-                if (gate != null && !gate.await(TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)) {
-                    throw new IllegalStateException("gate never released for " + kinesisRecord.sequenceNumber());
+                if (gate != null) {
+                    gate.await();
                 }
+                processed.add(kinesisRecord);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             } finally {
                 inFlight.decrementAndGet();
-                processed.add(kinesisRecord);
+            }
+            if (interruptLeftBySequences.contains(kinesisRecord.sequenceNumber())) {
+                Thread.currentThread().interrupt();
             }
         }
     }

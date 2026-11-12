@@ -130,9 +130,12 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
                 return;
             }
             checkpointIfDue(input.checkpointer());
+            if (recordsLeft) {
+                return;
+            }
             if (workerShuttingDown.getAsBoolean()) {
                 leaveRecordsFrom(kinesisRecord, "the worker is shutting down");
-            } else if (!submit(kinesisRecord)) {
+            } else if (!submitted(kinesisRecord)) {
                 leaveRecordsFrom(kinesisRecord, "the record could not be submitted");
             }
         }
@@ -185,6 +188,16 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
         if (System.currentTimeMillis() >= nextCheckpointTimeInMillis) {
             checkpointCompleted(checkpointer);
             nextCheckpointTimeInMillis = System.currentTimeMillis() + timings.checkpointInterval().toMillis();
+        }
+    }
+
+    // The KCL skips the rest of a batch whose processing throws, so nothing may escape while records remain.
+    private boolean submitted(KinesisClientRecord kinesisRecord) {
+        try {
+            return submit(kinesisRecord);
+        } catch (RuntimeException e) {
+            LOGGER.error("[{}] Unexpected error while submitting record {}", shardId, kinesisRecord.sequenceNumber(), e);
+            return false;
         }
     }
 
@@ -253,12 +266,14 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
     }
 
     // An Error escaping the handler still marks the record done, otherwise it would hold the checkpoint and its key forever.
+    // An interrupt flag left by the handler is cleared, so it does not fail the next records of the partition key.
     private void process(Tracked tracked) {
         try {
             processWithRetries(tracked.kinesisRecord);
         } catch (Throwable error) {
             LOGGER.error("[{}] Dropping record {} after an unexpected error", shardId, tracked.kinesisRecord.sequenceNumber(), error);
         } finally {
+            Thread.interrupted();
             tracked.done = true;
         }
     }
@@ -299,6 +314,7 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
     }
 
     // Only the shard thread adds to the queue and polls it, the processing threads only flag their record as done.
+    // Nothing may escape: the KCL would skip the records of the batch that are not submitted yet.
     private void checkpointCompleted(RecordProcessorCheckpointer checkpointer) {
         for (Tracked head = inFlight.peek(); head != null && head.done; head = inFlight.peek()) {
             inFlight.poll();
@@ -311,11 +327,13 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
             checkpointer.checkpoint(lastCompleted.sequenceNumber(), lastCompleted.subSequenceNumber());
             lastCheckpointed = lastCompleted;
         } catch (ShutdownException e) {
-            LOGGER.debug("[{}] Processor shut down, skipping checkpoint", shardId, e);
+            stopped = true;
+            recordsLeft = true;
+            LOGGER.info("[{}] Processor shut down, no more records are started", shardId, e);
         } catch (ThrottlingException e) {
             LOGGER.warn("[{}] Checkpoint throttled, the next one will cover it", shardId, e);
-        } catch (InvalidStateException | IllegalArgumentException e) {
-            LOGGER.error("[{}] Cannot checkpoint at {}", shardId, lastCompleted.sequenceNumber(), e);
+        } catch (InvalidStateException | RuntimeException e) {
+            LOGGER.error("[{}] Cannot checkpoint at {}, the next one will cover it", shardId, lastCompleted.sequenceNumber(), e);
         }
     }
 

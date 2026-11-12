@@ -65,7 +65,7 @@ class ParallelKinesisWorker implements KinesisWorker {
         .uncaughtExceptionHandler((thread, error) -> LOGGER.error("Unexpected error while processing a Kinesis record", error))
         .factory());
     private final AtomicBoolean shuttingDown = new AtomicBoolean();
-    private Scheduler scheduler;
+    private volatile Scheduler scheduler;
 
     ParallelKinesisWorker(
         KinesisClientConfiguration configuration,
