@@ -148,6 +148,33 @@ class ParallelRecordProcessorTest {
     }
 
     @Test
+    void processRecords_shouldKeepProcessingAPartitionKeyAfterAnError() throws Exception {
+        consumer.errorsBySequence.add("hot-0");
+        ParallelRecordProcessor processor = processor(new Semaphore(12, true), CHECKPOINT_EVERY_BATCH);
+
+        processor.processRecords(batch(sameKeyRecords("hot", 2)));
+        awaitCheckpoint(processor, "hot-1");
+
+        assertEquals(List.of("hot-1"), consumer.processedSequenceNumbers());
+    }
+
+    @Test
+    void shutdownRequested_shouldNotStartTheRecordsStillQueuedBehindTheirPartitionKey() throws Exception {
+        Semaphore slots = new Semaphore(12, true);
+        ParallelRecordProcessor processor = processor(slots, new ParallelRecordProcessor.Timings(Duration.ofSeconds(60), Duration.ofMillis(100)));
+        consumer.gate("hot-0");
+        processor.processRecords(batch(sameKeyRecords("hot", 3)));
+        await().atMost(TIMEOUT).until(() -> consumer.inFlight.get() == 1);
+
+        processor.shutdownRequested(ShutdownRequestedInput.builder().checkpointer(checkpointer).build());
+        consumer.release("hot-0");
+
+        await().atMost(TIMEOUT).until(() -> slots.availablePermits() == 12);
+        assertEquals(List.of("hot-0"), consumer.processedSequenceNumbers());
+        verify(checkpointer, never()).checkpoint(anyString(), anyLong());
+    }
+
+    @Test
     void processRecords_shouldProcessTheRecordsOfAPartitionKeyInParallelWhenTheOrderIsDisabled() {
         orderedByPartitionKey = false;
         ParallelRecordProcessor processor = processor(new Semaphore(12, true), CHECKPOINT_EVERY_BATCH);

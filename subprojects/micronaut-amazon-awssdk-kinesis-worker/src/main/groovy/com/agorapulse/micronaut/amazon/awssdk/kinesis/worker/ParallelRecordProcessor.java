@@ -36,10 +36,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.Semaphore;
@@ -62,7 +60,11 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
     /**
      * Records the worker processes at once, attempts a record gets, and whether the order of a partition key is kept.
      */
-    record Settings(int concurrency, int maxAttempts, boolean orderedByPartitionKey) { }
+    record Settings(int concurrency, int maxAttempts, boolean orderedByPartitionKey) {
+        Settings {
+            maxAttempts = Math.max(1, maxAttempts);
+        }
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ParallelRecordProcessor.class);
 
@@ -81,12 +83,13 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
     private final Timings timings;
 
     private final ConcurrentLinkedQueue<Tracked> inFlight = new ConcurrentLinkedQueue<>();
-    private final Map<String, CompletableFuture<Boolean>> lastByPartitionKey = new ConcurrentHashMap<>();
+    private final Map<String, Tracked> lastByPartitionKey = new ConcurrentHashMap<>();
     private String shardId = "";
     private long nextCheckpointTimeInMillis;
     private KinesisClientRecord lastCompleted;
     private KinesisClientRecord lastCheckpointed;
     private volatile boolean checkpointingSuspended;
+    private volatile boolean stopped;
 
     ParallelRecordProcessor(
         BiConsumer<String, KinesisClientRecord> consumer,
@@ -114,7 +117,8 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
         LOGGER.info("[{}] Initialized at sequence {}", shardId, input.extendedSequenceNumber());
     }
 
-    // Blocks the shard thread while the shard has as many unfinished records as the concurrency, so the KCL stops reading it.
+    // Blocks the shard thread while every slot is busy or the shard has as many unfinished records as the concurrency,
+    // so the KCL stops reading this shard until a record finishes.
     @Override
     public void processRecords(ProcessRecordsInput input) {
         for (KinesisClientRecord kinesisRecord : input.records()) {
@@ -135,6 +139,7 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
 
     @Override
     public void leaseLost(LeaseLostInput input) {
+        stopped = true;
         LOGGER.info("[{}] Lease lost with {} records in flight", shardId, inFlight.size());
     }
 
@@ -157,10 +162,11 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
         if (!drain(timings.shutdownDrainTimeout())) {
             LOGGER.warn("[{}] Shutting down with {} records still in flight, they will be processed again", shardId, inFlight.size());
         }
+        stopped = true;
         checkpointCompleted(input.checkpointer());
     }
 
-    // An Error escaping the handler still marks the record done, otherwise it would hold the checkpoint forever.
+    // The shard thread takes the slot itself, so the shards of a worker share the slots fairly.
     private boolean submit(KinesisClientRecord kinesisRecord) {
         try {
             pending.acquire();
@@ -170,58 +176,83 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
         }
         Tracked tracked = new Tracked(kinesisRecord);
         inFlight.add(tracked);
-        String partitionKey = Objects.requireNonNullElse(kinesisRecord.partitionKey(), "");
-        CompletableFuture<Boolean> previous = orderedByPartitionKey ? lastByPartitionKey.get(partitionKey) : null;
-        CompletableFuture<Boolean> current = new CompletableFuture<>();
-        if (orderedByPartitionKey) {
-            lastByPartitionKey.put(partitionKey, current);
+        if (orderedByPartitionKey && queuedBehindItsPartitionKey(tracked)) {
+            return true;
         }
         try {
-            executor.execute(() -> {
-                boolean interrupted = false;
-                try {
-                    interrupted = !processInOrder(previous, kinesisRecord);
-                } finally {
-                    tracked.done = !interrupted;
-                    lastByPartitionKey.remove(partitionKey, current);
-                    current.complete(!interrupted);
-                    pending.release();
-                }
-            });
+            slots.acquire();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            abandon(tracked);
+            return false;
+        }
+        try {
+            executor.execute(() -> run(tracked));
         } catch (RejectedExecutionException e) {
-            inFlight.remove(tracked);
-            lastByPartitionKey.remove(partitionKey, current);
-            current.complete(false);
-            pending.release();
+            slots.release();
+            abandon(tracked);
             return false;
         }
         return true;
     }
 
-    // Waits for the previous record of the partition key before taking a slot, so a busy key only ever holds one slot.
-    private boolean processInOrder(CompletableFuture<Boolean> previous, KinesisClientRecord kinesisRecord) {
-        try {
-            if (previous != null && !previous.get()) {
-                return false;
+    // The link is set under the map's lock, so the thread running the partition key always sees the record queued behind.
+    private boolean queuedBehindItsPartitionKey(Tracked tracked) {
+        Tracked[] previous = new Tracked[1];
+        lastByPartitionKey.compute(tracked.partitionKey(), (key, last) -> {
+            previous[0] = last;
+            if (last != null) {
+                last.next = tracked;
             }
-            slots.acquire();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            suspendCheckpointing("record " + kinesisRecord.sequenceNumber() + " was interrupted before being processed");
-            return false;
-        } catch (ExecutionException e) {
-            return false;
-        }
+            return tracked;
+        });
+        return previous[0] != null;
+    }
+
+    private void abandon(Tracked tracked) {
+        inFlight.remove(tracked);
+        lastByPartitionKey.remove(tracked.partitionKey(), tracked);
+        pending.release();
+    }
+
+    // Runs the record, then the records of its partition key queued behind it, on the same slot: a busy key holds one slot.
+    private void run(Tracked first) {
         try {
-            return processWithRetries(kinesisRecord);
+            boolean interrupted = false;
+            for (Tracked current = first; current != null; current = next(current)) {
+                if (!interrupted && !stopped) {
+                    interrupted = !process(current);
+                }
+                pending.release();
+            }
         } finally {
             slots.release();
         }
     }
 
+    // An Error escaping the handler still marks the record done, otherwise it would hold the checkpoint and its key forever.
+    private boolean process(Tracked tracked) {
+        try {
+            tracked.done = processWithRetries(tracked.kinesisRecord);
+        } catch (Throwable error) {
+            LOGGER.error("[{}] Dropping record {} after an unexpected error", shardId, tracked.kinesisRecord.sequenceNumber(), error);
+            tracked.done = true;
+        }
+        return tracked.done;
+    }
+
+    private Tracked next(Tracked current) {
+        if (!orderedByPartitionKey) {
+            return null;
+        }
+        Tracked last = lastByPartitionKey.compute(current.partitionKey(), (key, tail) -> tail == current ? null : tail);
+        return last == null ? null : current.next;
+    }
+
     // The KCL skips the rest of a batch whose records could not be submitted, so no later checkpoint may pass them.
     private void suspendCheckpointing(String reason) {
         checkpointingSuspended = true;
+        stopped = true;
         inFlight.clear();
         LOGGER.error("[{}] Checkpointing suspended until the lease is taken over: {}", shardId, reason);
     }
@@ -296,9 +327,14 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
     private static final class Tracked {
         private final KinesisClientRecord kinesisRecord;
         private volatile boolean done;
+        private volatile Tracked next;
 
         private Tracked(KinesisClientRecord kinesisRecord) {
             this.kinesisRecord = kinesisRecord;
+        }
+
+        private String partitionKey() {
+            return Objects.requireNonNullElse(kinesisRecord.partitionKey(), "");
         }
     }
 }

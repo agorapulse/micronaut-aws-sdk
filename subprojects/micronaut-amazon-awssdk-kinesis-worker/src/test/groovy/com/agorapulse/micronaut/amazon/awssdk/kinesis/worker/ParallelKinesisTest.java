@@ -34,6 +34,7 @@ import jakarta.inject.Inject;
 @Property(name = "aws.kinesis.stream", value = KinesisTest.TEST_STREAM)
 @Property(name = "aws.kinesis.listener.stream", value = KinesisTest.TEST_STREAM)
 @Property(name = "aws.kinesis.listener.concurrency", value = "4")
+@Property(name = "aws.kinesis.listener.max-attempts", value = "3")
 @Property(name = "aws.kinesis.listener.failover-time-millis", value = "1000")
 @Property(name = "aws.kinesis.listener.shard-sync-interval-millis", value = "1000")
 @Property(name = "aws.kinesis.listener.parent-shard-poll-interval-millis", value = "1000")
@@ -45,6 +46,7 @@ public class ParallelKinesisTest extends KinesisTest {
     @Test
     public void testParallelWorkerIsSelected() {
         Assertions.assertEquals(4, configuration.getConcurrency());
+        Assertions.assertEquals(3, configuration.getMaxAttempts());
         Assertions.assertTrue(configuration.isOrderedByPartitionKey());
         Assertions.assertInstanceOf(ParallelKinesisWorker.class, workerFactory.create(configuration));
     }
