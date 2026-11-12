@@ -42,6 +42,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.function.BiConsumer;
+import java.util.function.BooleanSupplier;
 
 /**
  * Processes each record on a virtual thread, bounded by the slots shared across the task's shards, and checkpoints
@@ -81,6 +82,7 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
     private final ApplicationEventPublisher<ProcessRecordsEvent> eventPublisher;
     private final String stream;
     private final Timings timings;
+    private final BooleanSupplier workerShuttingDown;
 
     private final ConcurrentLinkedQueue<Tracked> inFlight = new ConcurrentLinkedQueue<>();
     private final Map<String, Tracked> lastByPartitionKey = new ConcurrentHashMap<>();
@@ -98,7 +100,8 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
         Settings settings,
         ApplicationEventPublisher<ProcessRecordsEvent> eventPublisher,
         String stream,
-        Timings timings
+        Timings timings,
+        BooleanSupplier workerShuttingDown
     ) {
         this.consumer = consumer;
         this.executor = executor;
@@ -109,6 +112,7 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
         this.eventPublisher = eventPublisher;
         this.stream = stream;
         this.timings = timings;
+        this.workerShuttingDown = workerShuttingDown;
     }
 
     @Override
@@ -118,10 +122,16 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
     }
 
     // Blocks the shard thread while every slot is busy or the shard has as many unfinished records as the concurrency,
-    // so the KCL stops reading this shard until a record finishes.
+    // so the KCL stops reading this shard until a record finishes. The records left when the worker shuts down are not
+    // started: no checkpoint passes them, so the next owner of the lease processes them.
     @Override
     public void processRecords(ProcessRecordsInput input) {
         for (KinesisClientRecord kinesisRecord : input.records()) {
+            if (workerShuttingDown.getAsBoolean()) {
+                LOGGER.info("[{}] Worker shutting down, leaving the records from {} for the next owner of the lease", shardId, kinesisRecord.sequenceNumber());
+                return;
+            }
+            checkpointIfDue(input.checkpointer());
             if (!submit(kinesisRecord)) {
                 suspendCheckpointing("record " + kinesisRecord.sequenceNumber() + " could not be submitted");
                 return;
@@ -130,9 +140,12 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
         if (!input.records().isEmpty()) {
             eventPublisher.publishEventAsync(new ProcessRecordsEvent(stream, shardId, input.millisBehindLatest(), input.records().size()));
         }
+        checkpointIfDue(input.checkpointer());
+    }
 
+    private void checkpointIfDue(RecordProcessorCheckpointer checkpointer) {
         if (System.currentTimeMillis() >= nextCheckpointTimeInMillis) {
-            checkpointCompleted(input.checkpointer());
+            checkpointCompleted(checkpointer);
             nextCheckpointTimeInMillis = System.currentTimeMillis() + timings.checkpointInterval().toMillis();
         }
     }
@@ -147,7 +160,7 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
     @Override
     public void shardEnded(ShardEndedInput input) {
         if (checkpointingSuspended || !drain(SHARD_END_DRAIN_TIMEOUT)) {
-            LOGGER.error("[{}] Shard ended with {} records still in flight or checkpointing suspended, leaving the shard end for later", shardId, inFlight.size());
+            LOGGER.warn("[{}] Shard ended with {} records still in flight or checkpointing suspended, leaving the shard end for later", shardId, inFlight.size());
             return;
         }
         try {
@@ -175,7 +188,9 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
             return false;
         }
         Tracked tracked = new Tracked(kinesisRecord);
-        inFlight.add(tracked);
+        if (!checkpointingSuspended) {
+            inFlight.add(tracked);
+        }
         if (orderedByPartitionKey && queuedBehindItsPartitionKey(tracked)) {
             return true;
         }
@@ -250,9 +265,9 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
     }
 
     // The KCL skips the rest of a batch whose records could not be submitted, so no later checkpoint may pass them.
+    // The records keep being processed, untracked, until the lease is taken over.
     private void suspendCheckpointing(String reason) {
         checkpointingSuspended = true;
-        stopped = true;
         inFlight.clear();
         LOGGER.error("[{}] Checkpointing suspended until the lease is taken over: {}", shardId, reason);
     }
@@ -264,6 +279,10 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
                 consumer.accept(data, kinesisRecord);
                 return true;
             } catch (Exception e) {
+                if (Thread.currentThread().isInterrupted()) {
+                    suspendCheckpointing("record " + kinesisRecord.sequenceNumber() + " was interrupted while being processed");
+                    return false;
+                }
                 if (attempt == maxAttempts) {
                     LOGGER.error("[{}] Dropping record {} after {} attempt(s)", shardId, kinesisRecord.sequenceNumber(), attempt, e);
                 } else {
@@ -288,10 +307,12 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
         }
     }
 
-    // Only the shard thread polls the queue, the processing threads only flag their record as done.
+    // Only the shard thread adds and polls; a processing thread flags its record as done, or clears the queue when it
+    // suspends checkpointing, which the check below covers.
     private void checkpointCompleted(RecordProcessorCheckpointer checkpointer) {
-        while (inFlight.peek() != null && inFlight.peek().done) {
-            lastCompleted = inFlight.poll().kinesisRecord;
+        for (Tracked head = inFlight.peek(); head != null && head.done; head = inFlight.peek()) {
+            inFlight.poll();
+            lastCompleted = head.kinesisRecord;
         }
         if (checkpointingSuspended || lastCompleted == null || lastCompleted == lastCheckpointed) {
             return;

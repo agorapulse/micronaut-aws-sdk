@@ -190,7 +190,8 @@ aws:
 
 Each record is processed on its own virtual thread. The checkpoint only advances behind the oldest record still being processed and the shutdown
 waits for the records in flight, so a record is never skipped when the application stops. The delivery is at least once: the records processed after
-the oldest one in flight are processed again after a crash.
+the oldest one in flight are processed again after a crash. A failed record is retried as a whole: when several methods listen to the same
+configuration, all of them receive the record again.
 
 By default, the records sharing a partition key are still processed one at a time, in the order of the shard. Only the records of different
 partition keys are processed in parallel, so the finer the partition key, the more the processing is parallelized.

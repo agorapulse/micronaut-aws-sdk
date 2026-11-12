@@ -37,6 +37,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
 /**
@@ -63,6 +64,7 @@ class ParallelKinesisWorker implements KinesisWorker {
         .name("kinesis-record-", 0)
         .uncaughtExceptionHandler((thread, error) -> LOGGER.error("Unexpected error while processing a Kinesis record", error))
         .factory());
+    private final AtomicBoolean shuttingDown = new AtomicBoolean();
     private Scheduler scheduler;
 
     ParallelKinesisWorker(
@@ -94,7 +96,7 @@ class ParallelKinesisWorker implements KinesisWorker {
             amazonDynamoDB,
             amazonKinesis,
             amazonCloudWatch,
-            () -> new ParallelRecordProcessor(this::dispatch, recordExecutor, slots, settings, processRecordsEventPublisher, stream, ParallelRecordProcessor.Timings.DEFAULT)
+            () -> new ParallelRecordProcessor(this::dispatch, recordExecutor, slots, settings, processRecordsEventPublisher, stream, ParallelRecordProcessor.Timings.DEFAULT, shuttingDown::get)
         );
         PollingConfig pollingConfig = new PollingConfig(stream, configsBuilder.kinesisClient());
         scheduler = new Scheduler(
@@ -104,7 +106,8 @@ class ParallelKinesisWorker implements KinesisWorker {
             configsBuilder.leaseManagementConfig(),
             configsBuilder.lifecycleConfig(),
             configsBuilder.metricsConfig(),
-            configsBuilder.processorConfig(),
+            // the processor checkpoints on the calls for empty batches, once the records of a quiet shard are done
+            configsBuilder.processorConfig().callProcessRecordsEvenForEmptyRecordList(true),
             configsBuilder.retrievalConfig().retrievalSpecificConfig(pollingConfig)
         );
         LOGGER.info("Starting parallel Kinesis worker for {} with {}", stream, settings);
@@ -113,13 +116,17 @@ class ParallelKinesisWorker implements KinesisWorker {
 
     @Override
     public void shutdown() {
+        shuttingDown.set(true);
         if (scheduler != null) {
+            boolean graceful = false;
             try {
-                scheduler.startGracefulShutdown().get(GRACEFUL_SHUTDOWN_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+                graceful = scheduler.startGracefulShutdown().get(GRACEFUL_SHUTDOWN_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             } catch (ExecutionException | TimeoutException e) {
                 LOGGER.warn("Graceful shutdown of the Kinesis worker for {} did not complete", configuration.getStream(), e);
+            }
+            if (!graceful) {
                 scheduler.shutdown();
             }
         }

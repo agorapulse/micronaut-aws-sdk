@@ -81,6 +81,7 @@ class ParallelRecordProcessorTest {
     private int concurrency = 12;
     private int maxAttempts = 2;
     private boolean orderedByPartitionKey = true;
+    private volatile boolean workerShuttingDown;
     private final GatedConsumer consumer = new GatedConsumer();
     private ExecutorService executor;
 
@@ -171,6 +172,47 @@ class ParallelRecordProcessorTest {
 
         await().atMost(TIMEOUT).until(() -> slots.availablePermits() == 12);
         assertEquals(List.of("hot-0"), consumer.processedSequenceNumbers());
+        verify(checkpointer, never()).checkpoint(anyString(), anyLong());
+    }
+
+    @Test
+    void processRecords_shouldLeaveTheRecordsOfABatchWhenTheWorkerShutsDown() throws Exception {
+        ParallelRecordProcessor processor = processor(new Semaphore(12, true), CHECKPOINT_ONCE);
+        processor.processRecords(batch(records("before", 1)));
+        awaitProcessed(1);
+        workerShuttingDown = true;
+
+        processor.processRecords(batch(records("after", 3)));
+        processor.shutdownRequested(ShutdownRequestedInput.builder().checkpointer(checkpointer).build());
+
+        assertEquals(List.of("before-0"), consumer.processedSequenceNumbers());
+        verify(checkpointer).checkpoint("before-0", 0L);
+        verifyNoMoreInteractions(checkpointer);
+    }
+
+    @Test
+    void processRecords_shouldCheckpointWhileABatchIsStillBeingSubmitted() throws Exception {
+        ParallelRecordProcessor processor = processor(new Semaphore(1, true), CHECKPOINT_EVERY_BATCH);
+        consumer.gate("long-1");
+
+        CompletableFuture<Void> submission = CompletableFuture.runAsync(() -> processor.processRecords(batch(records("long", 3))));
+        await().atMost(TIMEOUT).untilAsserted(() -> verify(checkpointer).checkpoint("long-0", 0L));
+        assertFalse(submission.isDone());
+
+        consumer.release("long-1");
+        submission.join();
+    }
+
+    @Test
+    void processRecords_shouldSuspendCheckpointingWhenTheLastAttemptIsInterrupted() throws Exception {
+        maxAttempts = 1;
+        consumer.interruptedSequences.add("key-0");
+        ParallelRecordProcessor processor = processor(new Semaphore(12, true), CHECKPOINT_EVERY_BATCH);
+
+        processor.processRecords(batch(records("key", 1)));
+        await().atMost(TIMEOUT).until(() -> consumer.attempts.containsKey("key-0"));
+        processor.shutdownRequested(ShutdownRequestedInput.builder().checkpointer(checkpointer).build());
+
         verify(checkpointer, never()).checkpoint(anyString(), anyLong());
     }
 
@@ -325,11 +367,11 @@ class ParallelRecordProcessorTest {
         ParallelRecordProcessor processor = processor(new Semaphore(12, true), CHECKPOINT_ONCE);
         consumer.gate("key-0");
         processor.processRecords(batch(records("key", 1)));
+        await().atMost(TIMEOUT).until(() -> consumer.inFlight.get() == 1);
 
         processor.leaseLost(LeaseLostInput.builder().build());
         CompletableFuture<Void> shardEnd = CompletableFuture.runAsync(() ->
                 processor.shardEnded(ShardEndedInput.builder().checkpointer(checkpointer).build()));
-        await().atMost(TIMEOUT).until(() -> consumer.inFlight.get() == 1);
         assertFalse(shardEnd.isDone());
 
         consumer.release("key-0");
@@ -395,7 +437,7 @@ class ParallelRecordProcessorTest {
     }
 
     private ParallelRecordProcessor processor(Semaphore slots, ParallelRecordProcessor.Timings timings) {
-        ParallelRecordProcessor processor = new ParallelRecordProcessor(consumer, executor, slots, new ParallelRecordProcessor.Settings(concurrency, maxAttempts, orderedByPartitionKey), eventPublisher, STREAM, timings);
+        ParallelRecordProcessor processor = new ParallelRecordProcessor(consumer, executor, slots, new ParallelRecordProcessor.Settings(concurrency, maxAttempts, orderedByPartitionKey), eventPublisher, STREAM, timings, () -> workerShuttingDown);
         processor.initialize(InitializationInput.builder().shardId(SHARD).extendedSequenceNumber(ExtendedSequenceNumber.TRIM_HORIZON).build());
         return processor;
     }
@@ -443,6 +485,7 @@ class ParallelRecordProcessorTest {
         final Map<String, AtomicInteger> attempts = new ConcurrentHashMap<>();
         final Map<String, AtomicInteger> failuresBySequence = new ConcurrentHashMap<>();
         final Set<String> errorsBySequence = ConcurrentHashMap.newKeySet();
+        final Set<String> interruptedSequences = ConcurrentHashMap.newKeySet();
         final Map<String, CountDownLatch> gates = new ConcurrentHashMap<>();
         final AtomicInteger inFlight = new AtomicInteger();
         final AtomicInteger maxInFlight = new AtomicInteger();
@@ -470,6 +513,10 @@ class ParallelRecordProcessorTest {
         @Override
         public void accept(String data, KinesisClientRecord kinesisRecord) {
             attempts.computeIfAbsent(kinesisRecord.sequenceNumber(), k -> new AtomicInteger()).incrementAndGet();
+            if (interruptedSequences.contains(kinesisRecord.sequenceNumber())) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("interrupted " + kinesisRecord.sequenceNumber());
+            }
             if (errorsBySequence.contains(kinesisRecord.sequenceNumber())) {
                 throw new NoClassDefFoundError("failing " + kinesisRecord.sequenceNumber());
             }
