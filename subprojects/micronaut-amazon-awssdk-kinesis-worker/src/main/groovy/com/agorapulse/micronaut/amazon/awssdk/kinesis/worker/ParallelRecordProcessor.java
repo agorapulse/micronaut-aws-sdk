@@ -90,7 +90,7 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
     private long nextCheckpointTimeInMillis;
     private KinesisClientRecord lastCompleted;
     private KinesisClientRecord lastCheckpointed;
-    private volatile boolean checkpointingSuspended;
+    private boolean recordsLeft;
     private volatile boolean stopped;
 
     ParallelRecordProcessor(
@@ -122,20 +122,22 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
     }
 
     // Blocks the shard thread while every slot is busy or the shard has as many unfinished records as the concurrency,
-    // so the KCL stops reading this shard until a record finishes. The records left when the worker shuts down are not
-    // started: no checkpoint passes them, so the next owner of the lease processes them.
+    // so the KCL stops reading this shard until a record finishes.
     @Override
     public void processRecords(ProcessRecordsInput input) {
         for (KinesisClientRecord kinesisRecord : input.records()) {
-            if (workerShuttingDown.getAsBoolean()) {
-                LOGGER.info("[{}] Worker shutting down, leaving the records from {} for the next owner of the lease", shardId, kinesisRecord.sequenceNumber());
+            if (recordsLeft) {
                 return;
             }
             checkpointIfDue(input.checkpointer());
-            if (!submit(kinesisRecord)) {
-                suspendCheckpointing("record " + kinesisRecord.sequenceNumber() + " could not be submitted");
-                return;
+            if (workerShuttingDown.getAsBoolean()) {
+                leaveRecordsFrom(kinesisRecord, "the worker is shutting down");
+            } else if (!submit(kinesisRecord)) {
+                leaveRecordsFrom(kinesisRecord, "the record could not be submitted");
             }
+        }
+        if (recordsLeft) {
+            return;
         }
         if (!input.records().isEmpty()) {
             eventPublisher.publishEventAsync(new ProcessRecordsEvent(stream, shardId, input.millisBehindLatest(), input.records().size()));
@@ -143,11 +145,11 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
         checkpointIfDue(input.checkpointer());
     }
 
-    private void checkpointIfDue(RecordProcessorCheckpointer checkpointer) {
-        if (System.currentTimeMillis() >= nextCheckpointTimeInMillis) {
-            checkpointCompleted(checkpointer);
-            nextCheckpointTimeInMillis = System.currentTimeMillis() + timings.checkpointInterval().toMillis();
-        }
+    // The KCL never delivers a record twice to a processor: once a record is left, none of the following ones is
+    // started, so the checkpoint stays behind it and the next owner of the lease processes them all.
+    private void leaveRecordsFrom(KinesisClientRecord kinesisRecord, String reason) {
+        recordsLeft = true;
+        LOGGER.warn("[{}] Leaving the records from {} for the next owner of the lease: {}", shardId, kinesisRecord.sequenceNumber(), reason);
     }
 
     @Override
@@ -159,8 +161,8 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
     // Without the shard-end checkpoint the KCL fails the shutdown and calls this again later.
     @Override
     public void shardEnded(ShardEndedInput input) {
-        if (checkpointingSuspended || !drain(SHARD_END_DRAIN_TIMEOUT)) {
-            LOGGER.warn("[{}] Shard ended with {} records still in flight or checkpointing suspended, leaving the shard end for later", shardId, inFlight.size());
+        if (recordsLeft || !drain(SHARD_END_DRAIN_TIMEOUT)) {
+            LOGGER.warn("[{}] Shard ended with {} records still in flight or records left unprocessed, leaving the shard end for later", shardId, inFlight.size());
             return;
         }
         try {
@@ -179,6 +181,13 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
         checkpointCompleted(input.checkpointer());
     }
 
+    private void checkpointIfDue(RecordProcessorCheckpointer checkpointer) {
+        if (System.currentTimeMillis() >= nextCheckpointTimeInMillis) {
+            checkpointCompleted(checkpointer);
+            nextCheckpointTimeInMillis = System.currentTimeMillis() + timings.checkpointInterval().toMillis();
+        }
+    }
+
     // The shard thread takes the slot itself, so the shards of a worker share the slots fairly.
     private boolean submit(KinesisClientRecord kinesisRecord) {
         try {
@@ -188,9 +197,7 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
             return false;
         }
         Tracked tracked = new Tracked(kinesisRecord);
-        if (!checkpointingSuspended) {
-            inFlight.add(tracked);
-        }
+        inFlight.add(tracked);
         if (orderedByPartitionKey && queuedBehindItsPartitionKey(tracked)) {
             return true;
         }
@@ -231,12 +238,12 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
     }
 
     // Runs the record, then the records of its partition key queued behind it, on the same slot: a busy key holds one slot.
+    // Once stopped, the queued records are not started and stay unfinished, so no checkpoint passes them.
     private void run(Tracked first) {
         try {
-            boolean interrupted = false;
             for (Tracked current = first; current != null; current = next(current)) {
-                if (!interrupted && !stopped) {
-                    interrupted = !process(current);
+                if (!stopped) {
+                    process(current);
                 }
                 pending.release();
             }
@@ -246,14 +253,14 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
     }
 
     // An Error escaping the handler still marks the record done, otherwise it would hold the checkpoint and its key forever.
-    private boolean process(Tracked tracked) {
+    private void process(Tracked tracked) {
         try {
-            tracked.done = processWithRetries(tracked.kinesisRecord);
+            processWithRetries(tracked.kinesisRecord);
         } catch (Throwable error) {
             LOGGER.error("[{}] Dropping record {} after an unexpected error", shardId, tracked.kinesisRecord.sequenceNumber(), error);
+        } finally {
             tracked.done = true;
         }
-        return tracked.done;
     }
 
     private Tracked next(Tracked current) {
@@ -264,57 +271,40 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
         return last == null ? null : current.next;
     }
 
-    // The KCL skips the rest of a batch whose records could not be submitted, so no later checkpoint may pass them.
-    // The records keep being processed, untracked, until the lease is taken over.
-    private void suspendCheckpointing(String reason) {
-        checkpointingSuspended = true;
-        inFlight.clear();
-        LOGGER.error("[{}] Checkpointing suspended until the lease is taken over: {}", shardId, reason);
-    }
-
-    private boolean processWithRetries(KinesisClientRecord kinesisRecord) {
+    // An interruption of the handler counts as a failed attempt; the flag is cleared so it does not fail the next ones.
+    private void processWithRetries(KinesisClientRecord kinesisRecord) {
         String data = StandardCharsets.UTF_8.decode(kinesisRecord.data()).toString();
         for (int attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
                 consumer.accept(data, kinesisRecord);
-                return true;
+                return;
             } catch (Exception e) {
-                if (Thread.currentThread().isInterrupted()) {
-                    suspendCheckpointing("record " + kinesisRecord.sequenceNumber() + " was interrupted while being processed");
-                    return false;
-                }
+                Thread.interrupted();
                 if (attempt == maxAttempts) {
                     LOGGER.error("[{}] Dropping record {} after {} attempt(s)", shardId, kinesisRecord.sequenceNumber(), attempt, e);
                 } else {
                     LOGGER.warn("[{}] Retrying record {} after attempt {}", shardId, kinesisRecord.sequenceNumber(), attempt, e);
-                    if (!backoff()) {
-                        suspendCheckpointing("record " + kinesisRecord.sequenceNumber() + " was interrupted before its retry");
-                        return false;
-                    }
+                    backoff();
                 }
             }
         }
-        return true;
     }
 
-    private static boolean backoff() {
+    private static void backoff() {
         try {
             Thread.sleep(RETRY_BACKOFF_MILLIS);
-            return true;
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return false;
+            // the next attempt runs without waiting
         }
     }
 
-    // Only the shard thread adds and polls; a processing thread flags its record as done, or clears the queue when it
-    // suspends checkpointing, which the check below covers.
+    // Only the shard thread adds to the queue and polls it, the processing threads only flag their record as done.
     private void checkpointCompleted(RecordProcessorCheckpointer checkpointer) {
         for (Tracked head = inFlight.peek(); head != null && head.done; head = inFlight.peek()) {
             inFlight.poll();
             lastCompleted = head.kinesisRecord;
         }
-        if (checkpointingSuspended || lastCompleted == null || lastCompleted == lastCheckpointed) {
+        if (lastCompleted == null || lastCompleted == lastCheckpointed) {
             return;
         }
         try {

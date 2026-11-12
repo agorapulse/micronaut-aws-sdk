@@ -101,7 +101,7 @@ class ParallelRecordProcessorStressTest {
             shards.add(CompletableFuture.runAsync(() -> feedShard(shardIndex, slots, settings, timings, recorder)));
         }
         CompletableFuture.allOf(shards.toArray(CompletableFuture[]::new)).join();
-        assertEquals(SLOTS, slots.availablePermits());
+        await().atMost(TIMEOUT).until(() -> slots.availablePermits() == SLOTS);
         return recorder;
     }
 

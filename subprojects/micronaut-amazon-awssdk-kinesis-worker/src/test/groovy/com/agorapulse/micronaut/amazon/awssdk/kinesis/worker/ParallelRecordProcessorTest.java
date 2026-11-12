@@ -204,16 +204,28 @@ class ParallelRecordProcessorTest {
     }
 
     @Test
-    void processRecords_shouldSuspendCheckpointingWhenTheLastAttemptIsInterrupted() throws Exception {
-        maxAttempts = 1;
-        consumer.interruptedSequences.add("key-0");
+    void processRecords_shouldCountAnInterruptedHandlerAsAFailedAttemptAndKeepItsPartitionKeyGoing() throws Exception {
+        consumer.interruptedSequences.add("hot-0");
         ParallelRecordProcessor processor = processor(new Semaphore(12, true), CHECKPOINT_EVERY_BATCH);
 
-        processor.processRecords(batch(records("key", 1)));
-        await().atMost(TIMEOUT).until(() -> consumer.attempts.containsKey("key-0"));
-        processor.shutdownRequested(ShutdownRequestedInput.builder().checkpointer(checkpointer).build());
+        processor.processRecords(batch(sameKeyRecords("hot", 2)));
+        awaitCheckpoint(processor, "hot-1");
 
-        verify(checkpointer, never()).checkpoint(anyString(), anyLong());
+        assertEquals(2, consumer.attempts.get("hot-0").get());
+        assertEquals(List.of("hot-1"), consumer.processedSequenceNumbers());
+        assertEquals(Set.of(), consumer.interruptedOnEntry);
+    }
+
+    @Test
+    void shardEnded_shouldNotCheckpointTheEndWhenRecordsWereLeft() throws Exception {
+        ParallelRecordProcessor processor = processor(new Semaphore(12, true), CHECKPOINT_EVERY_BATCH);
+        workerShuttingDown = true;
+
+        processor.processRecords(batch(records("left", 2)));
+        processor.shardEnded(ShardEndedInput.builder().checkpointer(checkpointer).build());
+
+        assertTrue(consumer.processed.isEmpty());
+        verifyNoMoreInteractions(checkpointer);
     }
 
     @Test
@@ -307,20 +319,6 @@ class ParallelRecordProcessorTest {
     }
 
     @Test
-    void processRecords_shouldSuspendCheckpointingWhenARetryIsInterrupted() throws Exception {
-        consumer.failuresBySequence.put("key-0", new AtomicInteger(1));
-        ParallelRecordProcessor processor = processor(new Semaphore(12, true), CHECKPOINT_EVERY_BATCH);
-
-        processor.processRecords(batch(records("key", 1)));
-        await().atMost(TIMEOUT).until(() -> consumer.attempts.containsKey("key-0"));
-        executor.shutdownNow();
-        processor.shutdownRequested(ShutdownRequestedInput.builder().checkpointer(checkpointer).build());
-
-        assertTrue(consumer.processed.isEmpty());
-        verify(checkpointer, never()).checkpoint(anyString(), anyLong());
-    }
-
-    @Test
     void processRecords_shouldCheckpointAtMostOncePerInterval() throws Exception {
         ParallelRecordProcessor processor = processor(new Semaphore(12, true), CHECKPOINT_ONCE);
 
@@ -382,11 +380,11 @@ class ParallelRecordProcessorTest {
     }
 
     @Test
-    void processRecords_shouldSuspendCheckpointingWhenARecordCannotBeSubmitted() {
+    void processRecords_shouldLeaveTheRecordsThatCannotBeSubmitted() {
         Semaphore slots = new Semaphore(12, true);
         ParallelRecordProcessor processor = processor(slots, CHECKPOINT_EVERY_BATCH);
         processor.processRecords(batch(records("key", 1)));
-        awaitProcessed(1);
+        awaitCheckpoint(processor, "key-0");
         executor.shutdown();
         clearInvocations(checkpointer);
 
@@ -403,12 +401,12 @@ class ParallelRecordProcessorTest {
         doThrow(new ThrottlingException("throttled")).doNothing().when(checkpointer).checkpoint("key-0", 0L);
         ParallelRecordProcessor processor = processor(new Semaphore(12, true), CHECKPOINT_EVERY_BATCH);
         processor.processRecords(batch(records("key", 1)));
-        awaitProcessed(1);
 
+        await().atMost(TIMEOUT).untilAsserted(() -> {
+            processor.processRecords(batch(List.of()));
+            verify(checkpointer, times(2)).checkpoint("key-0", 0L);
+        });
         processor.processRecords(batch(List.of()));
-        processor.processRecords(batch(List.of()));
-        processor.processRecords(batch(List.of()));
-
         verify(checkpointer, times(2)).checkpoint("key-0", 0L);
     }
 
@@ -486,6 +484,7 @@ class ParallelRecordProcessorTest {
         final Map<String, AtomicInteger> failuresBySequence = new ConcurrentHashMap<>();
         final Set<String> errorsBySequence = ConcurrentHashMap.newKeySet();
         final Set<String> interruptedSequences = ConcurrentHashMap.newKeySet();
+        final Set<String> interruptedOnEntry = ConcurrentHashMap.newKeySet();
         final Map<String, CountDownLatch> gates = new ConcurrentHashMap<>();
         final AtomicInteger inFlight = new AtomicInteger();
         final AtomicInteger maxInFlight = new AtomicInteger();
@@ -513,6 +512,9 @@ class ParallelRecordProcessorTest {
         @Override
         public void accept(String data, KinesisClientRecord kinesisRecord) {
             attempts.computeIfAbsent(kinesisRecord.sequenceNumber(), k -> new AtomicInteger()).incrementAndGet();
+            if (Thread.currentThread().isInterrupted()) {
+                interruptedOnEntry.add(kinesisRecord.sequenceNumber());
+            }
             if (interruptedSequences.contains(kinesisRecord.sequenceNumber())) {
                 Thread.currentThread().interrupt();
                 throw new IllegalStateException("interrupted " + kinesisRecord.sequenceNumber());
