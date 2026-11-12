@@ -45,6 +45,7 @@ public abstract class KinesisClientConfiguration {
     private static final int DEFAULT_INITIAL_LEASE_TABLE_READ_CAPACITY = 10;
     private static final int DEFAULT_INITIAL_LEASE_TABLE_WRITE_CAPACITY = 10;
     private static final int DEFAULT_MAX_LIST_SHARDS_RETRY_ATTEMPTS = 50;
+    private static final int DEFAULT_MAX_ATTEMPTS = 2;
 
     @NotEmpty private final String applicationName;
     @NotEmpty private final String workerId;
@@ -72,6 +73,10 @@ public abstract class KinesisClientConfiguration {
     private int maxListShardsRetryAttempts = DEFAULT_MAX_LIST_SHARDS_RETRY_ATTEMPTS;
 
     private Optional<Long> logWarningForTaskAfterMillis = Optional.empty();
+
+    @Min(0L) private int concurrency;
+    @Min(1L) private int maxAttempts = DEFAULT_MAX_ATTEMPTS;
+    private boolean orderedByPartitionKey = true;
 
     protected KinesisClientConfiguration(@NonNull String applicationName, @NonNull  String workerId, String consumerFilterKey) {
         this.applicationName = applicationName;
@@ -236,6 +241,42 @@ public abstract class KinesisClientConfiguration {
 
     public void setLogWarningForTaskAfterMillis(Optional<Long> logWarningForTaskAfterMillis) {
         this.logWarningForTaskAfterMillis = logWarningForTaskAfterMillis;
+    }
+
+    /**
+     * Enables the parallel processing of the records when greater than zero.
+     *
+     * @param concurrency the number of records processed at once, shared between the shards held by this worker
+     */
+    public void setConcurrency(int concurrency) {
+        this.concurrency = concurrency;
+    }
+
+    /**
+     * @param maxAttempts the attempts a record gets before it is logged and dropped, only used by the parallel processing
+     */
+    public void setMaxAttempts(int maxAttempts) {
+        this.maxAttempts = maxAttempts;
+    }
+
+    /**
+     * @param orderedByPartitionKey whether the parallel processing handles the records sharing a partition key one at a time,
+     *                              in the order of the shard (defaults to <code>true</code>)
+     */
+    public void setOrderedByPartitionKey(boolean orderedByPartitionKey) {
+        this.orderedByPartitionKey = orderedByPartitionKey;
+    }
+
+    public boolean isOrderedByPartitionKey() {
+        return orderedByPartitionKey;
+    }
+
+    public int getConcurrency() {
+        return concurrency;
+    }
+
+    public int getMaxAttempts() {
+        return maxAttempts;
     }
 
     public String getApplicationName() {
