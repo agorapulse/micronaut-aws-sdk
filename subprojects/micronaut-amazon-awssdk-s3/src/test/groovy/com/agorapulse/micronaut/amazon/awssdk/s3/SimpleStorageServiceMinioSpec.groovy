@@ -32,8 +32,8 @@ import java.time.Duration
 class SimpleStorageServiceMinioSpec extends SimpleStorageServiceSpec implements TestPropertyProvider {
 
     private static final int MINIO_PORT = 9000
-    // MinIO no longer publishes to docker.io/minio/minio (the image 404s on pull); quay.io is the maintained registry
-    private static final GenericContainer MINIO_CONTAINER = new GenericContainer<>('quay.io/minio/minio:RELEASE.2025-04-08T15-41-24Z')
+    // MinIO no longer publishes its images (docker.io 404s, quay.io refuses anonymous pulls); Chainguard builds it from source
+    private static final GenericContainer MINIO_CONTAINER = new GenericContainer<>('cgr.dev/chainguard/minio:latest')
         .withCommand('server /data')
         .withEnv([
             MINIO_ACCESS_KEY:'accesskey',
