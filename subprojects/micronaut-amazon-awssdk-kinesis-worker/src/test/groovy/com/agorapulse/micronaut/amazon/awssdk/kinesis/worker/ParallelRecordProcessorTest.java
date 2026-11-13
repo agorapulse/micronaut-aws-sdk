@@ -375,6 +375,29 @@ class ParallelRecordProcessorTest {
     }
 
     @Test
+    void processRecords_shouldForgetTheCompletedRecordsBetweenTwoCheckpoints() throws Exception {
+        ParallelRecordProcessor processor = processor(new Semaphore(12, true), CHECKPOINT_ONCE);
+        consumer.gate("key-1");
+
+        processor.processRecords(batch(records("key", 3)));
+        awaitProcessed(2);
+        await().atMost(TIMEOUT).until(() -> {
+            processor.processRecords(batch(List.of()));
+            return processor.trackedRecords() == 2;
+        });
+
+        consumer.release("key-1");
+        await().atMost(TIMEOUT).until(() -> {
+            processor.processRecords(batch(List.of()));
+            return processor.trackedRecords() == 0;
+        });
+        verify(checkpointer, never()).checkpoint(anyString(), anyLong());
+
+        processor.shutdownRequested(ShutdownRequestedInput.builder().checkpointer(checkpointer).build());
+        verify(checkpointer).checkpoint("key-2", 0L);
+    }
+
+    @Test
     void shutdownRequested_shouldWaitForInFlightRecordsThenCheckpoint() throws Exception {
         ParallelRecordProcessor processor = processor(new Semaphore(12, true), CHECKPOINT_ONCE);
         consumer.gate("key-0");

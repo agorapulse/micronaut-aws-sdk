@@ -158,14 +158,14 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
     @Override
     public void leaseLost(LeaseLostInput input) {
         stopped = true;
-        LOGGER.info("[{}] Lease lost with {} records in flight", shardId, inFlight.size());
+        LOGGER.info("[{}] Lease lost with {} records in flight", shardId, unfinishedRecords());
     }
 
     // Without the shard-end checkpoint the KCL fails the shutdown and calls this again later.
     @Override
     public void shardEnded(ShardEndedInput input) {
         if (recordsLeft || !drain(SHARD_END_DRAIN_TIMEOUT)) {
-            LOGGER.warn("[{}] Shard ended with {} records still in flight or records left unprocessed, leaving the shard end for later", shardId, inFlight.size());
+            LOGGER.warn("[{}] Shard ended with {} records still in flight or records left unprocessed, leaving the shard end for later", shardId, unfinishedRecords());
             return;
         }
         try {
@@ -178,13 +178,14 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
     @Override
     public void shutdownRequested(ShutdownRequestedInput input) {
         if (!drain(timings.shutdownDrainTimeout())) {
-            LOGGER.warn("[{}] Shutting down with {} records still in flight, they will be processed again", shardId, inFlight.size());
+            LOGGER.warn("[{}] Shutting down with {} records still in flight, they will be processed again", shardId, unfinishedRecords());
         }
         stopped = true;
         checkpointCompleted(input.checkpointer());
     }
 
     private void checkpointIfDue(RecordProcessorCheckpointer checkpointer) {
+        forgetCompleted();
         if (System.currentTimeMillis() >= nextCheckpointTimeInMillis) {
             checkpointCompleted(checkpointer);
             nextCheckpointTimeInMillis = System.currentTimeMillis() + timings.checkpointInterval().toMillis();
@@ -314,12 +315,16 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
     }
 
     // Only the shard thread adds to the queue and polls it, the processing threads only flag their record as done.
-    // Nothing may escape: the KCL would skip the records of the batch that are not submitted yet.
-    private void checkpointCompleted(RecordProcessorCheckpointer checkpointer) {
+    private void forgetCompleted() {
         for (Tracked head = inFlight.peek(); head != null && head.done; head = inFlight.peek()) {
             inFlight.poll();
             lastCompleted = head.kinesisRecord;
         }
+    }
+
+    // Nothing may escape: the KCL would skip the records of the batch that are not submitted yet.
+    private void checkpointCompleted(RecordProcessorCheckpointer checkpointer) {
+        forgetCompleted();
         if (lastCompleted == null || lastCompleted == lastCheckpointed) {
             return;
         }
@@ -335,6 +340,14 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
         } catch (InvalidStateException | RuntimeException e) {
             LOGGER.error("[{}] Cannot checkpoint at {}, the next one will cover it", shardId, lastCompleted.sequenceNumber(), e);
         }
+    }
+
+    int trackedRecords() {
+        return inFlight.size();
+    }
+
+    private long unfinishedRecords() {
+        return inFlight.stream().filter(tracked -> !tracked.done).count();
     }
 
     private boolean drain(Duration timeout) {
