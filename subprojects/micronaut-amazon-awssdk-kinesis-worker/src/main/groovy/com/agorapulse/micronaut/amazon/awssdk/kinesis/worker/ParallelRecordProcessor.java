@@ -164,7 +164,7 @@ class ParallelRecordProcessor implements ShardRecordProcessor {
     // Without the shard-end checkpoint the KCL fails the shutdown and calls this again later.
     @Override
     public void shardEnded(ShardEndedInput input) {
-        if (recordsLeft || !drain(SHARD_END_DRAIN_TIMEOUT)) {
+        if (recordsLeft || stopped || !drain(SHARD_END_DRAIN_TIMEOUT)) {
             LOGGER.warn("[{}] Shard ended with {} records still in flight or records left unprocessed, leaving the shard end for later", shardId, unfinishedRecords());
             return;
         }

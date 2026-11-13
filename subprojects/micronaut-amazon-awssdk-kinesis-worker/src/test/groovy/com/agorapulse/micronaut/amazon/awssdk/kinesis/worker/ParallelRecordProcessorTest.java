@@ -53,6 +53,7 @@ import java.util.stream.IntStream;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -433,7 +434,6 @@ class ParallelRecordProcessorTest {
         processor.processRecords(batch(records("key", 1)));
         await().atMost(TIMEOUT).until(() -> consumer.inFlight.get() == 1);
 
-        processor.leaseLost(LeaseLostInput.builder().build());
         CompletableFuture<Void> shardEnd = CompletableFuture.runAsync(() ->
                 processor.shardEnded(ShardEndedInput.builder().checkpointer(checkpointer).build()));
         assertFalse(shardEnd.isDone());
@@ -442,7 +442,22 @@ class ParallelRecordProcessorTest {
         shardEnd.join();
         assertEquals(1, consumer.processed.size());
         verify(checkpointer).checkpoint();
+        processor.leaseLost(LeaseLostInput.builder().build());
         verifyNoMoreInteractions(checkpointer);
+    }
+
+    @Test
+    void shardEnded_shouldNotWaitForTheRecordsSkippedOnceStopped() throws Exception {
+        ParallelRecordProcessor processor = processor(new Semaphore(12, true), new ParallelRecordProcessor.Timings(Duration.ofSeconds(60), Duration.ofMillis(100)));
+        consumer.gate("hot-0");
+        processor.processRecords(batch(sameKeyRecords("hot", 3)));
+        await().atMost(TIMEOUT).until(() -> consumer.inFlight.get() == 1);
+        processor.shutdownRequested(ShutdownRequestedInput.builder().checkpointer(checkpointer).build());
+        consumer.release("hot-0");
+
+        assertTimeoutPreemptively(TIMEOUT, () -> processor.shardEnded(ShardEndedInput.builder().checkpointer(checkpointer).build()));
+
+        verify(checkpointer, never()).checkpoint();
     }
 
     @Test
