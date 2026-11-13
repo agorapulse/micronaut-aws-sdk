@@ -87,6 +87,17 @@ public class DefaultKinesisWorkerFactory implements KinesisWorkerFactory {
             return NOOP;
         }
 
+        if (kinesisConfiguration.getConcurrency() > 0) {
+            return new ParallelKinesisWorker(
+                kinesisConfiguration,
+                workerStateEventPublisher,
+                processRecordsEventPublisher,
+                amazonDynamoDB,
+                kinesis,
+                cloudWatch
+            );
+        }
+
         return new DefaultKinesisWorker(
             kinesisConfiguration,
             workerStateEventPublisher,

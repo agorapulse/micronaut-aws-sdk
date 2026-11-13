@@ -168,6 +168,37 @@ You can listen to different than default configuration by changing the `value` o
 Multiple methods in a single application can listen to the same configuration (stream). In that case, every method will be executed with the
 incoming payload.
 
+===== Parallel Processing
+
+By default, each shard is processed by its own thread, one record at a time. Set `concurrency` on the listener configuration to process the records
+of a shard in parallel. The value is the number of records processed at once by the application instance, shared between the shards it holds:
+
+[source,yaml,indent=0,options="nowrap"]
+.application.yml
+----
+aws:
+  kinesis:
+    listener:
+      stream: ListenerStream
+      concurrency: 10                                  # <1>
+      max-attempts: 2                                  # <2>
+      ordered-by-partition-key: true                   # <3>
+----
+<1> The parallel processing is disabled when the property is missing or zero
+<2> The attempts a record gets before it is logged and dropped (defaults to `2`)
+<3> Whether the records sharing a partition key are processed one at a time, in the order of the shard (defaults to `true`)
+
+Each record is processed on its own virtual thread. The checkpoint only advances behind the oldest record still being processed and the shutdown
+waits for the records in flight, so a record is never skipped when the application stops. The delivery is at least once: the records processed after
+the oldest one in flight are processed again after a crash. A failed record is retried as a whole: when several methods listen to the same
+configuration, all of them receive the record again.
+
+By default, the records sharing a partition key are still processed one at a time, in the order of the shard. Only the records of different
+partition keys are processed in parallel, so the finer the partition key, the more the processing is parallelized.
+
+WARNING: With `ordered-by-partition-key: false`, the records sharing a partition key are processed in parallel as well and their order is no
+longer guaranteed. Only disable it if your listener does not rely on that order.
+
 ==== Kinesis Service
 
 `KinesisService` provides middle-level API for creating, describing, and deleting streams. You can manage shards as well as read records
